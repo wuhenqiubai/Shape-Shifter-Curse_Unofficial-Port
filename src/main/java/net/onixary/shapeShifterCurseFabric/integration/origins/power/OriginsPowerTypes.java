@@ -5,8 +5,20 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeReference;
+import io.github.apace100.apoli.power.factory.PowerFactories;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
+import io.github.apace100.apoli.power.factory.action.BiEntityActions;
+import io.github.apace100.apoli.power.factory.action.BlockActions;
+import io.github.apace100.apoli.power.factory.action.EntityActions;
+import io.github.apace100.apoli.power.factory.action.ItemActions;
+import io.github.apace100.apoli.power.factory.condition.BiEntityConditions;
+import io.github.apace100.apoli.power.factory.condition.BlockConditions;
+import io.github.apace100.apoli.power.factory.condition.DamageConditions;
+import io.github.apace100.apoli.power.factory.condition.EntityConditions;
+import io.github.apace100.apoli.power.factory.condition.FluidConditions;
+import io.github.apace100.apoli.power.factory.condition.ItemConditions;
+import io.github.apace100.apoli.power.factory.condition.BiomeConditions;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
@@ -33,6 +45,24 @@ public class OriginsPowerTypes {
     public static final PowerType<?> CONDUIT_POWER_ON_LAND = new PowerTypeReference<>(Origins.identifier("conduit_power_on_land"));
 
     public static void register() {
+        // Register namespace alias so origins:* power types resolve to apoli:* equivalents
+        // This uses PowerFactories.ALIASES (not the registry) so it works regardless of init order,
+        // which is critical for NeoForge/Connector where Apoli may not have populated its registries yet.
+        PowerFactories.ALIASES.addNamespaceAlias("origins", "apoli");
+        // Also add namespace aliases for all condition and action registries, since they
+        // each have their own ALIASES instance used during data loading (see ApoliDataTypes).
+        EntityConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        BiEntityConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        ItemConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        BlockConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        DamageConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        FluidConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        BiomeConditions.ALIASES.addNamespaceAlias("origins", "apoli");
+        EntityActions.ALIASES.addNamespaceAlias("origins", "apoli");
+        BiEntityActions.ALIASES.addNamespaceAlias("origins", "apoli");
+        BlockActions.ALIASES.addNamespaceAlias("origins", "apoli");
+        ItemActions.ALIASES.addNamespaceAlias("origins", "apoli");
+
         // Register all apoli:* types as origins:* aliases
         // Needed because SSC JSONs use origins: namespace but Origins mod is not installed
         for (var registry : new Registry[]{
