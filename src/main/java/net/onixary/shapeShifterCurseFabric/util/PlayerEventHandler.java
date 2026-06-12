@@ -41,7 +41,10 @@ public class PlayerEventHandler {
             PlayerFormComponent playerFormComponent = RegPlayerFormComponent.PLAYER_FORM.get(player);
             if (playerFormComponent != null && playerFormComponent.isFirstJoin()) {
                 // Give the book directly instead of relying on advancement→function chain
-                player.getInventory().insertStack(new net.minecraft.item.ItemStack(net.onixary.shapeShifterCurseFabric.items.RegCustomItem.BOOK_OF_SHAPE_SHIFTER));
+                // 检查背包防止 NeoForge/Connector 下 NBT 持久化异常导致重复给书
+                if (!player.getInventory().contains(new net.minecraft.item.ItemStack(net.onixary.shapeShifterCurseFabric.items.RegCustomItem.BOOK_OF_SHAPE_SHIFTER))) {
+                    player.getInventory().insertStack(new net.minecraft.item.ItemStack(net.onixary.shapeShifterCurseFabric.items.RegCustomItem.BOOK_OF_SHAPE_SHIFTER));
+                }
                 ShapeShifterCurseFabric.ON_FIRST_JOIN_WITH_MOD.trigger(player);
                 playerFormComponent.setFirstJoin(false);
             }

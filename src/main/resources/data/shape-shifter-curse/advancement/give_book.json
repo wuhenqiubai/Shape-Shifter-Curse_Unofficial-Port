@@ -5,6 +5,6 @@
     }
   },
   "rewards": {
-    "function": "shape-shifter-curse:delay_give_book"
+    "recipes": []
   }
 }
