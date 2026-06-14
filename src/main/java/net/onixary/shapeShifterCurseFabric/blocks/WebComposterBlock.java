@@ -23,6 +23,7 @@ import net.minecraft.state.StateManager;
 import net.minecraft.state.property.IntProperty;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ItemActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Util;
 import net.minecraft.util.function.BooleanBiFunction;
@@ -117,26 +118,33 @@ public class WebComposterBlock extends Block implements InventoryProvider {
 
     }
 
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+    @Override
+    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         int i = state.get(LEVEL);
-        ItemStack itemStack = player.getStackInHand(hand);
-        if (i < MAX_LEVEL + 1 && canIncrease(itemStack)) {
+        if (i < MAX_LEVEL + 1 && canIncrease(stack)) {
             if (i < MAX_LEVEL && !world.isClient) {
-                BlockState blockState = addToComposter(player, state, world, pos, itemStack);
+                BlockState blockState = addToComposter(player, state, world, pos, stack);
                 world.syncWorldEvent(1500, pos, state != blockState ? 1 : 0);
-                player.incrementStat(Stats.USED.getOrCreateStat(itemStack.getItem()));
+                player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
                 if (!player.getAbilities().creativeMode) {
-                    itemStack.decrement(1);
+                    stack.decrement(1);
                 }
             }
-
-            return ActionResult.success(world.isClient);
-        } else if (i == MAX_LEVEL + 1) {
-            emptyFullComposter(player, state, world, pos);
-            return ActionResult.success(world.isClient);
-        } else {
-            return ActionResult.PASS;
+            return ItemActionResult.success(world.isClient);
         }
+        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+    }
+
+    @Override
+    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+        int i = state.get(LEVEL);
+        if (i == MAX_LEVEL + 1) {
+            if (!world.isClient) {
+                emptyFullComposter(player, state, world, pos);
+            }
+            return ActionResult.success(world.isClient);
+        }
+        return ActionResult.PASS;
     }
 
     public static BlockState compost(Entity user, BlockState state, ServerWorld world, ItemStack stack, BlockPos pos) {
@@ -199,7 +207,8 @@ public class WebComposterBlock extends Block implements InventoryProvider {
 
     public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
         if (state.get(LEVEL) == MAX_LEVEL) {
-	        world.setBlockState(pos, state.with(LEVEL, MAX_LEVEL + 1).with(COCOON_COUNT, ResultCount.apply(random)), 3);
+            int count = ResultCount.apply(random);
+	        world.setBlockState(pos, state.with(LEVEL, MAX_LEVEL + 1).with(COCOON_COUNT, count), 3);
             world.playSound(null, pos, SoundEvents.BLOCK_COMPOSTER_READY, SoundCategory.BLOCKS, 1.0F, 1.0F);
         }
 
