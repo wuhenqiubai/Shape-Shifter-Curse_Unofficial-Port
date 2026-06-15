@@ -49,7 +49,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         private float tailDragAmountVertical = 0.0F;
         private float tailDragAmountVerticalO;
         private float currentTailDragAmountVertical = 0.0F;
-        private float tailVelocityVertical;                  // 二阶阻尼：垂直速度
     }
 
     public static class partTransform {
@@ -66,15 +65,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
             if (bone == null) {
                 return;
             }
-            bone.setPosX(bone.getPosX() + pos.getX());
-            bone.setPosY(bone.getPosY() + pos.getY());
-            bone.setPosZ(bone.getPosZ() + pos.getZ());
-            bone.setRotX(bone.getRotX() + rot.getX());
-            bone.setRotY(bone.getRotY() + rot.getY());
-            bone.setRotZ(bone.getRotZ() + rot.getZ());
-            bone.setPivotX(bone.getPivotX() + pivot.getX());
-            bone.setPivotY(bone.getPivotY() + pivot.getY());
-            bone.setPivotZ(bone.getPivotZ() + pivot.getZ());
+            bone.setPosX(bone.getPosX() + pos.x());
+            bone.setPosY(bone.getPosY() + pos.y());
+            bone.setPosZ(bone.getPosZ() + pos.z());
+            bone.setRotX(bone.getRotX() + rot.x());
+            bone.setRotY(bone.getRotY() + rot.y());
+            bone.setRotZ(bone.getRotZ() + rot.z());
+            bone.setPivotX(bone.getPivotX() + pivot.x());
+            bone.setPivotY(bone.getPivotY() + pivot.y());
+            bone.setPivotZ(bone.getPivotZ() + pivot.z());
         }
 
         public static partTransform of(JsonObject json) {
