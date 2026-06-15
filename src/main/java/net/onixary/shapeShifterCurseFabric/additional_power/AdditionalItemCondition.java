@@ -36,6 +36,7 @@ public class AdditionalItemCondition {
                     return false;
                 }
         ));
+        FoodUtilsCondition.registerCondition(AdditionalItemCondition::register);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

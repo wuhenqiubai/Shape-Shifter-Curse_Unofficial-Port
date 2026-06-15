@@ -1,8 +1,0 @@
-{
-  "type": "apoli:particle",
-  "particle": {
-    "type": "minecraft:portal"
-  },
-  "frequency": 4,
-  "hidden": true
-}
