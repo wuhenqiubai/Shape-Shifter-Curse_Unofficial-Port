@@ -217,6 +217,14 @@ public class AnimSystem {
                 anim = animStateController.getAnimation(this.player, this.data);
             }
         }
+	    // Write to AnimationState for GeckoLib bridge
+	    if (anim != null && anim.isEnabled() && anim.animID != null) {
+	    	this.animationState.currentBodyAnimId = anim.animID;
+	    	this.animationState.bodySpeed = anim.getSpeed();
+	    	this.animationState.bodyTransitionTicks = anim.getFade();
+	    } else {
+	    	this.animationState.clearBody();
+	    }
 	    this.EndProcessAnimSystemData();
 	    return anim;
     }
@@ -227,6 +235,7 @@ public class AnimSystem {
 	 */
 	public @Nullable AnimationHolder getUpperBodyOverride() {
 		this.data.HasUpperBodyOverride = false;
+		this.animationState.clearUpper();
 		if (this.getPreProcessAnimation() != null) return null;
 
 		if (this.player.isUsingItem()) {
@@ -239,6 +248,8 @@ public class AnimSystem {
 				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
 				if (anim != null) {
 					this.data.HasUpperBodyOverride = true;
+					this.animationState.currentUpperAnimId = anim.animID;
+					this.animationState.upperSpeed = anim.getSpeed();
 					return anim;
 				}
 			}
@@ -253,6 +264,8 @@ public class AnimSystem {
 				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
 				if (anim != null) {
 					this.data.HasUpperBodyOverride = true;
+					this.animationState.currentUpperAnimId = anim.animID;
+					this.animationState.upperSpeed = anim.getSpeed();
 					return anim;
 				}
 			}
