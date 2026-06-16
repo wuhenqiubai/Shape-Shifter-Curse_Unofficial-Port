@@ -27,17 +27,22 @@ public class AnimationHolder {
     @Nullable private Animation animation;
     @Nullable private EasingType easingType;
     private boolean skipFade;
+    /** Animation identifier for GeckoLib bridge. Set when constructed with an Identifier. */
+    @Nullable public Identifier animID;
 
     public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, 5);
+        this.animID = animation_id;
     }
 
     public AnimationHolder(Identifier animation_id, boolean isEnabled) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, 1.0f, 2);
+        this.animID = animation_id;
     }
 
     public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed, int fade) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, fade);
+        this.animID = animation_id;
     }
 
     public AnimationHolder(@Nullable Animation animation, boolean isEnabled, float speed, int fade) {

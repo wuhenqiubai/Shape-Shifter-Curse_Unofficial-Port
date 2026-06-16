@@ -28,7 +28,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing.geo.json";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
-    public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/missing.animation.json";
+    public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/form_animations.animation.json";
 
     public PlayerEntity entity;
 
