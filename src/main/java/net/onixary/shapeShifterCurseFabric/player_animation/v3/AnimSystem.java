@@ -45,28 +45,33 @@ public class AnimSystem {
 	 * 所属玩家实体。当此玩家实体被卸载时，AnimSystem 也应被卸载。
 	 */
 	public final PlayerEntity player;
-    /** 前置处理器列表。在 FSM/Power 动画之前执行，用于变形过渡等特殊效果。 */
-    public final List<AbstractAnimStateController> PreProcessControllers;
+	/** 前置处理器列表。在 FSM/Power 动画之前执行，用于变形过渡等特殊效果。 */
+	public final List<AbstractAnimStateController> PreProcessControllers;
 	/**
-     * 当前帧的系统数据。每 Game Tick (0.05s) 由 {@link #getAnimation} 更新一次。
+	 * 当前帧的系统数据。每 Game Tick (0.05s) 由 {@link #getAnimation} 更新一次。
 	 */
-    public AnimSystemData data;
+	public AnimSystemData data;
 	/**
 	 * 当前活动的动画 FSM ID
 	 */
 	public Identifier nowAnimFSMID = defaultAnimFSMID;
-    /** 当前正在播放的 Power 动画 ID */
-    public @Nullable Identifier nowPlayingPowerAnimationID = null;
+	/** 当前正在播放的 Power 动画 ID */
+	public @Nullable Identifier nowPlayingPowerAnimationID = null;
 	/**
 	 * 当前正在播放的 Power 动画实例
 	 */
 	public @Nullable Animation nowPlayingPowerAnimation = null;
-    /** 当前 Power 动画的总时长（tick） */
-    public int NPPA_Length = -1;
+	/** 当前 Power 动画的总时长（tick） */
+	public int NPPA_Length = -1;
 	/**
 	 * 当前 Power 动画已播放的 tick 数
 	 */
 	public int NPPA_NowTick = 0;
+	/**
+	 * Per-frame animation state for GeckoLib AnimationControllers.
+	 * Written by {@link #getAnimation()} during tick, read by {@link FormAnimatable}'s controllers during render.
+	 */
+	public final AnimationState animationState = new AnimationState();
 
 	/**
 	 * 获取玩家指定骨骼在指定变换类型下的 3D 变换值。
@@ -227,14 +232,17 @@ public class AnimSystem {
                 }
                 Pair<Boolean, @Nullable AnimationHolder> result = this.data.playerForm.getPowerAnim(this.player, this.data, powerAnimID);
                 if (result.getLeft()) {
-                    return result.getRight();
+                    anim = result.getRight();
+                } else {
+                    @Nullable AnimRegistry.PowerDefaultAnim resultPowerDefaultAnim = AnimRegistry.getPowerDefaultAnim(powerAnimID);
+                    if (resultPowerDefaultAnim == null) {
+                        this.EndProcessAnimSystemData();
+                        this.animationState.clearAll();
+                        return null;
+                    }
+                    anim = resultPowerDefaultAnim.ANIM_SYSTEM_GET_CURRENT_ANIM(this.player, this.data);
+                    this.NPPA_SetAnimation(powerAnimID, anim);
                 }
-                @Nullable AnimRegistry.PowerDefaultAnim resultPowerDefaultAnim = AnimRegistry.getPowerDefaultAnim(powerAnimID);
-                if (resultPowerDefaultAnim == null) {
-                    return null;
-                }
-                anim = resultPowerDefaultAnim.ANIM_SYSTEM_GET_CURRENT_ANIM(this.player, this.data);
-                this.NPPA_SetAnimation(powerAnimID, anim);
             } else {
                 Pair<@Nullable Identifier, @NotNull Identifier> result = this.getAnimFSM().update(this.player, this.data);
                 if (result.getLeft() != null) {
