@@ -1,12 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
-import com.zigythebird.playeranim.accessors.IAnimatedPlayer;
-import com.zigythebird.playeranim.animation.PlayerAnimManager;
-import com.zigythebird.playeranimcore.animation.Animation;
-import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
-import com.zigythebird.playeranimcore.enums.TransformType;
-import com.zigythebird.playeranimcore.math.Vec3f;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
@@ -57,10 +50,6 @@ public class AnimSystem {
 	public Identifier nowAnimFSMID = defaultAnimFSMID;
 	/** 当前正在播放的 Power 动画 ID */
 	public @Nullable Identifier nowPlayingPowerAnimationID = null;
-	/**
-	 * 当前正在播放的 Power 动画实例
-	 */
-	public @Nullable Animation nowPlayingPowerAnimation = null;
 	/** 当前 Power 动画的总时长（tick） */
 	public int NPPA_Length = -1;
 	/**
@@ -72,33 +61,6 @@ public class AnimSystem {
 	 * Written by {@link #getAnimation()} during tick, read by {@link FormAnimatable}'s controllers during render.
 	 */
 	public final AnimationState animationState = new AnimationState();
-
-	/**
-	 * 获取玩家指定骨骼在指定变换类型下的 3D 变换值。
-	 * <p>
-	 * 用于 {@link net.onixary.shapeShifterCurseFabric.render.form_render.DefaultModelAnimationSystem} 中将 PAL 动画骨骼变换映射到 GeoModel 骨骼。
-	 * 仅在客户端、PAL 动画管理器活跃时有效。
-	 *
-	 * @param player      目标玩家
-	 * @param boneName    骨骼名称
-	 * @param type        变换类型（POSITION / ROTATION / SCALE）
-     * @param defaultValue 骨骼未找到或不可用时的默认值
-     * @return 变换后的 Vec3f 值
-     */
-    public static @NotNull Vec3f getPlayerBone3DTransform(PlayerEntity player, @NotNull String boneName, @NotNull TransformType type, @NotNull Vec3f defaultValue) {
-        if (!(player instanceof AbstractClientPlayerEntity clientPlayer) || !(clientPlayer instanceof IAnimatedPlayer animatedPlayer))
-            return defaultValue;
-        PlayerAnimManager manager = animatedPlayer.playerAnimLib$getAnimManager();
-        if (manager == null || !manager.isActive()) return defaultValue;
-        PlayerAnimBone bone = new PlayerAnimBone(boneName);
-        bone = manager.get3DTransform(bone);
-        return switch (type) {
-            case POSITION -> new Vec3f(bone.getPosX(), bone.getPosY(), bone.getPosZ());
-            case ROTATION -> new Vec3f(bone.getRotX(), bone.getRotY(), bone.getRotZ());
-            case SCALE -> new Vec3f(bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
-            default -> defaultValue;
-        };
-    }
 
 	/**
 	 * 获取当前的动画 FSM 实例。
@@ -181,24 +143,20 @@ public class AnimSystem {
             return;
         }
         this.nowPlayingPowerAnimationID = animID;
-        this.nowPlayingPowerAnimation = anim == null ? null : anim.getAnimation();
-        if (nowPlayingPowerAnimation == null) {
+        if (anim == null || !anim.isEnabled()) {
             this.NPPA_Length = -1;
             this.NPPA_NowTick = 0;
             return;
         }
-        int AnimLength = (int) this.nowPlayingPowerAnimation.length();
         float Speed = anim.getSpeed();
         if (Speed == 0) {
             this.NPPA_Length = -1;
             this.NPPA_NowTick = 0;
-        }
-        else {
-            this.NPPA_Length = (int) (AnimLength / Speed);
+        } else {
+            this.NPPA_Length = (int) (20 / Speed);
             this.NPPA_NowTick = 0;
         }
     }
-
     private @Nullable Identifier getPowerAnimID() {
         if (this.player instanceof IPlayerAnimController iPlayerAnimController) {
             return iPlayerAnimController.shape_shifter_curse$getPowerAnimationID();
@@ -217,7 +175,6 @@ public class AnimSystem {
 	 *   <li>Power 动画优先判断</li>
 	 *   <li>FSM 状态转换 + 状态控制器获取动画</li>
 	 * </ol>
-	 * 调用频率必须与 Game Tick 同步，否则 NPPA (nowPlayingPowerAnimation) 系统的时间计算会出错。
      *
      * @return 要播放的动画持有者，null 表示无动画
      */

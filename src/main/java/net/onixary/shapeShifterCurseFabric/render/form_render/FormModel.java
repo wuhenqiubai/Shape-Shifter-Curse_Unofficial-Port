@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.zigythebird.playeranimcore.math.Vec3f;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import net.minecraft.client.MinecraftClient;
@@ -19,6 +18,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -542,7 +542,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return b;
     }
 
-    public final void setRotationForBone(String bone_name, Vec3f rot) {
+    public final void setRotationForBone(String bone_name, Vector3f rot) {
         setRotationForBone(bone_name, new Vec3d(rot.x(), rot.y(), rot.z()));
     }
 
@@ -555,7 +555,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return b;
     }
 
-    public final GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
+    public final GeoBone setModelPositionForBone(String bone_name, Vector3f pos) {
         return setModelPositionForBone(bone_name, new Vec3d(pos.x(), pos.y(), pos.z()));
     }
 
@@ -570,7 +570,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return b;
     }
 
-    public final GeoBone setScaleForBone(String bone_name, Vec3f scale) {
+    public final GeoBone setScaleForBone(String bone_name, Vector3f scale) {
         return setScaleForBone(bone_name, new Vec3d(scale.x(), scale.y(), scale.z()));
     }
 

@@ -1,8 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.google.gson.JsonObject;
-import com.zigythebird.playeranimcore.enums.TransformType;
-import com.zigythebird.playeranimcore.math.Vec3f;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import net.minecraft.client.model.ModelPart;
@@ -13,8 +11,8 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -52,10 +50,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
     }
 
     public static class partTransform {
-        private final Vec3f pos;
-        private final Vec3f rot;
-        private final Vec3f pivot;
-        public partTransform(Vec3f pos, Vec3f rot, Vec3f pivot) {
+        private final Vector3f pos;
+        private final Vector3f rot;
+        private final Vector3f pivot;
+        public partTransform(Vector3f pos, Vector3f rot, Vector3f pivot) {
             this.pos = pos;
             this.rot = rot;
             this.pivot = pivot;
@@ -77,21 +75,21 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         }
 
         public static partTransform of(JsonObject json) {
-            Vec3f pos, rot, pivot;
+            Vector3f pos, rot, pivot;
             if (json.has("pos_x") && json.has("pos_y") && json.has("pos_z")) {
-                pos = new Vec3f(json.get("pos_x").getAsFloat(), json.get("pos_y").getAsFloat(), json.get("pos_z").getAsFloat());
+                pos = new Vector3f(json.get("pos_x").getAsFloat(), json.get("pos_y").getAsFloat(), json.get("pos_z").getAsFloat());
             } else {
-                pos = new Vec3f(0.0F, 0.0F, 0.0F);
+                pos = new Vector3f(0.0F, 0.0F, 0.0F);
             }
             if (json.has("rot_x") && json.has("rot_y") && json.has("rot_z")) {
-                rot = new Vec3f(json.get("rot_x").getAsFloat(), json.get("rot_y").getAsFloat(), json.get("rot_z").getAsFloat());
+                rot = new Vector3f(json.get("rot_x").getAsFloat(), json.get("rot_y").getAsFloat(), json.get("rot_z").getAsFloat());
             } else {
-                rot = new Vec3f(0.0F, 0.0F, 0.0F);
+                rot = new Vector3f(0.0F, 0.0F, 0.0F);
             }
             if (json.has("pivot_x") && json.has("pivot_y") && json.has("pivot_z")) {
-                pivot = new Vec3f(json.get("pivot_x").getAsFloat(), json.get("pivot_y").getAsFloat(), json.get("pivot_z").getAsFloat());
+                pivot = new Vector3f(json.get("pivot_x").getAsFloat(), json.get("pivot_y").getAsFloat(), json.get("pivot_z").getAsFloat());
             } else {
-                pivot = new Vec3f(0.0F, 0.0F, 0.0F);
+                pivot = new Vector3f(0.0F, 0.0F, 0.0F);
             }
             return new partTransform(pos, rot, pivot);
         }
@@ -201,13 +199,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         }
     }
 
-    public void ProcessExtraBone(FormModel m, PlayerEntity player, String OriginFursBoneID, String AnimBoneID) {
-        GeoBone bone =  m.resetBone(OriginFursBoneID);
-        Vec3f AnimPosition = AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.POSITION, new Vec3f(0, 0, 0));
-        m.setPositionForBone(OriginFursBoneID, new Vec3d(AnimPosition.x(), -AnimPosition.y(), -AnimPosition.z()));
-        m.setRotationForBone(OriginFursBoneID, AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.ROTATION, new Vec3f(0, 0, 0)));
-        m.invertRotForPart(OriginFursBoneID, false, true, true);
-    }
+
 
     @Override
     public void beforeRender(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
@@ -226,9 +218,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         model.resetBone(RM_RightArmGeoBoneID);
         model.resetBone(RM_LeftLegGeoBoneID);
         model.resetBone(RM_RightLegGeoBoneID);
-        for (Pair<String, String> pair : extraPartsMap) {
-            ProcessExtraBone(model, player, pair.getLeft(), pair.getRight());
-        }
+
         PlayerEntityModel<?> playerModel = renderer.getModel();
         model.setRotationForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartRotation(playerModel.head));
         model.translatePositionForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartPosition(playerModel.head));

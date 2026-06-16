@@ -212,7 +212,6 @@ dependencies {
     //  Modmenu
     modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
     // Player Animation Library
-    modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
 
     // Trinkets
 
