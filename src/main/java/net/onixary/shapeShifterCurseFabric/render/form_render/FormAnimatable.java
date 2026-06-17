@@ -3,10 +3,9 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimationState;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;
@@ -23,7 +22,6 @@ public class FormAnimatable implements GeoAnimatable {
         this.e = e;
     }
 
-    /** Gets the shared AnimationState from the current player's AnimSystem. */
     private @Nullable AnimationState getAnimState() {
         if (e instanceof IAnimSystemAccessor accessor) {
             return accessor.shape_shifter_curse$getAnimSystem().animationState;
@@ -38,6 +36,13 @@ public class FormAnimatable implements GeoAnimatable {
             if (animState != null && animState.currentBodyAnimId != null) {
                 state.setAnimation(RawAnimation.begin().thenPlay(animState.currentBodyAnimId.getPath()));
                 state.setControllerSpeed(animState.bodySpeed);
+            }
+            if (this.e != null && this.e.age % 20 == 0) {
+                ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] controller.main: animId={} speed={} animTick={} playerSet={}",
+                    animState != null ? animState.currentBodyAnimId : "null",
+                    animState != null ? animState.bodySpeed : 0f,
+                    state.getAnimationTick(),
+                    this.e != null);
             }
             return PlayState.CONTINUE;
         }));
