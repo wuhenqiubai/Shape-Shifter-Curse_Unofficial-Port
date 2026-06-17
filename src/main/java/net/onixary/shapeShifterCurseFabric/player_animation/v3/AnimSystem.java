@@ -217,16 +217,21 @@ public class AnimSystem {
                 anim = animStateController.getAnimation(this.player, this.data);
             }
         }
-	    // Write to AnimationState for GeckoLib bridge
-	    if (anim != null && anim.isEnabled() && anim.animID != null) {
-	    	this.animationState.currentBodyAnimId = anim.animID;
-	    	this.animationState.bodySpeed = anim.getSpeed();
-	    	this.animationState.bodyTransitionTicks = anim.getFade();
-	    } else {
-	    	this.animationState.clearBody();
-	    }
-	    this.EndProcessAnimSystemData();
-	    return anim;
+        // Write to AnimationState for GeckoLib bridge
+        if (anim != null && anim.isEnabled() && anim.animID != null) {
+            this.animationState.currentBodyAnimId = anim.animID;
+            this.animationState.bodySpeed = anim.getSpeed();
+            this.animationState.bodyTransitionTicks = anim.getFade();
+        } else {
+            this.animationState.clearBody();
+        }
+        ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] tick write: anim={} form={} age={} speed={}",
+            this.animationState.currentBodyAnimId,
+            this.data.playerForm != null ? this.data.playerForm.FormID : null,
+            this.player.age,
+            this.animationState.bodySpeed);
+        this.EndProcessAnimSystemData();
+        return anim;
     }
 
 	/**
@@ -299,8 +304,8 @@ public class AnimSystem {
 		public boolean IsWalking = false;
 		/** 自定义 NBT 数据，供其他拓展 Mod 使用。SSC 本身不使用。 */
         public NbtCompound customData;
-	/** 此帧是否有上半身动画覆盖 */
-	public boolean HasUpperBodyOverride = false;
+		/** 此帧是否有上半身动画覆盖 */
+		public boolean HasUpperBodyOverride = false;
 
         public AnimSystemData(PlayerEntity player) {
             this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
