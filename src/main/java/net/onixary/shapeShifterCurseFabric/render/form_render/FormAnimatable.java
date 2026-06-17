@@ -6,6 +6,7 @@ import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimationState;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;

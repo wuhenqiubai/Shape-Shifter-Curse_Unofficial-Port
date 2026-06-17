@@ -617,10 +617,14 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     @Override
     public void handleAnimations(FormAnimatable animatable, long instanceId, AnimationState<FormAnimatable> animationState, float partialTick) {
-        if (animatable.e != null && animationState.getData(DataTickets.TICK) == null) {
+        boolean hadTick = animationState.getData(DataTickets.TICK) != null;
+        if (animatable.e != null && !hadTick) {
             animationState.setData(DataTickets.TICK, (double)animatable.e.age);
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
+        if (animatable.e != null && animatable.e.age % 20 == 0) {
+            ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] handleAnimations: age={} partialTick={} hadTick={} animTick={}", animatable.e.age, partialTick, hadTick, animationState.animationTick);
+        }
     }
 
 }
