@@ -615,4 +615,12 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return this.Animation;
     }
 
+    @Override
+    public void handleAnimations(FormAnimatable animatable, long instanceId, AnimationState<FormAnimatable> animationState, float partialTick) {
+        if (animatable.e != null && animationState.getData(DataTickets.TICK) == null) {
+            animationState.setData(DataTickets.TICK, (double)animatable.e.age);
+        }
+        super.handleAnimations(animatable, instanceId, animationState, partialTick);
+    }
+
 }
