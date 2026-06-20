@@ -5,15 +5,23 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import software.bernie.geckolib.model.GeoModel;
 import software.bernie.geckolib.animation.AnimationState;
+import software.bernie.geckolib.animation.Animation;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.animation.keyframe.Keyframe;
+import software.bernie.geckolib.animation.keyframe.KeyframeLocation;
+import software.bernie.geckolib.loading.math.MathValue;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.entity.PlayerEntityRenderer;
+import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
@@ -31,6 +39,12 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing.geo.json";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
     public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/form_animations.animation.json";
+
+    // Static cache of resolved GeckoLib Animation objects, populated during handleAnimations, read by Mixin
+    private static final Map<String, Animation> ANIM_CACHE = new java.util.concurrent.ConcurrentHashMap<>();
+    public static @Nullable Animation getCachedAnimation(@Nullable String name) {
+        return name != null ? ANIM_CACHE.get(name) : null;
+    }
 
     public PlayerEntity entity;
 
@@ -98,6 +112,11 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public boolean Hidden_RightPants = false;
 
     public IModelAnimationSystem AnimationSystem = null;
+
+    // Stashed parameters for deferred processAnimation call (set in beforeRender, consumed in handleAnimations)
+    public FormRenderer stashedFormRenderer;
+    public PlayerEntityRenderer stashedRenderer;
+    public float stashedLimbAngle, stashedLimbDistance, stashedTickDelta, stashedAnimationProgress, stashedHeadYaw, stashedHeadPitch;
 
     // builtin_controller_data
     // chain -> [["tail0_0", "tail0_1"], [tail1_0", "tail1_1"]]
@@ -617,14 +636,80 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     @Override
     public void handleAnimations(FormAnimatable animatable, long instanceId, AnimationState<FormAnimatable> animationState, float partialTick) {
+        PlayerEntity player = animatable.e;
         boolean hadTick = animationState.getData(DataTickets.TICK) != null;
-        if (animatable.e != null && !hadTick) {
-            animationState.setData(DataTickets.TICK, (double)animatable.e.age);
+        if (player != null && !hadTick) {
+            animationState.setData(DataTickets.TICK, (double)player.age);
+        }
+
+        // Populate animation cache for Mixin and advance GeckoLib time
+        if (player instanceof IAnimSystemAccessor accessor) {
+            var sscState = accessor.shape_shifter_curse$getAnimSystem().animationState;
+            if (sscState.currentBodyAnimId != null) {
+                Animation anim = this.getAnimation(animatable, sscState.currentBodyAnimId.getPath());
+                if (anim != null) {
+                    ANIM_CACHE.put(sscState.currentBodyAnimId.getPath(), anim);
+                }
+            }
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
-        if (animatable.e != null && animatable.e.age % 20 == 0) {
-            ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] handleAnimations: age={} partialTick={} hadTick={} animTick={}", animatable.e.age, partialTick, hadTick, animationState.animationTick);
+
+        // Deferred processAnimation: runs AFTER GeckoLib AC so ModelPart-derived offsets are final
+        if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
+            this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
+                this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
+                this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
         }
+    }
+
+    public static KeyframeLocation<Keyframe<MathValue>> findKeyframe(java.util.List<Keyframe<MathValue>> frames, double tick) {
+        double total = 0;
+        for (Keyframe<MathValue> frame : frames) {
+            total += frame.length();
+            if (total > tick)
+                return new KeyframeLocation<>(frame, tick - (total - frame.length()));
+        }
+        Keyframe<MathValue> last = frames.getLast();
+        return new KeyframeLocation<>(last, tick - (total - last.length()));
+    }
+
+    public static double interpolateValue(KeyframeLocation<Keyframe<MathValue>> location) {
+        Keyframe<MathValue> frame = location.keyframe();
+        double blend = frame.length() > 0 ? location.startTick() / frame.length() : 0;
+        double start = frame.startValue().get();
+        double end = frame.endValue().get();
+        return start + (end - start) * blend;
+    }
+
+    public static ModelPart getVanillaPart(PlayerEntityModel<?> model, String geoName) {
+        return switch (geoName) {
+            case "bipedHead"     -> model.head;
+            case "bipedBody"     -> model.body;
+            case "bipedRightArm" -> model.rightArm;
+            case "bipedLeftArm"  -> model.leftArm;
+            case "bipedRightLeg" -> model.rightLeg;
+            case "bipedLeftLeg"  -> model.leftLeg;
+            default -> null;
+        };
+    }
+
+    public static float defaultPivotX(String geoName) {
+        return switch (geoName) {
+            case "bipedRightArm" -> 5f;
+            case "bipedLeftArm"  -> -5f;
+            case "bipedRightLeg" -> 2f;
+            case "bipedLeftLeg"  -> -2f;
+            default -> 0f;
+        };
+    }
+
+    public static float defaultPivotY(String geoName) {
+        return switch (geoName) {
+            case "bipedHead", "bipedBody" -> 24f;
+            case "bipedRightArm", "bipedLeftArm" -> 22f;
+            case "bipedRightLeg", "bipedLeftLeg" -> 12f;
+            default -> 0f;
+        };
     }
 
 }

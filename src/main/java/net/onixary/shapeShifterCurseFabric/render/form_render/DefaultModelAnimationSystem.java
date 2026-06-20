@@ -206,6 +206,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         tailData td = tailDataMap.computeIfAbsent(player.getUuid(), k -> new tailData());
         float targetDrag = MathHelper.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
         td.currentTailDragAmount = MathHelper.lerp(0.04f, td.currentTailDragAmount, targetDrag);
+        // Stash parameters for deferred processAnimation call in handleAnimations
+        model.stashedFormRenderer = formRenderer;
+        model.stashedRenderer = renderer;
+        model.stashedLimbAngle = limbAngle;
+        model.stashedLimbDistance = limbDistance;
+        model.stashedTickDelta = tickDelta;
+        model.stashedAnimationProgress = animationProgress;
+        model.stashedHeadYaw = headYaw;
+        model.stashedHeadPitch = headPitch;
     }
 
 

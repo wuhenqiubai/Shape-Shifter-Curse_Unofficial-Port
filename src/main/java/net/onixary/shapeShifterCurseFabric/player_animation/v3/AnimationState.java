@@ -12,6 +12,8 @@ public class AnimationState {
     public @Nullable Identifier currentBodyAnimId;
     public float bodySpeed = 1.0f;
     public int bodyTransitionTicks = 2;
+    /** Player age when the current body animation started playing */
+    public int bodyAnimStartAge;
 
     // Upper body override (using item, attacking)
     public @Nullable Identifier currentUpperAnimId;
@@ -34,6 +36,7 @@ public class AnimationState {
         bodySpeed = 1.0f;
         bodyTransitionTicks = 2;
         easingTypeName = null;
+        bodyAnimStartAge = 0;
     }
 
     public void clearUpper() {

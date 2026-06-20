@@ -268,8 +268,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 matrices.translate(0, -1.51f, 0);
                 matrices.translate(-0.5, -0.5, -0.5);
                 formModel.AnimationSystem.beforeRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                formModel.AnimationSystem.processAnimation(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                // 渲染部分
+                // processAnimation is now deferred to handleAnimations (after GeckoLib AC)
                 formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucent(formModel.getTextureResource(formAnimatable)), null, light, tickDelta);
                 formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucentEmissive(formModel.getFullbrightTextureResource(formAnimatable)), null, Integer.MAX_VALUE - 1, tickDelta);
                 if (hasOutline) {

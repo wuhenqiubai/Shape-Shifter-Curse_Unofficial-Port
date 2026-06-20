@@ -93,6 +93,8 @@
     "MoonPhaseRenderMixin",
     "PlayerClipAtLedgeMixin",
     "PlayerEntityAnimOverrideMixin",
+    "PlayerEntityModelAnimMixin",
+    "PlayerRendererBodyRootMixin",
     "PlayerEntityRendererFallFlyingMixin",
     "PlayerEntitySpeedFOVMixin",
     "PlayerMovementControlMixin",

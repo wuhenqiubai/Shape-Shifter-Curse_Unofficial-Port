@@ -219,17 +219,15 @@ public class AnimSystem {
         }
         // Write to AnimationState for GeckoLib bridge
         if (anim != null && anim.isEnabled() && anim.animID != null) {
+            if (!anim.animID.equals(this.animationState.currentBodyAnimId)) {
+                this.animationState.bodyAnimStartAge = this.player.age;
+            }
             this.animationState.currentBodyAnimId = anim.animID;
             this.animationState.bodySpeed = anim.getSpeed();
             this.animationState.bodyTransitionTicks = anim.getFade();
         } else {
             this.animationState.clearBody();
         }
-        ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] tick write: anim={} form={} age={} speed={}",
-            this.animationState.currentBodyAnimId,
-            this.data.playerForm != null ? this.data.playerForm.FormID : null,
-            this.player.age,
-            this.animationState.bodySpeed);
         this.EndProcessAnimSystemData();
         return anim;
     }

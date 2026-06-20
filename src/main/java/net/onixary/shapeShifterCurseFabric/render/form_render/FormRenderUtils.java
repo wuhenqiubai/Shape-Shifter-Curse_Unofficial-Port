@@ -77,8 +77,7 @@ public class FormRenderUtils {
     }
 
     public static Vec3d getPartPosition(ModelPart part) {
-        var t = part.getTransform();
-        return new Vec3d(t.pivotX, t.pivotY, t.pivotZ).negate();
+        return new Vec3d(part.pivotX, part.pivotY, part.pivotZ).negate();
     }
 
     public static Vec3d getPartRotation(ModelPart part) {
