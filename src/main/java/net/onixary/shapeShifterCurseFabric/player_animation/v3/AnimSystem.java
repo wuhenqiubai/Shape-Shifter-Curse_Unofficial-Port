@@ -225,6 +225,7 @@ public class AnimSystem {
             this.animationState.currentBodyAnimId = anim.animID;
             this.animationState.bodySpeed = anim.getSpeed();
             this.animationState.bodyTransitionTicks = anim.getFade();
+            this.animationState.easingTypeName = anim.getEasingTypeName();
         } else {
             this.animationState.clearBody();
         }

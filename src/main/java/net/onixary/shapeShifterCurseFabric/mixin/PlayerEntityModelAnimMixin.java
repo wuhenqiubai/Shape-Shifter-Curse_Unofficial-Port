@@ -59,6 +59,13 @@ public class PlayerEntityModelAnimMixin {
         if (anim == null) return;
 
         double elapsed = (ageInTicks - animState.bodyAnimStartAge) * animState.bodySpeed;
+        double animLength = FormModel.getAnimLength(anim);
+        if (anim.loopType().shouldPlayAgain(null, null, anim) && animLength > 0) {
+            elapsed = elapsed % animLength;
+        } else if (elapsed > animLength && animLength > 0) {
+            elapsed = animLength - 0.01;
+        }
+        String easingType = animState.easingTypeName;
 
         PlayerEntityModel<?> self = (PlayerEntityModel<?>) (Object) this;
 
@@ -73,9 +80,9 @@ public class PlayerEntityModelAnimMixin {
                 KeyframeLocation<Keyframe<MathValue>> locX = FormModel.findKeyframe(posFrames.xKeyframes(), elapsed);
                 KeyframeLocation<Keyframe<MathValue>> locY = FormModel.findKeyframe(posFrames.yKeyframes(), elapsed);
                 KeyframeLocation<Keyframe<MathValue>> locZ = FormModel.findKeyframe(posFrames.zKeyframes(), elapsed);
-                float kx = (float)FormModel.interpolateValue(locX);
-                float ky = (float)FormModel.interpolateValue(locY);
-                float kz = (float)FormModel.interpolateValue(locZ);
+                float kx = (float)FormModel.interpolateValue(locX, easingType);
+                float ky = (float)FormModel.interpolateValue(locY, easingType);
+                float kz = (float)FormModel.interpolateValue(locZ, easingType);
                 ModelTransform def = part.getDefaultTransform();
                 float dpX = def.pivotX;
                 float dpY = def.pivotY;
@@ -89,9 +96,9 @@ public class PlayerEntityModelAnimMixin {
                 KeyframeLocation<Keyframe<MathValue>> locX = FormModel.findKeyframe(rotFrames.xKeyframes(), elapsed);
                 KeyframeLocation<Keyframe<MathValue>> locY = FormModel.findKeyframe(rotFrames.yKeyframes(), elapsed);
                 KeyframeLocation<Keyframe<MathValue>> locZ = FormModel.findKeyframe(rotFrames.zKeyframes(), elapsed);
-                float rx = (float)FormModel.interpolateValue(locX);
-                float ry = (float)FormModel.interpolateValue(locY);
-                float rz = (float)FormModel.interpolateValue(locZ);
+                float rx = (float)FormModel.interpolateValue(locX, easingType);
+                float ry = (float)FormModel.interpolateValue(locY, easingType);
+                float rz = (float)FormModel.interpolateValue(locZ, easingType);
                 part.pitch = -rx;
                 part.yaw = -ry;
                 part.roll = rz;

@@ -40,15 +40,22 @@ public class PlayerRendererBodyRootMixin {
         if (bodyRootAnim == null) return;
 
         double elapsed = (player.age - animState.bodyAnimStartAge + tickDelta) * animState.bodySpeed;
+        double animLength = FormModel.getAnimLength(anim);
+        if (anim.loopType().shouldPlayAgain(null, null, anim) && animLength > 0) {
+            elapsed = elapsed % animLength;
+        } else if (elapsed > animLength && animLength > 0) {
+            elapsed = animLength - 0.01;
+        }
+        String easingType = animState.easingTypeName;
 
         KeyframeStack<Keyframe<MathValue>> posFrames = bodyRootAnim.positionKeyFrames();
         KeyframeStack<Keyframe<MathValue>> rotFrames = bodyRootAnim.rotationKeyFrames();
 
         // Apply position: PAL body bone pivot at Y=12 → translate(-posX/16, posY/16 + 0.75, posZ/16)
         if (!posFrames.xKeyframes().isEmpty()) {
-            float px = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.xKeyframes(), elapsed));
-            float py = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.yKeyframes(), elapsed));
-            float pz = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.zKeyframes(), elapsed));
+            float px = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.xKeyframes(), elapsed), easingType);
+            float py = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.yKeyframes(), elapsed), easingType);
+            float pz = (float)FormModel.interpolateValue(FormModel.findKeyframe(posFrames.zKeyframes(), elapsed), easingType);
             matrices.translate(-px / 16f, py / 16f + 0.75f, pz / 16f);
         } else {
             matrices.translate(0, 0.75f, 0);
@@ -57,9 +64,9 @@ public class PlayerRendererBodyRootMixin {
         // Apply rotation: match PAL's body bone transform (body.rotX*=-1, body.rotY*=-1, rotateZYX)
         // GeckoLib already stores X/Y as negated radians, so use directly for X, un-negate for Y
         if (!rotFrames.xKeyframes().isEmpty()) {
-            float rx = (float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.xKeyframes(), elapsed)); // already negated by GeckoLib, matches PAL rotX*=-1
-            float ry = -(float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.yKeyframes(), elapsed)); // un-negate GeckoLib, then invertY below
-            float rz = (float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.zKeyframes(), elapsed));
+            float rx = (float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.xKeyframes(), elapsed), easingType); // already negated by GeckoLib, matches PAL rotX*=-1
+            float ry = -(float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.yKeyframes(), elapsed), easingType); // un-negate GeckoLib, then invertY below
+            float rz = (float)FormModel.interpolateValue(FormModel.findKeyframe(rotFrames.zKeyframes(), elapsed), easingType);
             ry = -ry; // PAL body.rotY *= -1
             matrices.multiply(RotationAxis.POSITIVE_Z.rotation(rz));
             matrices.multiply(RotationAxis.POSITIVE_Y.rotation(ry));

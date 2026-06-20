@@ -8,8 +8,10 @@ import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.Animation;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.animation.keyframe.BoneAnimation;
 import software.bernie.geckolib.animation.keyframe.Keyframe;
 import software.bernie.geckolib.animation.keyframe.KeyframeLocation;
+import software.bernie.geckolib.animation.keyframe.KeyframeStack;
 import software.bernie.geckolib.loading.math.MathValue;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -673,9 +675,37 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return new KeyframeLocation<>(last, tick - (total - last.length()));
     }
 
-    public static double interpolateValue(KeyframeLocation<Keyframe<MathValue>> location) {
+    private static double applyEasing(double t, @Nullable String easingTypeName) {
+        if (easingTypeName == null || easingTypeName.isEmpty()) return t;
+        try {
+            var easing = software.bernie.geckolib.animation.EasingType.fromString(
+                easingTypeName.toLowerCase(java.util.Locale.ROOT).replace("_", ""));
+            if (easing != null) {
+                return easing.buildTransformer(null).apply(t);
+            }
+        } catch (Exception ignored) {}
+        return t;
+    }
+
+    /** Compute the actual animation length from keyframe data (anim.length() returns junk for merged files). */
+    public static double getAnimLength(Animation anim) {
+        double maxLen = 0;
+        for (BoneAnimation ba : anim.boneAnimations()) {
+            for (var frames : new KeyframeStack[]{ba.rotationKeyFrames(), ba.positionKeyFrames(), ba.scaleKeyFrames()}) {
+                for (var list : new java.util.List[]{frames.xKeyframes(), frames.yKeyframes(), frames.zKeyframes()}) {
+                    double sum = 0;
+                    for (var kf : (java.util.List<Keyframe<MathValue>>)list) sum += kf.length();
+                    if (sum > maxLen) maxLen = sum;
+                }
+            }
+        }
+        return maxLen;
+    }
+
+    public static double interpolateValue(KeyframeLocation<Keyframe<MathValue>> location, @Nullable String easingTypeName) {
         Keyframe<MathValue> frame = location.keyframe();
-        double blend = frame.length() > 0 ? location.startTick() / frame.length() : 0;
+        double blend = frame.length() > 0 ? Math.min(location.startTick() / frame.length(), 1.0) : 0;
+        blend = applyEasing(blend, easingTypeName);
         double start = frame.startValue().get();
         double end = frame.endValue().get();
         return start + (end - start) * blend;
