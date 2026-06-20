@@ -14,7 +14,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
  * 最终由 {@link net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance} 协调变形流程。
  *
  * @see net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance
- * @see net.onixary.shapeShifterCurseFabric.player_form.transform.TransformManager#getRandomOrBuffForm
  */
 // 自定义药水效果基类（含类型和回调）
 public abstract class BaseTransformativeStatusEffect extends StatusEffect {

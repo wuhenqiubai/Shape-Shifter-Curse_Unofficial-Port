@@ -40,7 +40,7 @@ public class PotionEntityMixin {
     }
 
     @Inject(method = "applySplashPotion", at = @At("HEAD"))
-    private void onApplySplashPotion(List<StatusEffectInstance> effects, Entity entity, CallbackInfo ci) {
+    private void onApplySplashPotion(Iterable<StatusEffectInstance> effects, Entity entity, CallbackInfo ci) {
         PotionEntity self = (PotionEntity) (Object) this;
         Box box = self.getBoundingBox().expand(4.0, 2.0, 4.0);
         List<LivingEntity> entities = self.getWorld().getNonSpectatingEntities(LivingEntity.class, box);
