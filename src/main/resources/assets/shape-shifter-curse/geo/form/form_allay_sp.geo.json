@@ -172,22 +172,6 @@
 				{
 					"name": "bipedRightArm",
 					"pivot": [5, 22, 0]
-				},
-				{
-					"name": "bipedLeftLeg",
-					"pivot": [-2, 12, 0],
-					"cubes": [
-						{"origin": [-3.9, 0, -2], "size": [4, 12, 4], "uv": [0, 16]},
-						{"origin": [-3.9, 0, -2], "size": [4, 12, 4], "inflate": 0.25, "uv": [0, 32]}
-					]
-				},
-				{
-					"name": "bipedRightLeg",
-					"pivot": [2, 12, 0],
-					"cubes": [
-						{"origin": [-0.1, 0, -2], "size": [4, 12, 4], "uv": [0, 16], "mirror": true},
-						{"origin": [-0.1, 0, -2], "size": [4, 12, 4], "inflate": 0.25, "uv": [0, 32], "mirror": true}
-					]
 				}
 			]
 		}
