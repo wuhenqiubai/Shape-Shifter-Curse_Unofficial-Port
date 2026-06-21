@@ -1,4 +1,5 @@
 {
-  "type": "origins:entity_group",
-  "group": "undead"
+  "type": "apoli:modify_type_tag",
+  "hidden": true,
+  "tag": "minecraft:undead"
 }
