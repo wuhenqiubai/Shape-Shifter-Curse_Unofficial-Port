@@ -101,7 +101,6 @@
     "PlayerRotationRendererMixin",
     "accessor.ApoliClientAccessor",
     "render.LivingEntityRendererMixin",
-    "render.OverlayRenderMixin",
     "render.PlayerEntityRendererMixin"
   ],
   "injectors": {
