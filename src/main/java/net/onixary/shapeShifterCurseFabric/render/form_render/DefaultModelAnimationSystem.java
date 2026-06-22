@@ -7,7 +7,6 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -17,7 +16,6 @@ import org.joml.Vector3f;
 import java.util.*;
 
 public class DefaultModelAnimationSystem implements IModelAnimationSystem {
-    public final List<Pair<String, String>> extraPartsMap = new ArrayList<>();
 
     public String leftArmGeoBoneID = "bipedLeftArm";
     public String rightArmGeoBoneID = "bipedRightArm";
@@ -128,15 +126,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
      */
     @Override
     public void loadConfig(@Nullable JsonObject json) {
-        this.extraPartsMap.clear();
         if (json == null) {
             return;
-        }
-        if (json.has("extra_parts_map")) {
-            JsonObject extraPartsMap = json.getAsJsonObject("extra_parts_map");
-            for (String key : extraPartsMap.keySet()) {
-                this.extraPartsMap.add(new Pair<>(key, extraPartsMap.get(key).getAsString()));
-            }
         }
 	    this.leftArmGeoBoneID = "bipedLeftArm";
 	    this.rightArmGeoBoneID = "bipedRightArm";
