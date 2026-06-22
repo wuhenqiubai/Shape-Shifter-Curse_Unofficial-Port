@@ -116,6 +116,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public IModelAnimationSystem AnimationSystem = null;
 
+    // Set by handleAnimations for mixed forms; checked by PlayerRendererBodyRootMixin
+    public static boolean applyBodyTransform = false;
+
     // Stashed parameters for deferred processAnimation call (set in beforeRender, consumed in handleAnimations)
     public FormRenderer stashedFormRenderer;
     public PlayerEntityRenderer stashedRenderer;
@@ -664,39 +667,18 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
 
-        // Apply player head tracking when animation has no head keyframes
-        if (player != null && this.stashedRenderer != null) {
-            Animation currentAnim = null;
-            if (player instanceof IAnimSystemAccessor accessor) {
-                var sscState = accessor.shape_shifter_curse$getAnimSystem().animationState;
-                if (sscState.currentBodyAnimId != null) {
-                    currentAnim = getCachedAnimation(sscState.currentBodyAnimId.getPath());
-                }
-            }
-            boolean hasHeadKeyframes = currentAnim != null && java.util.Arrays.stream(currentAnim.boneAnimations())
-                .anyMatch(ba -> ba.boneName().equals("bipedHead") && !ba.rotationKeyFrames().xKeyframes().isEmpty());
+        applyBodyTransform = false;
 
-            if (!hasHeadKeyframes) {
-                var pm = this.stashedRenderer.getModel();
-                var headBone = getCachedGeoBone("bipedHead");
-                if (headBone != null) {
-                    headBone.setRotX(pm.head.pitch);
-                    headBone.setRotY(-pm.head.yaw);
-                    headBone.setRotZ(-pm.head.roll); // invertRotForPart Z
-                }
-                var bodyBone = getCachedGeoBone("bipedBody");
-                if (bodyBone != null) {
-                    bodyBone.setRotY(-pm.body.yaw); // invertRotForPart Y
-                }
-            }
+        // Mixed forms (vanilla parts visible): processAnimation handles everything
+        boolean mixedForm = !Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
+                         || !Hidden_LeftLeg || !Hidden_RightLeg;
+
+        if (mixedForm && player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
+            applyBodyTransform = true; // body rotation via MatrixStack for vanilla model
+            this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
+                this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
+                this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
         }
-
-        // TEST: AC drives animation natively. Remove processAnimation if correct.
-        //if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
-        //    this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
-        //        this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
-        //        this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
-        //}
     }
 
     public static KeyframeLocation<Keyframe<MathValue>> findKeyframe(java.util.List<Keyframe<MathValue>> frames, double tick) {
@@ -760,9 +742,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         if (!rotFrames.xKeyframes().isEmpty()) {
             float rx = (float)interpolateValue(findKeyframe(rotFrames.xKeyframes(), elapsed), easingType);
-            float ry = -(float)interpolateValue(findKeyframe(rotFrames.yKeyframes(), elapsed), easingType);
+            float ry = (float)interpolateValue(findKeyframe(rotFrames.yKeyframes(), elapsed), easingType);
             float rz = (float)interpolateValue(findKeyframe(rotFrames.zKeyframes(), elapsed), easingType);
-            rot = new Vec3d(rx, -ry, rz); // PAL Y invert baked in
+            rot = new Vec3d(rx, ry, rz);
         }
         return new BodyRootData(pos, rot);
     }
