@@ -34,23 +34,24 @@ public class FormAnimatable implements GeoReplacedEntity {
         return null;
     }
 
+    private String lastMainAnim = null, lastUpperAnim = null, lastPowerAnim = null;
+
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        return; // TEST: disable all GeckoLib AnimationControllers, rely on Mixin→processAnimation only
-        /*controllers.add(new AnimationController<>(this, "main", 1, state -> {
+        controllers.add(new AnimationController<>(this, "main", 1, state -> {
             AnimationState animState = getAnimState();
             if (animState != null && animState.currentBodyAnimId != null) {
-                state.setAnimation(RawAnimation.begin().thenPlay(animState.currentBodyAnimId.getPath()));
-                state.setControllerSpeed(animState.bodySpeed);
-            }
-            if (this.e != null && this.e.age % 20 == 0) {
-                RawAnimation currentRaw = RawAnimation.begin().thenPlay(animState != null && animState.currentBodyAnimId != null ? animState.currentBodyAnimId.getPath() : "none");
-//                ShapeShifterCurseFabric.LOGGER.info("[SSC-ANIM] controller.main: animId={} speed={} animTick={} isCurrent={} playerSet={}",
-//                    animState != null ? animState.currentBodyAnimId : "null",
-//                    animState != null ? animState.bodySpeed : 0f,
-//                    state.getAnimationTick(),
-//                    state.isCurrentAnimation(currentRaw),
-//                    this.e != null);
+                String id = animState.currentBodyAnimId.getPath();
+                if (!id.equals(lastMainAnim)) {
+                    lastMainAnim = id;
+                    state.setControllerSpeed(animState.bodySpeed);
+                    if (e != null && e.age % 20 == 0) ShapeShifterCurseFabric.LOGGER.info("[SSC-AC-PRED] main SWITCH to " + id);
+                    return state.setAndContinue(RawAnimation.begin().thenPlay(id));
+                }
+                if (e != null && e.age % 20 == 0) ShapeShifterCurseFabric.LOGGER.info("[SSC-AC-PRED] main KEEP  " + id + " tick=" + state.getAnimationTick());
+            } else {
+                lastMainAnim = null;
+                return PlayState.STOP;
             }
             return PlayState.CONTINUE;
         }));
@@ -58,8 +59,15 @@ public class FormAnimatable implements GeoReplacedEntity {
         controllers.add(new AnimationController<>(this, "upper", 1, state -> {
             AnimationState animState = getAnimState();
             if (animState != null && animState.currentUpperAnimId != null) {
-                state.setAnimation(RawAnimation.begin().thenPlay(animState.currentUpperAnimId.getPath()));
-                state.setControllerSpeed(animState.upperSpeed);
+                String id = animState.currentUpperAnimId.getPath();
+                if (!id.equals(lastUpperAnim)) {
+                    lastUpperAnim = id;
+                    state.setControllerSpeed(animState.upperSpeed);
+                    return state.setAndContinue(RawAnimation.begin().thenPlay(id));
+                }
+            } else {
+                lastUpperAnim = null;
+                return PlayState.STOP;
             }
             return PlayState.CONTINUE;
         }));
@@ -67,11 +75,18 @@ public class FormAnimatable implements GeoReplacedEntity {
         controllers.add(new AnimationController<>(this, "power", 1, state -> {
             AnimationState animState = getAnimState();
             if (animState != null && animState.currentPowerAnimId != null) {
-                state.setAnimation(RawAnimation.begin().thenPlay(animState.currentPowerAnimId.getPath()));
-                state.setControllerSpeed(animState.powerSpeed);
+                String id = animState.currentPowerAnimId.getPath();
+                if (!id.equals(lastPowerAnim)) {
+                    lastPowerAnim = id;
+                    state.setControllerSpeed(animState.powerSpeed);
+                    return state.setAndContinue(RawAnimation.begin().thenPlay(id));
+                }
+            } else {
+                lastPowerAnim = null;
+                return PlayState.STOP;
             }
             return PlayState.CONTINUE;
-        }));*/
+        }));
     }
 
     @Override
@@ -81,6 +96,6 @@ public class FormAnimatable implements GeoReplacedEntity {
 
     @Override
     public double getTick(Object o) {
-        return MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true);
+        return e != null ? e.age + MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true) : 0;
     }
 }
