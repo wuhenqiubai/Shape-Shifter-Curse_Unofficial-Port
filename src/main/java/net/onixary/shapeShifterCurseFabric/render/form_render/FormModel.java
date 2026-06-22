@@ -664,12 +664,39 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
 
-        // Deferred processAnimation: runs AFTER GeckoLib AC so ModelPart-derived offsets are final
-        if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
-            this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
-                this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
-                this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
+        // Apply player head tracking when animation has no head keyframes
+        if (player != null && this.stashedRenderer != null) {
+            Animation currentAnim = null;
+            if (player instanceof IAnimSystemAccessor accessor) {
+                var sscState = accessor.shape_shifter_curse$getAnimSystem().animationState;
+                if (sscState.currentBodyAnimId != null) {
+                    currentAnim = getCachedAnimation(sscState.currentBodyAnimId.getPath());
+                }
+            }
+            boolean hasHeadKeyframes = currentAnim != null && java.util.Arrays.stream(currentAnim.boneAnimations())
+                .anyMatch(ba -> ba.boneName().equals("bipedHead") && !ba.rotationKeyFrames().xKeyframes().isEmpty());
+
+            if (!hasHeadKeyframes) {
+                var pm = this.stashedRenderer.getModel();
+                var headBone = getCachedGeoBone("bipedHead");
+                if (headBone != null) {
+                    headBone.setRotX(pm.head.pitch);
+                    headBone.setRotY(-pm.head.yaw);
+                    headBone.setRotZ(-pm.head.roll); // invertRotForPart Z
+                }
+                var bodyBone = getCachedGeoBone("bipedBody");
+                if (bodyBone != null) {
+                    bodyBone.setRotY(-pm.body.yaw); // invertRotForPart Y
+                }
+            }
         }
+
+        // TEST: AC drives animation natively. Remove processAnimation if correct.
+        //if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
+        //    this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
+        //        this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
+        //        this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
+        //}
     }
 
     public static KeyframeLocation<Keyframe<MathValue>> findKeyframe(java.util.List<Keyframe<MathValue>> frames, double tick) {
@@ -696,7 +723,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     /** Compute the actual animation length from keyframe data (anim.length() returns junk for merged files). */
-    /** Pre-computed bodyRoot transform data for PlayerRendererBodyRootMixin. */
+    /** Pre-computed body transform data for PlayerRendererBodyRootMixin. */
     public static record BodyRootData(@Nullable Vec3d pos, @Nullable Vec3d rot) {}
     public static @Nullable BodyRootData computeBodyRootTransform(PlayerEntity player, float tickDelta) {
         if (!(player instanceof IAnimSystemAccessor accessor)) return null;
@@ -705,11 +732,11 @@ public class FormModel extends GeoModel<FormAnimatable> {
         Animation anim = getCachedAnimation(animState.currentBodyAnimId.getPath());
         if (anim == null) return null;
 
-        BoneAnimation bodyRootAnim = null;
+        BoneAnimation bodyAnim = null;
         for (BoneAnimation ba : anim.boneAnimations()) {
-            if (ba.boneName().equals("bodyRoot")) { bodyRootAnim = ba; break; }
+            if (ba.boneName().equals("body")) { bodyAnim = ba; break; }
         }
-        if (bodyRootAnim == null) return null;
+        if (bodyAnim == null) return null;
 
         double elapsed = (player.age - animState.bodyAnimStartAge + tickDelta) * animState.bodySpeed;
         double animLength = getAnimLength(anim);
@@ -720,8 +747,8 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         String easingType = animState.easingTypeName;
 
-        KeyframeStack<Keyframe<MathValue>> posFrames = bodyRootAnim.positionKeyFrames();
-        KeyframeStack<Keyframe<MathValue>> rotFrames = bodyRootAnim.rotationKeyFrames();
+        KeyframeStack<Keyframe<MathValue>> posFrames = bodyAnim.positionKeyFrames();
+        KeyframeStack<Keyframe<MathValue>> rotFrames = bodyAnim.rotationKeyFrames();
 
         Vec3d pos = null, rot = null;
 

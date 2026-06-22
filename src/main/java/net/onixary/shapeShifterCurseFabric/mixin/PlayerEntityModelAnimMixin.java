@@ -83,6 +83,8 @@ public class PlayerEntityModelAnimMixin {
                 float kx = (float)FormModel.interpolateValue(locX, easingType);
                 float ky = (float)FormModel.interpolateValue(locY, easingType);
                 float kz = (float)FormModel.interpolateValue(locZ, easingType);
+                // Undo (-x, y, -z) processing applied to animation data (AC works with processed data; Mixin needs raw PAL values)
+                kx = -kx; kz = -kz;
                 ModelTransform def = part.getDefaultTransform();
                 float dpX = def.pivotX;
                 float dpY = def.pivotY;
@@ -99,6 +101,8 @@ public class PlayerEntityModelAnimMixin {
                 float rx = (float)FormModel.interpolateValue(locX, easingType);
                 float ry = (float)FormModel.interpolateValue(locY, easingType);
                 float rz = (float)FormModel.interpolateValue(locZ, easingType);
+                // Undo (-x, y, -z) processing: X and Z need to be reverted
+                rx = -rx; rz = -rz;
                 part.pitch = -rx;
                 part.yaw = -ry;
                 part.roll = rz;

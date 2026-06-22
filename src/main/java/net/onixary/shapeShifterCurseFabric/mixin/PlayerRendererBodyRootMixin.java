@@ -23,7 +23,8 @@ public class PlayerRendererBodyRootMixin {
     @Inject(method = "setupTransforms(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/util/math/MatrixStack;FFFF)V", at = @At("RETURN"))
     private void ssc$applyBodyRootTransform(AbstractClientPlayerEntity player, MatrixStack matrices,
                                              float animationProgress, float bodyYaw, float tickDelta, float scale, CallbackInfo ci) {
-        BodyRootData data = FormModel.computeBodyRootTransform(player, tickDelta);
+        return; // TEST: disabled — body rotation now handled by AC through body GeoBone hierarchy
+        /*BodyRootData data = FormModel.computeBodyRootTransform(player, tickDelta);
         if (data == null) return;
 
         // Apply position: PAL body bone pivot at Y=12 → translate(-posX/16, posY/16 + 0.75, posZ/16)
@@ -42,6 +43,6 @@ public class PlayerRendererBodyRootMixin {
             matrices.multiply(RotationAxis.POSITIVE_X.rotation((float) rot.x));
         }
 
-        matrices.translate(0, -0.75f, 0); // undo pivot offset
+        matrices.translate(0, -0.75f, 0); // undo pivot offset*/
     }
 }
