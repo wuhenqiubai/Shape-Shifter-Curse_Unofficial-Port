@@ -50,14 +50,12 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
             Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.thinArms);
             boolean bl2 = !player.isInvisibleTo(MinecraftClient.getInstance().player);
             if (overlayTexture != null) {
-                // Use TRANSLUCENT (not CUTOUT) for smooth alpha blending — needed by
-                // forms like allay so the overlay doesn't completely cover the player skin.
-                RenderLayer l = RenderLayer.getEntityTranslucent(overlayTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0x26FFFFFF : 0xFFFFFFFF);
+                RenderLayer l = RenderLayer.getEntityCutout(overlayTexture);
+                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0xFFFFFFFF : 0xFFFFFFFF);
             }
             if (emissiveTexture != null) {
                 RenderLayer l = RenderLayer.getEntityTranslucentEmissive(emissiveTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0x26FFFFFF : 0xFFFFFFFF);
+                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0xFFFFFFFF : 0xFFFFFFFF);
             }
             playerEntityModel.hat.hidden = false;
             playerEntityModel.head.hidden = false;
