@@ -8,6 +8,7 @@ import software.bernie.geckolib.animation.AnimationState;
 import software.bernie.geckolib.animation.Animation;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.constant.DataTickets;
+import software.bernie.geckolib.model.data.EntityModelData;
 import software.bernie.geckolib.animation.keyframe.BoneAnimation;
 import software.bernie.geckolib.animation.keyframe.Keyframe;
 import software.bernie.geckolib.animation.keyframe.KeyframeLocation;
@@ -642,6 +643,13 @@ public class FormModel extends GeoModel<FormAnimatable> {
         boolean hadTick = animationState.getData(DataTickets.TICK) != null;
         if (player != null && !hadTick) {
             animationState.setData(DataTickets.TICK, (double)player.age);
+        }
+
+        // Standard GeckoLib entity data (matching GeoReplacedEntityRenderer.actuallyRender)
+        if (player != null) {
+            animationState.setData(DataTickets.ENTITY, player);
+            animationState.setData(DataTickets.ENTITY_MODEL_DATA,
+                new EntityModelData(player.hasVehicle(), false, 0f, 0f));
         }
 
         // Populate animation cache for Mixin and advance GeckoLib time
