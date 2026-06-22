@@ -36,40 +36,16 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
     private static final boolean BetterCombatInstalled = FabricLoader.getInstance().isModLoaded("bettercombat");
     private static final boolean IRISInstalled = FabricLoader.getInstance().isModLoaded("iris");
 
+    /** Reset hidden flags on vanilla model parts after rendering.
+     *  Overlay/emissive texture rendering is handled by OverlayRenderMixin. */
     public static void rM_PartB(PlayerEntityRenderer playerEntityRenderer, AbstractClientPlayerEntity player, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
-        float animProgress = player.hurtTime > 0 ? (float) player.hurtTime - g : 0;
-        int p = OverlayTexture.packUv(OverlayTexture.getU(animProgress), OverlayTexture.getV(player.hurtTime > 0 || player.deathTime > 0));
-        if (player.isSpectator()) {
-            return;
-        }
-        List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        for (FormRenderer formRenderer : formRendererList) {
-            PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = playerEntityRenderer.getModel();
-            FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            Identifier overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.thinArms);
-            Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.thinArms);
-            boolean bl2 = !player.isInvisibleTo(MinecraftClient.getInstance().player);
-            if (overlayTexture != null) {
-                RenderLayer l = RenderLayer.getEntityCutout(overlayTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0xFFFFFFFF : 0xFFFFFFFF);
-            }
-            if (emissiveTexture != null) {
-                RenderLayer l = RenderLayer.getEntityTranslucentEmissive(emissiveTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0xFFFFFFFF : 0xFFFFFFFF);
-            }
-            playerEntityModel.hat.hidden = false;
-            playerEntityModel.head.hidden = false;
-            playerEntityModel.body.hidden = false;
-            playerEntityModel.jacket.hidden = false;
-            playerEntityModel.leftArm.hidden = false;
-            playerEntityModel.leftSleeve.hidden = false;
-            playerEntityModel.rightArm.hidden = false;
-            playerEntityModel.rightSleeve.hidden = false;
-            playerEntityModel.leftLeg.hidden = false;
-            playerEntityModel.leftPants.hidden = false;
-            playerEntityModel.rightLeg.hidden = false;
-            playerEntityModel.rightPants.hidden = false;
-        }
+        if (player.isSpectator()) return;
+        PlayerEntityModel<?> m = playerEntityRenderer.getModel();
+        m.hat.hidden = false; m.head.hidden = false; m.body.hidden = false;
+        m.jacket.hidden = false; m.leftArm.hidden = false; m.leftSleeve.hidden = false;
+        m.rightArm.hidden = false; m.rightSleeve.hidden = false;
+        m.leftLeg.hidden = false; m.leftPants.hidden = false;
+        m.rightLeg.hidden = false; m.rightPants.hidden = false;
     }
 
     /** Aggregate Hidden_* flags from all active form renderers and apply to the vanilla model. */
@@ -260,8 +236,8 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 matrices.translate(-0.5, -0.5, -0.5);
                 formModel.AnimationSystem.beforeRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
                 // processAnimation is now deferred to handleAnimations (after GeckoLib AC)
+                // Emissive pass handled by FormEmissiveLayer (registered on FormRenderer)
                 formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucent(formModel.getTextureResource(formAnimatable)), null, light, tickDelta);
-                formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucentEmissive(formModel.getFullbrightTextureResource(formAnimatable)), null, Integer.MAX_VALUE - 1, tickDelta);
                 if (hasOutline) {
                     formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getOutline(formModel.getTextureResource(formAnimatable)), vertexConsumers.getBuffer(RenderLayer.getOutline(formModel.getTextureResource(formAnimatable))), light, tickDelta);
                 }

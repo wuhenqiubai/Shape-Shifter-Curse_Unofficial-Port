@@ -15,6 +15,7 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
         this.realModel = (FormModel) this.model;
         this.persistentAnimatable = new FormAnimatable();
         this.animatable = this.persistentAnimatable;
+        addRenderLayer(new FormEmissiveLayer(this));
     }
 
     public void setPlayer(PlayerEntity player, boolean slim) {
