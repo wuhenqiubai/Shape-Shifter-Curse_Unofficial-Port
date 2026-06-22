@@ -74,6 +74,40 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         }
     }
 
+    /** Aggregate Hidden_* flags from all active form renderers and apply to the vanilla model. */
+    private static void applyVisibility(PlayerEntity player, List<FormRenderer> formRendererList,
+                                        PlayerEntityModel<AbstractClientPlayerEntity> model) {
+        boolean hatH = !player.isPartVisible(PlayerModelPart.HAT);
+        boolean headH = false, bodyH = false, leftArmH = false, rightArmH = false;
+        boolean leftLegH = false, rightLegH = false;
+        boolean jacketH = !player.isPartVisible(PlayerModelPart.JACKET);
+        boolean leftSleeveH = !player.isPartVisible(PlayerModelPart.LEFT_SLEEVE);
+        boolean rightSleeveH = !player.isPartVisible(PlayerModelPart.RIGHT_SLEEVE);
+        boolean leftPantsH = !player.isPartVisible(PlayerModelPart.LEFT_PANTS_LEG);
+        boolean rightPantsH = !player.isPartVisible(PlayerModelPart.RIGHT_PANTS_LEG);
+        for (FormRenderer fr : formRendererList) {
+            FormModel fm = (FormModel) fr.getGeoModel();
+            hatH |= fm.Hidden_Hat;       headH |= fm.Hidden_Head;
+            bodyH |= fm.Hidden_Body;     jacketH |= fm.Hidden_Jacket;
+            leftArmH |= fm.Hidden_LeftArm;   rightArmH |= fm.Hidden_RightArm;
+            leftSleeveH |= fm.Hidden_LeftSleeve; rightSleeveH |= fm.Hidden_RightSleeve;
+            leftLegH |= fm.Hidden_LeftLeg;   rightLegH |= fm.Hidden_RightLeg;
+            leftPantsH |= fm.Hidden_LeftPants; rightPantsH |= fm.Hidden_RightPants;
+        }
+        model.hat.visible = !hatH;
+        model.head.visible = !headH;
+        model.body.visible = !bodyH;
+        model.jacket.visible = !jacketH;
+        model.leftArm.visible = !leftArmH;
+        model.leftSleeve.visible = !leftSleeveH;
+        model.rightArm.visible = !rightArmH;
+        model.rightSleeve.visible = !rightSleeveH;
+        model.leftLeg.visible = !leftLegH;
+        model.leftPants.visible = !leftPantsH;
+        model.rightLeg.visible = !rightLegH;
+        model.rightPants.visible = !rightPantsH;
+    }
+
     // 处理 BonePart 隐藏
     public static void rM_PartA(PlayerEntityRenderer playerEntityRenderer, AbstractClientPlayerEntity player, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         if (player.isSpectator()) {
@@ -94,45 +128,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         }
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
         PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = playerEntityRenderer.getModel();
-        boolean hatHidden = !player.isPartVisible(PlayerModelPart.HAT);
-        boolean headHidden = false;
-        boolean bodyHidden = false;
-        boolean jacketHidden = !player.isPartVisible(PlayerModelPart.JACKET);
-        boolean leftArmHidden = false;
-        boolean leftSleeveHidden = !player.isPartVisible(PlayerModelPart.LEFT_SLEEVE);
-        boolean rightArmHidden = false;
-        boolean rightSleeveHidden = !player.isPartVisible(PlayerModelPart.RIGHT_SLEEVE);
-        boolean leftLegHidden = false;
-        boolean leftPantsHidden = !player.isPartVisible(PlayerModelPart.LEFT_PANTS_LEG);
-        boolean rightLegHidden = false;
-        boolean rightPantsHidden = !player.isPartVisible(PlayerModelPart.RIGHT_PANTS_LEG);
-        for (FormRenderer formRenderer : formRendererList) {
-            FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            hatHidden |= formModel.Hidden_Hat;
-            headHidden |= formModel.Hidden_Head;
-            bodyHidden |= formModel.Hidden_Body;
-            jacketHidden |= formModel.Hidden_Jacket;
-            leftArmHidden |= formModel.Hidden_LeftArm;
-            leftSleeveHidden |= formModel.Hidden_LeftSleeve;
-            rightArmHidden |= formModel.Hidden_RightArm;
-            rightSleeveHidden |= formModel.Hidden_RightSleeve;
-            leftLegHidden |= formModel.Hidden_LeftLeg;
-            leftPantsHidden |= formModel.Hidden_LeftPants;
-            rightLegHidden |= formModel.Hidden_RightLeg;
-            rightPantsHidden |= formModel.Hidden_RightPants;
-        }
-        playerEntityModel.hat.visible = !hatHidden;
-        playerEntityModel.head.visible = !headHidden;
-        playerEntityModel.body.visible = !bodyHidden;
-        playerEntityModel.jacket.visible = !jacketHidden;
-        playerEntityModel.leftArm.visible = !leftArmHidden;
-        playerEntityModel.leftSleeve.visible = !leftSleeveHidden;
-        playerEntityModel.rightArm.visible = !rightArmHidden;
-        playerEntityModel.rightSleeve.visible = !rightSleeveHidden;
-        playerEntityModel.leftLeg.visible = !leftLegHidden;
-        playerEntityModel.leftPants.visible = !leftPantsHidden;
-        playerEntityModel.rightLeg.visible = !rightLegHidden;
-        playerEntityModel.rightPants.visible = !rightPantsHidden;
+        applyVisibility(player, formRendererList, playerEntityModel);
 
         boolean IsClientNowPlayedPlayer = player instanceof ClientPlayerEntity;
         boolean IsFirstPersonView = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
