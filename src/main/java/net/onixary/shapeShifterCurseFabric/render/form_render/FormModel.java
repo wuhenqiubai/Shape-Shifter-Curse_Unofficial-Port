@@ -696,6 +696,50 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     /** Compute the actual animation length from keyframe data (anim.length() returns junk for merged files). */
+    /** Pre-computed bodyRoot transform data for PlayerRendererBodyRootMixin. */
+    public static record BodyRootData(@Nullable Vec3d pos, @Nullable Vec3d rot) {}
+    public static @Nullable BodyRootData computeBodyRootTransform(PlayerEntity player, float tickDelta) {
+        if (!(player instanceof IAnimSystemAccessor accessor)) return null;
+        var animState = accessor.shape_shifter_curse$getAnimSystem().animationState;
+        if (animState.currentBodyAnimId == null) return null;
+        Animation anim = getCachedAnimation(animState.currentBodyAnimId.getPath());
+        if (anim == null) return null;
+
+        BoneAnimation bodyRootAnim = null;
+        for (BoneAnimation ba : anim.boneAnimations()) {
+            if (ba.boneName().equals("bodyRoot")) { bodyRootAnim = ba; break; }
+        }
+        if (bodyRootAnim == null) return null;
+
+        double elapsed = (player.age - animState.bodyAnimStartAge + tickDelta) * animState.bodySpeed;
+        double animLength = getAnimLength(anim);
+        if (anim.loopType().shouldPlayAgain(null, null, anim) && animLength > 0) {
+            elapsed = elapsed % animLength;
+        } else if (elapsed > animLength && animLength > 0) {
+            elapsed = animLength - 0.01;
+        }
+        String easingType = animState.easingTypeName;
+
+        KeyframeStack<Keyframe<MathValue>> posFrames = bodyRootAnim.positionKeyFrames();
+        KeyframeStack<Keyframe<MathValue>> rotFrames = bodyRootAnim.rotationKeyFrames();
+
+        Vec3d pos = null, rot = null;
+
+        if (!posFrames.xKeyframes().isEmpty()) {
+            float px = (float)interpolateValue(findKeyframe(posFrames.xKeyframes(), elapsed), easingType);
+            float py = (float)interpolateValue(findKeyframe(posFrames.yKeyframes(), elapsed), easingType);
+            float pz = (float)interpolateValue(findKeyframe(posFrames.zKeyframes(), elapsed), easingType);
+            pos = new Vec3d(px, py, pz);
+        }
+        if (!rotFrames.xKeyframes().isEmpty()) {
+            float rx = (float)interpolateValue(findKeyframe(rotFrames.xKeyframes(), elapsed), easingType);
+            float ry = -(float)interpolateValue(findKeyframe(rotFrames.yKeyframes(), elapsed), easingType);
+            float rz = (float)interpolateValue(findKeyframe(rotFrames.zKeyframes(), elapsed), easingType);
+            rot = new Vec3d(rx, -ry, rz); // PAL Y invert baked in
+        }
+        return new BodyRootData(pos, rot);
+    }
+
     public static double getAnimLength(Animation anim) {
         double maxLen = 0;
         for (BoneAnimation ba : anim.boneAnimations()) {
