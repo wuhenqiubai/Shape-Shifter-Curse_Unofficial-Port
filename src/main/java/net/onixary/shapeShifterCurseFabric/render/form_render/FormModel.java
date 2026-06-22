@@ -664,31 +664,12 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
 
-        // DIAGNOSTIC: check AC processing
-        if (player != null && player.age % 20 == 0) {
-            double tick = animationState.animationTick;
-            var bone = getAnimationProcessor().getBone("bipedBody");
-            // Verify animation can be resolved by AnimationProcessor
-            if (player instanceof IAnimSystemAccessor accessor) {
-                var sscState = accessor.shape_shifter_curse$getAnimSystem().animationState;
-                if (sscState.currentBodyAnimId != null) {
-                    Animation resolved = this.getAnimation(animatable, sscState.currentBodyAnimId.getPath());
-                    ShapeShifterCurseFabric.LOGGER.info(String.format("[SSC-AC-DIAG] age=%d animTick=%.2f animName=%s resolved=%s bonePos=(%.2f,%.2f,%.2f) boneRot=(%.4f,%.4f,%.4f)",
-                        player.age, tick, sscState.currentBodyAnimId.getPath(),
-                        resolved != null ? "FOUND:" + resolved.boneAnimations().length + " bones" : "NOT FOUND",
-                        bone != null ? bone.getPosX() : 0f, bone != null ? bone.getPosY() : 0f, bone != null ? bone.getPosZ() : 0f,
-                        bone != null ? bone.getRotX() : 0f, bone != null ? bone.getRotY() : 0f, bone != null ? bone.getRotZ() : 0f));
-                }
-            }
-        }
-
-        // TEST: disabled — testing pure GeckoLib AC drive
         // Deferred processAnimation: runs AFTER GeckoLib AC so ModelPart-derived offsets are final
-        //if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
-        //    this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
-        //        this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
-        //        this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
-        //}
+        if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
+            this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
+                this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
+                this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
+        }
     }
 
     public static KeyframeLocation<Keyframe<MathValue>> findKeyframe(java.util.List<Keyframe<MathValue>> frames, double tick) {

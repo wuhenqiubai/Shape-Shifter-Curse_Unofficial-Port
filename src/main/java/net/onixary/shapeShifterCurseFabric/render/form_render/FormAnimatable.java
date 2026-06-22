@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimationState;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor;
 import software.bernie.geckolib.animatable.GeoReplacedEntity;
@@ -45,10 +44,8 @@ public class FormAnimatable implements GeoReplacedEntity {
                 if (!id.equals(lastMainAnim)) {
                     lastMainAnim = id;
                     state.setControllerSpeed(animState.bodySpeed);
-                    if (e != null && e.age % 20 == 0) ShapeShifterCurseFabric.LOGGER.info("[SSC-AC-PRED] main SWITCH to " + id);
                     return state.setAndContinue(RawAnimation.begin().thenPlay(id));
                 }
-                if (e != null && e.age % 20 == 0) ShapeShifterCurseFabric.LOGGER.info("[SSC-AC-PRED] main KEEP  " + id + " tick=" + state.getAnimationTick());
             } else {
                 lastMainAnim = null;
                 return PlayState.STOP;
