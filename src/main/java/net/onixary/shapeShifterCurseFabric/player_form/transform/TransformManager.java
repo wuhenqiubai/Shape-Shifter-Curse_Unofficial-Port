@@ -183,8 +183,11 @@ public class TransformManager {
         }
         data.curPlayer = player;
         data.curToForm = toForm;
-	    ShapeShifterCurseFabric.LOGGER.info("Cur Player: {} To Form: {}", data.curPlayer, data.curToForm);
-        applyStartTransformEffect(player, StaticParams.TRANSFORM_FX_DURATION_IN);
+        if (!isByCursedMoon) {
+            ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(player, toForm.FormID);
+        }
+        ShapeShifterCurseFabric.LOGGER.info("Cur Player: " + data.curPlayer + " To Form: " + data.curToForm);
+        applyStartTransformEffect((ServerPlayerEntity) player, StaticParams.TRANSFORM_FX_DURATION_IN);
         handleTransformEffect(player);
         RegPlayerFormComponent.PLAYER_FORM.sync(player);
     }

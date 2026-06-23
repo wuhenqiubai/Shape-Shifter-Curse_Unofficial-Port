@@ -22,6 +22,7 @@ public class AdditionalEntityActions {
         WebBridgeAction.registerAction(AdditionalEntityActions::registerAction, AdditionalEntityActions::registerBIAction);
         ItemStorePower.registerAction(AdditionalEntityActions::registerAction, AdditionalEntityActions::registerBIAction);
         ItemCooldownCA.registerAction(AdditionalEntityActions::registerAction, AdditionalEntityActions::registerBIAction);
+        registerAction(TANAddThirstAction.createFactory());
     }
 
     public static void registerAction(ActionFactory<Entity> actionFactory) {

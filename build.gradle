@@ -239,6 +239,9 @@ dependencies {
     annotationProcessor(files("_dev/libs/mixinextras-fabric-0.4.1.jar"))
 
 
+    // Tough as nails
+    modCompileOnly "maven.modrinth:tough-as-nails:VaFrDMPi"
+
 }
 
 processResources {
