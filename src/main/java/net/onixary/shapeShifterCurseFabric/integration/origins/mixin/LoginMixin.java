@@ -83,6 +83,6 @@ public abstract class LoginMixin {
 
 	@Unique
     private static void sendToPlayer(ServerPlayerEntity player, Identifier id, PacketByteBuf buf) {
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(id), buf));
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(id),  buf));
     }
 }

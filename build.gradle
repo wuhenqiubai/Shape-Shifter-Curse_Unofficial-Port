@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '1.9-SNAPSHOT'
+    id 'fabric-loom' version '1.17-SNAPSHOT'
     id 'maven-publish'
     //id("com.gradleup.shadow") version "8.3.6"
 }
@@ -150,9 +150,6 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.12.1'
 
-    // 已经包含在 fabric-api 中
-    // modImplementation "net.fabricmc.fabric-api:fabric-lifecycle-events-v1:${project.fabric_version}"
-
     //mappings loom.layered() {
     //    officialMojangMappings()
     //    parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
@@ -160,29 +157,11 @@ dependencies {
 
     //Common 1.20.1+ Latest Only (unused - replaced by GeckoLib)
 
-    //AzureLib
-    //modImplementation "mod.azure.azurelib:azurelib-fabric-1.21.1:${azurelib_version}"
-
     //GeckoLib
     modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
 
-
-    // Owo
-    // modImplementation "io.wispforest:owo-lib:${project.owo_version}"
-    // include "io.wispforest:owo-sentinel:${project.owo_version}"
-    // annotationProcessor modImplementation("io.wispforest:owo-lib:${project.owo_version}")
-    // modCompileOnly "io.wispforest:owo-lib:${owo_version}"
-    // modRuntimeOnly "io.wispforest:owo-lib:${owo_version}"
-
     // satin shader
     modImplementation "org.ladysnake:satin:${satin_version}"
-
-    // Reach Entity Attributes by jamieswhiteshirt
-    modImplementation "com.jamieswhiteshirt:reach-entity-attributes:${project.reach_version}"
-
-    // player ability lib
-    //modImplementation "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
-    //include "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
 
     // Apoli + Calio by Apace100
     // 1.21.1 alpha versions are on Ladysnake snapshots maven
@@ -198,10 +177,6 @@ dependencies {
     // Origins by Apace100
     //modImplementation "com.github.apace100:origins-fabric:${project.origins_version}"
 
-    // BreathingLib (fork) by eggohito
-    //modImplementation "com.github.eggohito:BreathingLib:${project.breathing_lib_version}"
-    //include "com.github.eggohito:BreathingLib:${project.breathing_lib_version}"
-
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
@@ -212,41 +187,28 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modApi("com.jamieswhiteshirt:reach-entity-attributes:${project.reach_version}")
     //  Modmenu
     modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
     // Player Animation Library
     modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
 
     // Trinkets
-
     modCompileOnly "dev.emi:trinkets:${project.trinkets_version}"
 
-    // Fabric forge config api port
-    // modLocalRuntime "fuzs.forgeconfigscreens:forgeconfigscreens-fabric:8.0.0"
-
-
-    //modImplementation "com.github.eggohito:eggolib:${project.eggolib_version}"
-    //include "com.github.eggohito:eggolib:${project.eggolib_version}"
-
-    modCompileOnly "maven.modrinth:iris:URWeWMAt"
-    modCompileOnly "maven.modrinth:extra-origins:spXxXXgx"
-    modCompileOnly "maven.modrinth:origins-classes:EnGfmh9y"
-    modCompileOnly "maven.modrinth:bendy-lib:DFxVCaiC"
-    modCompileOnly "maven.modrinth:better-combat:MxaoPSMy"
-    modCompileOnly "maven.modrinth:first-person-model:mquWPSix"
-    modRuntimeOnly "maven.modrinth:first-person-model:mquWPSix"
+    modCompileOnly "maven.modrinth:iris:zsoi0dso"
+    modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
+    modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
+    modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
+    modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
 
     modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
     modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
 
-    modCompileOnly "maven.modrinth:vivecraft:9Sa2NEEb"
-    annotationProcessor(files("_dev/libs/mixinextras-fabric-0.4.1.jar"))
+    modCompileOnly "maven.modrinth:vivecraft:Q589olkQ"
 
-    modCompileOnly "maven.modrinth:tacz-refabricated:HxQ3IsAZ" // TaCZ: Refabricated 1.20.1-0.4.0-forge1.1.7-hotfix
 
     // Tough as nails
-    modCompileOnly "maven.modrinth:tough-as-nails:VaFrDMPi"
+    modCompileOnly "maven.modrinth:tough-as-nails:dLxSK1xF"
 
 }
 

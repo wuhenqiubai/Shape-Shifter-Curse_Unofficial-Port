@@ -167,6 +167,6 @@ public class ModPacketsC2S {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(layer.getIdentifier());
         buf.writeIdentifier(origin.getIdentifier());
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
+	    ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
     }
 }

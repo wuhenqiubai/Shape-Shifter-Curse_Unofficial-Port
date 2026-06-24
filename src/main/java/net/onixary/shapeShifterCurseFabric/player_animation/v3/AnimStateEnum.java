@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 /**
  * 玩家动画状态枚举，快速映射 FSM 输出的状态 ID 到枚举常量。
  * <p>
- * 用于 {@link PlayerFormBase#getAnimStateController} 中的 switch 语句，
+ * 用于 {@link IForm#getAnimStateController} 中的 switch 语句，
  * 使 FSM 状态到动画控制器的映射代码更简洁。
  * <p>
  * 状态与 {@link AnimRegistries} 中注册的 ANIM_STATE_* Identifier 一一对应。

@@ -7,9 +7,10 @@ import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormDynamic;
+import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class PatronFormSelectScreen extends Screen {
-    private static final Identifier page_texID = Identifier.of(MOD_ID, "textures/gui/patron_form_select_menu.png");
+    private static final Identifier page_texID = Identifier.of(MOD_ID,"textures/gui/patron_form_select_menu.png");
     private final ClientPlayerEntity player;
 
     private List<Identifier> availableForms;
@@ -35,8 +36,8 @@ public class PatronFormSelectScreen extends Screen {
     private List<Identifier> getAvailableForms() {
         List<Identifier> availableForms = new ArrayList<>();
         for (Identifier formID : RegPlayerForms.dynamicPlayerForms) {
-            PlayerFormBase form = RegPlayerForms.getPlayerForm(formID);
-            if (form instanceof PlayerFormDynamic pfd) {
+            IForm form = RegPlayerForms.getPlayerForm(formID);
+            if (form instanceof DynamicForm pfd) {
                 if (pfd.IsPatronForm && pfd.IsPlayerCanUse(player)) {
                     if (!availableForms.contains(formID)) {
                         availableForms.add(formID);
@@ -46,7 +47,9 @@ public class PatronFormSelectScreen extends Screen {
         }
         // TODO 移除填充项
         // 下面是填充项
-	    RegPlayerForms.playerForms.forEach((formID, form) -> availableForms.add(form.FormID));
+        RegPlayerForms.playerForms.forEach((formID, form) -> {
+            availableForms.add(form.getFormID());
+        });
         // 填充项结束
         return availableForms;
     }
@@ -77,7 +80,7 @@ public class PatronFormSelectScreen extends Screen {
             ButtonWidget buttonWidget = buttonWidgetList.get(i);
             if (buttonForms.get(i) != null) {
                 try {
-                    buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getFormName());
+                    buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getContentText(CodexData.ContentType.NAME));
                 } catch (Exception e) {
                     buttonWidget.setMessage(Text.of(buttonForms.get(i).toString()));
                 }

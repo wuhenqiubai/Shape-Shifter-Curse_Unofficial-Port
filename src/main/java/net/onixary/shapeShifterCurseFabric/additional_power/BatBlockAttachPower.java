@@ -39,7 +39,7 @@ public class BatBlockAttachPower extends Power {
     private final int bottomAttachInterval;
 
     // 吸附状态
-    private boolean isAttached = false;
+    private static boolean isAttached = false;
     private AttachType attachType = AttachType.NONE;
     private BlockPos attachedBlockPos = null;
     private Direction attachedSide = null;

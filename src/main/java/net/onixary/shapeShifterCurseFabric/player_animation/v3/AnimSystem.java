@@ -15,7 +15,7 @@ import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController.TransformingController;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
@@ -302,7 +302,7 @@ public class AnimSystem {
 		/**
 		 * 当前帧该玩家的形态
 		 */
-        public PlayerFormBase playerForm;
+        public IForm playerForm;
 		/** 是否在地面上（含容错判断：长时间 Y 轴未变化也视为地面） */
         public boolean IsOnGround = true;
 		/** 上一帧的玩家位置，用于计算移动状态 */

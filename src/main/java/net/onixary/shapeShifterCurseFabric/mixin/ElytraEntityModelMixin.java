@@ -6,7 +6,7 @@ import net.minecraft.client.render.entity.model.ElytraEntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.Vec3d;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -39,16 +39,16 @@ public abstract class ElytraEntityModelMixin<T extends LivingEntity> {
         float l = -0.2617994f;
         float m = 0.0f;
         float n = 0.0f;
-        if (entity.isFallFlying()) {
+        if (((LivingEntity)entity).isFallFlying()) {
             float o = 1.0f;
-            Vec3d vec3d = entity.getVelocity();
+            Vec3d vec3d = ((Entity)entity).getVelocity();
             if (vec3d.y < 0.0) {
                 Vec3d vec3d2 = vec3d.normalize();
                 o = 1.0f - (float)Math.pow(-vec3d2.y, 1.5);
             }
             k = o * 0.34906584f + (1.0f - o) * k;
             l = o * -1.5707964f + (1.0f - o) * l;
-        } else if (entity.isInSneakingPose()) {
+        } else if (((Entity)entity).isInSneakingPose()) {
             k = 0.6981317f;
             l = -0.7853982f;
             m = 3.0f;
@@ -56,11 +56,11 @@ public abstract class ElytraEntityModelMixin<T extends LivingEntity> {
         }
         // 特殊处理 BAT3的鞘翅轴心要向下移动来适配动画
         if (entity instanceof AbstractClientPlayerEntity player) {
-            PlayerFormBase curForm0 = FormTextureUtils.getPlayerForm_Render(player);
+            IForm curForm0 = FormTextureUtils.getPlayerForm_Render(player);
             if(curForm0 == RegPlayerForms.BAT_3){
                 //ShapeShifterCurseFabric.LOGGER.info("BAT3 set elytra");
-                if (entity.isOnGround()){
-                    if (entity.isInSneakingPose()){
+                if (((LivingEntity)entity).isOnGround()){
+                    if (((Entity)entity).isInSneakingPose()){
                         k += (float)Math.toRadians(30.0);
                         m = 12.0f;
                     }
@@ -78,12 +78,13 @@ public abstract class ElytraEntityModelMixin<T extends LivingEntity> {
         }
 
         this.leftWing.pivotY = m;
-        if (entity instanceof AbstractClientPlayerEntity abstractClientPlayerEntity) {
-	        abstractClientPlayerEntity.elytraPitch += (k - abstractClientPlayerEntity.elytraPitch) * 0.1f;
+        if (entity instanceof AbstractClientPlayerEntity) {
+            AbstractClientPlayerEntity abstractClientPlayerEntity = (AbstractClientPlayerEntity)entity;
+            abstractClientPlayerEntity.elytraPitch += (k - abstractClientPlayerEntity.elytraPitch) * 0.1f;
             abstractClientPlayerEntity.elytraYaw += (n - abstractClientPlayerEntity.elytraYaw) * 0.1f;
             abstractClientPlayerEntity.elytraRoll += (l - abstractClientPlayerEntity.elytraRoll) * 0.1f;
 
-            PlayerFormBase curForm = FormTextureUtils.getPlayerForm_Render(abstractClientPlayerEntity);
+            IForm curForm = FormTextureUtils.getPlayerForm_Render(abstractClientPlayerEntity);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
             if(isFeral){
                 this.leftWing.pitch = k + (float)Math.toRadians(70.0);

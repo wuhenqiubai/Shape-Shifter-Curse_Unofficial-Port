@@ -8,25 +8,27 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControll
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Form_Bat1 extends PlayerFormBase {
+public class Form_Bat1 extends NormalForm {
     public Form_Bat1(Identifier formID) {
         super(formID);
     }
 
-    public static final AbstractAnimStateController JUMP_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_jump"), 1.0f, 6), null);
+    public static final AbstractAnimStateController JUMP_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_jump")), null);
 
     @Override
     public @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-	        return switch (animStateEnum) {
-		        case ANIM_STATE_JUMP -> JUMP_CONTROLLER;
-		        default -> null;
-	        };
+            switch (animStateEnum) {
+                case ANIM_STATE_JUMP:
+                    return JUMP_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }
