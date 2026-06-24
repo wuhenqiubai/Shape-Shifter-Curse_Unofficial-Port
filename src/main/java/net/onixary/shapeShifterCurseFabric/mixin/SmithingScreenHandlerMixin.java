@@ -7,7 +7,6 @@ import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.SmithingRecipe;
 import net.minecraft.recipe.input.SmithingRecipeInput;
 import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.util.math.BlockPos;
 import net.onixary.shapeShifterCurseFabric.recipes.ISmithingRecipeEX;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

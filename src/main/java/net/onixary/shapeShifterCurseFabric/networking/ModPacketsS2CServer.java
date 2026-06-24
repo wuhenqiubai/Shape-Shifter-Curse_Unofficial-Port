@@ -1,50 +1,28 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import com.google.gson.JsonObject;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.entity.player.PlayerEntity;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.network.PacketByteBuf;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.server.MinecraftServer;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.util.math.BlockPos;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.util.math.Direction;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import org.jetbrains.annotations.Nullable;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 import java.util.HashMap;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import java.util.UUID;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 import java.util.List;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import java.util.Map;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
