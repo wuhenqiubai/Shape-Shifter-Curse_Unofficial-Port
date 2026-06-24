@@ -30,6 +30,9 @@ import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.*;
 public class ModPacketsC2S {
 
     public static void register() {
+        // Register C2S payload types before registering handlers
+	    registerClient();
+
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(VALIDATE_START_BOOK_BUTTON), (payload, ctx) -> {
             ServerPlayerEntity player = ctx.player();
             if (player != null && RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
@@ -171,5 +174,19 @@ public class ModPacketsC2S {
                     animPlayer.shape_shifter_curse$getPowerAnimationCount(),
                     animPlayer.shape_shifter_curse$getPowerAnimationTime());
         }
+    }
+    /** Called from client initializer: registers C2S payload codecs so the client can send. */
+    public static void registerClient() {
+        BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
+        BytePayload.registerC2S(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
+        BytePayload.registerC2S(JUMP_DETACH_REQUEST_ID);
+        BytePayload.registerC2S(JUMP_EVENT_ID);
+        BytePayload.registerC2S(SPRINTING_TO_SNEAKING_EVENT_ID);
+        BytePayload.registerC2S(UPDATE_CUSTOM_SETTING);
+        BytePayload.registerC2S(UPDATE_CUSTOM_COLOR);
+        BytePayload.registerC2S(SET_PATRON_FORM);
+        BytePayload.registerC2S(SET_FORM);
+        BytePayload.registerC2S(UPDATE_POWER_ANIM_DATA_TO_SERVER);
+        BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
     }
 }

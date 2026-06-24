@@ -45,6 +45,26 @@ import static net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX.begi
 public class ModPacketsS2C {
 
     public static void register() {
+        // Register S2C payload types before registering handlers
+        BytePayload.registerS2C(SYNC_CURSED_MOON_DATA);
+        BytePayload.registerS2C(SYNC_FORM_CHANGE);
+        BytePayload.registerS2C(SYNC_TRANSFORM_STATE);
+        BytePayload.registerS2C(SYNC_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(RESET_FIRST_PERSON);
+        BytePayload.registerS2C(SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(SYNC_FORCE_SNEAK_STATE);
+        BytePayload.registerS2C(UPDATE_DYNAMIC_FORM);
+        BytePayload.registerS2C(REMOVE_DYNAMIC_FORM_EXCEPT);
+        BytePayload.registerS2C(LOGIN_PACKET);
+        BytePayload.registerS2C(ACTIVE_VIRTUAL_TOTEM);
+        BytePayload.registerS2C(UPDATE_POWER_ANIM_DATA_TO_CLIENT);
+        BytePayload.registerS2C(UPDATE_PATRON_LEVEL);
+        BytePayload.registerS2C(OPEN_PATRON_FORM_SELECT_MENU);
+        BytePayload.registerS2C(OPEN_FORM_SELECT_MENU);
+        BytePayload.registerS2C(SET_NO_JUMP_TICK);
+        BytePayload.registerS2C(OPEN_FORM_COLOR_SELECT_MENU);
+        BytePayload.registerS2C(MODIFY_FCD_DATA);
+
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(SYNC_CURSED_MOON_DATA), (payload, ctx) -> {
             boolean isCursedMoon = payload.data().readBoolean();
             ctx.client().execute(() -> {

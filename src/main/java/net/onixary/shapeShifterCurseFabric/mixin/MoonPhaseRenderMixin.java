@@ -31,6 +31,7 @@ public class MoonPhaseRenderMixin {
     @ModifyArg(method = "renderSky(Lorg/joml/Matrix4f;Lorg/joml/Matrix4f;FLnet/minecraft/client/render/Camera;ZLjava/lang/Runnable;)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/util/Identifier;)V", ordinal = 1))
     private Identifier getMoonPhaseTexture(Identifier identifier) {
-        return getMoonIdentifier();
+        Identifier moonId = getMoonIdentifier();
+        return moonId != null ? moonId : identifier;
     }
 }
