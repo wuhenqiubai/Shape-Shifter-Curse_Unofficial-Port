@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin.render;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -8,7 +9,6 @@ import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.util.SkinTextures;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,9 +16,9 @@ import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.NoRenderArmPower;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.RegPlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderFeature;
+import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,11 +41,11 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
 
     // 第一人称 渲染
     @Unique
-    private static final Identifier CUSTOM_SKIN = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
+    private static final Identifier CUSTOM_SKIN = new Identifier(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
 
     @Inject(method = "renderArm", at = @At("HEAD"), cancellable = true)
     private void shape_shifter_curse$RenderArm_HEAD(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
-        if (RegPlayerFormComponent.PLAYER_FORM.get(player).getCurrentForm().equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
+        if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.ignoreNoRenderArmPower && PowerHolderComponent.hasPower(player, NoRenderArmPower.class)) {  // 不渲染手臂情况
             ci.cancel();
         }
@@ -54,7 +54,7 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     @Inject(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/PlayerEntityRenderer;setModelPose(Lnet/minecraft/client/network/AbstractClientPlayerEntity;)V", shift = At.Shift.AFTER))
     private void shape_shifter_curse$RenderArm_setModelPose_AFTER(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
         // 渲染变身模型-根据模型设置修改手臂组件渲染
-        if (RegPlayerFormComponent.PLAYER_FORM.get(player).getCurrentForm().equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
+        if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}  // 仅当启用自定义第一人称渲染时才进行修改
         PlayerEntityRenderer realThis = (PlayerEntityRenderer) (Object) this;
         FormRenderFeature.rFPM_PartA(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
@@ -63,20 +63,28 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     @Inject(method = "renderArm", at = @At("RETURN"))
     private void shape_shifter_curse$RenderArm_RETURN(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
         // 渲染变身模型
-        if (RegPlayerFormComponent.PLAYER_FORM.get(player).getCurrentForm().equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
+        if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}  // 仅当启用自定义第一人称渲染时才进行修改
         PlayerEntityRenderer realThis = (PlayerEntityRenderer) (Object) this;
         FormRenderFeature.rFPM_PartB(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
     }
 
-    @Redirect(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;getSkinTextures()Lnet/minecraft/client/util/SkinTextures;"))
-    private SkinTextures shape_shifter_curse$getSkinTextures(AbstractClientPlayerEntity player) {
-        if (!RegPlayerFormComponent.PLAYER_FORM.get(player).getCurrentForm().equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {
+    @Redirect(method="renderArm", at= @At(value="INVOKE", target = "Lnet/minecraft/client/network/AbstractClientPlayerEntity;getSkinTexture()Lnet/minecraft/util/Identifier;"))
+    private Identifier shape_shifter_curse$getSkinTexture(AbstractClientPlayerEntity player) {
+        if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player))  // 仅当玩家激活Mod后才进行修改
+        {
+            if (FormTextureUtils.useTempCustomSkinConfig && MinecraftClient.getInstance().player == player) {
+                if (FormTextureUtils.tempCustomSkinConfigOverrider.keepOriginalSkin()) {
+                    return player.getSkinTexture();
+                } else {
+                    return CUSTOM_SKIN;
+                }
+            }
             if (!RegPlayerSkinComponent.SKIN_SETTINGS.get(player).shouldKeepOriginalSkin()) {
-                return new SkinTextures(CUSTOM_SKIN, null, null, null, SkinTextures.Model.WIDE, false);
+                return CUSTOM_SKIN;
             }
         }
-        return player.getSkinTextures();
+        return player.getSkinTexture();
     }
 
 
@@ -84,8 +92,17 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     @Inject(method = "getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;", at = @At("HEAD"), cancellable = true)
     private void shape_shifter_curse$onGetTexture(Entity entity, CallbackInfoReturnable<Identifier> cir) {
         if(entity instanceof PlayerEntity player) {
-            if (!RegPlayerFormComponent.PLAYER_FORM.get(player).getCurrentForm().equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {
+            if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
                 boolean keepOriginalSkin = RegPlayerSkinComponent.SKIN_SETTINGS.get(player).shouldKeepOriginalSkin();
+                if (FormTextureUtils.useTempCustomSkinConfig && MinecraftClient.getInstance().player == player) {
+                    if (FormTextureUtils.tempCustomSkinConfigOverrider.keepOriginalSkin()) {
+                        return;
+                    } else {
+                        cir.setReturnValue(CUSTOM_SKIN);
+                        cir.cancel();
+                        return;
+                    }
+                }
                 if(!keepOriginalSkin){
                     cir.setReturnValue(CUSTOM_SKIN);
                     cir.cancel();

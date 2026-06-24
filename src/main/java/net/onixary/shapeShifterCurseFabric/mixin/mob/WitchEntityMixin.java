@@ -4,19 +4,18 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.WitchEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.component.type.PotionContentsComponent;
 import net.minecraft.entity.projectile.thrown.PotionEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.potion.PotionUtil;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.additional_power.WitchFriendlyPower;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.items.RegCustomPotions;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.RegPlayerFormComponent;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,16 +23,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(WitchEntity.class)
 public abstract class WitchEntityMixin {
 
-	@Unique
     private static final float POTION_REPLACE_CHANCE = 0.6f;
 
-	@Inject(method = "shootAt", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "attack", at = @At("HEAD"), cancellable = true)
     private void injectCustomPotionAttack(LivingEntity target, float pullProgress, CallbackInfo ci) {
         WitchEntity witch = (WitchEntity) (Object) this;
         World world = witch.getWorld();
 
-        if(target instanceof PlayerEntity){
-            PlayerFormBase curForm = RegPlayerFormComponent.PLAYER_FORM.get(target).getCurrentForm();
+        if(target instanceof PlayerEntity player){
+            IForm curForm = FormUtils.getPlayerForm(player);
             if(curForm.equals(RegPlayerForms.ORIGINAL_SHIFTER)){
                 double randomChance = Math.random();
                 if(randomChance < POTION_REPLACE_CHANCE){
@@ -45,19 +43,14 @@ public abstract class WitchEntityMixin {
 
                     // 创建自定义溅射式药水
                     PotionEntity customPotion = new PotionEntity(world, witch);
-                    net.minecraft.registry.entry.RegistryEntry<net.minecraft.potion.Potion> familiarFoxPotion =
-                            net.minecraft.registry.Registries.POTION.getEntry(
-                                    net.minecraft.registry.RegistryKey.of(net.minecraft.registry.RegistryKeys.POTION,
-                                            net.minecraft.util.Identifier.of("shape-shifter-curse", "to_familiar_fox_0_potion")))
-                                    .orElseThrow();
-                    ItemStack potionStack = PotionContentsComponent.createStack(Items.SPLASH_POTION, familiarFoxPotion);
+                    ItemStack potionStack = PotionUtil.setPotion(new ItemStack(net.minecraft.item.Items.SPLASH_POTION), RegCustomPotions.FAMILIAR_FOX_FORM_POTION);
                     customPotion.setItem(potionStack);
 
                     customPotion.setPitch(customPotion.getPitch() - -20.0F);
                     customPotion.setVelocity(d, e + g * 0.2, f, 0.75F, 8.0F);
 
                     if (!witch.isSilent()) {
-                        witch.getWorld().playSound(null, witch.getX(), witch.getY(), witch.getZ(), SoundEvents.ENTITY_WITCH_THROW, witch.getSoundCategory(), 1.0F, 0.8F);
+                        witch.getWorld().playSound((PlayerEntity)null, witch.getX(), witch.getY(), witch.getZ(), SoundEvents.ENTITY_WITCH_THROW, witch.getSoundCategory(), 1.0F, 0.8F);
                     }
                     // 发射自定义药水
                     world.spawnEntity(customPotion);
@@ -66,7 +59,7 @@ public abstract class WitchEntityMixin {
                     ci.cancel();
                 }
             }
-            else if (PowerHolderComponent.hasPower(target, WitchFriendlyPower.class)) {
+            else if (PowerHolderComponent.hasPower((PlayerEntity)target, WitchFriendlyPower.class)) {
                 ci.cancel();
             }
         }

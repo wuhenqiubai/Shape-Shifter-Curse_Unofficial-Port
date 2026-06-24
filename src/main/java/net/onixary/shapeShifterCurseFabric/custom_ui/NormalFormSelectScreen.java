@@ -8,6 +8,7 @@ import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 
@@ -21,7 +22,7 @@ public class NormalFormSelectScreen extends Screen {
     // 背景图片固定尺寸配置
     private static final int BG_WIDTH = 470;
     private static final int BG_HEIGHT = 247;
-    private static final Identifier BG_TEXTURE = Identifier.of(MOD_ID, "textures/gui/normal_form_select_menu.png");
+    private static final Identifier BG_TEXTURE = new Identifier(MOD_ID, "textures/gui/normal_form_select_menu.png");
     private final String targetName;
     private final UUID targetUUID;
 
@@ -39,7 +40,9 @@ public class NormalFormSelectScreen extends Screen {
 
     private List<Identifier> getAvailableForms() {
         List<Identifier> availableForms = new ArrayList<>();
-	    RegPlayerForms.playerForms.forEach((formID, form) -> availableForms.add(form.FormID));
+        RegPlayerForms.playerForms.forEach((formID, form) -> {
+            availableForms.add(form.getFormID());
+        });
         return availableForms;
     }
 
@@ -69,7 +72,7 @@ public class NormalFormSelectScreen extends Screen {
             ButtonWidget buttonWidget = buttonWidgetList.get(i);
             if (buttonForms.get(i) != null) {
                 try {
-                    buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getFormName());
+                    buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getContentText(CodexData.ContentType.NAME));
                 } catch (Exception e) {
                     buttonWidget.setMessage(Text.of(buttonForms.get(i).toString()));
                 }

@@ -11,7 +11,6 @@ import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -21,18 +20,21 @@ import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
 import net.onixary.shapeShifterCurseFabric.client.ClientPlayerStateManager;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
+import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenu;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenuV2;
 import net.onixary.shapeShifterCurseFabric.custom_ui.NormalFormSelectScreen;
-import net.onixary.shapeShifterCurseFabric.custom_ui.PatronFormSelectScreen;
+import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimController;
+import net.onixary.shapeShifterCurseFabric.custom_ui.PatronFormSelectScreen;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.transform.TransformManager;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
+import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import org.jetbrains.annotations.Nullable;
+import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -40,51 +42,33 @@ import java.util.List;
 import java.util.UUID;
 
 import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.*;
+import static net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX.beginTransformEffect;
 
-
-/**
- * 应仅在客户端注册
- * This class should only be registered on the client side
- * 纯客户端类，所有的receive方法都只在这里调用
- * This is a pure client-side class, all receive methods are called only here
- */
+// 应仅在客户端注册
+// This class should only be registered on the client side
+// 纯客户端类，所有的receive方法都只在这里调用
+// This is a pure client-side class, all receive methods are called only here
 public class ModPacketsS2C {
 
-    // Helper: register a BytePayload-based receiver wrapping old-style (client, handler, buf, sender) callback
-    @FunctionalInterface
-    private interface LegacyReceiver {
-        void receive(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender sender);
-    }
-
-    private static void reg(Identifier id, LegacyReceiver receiver) {
-        BytePayload.registerS2C(id);
-	    ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(id), (payload, context) -> context.client().execute(() -> receiver.receive(context.client(), null, payload.data(), null)));
-    }
-
     public static void register() {
-        reg(ModPackets.TRANSFORM_EFFECT_ID, ModPacketsS2C::receiveTransformEffect);
-        reg(ModPackets.INSTINCT_THRESHOLD_EFFECT_ID, ModPacketsS2C::receiveInstinctThresholdEffect);
-        reg(ModPackets.SYNC_CURSED_MOON_DATA, ModPacketsS2C::receiveCursedMoonData);
-        reg(ModPackets.SYNC_FORM_CHANGE, ModPacketsS2C::receiveFormChange);
-        reg(ModPackets.SYNC_TRANSFORM_STATE, ModPacketsS2C::receiveTransformState);
-        reg(ModPackets.SYNC_BAT_ATTACH_STATE, ModPacketsS2C::receiveBatAttachState);
-        reg(ModPackets.UPDATE_OVERLAY_EFFECT, ModPacketsS2C::receiveUpdateOverlayEffect);
-        reg(ModPackets.UPDATE_OVERLAY_FADE_EFFECT, ModPacketsS2C::receiveUpdateOverlayFadeEffect);
-        reg(ModPackets.TRANSFORM_COMPLETE_EFFECT, ModPacketsS2C::receiveTransformCompleteEffect);
-        reg(ModPackets.RESET_FIRST_PERSON, ModPacketsS2C::receiveResetFirstPerson);
-        reg(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE, ModPacketsS2C::receiveOtherPlayerBatAttachState);
-        reg(ModPackets.SYNC_FORCE_SNEAK_STATE, ModPacketsS2C::receiveForceSneakState);
-        reg(ModPackets.UPDATE_DYNAMIC_FORM, ModPacketsS2C::handleUpdateDynamicForm);
-        reg(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT, ModPacketsS2C::handleRemoveDynamicExcept);
-        reg(ModPackets.LOGIN_PACKET, ModPacketsS2C::onPlayerConnectServer);
-        reg(ModPackets.ACTIVE_VIRTUAL_TOTEM, ModPacketsS2C::receiveActiveVirtualTotem);
-        reg(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT, ModPacketsS2C::receivePowerAnimationData);
-        reg(ModPackets.UPDATE_PATRON_LEVEL, ModPacketsS2C::receiveUpdatePatronLevel);
-        reg(ModPackets.OPEN_PATRON_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenPatronFormSelectMenu);
-        reg(ModPackets.OPEN_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenFormSelectMenu);
-        reg(ModPackets.SET_NO_JUMP_TICK, ModPacketsS2C::receiveSetNoJumpTick);
-        reg(ModPackets.OPEN_FORM_COLOR_SELECT_MENU, ModPacketsS2C::receiveOpenFCSMenu);
-        reg(ModPackets.MODIFY_FCD_DATA, ModPacketsS2C::receiveModifyFCDData);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_CURSED_MOON_DATA, ModPacketsS2C::receiveCursedMoonData);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_FORM_CHANGE, ModPacketsS2C::receiveFormChange);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_TRANSFORM_STATE, ModPacketsS2C::receiveTransformState);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_BAT_ATTACH_STATE, ModPacketsS2C::receiveBatAttachState);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.RESET_FIRST_PERSON, ModPacketsS2C::receiveResetFirstPerson);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE, ModPacketsS2C::receiveOtherPlayerBatAttachState);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_FORCE_SNEAK_STATE, ModPacketsS2C::receiveForceSneakState);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_DYNAMIC_FORM, ModPacketsS2C::handleUpdateDynamicForm);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT, ModPacketsS2C::handleRemoveDynamicExcept);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.LOGIN_PACKET, ModPacketsS2C::onPlayerConnectServer);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.ACTIVE_VIRTUAL_TOTEM, ModPacketsS2C::receiveActiveVirtualTotem);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT, ModPacketsS2C::receivePowerAnimationData);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_PATRON_LEVEL, ModPacketsS2C::receiveUpdatePatronLevel);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_PATRON_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenPatronFormSelectMenu);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenFormSelectMenu);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SET_NO_JUMP_TICK, ModPacketsS2C::receiveSetNoJumpTick);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_FORM_COLOR_SELECT_MENU, ModPacketsS2C::receiveOpenFCSMenu);
+        ClientPlayNetworking.registerGlobalReceiver(ModPackets.MODIFY_FCD_DATA, ModPacketsS2C::receiveModifyFCDData);
     }
 
     /* 重构后不需要了 仅用于参考旧实现逻辑
@@ -103,48 +87,26 @@ public class ModPacketsS2C {
     }
      */
 
-    public static void receiveTransformEffect(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                              PacketByteBuf buf, PacketSender responseSender) {
-	    // 当客户端收到这个数据包时，调用TransformManager中的新方法来播放特效
-	    client.execute(TransformManager::playClientTransformEffect);
-    }
 
-    public static void receiveInstinctThresholdEffect(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                                      PacketByteBuf buf, PacketSender responseSender) {
-	    // 当客户端收到这个数据包时，调用TransformManager中的新方法来播放特效
-	    client.execute(ShapeShifterCurseFabricClient::applyInstinctThresholdEffect);
-    }
-
-    public static void receiveCursedMoonData(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                           PacketByteBuf buf, PacketSender responseSender) {
-        long dayTime = buf.readLong();
-        int day = buf.readInt();
+    public static void receiveCursedMoonData(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         boolean isCursedMoon = buf.readBoolean();
-        boolean isNight = buf.readBoolean();
-
         client.execute(() -> {
-            // 更新客户端的CursedMoon状态
-            net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.day_time = dayTime;
-            net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.day = day;
-            net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.clientIsCursedMoon = isCursedMoon;
-            net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.clientIsNight = isNight;
+            CursedMoonClient.isCursedMoon = isCursedMoon;
+            CursedMoonClient.middayMessageSent = false;
         });
     }
 
     // 接收形态变化同步包
-    public static void receiveFormChange(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                       PacketByteBuf buf, PacketSender responseSender) {
-        String newFormName = buf.readString();
+    public static void receiveFormChange(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+        Identifier newFormID = buf.readIdentifier();
 
         client.execute(() -> {
-            // 强制客户端重新注册动画（如果需要）
             if (client.player != null) {
-	            ShapeShifterCurseFabric.LOGGER.info("Client received form change: {}", newFormName);
                 // 触发动画重新初始化
-                net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient.refreshPlayerAnimations();
+                ShapeShifterCurseFabricClient.refreshPlayerAnimations();
 
                 // 更新 formColorData 的数据(其实是FormColorSelectMenu的数据) 如果启动了自动切换 那么还会自动切换颜色数据
-                ShapeShifterCurseFabricClient.formColorData.onClientFormChange(Identifier.tryParse(newFormName));
+                ShapeShifterCurseFabricClient.formColorData.onClientFormChange(newFormID);
             }
         });
     }
@@ -159,41 +121,24 @@ public class ModPacketsS2C {
 
         client.execute(() -> {
             if (client.player != null) {
-	            ShapeShifterCurseFabric.LOGGER.info("Client received transform state: isTransforming={}", isTransforming);
-                // 更新客户端的变身状态
-                net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient.updateTransformState(
-                        playerUuid, isTransforming, fromForm.isEmpty() ? null : fromForm, toForm.isEmpty() ? null : toForm);
+                ShapeShifterCurseFabricClient.updateTransformState(playerUuid, isTransforming, fromForm.isEmpty() ? null : fromForm, toForm.isEmpty() ? null : toForm);
+                if (client.player.getUuid().equals(playerUuid)) {
+                    if (isTransforming) {
+                        TransformManager.transformTimer = 0;
+                        ShapeShifterCurseFabricClient.emitTransformParticle(StaticParams.TRANSFORM_FX_DURATION_IN);
+                        beginTransformEffect();
+                        TransformOverlay.INSTANCE.setEnableOverlay(true);
+                    } else {
+                        TransformManager.transformTimer = -1;
+                        TransformOverlay.INSTANCE.setEnableOverlay(false);
+                    }
+                }
             }
         });
     }
 
-    // 接收Overlay效果更新包
-    public static void receiveUpdateOverlayEffect(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                                 PacketByteBuf buf, PacketSender responseSender) {
-        float nauseaStrength = buf.readFloat();
-        int ticks = buf.readInt();
-
-	    client.execute(() -> TransformManager.handleClientOverlayUpdate(nauseaStrength, ticks));
-    }
-
-    // 接收Overlay淡出效果更新包
-    public static void receiveUpdateOverlayFadeEffect(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                                     PacketByteBuf buf, PacketSender responseSender) {
-        float nauseaStrength = buf.readFloat();
-        int ticks = buf.readInt();
-
-	    client.execute(() -> TransformManager.handleClientOverlayFadeUpdate(nauseaStrength, ticks));
-    }
-
-    // 接收变身完成效果包
-    public static void receiveTransformCompleteEffect(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                                     PacketByteBuf buf, PacketSender responseSender) {
-        client.execute(TransformManager::executeClientTransformCompleteEffect);
-    }
-
     // 接收FirstPerson重置包
-    public static void receiveResetFirstPerson(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                             PacketByteBuf buf, PacketSender responseSender) {
+    public static void receiveResetFirstPerson(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         client.execute(TransformManager::executeClientFirstPersonReset);
     }
 
@@ -247,13 +192,17 @@ public class ModPacketsS2C {
             attachedSide = null;
         }
 
-	    client.execute(() -> ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached,
-			    attachType, attachedPos, attachedSide));
+        client.execute(() -> {
+            ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached,
+                    attachType, attachedPos, attachedSide);
+        });
     }
 
     private static void receiveForceSneakState(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
         boolean shouldForce = buf.readBoolean();
-	    client.execute(() -> ClientPlayerStateManager.shouldForceSneak = shouldForce);
+        client.execute(() -> {
+            ClientPlayerStateManager.shouldForceSneak = shouldForce;
+        });
     }
 
     private static void handleUpdateDynamicForm(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -266,7 +215,9 @@ public class ModPacketsS2C {
             JsonObject jsonObject = new Gson().fromJson(jsonStr, JsonObject.class);
             allFrom.add(formName, jsonObject);
         }
-	    client.execute(() -> RegPlayerForms.ApplyDynamicPlayerForms(allFrom));
+        client.execute(() -> {
+            RegPlayerForms.ApplyDynamicPlayerForms(allFrom);
+        });
     }
 
     private static void handleRemoveDynamicExcept(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -277,7 +228,9 @@ public class ModPacketsS2C {
             String formName = buf.readString();
             except.add(Identifier.tryParse(formName));
         }
-	    client.execute(() -> RegPlayerForms.removeDynamicPlayerFormsExcept(except));
+        client.execute(() -> {
+            RegPlayerForms.removeDynamicPlayerFormsExcept(except);
+        });
     }
 
     public static void onPlayerConnectServer(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -297,23 +250,13 @@ public class ModPacketsS2C {
         }).start();
     }
 
-    public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean syncCustomSettings, boolean keepOriginalSkin, boolean enableFormColorSystem) {
-        sendUpdateCustomColor(colorSetting, sendRAW);
-        if (syncCustomSettings) {
-            sendUpdateCustomSettingWithParams(keepOriginalSkin, enableFormColorSystem);
+    public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeBoolean(sendExtraData);
+        if (sendExtraData) {
+            buf.writeBoolean(keepOriginalSkin);
+            buf.writeBoolean(enableFormColorSystem);
         }
-    }
-
-    private static void sendUpdateCustomSettingWithParams(boolean keepOriginalSkin, boolean enableFormColorSystem) {
-        if (MinecraftClient.getInstance().getNetworkHandler() == null) return;
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeBoolean(keepOriginalSkin);
-        buf.writeBoolean(enableFormColorSystem);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(UPDATE_CUSTOM_SETTING), buf));
-    }
-
-    public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW) {
-        PacketByteBuf buf = PacketByteBufs.create();
         if (sendRAW) {
             buf.writeInt(colorSetting.getPrimaryColor());
             buf.writeInt(colorSetting.getAccentColor1());
@@ -330,14 +273,11 @@ public class ModPacketsS2C {
         buf.writeBoolean(colorSetting.getPrimaryGreyReverse());
         buf.writeBoolean(colorSetting.getAccent1GreyReverse());
         buf.writeBoolean(colorSetting.getAccent2GreyReverse());
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(UPDATE_CUSTOM_COLOR), buf));
+        ClientPlayNetworking.send(UPDATE_CUSTOM_COLOR, buf);
     }
 
     // 临时先放这里，以后再整理
     public static void sendUpdateCustomSetting(boolean ForceUpdate) {
-        if (MinecraftClient.getInstance().getNetworkHandler() == null) {
-            return; // Not connected to a server
-        }
         PacketByteBuf buf = PacketByteBufs.create();
         boolean autoSyncConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_config;
         if (!ForceUpdate && !autoSyncConfig) {
@@ -346,12 +286,13 @@ public class ModPacketsS2C {
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.keep_original_skin);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_color);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_random_sound);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(UPDATE_CUSTOM_SETTING), buf));
+        ClientPlayNetworking.send(UPDATE_CUSTOM_SETTING, buf);
         boolean autoSyncColorConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_color_config;
         if (!ForceUpdate && !autoSyncColorConfig) {
             return;
         }
         buf = PacketByteBufs.create();
+        buf.writeBoolean(false);
         int AGBRInt = 0;
         AGBRInt = FormTextureUtils.ARGB2ABGR(ShapeShifterCurseFabric.playerCustomConfig.primaryColor);
         buf.writeInt(AGBRInt);
@@ -366,7 +307,7 @@ public class ModPacketsS2C {
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.primaryGreyReverse);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.accent1GreyReverse);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.accent2GreyReverse);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(UPDATE_CUSTOM_COLOR), buf));
+        ClientPlayNetworking.send(UPDATE_CUSTOM_COLOR, buf);
     }
 
     public static void sendUpdateCustomSetting() {
@@ -385,7 +326,7 @@ public class ModPacketsS2C {
             return;
         }
         Identifier virtualTotemType = buf.readIdentifier();
-        ItemStack totemStack = ItemStack.PACKET_CODEC.decode((RegistryByteBuf) buf);
+        ItemStack totemStack = buf.readItemStack();
         // ConcurrentModificationException 需要把这个操作放到Client线程而非Network线程
         client.execute(() -> VirtualTotemPower.process_virtual_totem_type(playerEntity, virtualTotemType, totemStack));
     }
@@ -411,9 +352,7 @@ public class ModPacketsS2C {
             if (playerEntity instanceof IPlayerAnimController animPlayer) {
                 animPlayer.shape_shifter_curse$setAnimationData(animationId, animationCount, animationLength);
             } else {
-	            if (playerEntity != null) {
-		            ShapeShifterCurseFabric.LOGGER.error("Player {} is not a IPlayerAnimController when receiving update power anim data packet", playerEntity.getName());
-	            }
+                ShapeShifterCurseFabric.LOGGER.error("Player {} is not a IPlayerAnimController when receiving update power anim data packet", playerEntity.getName());
             }
         });
     }
@@ -429,13 +368,13 @@ public class ModPacketsS2C {
         }
         buf.writeInt(animationCount);
         buf.writeInt(animationLength);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_SERVER), buf));
+        ClientPlayNetworking.send(UPDATE_POWER_ANIM_DATA_TO_SERVER, buf);
     }
 
     public static void sendRequestPlayerAnimationData(UUID targetPlayerUUID) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(targetPlayerUUID);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA), buf));
+        ClientPlayNetworking.send(REQUEST_POWER_ANIM_DATA, buf);
     }
 
     public static void receiveUpdatePatronLevel(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -446,7 +385,9 @@ public class ModPacketsS2C {
             int level = buf.readInt();
             map.put(uuid, level);
         }
-	    client.execute(() -> PatronUtils.ApplyPatronLevel(map));
+        client.execute(() -> {
+            PatronUtils.ApplyPatronLevel(map);
+        });
     }
 
     public static void receiveOpenPatronFormSelectMenu(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -468,14 +409,14 @@ public class ModPacketsS2C {
     public static void sendSetPatronForm(Identifier formID) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(formID);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM), buf));
+        ClientPlayNetworking.send(SET_PATRON_FORM, buf);
     }
 
     public static void sendSetForm(Identifier formID, UUID target) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(target);
         buf.writeIdentifier(formID);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM), buf));
+        ClientPlayNetworking.send(SET_FORM, buf);
     }
 
     public static void receiveSetNoJumpTick(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
@@ -540,10 +481,15 @@ public class ModPacketsS2C {
                     return;
                 }
                 switch (arg1) {
-                    case "form" ->
-		                    ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).put(arg2, nowColorSetting);
-                    case "global" -> ShapeShifterCurseFabricClient.formColorData.customSetting.put(arg2, nowColorSetting);
-                    case "form_default" -> ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.put(formID, nowColorSetting);
+                    case "form" -> {
+                        ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).put(arg2, nowColorSetting);
+                    }
+                    case "global" -> {
+                        ShapeShifterCurseFabricClient.formColorData.customSetting.put(arg2, nowColorSetting);
+                    }
+                    case "form_default" -> {
+                        ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.put(formID, nowColorSetting);
+                    }
                 }
                 ShapeShifterCurseFabricClient.formColorData.writeToConfig();
             }
@@ -553,12 +499,18 @@ public class ModPacketsS2C {
                 }
                 FormTextureUtils.ColorSetting colorSetting = null;
                 switch (arg1) {
-                    case "form" -> colorSetting = ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).getOrDefault(arg2, null);
-                    case "global" -> colorSetting = ShapeShifterCurseFabricClient.formColorData.customSetting.getOrDefault(arg2, null);
-                    case "form_default" -> colorSetting = ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.getOrDefault(formID, null);
+                    case "form" -> {
+                        colorSetting = ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).getOrDefault(arg2, null);
+                    }
+                    case "global" -> {
+                        colorSetting = ShapeShifterCurseFabricClient.formColorData.customSetting.getOrDefault(arg2, null);
+                    }
+                    case "form_default" -> {
+                        colorSetting = ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.getOrDefault(formID, null);
+                    }
                 }
                 if (colorSetting != null) {
-                    ModPacketsS2C.sendUpdateCustomColor(colorSetting, false);
+                    ModPacketsS2C.sendUpdateCustomColor(colorSetting, false, false, false, false);
                 }
             }
             case "delete" -> {
@@ -566,10 +518,15 @@ public class ModPacketsS2C {
                     return;
                 }
                 switch (arg1) {
-                    case "form" ->
-		                    ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).remove(arg2);
-                    case "global" -> ShapeShifterCurseFabricClient.formColorData.customSetting.remove(arg2);
-                    case "form_default" -> ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.remove(formID);
+                    case "form" -> {
+                        ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).remove(arg2);
+                    }
+                    case "global" -> {
+                        ShapeShifterCurseFabricClient.formColorData.customSetting.remove(arg2);
+                    }
+                    case "form_default" -> {
+                        ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.remove(formID);
+                    }
                 }
                 ShapeShifterCurseFabricClient.formColorData.writeToConfig();
             }

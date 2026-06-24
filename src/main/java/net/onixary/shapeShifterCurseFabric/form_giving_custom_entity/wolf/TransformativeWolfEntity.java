@@ -12,24 +12,18 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.world.*;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.TWolfFriendlyPower;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
-import net.onixary.shapeShifterCurseFabric.status_effects.TStatusApplier;
 import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_ANUBIS_WOLF_0_EFFECT;
@@ -40,8 +34,16 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     }
 
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        return super.initialize(world, difficulty, spawnReason, entityData);
+    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData, @Nullable NbtCompound entityNbt) {
+        PassiveData data;
+        if (entityData instanceof PassiveData passiveData) {
+            passiveData.babyAllowed = false;
+            data = passiveData;
+        }
+        else {
+            data = new PassiveData(false);
+        }
+        return super.initialize(world, difficulty, spawnReason, data, entityNbt);
     }
 
     private float cooldown = 0;
@@ -49,9 +51,9 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     @Override
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
-        this.goalSelector.add(1, new EscapeDangerGoal(this, 1.5));
+        this.goalSelector.add(1, new WolfEscapeDangerGoal(1.5));
         this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new WolfEntity.AvoidLlamaGoal<>(this, LlamaEntity.class, 24.0F, 1.5, 1.5));
+        this.goalSelector.add(3, new AvoidLlamaGoal(this, LlamaEntity.class, 24.0F, 1.5, 1.5));
         this.goalSelector.add(4, new PounceAtTargetGoal(this, 0.4F));
         this.goalSelector.add(5, new MeleeAttackGoal(this, 1.0, true));
         this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
@@ -60,10 +62,10 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
         this.goalSelector.add(10, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.add(10, new LookAroundGoal(this));
         this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.add(2, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(3, new UntamedActiveTargetGoal<>(this, TurtleEntity.class, false, null));
-        this.targetSelector.add(4, new ActiveTargetGoal<>(this, AbstractSkeletonEntity.class, false));
-        this.targetSelector.add(5, new UniversalAngerGoal<>(this, true));
+        this.targetSelector.add(2, (new RevengeGoal(this, new Class[0])).setGroupRevenge(new Class[0]));
+        this.targetSelector.add(3, new UntamedActiveTargetGoal(this, TurtleEntity.class, false, TurtleEntity.BABY_TURTLE_ON_LAND_FILTER));
+        this.targetSelector.add(4, new ActiveTargetGoal(this, AbstractSkeletonEntity.class, false));
+        this.targetSelector.add(5, new UniversalAngerGoal(this, true));
     }
 
     public static DefaultAttributeContainer.Builder createAttributes() {
@@ -120,18 +122,20 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     }
 
     @Override
-    public void onAttacking(Entity target) {
+    public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // 在applyStatusByChance里面已经判断形态了 无需在外面判断
         if (target instanceof PlayerEntity player) {
-            TStatusApplier.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+            ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
     }
 
     @Override
     public boolean tryAttack(Entity target) {
         if(target instanceof PlayerEntity) {
-            this.onAttacking(target);
             boolean attacked = target.damage(this.getDamageSources().mobAttack(this), (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE));
+            if (attacked) {
+                this.applyDamageEffects(this, target);
+            }
             return attacked;
         }
         return super.tryAttack(target);
@@ -149,19 +153,13 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     }
 
     @Override
-    protected RegistryKey<LootTable> getLootTableId() {
-        return RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf"));
-    }
-
-    protected RegistryKey<LootTable> getLootTableKey() {
-        return RegistryKey.of(
-                RegistryKeys.LOOT_TABLE,
-                Identifier.of(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf")
-        );
+    protected Identifier getLootTableId() {
+        return new Identifier(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf");
     }
 
     @Override
-    public void setTamed(boolean tamed, boolean updateAttributes) {
+    public void setTamed(boolean tamed) {
+        return;
     }
 
     @Override
@@ -189,5 +187,10 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     @Override
     public boolean IsInCooldown() {
         return this.cooldown > 0;
+    }
+
+    @Override
+    public EntityView method_48926() {
+        return super.getWorld();
     }
 }

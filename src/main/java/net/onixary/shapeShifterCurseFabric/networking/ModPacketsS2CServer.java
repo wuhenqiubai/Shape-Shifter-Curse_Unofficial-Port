@@ -12,39 +12,35 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormDynamic;
+import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import org.jetbrains.annotations.Nullable;
+import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT;
 
+import java.util.List;
+import java.util.Map;
 
 // 纯服务端类，所有send方法都只在这里调用
 // This is a pure server-side class, all send methods are called only here
 public class ModPacketsS2CServer {
 
-    public static void sendCursedMoonData(ServerPlayerEntity player, long dayTime, int day, boolean isCursedMoon, boolean isNight) {
+    public static void sendCursedMoonData(ServerPlayerEntity player, boolean isCursedMoon) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeLong(dayTime);
-        buf.writeInt(day);
         buf.writeBoolean(isCursedMoon);
-        buf.writeBoolean(isNight);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), buf));
+        ServerPlayNetworking.send(player, ModPackets.SYNC_CURSED_MOON_DATA, buf);
     }
 
     // 发送形态变化同步包
-    public static void sendFormChange(ServerPlayerEntity player, String newFormName) {
+    public static void sendFormChange(ServerPlayerEntity player, Identifier newFormID) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeString(newFormName);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), buf));
-	    ShapeShifterCurseFabric.LOGGER.info("Sent form change to client: {}", newFormName);
+        buf.writeIdentifier(newFormID);
+        ServerPlayNetworking.send(player, ModPackets.SYNC_FORM_CHANGE, buf);
     }
 
     /* 重构后不需要了 仅用于参考旧实现逻辑
@@ -52,24 +48,20 @@ public class ModPacketsS2CServer {
         PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
         buf.writeNbt(attachment.toNbt());
         //ShapeShifterCurseFabric.LOGGER.info("Attachment sent, nbt: " + attachment.toNbt());
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_EFFECT_ATTACHMENT), buf));
+        ServerPlayNetworking.send(player, ModPackets.SYNC_EFFECT_ATTACHMENT, buf);
     }
      */
 
     // 发送变身状态同步包
-    public static void sendTransformState(ServerPlayerEntity player, boolean isTransforming,
-                                          String fromForm, String toForm) {
+    public static void sendTransformState(ServerPlayerEntity player, boolean isTransforming, Identifier fromForm, Identifier toForm) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeUuid(player.getUuid());
         buf.writeBoolean(isTransforming);
-        buf.writeString(fromForm != null ? fromForm : "");
-        buf.writeString(toForm != null ? toForm : "");
-//        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), buf))
-        // 广播给所有玩家 用于同步动作
+        buf.writeString(fromForm == null ? "" : fromForm.toString());
+        buf.writeString(toForm== null ? "" : toForm.toString());
         for (ServerPlayerEntity p : player.getServerWorld().getPlayers()) {
-            ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), buf));
+            ServerPlayNetworking.send(p, ModPackets.SYNC_TRANSFORM_STATE, buf);
         }
-	    ShapeShifterCurseFabric.LOGGER.info("Sent transform state to client: isTransforming={}", isTransforming);
     }
 
     // 发送蝙蝠吸附状态同步包
@@ -93,7 +85,7 @@ public class ModPacketsS2CServer {
             buf.writeBoolean(false);
         }
 
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_BAT_ATTACH_STATE), buf));
+        ServerPlayNetworking.send(player, ModPackets.SYNC_BAT_ATTACH_STATE, buf);
     }
 
     // 广播给附近其他玩家的蝙蝠吸附状态
@@ -133,14 +125,14 @@ public class ModPacketsS2CServer {
             buf.writeBoolean(false);
         }
 
-        ServerPlayNetworking.send(receiver, new BytePayload(BytePayload.id(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE), buf));
+        ServerPlayNetworking.send(receiver, ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE, buf);
     }
 
     // 发送强制潜行状态同步包
     public static void sendForceSneakState(ServerPlayerEntity player, boolean shouldForceSneak) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(shouldForceSneak);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_FORCE_SNEAK_STATE), buf));
+        ServerPlayNetworking.send(player, ModPackets.SYNC_FORCE_SNEAK_STATE, buf);
     }
 
     private static void sendRemoveDynamicFormExcept(ServerPlayerEntity player) {
@@ -149,7 +141,7 @@ public class ModPacketsS2CServer {
         for (Identifier formId : RegPlayerForms.dynamicPlayerForms) {
             buf.writeString(formId.toString());
         }
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT), buf));
+        ServerPlayNetworking.send(player, ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT, buf);
     }
 
     // 发送动态Form同步包 旧的最大32K 本来以为挺多的，结果发现单个就快4K
@@ -160,19 +152,19 @@ public class ModPacketsS2CServer {
             buf.writeString(formName);
             buf.writeString(forms.get(formName).toString());
         }
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.UPDATE_DYNAMIC_FORM), buf));
+        ServerPlayNetworking.send(player, ModPackets.UPDATE_DYNAMIC_FORM, buf);
     }
 
     // 现在理论 单包32K Form数量无限
     public static void updateDynamicForm(ServerPlayerEntity player) {
         int MaxFormPerPacket = 63;  // 2M / 32K - 1
-        HashMap<Identifier, PlayerFormDynamic> forms = RegPlayerForms.DumpDynamicPlayerForms();
+        HashMap<Identifier, DynamicForm> forms = RegPlayerForms.DumpDynamicPlayerForms();
         sendRemoveDynamicFormExcept(player);
         for (int i = 0; i < forms.size(); i += MaxFormPerPacket) {
             JsonObject jsonForms = new JsonObject();
             for (int j = 0; j < MaxFormPerPacket && i + j < forms.size(); j++) {
                 Identifier formId = RegPlayerForms.dynamicPlayerForms.get(i + j);
-                jsonForms.add(formId.toString(), forms.get(formId).save());
+                jsonForms.add(formId.toString(), forms.get(formId).toJson());
             }
             sendUpdateDynamicForm(player, jsonForms);
         }
@@ -181,16 +173,16 @@ public class ModPacketsS2CServer {
     // 我暂时没找到玩家进入服务去时的Hook，所以暂时由服务器询问来代替
     public static void sendPlayerLogin(ServerPlayerEntity player) {
         PacketByteBuf buf = PacketByteBufs.create();
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.LOGIN_PACKET), buf));
+        ServerPlayNetworking.send(player, ModPackets.LOGIN_PACKET, buf);
     }
 
     // 仅在获取到 Patron 数据后调用 玩家登录由 updateDynamicForm 负责
     public static void updatePatronForms(ServerPlayerEntity player, List<Identifier> patronForms) {
         int MaxFormPerPacket = 63;
-        HashMap<Identifier, PlayerFormDynamic> forms = new HashMap<>();
+        HashMap<Identifier, DynamicForm> forms = new HashMap<>();
         for (Identifier formId : patronForms) {
-            PlayerFormBase form = RegPlayerForms.getPlayerForm(formId);
-            if (form instanceof PlayerFormDynamic pfd) {
+            IForm form = RegPlayerForms.getPlayerForm(formId);
+            if (form instanceof DynamicForm pfd) {
                 forms.put(formId, pfd);
             }
         }
@@ -198,7 +190,7 @@ public class ModPacketsS2CServer {
         int RemainPacket = forms.size();
         JsonObject jsonForms = new JsonObject();
         for (Identifier formId : forms.keySet()) {
-            jsonForms.add(formId.toString(), forms.get(formId).save());
+            jsonForms.add(formId.toString(), forms.get(formId).toJson());
             NowPacket ++;
             RemainPacket --;
             if (NowPacket % MaxFormPerPacket == 0) {
@@ -221,20 +213,20 @@ public class ModPacketsS2CServer {
                 buf.writeUuid(entry.getKey());
                 buf.writeInt(entry.getValue());
             }
-            ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.UPDATE_PATRON_LEVEL), buf));
+            ServerPlayNetworking.send(player, ModPackets.UPDATE_PATRON_LEVEL, buf);
         }
     }
 
     public static void OpenPatronFormSelectMenu(ServerPlayerEntity player) {
         PacketByteBuf buf = PacketByteBufs.create();
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_PATRON_FORM_SELECT_MENU), buf));
+        ServerPlayNetworking.send(player, ModPackets.OPEN_PATRON_FORM_SELECT_MENU, buf);
     }
 
     public static void OpenFormSelectMenu(ServerPlayerEntity player, PlayerEntity target) {
         PacketByteBuf buf = PacketByteBufs.create();
-	    buf.writeString(String.valueOf(target.getName()));
+        buf.writeString(target.getEntityName());
         buf.writeUuid(target.getUuid());
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), buf));
+        ServerPlayNetworking.send(player, ModPackets.OPEN_FORM_SELECT_MENU, buf);
     }
 
     public static void sendActiveVirtualTotem(ServerPlayerEntity player, VirtualTotemPower virtualTotemPower) {
@@ -242,7 +234,7 @@ public class ModPacketsS2CServer {
                 nearPlayer -> {
                     PacketByteBuf buf = virtualTotemPower.create_packet_byte_buf();
                     if (buf != null) {
-                        ServerPlayNetworking.send(nearPlayer, new BytePayload(BytePayload.id(ModPackets.ACTIVE_VIRTUAL_TOTEM), buf));
+                        ServerPlayNetworking.send(nearPlayer, ModPackets.ACTIVE_VIRTUAL_TOTEM, buf);
                     }
                 }
         );
@@ -259,25 +251,27 @@ public class ModPacketsS2CServer {
         }
         buf.writeInt(animationCount);
         buf.writeInt(animationLength);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_CLIENT), buf));
+        ServerPlayNetworking.send(player, UPDATE_POWER_ANIM_DATA_TO_CLIENT, buf);
     }
 
     public static void sendPowerAnimationDataToNearPlayer(ServerPlayerEntity player, @Nullable Identifier animationId, int animationCount, int animationLength) {
         player.getServerWorld().getPlayers(near_player -> near_player.squaredDistanceTo(player) <= 128 * 128).forEach(
-                nearPlayer -> sendPowerAnimationDataToClient(nearPlayer, player.getUuid(), animationId, animationCount, animationLength)
+                nearPlayer -> {
+                    sendPowerAnimationDataToClient(nearPlayer, player.getUuid(), animationId, animationCount, animationLength);
+                }
         );
     }
 
     public static void sendNoJumpTick(ServerPlayerEntity player, int tick) {
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeInt(tick);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), buf));
+        ServerPlayNetworking.send(player, ModPackets.SET_NO_JUMP_TICK, buf);
     }
 
 
     public static void sendOpenFCSMenu(ServerPlayerEntity player) {
         PacketByteBuf buf = PacketByteBufs.create();
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), buf));
+        ServerPlayNetworking.send(player, ModPackets.OPEN_FORM_COLOR_SELECT_MENU, buf);
     }
 
     public static void sendModifyFCDData(ServerPlayerEntity player, String commandType, Identifier formID, String arg1, String arg2, String arg3, String arg4) {
@@ -314,6 +308,6 @@ public class ModPacketsS2CServer {
         buf.writeString(arg2);
         buf.writeString(arg3);
         buf.writeString(arg4);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
+        ServerPlayNetworking.send(player, ModPackets.MODIFY_FCD_DATA, buf);
     }
 }
