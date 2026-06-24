@@ -90,7 +90,7 @@ public class TransformManager {
         data.transformStartForm = FormUtils.getPlayerForm(player);
         data.transformEndForm = form;
         data.onTransformComplete = onTransformComplete;
-        ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(serverPlayerEntity, form);
+        ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(serverPlayerEntity, form.getFormID());
         if (ShapeShifterCurseFabric.commonConfig.immediatelyTransform) {
             data.transformTimer = -1;
             setForm(player);
@@ -112,7 +112,7 @@ public class TransformManager {
         data.transformStartForm = FormUtils.getPlayerForm(player);
         data.transformEndForm = form;
         data.onTransformComplete = null;
-        ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(serverPlayerEntity, form);
+        ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(serverPlayerEntity, form.getFormID());
         setForm(player);
     }
 
@@ -239,7 +239,7 @@ public class TransformManager {
             executeClientFirstPersonReset();
         } else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
             PacketByteBuf buf = PacketByteBufs.create();
-            ServerPlayNetworking.send(serverPlayerEntity, new BytePayload(BytePayload.id(ModPackets.RESET_FIRST_PERSON), buf));
+            ServerPlayNetworking.send(serverPlayerEntity, new BytePayload(BytePayload.id(ModPackets.RESET_FIRST_PERSON),  buf));
         }
     }
 }

@@ -82,7 +82,7 @@ public class PlayerMovementControlMixin {
             // 处理跳跃取消吸附
             if (player.getWorld().isClient()) {
                 PacketByteBuf buf = PacketByteBufs.create();
-                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID), buf));
+                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
             }
             ci.cancel();
         }
@@ -94,7 +94,7 @@ public class PlayerMovementControlMixin {
         if (player.getWorld().isClient()) {
             PacketByteBuf buf = PacketByteBufs.create();
             buf.writeUuid(player.getUuid());
-            ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID), buf));
+            ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID),  buf));
         }
     }
 
@@ -118,7 +118,7 @@ public class PlayerMovementControlMixin {
 
             if (player.getWorld().isClient()) {
                 PacketByteBuf buf = PacketByteBufs.create();
-                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID), buf));
+                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
             }
 
             // 重置鞘翅相关标志
@@ -152,7 +152,7 @@ public class PlayerMovementControlMixin {
             if (player.getWorld().isClient()) {
                 PacketByteBuf buf = PacketByteBufs.create();
                 buf.writeUuid(player.getUuid());
-                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.SPRINTING_TO_SNEAKING_EVENT_ID), buf));
+                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.SPRINTING_TO_SNEAKING_EVENT_ID),  buf));
             }
         }
     }

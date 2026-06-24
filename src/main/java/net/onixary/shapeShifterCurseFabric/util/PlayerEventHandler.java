@@ -221,7 +221,7 @@ public class PlayerEventHandler {
             || entity.getType() == EntityType.RAVAGER)
             {
                 if (sorceryTeam != null) {
-                    scoreboard.addPlayerToTeam(entity.getEntityName(), sorceryTeam);
+                    scoreboard.addScoreHolderToTeam(entity.getEntityName(), sorceryTeam);
                 }
             }
         }

@@ -97,11 +97,11 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 			PacketByteBuf buf = PacketByteBufs.create();
 			if(currentOrigin == originSelection.size()) {
 				buf.writeString(layerList.get(currentLayerIndex).getIdentifier().toString());
-				ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.CHOOSE_RANDOM_ORIGIN), buf));
+				ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.CHOOSE_RANDOM_ORIGIN),  buf));
 			} else {
 				buf.writeString(getCurrentOrigin().getIdentifier().toString());
 				buf.writeString(layerList.get(currentLayerIndex).getIdentifier().toString());
-				ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.CHOOSE_ORIGIN), buf));
+				ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.CHOOSE_ORIGIN),  buf));
 			}
 			openNextLayerScreen();
 		}).dimensions(guiLeft + windowWidth / 2 - 50, guiTop + windowHeight + 5, 100, 20).build());
