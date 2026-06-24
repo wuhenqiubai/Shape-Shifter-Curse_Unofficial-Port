@@ -212,8 +212,8 @@ public class FormColorData {
 
     public void unlockAll() {
         for (IForm form : RegPlayerForms.playerForms.values()) {
-            if (!unlockedForms.contains(form.getFormID())) {
-                unlockedForms.add(form.getFormID());
+            if (!unlockedForms.contains(form.FormID)) {
+                unlockedForms.add(form.FormID);
             }
         }
         this.writeToConfig();
@@ -221,7 +221,7 @@ public class FormColorData {
 
     public void clearFormUnlock() {
         unlockedForms.clear();
-        unlockedForms.add(RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID());
+        unlockedForms.add(RegPlayerForms.ORIGINAL_BEFORE_ENABLE.FormID);
         this.writeToConfig();
     }
 

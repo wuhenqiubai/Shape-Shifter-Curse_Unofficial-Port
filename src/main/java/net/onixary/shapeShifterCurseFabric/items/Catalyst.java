@@ -1,22 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_form.IForm;
-import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
-import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -26,7 +21,7 @@ public class Catalyst extends Item {
                 .maxCount(16)
                 .food(
                         new FoodComponent.Builder()
-                                .hunger(2)
+                                .nutrition(2)
                                 .saturationModifier(0.3f)
                                 .alwaysEdible()
                                 .build()
@@ -44,11 +39,8 @@ public class Catalyst extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+        // 实际效果在ItemStackMixin的注入中进行处理
         super.finishUsing(stack, world, user);
-
-        if (user instanceof PlayerEntity player) {
-            TransformRelatedItems.OnUseCatalyst(player, stack);
-        }
 
         if (user instanceof PlayerEntity playerEntity) {
             if (playerEntity.getAbilities().creativeMode) {
@@ -69,7 +61,7 @@ public class Catalyst extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
+    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
         tooltip.add(Text.translatable("item.shape-shifter-curse.catalyst.tooltip").formatted(Formatting.LIGHT_PURPLE));
     }
 }

@@ -32,6 +32,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.additional_power.*;
 import net.onixary.shapeShifterCurseFabric.advancement.*;
+import net.onixary.shapeShifterCurseFabric.advancement.misc.CriterionAdditions;
 import net.onixary.shapeShifterCurseFabric.command.DynamicFormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.FormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.MiscArgumentType;
@@ -108,30 +109,30 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public static float feralItemEulerX = 0.0F;
 
     // Reg custom advancement criterion
-    public static final OnEnableMod ON_ENABLE_MOD = Criteria.register(new OnEnableMod());
-    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = Criteria.register(new OnOpenBookOfShapeShifter());
-    public static final OnEndCursedMoon ON_END_CURSED_MOON = Criteria.register(new OnEndCursedMoon());
-    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = Criteria.register(new OnEndCursedMoonCured());
-    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = Criteria.register(new OnEndCursedMoonCuredForm2());
-    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = Criteria.register(new OnGetTransformEffect());
-    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = Criteria.register(new OnSleepWhenHaveTransformEffect());
-    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = Criteria.register(new OnTransformByCatalyst());
-    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = Criteria.register(new OnTransformByCure());
-    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = Criteria.register(new OnUseGoldenApple());
-    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = Criteria.register(new OnTransformByCureFinal());
-    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = Criteria.register(new OnTransformEffectFade());
-    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = Criteria.register(new OnTriggerCursedMoon());
-    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = Criteria.register(new OnTriggerCursedMoonForm2());
-    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = Criteria.register(new OnFirstJoinWithMod());
+    public static final OnEnableMod ON_ENABLE_MOD = Criteria.register(OnEnableMod.ID.toString(), new OnEnableMod());
+    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = Criteria.register(OnOpenBookOfShapeShifter.ID.toString(), new OnOpenBookOfShapeShifter());
+    public static final OnEndCursedMoon ON_END_CURSED_MOON = Criteria.register(OnEndCursedMoon.ID.toString(), new OnEndCursedMoon());
+    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = Criteria.register(OnEndCursedMoonCured.ID.toString(), new OnEndCursedMoonCured());
+    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = Criteria.register(OnEndCursedMoonCuredForm2.ID.toString(), new OnEndCursedMoonCuredForm2());
+    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = Criteria.register(OnGetTransformEffect.ID.toString(), new OnGetTransformEffect());
+    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = Criteria.register(OnSleepWhenHaveTransformEffect.ID.toString(), new OnSleepWhenHaveTransformEffect());
+    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = Criteria.register(OnTransformByCatalyst.ID.toString(), new OnTransformByCatalyst());
+    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = Criteria.register(OnTransformByCure.ID.toString(), new OnTransformByCure());
+    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = Criteria.register(OnUseGoldenApple.ID.toString(), new OnUseGoldenApple());
+    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = Criteria.register(OnTransformByCureFinal.ID.toString(), new OnTransformByCureFinal());
+    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = Criteria.register(OnTransformEffectFade.ID.toString(), new OnTransformEffectFade());
+    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = Criteria.register(OnTriggerCursedMoon.ID.toString(), new OnTriggerCursedMoon());
+    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = Criteria.register(OnTriggerCursedMoonForm2.ID.toString(), new OnTriggerCursedMoonForm2());
+    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = Criteria.register(OnFirstJoinWithMod.ID.toString(), new OnFirstJoinWithMod());
 
-    public static final OnTransformForm ON_TRANSFORM_FORM = Criteria.register(new OnTransformForm());
-    public static final OnWebEntity ON_WEB_ENTITY = Criteria.register(new OnWebEntity());
+    public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = Criteria.register(CriterionAdditions.OnTransformForm.ID.toString(), CriterionAdditions.createOnTransformForm());
+    public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = Criteria.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());
 
     // Reg custom entities
     // Bat
     public static final EntityType<TransformativeBatEntity> T_BAT = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
+            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
             FabricEntityTypeBuilder.create(SpawnGroup.AMBIENT, TransformativeBatEntity::new)
                     .dimensions(EntityDimensions.fixed(0.5f, 0.9f))
                     .build()
@@ -139,7 +140,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Axolotl
     public static final EntityType<TransformativeAxolotlEntity> T_AXOLOTL = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
+            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
             FabricEntityTypeBuilder.create(SpawnGroup.AXOLOTLS, TransformativeAxolotlEntity::new)
                     .dimensions(EntityDimensions.fixed(0.75f, 0.42f))
                     .build()
@@ -147,7 +148,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Ocelot
     public static final EntityType<TransformativeOcelotEntity> T_OCELOT = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
+            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
             FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, TransformativeOcelotEntity::new)
                     .dimensions(EntityDimensions.fixed(0.6f, 0.7f))
                     .build()
@@ -155,7 +156,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
     public static final EntityType<TransformativeWolfEntity> T_WOLF = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
+            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
             FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TransformativeWolfEntity::new)
                 .dimensions(EntityDimensions.fixed(0.6f, 0.85f))
                 .build()
@@ -163,7 +164,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
     public static final EntityType<TransformativeSpiderEntity> T_SPIDER = Registry.register(
             Registries.ENTITY_TYPE,
-            new Identifier(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
+            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
             FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, TransformativeSpiderEntity::new)
                     .dimensions(EntityDimensions.fixed(1.4f, 0.9f))
                     .build()
@@ -174,7 +175,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
 
     public static Identifier identifier(String path) {
-        return new Identifier(MOD_ID, path);
+        return Identifier.of(MOD_ID, path);
     }
 
 

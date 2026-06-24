@@ -16,7 +16,7 @@ import java.util.List;
 public class FormDataPackReloadListener implements SimpleSynchronousResourceReloadListener {
     @Override
     public Identifier getFabricId() {
-        return new Identifier(ShapeShifterCurseFabric.MOD_ID, "ssc_form");
+        return Identifier.of(ShapeShifterCurseFabric.MOD_ID, "ssc_form");
     }
 
     @Override
@@ -25,7 +25,7 @@ public class FormDataPackReloadListener implements SimpleSynchronousResourceRelo
         RegPlayerForms.ClearAllDynamicPlayerForms();
         manager.findResources("ssc_form", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
             // shape-shifter-curse:ssc_form/example.json -> shape-shifter-curse:example
-            Identifier formID = new Identifier(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(9));
+            Identifier formID = Identifier.of(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(9));
             JsonObject formData;
             try {
                 formData = JsonParser.parseString(new String(resource.getInputStream().readAllBytes())).getAsJsonObject();
@@ -43,7 +43,7 @@ public class FormDataPackReloadListener implements SimpleSynchronousResourceRelo
         // origins_power_extra
         FormUtils.extraPowerRegistry.clear();
         manager.findResources("origins_power_extra", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
-            Identifier ID = new Identifier(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(20));
+            Identifier ID = Identifier.of(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(20));
             JsonObject ExtraPowerData;
             Identifier LayerID;
             Identifier OriginID;

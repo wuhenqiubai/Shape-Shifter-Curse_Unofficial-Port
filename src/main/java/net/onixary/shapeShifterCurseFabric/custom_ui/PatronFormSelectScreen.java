@@ -19,7 +19,7 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class PatronFormSelectScreen extends Screen {
-    private static final Identifier page_texID = new Identifier(MOD_ID,"textures/gui/patron_form_select_menu.png");
+    private static final Identifier page_texID = Identifier.of(MOD_ID,"textures/gui/patron_form_select_menu.png");
     private final ClientPlayerEntity player;
 
     private List<Identifier> availableForms;

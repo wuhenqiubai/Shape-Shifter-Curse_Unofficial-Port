@@ -4,7 +4,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
  * </ol>
  * <p>
  * 支持链式转换：FSM A → FSM B → FSM C，由 {@link #update} 中的递归逻辑处理。
- * 最终输出的状态 ID 用于在 {@link PlayerFormBase#getAnimStateController} 中查找对应的 {@link AbstractAnimStateController}。
+ * 最终输出的状态 ID 用于在 {@link IForm#getAnimStateController} 中查找对应的 {@link AbstractAnimStateController}。
  *
  * @see AnimRegistry#getAnimFSM
  * @see net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM.InAirFSM

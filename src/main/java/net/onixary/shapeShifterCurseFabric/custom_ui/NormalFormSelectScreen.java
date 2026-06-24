@@ -22,7 +22,7 @@ public class NormalFormSelectScreen extends Screen {
     // 背景图片固定尺寸配置
     private static final int BG_WIDTH = 470;
     private static final int BG_HEIGHT = 247;
-    private static final Identifier BG_TEXTURE = new Identifier(MOD_ID, "textures/gui/normal_form_select_menu.png");
+    private static final Identifier BG_TEXTURE = Identifier.of(MOD_ID, "textures/gui/normal_form_select_menu.png");
     private final String targetName;
     private final UUID targetUUID;
 

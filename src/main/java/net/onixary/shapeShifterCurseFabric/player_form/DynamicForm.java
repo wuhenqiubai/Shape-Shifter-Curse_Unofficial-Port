@@ -7,7 +7,6 @@ import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
-import io.github.apace100.apoli.util.NamespaceAlias;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -268,19 +267,13 @@ public class DynamicForm implements IForm {
     }
 
     private Identifier registerPower(JsonObject powerData) {
-        Identifier powerID = new Identifier(this.formID.getNamespace(), this.formID.getPath() + "_tpower_" + this.TempPowerIndex);
+        Identifier powerID = Identifier.of(this.formID.getNamespace(), this.formID.getPath() + "_tpower_" + this.TempPowerIndex);
         if (powerData == null) {
             return null;
         }
         try {
             Identifier PowerID = Identifier.tryParse(powerData.get("type").getAsString());
-            PowerFactory<Power> pf = null;
-            if (NamespaceAlias.hasAlias(PowerID)) {
-                pf = ApoliRegistries.POWER_FACTORY.get(NamespaceAlias.resolveAlias(PowerID));
-            }
-            else {
-                pf = ApoliRegistries.POWER_FACTORY.get(PowerID);
-            }
+            PowerFactory<Power> pf = ApoliRegistries.POWER_FACTORY.get(PowerID);
             if (pf == null) {
                 ShapeShifterCurseFabric.LOGGER.warn("Power Factory is null! From {}", this.formID.toString());
                 return null;

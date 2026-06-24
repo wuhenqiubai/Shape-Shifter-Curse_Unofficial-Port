@@ -271,9 +271,9 @@ public class TrinketUtils {
                         }
                         AccessoryItem.SlotData data = null;
                         if (slotPair.getLeft() == null) {
-                            data = new AccessoryItem.SlotData(new Identifier(ioName, slotPair.getRight()), Index);
+                            data = new AccessoryItem.SlotData(Identifier.of(ioName, slotPair.getRight()), Index);
                         } else {
-                            data = new AccessoryItem.SlotData(new Identifier(ioName, "%s/%s".formatted(slotPair.getLeft(), slotPair.getRight())), Index);
+                            data = new AccessoryItem.SlotData(Identifier.of(ioName, "%s/%s".formatted(slotPair.getLeft(), slotPair.getRight())), Index);
                         }
                         allAccessory.add(new Pair<>(data, stack));
                         Index++;

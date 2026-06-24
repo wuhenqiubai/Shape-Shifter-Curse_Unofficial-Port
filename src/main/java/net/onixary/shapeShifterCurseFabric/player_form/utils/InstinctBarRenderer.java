@@ -14,7 +14,7 @@ import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class InstinctBarRenderer {
-    private static final Identifier instinctBarID = new Identifier(MOD_ID, "textures/gui/instinct_bar.png");
+    private static final Identifier instinctBarID = Identifier.of(MOD_ID, "textures/gui/instinct_bar.png");
     private static final float increase1Threshold = StaticParams.INSTINCT_INCREASE_RATE + 0.005f;
     private static final float increase2Threshold = StaticParams.INSTINCT_INCREASE_RATE + 0.01f;
     private static final float increase3Threshold = StaticParams.INSTINCT_INCREASE_RATE + 0.1f;

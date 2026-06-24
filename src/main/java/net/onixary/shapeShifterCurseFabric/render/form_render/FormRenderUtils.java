@@ -97,7 +97,7 @@ public class FormRenderUtils {
             Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.of("origins", "origin"), formID);
             if (formRenderer == null) {
-                ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: PlayerFormDynamic.ModelID is not null, but the model is not registered: {}", formID);
+                ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: DynamicForm.ModelID is not null, but the model is not registered: {}", formID);
                 return new ArrayList<>();
             }
             formRenderers.add(formRenderer);
@@ -110,7 +110,7 @@ public class FormRenderUtils {
                 if (pfd.layerRenderOverwrite != null) {
                     FormRenderer formRenderer = FormRenderUtils.getFormRenderer(pfd.layerRenderOverwrite.getLeft(), pfd.layerRenderOverwrite.getRight());
                     if (formRenderer == null) {
-                        ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: PlayerFormDynamic.layerRenderOverwrite is not null, but the model is not registered: {} - {}", pfd.layerRenderOverwrite.getLeft(), pfd.layerRenderOverwrite.getRight());
+                        ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: DynamicForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", pfd.layerRenderOverwrite.getLeft(), pfd.layerRenderOverwrite.getRight());
                         return new ArrayList<>();
                     }
                     formRenderers.add(formRenderer);

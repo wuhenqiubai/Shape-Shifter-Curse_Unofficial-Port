@@ -20,7 +20,7 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.*;
 
 public class EffectManager {
     // public static final AttachmentType<PlayerEffectAttachment> EFFECT_ATTACHMENT =
-    //         AttachmentRegistry.create(new Identifier(MOD_ID, "effect_data"));
+    //         AttachmentRegistry.create(Identifier.of(MOD_ID, "effect_data"));
 
     // 移除静态的 currentRegEffect，因为它可能与多个玩家的状态冲突
     // 应该只使用 attachment 中的 currentRegEffect

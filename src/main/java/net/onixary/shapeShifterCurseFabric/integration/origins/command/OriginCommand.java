@@ -311,7 +311,7 @@ public class OriginCommand {
 		originComponent.sync();
 
 		buffer.writeBoolean(false);
-		ServerPlayNetworking.send(target, new BytePayload(BytePayload.id(ModPackets.OPEN_ORIGIN_SCREEN), buffer));
+		ServerPlayNetworking.send(target, new BytePayload(BytePayload.id(new BytePayload(BytePayload.id(ModPackets.OPEN_ORIGIN_SCREEN)), buffer)));
 
 	}
 

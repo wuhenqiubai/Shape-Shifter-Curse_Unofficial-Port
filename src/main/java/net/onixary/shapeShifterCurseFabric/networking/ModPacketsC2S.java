@@ -1,34 +1,61 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.fabricmc.fabric.api.networking.v1.*;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.entity.player.PlayerEntity;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.network.PacketByteBuf;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.server.MinecraftServer;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.text.Text;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.util.Formatting;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.minecraft.util.Identifier;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnJumpPower;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnSprintingToSneakingPower;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimController;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import org.jetbrains.annotations.Nullable;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 import java.util.UUID;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.*;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 // 应仅在服务器端注册
 // This class should only be registered on the server side
@@ -143,7 +170,7 @@ public class ModPacketsC2S {
         PacketByteBuf buf = PacketByteBufs.create();
         // 不需要额外数据，只是一个解除吸附的信号
 
-        ServerPlayNetworking.send(player, JUMP_DETACH_REQUEST_ID, buf);
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(JUMP_DETACH_REQUEST_ID), buf));
     }
 
     private static void onUpdatePlayerCustomConfig(MinecraftServer minecraftServer, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler serverPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
