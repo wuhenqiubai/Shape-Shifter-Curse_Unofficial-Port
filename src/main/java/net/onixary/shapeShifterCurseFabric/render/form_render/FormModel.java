@@ -667,13 +667,26 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
 
-        // Mixed forms (vanilla parts visible): processAnimation handles 6 main bones from Mixin;
-        // bodyRoot Mixin provides MatrixStack transform for the whole-body rotation (new in BB rig)
-        boolean mixedForm = !Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
-                         || !Hidden_LeftLeg || !Hidden_RightLeg;
+        // Determine if processAnimation is needed: mixed forms (vanilla parts visible) OR
+        // pure Geo forms without `body` bone keyframes (spider2, etc.) need Mixin-derived values
+        boolean needsPA = !Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
+                       || !Hidden_LeftLeg || !Hidden_RightLeg;
+        if (!needsPA && player instanceof IAnimSystemAccessor _paAcc) {
+            var _paSsc = _paAcc.shape_shifter_curse$getAnimSystem().animationState;
+            if (_paSsc.currentBodyAnimId != null) {
+                Animation _paAnim = getCachedAnimation(_paSsc.currentBodyAnimId.getPath());
+                if (_paAnim == null || java.util.Arrays.stream(_paAnim.boneAnimations())
+                        .noneMatch(ba -> ba.boneName().equals("body")))
+                    needsPA = true;
+            } else {
+                needsPA = true;
+            }
+        }
 
-        if (mixedForm && player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
-            applyBodyTransform = true;
+        if (needsPA && player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
+            if (!Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
+                || !Hidden_LeftLeg || !Hidden_RightLeg)
+                applyBodyTransform = true; // only for mixed forms
             this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
                 this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
                 this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);

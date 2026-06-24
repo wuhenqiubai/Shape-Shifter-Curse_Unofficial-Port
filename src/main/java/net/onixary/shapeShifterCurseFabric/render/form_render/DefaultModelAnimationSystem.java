@@ -233,10 +233,21 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3d(-2, 12, 0));
         model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
         model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
-        // Mixed forms: body root rotation comes from MatrixStack (bodyRoot Mixin), not AC
-        boolean mixedForm = !model.Hidden_Body || !model.Hidden_Head || !model.Hidden_LeftArm
-                         || !model.Hidden_RightArm || !model.Hidden_LeftLeg || !model.Hidden_RightLeg;
-        if (mixedForm) model.resetBone("body");
+        // Reset body root for mixed forms (MatrixStack handles rotation) or forms without body keyframe
+        boolean _mixedFm = !model.Hidden_Body || !model.Hidden_Head || !model.Hidden_LeftArm
+                        || !model.Hidden_RightArm || !model.Hidden_LeftLeg || !model.Hidden_RightLeg;
+        if (_mixedFm) {
+            model.resetBone("body");  // MatrixStack handles body rotation
+        } else if (net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor.class.isInstance(player)) {
+            var _acc = (net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor)player;
+            var _ss = _acc.shape_shifter_curse$getAnimSystem().animationState;
+            if (_ss.currentBodyAnimId != null) {
+                var _anim = FormModel.getCachedAnimation(_ss.currentBodyAnimId.getPath());
+                boolean hasBodyKF = _anim != null && java.util.Arrays.stream(_anim.boneAnimations())
+                    .anyMatch(ba -> ba.boneName().equals("body"));
+                if (!hasBodyKF) model.resetBone("body");
+            }
+        }
         model.setRotationForTailBones(limbAngle, limbDistance, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForHeadTailBones(headYaw, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForWingBones(limbAngle, limbDistance, player.age, td.tailDragAmountVertical);
