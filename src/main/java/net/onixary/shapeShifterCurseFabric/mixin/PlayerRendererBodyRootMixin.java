@@ -45,5 +45,7 @@ public class PlayerRendererBodyRootMixin {
         }
 
         matrices.translate(0, -0.75f, 0); // undo pivot offset
+        // Reset static flag — next form in the same render pass might be pure Geo
+        FormModel.applyBodyTransform = false;
     }
 }
