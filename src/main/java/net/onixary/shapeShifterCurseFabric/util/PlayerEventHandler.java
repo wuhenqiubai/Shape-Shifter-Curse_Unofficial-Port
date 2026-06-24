@@ -204,8 +204,9 @@ public class PlayerEventHandler {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
         NbtCompound nbt = new NbtCompound();
-        oldComponent.writeToNbt(nbt);
-        newComponent.readFromNbt(nbt);
+        var lookup = oldPlayer.getServer().getRegistryManager();
+        oldComponent.writeToNbt(nbt, lookup);
+        newComponent.readFromNbt(nbt, lookup);
         FormUtils._loadForm(newPlayer, newComponent.nowForm);
     }
 
@@ -221,7 +222,7 @@ public class PlayerEventHandler {
             || entity.getType() == EntityType.RAVAGER)
             {
                 if (sorceryTeam != null) {
-                    scoreboard.addScoreHolderToTeam(entity.getEntityName(), sorceryTeam);
+                    scoreboard.addScoreHolderToTeam(entity.getNameForScoreboard(), sorceryTeam);
                 }
             }
         }

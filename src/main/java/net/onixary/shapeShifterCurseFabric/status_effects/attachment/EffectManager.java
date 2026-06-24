@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.status_effects.attachment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
@@ -267,8 +268,8 @@ public class EffectManager {
             ShapeShifterCurseFabric.LOGGER.error("Attempted to reload effect with null player");
             return;
         }
-        Map<StatusEffect, StatusEffectInstance> effects = player.getActiveStatusEffects();
-        for (Map.Entry<StatusEffect, StatusEffectInstance> entry : effects.entrySet()) {
+        Map<RegistryEntry<StatusEffect>, StatusEffectInstance> effects = player.getActiveStatusEffects();
+        for (Map.Entry<RegistryEntry<StatusEffect>, StatusEffectInstance> entry : effects.entrySet()) {
             if (entry.getValue() instanceof TransformativeStatusInstance) {
                 continue;
             }

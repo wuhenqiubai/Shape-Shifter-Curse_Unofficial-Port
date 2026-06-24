@@ -53,7 +53,7 @@ public interface ITMob {
 
 	default Optional<Boolean> TMob_TryAttack(MobEntity TMob, Entity target) {
         if(target instanceof PlayerEntity) {
-	        IForm currentForm = target.getComponent(RegPlayerFormComponent.PLAYER_FORM).getCurrentForm();
+	        IForm currentForm = target.getComponent(RegPlayerFormComponent.PLAYER_FORM).nowForm;
             if (currentForm.equals(RegPlayerForms.ORIGINAL_SHIFTER)) {
                 boolean attacked = target.damage(TMob.getDamageSources().mobAttack(TMob), (float)TMob.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE));
                 if (attacked) {

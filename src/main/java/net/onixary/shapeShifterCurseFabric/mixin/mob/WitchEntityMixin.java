@@ -33,7 +33,7 @@ public abstract class WitchEntityMixin {
         World world = witch.getWorld();
 
         if(target instanceof PlayerEntity){
-            IForm curForm = RegPlayerFormComponent.PLAYER_FORM.get(target).getCurrentForm();
+            IForm curForm = RegPlayerFormComponent.PLAYER_FORM.get(target).nowForm;
             if(curForm.equals(RegPlayerForms.ORIGINAL_SHIFTER)){
                 double randomChance = Math.random();
                 if(randomChance < POTION_REPLACE_CHANCE){

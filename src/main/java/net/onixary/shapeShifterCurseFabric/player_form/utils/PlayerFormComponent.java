@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
+import net.minecraft.registry.RegistryWrapper;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
@@ -50,7 +51,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public void readFromNbt(NbtCompound tag) {
+    public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         if (tag.contains("no_form_id") && tag.getBoolean("no_form_id")) {
             nowFormID = null;
             nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
@@ -129,7 +130,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     }
 
     @Override
-    public void writeToNbt(NbtCompound tag) {
+    public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registryLookup) {
         if (nowFormID != null) {
             tag.putString("nowFormID", nowFormID.toString());
         } else {

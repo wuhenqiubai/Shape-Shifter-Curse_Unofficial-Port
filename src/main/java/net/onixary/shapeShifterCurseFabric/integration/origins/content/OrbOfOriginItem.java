@@ -56,7 +56,7 @@ public class OrbOfOriginItem extends Item {
             component.sync();
             PacketByteBuf data = PacketByteBufs.create();
             data.writeBoolean(false);
-            ServerPlayNetworking.send((ServerPlayerEntity) user, new BytePayload(BytePayload.id(new BytePayload(BytePayload.id(ModPackets.OPEN_ORIGIN_SCREEN)), data)));
+	        ServerPlayNetworking.send((ServerPlayerEntity) user, new BytePayload(BytePayload.id(ModPackets.OPEN_ORIGIN_SCREEN), data));
         }
         if(!user.isCreative()) {
             stack.decrement(1);
