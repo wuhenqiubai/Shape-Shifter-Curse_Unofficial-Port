@@ -232,11 +232,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
         model.translatePositionForBone(RM_LeftLegGeoBoneID, new Vec3d(2, 12, 0));
         model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3d(-2, 12, 0));
         model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
+        model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
+        // Mixed forms: body root rotation comes from MatrixStack (bodyRoot Mixin), not AC
+        boolean mixedForm = !model.Hidden_Body || !model.Hidden_Head || !model.Hidden_LeftArm
+                         || !model.Hidden_RightArm || !model.Hidden_LeftLeg || !model.Hidden_RightLeg;
+        if (mixedForm) model.resetBone("body");
         model.setRotationForTailBones(limbAngle, limbDistance, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForHeadTailBones(headYaw, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForWingBones(limbAngle, limbDistance, player.age, td.tailDragAmountVertical);
         if (this.bodyTransform != null) this.bodyTransform.apply(model.getCachedGeoBone(RM_BodyGeoBoneID));
-        model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
         model.setRotationForBone(RM_LeftArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftArm));
         model.setRotationForBone(RM_RightArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.rightArm));
         model.setRotationForBone(RM_LeftLegGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftLeg));
