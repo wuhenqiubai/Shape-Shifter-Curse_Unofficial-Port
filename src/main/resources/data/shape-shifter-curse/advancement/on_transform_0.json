@@ -1,8 +1,7 @@
 {
   "display": {
     "icon": {
-      "id": "minecraft:phantom_membrane",
-      "count": 1
+      "item": "minecraft:phantom_membrane"
     },
     "title": {
       "translate": "advancements.shape-shifter-curse.on_transform_0.title"
@@ -18,7 +17,14 @@
   "parent": "shape-shifter-curse:on_open_book_of_shape_shifter",
   "criteria": {
     "on_transform_0": {
-      "trigger": "shape-shifter-curse:on_transform_0"
+      "trigger": "shape-shifter-curse:on_transform_form",
+      "conditions": {
+        "form_tier": [1],
+        "not_flags": [
+          "special_form"
+        ]
+      }
     }
-  }
+  },
+  "requirements": []
 }

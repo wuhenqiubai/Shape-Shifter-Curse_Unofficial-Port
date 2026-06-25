@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.FormAbilityManager;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -30,34 +30,40 @@ public class FormDataPackReloadListener implements SimpleSynchronousResourceRelo
             try {
                 formData = JsonParser.parseString(new String(resource.getInputStream().readAllBytes())).getAsJsonObject();
             } catch (IOException e) {
-	            ShapeShifterCurseFabric.LOGGER.error("Failed to load form data for {}", formID);
+                ShapeShifterCurseFabric.LOGGER.error("Failed to load form data for " + formID);
                 return;
             }
-            RegPlayerForms.registerDynamicPlayerForm(PlayerFormDynamic.of(formID, formData));
-	        ShapeShifterCurseFabric.LOGGER.info("Loaded form data for {}", formID);
+            try {
+                RegPlayerForms.registerDynamicPlayerForm(DynamicForm.fromJson(formID, formData));
+            } catch (Exception e) {
+                ShapeShifterCurseFabric.LOGGER.error("Failed to load form data for " + formID);
+            }
+            ShapeShifterCurseFabric.LOGGER.info("Loaded form data for " + formID);
         });
         // origins_power_extra
-        FormAbilityManager.OriginExtraPowerRegistry.clear();
+        FormUtils.extraPowerRegistry.clear();
         manager.findResources("origins_power_extra", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
             Identifier ID = Identifier.of(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(20));
             JsonObject ExtraPowerData;
+            Identifier LayerID;
             Identifier OriginID;
             List<Identifier> ExtraPowerIDs = new LinkedList<>();
             try {
                 ExtraPowerData = JsonParser.parseString(new String(resource.getInputStream().readAllBytes())).getAsJsonObject();
+                LayerID = Identifier.tryParse(ExtraPowerData.get("TargetLayerID").getAsString());
                 OriginID = Identifier.tryParse(ExtraPowerData.get("TargetOriginsID").getAsString());
                 JsonArray PowerIDs = ExtraPowerData.get("ExtraPowers").getAsJsonArray();
                 for (int i = 0; i < PowerIDs.size(); i++) {
                     ExtraPowerIDs.add(Identifier.tryParse(PowerIDs.get(i).getAsString()));
                 }
             } catch (Exception e) {
-	            ShapeShifterCurseFabric.LOGGER.error("Failed to load extra power data for {}", ID);
+                ShapeShifterCurseFabric.LOGGER.error("Failed to load extra power data for " + ID);
                 return;
             }
-            if (!ExtraPowerIDs.isEmpty()) {
-                FormAbilityManager.RegisterOriginExtraPower(ID, OriginID, ExtraPowerIDs);
+            if (!ExtraPowerIDs.isEmpty() && LayerID != null && OriginID != null) {
+                FormUtils.registerExtraPower(ID, new FormUtils.ExtraPower(LayerID, OriginID, ExtraPowerIDs));
             }
-	        ShapeShifterCurseFabric.LOGGER.info("Loaded extra power data for {}", ID);
+            ShapeShifterCurseFabric.LOGGER.info("Loaded extra power data for " + ID);
         });
     }
 }

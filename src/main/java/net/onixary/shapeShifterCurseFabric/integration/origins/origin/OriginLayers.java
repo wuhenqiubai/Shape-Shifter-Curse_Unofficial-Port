@@ -14,7 +14,6 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class OriginLayers extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
 

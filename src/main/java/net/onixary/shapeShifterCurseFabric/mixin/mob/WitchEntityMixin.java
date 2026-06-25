@@ -12,9 +12,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.additional_power.WitchFriendlyPower;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.RegPlayerFormComponent;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.RegPlayerFormComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,7 +33,7 @@ public abstract class WitchEntityMixin {
         World world = witch.getWorld();
 
         if(target instanceof PlayerEntity){
-            PlayerFormBase curForm = RegPlayerFormComponent.PLAYER_FORM.get(target).getCurrentForm();
+            IForm curForm = RegPlayerFormComponent.PLAYER_FORM.get(target).nowForm;
             if(curForm.equals(RegPlayerForms.ORIGINAL_SHIFTER)){
                 double randomChance = Math.random();
                 if(randomChance < POTION_REPLACE_CHANCE){

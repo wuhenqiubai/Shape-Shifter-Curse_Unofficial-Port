@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import net.fabricmc.loader.api.FabricLoader;
@@ -21,7 +22,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
@@ -107,7 +107,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         boolean IsClientNowPlayedPlayer = player instanceof ClientPlayerEntity;
         boolean IsFirstPersonView = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
 
-        if (BetterCombatInstalled && IsFirstPersonView && IsClientNowPlayedPlayer && ClientUtils.ShouldEnableBetterCombatFix()) {
+        if (BetterCombatInstalled && IsFirstPersonView && IsClientNowPlayedPlayer && ClientConfig.enableBetterCombatFix) {
             playerEntityModel.hat.visible = false;
             playerEntityModel.head.visible = false;
         }

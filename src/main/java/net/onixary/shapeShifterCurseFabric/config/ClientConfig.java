@@ -45,7 +45,7 @@ public class ClientConfig implements ConfigData {
 
     @ConfigEntry.Category("Integration")
     @Comment("Enable Better Combat Fix. Default: true")
-    public boolean enableBetterCombatFix = true;  // 启用Better Combat Fix
+    public static boolean enableBetterCombatFix = true;  // 启用Better Combat Fix
 
     // 开发用
     // @ConfigEntry.Category("InDevelopment")

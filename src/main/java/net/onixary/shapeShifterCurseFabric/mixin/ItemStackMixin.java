@@ -12,9 +12,10 @@ import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.RegPlayerFormComponent;
-import net.onixary.shapeShifterCurseFabric.player_form.transform.TransformRelatedItems;
+import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,22 +41,23 @@ public abstract class ItemStackMixin {
 		if (!world.isClient && user instanceof ServerPlayerEntity player) {
 			ItemStack stack = (ItemStack) (Object) this;
 
-			if (stack.getItem() == TransformRelatedItems.TRANSFORM_CURE) {
-				TransformRelatedItems.OnUseCure(player);
-			} else if (stack.getItem() == TransformRelatedItems.TRANSFORM_CURE_FINAL) {
-				TransformRelatedItems.OnUseCureFinal(player);
-			} else if (stack.getItem() == TransformRelatedItems.TRANSFORM_CURE_CREATIVE) {
-				TransformRelatedItems.OnUseCreativeCure(player);
-			} else if (stack.getItem() == TransformRelatedItems.TRANSFORM_CATALYST) {
-				TransformRelatedItems.OnUseCatalyst(player);
-			} else if (stack.getItem() == TransformRelatedItems.TRANSFORM_POWERFUL_CATALYST) {
-				TransformRelatedItems.OnUsePowerfulCatalyst(player);
+			if (stack.getItem() == RegCustomItem.INHIBITOR) {
+				TransformRelatedItems.OnUseCure(player, stack);
+			} else if (stack.getItem() == RegCustomItem.POWERFUL_INHIBITOR) {
+				TransformRelatedItems.OnUseCureFinal(player, stack);
+			} else if (stack.getItem() == RegCustomItem.CREATIVE_INHIBITOR) {
+				TransformRelatedItems.OnUseCreativeCure(player, stack);
+			} else if (stack.getItem() == RegCustomItem.CATALYST) {
+				TransformRelatedItems.OnUseCatalyst(player, stack);
+			} else if (stack.getItem() == RegCustomItem.POWERFUL_CATALYST) {
+				TransformRelatedItems.OnUsePowerfulCatalyst(player, stack);
 			} else if (stack.getItem() == Items.GOLDEN_APPLE) {
-				PlayerFormBase currentForm = player.getComponent(RegPlayerFormComponent.PLAYER_FORM).getCurrentForm();
-				int currentFormIndex = currentForm.getIndex();
-				if (currentFormIndex == 0 || currentFormIndex == 1) {
-					// 触发自定义成就
-					ShapeShifterCurseFabric.ON_USE_GOLDEN_APPLE.trigger(player);
+				IForm currentForm = FormUtils.getPlayerForm(player);
+				if (currentForm != null) {
+					int currentFormIndex = currentForm.getFormTier();
+					if (currentFormIndex == 0 || currentFormIndex == 1) {
+						ShapeShifterCurseFabric.ON_USE_GOLDEN_APPLE.trigger(player);
+					}
 				}
 			}
 		}

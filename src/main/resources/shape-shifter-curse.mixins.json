@@ -13,7 +13,6 @@
     "BreathingUnderWaterMixin",
     "BrewingRecipeRegistryMixin",
     "CancelEntityStepSoundMixin",
-    "CursedMoonWorldMixin",
     "CustomEdibleItemMixin",
     "CustomEdiblePlayerAMixin",
     "CustomEdiblePlayerBMixin",

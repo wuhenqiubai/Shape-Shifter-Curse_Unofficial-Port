@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.Nullable;
  *
  * @see AnimStateEnum
  * @see net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP
- * @see PlayerFormBase#getAnimStateController
+ * @see IForm#getAnimStateController
  */
 public abstract class AbstractAnimStateController {
 	/**

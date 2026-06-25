@@ -10,7 +10,7 @@ import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenu;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
@@ -211,9 +211,9 @@ public class FormColorData {
     }
 
     public void unlockAll() {
-        for (PlayerFormBase form : RegPlayerForms.playerForms.values()) {
-            if (!unlockedForms.contains(form.FormID)) {
-                unlockedForms.add(form.FormID);
+        for (IForm form : RegPlayerForms.playerForms.values()) {
+            if (!unlockedForms.contains(form.getFormID())) {
+                unlockedForms.add(form.getFormID());
             }
         }
         this.writeToConfig();
@@ -221,7 +221,7 @@ public class FormColorData {
 
     public void clearFormUnlock() {
         unlockedForms.clear();
-        unlockedForms.add(RegPlayerForms.ORIGINAL_BEFORE_ENABLE.FormID);
+        unlockedForms.add(RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID());
         this.writeToConfig();
     }
 
@@ -235,7 +235,7 @@ public class FormColorData {
     // 挂一个钩子在网络接受形态上 比如客户端的SYNC_FORM_CHANGE接收函数上
     public void onClientFormChange(Identifier form) {
         if (this.enableDefaultFormColor && ShapeShifterCurseFabric.playerCustomConfig.enable_form_default_color_system && this.formDefaultSetting.containsKey(form)) {
-            ModPacketsS2C.sendUpdateCustomColor(this.formDefaultSetting.get(form), false);
+            ModPacketsS2C.sendUpdateCustomColor(this.formDefaultSetting.get(form), false, false, false, false);
         }
         this.unlockForm(form);
         // 延时一下 好同步 "sendUpdateCustomSetting" 的更新
