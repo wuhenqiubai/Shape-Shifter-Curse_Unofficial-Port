@@ -10,11 +10,11 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Form_Allay extends PlayerFormBase {
+public class Form_Allay extends NormalForm {
     public Form_Allay(Identifier formID) {
         super(formID);
     }

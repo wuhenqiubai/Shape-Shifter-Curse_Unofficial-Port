@@ -10,15 +10,14 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Form_SnowFox3 extends PlayerFormBase {
+public class Form_SnowFox3 extends NormalForm {
     public Form_SnowFox3(Identifier formID) {
         super(formID);
-        this.setBodyType(PlayerFormBodyType.FERAL);
     }
 
     public static AbstractAnimStateController RIDE_CONTROLLER = new RideAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("form_feral_common_sneak_idle"), 1.0f, 6, "EASE_IN_OUT_QUAD"), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("snow_fox_3_riding"), 1.0f, 6));
