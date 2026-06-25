@@ -6,18 +6,12 @@ import net.minecraft.util.Identifier;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.Optional;
-import java.util.function.Function;
 
-/**
- * Shared GeoModel for the player base mesh (wide/slim variant).
- * Loaded once and cached; bone transforms are synced from FormModel before each render.
- */
 public class PlayerBaseModel extends GeoModel<FormAnimatable> {
-    private static final Identifier WIDE_MODEL = Identifier.of("shape-shifter-curse", "geo/player_base_wide");
-    private static final Identifier SLIM_MODEL = Identifier.of("shape-shifter-curse", "geo/player_base_slim");
+    private static final Identifier WIDE_MODEL = Identifier.of("shape-shifter-curse", "geo/player_base_wide.geo.json");
+    private static final Identifier SLIM_MODEL = Identifier.of("shape-shifter-curse", "geo/player_base_slim.geo.json");
 
     private static PlayerBaseModel WIDE_INSTANCE;
     private static PlayerBaseModel SLIM_INSTANCE;
@@ -44,7 +38,6 @@ public class PlayerBaseModel extends GeoModel<FormAnimatable> {
 
     @Override
     public Identifier getTextureResource(FormAnimatable animatable) {
-        // Return the player's skin texture
         if (animatable.getEntity() instanceof AbstractClientPlayerEntity player) {
             return player.getSkinTextures().texture();
         }
@@ -53,12 +46,12 @@ public class PlayerBaseModel extends GeoModel<FormAnimatable> {
 
     @Override
     public Identifier getAnimationResource(FormAnimatable animatable) {
-        return null; // No animations; driven by FormModel
+        return null;
     }
 
-    /** Copy bone transforms from FormModel's corresponding bones to this model. */
     public void syncBoneTransforms(FormModel source) {
         BakedGeoModel baked = getBakedModel(getModelResource(null));
+        if (baked == null) return;
         for (GeoBone targetBone : baked.topLevelBones()) {
             syncBoneRecursive(targetBone, source);
         }

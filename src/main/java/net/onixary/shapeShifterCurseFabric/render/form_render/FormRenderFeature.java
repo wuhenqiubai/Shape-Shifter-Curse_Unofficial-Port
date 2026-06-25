@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityModel<T>, A extends BipedEntityModel<T>> extends FeatureRenderer<T, M> {
     public FormRenderFeature(FeatureRendererContext<T, M> context) {
@@ -185,6 +186,21 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 arm.render(matrices, vertexConsumers.getBuffer(OverlayLayer), light, OverlayInt);
             }
             formModel.AnimationSystem.afterRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+            // Also render player base arm in first person for forms without their own geo
+            if (formModel.ModelResource.toString().contains("missing")) {
+                PlayerBaseModel baseModel = PlayerBaseModel.get(playerEntityModel.thinArms);
+                baseModel.syncBoneTransforms(formModel);
+                String armBoneName = IsRenderRight ? "bipedRightArm" : "bipedLeftArm";
+                Optional<GeoBone> baseArmBone = baseModel.getBone(armBoneName);
+                if (baseArmBone.isPresent()) {
+                    matrices.push();
+                    matrices.multiply(new Quaternionf().rotateX(180 * MathHelper.RADIANS_PER_DEGREE));
+                    matrices.translate(0, -1.51f, 0);
+                    RenderLayer baseLayer = RenderLayer.getEntityTranslucent(baseModel.getTextureResource(formAnimatable));
+                    renderGeoBone(formRenderer, baseArmBone.get(), matrices, formAnimatable, vertexConsumers, baseLayer, vertexConsumers.getBuffer(baseLayer), light);
+                    matrices.pop();
+                }
+            }
         }
     }
 
@@ -242,19 +258,16 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 if (hasOutline) {
                     formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getOutline(formModel.getTextureResource(formAnimatable)), vertexConsumers.getBuffer(RenderLayer.getOutline(formModel.getTextureResource(formAnimatable))), light, tickDelta);
                 }
-                // Render player base model (skin) with the same animated bone transforms
-                PlayerBaseModel baseModel = PlayerBaseModel.get(playerEntityModel.thinArms);
-                baseModel.syncBoneTransforms(formModel);
-                RenderLayer baseLayer = RenderLayer.getEntityTranslucent(baseModel.getTextureResource(formAnimatable));
-                BakedGeoModel baseBaked = baseModel.getBakedModel(baseModel.getModelResource(formAnimatable));
-                formRenderer.preRender(matrices, formAnimatable, baseBaked, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
-                matrices.push();
-                formRenderer.updateAnimatedTextureFrame(formAnimatable);
-                for (GeoBone bone : baseBaked.topLevelBones()) {
-                    formRenderer.renderRecursively(matrices, formAnimatable, bone, baseLayer, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+                // Render player base model (skin) only for forms without their own geo geometry
+                if (formModel.ModelResource.toString().contains("missing")) {
+                    PlayerBaseModel baseModel = PlayerBaseModel.get(playerEntityModel.thinArms);
+                    baseModel.syncBoneTransforms(formModel);
+                    BakedGeoModel baseBaked = baseModel.getBakedModel(baseModel.getModelResource(formAnimatable));
+                    RenderLayer baseLayer = RenderLayer.getEntityTranslucent(baseModel.getTextureResource(formAnimatable));
+                    for (GeoBone bone : baseBaked.topLevelBones()) {
+                        renderGeoBone(formRenderer, bone, matrices, formAnimatable, vertexConsumers, baseLayer, vertexConsumers.getBuffer(baseLayer), light);
+                    }
                 }
-                matrices.pop();
-                formRenderer.postRender(matrices, formAnimatable, baseBaked, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
                 matrices.pop();
                 formModel.AnimationSystem.afterRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
             }
