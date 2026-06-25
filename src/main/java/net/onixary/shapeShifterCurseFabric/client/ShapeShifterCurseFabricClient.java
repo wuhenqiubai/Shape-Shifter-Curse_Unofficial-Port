@@ -19,6 +19,7 @@ import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
@@ -98,6 +99,8 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// Mana System
 		if (!MinecraftClient.getInstance().isPaused()) {
 			ManaUtils.manaTick(minecraftClient.player);
+			// Transform overlay tick (black screen + nausea)
+			TransformManager.clientTick();
 		}
 		// ItemStorePower restored — clientTick needs PowerHolderComponent.getPowers usage
 	}

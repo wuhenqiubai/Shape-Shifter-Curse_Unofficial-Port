@@ -11,6 +11,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -58,9 +59,10 @@ public class ModPacketsS2CServer {
         buf.writeUuid(player.getUuid());
         buf.writeBoolean(isTransforming);
         buf.writeString(fromForm == null ? "" : fromForm.toString());
-        buf.writeString(toForm== null ? "" : toForm.toString());
+        buf.writeString(toForm == null ? "" : toForm.toString());
         for (ServerPlayerEntity p : player.getServerWorld().getPlayers()) {
-            ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), buf));
+            PacketByteBuf copy = PacketByteBufs.copy(buf);
+            ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), copy));
         }
     }
 
