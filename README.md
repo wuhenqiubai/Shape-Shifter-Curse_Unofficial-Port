@@ -14,7 +14,7 @@
 > **分支 / Branch**: `ver/1.21.1_Apoli2.12.0-alpha7`
 >
 > **基于主线commit
-**: [f2a56da](https://github.com/onixary/shape-shifter-curse-fabric/commit/f2a56da83ea987b4bd78eb51a8ad2efa6f6293d5)
+**: [2ea1585](https://github.com/onixary/shape-shifter-curse-fabric/commit/2ea1585476ae2b457c35a3cbb95f708dcaeafe89)
 
 | 状态 | 模块     | 说明                |
 |----|--------|-------------------|
