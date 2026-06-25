@@ -268,6 +268,8 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                         renderGeoBone(formRenderer, bone, matrices, formAnimatable, vertexConsumers, baseLayer, vertexConsumers.getBuffer(baseLayer), light);
                     }
                 }
+                // Sync GeckoLib bone transforms back to vanilla ModelParts (equipment, BetterCombat etc.)
+                net.onixary.shapeShifterCurseFabric.mixin.PlayerEntityModelAnimSyncMixin.ssc$cacheBoneTransforms(formModel);
                 matrices.pop();
                 formModel.AnimationSystem.afterRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
             }

@@ -210,6 +210,16 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
 
     @Override
     public void processAnimation(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+        // Vanilla-style walking/running bone animation (direct GeoBone, no ModelPart dependency)
+        float walkCycle = limbAngle * 0.6662F;
+        float swing = limbDistance;
+        model.setRotationForBone(RM_HeadGeoBoneID, new Vec3d(headPitch, headYaw, 0));
+        model.setRotationForBone(RM_BodyGeoBoneID, new Vec3d(0, 0, MathHelper.cos(walkCycle + (float)Math.PI) * 2.0F * swing * 0.5F));
+        model.setRotationForBone(RM_LeftArmGeoBoneID, new Vec3d(MathHelper.cos(walkCycle + (float)Math.PI) * 2.0F * swing * 0.5F, 0, 0));
+        model.setRotationForBone(RM_RightArmGeoBoneID, new Vec3d(MathHelper.cos(walkCycle) * 2.0F * swing * 0.5F, 0, 0));
+        model.setRotationForBone(RM_LeftLegGeoBoneID, new Vec3d(MathHelper.cos(walkCycle) * 1.4F * swing, 0, 0));
+        model.setRotationForBone(RM_RightLegGeoBoneID, new Vec3d(MathHelper.cos(walkCycle + (float)Math.PI) * 1.4F * swing, 0, 0));
+
         // Procedural tail/wing animation (driven by player yaw deltas and vertical velocity)
         tailData td = tailDataMap.computeIfAbsent(player.getUuid(), k -> new tailData());
         model.setRotationForTailBones(limbAngle, limbDistance, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
