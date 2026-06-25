@@ -116,8 +116,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public IModelAnimationSystem AnimationSystem = null;
 
-    // Set by handleAnimations for mixed forms; checked by PlayerRendererBodyRootMixin
-    public static boolean applyBodyTransform = false;
 
     // Stashed parameters for deferred processAnimation call (set in beforeRender, consumed in handleAnimations)
     public FormRenderer stashedFormRenderer;
@@ -667,26 +665,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         super.handleAnimations(animatable, instanceId, animationState, partialTick);
 
-        // Determine if processAnimation is needed: mixed forms (vanilla parts visible) OR
-        // pure Geo forms without `body` bone keyframes (spider2, etc.) need Mixin-derived values
-        boolean needsPA = !Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
-                       || !Hidden_LeftLeg || !Hidden_RightLeg;
-        if (!needsPA && player instanceof IAnimSystemAccessor _paAcc) {
-            var _paSsc = _paAcc.shape_shifter_curse$getAnimSystem().animationState;
-            if (_paSsc.currentBodyAnimId != null) {
-                Animation _paAnim = getCachedAnimation(_paSsc.currentBodyAnimId.getPath());
-                if (_paAnim == null || java.util.Arrays.stream(_paAnim.boneAnimations())
-                        .noneMatch(ba -> ba.boneName().equals("body")))
-                    needsPA = true;
-            } else {
-                needsPA = true;
-            }
-        }
-
-        if (needsPA && player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
-            if (!Hidden_Head || !Hidden_Body || !Hidden_LeftArm || !Hidden_RightArm
-                || !Hidden_LeftLeg || !Hidden_RightLeg)
-                applyBodyTransform = true; // only for mixed forms
+        // Always run processAnimation for procedural tail/wing physics and extra transforms
+        // (ModelPart→GeoBone copying was removed — AC drives all standard bones)
+        if (player != null && this.AnimationSystem != null && this.stashedFormRenderer != null && this.stashedRenderer != null) {
             this.AnimationSystem.processAnimation(this.stashedFormRenderer, this, this.stashedRenderer, player,
                 this.stashedLimbAngle, this.stashedLimbDistance, this.stashedTickDelta,
                 this.stashedAnimationProgress, this.stashedHeadYaw, this.stashedHeadPitch);
@@ -717,7 +698,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     /** Compute the actual animation length from keyframe data (anim.length() returns junk for merged files). */
-    /** Pre-computed body transform data for PlayerRendererBodyRootMixin. */
     public static record BodyRootData(@Nullable Vec3d pos, @Nullable Vec3d rot) {}
     public static @Nullable BodyRootData computeBodyRootTransform(PlayerEntity player, float tickDelta) {
         if (!(player instanceof IAnimSystemAccessor accessor)) return null;

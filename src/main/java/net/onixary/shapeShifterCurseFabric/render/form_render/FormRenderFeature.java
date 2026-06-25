@@ -38,7 +38,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
     private static final boolean IRISInstalled = FabricLoader.getInstance().isModLoaded("iris");
 
     /** Reset hidden flags on vanilla model parts after rendering.
-     *  Overlay/emissive texture rendering is handled by OverlayRenderMixin. */
+     *  Overlay/emissive texture rendering is handled by FormEmissiveLayer. */
     public static void rM_PartB(PlayerEntityRenderer playerEntityRenderer, AbstractClientPlayerEntity player, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         if (player.isSpectator()) return;
         PlayerEntityModel<?> m = playerEntityRenderer.getModel();

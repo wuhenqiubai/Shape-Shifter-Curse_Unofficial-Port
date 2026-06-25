@@ -86,7 +86,6 @@
     "ElytraEntityModelMixin",
     "EntityRenderDispatcherSafetyMixin",
     "EntityRendererMixin",
-    "FeralPlayerEntityRendererMixin",
     "GameRendererMixin",
     "IEntityRenderDispatcherAccessor",
     "InGameHudMixin",
@@ -96,15 +95,12 @@
     "MoonPhaseRenderMixin",
     "PlayerClipAtLedgeMixin",
     "PlayerEntityAnimOverrideMixin",
-    "PlayerEntityModelAnimMixin",
-    "PlayerRendererBodyRootMixin",
     "PlayerEntityRendererFallFlyingMixin",
     "PlayerEntitySpeedFOVMixin",
     "PlayerMovementControlMixin",
     "PlayerRotationRendererMixin",
     "accessor.ApoliClientAccessor",
     "render.LivingEntityRendererMixin",
-    "render.OverlayRenderMixin",
     "render.PlayerEntityRendererMixin"
   ],
   "injectors": {

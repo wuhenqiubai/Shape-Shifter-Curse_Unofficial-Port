@@ -5,7 +5,6 @@ import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -211,61 +210,18 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem {
 
     @Override
     public void processAnimation(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+        // Procedural tail/wing animation (driven by player yaw deltas and vertical velocity)
         tailData td = tailDataMap.computeIfAbsent(player.getUuid(), k -> new tailData());
-        model.resetBone(RM_HeadGeoBoneID);
-        model.resetBone(RM_BodyGeoBoneID);
-        model.resetBone(RM_LeftArmGeoBoneID);
-        model.resetBone(RM_RightArmGeoBoneID);
-        model.resetBone(RM_LeftLegGeoBoneID);
-        model.resetBone(RM_RightLegGeoBoneID);
-
-        PlayerEntityModel<?> playerModel = renderer.getModel();
-        model.setRotationForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartRotation(playerModel.head));
-        model.translatePositionForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartPosition(playerModel.head));
-        model.translatePositionForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartPosition(playerModel.body));
-        model.translatePositionForBone(RM_LeftArmGeoBoneID, FormRenderUtils.getPartPosition(playerModel.leftArm));
-        model.translatePositionForBone(RM_RightArmGeoBoneID, FormRenderUtils.getPartPosition(playerModel.rightArm));
-        model.translatePositionForBone(RM_LeftLegGeoBoneID, FormRenderUtils.getPartPosition(playerModel.leftLeg));
-        model.translatePositionForBone(RM_RightLegGeoBoneID, FormRenderUtils.getPartPosition(playerModel.rightLeg));
-        model.translatePositionForBone(RM_LeftArmGeoBoneID, new Vec3d(5, 2, 0));
-        model.translatePositionForBone(RM_RightArmGeoBoneID, new Vec3d(-5, 2, 0));
-        model.translatePositionForBone(RM_LeftLegGeoBoneID, new Vec3d(2, 12, 0));
-        model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3d(-2, 12, 0));
-        model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
-        model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
-        // Reset body root for mixed forms (MatrixStack handles rotation) or forms without body keyframe
-        boolean _mixedFm = !model.Hidden_Body || !model.Hidden_Head || !model.Hidden_LeftArm
-                        || !model.Hidden_RightArm || !model.Hidden_LeftLeg || !model.Hidden_RightLeg;
-        if (_mixedFm) {
-            model.resetBone("body");  // MatrixStack handles body rotation
-        } else if (net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor.class.isInstance(player)) {
-            var _acc = (net.onixary.shapeShifterCurseFabric.player_animation.v3.IAnimSystemAccessor)player;
-            var _ss = _acc.shape_shifter_curse$getAnimSystem().animationState;
-            if (_ss.currentBodyAnimId != null) {
-                var _anim = FormModel.getCachedAnimation(_ss.currentBodyAnimId.getPath());
-                boolean hasBodyKF = _anim != null && java.util.Arrays.stream(_anim.boneAnimations())
-                    .anyMatch(ba -> ba.boneName().equals("body"));
-                if (!hasBodyKF) model.resetBone("body");
-            }
-        }
         model.setRotationForTailBones(limbAngle, limbDistance, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForHeadTailBones(headYaw, player.age, td.currentTailDragAmount, td.tailDragAmountVertical);
         model.setRotationForWingBones(limbAngle, limbDistance, player.age, td.tailDragAmountVertical);
+        // Apply JSON-configured extra position/rotation transforms
         if (this.bodyTransform != null) this.bodyTransform.apply(model.getCachedGeoBone(RM_BodyGeoBoneID));
-        model.setRotationForBone(RM_LeftArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftArm));
-        model.setRotationForBone(RM_RightArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.rightArm));
-        model.setRotationForBone(RM_LeftLegGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftLeg));
-        model.setRotationForBone(RM_RightLegGeoBoneID, FormRenderUtils.getPartRotation(playerModel.rightLeg));
         if (this.headTransform != null) this.headTransform.apply(model.getCachedGeoBone(RM_HeadGeoBoneID));
         if (this.leftArmTransform != null) this.leftArmTransform.apply(model.getCachedGeoBone(RM_LeftArmGeoBoneID));
         if (this.rightArmTransform != null) this.rightArmTransform.apply(model.getCachedGeoBone(RM_RightArmGeoBoneID));
         if (this.leftLegTransform != null) this.leftLegTransform.apply(model.getCachedGeoBone(RM_LeftLegGeoBoneID));
         if (this.rightLegTransform != null) this.rightLegTransform.apply(model.getCachedGeoBone(RM_RightLegGeoBoneID));
-        model.invertRotForPart(RM_HeadGeoBoneID, false, true, true);
-        model.invertRotForPart(RM_RightArmGeoBoneID, false, true, true);
-        model.invertRotForPart(RM_LeftArmGeoBoneID, false, true, true);
-        model.invertRotForPart(RM_LeftLegGeoBoneID, false, true, true);
-        model.invertRotForPart(RM_RightLegGeoBoneID, false, true, true);
     }
 
     @Override
