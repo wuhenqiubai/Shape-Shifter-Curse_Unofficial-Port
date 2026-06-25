@@ -1,8 +1,8 @@
 {
-  "type": "origins:resource",
-  "min": 0,
-  "max": 1,
-  "hud_render": {
-    "should_render": false
-  }
+    "type": "apoli:resource",
+    "min": 0,
+    "max": 1,
+    "hud_render": {
+        "should_render": false
+    }
 }

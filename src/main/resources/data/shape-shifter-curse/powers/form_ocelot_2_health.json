@@ -1,1 +1,9 @@
-{"type": "origins:attribute", "modifier": {"id": "shape-shifter-curse:form_ocelot0_health_reduction", "attribute": "minecraft:generic.max_health", "value": -6.0, "operation": "add_value"}}
+{
+    "type": "apoli:attribute",
+    "modifier": {
+        "name": "Form ocelot0 health reduction",
+        "attribute": "minecraft:generic.max_health",
+        "value": -6.0,
+        "operation": "addition"
+    }
+}

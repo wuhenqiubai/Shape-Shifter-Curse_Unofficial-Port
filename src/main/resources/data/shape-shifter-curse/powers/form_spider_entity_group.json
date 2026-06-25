@@ -1,5 +1,5 @@
 {
-  "type": "apoli:modify_type_tag",
-  "hidden": true,
-  "tag": "minecraft:arthropod"
+  "type": "apoli:entity_group",
+  "group": "arthropod",
+  "hidden": true
 }

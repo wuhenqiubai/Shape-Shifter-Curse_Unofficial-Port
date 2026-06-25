@@ -1,5 +1,5 @@
 {
-    "type": "origins:modify_food",
+    "type": "apoli:modify_food",
     "food_modifiers": [
         {
             "name": "increase food points",
@@ -8,7 +8,7 @@
         },
         {
             "name": "increase food points",
-            "operation": "apoli:min_base",
+            "operation": "min_base",
             "value": 4.0
         },
         {
@@ -20,36 +20,36 @@
     "saturation_modifiers": [
         {
             "name": "increase food points",
-            "operation": "apoli:min_total",
+            "operation": "min_total",
             "value": 0.6
         }
     ],
     "item_condition": {
-        "type": "origins:and",
+        "type": "apoli:and",
         "conditions": [
             {
-                "type": "origins:or",
+                "type": "apoli:or",
                 "conditions": [
                     {
-                        "type": "origins:ingredient",
+                        "type": "apoli:ingredient",
                         "ingredient": {
-                            "tag": "minecraft:meat"
+                            "tag": "shape-shifter-curse:meat"
                         }
                     },
                     {
-                        "type": "origins:meat"
+                        "type": "apoli:meat"
                     }
                 ]
             },
             {
-                "type": "origins:ingredient",
+                "type": "apoli:ingredient",
                 "ingredient": {
-                    "tag": "origins:ignore_diet"
+                    "tag": "shape-shifter-curse:ignore_diet"
                 },
                 "inverted": true
             },
             {
-                "type": "origins:ingredient",
+                "type": "apoli:ingredient",
                 "ingredient": {
                     "tag": "shape-shifter-curse:ignore_vc_eat"
                 },

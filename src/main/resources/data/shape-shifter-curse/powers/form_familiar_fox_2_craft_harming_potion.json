@@ -1,45 +1,45 @@
 {
-  "type": "origins:item_on_item",
-  "using_item_condition": {
-    "type": "origins:ingredient",
-    "ingredient": {
-      "item": "minecraft:potion"
+    "type": "apoli:item_on_item",
+    "using_item_condition": {
+        "type": "apoli:ingredient",
+        "ingredient": {
+            "item": "minecraft:potion"
+        }
+    },
+    "on_item_condition": {
+        "type": "apoli:ingredient",
+        "ingredient": {
+            "item": "minecraft:fermented_spider_eye"
+        }
+    },
+    "using_item_action": {
+        "type": "apoli:consume",
+        "amount": 1
+    },
+    "on_item_action": {
+        "type": "apoli:consume",
+        "amount": 1
+    },
+    "entity_action": {
+        "type": "apoli:and",
+        "actions": [
+            {
+                "type": "apoli:execute_command",
+                "command": "/give @p minecraft:splash_potion{Potion:\"minecraft:harming\"} 3"
+            },
+            {
+                "type": "shape-shifter-curse:consume_mana",
+                "mana": 5
+            }
+        ]
+    },
+    "condition": {
+        "type": "apoli:and",
+        "conditions": [
+            {
+                "type": "shape-shifter-curse:has_mana",
+                "mana": 5
+            }
+        ]
     }
-  },
-  "on_item_condition": {
-    "type": "origins:ingredient",
-    "ingredient": {
-      "item": "minecraft:fermented_spider_eye"
-    }
-  },
-  "using_item_action": {
-    "type": "origins:consume",
-    "amount": 1
-  },
-  "on_item_action": {
-    "type": "origins:consume",
-    "amount": 1
-  },
-  "entity_action": {
-    "type": "origins:and",
-    "actions": [
-      {
-        "type": "origins:execute_command",
-        "command": "/give @p minecraft:splash_potion{Potion:\"minecraft:harming\"} 3"
-      },
-      {
-        "type": "shape-shifter-curse:consume_mana",
-        "mana": 5
-      }
-    ]
-  },
-  "condition": {
-    "type": "origins:and",
-    "conditions": [
-      {
-        "type": "shape-shifter-curse:has_mana",
-        "mana": 5
-      }
-    ]
-  }
 }

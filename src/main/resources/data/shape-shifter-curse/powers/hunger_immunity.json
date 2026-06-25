@@ -1,6 +1,6 @@
 {
-  "type": "origins:effect_immunity",
-  "effects": [
-    "minecraft:hunger"
-  ]
+    "type": "apoli:effect_immunity",
+    "effects": [
+        "minecraft:hunger"
+    ]
 }

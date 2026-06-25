@@ -1,39 +1,39 @@
 {
   "type": "apoli:multiple",
   "restrict_food_type": {
-    "type": "origins:modify_food",
+    "type": "apoli:modify_food",
     "food_modifiers": [
       {
-        "operation": "apoli:set_total",
+        "operation": "set_total",
         "value": 0.0
       }
     ],
     "saturation_modifiers": [
       {
-        "operation": "apoli:set_total",
+        "operation": "set_total",
         "value": 0.0
       }
     ],
     "item_condition": {
-      "type": "origins:and",
+      "type": "apoli:and",
       "conditions": [
         {
-          "type": "origins:or",
+          "type": "apoli:or",
           "conditions": [
             {
-              "type": "origins:ingredient",
+              "type": "apoli:ingredient",
               "ingredient": {
-                "tag": "minecraft:meat"
+                "tag": "shape-shifter-curse:meat"
               }
             },
             {
-              "type": "origins:ingredient",
+              "type": "apoli:ingredient",
               "ingredient": {
                 "item": "minecraft:rotten_flesh"
               }
             },
             {
-              "type": "origins:ingredient",
+              "type": "apoli:ingredient",
               "ingredient": {
                 "item": "shape-shifter-curse:spider_fluid_cocoon"
               }
@@ -42,17 +42,17 @@
           "inverted": true
         },
         {
-          "type": "origins:food"
+          "type": "apoli:food"
         },
         {
-          "type": "origins:ingredient",
+          "type": "apoli:ingredient",
           "ingredient": {
-            "tag": "origins:ignore_diet"
+            "tag": "shape-shifter-curse:ignore_diet"
           },
           "inverted": true
         },
         {
-          "type": "origins:ingredient",
+          "type": "apoli:ingredient",
           "ingredient": {
             "tag": "shape-shifter-curse:ignore_vc_eat"
           },
@@ -65,27 +65,28 @@
       ]
     }
   },
+
   "meat_down": {
-    "type": "origins:modify_food",
+    "type": "apoli:modify_food",
     "food_modifiers": [
       {
-        "operation": "multiply_base",
+        "operation": "multiply_base_multiplicative",
         "value": -0.2
       }
     ],
     "saturation_modifiers": [
       {
-        "operation": "multiply_base",
+        "operation": "multiply_base_multiplicative",
         "value": -0.1
       }
     ],
     "item_condition": {
-      "type": "origins:and",
+      "type": "apoli:and",
       "conditions": [
         {
-          "type": "origins:ingredient",
+          "type": "apoli:ingredient",
           "ingredient": {
-            "tag": "minecraft:meat"
+            "tag": "shape-shifter-curse:meat"
           }
         }
       ]

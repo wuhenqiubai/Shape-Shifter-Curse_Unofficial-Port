@@ -1,18 +1,18 @@
 {
-  "type": "origins:prevent_item_use",
-  "item_condition": {
-    "type": "origins:and",
-    "conditions": [
-      {
-        "type": "origins:ingredient",
-        "ingredient": {
-          "tag": "origins:ranged_weapons"
-        }
-      },
-      {
-        "type": "shape-shifter-curse:is_morph_scale_item",
-        "inverted": true
-      }
-    ]
-  }
+    "type": "apoli:prevent_item_use",
+    "item_condition": {
+        "type": "apoli:and",
+        "conditions": [
+            {
+                "type": "apoli:ingredient",
+                "ingredient": {
+                    "tag": "shape-shifter-curse:ranged_weapons"
+                }
+            },
+            {
+                "type": "shape-shifter-curse:is_morph_scale_item",
+                "inverted": true
+            }
+        ]
+    }
 }
