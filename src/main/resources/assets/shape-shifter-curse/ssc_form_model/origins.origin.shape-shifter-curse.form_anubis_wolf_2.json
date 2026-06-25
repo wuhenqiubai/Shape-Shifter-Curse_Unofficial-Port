@@ -18,6 +18,9 @@
     "rightSleeve",
     "leftArm",
     "rightArm",
+    "body",
+    "jacket",
+    "head",
     "hat"
   ],
   "builtin_controller_data": {

@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
+import net.fabricmc.fabric.api.util.TriState;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -241,6 +242,19 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 if (hasOutline) {
                     formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getOutline(formModel.getTextureResource(formAnimatable)), vertexConsumers.getBuffer(RenderLayer.getOutline(formModel.getTextureResource(formAnimatable))), light, tickDelta);
                 }
+                // Render player base model (skin) with the same animated bone transforms
+                PlayerBaseModel baseModel = PlayerBaseModel.get(playerEntityModel.thinArms);
+                baseModel.syncBoneTransforms(formModel);
+                RenderLayer baseLayer = RenderLayer.getEntityTranslucent(baseModel.getTextureResource(formAnimatable));
+                BakedGeoModel baseBaked = baseModel.getBakedModel(baseModel.getModelResource(formAnimatable));
+                formRenderer.preRender(matrices, formAnimatable, baseBaked, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+                matrices.push();
+                formRenderer.updateAnimatedTextureFrame(formAnimatable);
+                for (GeoBone bone : baseBaked.topLevelBones()) {
+                    formRenderer.renderRecursively(matrices, formAnimatable, bone, baseLayer, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
+                }
+                matrices.pop();
+                formRenderer.postRender(matrices, formAnimatable, baseBaked, vertexConsumers, vertexConsumers.getBuffer(baseLayer), false, tickDelta, light, OverlayTexture.DEFAULT_UV, 0xFFFFFFFF);
                 matrices.pop();
                 formModel.AnimationSystem.afterRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
             }

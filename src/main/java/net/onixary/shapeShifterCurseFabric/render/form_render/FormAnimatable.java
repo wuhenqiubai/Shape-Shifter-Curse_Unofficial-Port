@@ -21,6 +21,8 @@ public class FormAnimatable implements GeoReplacedEntity {
         this.e = e;
     }
 
+    public PlayerEntity getEntity() { return e; }
+
     @Override
     public EntityType<?> getReplacingEntityType() {
         return EntityType.PLAYER;

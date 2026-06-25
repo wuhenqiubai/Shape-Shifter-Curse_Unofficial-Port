@@ -3,5 +3,19 @@
   "name": "shape-shifter-curse.form_original_before_enable.model_name",
   "layer": "origins:origin",
   "form": "shape-shifter-curse:form_original_before_enable",
-  "wide_only": true
+  "wide_only": true,
+  "hidden": [
+    "leftLeg",
+    "rightLeg",
+    "rightPants",
+    "leftPants",
+    "leftSleeve",
+    "rightSleeve",
+    "leftArm",
+    "rightArm",
+    "body",
+    "jacket",
+    "head",
+    "hat"
+  ]
 }

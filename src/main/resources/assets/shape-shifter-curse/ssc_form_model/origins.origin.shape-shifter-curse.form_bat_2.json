@@ -8,14 +8,18 @@
   "texture": "shape-shifter-curse:textures/form/form_bat_2/form_bat_2.png",
   "texture_mask": "shape-shifter-curse:textures/form/form_bat_2/form_bat_2_colormask.png",
   "hidden": [
-    "leftArm",
-    "rightArm",
     "leftLeg",
     "rightLeg",
+    "rightPants",
+    "leftPants",
     "leftSleeve",
     "rightSleeve",
-    "rightPants",
-    "leftPants"
+    "leftArm",
+    "rightArm",
+    "body",
+    "jacket",
+    "head",
+    "hat"
   ],
   "builtin_controller_data": {
     "tail_chain": {

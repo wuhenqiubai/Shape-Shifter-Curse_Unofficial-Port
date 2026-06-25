@@ -14,8 +14,14 @@
     "rightLeg",
     "rightPants",
     "leftPants",
+    "leftSleeve",
+    "rightSleeve",
+    "leftArm",
+    "rightArm",
     "body",
-    "jacket"
+    "jacket",
+    "head",
+    "hat"
   ],
   "builtin_controller_data": {
     "tail_chain": {
