@@ -39,17 +39,22 @@ import java.util.Objects;
  * @see AnimationHolder
  */
 public class AnimSystem {
-    /** 默认动画 FSM ID（地面状态 {@code on_ground}） */
-    public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
-	/**
-	 * 所属玩家实体。当此玩家实体被卸载时，AnimSystem 也应被卸载。
-	 */
-	public final PlayerEntity player;
-    /** 前置处理器列表。在 FSM/Power 动画之前执行，用于变形过渡等特殊效果。 */
-    public final List<AbstractAnimStateController> PreProcessControllers;
-	/**
-     * 当前帧的系统数据。每 Game Tick (0.05s) 由 {@link #getAnimation} 更新一次。
-	 */
+    public static class AnimSystemData {
+        public IForm playerForm;
+        public boolean IsOnGround = true;
+        public Vec3d LastPosition;
+        public long ContinueSwingAnimCounter = 0;  // 持续增长使用long防止溢出 顺便可以不用做最大值判断
+        public boolean IsWalking = false;
+        public NbtCompound customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
+
+        public AnimSystemData(PlayerEntity player) {
+            this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
+            this.customData = new NbtCompound();
+            this.LastPosition = player.getPos();
+        }
+    }
+    public final PlayerEntity player;  // 玩家实体 理论上如果当前玩家实体被卸载了 那么这个AnimSystem也应该被卸载
+
     public AnimSystemData data;
 	/**
 	 * 当前活动的动画 FSM ID
@@ -135,23 +140,27 @@ public class AnimSystem {
         return null;
     }
 
+    public static boolean checkOnGroundSuper(PlayerEntity player) {
+        if (player.isOnGround()) {
+            return true;
+        }
+        if (player.getAbilities().flying) {
+            return false;
+        }
+        return !player.getWorld().isSpaceEmpty(player.getBoundingBox().offset(0, -0.01, 0).withMaxY(player.getY()));
+    }
+
     private void PreProcessAnimSystemData() {
         // this.data.playerForm = RegPlayerFormComponent.PLAYER_FORM.get(this.player).getCurrentForm();
         this.data.playerForm = FormTextureUtils.getPlayerForm_Render(this.player);
         this.data.IsWalking = !this.data.LastPosition.equals(this.player.getPos());
-        if (this.player.getPos().getY() == this.data.LastPosition.getY()) {
-            this.data.LastPosYChange ++;
-        }
-        else {
-            this.data.LastPosYChange = 0;
-        }
         if (this.player.handSwinging) {
             this.data.ContinueSwingAnimCounter ++;
         }
         else {
             this.data.ContinueSwingAnimCounter = 0;
         }
-        this.data.IsOnGround = (player.isOnGround() || (!player.getAbilities().flying && this.data.LastPosYChange > 10));
+        this.data.IsOnGround = checkOnGroundSuper(this.player);
         this.NPPA_Tick();
     }
 

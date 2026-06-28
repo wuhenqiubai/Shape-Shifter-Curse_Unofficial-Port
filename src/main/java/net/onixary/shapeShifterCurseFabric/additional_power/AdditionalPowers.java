@@ -88,6 +88,7 @@ public class AdditionalPowers {
         register(TANFormTemperatureModifierPower.createFactory());
         register(TANPreventDirtyWaterThirstEffectPower.createFactory());
         register(TANModifyThirstExhaustionPower.createFactory());
+        register(ClimbingEXPower.createFactory());
     }
 
     public static void register(PowerFactory<?> powerFactory) {

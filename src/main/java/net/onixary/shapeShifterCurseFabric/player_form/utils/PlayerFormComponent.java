@@ -13,6 +13,7 @@ import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.util.InitialFormUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,8 +27,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     public static final ComponentKey<PlayerFormComponent> COMPONENT = ComponentRegistry.getOrCreate(ShapeShifterCurseFabric.identifier("player_form"), PlayerFormComponent.class);
 
     // form的2个值禁止使用非setForm函数修改 除非你知道你在干什么 读取可以直接读 但是修改请使用setForm
-    public @Nullable Identifier nowFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
     public @NotNull IForm nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
+    public @Nullable Identifier nowFormID = nowForm.getFormID();
     public final List<IForm> formHistory = new ArrayList<>();
     // 诅咒之月逻辑
     public boolean isCursedMoonApplied = false;
@@ -48,6 +49,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     public PlayerFormComponent(PlayerEntity player) {
         this.player = player;
+        this.nowForm = InitialFormUtils.getInitialForm(player);
+        this.nowFormID = nowForm.getFormID();
     }
 
     @Override
@@ -167,14 +170,18 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     }
 
     public void clear() {
-        nowFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
-        nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
+        this.nowForm = InitialFormUtils.getInitialForm(this.player);
+        this.nowFormID = nowForm.getFormID();
         formHistory.clear();
         isCursedMoonApplied = false;
         lastTransformByCure = false;
         BeforeCursedMoonAppliedForm = null;
         AfterCursedMoonAppliedForm = null;
         transformTargetForm = null;
+        customPotionFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
+        instinctValue = 0.0f;
+        instinctRate = 0.0f;
+        instinctEffects.clear();
     }
 
     public void sync() {

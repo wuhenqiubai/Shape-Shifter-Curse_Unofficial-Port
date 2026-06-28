@@ -195,7 +195,7 @@ public class FormUtils {
         playerFormComponent.setForm(form);
         playerFormComponent.sync();
 
-        if (!RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
+        if (!EffectManager.playerCanHaveTransformativeEffect(player)) {
             EffectManager.clearTransformativeEffect(player);
         }
         // 应用Scale
@@ -205,6 +205,7 @@ public class FormUtils {
         applyLayer(player, layerPair);
         applyDynamicFormPower(player, form, layerPair);
         TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        form.onApplyPowerEnd(player);
         // 停止Power动画 目前就蝙蝠用了
         AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);
 

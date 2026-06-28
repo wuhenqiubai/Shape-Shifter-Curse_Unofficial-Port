@@ -98,7 +98,7 @@ public interface IForm {
     }
 
     // 选择性处理 如果不匹配则必须返回null
-    default @Nullable IForm getNextForm(PlayerEntity player, ITransformReason reason) {
+    public default @Nullable IForm getNextForm(PlayerEntity player, ITransformReason reason) {
         return null;
     }
 
@@ -164,12 +164,16 @@ public interface IForm {
     default void onTransform_To(PlayerEntity player, IForm nextForm) {
     }
 
+    default void onApplyPowerEnd(PlayerEntity player) { }
+
+    // Scale 系统
+    // 先这样写 等我之后翻一下 pehkui 的代码
 	/**
 	 * 应用形态的缩放。
 	 * <p>
 	 * 通过 Pehkui API 修改玩家实体大小。
-     */
-	void applyScale(PlayerEntity player);
+	 */
+    public void applyScale(PlayerEntity player);
 
 	/**
 	 * 比较两个形态是否相等（基于 {@link #getFormID}）。

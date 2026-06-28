@@ -72,13 +72,9 @@ import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotionEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
+import net.onixary.shapeShifterCurseFabric.util.*;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.DefaultAccessory;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
-import net.onixary.shapeShifterCurseFabric.util.AttackEntityDataTracker;
-import net.onixary.shapeShifterCurseFabric.util.PlayerEventHandler;
-import net.onixary.shapeShifterCurseFabric.util.TickManager;
-import net.onixary.shapeShifterCurseFabric.util.TrinketDataPackReloadListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -219,6 +215,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         MinionRegister.register();
 
         AttackEntityDataTracker.init();
+        ModGameRules.register();
 
         // 注册配置文件
         AutoConfig.register(PlayerCustomConfig.class, Toml4jConfigSerializer::new);  // 客户端配置
@@ -262,7 +259,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
             ModPacketsS2CServer.updateDynamicForm(player);
             PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
             if (RegPlayerForms.getPlayerForm(component.nowFormID) == null) {
-                FormUtils._loadForm(player, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
+                FormUtils._loadForm(player, InitialFormUtils.getInitialForm(player));
             }
         }));
         initLocalDataStorage();
