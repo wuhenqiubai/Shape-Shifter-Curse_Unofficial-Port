@@ -1,8 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mana;
 
-import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
-import dev.onyxstudios.cca.api.v3.component.sync.PlayerSyncPredicate;
-import dev.onyxstudios.cca.api.v3.entity.PlayerComponent;
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
+import org.ladysnake.cca.api.v3.component.sync.PlayerSyncPredicate;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;

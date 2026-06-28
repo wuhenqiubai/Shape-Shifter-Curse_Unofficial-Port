@@ -39,27 +39,55 @@ import java.util.Objects;
  * @see AnimationHolder
  */
 public class AnimSystem {
-    public static class AnimSystemData {
-        public IForm playerForm;
-        public boolean IsOnGround = true;
-        public Vec3d LastPosition;
-        public long ContinueSwingAnimCounter = 0;  // 持续增长使用long防止溢出 顺便可以不用做最大值判断
-        public boolean IsWalking = false;
-        public NbtCompound customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
+	/**
+	 * 动画系统上下文数据，每帧由 {@link #getAnimation} 更新。
+	 */
+	public static class AnimSystemData {
+		/**
+		 * 当前帧该玩家的形态
+		 */
+		public IForm playerForm;
+		/** 是否在地面上（含容错判断：长时间 Y 轴未变化也视为地面） */
+		public boolean IsOnGround = true;
+		/** 上一帧的玩家位置，用于计算移动状态 */
+		public Vec3d LastPosition;
+		/**
+		 * 玩家 Y 轴位置未变化的持续 tick 数
+		 */
+		public long LastPosYChange = 0;
+		/**
+		 * 玩家挥动手臂的持续 tick 数
+		 */
+		public long ContinueSwingAnimCounter = 0;
+		/**
+		 * 是否在移动
+		 */
+		public boolean IsWalking = false;
+		/** 自定义 NBT 数据，供其他拓展 Mod 使用。SSC 本身不使用。 */
+		public NbtCompound customData;
+		/** 此帧是否有上半身动画覆盖 */
+		public boolean HasUpperBodyOverride = false;
 
-        public AnimSystemData(PlayerEntity player) {
-            this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-            this.customData = new NbtCompound();
-            this.LastPosition = player.getPos();
-        }
-    }
+		public AnimSystemData(PlayerEntity player) {
+			this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
+			this.customData = new NbtCompound();
+			this.LastPosition = player.getPos();
+		}
+	}
+
     public final PlayerEntity player;  // 玩家实体 理论上如果当前玩家实体被卸载了 那么这个AnimSystem也应该被卸载
 
     public AnimSystemData data;
+
+	public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
+
 	/**
 	 * 当前活动的动画 FSM ID
 	 */
 	public Identifier nowAnimFSMID = defaultAnimFSMID;
+
+	public final List<AbstractAnimStateController> PreProcessControllers;
+
     /** 当前正在播放的 Power 动画 ID */
     public @Nullable Identifier nowPlayingPowerAnimationID = null;
 	/**
@@ -304,39 +332,5 @@ public class AnimSystem {
 		return null;
 	}
 
-	/**
-	 * 动画系统上下文数据，每帧由 {@link #getAnimation} 更新。
-	 */
-    public static class AnimSystemData {
-		/**
-		 * 当前帧该玩家的形态
-		 */
-        public IForm playerForm;
-		/** 是否在地面上（含容错判断：长时间 Y 轴未变化也视为地面） */
-        public boolean IsOnGround = true;
-		/** 上一帧的玩家位置，用于计算移动状态 */
-        public Vec3d LastPosition;
-		/**
-		 * 玩家 Y 轴位置未变化的持续 tick 数
-		 */
-		public long LastPosYChange = 0;
-		/**
-		 * 玩家挥动手臂的持续 tick 数
-		 */
-		public long ContinueSwingAnimCounter = 0;
-		/**
-		 * 是否在移动
-		 */
-		public boolean IsWalking = false;
-		/** 自定义 NBT 数据，供其他拓展 Mod 使用。SSC 本身不使用。 */
-        public NbtCompound customData;
-	/** 此帧是否有上半身动画覆盖 */
-	public boolean HasUpperBodyOverride = false;
 
-        public AnimSystemData(PlayerEntity player) {
-            this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-            this.customData = new NbtCompound();
-	        this.LastPosition = player.getPos();
-        }
-	}
 }

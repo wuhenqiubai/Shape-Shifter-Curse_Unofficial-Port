@@ -66,14 +66,14 @@ public class NormalFormLayer implements IFormLayer {
     public static NormalFormLayer fromJson(@NotNull Identifier id, @NotNull JsonObject json) {
         NormalFormLayer layer = new NormalFormLayer();
         if (json.has("id")) {
-            layer.setID(new Identifier(json.get("id").getAsString()));
+            layer.setID(Identifier.of(json.get("id").getAsString()));
         } else {
             layer.setID(id);
         }
         JsonObject powerJson = json.getAsJsonObject("power");
         List<Identifier> powerID = new ArrayList<>();
         for (String key : powerJson.keySet()) {
-            powerID.add(new Identifier(key));
+            powerID.add(Identifier.of(key));
         }
         layer.setPower(powerID);
         return layer;

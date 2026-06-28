@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
-import net.minecraft.client.item.TooltipContext;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Vanishable;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.item.tooltip.TooltipType;
@@ -18,7 +18,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -59,7 +58,7 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack) {
+    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
         return 24;
     }
 
@@ -91,14 +90,14 @@ public class SuperMorphScaleCore extends Item {
             int damage = stack.getDamage();
             int need_repair = 0;
             if (user.isSneaking()) {
-                need_repair = getMaxDamage();
+                need_repair = stack.getMaxDamage();
             } else {
                 need_repair = damagePerItem;
             }
             int max_repair = damage;
             need_repair = Math.min(need_repair, max_repair);
             float exp_multiplier = mendingMultiplier;
-            if (EnchantmentHelper.getLevel(Enchantments.MENDING, stack) > 0) {
+            if (EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.MENDING, stack) > 0) {
                 exp_multiplier *= quickChargeCostMultiplier;
             } else {
                 exp_multiplier *= quickChargeCostMultiplierNoMending;
@@ -114,7 +113,7 @@ public class SuperMorphScaleCore extends Item {
                 }
                 stack.setDamage(finalDamage);
                 player.addExperience(-exp_cost);
-                player.playSound(SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, SoundCategory.PLAYERS, 1.0f, 1.0f);
+                player.playSound(SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f);
             }
         }
         return stack;
