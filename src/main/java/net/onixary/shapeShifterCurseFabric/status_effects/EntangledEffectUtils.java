@@ -19,13 +19,10 @@ public class EntangledEffectUtils {
     public static final int ENTANGLED_FULL_DURATION_PLAYER = 20 * 5;
 
     public static void applyEntangledEffect(@Nullable Entity owner, LivingEntity target, int Time) {
-        // 1.21: Convert StatusEffect to RegistryEntry<StatusEffect>
-        RegistryEntry<net.minecraft.entity.effect.StatusEffect> entangledEffectType =
-            Registries.STATUS_EFFECT.getEntry(RegOtherStatusEffects.ENTANGLED_EFFECT);
-        RegistryEntry<net.minecraft.entity.effect.StatusEffect> entangledFullType =
-            Registries.STATUS_EFFECT.getEntry(RegOtherStatusEffects.ENTANGLED_FULL_EFFECT);
-
-        if (target.getStatusEffect(entangledFullType) != null) {
+        if (target.getWorld().isClient) {
+            return;
+        }
+        if (target.getStatusEffect(RegOtherStatusEffects.ENTANGLED_FULL_EFFECT) != null) {
             return;
         }
         StatusEffectInstance entangledEffect = target.getStatusEffect(entangledEffectType);
