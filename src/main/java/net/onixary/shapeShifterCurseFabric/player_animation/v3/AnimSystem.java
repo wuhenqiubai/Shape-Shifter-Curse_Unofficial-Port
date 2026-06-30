@@ -21,8 +21,6 @@ import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -86,7 +84,7 @@ public class AnimSystem {
 	 */
 	public Identifier nowAnimFSMID = defaultAnimFSMID;
 
-	public final List<AbstractAnimStateController> PreProcessControllers;
+	public @Nullable AbstractAnimStateController preProcessController;
 
     /** 当前正在播放的 Power 动画 ID */
     public @Nullable Identifier nowPlayingPowerAnimationID = null;
@@ -142,28 +140,15 @@ public class AnimSystem {
     public AnimSystem(PlayerEntity player) {
         this.player = player;
         this.data = new AnimSystemData(player);
-        this.PreProcessControllers = new ArrayList<>();
-        this.initPreProcessControllers();
-        this.registerAllPreProcessControllers();
-    }
-
-    public void registerAllPreProcessControllers() {
-        for (AbstractAnimStateController controller : this.PreProcessControllers) {
-            if (!controller.isRegistered(this.player, this.data)) {
-                controller.registerAnim(this.player, this.data);
-            }
+        this.preProcessController = new TransformingController();
+        if (!this.preProcessController.isRegistered(this.player, this.data)) {
+            this.preProcessController.registerAnim(this.player, this.data);
         }
     }
 
-    public void initPreProcessControllers() {
-        this.PreProcessControllers.add(new TransformingController());
-    }
-
     public @Nullable AnimationHolder getPreProcessAnimation() {
-        for (AbstractAnimStateController controller : this.PreProcessControllers) {
-            if (controller.isEnabled(this.player, this.data)) {
-                return controller.getAnimation(this.player, this.data);
-            }
+        if (this.preProcessController != null && this.preProcessController.isEnabled(this.player, this.data)) {
+            return this.preProcessController.getAnimation(this.player, this.data);
         }
         return null;
     }
