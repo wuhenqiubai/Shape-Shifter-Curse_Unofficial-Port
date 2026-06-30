@@ -33,11 +33,7 @@ public class PlayerLayerData {
         for (IFormLayerGroup layerGroup : layerGroups) {
             layerGroupsID.add(layerGroup.getGroupID());
         }
-        for (Identifier layerGroup : targetLayers.keySet()) {
-            if (!layerGroupsID.contains(layerGroup)) {
-                targetLayers.remove(layerGroup);
-            }
-        }
+        targetLayers.keySet().removeIf(layerGroup -> !layerGroupsID.contains(layerGroup));
         for (IFormLayerGroup layerGroup : layerGroups) {
             if (!targetLayers.containsKey(layerGroup.getGroupID())) {
                 IFormLayer layer = RegFormLayer.getLayer(layerGroup.transformLayerID(this.player, null));

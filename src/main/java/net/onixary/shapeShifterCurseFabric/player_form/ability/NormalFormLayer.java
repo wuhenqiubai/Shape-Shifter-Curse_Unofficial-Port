@@ -47,7 +47,7 @@ public class NormalFormLayer implements IFormLayer {
 
     @Override
     public void __setPowerID(@NotNull List<Identifier> powerIDList) {
-        this.setPower(powerID);
+        this.setPower(powerIDList);
     }
 
     /*
