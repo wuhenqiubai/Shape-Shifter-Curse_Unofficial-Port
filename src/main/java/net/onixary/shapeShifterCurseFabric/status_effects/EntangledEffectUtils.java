@@ -2,10 +2,10 @@ package net.onixary.shapeShifterCurseFabric.status_effects;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -19,10 +19,14 @@ public class EntangledEffectUtils {
     public static final int ENTANGLED_FULL_DURATION_PLAYER = 20 * 5;
 
     public static void applyEntangledEffect(@Nullable Entity owner, LivingEntity target, int Time) {
+        RegistryEntry<net.minecraft.entity.effect.StatusEffect> entangledEffectType =
+                Registries.STATUS_EFFECT.getEntry(RegOtherStatusEffects.ENTANGLED_EFFECT);
+        RegistryEntry<net.minecraft.entity.effect.StatusEffect> entangledFullType =
+                Registries.STATUS_EFFECT.getEntry(RegOtherStatusEffects.ENTANGLED_FULL_EFFECT);
         if (target.getWorld().isClient) {
             return;
         }
-        if (target.getStatusEffect(RegOtherStatusEffects.ENTANGLED_FULL_EFFECT) != null) {
+        if (target.getStatusEffect(entangledFullType) != null) {
             return;
         }
         StatusEffectInstance entangledEffect = target.getStatusEffect(entangledEffectType);
