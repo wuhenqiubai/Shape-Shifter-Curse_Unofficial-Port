@@ -18,5 +18,10 @@
     "recipes": [
       "shape-shifter-curse:dew_covered_cobweb"
     ]
-  }
+  },
+  "requirements": [
+    [
+      "has_untreated_moon_dust"
+    ]
+  ]
 }

@@ -20,5 +20,10 @@
     "on_end_cursed_moon_cured": {
       "trigger": "shape-shifter-curse:on_end_cursed_moon_cured"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_end_cursed_moon_cured"
+    ]
+  ]
 }

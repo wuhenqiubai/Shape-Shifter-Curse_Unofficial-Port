@@ -20,5 +20,10 @@
     "on_transform_by_catalyst": {
       "trigger": "shape-shifter-curse:on_transform_by_catalyst"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_transform_by_catalyst"
+    ]
+  ]
 }

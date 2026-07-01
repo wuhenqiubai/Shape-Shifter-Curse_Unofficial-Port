@@ -25,5 +25,10 @@
         ]
       }
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_transform_familiar_fox_3"
+    ]
+  ]
 }

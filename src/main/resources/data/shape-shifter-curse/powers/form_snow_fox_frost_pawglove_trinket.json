@@ -1,6 +1,5 @@
 {
   "type": "apoli:multiple",
-
   "snow_ball_damage_down": {
     "type": "apoli:modify_projectile_damage",
     "damage_condition": {
@@ -25,7 +24,6 @@
       "sound": "minecraft:entity.firework_rocket.blast_far"
     }
   },
-
   "snow_ball_effect": {
     "type": "apoli:modify_projectile_damage",
     "damage_condition": {
@@ -59,12 +57,10 @@
       "power": "shape-shifter-curse:form_snow_fox_snowball_effect_cooldown"
     }
   },
-
   "no_slowness": {
     "type": "apoli:effect_immunity",
     "effects": [
       "minecraft:slowness"
     ]
   }
-
 }

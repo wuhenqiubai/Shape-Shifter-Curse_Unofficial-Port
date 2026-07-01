@@ -11,7 +11,7 @@
   },
   "damage_condition": {
     "type": "apoli:projectile",
-    "inverted" : true
+    "inverted": true
   },
   "target_condition": {
     "type": "apoli:status_effect",

@@ -2,8 +2,8 @@
   "type": "apoli:attribute",
   "modifier": {
     "attribute": "minecraft:generic.movement_speed",
-    "operation": "multiply_total",
+    "operation": "add_multiplied_total",
     "value": -0.85,
-    "name": "Movement speed down"
+    "id": "shape-shifter-curse:movement_speed_down"
   }
 }

@@ -18,5 +18,10 @@
     "recipes": [
       "shape-shifter-curse:moondust_matrix"
     ]
-  }
+  },
+  "requirements": [
+    [
+      "has_untreated_moon_dust"
+    ]
+  ]
 }

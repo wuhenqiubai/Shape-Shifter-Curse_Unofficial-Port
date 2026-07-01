@@ -20,5 +20,10 @@
     "on_first_transform_enable_form_list": {
       "trigger": "shape-shifter-curse:on_first_transform_enable_form_list"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_first_transform_enable_form_list"
+    ]
+  ]
 }

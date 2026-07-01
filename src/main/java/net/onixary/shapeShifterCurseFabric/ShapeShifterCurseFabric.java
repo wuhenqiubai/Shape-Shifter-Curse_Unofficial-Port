@@ -33,6 +33,7 @@ import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.additional_power.*;
 import net.onixary.shapeShifterCurseFabric.advancement.*;
 import net.onixary.shapeShifterCurseFabric.advancement.misc.CriterionAdditions;
+import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.command.DynamicFormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.FormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.MiscArgumentType;
@@ -50,7 +51,6 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.Transfo
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider.TransformativeSpiderEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
-import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomPotions;
 import net.onixary.shapeShifterCurseFabric.mana.ManaRegistries;
@@ -72,9 +72,9 @@ import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotionEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
-import net.onixary.shapeShifterCurseFabric.util.*;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.DefaultAccessory;
+import net.onixary.shapeShifterCurseFabric.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +83,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
 
 
 public class ShapeShifterCurseFabric implements ModInitializer {
@@ -120,6 +119,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = Criteria.register(OnTriggerCursedMoon.ID.toString(), new OnTriggerCursedMoon());
     public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = Criteria.register(OnTriggerCursedMoonForm2.ID.toString(), new OnTriggerCursedMoonForm2());
     public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = Criteria.register(OnFirstJoinWithMod.ID.toString(), new OnFirstJoinWithMod());
+    public static final OnFirstTransformEnableFormList ON_FIRST_TRANSFORM_ENABLE_FORM_LIST = Criteria.register(OnFirstTransformEnableFormList.ID.toString(), new OnFirstTransformEnableFormList());
 
     public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = Criteria.register(CriterionAdditions.OnTransformForm.ID.toString(), CriterionAdditions.createOnTransformForm());
     public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = Criteria.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());

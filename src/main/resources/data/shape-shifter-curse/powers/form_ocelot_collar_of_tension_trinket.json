@@ -1,6 +1,5 @@
 {
   "type": "apoli:multiple",
-
   "bare_paw_attack": {
     "type": "apoli:conditioned_attribute",
     "condition": {
@@ -30,13 +29,12 @@
     },
     "modifier": {
       "attribute": "minecraft:generic.attack_damage",
-      "name": "Extra Attack Damage",
-      "operation": "addition",
+      "id": "shape-shifter-curse:extra_attack_damage",
+      "operation": "add_value",
       "value": 9.0
     },
     "tick_rate": 1
   },
-
   "sneaking_jump_clash": {
     "type": "shape-shifter-curse:sneaking_jump_clash",
     "bientity_action": {
@@ -53,7 +51,9 @@
             "actions": [
               {
                 "type": "apoli:spawn_particles",
-                "particle": "minecraft:crit",
+                "particle": {
+                  "type": "minecraft:crit"
+                },
                 "count": 8,
                 "speed": 0.0,
                 "force": true,

@@ -1,6 +1,5 @@
 {
   "type": "apoli:multiple",
-
   "damage_on_block_break": {
     "type": "apoli:action_on_block_break",
     "entity_action": {
@@ -27,7 +26,6 @@
       "inverted": true
     }
   },
-
   "damage_on_attack_entity": {
     "type": "apoli:self_action_on_hit",
     "entity_action": {

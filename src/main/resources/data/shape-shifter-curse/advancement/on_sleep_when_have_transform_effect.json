@@ -20,5 +20,10 @@
     "on_sleep_when_have_transform_effect": {
       "trigger": "shape-shifter-curse:on_sleep_when_have_transform_effect"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_sleep_when_have_transform_effect"
+    ]
+  ]
 }

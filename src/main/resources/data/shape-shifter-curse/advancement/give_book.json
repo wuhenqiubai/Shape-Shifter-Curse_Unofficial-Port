@@ -6,5 +6,10 @@
   },
   "rewards": {
     "recipes": []
-  }
+  },
+  "requirements": [
+    [
+      "first_join"
+    ]
+  ]
 }

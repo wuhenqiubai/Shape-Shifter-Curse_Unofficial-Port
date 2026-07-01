@@ -21,5 +21,10 @@
       "shape-shifter-curse:powerful_inhibitor",
       "shape-shifter-curse:powerful_catalyst"
     ]
-  }
+  },
+  "requirements": [
+    [
+      "has_untreated_moon_dust"
+    ]
+  ]
 }

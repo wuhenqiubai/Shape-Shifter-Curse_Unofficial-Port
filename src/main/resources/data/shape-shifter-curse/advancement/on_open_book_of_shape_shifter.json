@@ -20,5 +20,10 @@
     "on_open_book_of_shape_shifter": {
       "trigger": "shape-shifter-curse:on_open_book_of_shape_shifter"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_open_book_of_shape_shifter"
+    ]
+  ]
 }

@@ -1,16 +1,16 @@
 {
     "type": "shape-shifter-curse:climbing_ex",
     "start_climb_condition": {
-        "type": "apoli:and",
+    "type": "apoli:and",
+    "conditions": [
+      {
+        "type": "apoli:collided_horizontally"
+      },
+      {
+        "type": "apoli:or",
         "conditions": [
-            {
-                "type": "apoli:collided_horizontally"
-            },
-            {
-                "type": "apoli:or",
-                "conditions": [
-                    {
-                        "type": "apoli:block_collision",
+          {
+            "type": "apoli:block_collision",
                         "offset_x": 0.05,
                         "offset_z": 0.05
                     },
@@ -37,14 +37,14 @@
                         "type": "apoli:block_collision",
                         "offset_x": 0.01,
                         "offset_z": 0.01
-                    },
-                    {
-                        "type": "apoli:block_collision",
+          },
+          {
+            "type": "apoli:block_collision",
                         "offset_x": -0.01,
                         "offset_z": -0.01
-                    }
-                ]
-            }
+          }
         ]
-    }
+      }
+    ]
+  }
 }

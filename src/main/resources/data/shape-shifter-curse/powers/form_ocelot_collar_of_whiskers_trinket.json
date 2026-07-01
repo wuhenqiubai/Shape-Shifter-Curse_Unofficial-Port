@@ -1,6 +1,5 @@
 {
   "type": "apoli:multiple",
-
   "dodge_arrow_plus": {
     "type": "shape-shifter-curse:projectile_dodge",
     "range": 7.0,

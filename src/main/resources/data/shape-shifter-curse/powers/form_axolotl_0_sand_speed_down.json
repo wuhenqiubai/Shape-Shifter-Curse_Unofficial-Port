@@ -2,9 +2,9 @@
     "type": "apoli:conditioned_attribute",
     "modifier": {
         "attribute": "minecraft:generic.movement_speed",
-        "operation": "multiply_total",
+        "operation": "add_multiplied_total",
         "value": -0.2,
-        "name": "Decreased speed on sand"
+        "id": "shape-shifter-curse:decreased_speed_on_sand"
     },
     "tick_rate": 20,
     "condition": {

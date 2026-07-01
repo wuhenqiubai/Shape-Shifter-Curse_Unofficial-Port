@@ -1,13 +1,12 @@
 {
   "type": "apoli:multiple",
-
-  "auxiliary_sword_attack_speed":{
+  "auxiliary_sword_attack_speed": {
     "type": "apoli:conditioned_attribute",
     "modifier": {
       "attribute": "minecraft:generic.attack_speed",
-      "operation": "addition",
+      "operation": "add_value",
       "value": 1.2,
-      "name": "Increased attack speed"
+      "id": "shape-shifter-curse:increased_attack_speed"
     },
     "tick_rate": 20,
     "condition": {
@@ -23,8 +22,7 @@
       }
     }
   },
-
-  "auxiliary_sword_tool_damage":{
+  "auxiliary_sword_tool_damage": {
     "type": "apoli:self_action_on_hit",
     "entity_action": {
       "type": "apoli:and",
@@ -64,11 +62,10 @@
       }
     }
   },
-
-  "auxiliary_axe_attack_damage":{
+  "auxiliary_axe_attack_damage": {
     "type": "apoli:modify_damage_dealt",
     "modifier": {
-      "name": "Increased attack damage",
+      "id": "shape-shifter-curse:increased_attack_damage",
       "operation": "addition",
       "value": 5.0
     },
@@ -90,14 +87,13 @@
       }
     }
   },
-
-  "auxiliary_axe_attack_speed":{
+  "auxiliary_axe_attack_speed": {
     "type": "apoli:conditioned_attribute",
     "modifier": {
       "attribute": "minecraft:generic.attack_speed",
-      "operation": "multiply_base",
+      "operation": "add_multiplied_base",
       "value": -0.4,
-      "name": "Decreased attack speed"
+      "id": "shape-shifter-curse:decreased_attack_speed"
     },
     "tick_rate": 20,
     "condition": {
@@ -113,8 +109,7 @@
       }
     }
   },
-
-  "auxiliary_axe_tool_damage":{
+  "auxiliary_axe_tool_damage": {
     "type": "apoli:self_action_on_hit",
     "entity_action": {
       "type": "apoli:and",
@@ -145,11 +140,10 @@
       }
     }
   },
-
-  "auxiliary_pickaxe_attack_damage":{
+  "auxiliary_pickaxe_attack_damage": {
     "type": "apoli:modify_damage_dealt",
     "modifier": {
-      "name": "Decreased attack damage",
+      "id": "shape-shifter-curse:decreased_attack_damage",
       "operation": "addition",
       "value": -4.0
     },
@@ -166,8 +160,7 @@
       }
     }
   },
-
-  "auxiliary_pickaxe_mining_speed":{
+  "auxiliary_pickaxe_mining_speed": {
     "type": "apoli:modify_break_speed",
     "modifier": {
       "operation": "multiply_base",
@@ -186,8 +179,7 @@
       }
     }
   },
-
-  "auxiliary_pickaxe_tool_damage":{
+  "auxiliary_pickaxe_tool_damage": {
     "type": "apoli:self_action_on_hit",
     "entity_action": {
       "type": "apoli:and",
@@ -218,8 +210,7 @@
       }
     }
   },
-
-  "extra_shield_blocking":{
+  "extra_shield_blocking": {
     "type": "shape-shifter-curse:virtual_shield",
     "active_shield_condition": {
       "type": "apoli:and",

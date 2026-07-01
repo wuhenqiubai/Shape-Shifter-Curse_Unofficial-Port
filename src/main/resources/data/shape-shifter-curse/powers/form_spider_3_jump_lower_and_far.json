@@ -29,7 +29,6 @@
           "command": "particle cloud ~ ~ ~ 0.3 0.3 0.3 0.01 16 normal @a"
         }
       ]
-
     },
     "entity_condition": {
       "type": "apoli:and",
@@ -57,7 +56,7 @@
   "jump_lower": {
     "type": "apoli:modify_jump",
     "modifier": {
-      "operation": "multiply_base_multiplicative",
+      "operation": "multiply_base",
       "value": -0.25
     }
   }

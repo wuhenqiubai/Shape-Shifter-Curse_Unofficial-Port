@@ -2,8 +2,9 @@
   "type": "apoli:conditioned_attribute",
   "modifier": {
     "attribute": "minecraft:generic.movement_speed",
-    "operation": "multiply_base",
-    "value": -0.20
+    "operation": "add_multiplied_base",
+    "value": -0.2,
+    "id": "shape-shifter-curse:auto_generated"
   },
   "tick_rate": 2,
   "condition": {

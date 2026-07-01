@@ -20,5 +20,10 @@
     "on_get_transform_effect": {
       "trigger": "shape-shifter-curse:on_get_transform_effect"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_get_transform_effect"
+    ]
+  ]
 }

@@ -25,5 +25,10 @@
         ]
       }
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_transform_bat_0"
+    ]
+  ]
 }

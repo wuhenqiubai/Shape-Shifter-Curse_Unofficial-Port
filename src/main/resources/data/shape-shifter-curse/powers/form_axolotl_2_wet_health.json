@@ -1,15 +1,15 @@
 {
-    "type": "apoli:conditioned_attribute",
-    "modifier": {
-        "name": "Gain health when having air(moist)",
-        "attribute": "minecraft:generic.max_health",
-        "value": 6.0,
-        "operation": "addition"
-    },
-    "tick_rate": 40,
-    "condition": {
-        "type": "apoli:air",
-        "comparison": ">",
-        "compare_to": 0
-    }
+  "type": "apoli:conditioned_attribute",
+  "modifier": {
+    "id": "shape-shifter-curse:gain_health_when_having_air_moist_",
+    "attribute": "minecraft:generic.max_health",
+    "value": 6.0,
+    "operation": "add_value"
+  },
+  "tick_rate": 40,
+  "condition": {
+    "type": "apoli:air",
+    "comparison": ">",
+    "compare_to": 0
+  }
 }

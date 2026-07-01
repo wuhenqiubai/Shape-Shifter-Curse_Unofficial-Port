@@ -20,5 +20,10 @@
     "on_enable_mod": {
       "trigger": "shape-shifter-curse:on_enable_mod"
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_enable_mod"
+    ]
+  ]
 }

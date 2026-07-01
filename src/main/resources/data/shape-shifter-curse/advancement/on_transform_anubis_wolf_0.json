@@ -25,5 +25,10 @@
         ]
       }
     }
-  }
+  },
+  "requirements": [
+    [
+      "on_transform_anubis_wolf_0"
+    ]
+  ]
 }

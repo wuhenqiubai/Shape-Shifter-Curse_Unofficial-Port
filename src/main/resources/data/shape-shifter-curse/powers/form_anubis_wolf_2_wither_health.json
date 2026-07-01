@@ -1,10 +1,10 @@
 {
   "type": "shape-shifter-curse:delay_attribute",
   "modifier": {
-    "name": "Add Max Health When Wither",
+    "id": "shape-shifter-curse:add_max_health_when_wither",
     "attribute": "minecraft:generic.max_health",
-    "value": 4,
-    "operation": "addition"
+    "value": 4.0,
+    "operation": "add_value"
   },
   "tick_rate": 2,
   "updateHealth": true,
