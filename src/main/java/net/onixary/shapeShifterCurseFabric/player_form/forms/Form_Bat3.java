@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
+import com.zigythebird.playeranimcore.easing.EasingType;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -11,7 +12,6 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.*;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.ClimbAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.OneAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.RideAnimController;
-import com.zigythebird.playeranimcore.easing.EasingType;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.WithSneakAnimController;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.ModifyCapeRender;
@@ -49,15 +49,15 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     public static final AnimUtils.AnimationHolderData ANIM_CLIMB_IDLE =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_attach_side"));
 
-    public static final AbstractAnimStateController IDLE_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_idle")), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_sneak_idle")));
-    public static final AbstractAnimStateController WALK_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_walk"), 1.7f, 4), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_sneak_walk")));
-    public static final AbstractAnimStateController SPRINT_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_walk"), 2.4f, 4), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_sneak_walk")));
+    public static final AbstractAnimStateController IDLE_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_idle"), 1.0f, 6, EasingType.EASE_IN_OUT_QUAD), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_sneak_idle")));
+    public static final AbstractAnimStateController WALK_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_walk"), 1.7f, 4, EasingType.EASE_IN_OUT_QUAD), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_sneak_walk")));
+    public static final AbstractAnimStateController SPRINT_CONTROLLER = new WithSneakAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_walk"), 2.4f, 4, EasingType.EASE_IN_OUT_QUAD), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_sneak_walk")));
     public static final AbstractAnimStateController MINING_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_digging"), 1.5f, 2));
     public static final AbstractAnimStateController ATTACK_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_attack"), 1.5f, 2));
     public static final AbstractAnimStateController JUMP_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_jump"), 1.5f, 2));
-    public static final AbstractAnimStateController FALL_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_2_slow_falling")));
-    public static final AbstractAnimStateController RIDE_CONTROLLER = new RideAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_riding")), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_sneak_idle")));
-    public static final AbstractAnimStateController FLYING_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_2_slow_falling")));
+    public static final AbstractAnimStateController FALL_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_2_slow_falling"), 1.0f, 6));
+    public static final AbstractAnimStateController RIDE_CONTROLLER = new RideAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_3_riding"), 1.0f, 6, EasingType.EASE_IN_OUT_QUAD), new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_1_sneak_idle"), 1.0f, 6));
+    public static final AbstractAnimStateController FLYING_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("bat_2_slow_falling"), 1.0f, 6));
     public static final AbstractAnimStateController CLIMB_CONTROLLER =
             new ClimbAnimController(ANIM_CLIMB_IDLE, ANIM_CLIMB);
 
