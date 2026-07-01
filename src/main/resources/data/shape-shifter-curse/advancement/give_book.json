@@ -1,15 +1,15 @@
 {
-  "criteria": {
-    "first_join": {
-      "trigger": "shape-shifter-curse:on_first_join_with_mod"
-    }
-  },
-  "rewards": {
-    "recipes": []
-  },
-  "requirements": [
-    [
-      "first_join"
-    ]
-  ]
+	"criteria": {
+		"first_join": {
+			"trigger": "shape-shifter-curse:on_first_join_with_mod"
+		}
+	},
+	"rewards": {
+		"recipes": []
+	},
+	"requirements": [
+		[
+			"first_join"
+		]
+	]
 }

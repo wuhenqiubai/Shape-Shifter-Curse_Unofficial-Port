@@ -1,9 +1,9 @@
 {
-  "type": "apoli:attribute",
-  "modifier": {
-    "attribute": "additionalentityattributes:generic.water_speed",
-    "id": "shape-shifter-curse:additional_swim_speed",
-    "value": 1.2,
-    "operation": "add_multiplied_base"
-  }
+	"type": "apoli:attribute",
+	"modifier": {
+		"attribute": "additionalentityattributes:generic.water_speed",
+		"id": "shape-shifter-curse:additional_swim_speed",
+		"value": 1.2,
+		"operation": "add_multiplied_base"
+	}
 }

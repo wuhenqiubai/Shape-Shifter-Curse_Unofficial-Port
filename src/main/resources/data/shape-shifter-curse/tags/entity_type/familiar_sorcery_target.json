@@ -1,8 +1,8 @@
 {
-  "replace": false,
-  "values": [
-    "minecraft:witch",
-    "minecraft:allay",
-    "minecraft:evoker"
-  ]
+	"replace": false,
+	"values": [
+		"minecraft:witch",
+		"minecraft:allay",
+		"minecraft:evoker"
+	]
 }

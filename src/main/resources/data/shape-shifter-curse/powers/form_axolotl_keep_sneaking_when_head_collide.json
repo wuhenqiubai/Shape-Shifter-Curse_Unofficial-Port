@@ -1,15 +1,15 @@
 {
-    "type": "shape-shifter-curse:keep_sneaking",
-    "condition": {
-        "type": "apoli:and",
-        "conditions": [
-            {
-                "type": "shape-shifter-curse:must_crawling"
-            },
-            {
-                "type": "apoli:swimming",
-                "inverted": true
-            }
-        ]
-    }
+	"type": "shape-shifter-curse:keep_sneaking",
+	"condition": {
+		"type": "apoli:and",
+		"conditions": [
+			{
+				"type": "shape-shifter-curse:must_crawling"
+			},
+			{
+				"type": "apoli:swimming",
+				"inverted": true
+			}
+		]
+	}
 }

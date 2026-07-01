@@ -1,9 +1,9 @@
 {
-  "type": "apoli:particle",
-  "particle": {
-    "type": "minecraft:soul_fire_flame"
-  },
-  "frequency": 10,
-  "visible_while_invisible": true,
-  "offset_y": 0.15
+	"type": "apoli:particle",
+	"particle": {
+		"type": "minecraft:soul_fire_flame"
+	},
+	"frequency": 10,
+	"visible_while_invisible": true,
+	"offset_y": 0.15
 }

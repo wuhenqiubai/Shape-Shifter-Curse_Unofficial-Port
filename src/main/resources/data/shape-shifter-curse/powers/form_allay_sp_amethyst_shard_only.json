@@ -1,18 +1,18 @@
 {
-    "type": "apoli:prevent_item_use",
-    "item_condition": {
-        "type": "apoli:and",
-        "conditions": [
-            {
-                "type": "apoli:food"
-            },
-            {
-                "type": "apoli:ingredient",
-                "ingredient": {
-                    "tag": "shape-shifter-curse:ignore_diet"
-                },
-                "inverted": true
-            }
-        ]
-    }
+	"type": "apoli:prevent_item_use",
+	"item_condition": {
+		"type": "apoli:and",
+		"conditions": [
+			{
+				"type": "apoli:food"
+			},
+			{
+				"type": "apoli:ingredient",
+				"ingredient": {
+					"tag": "shape-shifter-curse:ignore_diet"
+				},
+				"inverted": true
+			}
+		]
+	}
 }

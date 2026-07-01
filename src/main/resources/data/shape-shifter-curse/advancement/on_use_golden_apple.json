@@ -1,29 +1,29 @@
 {
-  "display": {
-    "icon": {
-      "id": "minecraft:golden_apple",
-      "count": 1
-    },
-    "title": {
-      "translate": "advancements.shape-shifter-curse.on_use_golden_apple.title"
-    },
-    "description": {
-      "translate": "advancements.shape-shifter-curse.on_use_golden_apple.description"
-    },
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": false
-  },
-  "parent": "shape-shifter-curse:on_transform_0",
-  "criteria": {
-    "on_use_golden_apple": {
-      "trigger": "shape-shifter-curse:on_use_golden_apple"
-    }
-  },
-  "requirements": [
-    [
-      "on_use_golden_apple"
-    ]
-  ]
+	"display": {
+		"icon": {
+			"id": "minecraft:golden_apple",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.shape-shifter-curse.on_use_golden_apple.title"
+		},
+		"description": {
+			"translate": "advancements.shape-shifter-curse.on_use_golden_apple.description"
+		},
+		"frame": "task",
+		"show_toast": true,
+		"announce_to_chat": true,
+		"hidden": false
+	},
+	"parent": "shape-shifter-curse:on_transform_0",
+	"criteria": {
+		"on_use_golden_apple": {
+			"trigger": "shape-shifter-curse:on_use_golden_apple"
+		}
+	},
+	"requirements": [
+		[
+			"on_use_golden_apple"
+		]
+	]
 }

@@ -1,7 +1,7 @@
 {
-  "type": "apoli:modify_jump",
-  "modifier": {
-    "operation": "multiply_base",
-    "value": -0.75
-  }
+	"type": "apoli:modify_jump",
+	"modifier": {
+		"operation": "multiply_base",
+		"value": -0.75
+	}
 }

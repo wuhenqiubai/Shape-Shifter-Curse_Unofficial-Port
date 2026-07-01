@@ -1,29 +1,29 @@
 {
-  "display": {
-    "icon": {
-      "id": "shape-shifter-curse:icon_cursed_moon",
-      "count": 1
-    },
-    "title": {
-      "translate": "advancements.shape-shifter-curse.on_trigger_cursed_moon_form_2.title"
-    },
-    "description": {
-      "translate": "advancements.shape-shifter-curse.on_trigger_cursed_moon_form_2.description"
-    },
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": true
-  },
-  "parent": "shape-shifter-curse:on_trigger_cursed_moon",
-  "criteria": {
-    "on_trigger_cursed_moon_form_2": {
-      "trigger": "shape-shifter-curse:on_trigger_cursed_moon_form_2"
-    }
-  },
-  "requirements": [
-    [
-      "on_trigger_cursed_moon_form_2"
-    ]
-  ]
+	"display": {
+		"icon": {
+			"id": "shape-shifter-curse:icon_cursed_moon",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.shape-shifter-curse.on_trigger_cursed_moon_form_2.title"
+		},
+		"description": {
+			"translate": "advancements.shape-shifter-curse.on_trigger_cursed_moon_form_2.description"
+		},
+		"frame": "task",
+		"show_toast": true,
+		"announce_to_chat": true,
+		"hidden": true
+	},
+	"parent": "shape-shifter-curse:on_trigger_cursed_moon",
+	"criteria": {
+		"on_trigger_cursed_moon_form_2": {
+			"trigger": "shape-shifter-curse:on_trigger_cursed_moon_form_2"
+		}
+	},
+	"requirements": [
+		[
+			"on_trigger_cursed_moon_form_2"
+		]
+	]
 }

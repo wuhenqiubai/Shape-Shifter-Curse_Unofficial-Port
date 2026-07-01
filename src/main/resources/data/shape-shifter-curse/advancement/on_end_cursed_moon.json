@@ -1,29 +1,29 @@
 {
-  "display": {
-    "icon": {
-      "id": "shape-shifter-curse:icon_cursed_moon",
-      "count": 1
-    },
-    "title": {
-      "translate": "advancements.shape-shifter-curse.on_end_cursed_moon.title"
-    },
-    "description": {
-      "translate": "advancements.shape-shifter-curse.on_end_cursed_moon.description"
-    },
-    "frame": "task",
-    "show_toast": true,
-    "announce_to_chat": true,
-    "hidden": true
-  },
-  "parent": "shape-shifter-curse:on_trigger_cursed_moon",
-  "criteria": {
-    "on_end_cursed_moon": {
-      "trigger": "shape-shifter-curse:on_end_cursed_moon"
-    }
-  },
-  "requirements": [
-    [
-      "on_end_cursed_moon"
-    ]
-  ]
+	"display": {
+		"icon": {
+			"id": "shape-shifter-curse:icon_cursed_moon",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.shape-shifter-curse.on_end_cursed_moon.title"
+		},
+		"description": {
+			"translate": "advancements.shape-shifter-curse.on_end_cursed_moon.description"
+		},
+		"frame": "task",
+		"show_toast": true,
+		"announce_to_chat": true,
+		"hidden": true
+	},
+	"parent": "shape-shifter-curse:on_trigger_cursed_moon",
+	"criteria": {
+		"on_end_cursed_moon": {
+			"trigger": "shape-shifter-curse:on_end_cursed_moon"
+		}
+	},
+	"requirements": [
+		[
+			"on_end_cursed_moon"
+		]
+	]
 }

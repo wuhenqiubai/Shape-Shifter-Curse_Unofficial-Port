@@ -1,17 +1,17 @@
 {
-  "entities": [
-    "player"
-  ],
-  "slots": [
-    "back",
-    "belt",
-    "body",
-    "bracelet",
-    "charm",
-    "hands",
-    "head",
-    "necklace",
-    "ring",
-    "extra_hand"
-  ]
+	"entities": [
+		"player"
+	],
+	"slots": [
+		"back",
+		"belt",
+		"body",
+		"bracelet",
+		"charm",
+		"hands",
+		"head",
+		"necklace",
+		"ring",
+		"extra_hand"
+	]
 }

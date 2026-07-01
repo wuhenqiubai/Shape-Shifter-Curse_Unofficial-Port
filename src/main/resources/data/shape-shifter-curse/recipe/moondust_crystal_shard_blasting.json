@@ -1,9 +1,12 @@
 {
-  "type": "minecraft:blasting",
-  "ingredient": {
-    "item": "shape-shifter-curse:moondust_crystal_grit"
-  },
-  "result": { "id": "shape-shifter-curse:moondust_crystal_shard", "count": 1 },
-  "experience": 5,
-  "cookingtime": 400
+	"type": "minecraft:blasting",
+	"ingredient": {
+		"item": "shape-shifter-curse:moondust_crystal_grit"
+	},
+	"result": {
+		"id": "shape-shifter-curse:moondust_crystal_shard",
+		"count": 1
+	},
+	"experience": 5,
+	"cookingtime": 400
 }
