@@ -4,8 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -19,6 +17,8 @@ import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
+import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.model.GeoModel;
 
 import java.util.*;
 
@@ -401,6 +401,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final HashMap<String, GeoBone> geoBoneCache = new HashMap<>();
+    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
 
     public final @Nullable GeoBone getCachedGeoBone(String name) {
         GeoBone bone = geoBoneCache.get(name);
@@ -531,15 +532,35 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return b;
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3d rot) {
+    public final GeoBone setRotationForBone(String bone_name, Vec3d raw) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
         }
-        b.setRotX((float)rot.x);
-        b.setRotY((float)rot.y);
-        b.setRotZ((float)rot.z);
+        Vec3d prev = prevBoneRotation.get(bone_name);
+        double rx, ry, rz;
+        if (prev != null) {
+            rx = prev.x + wrapRadiansDelta(raw.x - prev.x);
+            ry = prev.y + wrapRadiansDelta(raw.y - prev.y);
+            rz = prev.z + wrapRadiansDelta(raw.z - prev.z);
+        } else {
+            rx = raw.x;
+            ry = raw.y;
+            rz = raw.z;
+        }
+        Vec3d corrected = new Vec3d(rx, ry, rz);
+        b.setRotX((float) corrected.x);
+        b.setRotY((float) corrected.y);
+        b.setRotZ((float) corrected.z);
+        prevBoneRotation.put(bone_name, corrected);
         return b;
+    }
+
+    private static double wrapRadiansDelta(double delta) {
+        delta = delta % (2.0 * Math.PI);
+        if (delta > Math.PI) delta -= 2.0 * Math.PI;
+        if (delta <= -Math.PI) delta += 2.0 * Math.PI;
+        return delta;
     }
 
     public final void setRotationForBone(String bone_name, Vec3f rot) {
@@ -584,6 +605,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final GeoBone resetBone(String bone_name) {
+        prevBoneRotation.remove(bone_name);
         setPositionForBone(bone_name, new Vec3d(0,0,0));
         setRotationForBone(bone_name, new Vec3d(0,0,0));
         setModelPositionForBone(bone_name, Vec3d.ZERO);
