@@ -39,6 +39,7 @@ public class Form_FeralBase extends NormalForm {
     public static final AnimUtils.AnimationHolderData ANIM_SLEEP = new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("form_feral_common_sleep"), 1.0f, 6);
     public static final AnimUtils.AnimationHolderData ANIM_ELYTRA_FLY = new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("form_feral_common_elytra_fly"), 1.0f, 6);
     public static final AnimUtils.AnimationHolderData ANIM_SNEAK_RUSH = new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("form_feral_common_run"), 2.3f, 2);
+    public static final AnimUtils.AnimationHolderData ANIM_CLIMB_IDLE = new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("form_feral_common_climb_idle"));
 
     public static final AbstractAnimStateController IDLE_CONTROLLER = new WithSneakAnimController(ANIM_IDLE, ANIM_SNEAK_IDLE);
     public static final AbstractAnimStateController WALK_CONTROLLER = new WithSneakAnimController(ANIM_WALK, ANIM_SNEAK_WALK);
@@ -57,7 +58,7 @@ public class Form_FeralBase extends NormalForm {
     public static final AbstractAnimStateController ATTACK_CONTROLLER = new OneAnimController(ANIM_ATTACK);
     public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
     public static final AbstractAnimStateController FALL_FLYING_CONTROLLER = new OneAnimController(ANIM_ELYTRA_FLY);
-    public static final AbstractAnimStateController CLIMB_CONTROLLER = new OneAnimController(ANIM_CLIMB);
+    public static final AbstractAnimStateController CLIMB_CONTROLLER = new ClimbAnimController(ANIM_CLIMB_IDLE, ANIM_CLIMB);
     public static final AbstractAnimStateController JUMP_CONTROLLER = new OneAnimController(ANIM_JUMP);
     public static final AbstractAnimStateController FALL_CONTROLLER = new OneAnimController(ANIM_FALL);
     // UseItemAnimControllerPro的参数确实是ANIM_IDLE, ANIM_IDLE, ANIM_SNEAK_IDLE, ANIM_SNEAK_WALK 由于ANIM_SNEAK_IDLE为坐下动画 所以SNEAK动画需要区分 如果有单独的动画可以使用WithSneakAnimController
