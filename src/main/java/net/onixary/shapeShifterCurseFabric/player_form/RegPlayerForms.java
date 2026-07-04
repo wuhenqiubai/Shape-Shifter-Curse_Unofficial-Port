@@ -18,6 +18,8 @@ public class RegPlayerForms {
     public static LinkedHashMap<Identifier, IForm> playerForms = new LinkedHashMap<>();
     public static LinkedHashMap<Identifier, IFormGroup> playerFormGroups = new LinkedHashMap<>();
 
+    public static HashMap<Identifier, List<Identifier>> subFormMap = new HashMap<>();
+
     public static String PatronNameSpace = "ssc-patron";  // 在更新数据包时保留
 
     // Builtin PlayerForms
@@ -74,8 +76,12 @@ public class RegPlayerForms {
     public static IForm FERAL_CAT_SP = registerPlayerForm(new Form_FeralCatSP(ShapeShifterCurseFabric.identifier("feral_cat_sp")).formFlag(NoInstinct, NoCursedMoonEffect, SpecialForm).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f,0.6f)));
     public static IFormGroup FERAL_CAT_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("feral_cat_form")).registerForm(1, 1, FERAL_CAT_SP));
 
+    // EXAMPLE_SUB_FORM
+    public static IForm EXAMPLE_SUB_FORM = registerPlayerForm(new ExampleSubForm(ShapeShifterCurseFabric.identifier("example_sub_form")));
+
     public static <T extends IForm> T registerPlayerForm(T form) {
         playerForms.put(form.getFormID(), form);
+        form.onRegister();
         return form;
     }
 
@@ -84,6 +90,27 @@ public class RegPlayerForms {
             dynamicPlayerForms.add(form.getFormID());
         }
         return registerPlayerForm(form);
+    }
+
+    public static void registerSubForm(IForm masterForm, ISubForm subForm) {
+        List<Identifier> subFormList = subFormMap.computeIfAbsent(masterForm.getFormID(), k -> new ArrayList<>());
+        if (!subFormList.contains(subForm.getFormID())) {
+            subFormList.add(subForm.getFormID());
+        }
+    }
+
+    public static List<IForm> getSubForms(IForm masterForm) {
+        List<IForm> result = new ArrayList<>();
+        List<Identifier> subFormList = subFormMap.get(masterForm.getFormID());
+        if (subFormList != null) {
+            for (Identifier id : subFormList) {
+                IForm form = playerForms.get(id);
+                if (form != null) {
+                    result.add(form);
+                }
+            }
+        }
+        return result;
     }
 
     public static DynamicForm buildDynamicPlayerForm(Identifier id, JsonObject dynamicPlayerForm) {

@@ -56,6 +56,9 @@ public interface IForm {
 	/** @return 临时能力系统的层标识（等 Origins 移除后再完善） */
     @NotNull Pair<Identifier, Identifier> getFormLayer();
 
+    public default @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
+        return null;
+    }
 
     @NotNull PlayerFormBodyType getBodyType();
 
@@ -145,16 +148,10 @@ public interface IForm {
         return new Pair<>(false, null);
     }
 
-	/**
-	 * 变形转换钩子。调用顺序为：
-	 * <ol>
-	 *   <li>当前形态的 {@code onTransform_To}</li>
-	 *   <li>目标形态的 {@code onTransform_From}</li>
-	 *   <li>目标形态的 {@code onTransform_Finish}</li>
-	 * </ol>
-     */
-    default void onTransform_From(PlayerEntity player, IForm prevForm) {
-    }
+    default void onRegister() { }
+
+    // 3个Hook 顺序为当前形态onTransform_To 目标形态onTransform_From 目标形态onTransform_Finish
+    default void onTransform_From(PlayerEntity player, IForm prevForm) { }
 
 	/** 变形完成钩子。 */
     default void onTransform_Finish(PlayerEntity player) {
@@ -164,6 +161,10 @@ public interface IForm {
     default void onTransform_To(PlayerEntity player, IForm nextForm) {
     }
 
+    // 应用Layer后
+    default void afterApplyLayer(PlayerEntity player) { }
+
+    // 所有Power修改结束
     default void onApplyPowerEnd(PlayerEntity player) { }
 
     // Scale 系统
@@ -184,9 +185,23 @@ public interface IForm {
         return form != null && this.getFormID().equals(form.getFormID());
     }
 
+    default boolean isSoftEquals(IForm form) {
+        IForm ThisMasterForm = this instanceof ISubForm subForm ? subForm.getMasterForm() : this;
+        IForm FormMasterForm = form instanceof ISubForm subForm ? subForm.getMasterForm() : form;
+        if (ThisMasterForm == null || FormMasterForm == null) {
+            return false;
+        }
+        return ThisMasterForm.isEquals(FormMasterForm);
+    }
+
     default boolean isPlayerForm(PlayerEntity player) {
         IForm playerForm = FormUtils.getPlayerForm(player);
         return this.isEquals(playerForm);
+    }
+
+    default boolean isPlayerFormSoft(PlayerEntity player) {
+        IForm playerForm = FormUtils.getPlayerForm(player);
+        return this.isSoftEquals(playerForm);
     }
 
     default boolean isDynamicForm() {

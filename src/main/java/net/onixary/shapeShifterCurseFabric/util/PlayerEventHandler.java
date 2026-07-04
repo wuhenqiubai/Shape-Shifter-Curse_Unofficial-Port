@@ -20,11 +20,11 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.NeedCheckUsableForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 import net.onixary.shapeShifterCurseFabric.team.MobTeamManager;
-
 
 public class PlayerEventHandler {
     public static void register() {
@@ -47,9 +47,14 @@ public class PlayerEventHandler {
                 }
                 try {
                     IForm form = FormUtils.getPlayerForm(player);
-                    FormUtils._loadForm(player, form);
+                    if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
+                        FormUtils.applyFallback(player);
+                    } else {
+                        FormUtils._loadForm(player, form);
+                    }
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.error("Error loading player form: ", e);
+                    FormUtils.applyFallback(player);
                 }
             });
 
@@ -118,7 +123,11 @@ public class PlayerEventHandler {
         ServerWorldEvents.LOAD.register((server, world) -> {
             for (ServerPlayerEntity player : world.getPlayers()) {
                 IForm form = FormUtils.getPlayerForm(player);
-                FormUtils._loadForm(player, form);
+                if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
+                    FormUtils.applyFallback(player);
+                } else {
+                    FormUtils._loadForm(player, form);
+                }
 
                 /* 重构后不需要了 仅用于参考旧实现逻辑
                 // load attachment
