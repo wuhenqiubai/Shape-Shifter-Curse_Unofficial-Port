@@ -1,28 +1,23 @@
 
 # 感谢 [onixary](https://github.com/onixary) 与 [xu233333](https://github.com/xu233333) 开发了这个优秀的模组！本项目仅为适配与修复维护，所有核心功能版权归原作者所有。
-# Thank you [onixary](https://github.com/onixary) with [xu233333](https://github.com/xu233333) Developed this excellent mod! This project is only for adaptation and repair maintenance, and all core functions are copyrighted by the original author.
 
-## **幻形者诅咒（Shape Shifter Curse Mod）** 的 **独立维护/非官方移植版本**
+## **幻形者诅咒（Shape Shifter Curse Mod）** 的 **非官方移植版本**
 - 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
 - 原作者：[onixary](https://github.com/onixary)
 - 许可证：MIT License（遵循原项目协议，保留所有版权声明）
 > 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
 > 在发布稳定版本后会偶尔发布我的小巧思。
 
-## Minecraft 1.21.1 移植进度 / Porting Progress
-
-> **分支 / Branch**: `ver/1.21.1_main`
 >
-> **基于主线commit
-**: [2420681](https://github.com/onixary/shape-shifter-curse-fabric/commit/24206817c739ef66aa1afa834e667b0182b9da84)
+> **基于主线commit**: [2420681](https://github.com/onixary/shape-shifter-curse-fabric/commit/24206817c739ef66aa1afa834e667b0182b9da84)
 > 
-## 已知问题 / Known Issues
+## 已知问题
 
 - 目前大部分已知问题在 [#Issue10](https://github.com/wuhenqiubai/Shape-Shifter-Curse_Unofficial-Port/issues/10) 中有说明。
 
 ---
 
-## 非官方维护声明 / Unofficial Maintenance Notice
+## 非官方维护声明
 
 **本分支是社区维护的 1.21.1 移植版本，非官方发布。**
 
