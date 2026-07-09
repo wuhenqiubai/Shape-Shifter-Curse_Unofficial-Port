@@ -16,10 +16,9 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
@@ -29,16 +28,12 @@ import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowe
 @Mixin(PlayerEntity.class)
 public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
 
-    @Unique
-    private ItemStack ssc$currentFoodStack;
-
     protected CustomEdiblePlayerBMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
 
     @Inject(method = "eatFood", at = @At(value = "HEAD"), cancellable = true)
     private void eatFood(World world, ItemStack stack, FoodComponent vanillaComponent, CallbackInfoReturnable<ItemStack> cir) {
-        ssc$currentFoodStack = stack;
         if ((Object)this instanceof PlayerEntity playerEntity) {
             FoodComponent foodComponent = getPowerFoodComponent(playerEntity, stack);
             if (foodComponent == null) {
@@ -54,13 +49,13 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
         }
     }
 
-    @ModifyArg(method = "eatFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/HungerManager;eat(Lnet/minecraft/component/type/FoodComponent;)V"), index = 0)
-    private FoodComponent ssc$modifyFoodComponent(FoodComponent original) {
+    @ModifyVariable(method = "eatFood", at = @At("HEAD"), argsOnly = true)
+    private FoodComponent ssc$modifyFoodComponent(FoodComponent original, World world, ItemStack stack) {
         PlayerEntity player = (PlayerEntity) (Object) this;
 
         List<ModifyFoodPower> powers = PowerHolderComponent.getPowers(player, ModifyFoodPower.class)
                 .stream()
-                .filter(p -> p.doesApply(ssc$currentFoodStack))
+                .filter(p -> p.doesApply(stack))
                 .toList();
 
         if (powers.isEmpty()) return original;
