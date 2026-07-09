@@ -281,39 +281,40 @@ public class AnimSystem {
 	/**
 	 * 获取上半身覆盖动画（使用物品/攻击时）。
 	 * 返回 UPPER-ONLY 动画，与主 FSM 动画同时在 PAL 不同层播放。
+	 * 暂时禁用这项功能，等到bug修复的大差不差的时候在弄动画
 	 */
 	public @Nullable AnimationHolder getUpperBodyOverride() {
-		this.data.HasUpperBodyOverride = false;
-		if (this.getPreProcessAnimation() != null) return null;
-
-		if (this.player.isUsingItem()) {
-			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_USE_ITEM);
-			if (controller == null) {
-				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_USE_ITEM);
-				if (animState != null) controller = animState.defaultController;
-			}
-			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
-				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
-				if (anim != null) {
-					this.data.HasUpperBodyOverride = true;
-					return anim;
-				}
-			}
-		}
-		if (this.player.handSwinging) {
-			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_ATTACK);
-			if (controller == null) {
-				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_ATTACK);
-				if (animState != null) controller = animState.defaultController;
-			}
-			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
-				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
-				if (anim != null) {
-					this.data.HasUpperBodyOverride = true;
-					return anim;
-				}
-			}
-		}
+//		this.data.HasUpperBodyOverride = false;
+//		if (this.getPreProcessAnimation() != null) return null;
+//
+//		if (this.player.isUsingItem()) {
+//			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_USE_ITEM);
+//			if (controller == null) {
+//				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_USE_ITEM);
+//				if (animState != null) controller = animState.defaultController;
+//			}
+//			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
+//				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
+//				if (anim != null) {
+//					this.data.HasUpperBodyOverride = true;
+//					return anim;
+//				}
+//			}
+//		}
+//		if (this.player.handSwinging) {
+//			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_ATTACK);
+//			if (controller == null) {
+//				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_ATTACK);
+//				if (animState != null) controller = animState.defaultController;
+//			}
+//			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
+//				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
+//				if (anim != null) {
+//					this.data.HasUpperBodyOverride = true;
+//					return anim;
+//				}
+//			}
+//		}
 		return null;
 	}
 

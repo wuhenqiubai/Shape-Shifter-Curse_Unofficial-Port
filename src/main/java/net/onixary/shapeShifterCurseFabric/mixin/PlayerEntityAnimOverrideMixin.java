@@ -31,12 +31,9 @@ public abstract class PlayerEntityAnimOverrideMixin extends PlayerEntity {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void shape_shifter_curse$init(ClientWorld level, GameProfile profile, CallbackInfo info) {
-        var player = (AbstractClientPlayerEntity) (Object) this;
-        var animManager = PlayerAnimationAccess.getPlayerAnimManager(player);
-        controller = new PlayerAnimationController(player, (c, state, setter) -> null);
-        animManager.addAnimLayer(1, controller);
-        upperController = new PlayerAnimationController(player, (c, state, setter) -> null);
-        animManager.addAnimLayer(2, upperController);
+        controller = new PlayerAnimationController((AbstractClientPlayerEntity) (Object) this,
+                (c, state, setter) -> null);
+        PlayerAnimationAccess.getPlayerAnimManager((AbstractClientPlayerEntity) (Object) this).addAnimLayer(1, controller);
         currentAnimation = null;
     }
 
