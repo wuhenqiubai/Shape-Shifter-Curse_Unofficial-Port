@@ -117,7 +117,7 @@ public class CapeFeatureRendererMixin {
         if (curForm instanceof ModifyCapeRender mcr) {
             return mcr.getCapeBaseRotateAngle(player);
         }
-        return 100.0f;
+        return 0.0f;
     }
 
     @Unique
