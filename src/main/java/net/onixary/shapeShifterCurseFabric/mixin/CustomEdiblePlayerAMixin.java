@@ -17,36 +17,6 @@ public class CustomEdiblePlayerAMixin {
     @Shadow
     protected ItemStack activeItemStack;
 
-    /* isFood() removed in 1.21, replaced by DataComponentTypes.FOOD component
-    @ModifyExpressionValue(method = "eatFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isFood()Z"))
-    private boolean eatFood$isFood(boolean original, World world, ItemStack stack) {
-        if ((Object)this instanceof PlayerEntity playerEntity) {
-            return getPowerFoodComponent(playerEntity, stack) != null || original;
-        }
-        return original;
-    }
-
-    @ModifyExpressionValue(method = "applyFoodEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;isFood()Z"))
-    private boolean applyFoodEffects$isFood(boolean original, ItemStack stack, World world, LivingEntity targetEntity) {
-        if ((Object)this instanceof PlayerEntity playerEntity) {
-            return getPowerFoodComponent(playerEntity, stack) != null || original;
-        }
-        return original;
-    }
-
-    @ModifyExpressionValue(method = "applyFoodEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"))
-    private FoodComponent applyFoodEffects$getFoodComponent(FoodComponent original, ItemStack stack, World world, LivingEntity targetEntity) {
-        if (targetEntity instanceof PlayerEntity playerEntity) {
-            FoodComponent fc = getPowerFoodComponent(playerEntity, stack);
-            if (fc == null) {
-                return original;
-            }
-            return fc;
-        }
-        return original;
-    }
-    */
-
     @ModifyExpressionValue(method = "shouldSpawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getMaxUseTime(Lnet/minecraft/entity/LivingEntity;)I"))
     private int shouldSpawnConsumptionEffects$getMaxUseTime(int original) {
         if ((Object)this instanceof PlayerEntity playerEntity) {
@@ -54,8 +24,7 @@ public class CustomEdiblePlayerAMixin {
             if (fc == null) {
                 return original;
             }
-            // isSnack() removed in 1.21 — useStandardEatingSpeed default is 32 ticks
-            return 32;
+            return fc.eatSeconds() < 1.0f ? 16 : 32;
         }
         return original;
     }
@@ -67,8 +36,7 @@ public class CustomEdiblePlayerAMixin {
             if (fc == null) {
                 return original;
             }
-            // isSnack() removed in 1.21 — useStandardEatingSpeed default is 32 ticks
-            return 32;
+            return fc.eatSeconds() < 1.0f ? 16 : 32;
         }
         return original;
     }
@@ -80,26 +48,10 @@ public class CustomEdiblePlayerAMixin {
             if (fc == null) {
                 return original;
             }
-            // isSnack() removed in 1.21 — useStandardEatingSpeed default is 32 ticks
-            return 32;
+            return fc.eatSeconds() < 1.0f ? 16 : 32;
         }
         return original;
     }
-
-    // 1.21: Item.getFoodComponent() removed — TODO: rewrite
-    /*
-    @ModifyExpressionValue(method = "shouldSpawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"))
-    private FoodComponent shouldSpawnConsumptionEffects$getFoodComponent(FoodComponent original) {
-        if ((Object)this instanceof PlayerEntity playerEntity) {
-            FoodComponent fc = getPowerFoodComponent(playerEntity, activeItemStack);
-            if (fc == null) {
-                return original;
-            }
-            return fc;
-        }
-        return original;
-    }
-    */
 
     @ModifyExpressionValue(method = "spawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getUseAction()Lnet/minecraft/util/UseAction;"))
     private UseAction spawnConsumptionEffects$getUseAction(UseAction original, ItemStack stack, int particleCount) {
