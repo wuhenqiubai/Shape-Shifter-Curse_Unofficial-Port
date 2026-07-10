@@ -22,17 +22,17 @@ import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenu;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenuV2;
 import net.onixary.shapeShifterCurseFabric.custom_ui.NormalFormSelectScreen;
+import net.onixary.shapeShifterCurseFabric.custom_ui.PatronFormSelectScreen;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimController;
-import net.onixary.shapeShifterCurseFabric.custom_ui.PatronFormSelectScreen;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
-import org.jetbrains.annotations.Nullable;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -173,7 +173,13 @@ public class ModPacketsS2C {
                 return;
             }
             Identifier virtualTotemType = buf.readIdentifier();
-            ItemStack totemStack = ItemStack.PACKET_CODEC.decode((RegistryByteBuf) buf);
+            ItemStack totemStack;
+            if (buf.readBoolean()) {
+                RegistryByteBuf regBuf = new RegistryByteBuf(buf, ctx.client().world.getRegistryManager());
+                totemStack = ItemStack.PACKET_CODEC.decode(regBuf);
+            } else {
+                totemStack = ItemStack.EMPTY;
+            }
             ctx.client().execute(() -> VirtualTotemPower.process_virtual_totem_type(playerEntity, virtualTotemType, totemStack));
         });
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_CLIENT), (payload, ctx) -> {

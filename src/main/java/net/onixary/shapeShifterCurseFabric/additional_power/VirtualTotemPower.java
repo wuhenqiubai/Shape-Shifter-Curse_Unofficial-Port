@@ -7,7 +7,6 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -107,11 +106,14 @@ public class VirtualTotemPower extends CooldownPower {
 
     public @Nullable PacketByteBuf create_packet_byte_buf() {
         if (this.entity instanceof ServerPlayerEntity serverPlayerEntity) {
-            PacketByteBuf packetByteBuf = PacketByteBufs.create();
-            packetByteBuf.writeUuid(serverPlayerEntity.getUuid());
-            packetByteBuf.writeIdentifier(this.virtualTotemType);
-            ItemStack.PACKET_CODEC.encode((RegistryByteBuf) packetByteBuf, this.totemStack);
-            return packetByteBuf;
+            RegistryByteBuf buf = new RegistryByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.getServer().getRegistryManager());
+            buf.writeUuid(serverPlayerEntity.getUuid());
+            buf.writeIdentifier(this.virtualTotemType);
+            buf.writeBoolean(this.totemStack != null && !this.totemStack.isEmpty());
+            if (this.totemStack != null && !this.totemStack.isEmpty()) {
+                ItemStack.PACKET_CODEC.encode(buf, this.totemStack);
+            }
+            return buf;
         }
         return null;
     }
