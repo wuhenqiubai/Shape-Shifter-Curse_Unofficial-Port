@@ -9,6 +9,11 @@
 		"type": "apoli:and",
 		"conditions": [
 			{
+				"type": "apoli:air",
+				"comparison": ">",
+				"compare_to": 0
+			},
+			{
 				"type": "apoli:food_level",
 				"comparison": ">=",
 				"compare_to": 6
