@@ -1,7 +1,7 @@
 {
 	"type": "apoli:conditioned_attribute",
 	"modifier": {
-		"id": "shape-shifter-curse:oxygen_health",
+		"id": "shape-shifter-curse:oxygen_health_2",
 		"attribute": "minecraft:generic.max_health",
 		"value": 2.0,
 		"operation": "add_value"
