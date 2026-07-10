@@ -7,15 +7,16 @@ import net.minecraft.advancement.criterion.Criteria;
 import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.HungerConstants;
 import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.stat.Stats;
 import net.minecraft.world.World;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -55,29 +56,24 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
     private FoodComponent ssc$modifyFoodComponent(FoodComponent original, World world, ItemStack stack) {
         PlayerEntity player = (PlayerEntity) (Object) this;
 
-        List<ModifyFoodPower> allPowers = PowerHolderComponent.getPowers(player, ModifyFoodPower.class);
-        ShapeShifterCurseFabric.LOGGER.info("[SSC] HEAD: powers={}, food={}, orig Nutr={}, Sat={}",
-                allPowers.size(), stack.getItem(), original.nutrition(), original.saturation());
-
-        List<ModifyFoodPower> powers = allPowers.stream()
-                .filter(p -> {
-                    boolean apply = p.doesApply(stack);
-                    ShapeShifterCurseFabric.LOGGER.info("[SSC] HEAD: doesApply {} = {}", p.getType().getIdentifier(), apply);
-                    return apply;
-                })
+        List<ModifyFoodPower> powers = PowerHolderComponent.getPowers(player, ModifyFoodPower.class)
+                .stream()
+                .filter(p -> p.doesApply(stack))
                 .toList();
 
-        if (powers.isEmpty()) {
-            ShapeShifterCurseFabric.LOGGER.info("[SSC] HEAD: no powers, returning original");
-            return original;
-        }
+        if (powers.isEmpty()) return original;
 
         int newNutrition = (int) ModifierUtil.applyModifiers(player,
                 powers.stream().flatMap(p -> p.getFoodModifiers().stream()).toList(), original.nutrition());
-        float newSaturation = (float) ModifierUtil.applyModifiers(player,
-                powers.stream().flatMap(p -> p.getSaturationModifiers().stream()).toList(), original.saturation());
 
-        ShapeShifterCurseFabric.LOGGER.info("[SSC] HEAD: NEW FoodComponent n={} s={}", newNutrition, newSaturation);
+        float origSatMod = original.saturation() / (original.nutrition() * 2.0f);
+        float newSatMod = (float) ModifierUtil.applyModifiers(player,
+                powers.stream().flatMap(p -> p.getSaturationModifiers().stream()).toList(), origSatMod);
+        float newSaturation = HungerConstants.calculateSaturation(newNutrition, newSatMod);
+
+        if (newNutrition == original.nutrition() && newSaturation == original.saturation()) {
+            return original;
+        }
 
         return new FoodComponent(
                 newNutrition,
@@ -91,15 +87,13 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
 
     @Redirect(method = "eatFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/HungerManager;eat(Lnet/minecraft/component/type/FoodComponent;)V"))
     private void ssc$redirectEat(HungerManager manager, FoodComponent foodComponent) {
-        ShapeShifterCurseFabric.LOGGER.info("[SSC] INVOKE: received n={}, s={}", foodComponent.nutrition(), foodComponent.saturation());
         manager.eat(foodComponent);
-        int fl = manager.getFoodLevel();
-        float sl = manager.getSaturationLevel();
-        ShapeShifterCurseFabric.LOGGER.info("[SSC] INVOKE: after eat, foodLevel={}, satLevel={}", fl, sl);
         if ((Object)this instanceof ServerPlayerEntity serverPlayer) {
             serverPlayer.networkHandler.sendPacket(
-                    new net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket(
-                            serverPlayer.getHealth(), fl, sl));
+                    new HealthUpdateS2CPacket(
+                            serverPlayer.getHealth(),
+                            manager.getFoodLevel(),
+                            manager.getSaturationLevel()));
         }
     }
 }
