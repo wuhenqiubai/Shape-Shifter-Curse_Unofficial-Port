@@ -5,13 +5,8 @@
   "compatibilityLevel": "JAVA_21",
   "refmap": "ssc-misc.refmap.json",
   "plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
-  "mixins": [
-    "forge.CurioImpl",
-    "forge.CurioItemImpl",
-    "forge.CurioUtilsImpl"
-  ],
-  "client": [
-  ],
+  "mixins": [],
+  "client": [],
   "injectors": {
     "defaultRequire": 1
   }
