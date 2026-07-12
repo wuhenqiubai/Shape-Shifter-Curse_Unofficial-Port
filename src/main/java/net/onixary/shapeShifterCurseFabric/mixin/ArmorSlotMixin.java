@@ -27,14 +27,19 @@ public abstract class ArmorSlotMixin {
 
     @Inject(method = "canInsert", at = @At("RETURN"), cancellable = true)
     private void preventRestrictedArmorInsert(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (!cir.getReturnValueZ()) return;
-        if (isMorphScaleItem(stack)) return;
+        if (isMorphScaleItem(stack)) {
+            cir.setReturnValue(true);
+            return;
+        }
         for (RestrictArmorPower rap : PowerHolderComponent.KEY.get(this.entity).getPowers(RestrictArmorPower.class)) {
             if (!rap.canEquip(stack, this.equipmentSlot)) {
                 cir.setReturnValue(false);
                 return;
             }
         }
+        // Apoli 的 ArmorSlotMixin 谓词写反（p.canEquip 而非 !p.canEquip），
+        // 导致未被限制的槽位也返回 false。此处主动返回 true 覆盖。
+        cir.setReturnValue(true);
     }
 
     @Unique
