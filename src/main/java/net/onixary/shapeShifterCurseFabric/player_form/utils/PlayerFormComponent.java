@@ -1,14 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
-import net.minecraft.registry.RegistryWrapper;
-import org.ladysnake.cca.api.v3.component.ComponentKey;
-import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -16,8 +13,14 @@ import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.InitialFormUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.ladysnake.cca.api.v3.component.ComponentKey;
+import org.ladysnake.cca.api.v3.component.ComponentRegistry;
+import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 public class PlayerFormComponent implements AutoSyncedComponent {
@@ -100,6 +103,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         }
         if (tag.contains("formHistory")) {
             NbtList history = tag.getList("formHistory", NbtElement.STRING_TYPE);
+            formHistory.clear();
             for (NbtElement element : history) {
                 IForm form = FormUtils.parseForm(Identifier.tryParse(element.asString()), null);
                 if (form != null) {

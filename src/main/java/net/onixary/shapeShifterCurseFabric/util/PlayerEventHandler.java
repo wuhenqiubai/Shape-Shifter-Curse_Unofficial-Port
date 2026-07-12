@@ -26,6 +26,8 @@ import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManag
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 import net.onixary.shapeShifterCurseFabric.team.MobTeamManager;
 
+import java.util.Objects;
+
 public class PlayerEventHandler {
     public static void register() {
         // join event
@@ -213,10 +215,17 @@ public class PlayerEventHandler {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
         NbtCompound nbt = new NbtCompound();
-        var lookup = oldPlayer.getServer().getRegistryManager();
+        var lookup = Objects.requireNonNull(oldPlayer.getServer()).getRegistryManager();
         oldComponent.writeToNbt(nbt, lookup);
         newComponent.readFromNbt(nbt, lookup);
-        FormUtils._loadForm(newPlayer, newComponent.nowForm);
+        // CCA 的 ALWAYS_COPY 已自动复制了组件和 origin。
+        // 不要调用 _loadForm（会触发 applyLayer → setOrigin → onRemoved → 清空重生点）。
+        // 只需应用 scale 并通知客户端即可。
+        IForm form = newComponent.nowForm;
+        form.applyScale(newPlayer);
+        if (!newPlayer.getWorld().isClient()) {
+            ModPacketsS2CServer.sendFormChange(newPlayer, form.getFormID());
+        }
     }
 
     private static void handleEntityTeam(ServerWorld world){
