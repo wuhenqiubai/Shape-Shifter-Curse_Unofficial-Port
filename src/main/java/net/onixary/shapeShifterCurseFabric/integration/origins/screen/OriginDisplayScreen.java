@@ -6,6 +6,7 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.HoveredTooltipPositioner;
+import net.minecraft.client.gui.tooltip.OrderedTextTooltipComponent;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
@@ -18,11 +19,12 @@ import net.minecraft.util.Language;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.Badge;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
-import net.onixary.shapeShifterCurseFabric.integration.origins.mixin.DrawContextAccessor;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -45,6 +47,17 @@ public class OriginDisplayScreen extends Screen {
     protected final boolean showDirtBackground;
 
     private final LinkedList<RenderedBadge> renderedBadges = new LinkedList<>();
+
+    private static final Field ORDERED_TEXT_FIELD;
+
+    static {
+        try {
+            ORDERED_TEXT_FIELD = OrderedTextTooltipComponent.class.getDeclaredField("text");
+            ORDERED_TEXT_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Failed to access OrderedTextTooltipComponent.text field", e);
+        }
+    }
 
     public OriginDisplayScreen(Text title, boolean showDirtBackground) {
         super(title);
@@ -159,14 +172,23 @@ public class OriginDisplayScreen extends Screen {
     }
 
     private void renderBadgeTooltip(DrawContext context, int mouseX, int mouseY) {
-        for(RenderedBadge rb : renderedBadges) {
-            if(mouseX >= rb.x &&
+        for (RenderedBadge rb : renderedBadges) {
+            if (mouseX >= rb.x &&
                mouseX < rb.x + 9 &&
                mouseY >= rb.y &&
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                ((DrawContextAccessor)context).invokeDrawTooltip(textRenderer, rb.getTooltipComponents(textRenderer, widthLimit), mouseX, mouseY, HoveredTooltipPositioner.INSTANCE);
+                List<TooltipComponent> components = rb.getTooltipComponents(textRenderer, widthLimit);
+                List<OrderedText> texts = new ArrayList<>();
+                for (TooltipComponent component : components) {
+                    if (component instanceof OrderedTextTooltipComponent otc) {
+                        try {
+                            texts.add((OrderedText) ORDERED_TEXT_FIELD.get(otc));
+                        } catch (IllegalAccessException ignored) {}
+                    }
+                }
+                context.drawTooltip(textRenderer, texts, HoveredTooltipPositioner.INSTANCE, mouseX, mouseY);
             }
         }
     }
