@@ -103,46 +103,53 @@ public class DefaultAccessory {
             }
         });
 
-        AccessoryUtils.registerAccessoryMod("curios", new AccessoryUtils.AccessoryIO() {
-            @Override
-            public int priority() {
-                return 2000;
-            }
-
-            @Override
-            public boolean canLoaded() {
-                return FabricLoader.getInstance().isModLoaded("curios");
-            }
-
-            @Override
-            public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
-                Map<Pair<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
-                Map<String, List<ItemStack>> curiosData = CurioUtils.getEntitySlots(entity);
-                for (String slotName : curiosData.keySet()) {
-                    map.put(new Pair<>(null, slotName), curiosData.get(slotName));
+        // Curios 仅在 Forge 下存在，Fabric/NeoForge 下不加载
+        // 用 try-catch 包裹避免 ClassNotFoundException/NoClassDefFoundError
+        try {
+            Class.forName("net.onixary.shapeShifterCurseFabric.util.Accessory.CurioUtils");
+            AccessoryUtils.registerAccessoryMod("curios", new AccessoryUtils.AccessoryIO() {
+                @Override
+                public int priority() {
+                    return 2000;
                 }
-                return map;
-            }
 
-            @Override
-            public List<ItemStack> getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName) {
-                return CurioUtils.getEntitySlot(entity, SlotName);
-            }
-
-            @Override
-            public @Nullable ItemStack getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index) {
-                List<ItemStack> ItemList = CurioUtils.getEntitySlot(entity, SlotName);
-                if (Index >= 0 && Index < ItemList.size()) {
-                    return ItemList.get(Index);
+                @Override
+                public boolean canLoaded() {
+                    return FabricLoader.getInstance().isModLoaded("curios");
                 }
-                return null;
-            }
 
-            @Override
-            public void setEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index, ItemStack stack) {
-                CurioUtils.setEntitySlot(entity, SlotName, Index, stack);
-            }
-        });
+                @Override
+                public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
+                    Map<Pair<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
+                    Map<String, List<ItemStack>> curiosData = CurioUtils.getEntitySlots(entity);
+                    for (String slotName : curiosData.keySet()) {
+                        map.put(new Pair<>(null, slotName), curiosData.get(slotName));
+                    }
+                    return map;
+                }
+
+                @Override
+                public List<ItemStack> getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName) {
+                    return CurioUtils.getEntitySlot(entity, SlotName);
+                }
+
+                @Override
+                public @Nullable ItemStack getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index) {
+                    List<ItemStack> ItemList = CurioUtils.getEntitySlot(entity, SlotName);
+                    if (Index >= 0 && Index < ItemList.size()) {
+                        return ItemList.get(Index);
+                    }
+                    return null;
+                }
+
+                @Override
+                public void setEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index, ItemStack stack) {
+                    CurioUtils.setEntitySlot(entity, SlotName, Index, stack);
+                }
+            });
+        } catch (ClassNotFoundException | NoClassDefFoundError ignored) {
+            // Curios not available, skip registration
+        }
 
         AccessoryUtils.reCalcAccessoryMod();
     }
