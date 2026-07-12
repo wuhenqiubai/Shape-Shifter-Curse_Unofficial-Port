@@ -1,13 +1,13 @@
 {
-  "type": "apoli:modify_food",
-  "food_modifier": {
-    "name": "Decreased food points",
-    "operation": "multiply_base",
-    "value": -0.5
-  },
-  "saturation_modifier": {
-    "name": "Decreased saturation points",
-    "operation": "multiply_base",
-    "value": -0.5
-  }
+	"type": "apoli:modify_food",
+	"food_modifier": {
+		"name": "Decreased food points",
+		"operation": "multiply_base",
+		"value": -0.5
+	},
+	"saturation_modifier": {
+		"name": "Decreased saturation points",
+		"operation": "multiply_base",
+		"value": -0.5
+	}
 }

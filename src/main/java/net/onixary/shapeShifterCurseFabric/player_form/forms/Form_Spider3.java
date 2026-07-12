@@ -3,13 +3,16 @@ package net.onixary.shapeShifterCurseFabric.player_form.forms;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.*;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.*;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class Form_Spider3 extends PlayerFormBase {
+public class Form_Spider3 extends NormalForm {
     
     public Form_Spider3(Identifier formID) {
         super(formID);
@@ -34,10 +37,15 @@ public class Form_Spider3 extends PlayerFormBase {
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_fall"), 1.0f, 6);
     public static final AnimUtils.AnimationHolderData ANIM_CLIMB =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_climb"), 1.0f, 6);
+    public static final AnimUtils.AnimationHolderData ANIM_CLIMB_IDLE =
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_climb_idle"));
     public static final AnimUtils.AnimationHolderData ANIM_FLY =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_creative_flight"), 1.0f, 6);
     public static final AnimUtils.AnimationHolderData ANIM_RIDE =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_ride"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_ride"));
+    public static final AnimUtils.AnimationHolderData ANIM_SLEEP =
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_sleep"));
+
 
     public static final AbstractAnimStateController IDLE_CONTROLLER = 
         new WithSneakAnimController(ANIM_IDLE, ANIM_SNEAK_IDLE);
@@ -52,11 +60,13 @@ public class Form_Spider3 extends PlayerFormBase {
     public static final AbstractAnimStateController SWIM_CONTROLLER =
             new SwimAnimController(ANIM_SWIM_IDLE, null);
     public static final AbstractAnimStateController CLIMB_CONTROLLER =
-            new OneAnimController(ANIM_CLIMB);
+            new ClimbAnimController(ANIM_CLIMB_IDLE, ANIM_CLIMB);
     public static final AbstractAnimStateController FLIGHT_CONTROLLER =
             new OneAnimController(ANIM_FLY);
     public static final AbstractAnimStateController RIDE_CONTROLLER =
             new RideAnimController(ANIM_RIDE, ANIM_RIDE);
+    public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
+
 
 
 
@@ -68,18 +78,30 @@ public class Form_Spider3 extends PlayerFormBase {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {
-	        return switch (state) {
-		        case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
-		        case ANIM_STATE_WALK -> WALK_CONTROLLER;
-		        case ANIM_STATE_SPRINT -> RUN_CONTROLLER;
-		        case ANIM_STATE_JUMP -> JUMP_CONTROLLER;
-		        case ANIM_STATE_FALL -> FALL_CONTROLLER;
-		        case ANIM_STATE_SWIM -> SWIM_CONTROLLER;
-		        case ANIM_STATE_CLIMB -> CLIMB_CONTROLLER;
-		        case ANIM_STATE_FLYING -> FLIGHT_CONTROLLER;
-		        case ANIM_STATE_RIDE -> RIDE_CONTROLLER;
-		        default -> null;
-	        };
+            switch (state) {
+                case ANIM_STATE_IDLE:
+                    return IDLE_CONTROLLER;
+                case ANIM_STATE_WALK:
+                    return WALK_CONTROLLER;
+                case ANIM_STATE_SPRINT:
+                    return RUN_CONTROLLER;
+                case ANIM_STATE_JUMP:
+                    return JUMP_CONTROLLER;
+                case ANIM_STATE_FALL:
+                    return FALL_CONTROLLER;
+                case ANIM_STATE_SWIM:
+                    return SWIM_CONTROLLER;
+                case ANIM_STATE_CLIMB:
+                    return CLIMB_CONTROLLER;
+                case ANIM_STATE_FLYING:
+                    return FLIGHT_CONTROLLER;
+                case ANIM_STATE_RIDE:
+                    return RIDE_CONTROLLER;
+                case ANIM_STATE_SLEEP:
+                    return SLEEP_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

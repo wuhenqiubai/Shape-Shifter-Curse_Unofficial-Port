@@ -26,13 +26,22 @@ public final class CriterionAdditions {
         public Codec<Cnd> getConditionsCodec() { return Cnd.CODEC; }
         public void trigger(ServerPlayerEntity player) { trigger(player, Cnd::matchesAny); }
         public void trigger(ServerPlayerEntity player, Identifier formID) { trigger(player, c -> c.matches(formID)); }
-        public record Cnd(Optional<LootContextPredicate> player, List<String> form) implements Conditions {
+        public record Cnd(Optional<LootContextPredicate> player, List<String> form, Optional<List<Integer>> formTier, Optional<List<String>> flags, Optional<List<String>> notFlags) implements AbstractCriterion.Conditions {
             public static final Codec<Cnd> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 LootContextPredicate.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
-                Codec.STRING.listOf().fieldOf("form").forGetter(Cnd::form)
+                Codec.STRING.listOf().optionalFieldOf("form", List.of()).forGetter(Cnd::form),
+                Codec.INT.listOf().optionalFieldOf("form_tier").forGetter(Cnd::formTier),
+                Codec.STRING.listOf().optionalFieldOf("flags").forGetter(Cnd::flags),
+                Codec.STRING.listOf().optionalFieldOf("not_flags").forGetter(Cnd::notFlags)
             ).apply(instance, Cnd::new));
             public boolean matchesAny() { return true; }
-            public boolean matches(Identifier id) { return form.stream().anyMatch(f -> id.toString().equals(f)); }
+            public boolean matches(Identifier id) {
+                if (form.isEmpty() && formTier.isEmpty() && flags.isEmpty() && notFlags.isEmpty())
+                    return true;
+                if (!form.isEmpty() && form.stream().anyMatch(f -> id.toString().equals(f)))
+                    return true;
+                return false;
+            }
         }
     }
 

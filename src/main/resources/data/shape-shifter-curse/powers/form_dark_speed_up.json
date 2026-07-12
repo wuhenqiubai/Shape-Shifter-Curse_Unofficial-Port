@@ -1,15 +1,15 @@
 {
-  "type": "apoli:conditioned_attribute",
-  "modifier": {
-    "attribute": "minecraft:generic.movement_speed",
-    "operation": "add_multiplied_total",
-    "value": 0.35,
-    "id": "shape-shifter-curse:increased_speed_when_dark"
-  },
-  "tick_rate": 20,
-  "condition": {
-    "type": "apoli:brightness",
-    "comparison": "<=",
-    "compare_to": 0.25
-  }
+	"type": "apoli:conditioned_attribute",
+	"modifier": {
+		"attribute": "minecraft:generic.movement_speed",
+		"operation": "add_multiplied_total",
+		"value": 0.35,
+		"id": "shape-shifter-curse:increased_speed_when_dark"
+	},
+	"tick_rate": 20,
+	"condition": {
+		"type": "apoli:brightness",
+		"comparison": "<=",
+		"compare_to": 0.25
+	}
 }

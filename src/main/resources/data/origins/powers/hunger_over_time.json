@@ -1,9 +1,0 @@
-{
-  "type": "apoli:exhaust",
-  "interval": 20,
-  "exhaustion": 0.812,
-  "condition": {
-    "type": "apoli:power_active",
-    "power": "*:phantomize"
-  }
-}

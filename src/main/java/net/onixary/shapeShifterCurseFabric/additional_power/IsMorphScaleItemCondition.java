@@ -12,7 +12,7 @@ import net.onixary.shapeShifterCurseFabric.util.ModTags;
 
 public class IsMorphScaleItemCondition {
     public static final String IsMorphScaleArmorTagName = "MorphScaleItem";
-    public static final String IsMorphScaleFoodTagName = "MorphScaleFood";  // TODO 得改一下名称 我想不出名字了
+    public static final String IsMorphScaleFoodTagName = "MorphScaleFood";
 
 	public static boolean MSI_condition(SerializableData.Instance data, Pair<World, ItemStack> pair) {
 		ItemStack itemStack = pair.getRight();
@@ -28,22 +28,22 @@ public class IsMorphScaleItemCondition {
 
 	public static boolean MSF_condition(SerializableData.Instance data, Pair<World, ItemStack> pair) {
 		ItemStack itemStack = pair.getRight();
-        if (!ShapeShifterCurseFabric.commonConfig.enableFoodHabitSystem) {
-            return true;
-        }
-        if (itemStack.isIn(ModTags.MorphScaleItem_Tag)) {
-            return true;
-        }
+		if (!ShapeShifterCurseFabric.commonConfig.enableFoodHabitSystem) {
+			return true;
+		}
+		if (itemStack.isIn(ModTags.MorphScaleItem_Tag)) {
+			return true;
+		}
 		var customData = itemStack.get(DataComponentTypes.CUSTOM_DATA);
 		if (customData != null) {
 			NbtCompound itemNBT = customData.copyNbt();
-            if (itemNBT.getBoolean(IsMorphScaleFoodTagName)) {
-                return true;
-            }
+			if (itemNBT.getBoolean(IsMorphScaleFoodTagName)) {
+				return true;
+			}
 			return itemNBT.getBoolean(IsMorphScaleArmorTagName);
-        }
-        return false;
-    }
+		}
+		return false;
+	}
 
 	public static ConditionFactory<Pair<World, ItemStack>> getFactory1() {
 		return new ConditionFactory<>(

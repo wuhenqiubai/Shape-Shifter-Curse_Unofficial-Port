@@ -115,9 +115,15 @@ public class ModPacketsS2C {
         try {
             Identifier[] ids = new Identifier[packetByteBuf.readInt()];
             SerializableData.Instance[] origins = new SerializableData.Instance[ids.length];
-            for(int i = 0; i < origins.length; i++) {
-                ids[i] = Identifier.tryParse(packetByteBuf.readString());
-                origins[i] = Origin.DATA.read((RegistryByteBuf) packetByteBuf);
+	        RegistryByteBuf originRegBuf = null;
+	        if (minecraftClient.world != null) {
+		        originRegBuf = new RegistryByteBuf(packetByteBuf, minecraftClient.world.getRegistryManager());
+	        }
+	        for(int i = 0; i < origins.length; i++) {
+		        if (originRegBuf != null) {
+			        ids[i] = Identifier.tryParse(originRegBuf.readString());
+		        }
+		        origins[i] = Origin.DATA.read(originRegBuf);
             }
             minecraftClient.execute(() -> {
                 OriginsClient.isServerRunningOrigins = true;
@@ -135,9 +141,15 @@ public class ModPacketsS2C {
     private static void receiveLayerList(MinecraftClient minecraftClient, ClientPlayNetworkHandler clientPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
         try {
             int layerCount = packetByteBuf.readInt();
-            OriginLayer[] layers = new OriginLayer[layerCount];
+	        RegistryByteBuf layerRegBuf = null;
+	        if (minecraftClient.world != null) {
+		        layerRegBuf = new RegistryByteBuf(packetByteBuf, minecraftClient.world.getRegistryManager());
+	        }
+	        OriginLayer[] layers = new OriginLayer[layerCount];
             for(int i = 0; i < layerCount; i++) {
-                layers[i] = OriginLayer.read((RegistryByteBuf) packetByteBuf);
+	            if (layerRegBuf != null) {
+		            layers[i] = OriginLayer.read(layerRegBuf);
+	            }
             }
             minecraftClient.execute(() -> {
                 OriginLayers.clear();
@@ -160,8 +172,9 @@ public class ModPacketsS2C {
                 Identifier powerId = packetByteBuf.readIdentifier();
                 List<Badge> badgeList = new LinkedList<>();
                 int badgeCount = packetByteBuf.readInt();
+                RegistryByteBuf badgeRegBuf = new RegistryByteBuf(packetByteBuf, minecraftClient.world.getRegistryManager());
                 for(int j = 0; j < badgeCount; j++) {
-                    Badge badge = BadgeManager.REGISTRY.receiveDataObject((RegistryByteBuf) packetByteBuf);
+                    Badge badge = BadgeManager.REGISTRY.receiveDataObject(badgeRegBuf);
                     badgeList.add(badge);
                 }
                 badges.put(powerId, badgeList);

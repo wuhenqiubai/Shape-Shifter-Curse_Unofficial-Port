@@ -22,8 +22,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class PlayerEntityAnimOverrideMixin extends PlayerEntity {
     @Unique
     PlayerAnimationController controller;
-    @Unique
-    PlayerAnimationController upperController;
 
     public PlayerEntityAnimOverrideMixin(ClientWorld world, GameProfile gameProfile) {
         super(world, world.getSpawnPos(), world.getSpawnAngle(), gameProfile);
@@ -31,19 +29,14 @@ public abstract class PlayerEntityAnimOverrideMixin extends PlayerEntity {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void shape_shifter_curse$init(ClientWorld level, GameProfile profile, CallbackInfo info) {
-        var player = (AbstractClientPlayerEntity) (Object) this;
-        var animManager = PlayerAnimationAccess.getPlayerAnimManager(player);
-        controller = new PlayerAnimationController(player, (c, state, setter) -> null);
-        animManager.addAnimLayer(1, controller);
-        upperController = new PlayerAnimationController(player, (c, state, setter) -> null);
-        animManager.addAnimLayer(2, upperController);
+        controller = new PlayerAnimationController((AbstractClientPlayerEntity) (Object) this,
+                (c, state, setter) -> null);
+        PlayerAnimationAccess.getPlayerAnimManager((AbstractClientPlayerEntity) (Object) this).addAnimLayer(1, controller);
         currentAnimation = null;
     }
 
     @Unique
     Animation currentAnimation = null;
-    @Unique
-    Animation currentUpperAnimation = null;
 
     @Unique
     AnimationHolder animToPlay = null;
@@ -70,21 +63,21 @@ public abstract class PlayerEntityAnimOverrideMixin extends PlayerEntity {
             controller.stop();
         }
         // 上半身覆盖层
-        AnimationHolder upperAnim = this.animSystem.getUpperBodyOverride();
-        if (upperAnim != null) {
-            Animation palAnim = upperAnim.getAnimation();
-            if (currentUpperAnimation != palAnim) {
-                currentUpperAnimation = palAnim;
-                if (palAnim != null) {
-                    upperController.triggerAnimation(palAnim, 0);
-                } else {
-                    upperController.stop();
-                }
-            }
-        } else {
-            currentUpperAnimation = null;
-            upperController.stop();
-        }
+//        AnimationHolder upperAnim = this.animSystem.getUpperBodyOverride();
+//        if (upperAnim != null) {
+//            Animation palAnim = upperAnim.getAnimation();
+//            if (currentUpperAnimation != palAnim) {
+//                currentUpperAnimation = palAnim;
+//                if (palAnim != null) {
+//                    upperController.triggerAnimation(palAnim, 0);
+//                } else {
+//                    upperController.stop();
+//                }
+//            }
+//        } else {
+//            currentUpperAnimation = null;
+//            upperController.stop();
+//        }
     }
 
     @Unique

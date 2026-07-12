@@ -1,6 +1,5 @@
 {
     "powers": [
-        "shape-shifter-curse:form_ocelot_1_scale",
         "shape-shifter-curse:scare_creepers",
         "shape-shifter-curse:sneaking_speed_up",
         "shape-shifter-curse:fall_immunity",
@@ -21,7 +20,8 @@
         "shape-shifter-curse:form_ocelot_instinct_eat_raw_meat",
         "shape-shifter-curse:form_ocelot_instinct_biome",
         "shape-shifter-curse:form_ocelot_hiss_phantom",
-        "shape-shifter-curse:form_ocelot_sound_key"
+        "shape-shifter-curse:form_ocelot_sound_key",
+        "shape-shifter-curse:cat_friendly"
     ],
     "icon": {
         "item": "minecraft:player_head"

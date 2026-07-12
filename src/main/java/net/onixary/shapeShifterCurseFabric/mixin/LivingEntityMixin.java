@@ -112,7 +112,7 @@ public abstract class LivingEntityMixin {
             handleExtraLoot(mobEntity, player);
         }
 
-        if(!(CursedMoon.isCursedMoon(world) && CursedMoon.isNight(world))){
+        if(!CursedMoon.isInCursedMoon(entity.getWorld())){
             return;
         }
 

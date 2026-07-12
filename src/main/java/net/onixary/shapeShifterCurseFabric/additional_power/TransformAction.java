@@ -8,9 +8,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.transform.TransformManager;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotionEffect;
 
@@ -29,12 +29,12 @@ public class TransformAction {
                 ShapeShifterCurseFabric.LOGGER.warn("Invalid form_id for TransformAction: {}", formId);
                 return;
             }
-            PlayerFormBase pfb = RegPlayerForms.getPlayerForm(formId);
+            IForm pfb = RegPlayerForms.getPlayerForm(formId);
             if (instant) {
-                TransformManager.setFormDirectly(pe, pfb);
+                TransformManager.immediatelyTransform(pe, pfb);
             }
             else {
-                TransformManager.handleDirectTransform(pe, pfb, false);
+                TransformManager.startTransform(pe, pfb, null);
             }
         }
     }

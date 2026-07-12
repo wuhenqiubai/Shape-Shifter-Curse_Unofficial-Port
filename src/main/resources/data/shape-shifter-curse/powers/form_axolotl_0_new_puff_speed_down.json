@@ -1,30 +1,30 @@
 {
-  "type": "apoli:conditioned_attribute",
-  "modifier": {
-    "attribute": "minecraft:generic.movement_speed",
-    "operation": "add_multiplied_total",
-    "value": -0.2,
-    "id": "shape-shifter-curse:decreased_speed_on_sand"
-  },
-  "tick_rate": 20,
-  "condition": {
-    "type": "apoli:or",
-    "conditions": [
-      {
-        "type": "apoli:on_block",
-        "block_condition": {
-          "type": "apoli:in_tag",
-          "tag": "origins:puff_block"
-        }
-      },
-      {
-        "type": "apoli:on_block",
-        "block_condition": {
-          "type": "apoli:block_state",
-          "property": "snowy",
-          "value": true
-        }
-      }
-    ]
-  }
+	"type": "apoli:conditioned_attribute",
+	"modifier": {
+		"attribute": "minecraft:generic.movement_speed",
+		"operation": "add_multiplied_total",
+		"value": -0.2,
+		"id": "shape-shifter-curse:decreased_speed_on_sand"
+	},
+	"tick_rate": 20,
+	"condition": {
+		"type": "apoli:or",
+		"conditions": [
+			{
+				"type": "apoli:on_block",
+				"block_condition": {
+					"type": "apoli:in_tag",
+					"tag": "shape-shifter-curse:puff_block"
+				}
+			},
+			{
+				"type": "apoli:on_block",
+				"block_condition": {
+					"type": "apoli:block_state",
+					"property": "snowy",
+					"value": true
+				}
+			}
+		]
+	}
 }

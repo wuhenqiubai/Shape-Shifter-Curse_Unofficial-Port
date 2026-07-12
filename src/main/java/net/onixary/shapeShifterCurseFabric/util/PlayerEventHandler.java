@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -16,14 +17,16 @@ import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.FormAbilityManager;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.PlayerFormComponent;
-import net.onixary.shapeShifterCurseFabric.player_form.ability.RegPlayerFormComponent;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.NeedCheckUsableForm;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 import net.onixary.shapeShifterCurseFabric.team.MobTeamManager;
 
+import java.util.Objects;
 
 public class PlayerEventHandler {
     public static void register() {
@@ -33,22 +36,9 @@ public class PlayerEventHandler {
 
             ServerPlayerEntity player = handler.player;
 
-            // load form first
-            FormAbilityManager.getServerWorld(player.getServerWorld());
-
             RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
-
-            PlayerFormComponent playerFormComponent = RegPlayerFormComponent.PLAYER_FORM.get(player);
-            if (playerFormComponent != null && playerFormComponent.isFirstJoin()) {
-                // Give the book directly instead of relying on advancement→function chain
-                // 检查背包防止 NeoForge/Connector 下 NBT 持久化异常导致重复给书
-                if (!player.getInventory().contains(new net.minecraft.item.ItemStack(net.onixary.shapeShifterCurseFabric.items.RegCustomItem.BOOK_OF_SHAPE_SHIFTER))) {
-                    player.getInventory().insertStack(new net.minecraft.item.ItemStack(net.onixary.shapeShifterCurseFabric.items.RegCustomItem.BOOK_OF_SHAPE_SHIFTER));
-                }
-                ShapeShifterCurseFabric.ON_FIRST_JOIN_WITH_MOD.trigger(player);
-                playerFormComponent.setFirstJoin(false);
-            }
-            RegPlayerFormComponent.PLAYER_FORM.sync(player);
+            // 成就仅一次触发 不如直接由成就系统管理是否为初次进入
+            ShapeShifterCurseFabric.ON_FIRST_JOIN_WITH_MOD.trigger(player);
 
             // 同步动态Form
             server.execute(() -> {
@@ -58,9 +48,15 @@ public class PlayerEventHandler {
                     ShapeShifterCurseFabric.LOGGER.error("Error sending update dynamic form: ", e);
                 }
                 try {
-                    FormAbilityManager.loadForm(player);
+                    IForm form = FormUtils.getPlayerForm(player);
+                    if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
+                        FormUtils.applyFallback(player);
+                    } else {
+                        FormUtils._loadForm(player, form);
+                    }
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.error("Error loading player form: ", e);
+                    FormUtils.applyFallback(player);
                 }
             });
 
@@ -80,14 +76,10 @@ public class PlayerEventHandler {
 
             // 修改为使用新的月相判定系统
             ServerWorld world = server.getOverworld();
-            boolean currentIsCursedMoon = CursedMoon.isCursedMoon(world); // 使用新的月相判定
-            boolean currentIsNight = CursedMoon.isNight(world);
 
             // 立即同步当前状态给玩家
-            ModPacketsS2CServer.sendCursedMoonData(player, world.getTimeOfDay(), CursedMoon.getDay(world),
-                    currentIsCursedMoon, currentIsNight);
+            ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(world));
 
-	        ShapeShifterCurseFabric.LOGGER.info("向玩家同步诅咒之月状态: {}, 月相: {}", currentIsCursedMoon, world.getMoonPhase());
             // 添加延迟同步，确保客户端完全加载后再次发送状态
             // 延迟40个tick（2秒）再次同步
             // 反正都得延时2秒 先不在主线程处跑了 等新建的线程等完2秒后再切进主线程
@@ -102,19 +94,10 @@ public class PlayerEventHandler {
                 server.execute(() -> {
                     if (player.networkHandler != null && !player.isDisconnected()) {
                         ServerWorld currentWorld = player.getServerWorld();
-                        boolean delayedIsCursedMoon = CursedMoon.isCursedMoonByPhase(currentWorld); // 直接使用月相判定
-                        boolean delayedIsNight = CursedMoon.isNight(currentWorld);
-
-                        ModPacketsS2CServer.sendCursedMoonData(player, currentWorld.getTimeOfDay(), CursedMoon.getDay(currentWorld),
-                                delayedIsCursedMoon, delayedIsNight);
-
-	                    ShapeShifterCurseFabric.LOGGER.info("延迟同步诅咒之月状态: {}, 月相: {}, 玩家: {}", delayedIsCursedMoon, currentWorld.getMoonPhase(), player.getName().getString());
+                        ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(currentWorld));
                     }
                 });
             }).start();
-
-            // reset moon effect
-            CursedMoon.resetMoonEffect(player);
 
             // Set doDaylightCycle to true forced
             //server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
@@ -141,7 +124,12 @@ public class PlayerEventHandler {
         //load event
         ServerWorldEvents.LOAD.register((server, world) -> {
             for (ServerPlayerEntity player : world.getPlayers()) {
-                FormAbilityManager.loadForm(player);
+                IForm form = FormUtils.getPlayerForm(player);
+                if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
+                    FormUtils.applyFallback(player);
+                } else {
+                    FormUtils._loadForm(player, form);
+                }
 
                 /* 重构后不需要了 仅用于参考旧实现逻辑
                 // load attachment
@@ -157,18 +145,11 @@ public class PlayerEventHandler {
                 // 将 StatusEffectInstance 转换为 TransformativeStatusInstance
                 EffectManager.ReloadPlayerEffect(player);
 
-                // 修改为使用新的月相判定系统
-                boolean currentIsCursedMoon = CursedMoon.isCursedMoon(world); // 使用新的月相判定
-                boolean currentIsNight = CursedMoon.isNight(world);
-
                 // 立即同步当前状态给玩家
-                ModPacketsS2CServer.sendCursedMoonData(player, world.getTimeOfDay(), CursedMoon.getDay(world),
-                        currentIsCursedMoon, currentIsNight);
-
-	            ShapeShifterCurseFabric.LOGGER.info("向玩家同步诅咒之月状态: {}, 月相: {}", currentIsCursedMoon, world.getMoonPhase());
+                ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(world));
 
                 // reset moon effect
-                CursedMoon.resetMoonEffect(player);
+                // CursedMoon.resetMoonEffect(player);
 
                 // Set doDaylightCycle to true forced
                 server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
@@ -231,10 +212,20 @@ public class PlayerEventHandler {
     }
 
     private static void copyFormAndAbility(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer) {
-        PlayerFormComponent oldComponent = RegPlayerFormComponent.PLAYER_FORM.get(oldPlayer);
-        PlayerFormComponent newComponent = RegPlayerFormComponent.PLAYER_FORM.get(newPlayer);
-        newComponent.setCurrentForm(oldComponent.getCurrentForm());
-        FormAbilityManager.applyForm(newPlayer, newComponent.getCurrentForm());
+        PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
+        PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
+        NbtCompound nbt = new NbtCompound();
+        var lookup = Objects.requireNonNull(oldPlayer.getServer()).getRegistryManager();
+        oldComponent.writeToNbt(nbt, lookup);
+        newComponent.readFromNbt(nbt, lookup);
+        // CCA 的 ALWAYS_COPY 已自动复制了组件和 origin。
+        // 不要调用 _loadForm（会触发 applyLayer → setOrigin → onRemoved → 清空重生点）。
+        // 只需应用 scale 并通知客户端即可。
+        IForm form = newComponent.nowForm;
+        form.applyScale(newPlayer);
+        if (!newPlayer.getWorld().isClient()) {
+            ModPacketsS2CServer.sendFormChange(newPlayer, form.getFormID());
+        }
     }
 
     private static void handleEntityTeam(ServerWorld world){
@@ -249,8 +240,7 @@ public class PlayerEventHandler {
             || entity.getType() == EntityType.RAVAGER)
             {
                 if (sorceryTeam != null) {
-                    // scoreboard.addPlayerToTeam API changed in 1.21
-                // scoreboard.addPlayerToTeam(entity.getEntityName(), sorceryTeam);
+                    scoreboard.addScoreHolderToTeam(entity.getNameForScoreboard(), sorceryTeam);
                 }
             }
         }

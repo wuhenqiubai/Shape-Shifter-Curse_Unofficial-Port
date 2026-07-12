@@ -1,19 +1,19 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "category": "misc",
-  "ingredients": [
-    {
-      "item": "minecraft:echo_shard"
-    },
-    {
-      "item": "shape-shifter-curse:moondust_matrix"
-    },
-    {
-      "item": "minecraft:bowl"
-    }
-  ],
-  "result": {
-    "count": 1,
-    "id": "shape-shifter-curse:powerful_catalyst"
-  }
+	"type": "minecraft:crafting_shapeless",
+	"category": "misc",
+	"ingredients": [
+		{
+			"item": "minecraft:echo_shard"
+		},
+		{
+			"item": "shape-shifter-curse:moondust_matrix"
+		},
+		{
+			"item": "minecraft:bowl"
+		}
+	],
+	"result": {
+		"count": 1,
+		"id": "shape-shifter-curse:powerful_catalyst"
+	}
 }

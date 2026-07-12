@@ -1,25 +1,25 @@
 {
-  "type": "apoli:modify_damage_dealt",
-  "bientity_condition": {
-    "type": "apoli:target_condition",
-    "condition": {
-      "type": "apoli:and",
-      "conditions": [
-        {
-          "type": "apoli:in_tag",
-          "tag": "minecraft:undead"
-        }
-      ]
-    }
-  },
-  "damage_condition": {
-    "type": "apoli:amount",
-    "comparison": ">=",
-    "compare_to": 3
-  },
-  "modifier": {
-    "name": "Undead damage down",
-    "operation": "addition",
-    "value": -2.0
-  }
+	"type": "apoli:modify_damage_dealt",
+	"bientity_condition": {
+		"type": "apoli:target_condition",
+		"condition": {
+			"type": "apoli:and",
+			"conditions": [
+				{
+					"type": "apoli:in_tag",
+					"tag": "minecraft:undead"
+				}
+			]
+		}
+	},
+	"damage_condition": {
+		"type": "apoli:amount",
+		"comparison": ">=",
+		"compare_to": 3
+	},
+	"modifier": {
+		"name": "Undead damage down",
+		"operation": "addition",
+		"value": -2.0
+	}
 }

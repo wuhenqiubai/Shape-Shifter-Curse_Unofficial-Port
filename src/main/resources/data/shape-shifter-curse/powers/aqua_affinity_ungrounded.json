@@ -1,23 +1,23 @@
 {
-  "type": "origins:modify_break_speed",
-  "modifier": {
-    "operation": "multiply_total",
-    "value": 4
-  },
-  "condition": {
-    "type": "origins:and",
-    "conditions": [
-      {
-        "type": "origins:fluid_height",
-        "fluid": "minecraft:water",
-        "comparison": ">",
-        "compare_to": 0
-      },
-      {
-        "type": "origins:on_block",
-        "inverted": true
-      }
-    ]
-  },
-  "hidden": true
+	"type": "apoli:modify_break_speed",
+	"modifier": {
+		"operation": "multiply_total",
+		"value": 4
+	},
+	"condition": {
+		"type": "apoli:and",
+		"conditions": [
+			{
+				"type": "apoli:fluid_height",
+				"fluid": "minecraft:water",
+				"comparison": ">",
+				"compare_to": 0
+			},
+			{
+				"type": "apoli:on_block",
+				"inverted": true
+			}
+		]
+	},
+	"hidden": true
 }

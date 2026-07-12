@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -21,9 +19,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
+import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
 
 import java.util.List;
 
@@ -140,7 +140,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         boolean IsClientNowPlayedPlayer = player instanceof ClientPlayerEntity;
         boolean IsFirstPersonView = MinecraftClient.getInstance().options.getPerspective().isFirstPerson();
 
-        if (BetterCombatInstalled && IsFirstPersonView && IsClientNowPlayedPlayer && ClientUtils.ShouldEnableBetterCombatFix()) {
+        if (BetterCombatInstalled && IsFirstPersonView && IsClientNowPlayedPlayer && ClientConfig.enableBetterCombatFix) {
             playerEntityModel.hat.visible = false;
             playerEntityModel.head.visible = false;
         }
@@ -271,7 +271,13 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 formModel.AnimationSystem.processAnimation(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
                 // 渲染部分
                 formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucent(formModel.getTextureResource(formAnimatable)), null, light, tickDelta);
-                formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucentEmissive(formModel.getFullbrightTextureResource(formAnimatable)), null, Integer.MAX_VALUE - 1, tickDelta);
+                if (formModel.getFullbrightTextureResource(formAnimatable) != null) {
+                    // GeckoLib 的 handleAnimations 在第一次 render 时会覆盖 processAnimation 设的骨骼
+                    // 第二次 render 虽然跳过了 handleAnimations（重渲染保护），但骨骼已经不对了
+                    // 所以在两次 render 之间重新 processAnimation 恢复正确骨骼
+                    formModel.AnimationSystem.processAnimation(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
+                    formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getEntityTranslucentEmissive(formModel.getFullbrightTextureResource(formAnimatable)), null, Integer.MAX_VALUE - 1, tickDelta);
+                }
                 if (hasOutline) {
                     formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderLayer.getOutline(formModel.getTextureResource(formAnimatable)), vertexConsumers.getBuffer(RenderLayer.getOutline(formModel.getTextureResource(formAnimatable))), light, tickDelta);
                 }

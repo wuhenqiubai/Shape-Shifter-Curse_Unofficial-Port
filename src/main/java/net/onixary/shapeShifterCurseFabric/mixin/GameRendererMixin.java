@@ -20,7 +20,7 @@ public class GameRendererMixin {
         TransformOverlay.INSTANCE.render();
     }
 
-    /** getNightVisionStrength 中 getStatusEffect 可能返回 null，给个假实例防 NPE */
+    /** Guard getNightVisionStrength against null entity (Fabric Loader 0.19.3 mapping corruption). */
     @ModifyExpressionValue(
             method = "getNightVisionStrength(Lnet/minecraft/entity/LivingEntity;F)F",
             at = @At(value = "INVOKE",

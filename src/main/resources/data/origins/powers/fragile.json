@@ -1,9 +1,0 @@
-{
-  "type": "apoli:attribute",
-  "modifier": {
-    "id": "fragile_health_reduction",
-    "attribute": "minecraft:generic.max_health",
-    "value": -6.0,
-    "operation": "add_value"
-  }
-}

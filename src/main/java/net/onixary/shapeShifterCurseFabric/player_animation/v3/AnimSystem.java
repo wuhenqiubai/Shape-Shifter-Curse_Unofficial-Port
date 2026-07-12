@@ -15,14 +15,12 @@ import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController.TransformingController;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -39,22 +37,55 @@ import java.util.Objects;
  * @see AnimationHolder
  */
 public class AnimSystem {
-    /** 默认动画 FSM ID（地面状态 {@code on_ground}） */
-    public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
 	/**
-	 * 所属玩家实体。当此玩家实体被卸载时，AnimSystem 也应被卸载。
+	 * 动画系统上下文数据，每帧由 {@link #getAnimation} 更新。
 	 */
-	public final PlayerEntity player;
-    /** 前置处理器列表。在 FSM/Power 动画之前执行，用于变形过渡等特殊效果。 */
-    public final List<AbstractAnimStateController> PreProcessControllers;
-	/**
-     * 当前帧的系统数据。每 Game Tick (0.05s) 由 {@link #getAnimation} 更新一次。
-	 */
+	public static class AnimSystemData {
+		/**
+		 * 当前帧该玩家的形态
+		 */
+		public IForm playerForm;
+		/** 是否在地面上（含容错判断：长时间 Y 轴未变化也视为地面） */
+		public boolean IsOnGround = true;
+		/** 上一帧的玩家位置，用于计算移动状态 */
+		public Vec3d LastPosition;
+		/**
+		 * 玩家 Y 轴位置未变化的持续 tick 数
+		 */
+		public long LastPosYChange = 0;
+		/**
+		 * 玩家挥动手臂的持续 tick 数
+		 */
+		public long ContinueSwingAnimCounter = 0;
+		/**
+		 * 是否在移动
+		 */
+		public boolean IsWalking = false;
+		/** 自定义 NBT 数据，供其他拓展 Mod 使用。SSC 本身不使用。 */
+		public NbtCompound customData;
+		/** 此帧是否有上半身动画覆盖 */
+		public boolean HasUpperBodyOverride = false;
+
+		public AnimSystemData(PlayerEntity player) {
+			this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
+			this.customData = new NbtCompound();
+			this.LastPosition = player.getPos();
+		}
+	}
+
+    public final PlayerEntity player;  // 玩家实体 理论上如果当前玩家实体被卸载了 那么这个AnimSystem也应该被卸载
+
     public AnimSystemData data;
+
+	public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
+
 	/**
 	 * 当前活动的动画 FSM ID
 	 */
 	public Identifier nowAnimFSMID = defaultAnimFSMID;
+
+	public @Nullable AbstractAnimStateController preProcessController;
+
     /** 当前正在播放的 Power 动画 ID */
     public @Nullable Identifier nowPlayingPowerAnimationID = null;
 	/**
@@ -109,49 +140,40 @@ public class AnimSystem {
     public AnimSystem(PlayerEntity player) {
         this.player = player;
         this.data = new AnimSystemData(player);
-        this.PreProcessControllers = new ArrayList<>();
-        this.initPreProcessControllers();
-        this.registerAllPreProcessControllers();
-    }
-
-    public void registerAllPreProcessControllers() {
-        for (AbstractAnimStateController controller : this.PreProcessControllers) {
-            if (!controller.isRegistered(this.player, this.data)) {
-                controller.registerAnim(this.player, this.data);
-            }
+        this.preProcessController = new TransformingController();
+        if (!this.preProcessController.isRegistered(this.player, this.data)) {
+            this.preProcessController.registerAnim(this.player, this.data);
         }
-    }
-
-    public void initPreProcessControllers() {
-        this.PreProcessControllers.add(new TransformingController());
     }
 
     public @Nullable AnimationHolder getPreProcessAnimation() {
-        for (AbstractAnimStateController controller : this.PreProcessControllers) {
-            if (controller.isEnabled(this.player, this.data)) {
-                return controller.getAnimation(this.player, this.data);
-            }
+        if (this.preProcessController != null && this.preProcessController.isEnabled(this.player, this.data)) {
+            return this.preProcessController.getAnimation(this.player, this.data);
         }
         return null;
+    }
+
+    public static boolean checkOnGroundSuper(PlayerEntity player) {
+        if (player.isOnGround()) {
+            return true;
+        }
+        if (player.getAbilities().flying) {
+            return false;
+        }
+        return !player.getWorld().isSpaceEmpty(player.getBoundingBox().offset(0, -0.01, 0).withMaxY(player.getY()));
     }
 
     private void PreProcessAnimSystemData() {
         // this.data.playerForm = RegPlayerFormComponent.PLAYER_FORM.get(this.player).getCurrentForm();
         this.data.playerForm = FormTextureUtils.getPlayerForm_Render(this.player);
         this.data.IsWalking = !this.data.LastPosition.equals(this.player.getPos());
-        if (this.player.getPos().getY() == this.data.LastPosition.getY()) {
-            this.data.LastPosYChange ++;
-        }
-        else {
-            this.data.LastPosYChange = 0;
-        }
         if (this.player.handSwinging) {
             this.data.ContinueSwingAnimCounter ++;
         }
         else {
             this.data.ContinueSwingAnimCounter = 0;
         }
-        this.data.IsOnGround = (player.isOnGround() || (!player.getAbilities().flying && this.data.LastPosYChange > 10));
+        this.data.IsOnGround = checkOnGroundSuper(this.player);
         this.NPPA_Tick();
     }
 
@@ -259,75 +281,42 @@ public class AnimSystem {
 	/**
 	 * 获取上半身覆盖动画（使用物品/攻击时）。
 	 * 返回 UPPER-ONLY 动画，与主 FSM 动画同时在 PAL 不同层播放。
+	 * 暂时禁用这项功能，等到bug修复的大差不差的时候在弄动画
 	 */
 	public @Nullable AnimationHolder getUpperBodyOverride() {
-		this.data.HasUpperBodyOverride = false;
-		if (this.getPreProcessAnimation() != null) return null;
-
-		if (this.player.isUsingItem()) {
-			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_USE_ITEM);
-			if (controller == null) {
-				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_USE_ITEM);
-				if (animState != null) controller = animState.defaultController;
-			}
-			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
-				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
-				if (anim != null) {
-					this.data.HasUpperBodyOverride = true;
-					return anim;
-				}
-			}
-		}
-		if (this.player.handSwinging) {
-			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_ATTACK);
-			if (controller == null) {
-				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_ATTACK);
-				if (animState != null) controller = animState.defaultController;
-			}
-			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
-				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
-				if (anim != null) {
-					this.data.HasUpperBodyOverride = true;
-					return anim;
-				}
-			}
-		}
+//		this.data.HasUpperBodyOverride = false;
+//		if (this.getPreProcessAnimation() != null) return null;
+//
+//		if (this.player.isUsingItem()) {
+//			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_USE_ITEM);
+//			if (controller == null) {
+//				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_USE_ITEM);
+//				if (animState != null) controller = animState.defaultController;
+//			}
+//			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
+//				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
+//				if (anim != null) {
+//					this.data.HasUpperBodyOverride = true;
+//					return anim;
+//				}
+//			}
+//		}
+//		if (this.player.handSwinging) {
+//			AbstractAnimStateController controller = this.data.playerForm.getAnimStateController(this.player, this.data, AnimRegistries.ANIM_STATE_ATTACK);
+//			if (controller == null) {
+//				AnimRegistry.AnimState animState = AnimRegistry.getAnimState(AnimRegistries.ANIM_STATE_ATTACK);
+//				if (animState != null) controller = animState.defaultController;
+//			}
+//			if (controller != null && controller.isRegistered(this.player, this.data) && controller.isEnabled(this.player, this.data)) {
+//				@Nullable AnimationHolder anim = controller.getAnimation(this.player, this.data);
+//				if (anim != null) {
+//					this.data.HasUpperBodyOverride = true;
+//					return anim;
+//				}
+//			}
+//		}
 		return null;
 	}
 
-	/**
-	 * 动画系统上下文数据，每帧由 {@link #getAnimation} 更新。
-	 */
-    public static class AnimSystemData {
-		/**
-		 * 当前帧该玩家的形态
-		 */
-        public PlayerFormBase playerForm;
-		/** 是否在地面上（含容错判断：长时间 Y 轴未变化也视为地面） */
-        public boolean IsOnGround = true;
-		/** 上一帧的玩家位置，用于计算移动状态 */
-        public Vec3d LastPosition;
-		/**
-		 * 玩家 Y 轴位置未变化的持续 tick 数
-		 */
-		public long LastPosYChange = 0;
-		/**
-		 * 玩家挥动手臂的持续 tick 数
-		 */
-		public long ContinueSwingAnimCounter = 0;
-		/**
-		 * 是否在移动
-		 */
-		public boolean IsWalking = false;
-		/** 自定义 NBT 数据，供其他拓展 Mod 使用。SSC 本身不使用。 */
-        public NbtCompound customData;
-	/** 此帧是否有上半身动画覆盖 */
-	public boolean HasUpperBodyOverride = false;
 
-        public AnimSystemData(PlayerEntity player) {
-            this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-            this.customData = new NbtCompound();
-	        this.LastPosition = player.getPos();
-        }
-	}
 }

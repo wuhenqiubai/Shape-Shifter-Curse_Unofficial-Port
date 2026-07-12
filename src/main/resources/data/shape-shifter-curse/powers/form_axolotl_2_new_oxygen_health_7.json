@@ -1,25 +1,25 @@
 {
-  "type": "apoli:conditioned_attribute",
-  "modifier": {
-    "id": "shape-shifter-curse:oxygen_health",
-    "attribute": "minecraft:generic.max_health",
-    "value": -6.0,
-    "operation": "add_value"
-  },
-  "tick_rate": 20,
-  "condition": {
-    "type": "apoli:and",
-    "conditions": [
-      {
-        "type": "apoli:air",
-        "comparison": "<",
-        "compare_to": 90
-      },
-      {
-        "type": "apoli:air",
-        "comparison": ">=",
-        "compare_to": 60
-      }
-    ]
-  }
+	"type": "apoli:conditioned_attribute",
+	"modifier": {
+		"id": "shape-shifter-curse:oxygen_health_7",
+		"attribute": "minecraft:generic.max_health",
+		"value": -6.0,
+		"operation": "add_value"
+	},
+	"tick_rate": 20,
+	"condition": {
+		"type": "apoli:and",
+		"conditions": [
+			{
+				"type": "apoli:air",
+				"comparison": "<",
+				"compare_to": 90
+			},
+			{
+				"type": "apoli:air",
+				"comparison": ">=",
+				"compare_to": 60
+			}
+		]
+	}
 }

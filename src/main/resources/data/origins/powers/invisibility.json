@@ -1,8 +1,0 @@
-{
-  "type": "apoli:invisibility",
-  "render_armor": true,
-  "condition": {
-    "type": "apoli:power_active",
-    "power": "*:phantomize"
-  }
-}

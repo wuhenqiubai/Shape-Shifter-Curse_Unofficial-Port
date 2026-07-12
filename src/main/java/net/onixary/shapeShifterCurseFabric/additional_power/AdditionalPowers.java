@@ -15,6 +15,7 @@ public class AdditionalPowers {
     public static final PowerType<?> CAN_LOOT_SPIDER_FLUID_COCOON = new PowerTypeReference<>(ShapeShifterCurseFabric.identifier("can_loot_spider_fluid_cocoon"));
     public static final PowerType<?> SPIDER_FRIENDLY = new PowerTypeReference<>(ShapeShifterCurseFabric.identifier("spider_friendly"));
     public static final PowerType<?> HOSTILE_IRON_GOLEM = new PowerTypeReference<>(ShapeShifterCurseFabric.identifier("hostile_iron_golem"));
+    public static final PowerType<?> CAT_FRIENDLY = new PowerTypeReference<>(ShapeShifterCurseFabric.identifier("cat_friendly"));
 
     public static void register() {
         register(AddSustainedInstinctPower.getFactory());
@@ -85,6 +86,10 @@ public class AdditionalPowers {
         register(DisablePlayerRotationPower.createFactory());
         register(HideTPHeldItemPower.createFactory());
         register(ModifyFootstepSoundSpeedPower.createFactory());
+        register(TANFormTemperatureModifierPower.createFactory());
+        register(TANPreventDirtyWaterThirstEffectPower.createFactory());
+        register(TANModifyThirstExhaustionPower.createFactory());
+        register(ClimbingEXPower.createFactory());
     }
 
     public static void register(PowerFactory<?> powerFactory) {

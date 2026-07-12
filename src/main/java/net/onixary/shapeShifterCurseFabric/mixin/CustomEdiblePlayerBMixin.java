@@ -1,11 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import io.github.apace100.apoli.component.PowerHolderComponent;
+import io.github.apace100.apoli.power.ModifyFoodPower;
+import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import net.minecraft.advancement.criterion.Criteria;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.HungerConstants;
+import net.minecraft.entity.player.HungerManager;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.component.type.FoodComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
@@ -14,7 +20,11 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowerFoodComponent;
 
@@ -39,6 +49,51 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
                 Criteria.CONSUME_ITEM.trigger(spe, stack);
             }
             cir.setReturnValue(super.eatFood(world, stack, foodComponent));
+        }
+    }
+
+    @ModifyVariable(method = "eatFood", at = @At("HEAD"), argsOnly = true)
+    private FoodComponent ssc$modifyFoodComponent(FoodComponent original, World world, ItemStack stack) {
+        PlayerEntity player = (PlayerEntity) (Object) this;
+
+        List<ModifyFoodPower> powers = PowerHolderComponent.getPowers(player, ModifyFoodPower.class)
+                .stream()
+                .filter(p -> p.doesApply(stack))
+                .toList();
+
+        if (powers.isEmpty()) return original;
+
+        int newNutrition = (int) ModifierUtil.applyModifiers(player,
+                powers.stream().flatMap(p -> p.getFoodModifiers().stream()).toList(), original.nutrition());
+
+        float origSatMod = original.saturation() / (original.nutrition() * 2.0f);
+        float newSatMod = (float) ModifierUtil.applyModifiers(player,
+                powers.stream().flatMap(p -> p.getSaturationModifiers().stream()).toList(), origSatMod);
+        float newSaturation = HungerConstants.calculateSaturation(newNutrition, newSatMod);
+
+        if (newNutrition == original.nutrition() && newSaturation == original.saturation()) {
+            return original;
+        }
+
+        return new FoodComponent(
+                newNutrition,
+                newSaturation,
+                original.canAlwaysEat(),
+                original.eatSeconds(),
+                original.usingConvertsTo(),
+                original.effects()
+        );
+    }
+
+    @Redirect(method = "eatFood", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/HungerManager;eat(Lnet/minecraft/component/type/FoodComponent;)V"))
+    private void ssc$redirectEat(HungerManager manager, FoodComponent foodComponent) {
+        manager.eat(foodComponent);
+        if ((Object)this instanceof ServerPlayerEntity serverPlayer) {
+            serverPlayer.networkHandler.sendPacket(
+                    new HealthUpdateS2CPacket(
+                            serverPlayer.getHealth(),
+                            manager.getFoodLevel(),
+                            manager.getSaturationLevel()));
         }
     }
 }

@@ -1,4 +1,4 @@
 {
-  "type": "apoli:modify_harvest",
-  "allow": true
+	"type": "apoli:modify_harvest",
+	"allow": true
 }
