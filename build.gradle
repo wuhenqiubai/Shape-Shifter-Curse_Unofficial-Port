@@ -30,6 +30,9 @@ loom {
         }
     }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
+    mixin {
+        useLegacyMixinAp = true
+    }
 }
 
 repositories {

@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.onixary.shapeShifterCurseFabric.integration.origins.mixin",
   "compatibilityLevel": "JAVA_21",
+  "refmap": "shape-shifter-curse-connector-refmap.json",
   "mixins": [
     "ArgumentTypesMixin",
     "ConduitOnLandMixin",

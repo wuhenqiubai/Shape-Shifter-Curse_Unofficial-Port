@@ -4,6 +4,7 @@
   "package": "net.onixary.shapeShifterCurseFabric.mixin",
   "compatibilityLevel": "JAVA_21",
   "plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
+  "refmap": "shape-shifter-curse-connector-refmap.json",
   "mixins": [
       "AdvancementFixMixin",
       "AreaEffectCloudEntityMixin",
@@ -94,7 +95,6 @@
     "InGameHudMixin",
     "InventoryScreenMixin",
     "KeyboardInputMixin",
-    "MinecraftClientMixin",
     "MoonPhaseRenderMixin",
     "PlayerClipAtLedgeMixin",
     "PlayerEntityAnimOverrideMixin",
