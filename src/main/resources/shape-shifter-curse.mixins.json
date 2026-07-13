@@ -104,9 +104,11 @@
     "PlayerMovementControlMixin",
     "PlayerRotationRendererMixin",
     "accessor.ApoliClientAccessor",
+    "accessor.LivingEntityRendererAccessor",
     "render.LivingEntityRendererMixin",
     "render.OverlayRenderMixin",
-    "render.PlayerEntityRendererMixin"
+    "render.PlayerEntityRendererMixin",
+    "render.AbstractClientPlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

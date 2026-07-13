@@ -38,6 +38,7 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.render.render_layer.FurGradientRenderLayer;
 import net.onixary.shapeShifterCurseFabric.util.*;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -286,6 +287,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		RegCustomBlock.ClientInit();
 		PatronUtils.OnClientInit();
+		AuthClient.init();
 	}
 
 	public static ShaderProgram getFurGradientShader() {
