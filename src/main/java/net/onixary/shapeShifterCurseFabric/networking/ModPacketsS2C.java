@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.networking;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
@@ -32,6 +33,8 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -293,6 +296,7 @@ public class ModPacketsS2C {
                 }
             }
         });
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), ModPacketsS2C::receiveNewSubKey);
     }
 
     public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
@@ -374,10 +378,15 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM),  buf));
     }
 
-    public static void sendPatronAuthFile(net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile authFile) {
+    public static void sendPatronAuthFile(AuthFile authFile) {
         if (authFile == null) return;
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeByteArray(authFile.getRaw());
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
+    }
+
+    private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context context) {
+        PacketByteBuf keyBuf = new PacketByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
+        context.client().execute(() -> AuthClient.loadServerKey(keyBuf));
     }
 }
