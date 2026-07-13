@@ -53,7 +53,9 @@ public final class AuthClient {
     }
 
     public static @Nullable Path getLocalPatronAuthFilePath() {
-        UUID playerUUID = ClientUtils.getPlayerUUID();
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) { return null; }
+        UUID playerUUID = client.player.getUuid();
         if (playerUUID == null) {
             return null;
         }
@@ -110,7 +112,9 @@ public final class AuthClient {
     }
 
     private static String getAuthFileUrl() {
-        UUID playerUUID = ClientUtils.getPlayerUUID();
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client.player == null) { return null; }
+        UUID playerUUID = client.player.getUuid();
         if (playerUUID == null) {
             return null;
         }

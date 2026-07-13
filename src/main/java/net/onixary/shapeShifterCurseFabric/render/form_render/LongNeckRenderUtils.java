@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import dev.tr7zw.firstperson.FirstPersonModelCore;
-import mod.azure.azurelib.cache.object.GeoBone;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -30,6 +29,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FeralRenderUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import software.bernie.geckolib.cache.object.GeoBone;
 
 import java.util.ArrayList;
 import java.util.Collections;

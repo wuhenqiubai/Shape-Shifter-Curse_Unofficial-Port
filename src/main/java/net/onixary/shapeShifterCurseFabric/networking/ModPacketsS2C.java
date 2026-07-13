@@ -117,9 +117,7 @@ public class ModPacketsS2C {
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(RESET_FIRST_PERSON), (payload, ctx) -> {
-            ctx.client().execute(TransformManager::executeClientFirstPersonReset);
-        });
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(RESET_FIRST_PERSON), (payload, ctx) -> ctx.client().execute(TransformManager::executeClientFirstPersonReset));
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(SYNC_OTHER_PLAYER_BAT_ATTACH_STATE), (payload, ctx) -> {
             PacketByteBuf buf = payload.data();
             UUID targetPlayerUuid = buf.readUuid();
@@ -127,9 +125,7 @@ public class ModPacketsS2C {
             int attachType = buf.readInt();
             BlockPos attachedPos = buf.readBoolean() ? buf.readBlockPos() : null;
             Direction attachedSide = buf.readBoolean() ? Direction.byId(buf.readInt()) : null;
-            ctx.client().execute(() -> {
-                ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached, attachType, attachedPos, attachedSide);
-            });
+            ctx.client().execute(() -> ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached, attachType, attachedPos, attachedSide));
         });
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(SYNC_FORCE_SNEAK_STATE), (payload, ctx) -> {
             boolean shouldForce = payload.data().readBoolean();
@@ -208,9 +204,7 @@ public class ModPacketsS2C {
             for (int i = 0; i < PairCount; i++) map.put(buf.readUuid(), buf.readInt());
             ctx.client().execute(() -> PatronUtils.ApplyPatronLevel(map));
         });
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(OPEN_PATRON_FORM_SELECT_MENU), (payload, ctx) -> {
-            ctx.client().execute(() -> ctx.client().setScreen(new PatronFormSelectScreen(Text.literal("PatronFromSelectScreen"), ctx.client().player)));
-        });
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(OPEN_PATRON_FORM_SELECT_MENU), (payload, ctx) -> ctx.client().execute(() -> ctx.client().setScreen(new PatronFormSelectScreen(Text.literal("PatronFromSelectScreen"), ctx.client().player))));
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(OPEN_FORM_SELECT_MENU), (payload, ctx) -> {
             PacketByteBuf buf = payload.data();
             String targetName = buf.readString();
@@ -225,17 +219,15 @@ public class ModPacketsS2C {
                 }
             });
         });
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(OPEN_FORM_COLOR_SELECT_MENU), (payload, ctx) -> {
-            ctx.client().execute(() -> {
-                if (ShapeShifterCurseFabric.clientConfig.fcs_use_v1_menu) {
-                    if (FormColorSelectMenu.instance == null)
-                        ctx.client().setScreen(new FormColorSelectMenu(Text.literal("text.shape-shifter-curse.config.form_color_select_menu")));
-                } else {
-                    if (FormColorSelectMenuV2.instance == null)
-                        ctx.client().setScreen(new FormColorSelectMenuV2(Text.literal("text.shape-shifter-curse.config.form_color_select_menu_v2")));
-                }
-            });
-        });
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(OPEN_FORM_COLOR_SELECT_MENU), (payload, ctx) -> ctx.client().execute(() -> {
+            if (ShapeShifterCurseFabric.clientConfig.fcs_use_v1_menu) {
+                if (FormColorSelectMenu.instance == null)
+                    ctx.client().setScreen(new FormColorSelectMenu(Text.literal("text.shape-shifter-curse.config.form_color_select_menu")));
+            } else {
+                if (FormColorSelectMenuV2.instance == null)
+                    ctx.client().setScreen(new FormColorSelectMenuV2(Text.literal("text.shape-shifter-curse.config.form_color_select_menu_v2")));
+            }
+        }));
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(MODIFY_FCD_DATA), (payload, ctx) -> {
             PacketByteBuf buf = payload.data();
             String commandType = buf.readString();
@@ -380,5 +372,12 @@ public class ModPacketsS2C {
         buf.writeUuid(target);
         buf.writeIdentifier(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM),  buf));
+    }
+
+    public static void sendPatronAuthFile(net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile authFile) {
+        if (authFile == null) return;
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeByteArray(authFile.getRaw());
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
     }
 }

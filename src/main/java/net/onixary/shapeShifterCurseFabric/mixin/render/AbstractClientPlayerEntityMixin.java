@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(AbstractClientPlayerEntity.class)
 public class AbstractClientPlayerEntityMixin {
     @Unique
-    private static final Identifier CUSTOM_SKIN = new Identifier(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
+    private static final Identifier CUSTOM_SKIN = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
 
     @Inject(method = "getSkinTexture", at = @At("HEAD"), cancellable = true, order = 1000)
     private void shape_shifter_curse$modifyPlayerSkin(CallbackInfoReturnable<Identifier> cir) {

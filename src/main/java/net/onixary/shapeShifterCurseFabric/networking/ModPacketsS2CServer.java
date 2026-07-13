@@ -10,6 +10,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -320,6 +321,6 @@ public class ModPacketsS2CServer {
         }
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeByteArray(newKey.getRaw());
-        ServerPlayNetworking.send(player, ModPackets.MELT_AUTH_SUB_KEY, buf);
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), buf));
     }
 }
