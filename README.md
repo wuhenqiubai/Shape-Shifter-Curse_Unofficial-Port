@@ -10,7 +10,7 @@
 > 在发布稳定版本后会偶尔发布我的小巧思。
 
 >
-> **基于主线commit**: [2420681](https://github.com/onixary/shape-shifter-curse-fabric/commit/24206817c739ef66aa1afa834e667b0182b9da84)
+> **基于上游commit**: [70d9d99](https://github.com/onixary/shape-shifter-curse-fabric/commit/70d9d99efdc1ed0459bcb28eb073d00978dd0c37)
 > 
 ## 已知问题
 
