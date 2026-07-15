@@ -8,6 +8,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
 
+@SuppressWarnings("removal")
 public class FormAnimatable implements GeoAnimatable {
     AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 

@@ -1,15 +1,14 @@
 {
   "load_priority": 0,
 
-  "name": "shape-shifter-curse.form_snow_fox_1.model_name",
+  "name": "example_namespace.form_example.model_name",
   "layer": "origins:origin",
-  "form": "shape-shifter-curse:form_snow_fox_1",
+  "form": "example_namespace:form_example",
 
   "wide_only": true,
 
-  "model": "shape-shifter-curse:geo/form/form_snow_fox_1.geo.json",
-  "texture": "shape-shifter-curse:textures/form/form_snow_fox_1/form_snow_fox_1.png",
-  "texture_mask": "shape-shifter-curse:textures/form/form_snow_fox_1/form_snow_fox_1_colormask.png",
+  "model": "example_namespace:geo/form_example.geo.json",
+  "texture": "example_namespace:textures/form_example.png",
   "hidden": [
     "leftLeg",
     "rightLeg",
@@ -18,14 +17,18 @@
     "leftSleeve",
     "rightSleeve",
     "leftArm",
-    "rightArm"
+    "rightArm",
+    "body",
+    "jacket",
+    "head",
+    "hat"
   ],
 
   "animation_system": "shape-shifter-curse:default",
   "animation_system_config": {
     "tail": {
       "chain": {
-        "tail": [0, 1, 2, 3, 4]
+        "tail": [0, 1, 2, 3]
       }
     },
     "head_tail": {
