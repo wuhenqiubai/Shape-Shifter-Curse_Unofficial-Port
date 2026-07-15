@@ -1,10 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.EmptyController;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.UseOtherStateAnimController;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

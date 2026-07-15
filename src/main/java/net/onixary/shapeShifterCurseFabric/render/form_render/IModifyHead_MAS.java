@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
 import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.entity.player.PlayerEntity;
 

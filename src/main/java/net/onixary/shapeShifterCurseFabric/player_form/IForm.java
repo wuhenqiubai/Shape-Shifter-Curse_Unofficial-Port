@@ -18,7 +18,6 @@ import java.util.Set;
 /**
  * 新形态系统核心接口。定义形态的生命周期方法和变形链协议。
  * <p>
- * 与旧系统 {@link net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBase} 不同，
  * 新系统将所有形态属性整合为 {@code Flag} 集合，并通过 {@link ITransformReason} 处理变形逻辑。
  * <p>
  * 变形链协议：{@link #_getNextForm} → {@link #getNextForm} / {@link #getDefaultNextForm} / reason.getFallBackNextForm

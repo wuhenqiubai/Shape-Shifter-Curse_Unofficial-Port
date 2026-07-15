@@ -5,8 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -28,12 +26,15 @@ import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.util.CachedDataMap;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.*;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import software.bernie.geckolib.cache.object.BakedGeoModel;
+import software.bernie.geckolib.cache.object.GeoBone;
 
-import java.lang.Math;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModifyHead_MAS {
 
@@ -706,10 +707,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         tailData td = tailDataMap.get(player);
         td.tailDragAmountO = td.tailDragAmount;
         td.tailDragAmount *= 0.75F;
-        float lerpedYaw = MathHelper.lerp(tickDelta, player.prevBodyYaw, player.bodyYaw);
-        float yawDelta = (float) Math.toRadians(lerpedYaw - td.lastYaw);
-        td.tailDragAmount -= yawDelta * 0.55F;
-        td.lastYaw = lerpedYaw;
+        td.tailDragAmount -= (float) (Math.toRadians((player.bodyYaw - player.prevBodyYaw)) * 0.55F);
         td.tailDragAmount = MathHelper.clamp(td.tailDragAmount, -1.6F, 1.6F);
         float verticalSpeed = (float) player.getVelocity().y;
         float targetVerticalDrag = MathHelper.clamp(verticalSpeed * 1.5f, -1.6f, 1.6f);

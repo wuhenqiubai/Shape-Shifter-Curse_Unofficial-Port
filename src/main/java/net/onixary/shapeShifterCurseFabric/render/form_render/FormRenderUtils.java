@@ -22,8 +22,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
-import org.joml.Vector3d;
+import software.bernie.geckolib.cache.object.GeoBone;
 
 import java.util.*;
 import java.util.function.Predicate;
