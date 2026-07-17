@@ -1,8 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
-import com.zigythebird.playeranim.accessors.IAnimatedPlayer;
-import com.zigythebird.playeranimcore.api.firstPerson.FirstPersonConfiguration;
-import com.zigythebird.playeranimcore.api.firstPerson.FirstPersonMode;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -21,7 +18,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -119,26 +115,26 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         boolean rightLegHidden = false;
         boolean rightPantsHidden = !player.isPartVisible(PlayerModelPart.RIGHT_PANTS_LEG);
         // Better Combat 修复
-        if (FirstPersonMode.isFirstPersonPass() && ShapeShifterCurseFabric.clientConfig.enableBetterCombatFix && player == MinecraftClient.getInstance().getCameraEntity()) {
-            AnimationApplier animationApplier = ((IAnimatedPlayer) player).playerAnimator_getAnimation();
-            FirstPersonConfiguration config = animationApplier.getFirstPersonConfiguration();
-            hatHidden = true;
-            headHidden = true;
-            bodyHidden = true;
-            jacketHidden = true;
-            if (!config.isShowLeftArm()) {
-                leftArmHidden = true;
-                leftSleeveHidden = true;
-            }
-            if (!config.isShowRightArm()) {
-                rightArmHidden = true;
-                rightSleeveHidden = true;
-            }
-            leftLegHidden = true;
-            leftPantsHidden = true;
-            rightLegHidden = true;
-            rightPantsHidden = true;
-        }
+//        if (FirstPersonMode.isFirstPersonPass() && ClientConfig.enableBetterCombatFix && player == MinecraftClient.getInstance().getCameraEntity()) {
+//            AnimationApplier animationApplier = ((IAnimatedPlayer) player).playerAnimator_getAnimation();
+//            FirstPersonConfiguration config = animationApplier.getFirstPersonConfiguration();
+//            hatHidden = true;
+//            headHidden = true;
+//            bodyHidden = true;
+//            jacketHidden = true;
+//            if (!config.isShowLeftArm()) {
+//                leftArmHidden = true;
+//                leftSleeveHidden = true;
+//            }
+//            if (!config.isShowRightArm()) {
+//                rightArmHidden = true;
+//                rightSleeveHidden = true;
+//            }
+//            leftLegHidden = true;
+//            leftPantsHidden = true;
+//            rightLegHidden = true;
+//            rightPantsHidden = true;
+//        }
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             hatHidden |= formModel.Hidden_Hat;
