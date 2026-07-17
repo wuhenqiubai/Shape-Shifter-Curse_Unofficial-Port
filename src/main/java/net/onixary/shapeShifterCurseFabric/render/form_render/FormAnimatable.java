@@ -8,13 +8,15 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 
 
-@SuppressWarnings("removal")
 public class FormAnimatable implements GeoAnimatable {
     AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        /* No-op: animations are driven by IModelAnimationSystem, not GeckoLib controllers */
+        controllerRegistrar.add(new AnimationController<FormAnimatable>(this, ShapeShifterCurseFabric.MOD_ID, animationState -> {
+            animationState.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
+        }));
     }
 
     public PlayerEntity e;

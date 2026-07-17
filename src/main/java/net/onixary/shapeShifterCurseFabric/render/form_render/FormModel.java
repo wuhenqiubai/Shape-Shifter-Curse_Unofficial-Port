@@ -275,7 +275,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
                 JsonArray array = entry.getValue().getAsJsonArray();
                 List<String> chain = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
-	                chain.add(base + "_" + array.get(i).getAsString());
+                    chain.add(base + "_" + array.get(i).getAsString());
                 }
                 ChainData.add(chain);
             }
@@ -424,7 +424,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final HashMap<String, GeoBone> geoBoneCache = new HashMap<>();
-    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
 
     public final @Nullable GeoBone getCachedGeoBone(String name) {
         GeoBone bone = geoBoneCache.get(name);
@@ -460,28 +459,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return (GeoBone) b;
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3d raw) {
+    public final GeoBone setRotationForBone(String bone_name, Vec3d rot) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
         }
-        Vec3d prev = prevBoneRotation.get(bone_name);
-        double rx, ry, rz;
-        if (prev != null) {
-            rx = prev.x + wrapRadiansDelta(raw.x - prev.x);
-            ry = prev.y + wrapRadiansDelta(raw.y - prev.y);
-            rz = prev.z + wrapRadiansDelta(raw.z - prev.z);
-        } else {
-            rx = raw.x;
-            ry = raw.y;
-            rz = raw.z;
-        }
-        Vec3d corrected = new Vec3d(rx, ry, rz);
-        b.setRotX((float) corrected.x);
-        b.setRotY((float) corrected.y);
-        b.setRotZ((float) corrected.z);
-        prevBoneRotation.put(bone_name, corrected);
-        return b;
+        b.setRotX((float)rot.x);
+        b.setRotY((float)rot.y);
+        b.setRotZ((float)rot.z);
+        return (GeoBone) b;
     }
 
     private static double wrapRadiansDelta(double delta) {
@@ -501,7 +487,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
             return null;
         }
         b.setModelPosition(new Vector3d(pos.x, pos.y, pos.z));
-        return b;
+        return (GeoBone) b;
     }
 
     public final GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
@@ -516,24 +502,24 @@ public class FormModel extends GeoModel<FormAnimatable> {
         b.setScaleX((float)scale.x);
         b.setScaleY((float)scale.y);
         b.setScaleZ((float)scale.z);
-        return b;
+        return (GeoBone) b;
     }
 
     public final GeoBone setScaleForBone(String bone_name, Vec3f scale) {
         return setScaleForBone(bone_name, new Vec3d(scale.x(), scale.y(), scale.z()));
     }
 
-    public final void invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
+    public final GeoBone invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
         var b = getCachedGeoBone(bone_name);
-        if (b == null) {return;}
+        if (b == null) {return null;}
         var r =b.getRotationVector().mul(x ? -1 : 1, y ? -1 : 1, z ? -1 : 1);
         b.setRotX((float) r.x);
         b.setRotY((float) r.y);
         b.setRotZ((float) r.z);
+        return b;
     }
 
     public final GeoBone resetBone(String bone_name) {
-        prevBoneRotation.remove(bone_name);
         setPositionForBone(bone_name, new Vec3d(0,0,0));
         setRotationForBone(bone_name, new Vec3d(0,0,0));
         setModelPositionForBone(bone_name, Vec3d.ZERO);
@@ -543,6 +529,16 @@ public class FormModel extends GeoModel<FormAnimatable> {
     @Override
     public Identifier getModelResource(FormAnimatable animatable) {
         PlayerEntity player = animatable.e;
+        // Skin Model System Not Implemented
+        // if (player != null) {
+        //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
+        //     if (formSkin != null) {
+        //         Identifier formModel = formSkin.getSkinModel(useSlim(SlimMap.getOrDefault(player, false)));
+        //         if (formModel != null) {
+        //             return formModel;
+        //         }
+        //     }
+        // }
         return getModelResource(SlimMap.getOrDefault(player, false));
     }
 

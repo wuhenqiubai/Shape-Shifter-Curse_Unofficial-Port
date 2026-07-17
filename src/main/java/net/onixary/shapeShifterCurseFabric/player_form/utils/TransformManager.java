@@ -57,9 +57,12 @@ public class TransformManager {
         return data;
     }
 
-    public static void startTransform(PlayerEntity player, IForm form, @Nullable Consumer<PlayerTransformData> onTransformComplete) {
+    public static boolean startTransform(PlayerEntity player, IForm form, @Nullable Consumer<PlayerTransformData> onTransformComplete) {
         if (form.isPlayerForm(player) || !(player instanceof ServerPlayerEntity serverPlayerEntity)) {
-            return;
+            return true;
+        }
+        if (!FormUtils.isFormCanUse(player, form)) {
+            return false;
         }
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.transformTargetForm = form;
@@ -77,11 +80,15 @@ public class TransformManager {
                 data.onTransformComplete = null;
             }
         }
+        return true;
     }
 
-    public static void immediatelyTransform(PlayerEntity player, IForm form) {
+    public static boolean immediatelyTransform(PlayerEntity player, IForm form) {
         if (form.isPlayerForm(player) || !(player instanceof ServerPlayerEntity serverPlayerEntity)) {
-            return;
+            return true;
+        }
+        if (!FormUtils.isFormCanUse(player, form)) {
+            return false;
         }
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.transformTargetForm = form;
@@ -92,6 +99,7 @@ public class TransformManager {
         data.onTransformComplete = null;
         ShapeShifterCurseFabric.ON_TRANSFORM_FORM.trigger(serverPlayerEntity, form.getFormID());
         setForm(player);
+        return true;
     }
 
     private static void setForm(PlayerEntity player) {

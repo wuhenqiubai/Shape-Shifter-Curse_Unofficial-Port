@@ -1,5 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.zigythebird.playeranim.accessors.IAnimatedPlayer;
+import com.zigythebird.playeranimcore.api.firstPerson.FirstPersonConfiguration;
+import com.zigythebird.playeranimcore.api.firstPerson.FirstPersonMode;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.model.ModelPart;
@@ -18,6 +21,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
@@ -55,7 +59,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
                 PlayerEntityRenderer playerEntityRenderer = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(abstractClientPlayerEntity);
                 PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = playerEntityRenderer.getModel();
                 FormModel formModel = (FormModel) formRenderer.getGeoModel();
-                FormAnimatable formAnimatable = formRenderer.getAnimatable();
+                FormAnimatable formAnimatable = formRenderer.realAnimatable;
                 formRenderer.setPlayer(abstractClientPlayerEntity, playerEntityModel.thinArms);
                 matrices.push();
                 matrices.multiply(new Quaternionf().rotateX(180 * MathHelper.RADIANS_PER_DEGREE));
@@ -115,26 +119,26 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
         boolean rightLegHidden = false;
         boolean rightPantsHidden = !player.isPartVisible(PlayerModelPart.RIGHT_PANTS_LEG);
         // Better Combat 修复
-//        if (FirstPersonMode.isFirstPersonPass() && ShapeShifterCurseFabric.clientConfig.enableBetterCombatFix && player == MinecraftClient.getInstance().getCameraEntity()) {
-//            AnimationApplier animationApplier = ((IAnimatedPlayer) player).playerAnimator_getAnimation();
-//            FirstPersonConfiguration config = animationApplier.getFirstPersonConfiguration();
-//            hatHidden = true;
-//            headHidden = true;
-//            bodyHidden = true;
-//            jacketHidden = true;
-//            if (!config.isShowLeftArm()) {
-//                leftArmHidden = true;
-//                leftSleeveHidden = true;
-//            }
-//            if (!config.isShowRightArm()) {
-//                rightArmHidden = true;
-//                rightSleeveHidden = true;
-//            }
-//            leftLegHidden = true;
-//            leftPantsHidden = true;
-//            rightLegHidden = true;
-//            rightPantsHidden = true;
-//        }
+        if (FirstPersonMode.isFirstPersonPass() && ShapeShifterCurseFabric.clientConfig.enableBetterCombatFix && player == MinecraftClient.getInstance().getCameraEntity()) {
+            AnimationApplier animationApplier = ((IAnimatedPlayer) player).playerAnimator_getAnimation();
+            FirstPersonConfiguration config = animationApplier.getFirstPersonConfiguration();
+            hatHidden = true;
+            headHidden = true;
+            bodyHidden = true;
+            jacketHidden = true;
+            if (!config.isShowLeftArm()) {
+                leftArmHidden = true;
+                leftSleeveHidden = true;
+            }
+            if (!config.isShowRightArm()) {
+                rightArmHidden = true;
+                rightSleeveHidden = true;
+            }
+            leftLegHidden = true;
+            leftPantsHidden = true;
+            rightLegHidden = true;
+            rightPantsHidden = true;
+        }
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             hatHidden |= formModel.Hidden_Hat;
@@ -265,7 +269,7 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
             if (formRenderer == null) {return;}
             PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = playerEntityRenderer.getModel();
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            FormAnimatable formAnimatable = formRenderer.getAnimatable();
+            FormAnimatable formAnimatable = formRenderer.realAnimatable;
             formRenderer.setPlayer(player, playerEntityModel.thinArms);
             matrices.push();
             matrices.multiply(new Quaternionf().rotateX(180 * MathHelper.RADIANS_PER_DEGREE));
@@ -288,8 +292,8 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
             Identifier OverlayTextureID = formModel.getOverlayTextureResource(playerEntityModel.thinArms);
             if (OverlayTextureID != null) {
                 RenderLayer OverlayLayer = null;
-                if (FormRenderUtils.isRenderingInWorld && IRISInstalled) {
-                    OverlayLayer = RenderLayer.getEntityCutout(OverlayTextureID);
+                if ((FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled) {
+                    OverlayLayer = RenderLayer.getEntityCutoutNoCullZOffset(OverlayTextureID);
                 } else {
                     OverlayLayer = RenderLayer.getEntityCutout(OverlayTextureID);
                 }

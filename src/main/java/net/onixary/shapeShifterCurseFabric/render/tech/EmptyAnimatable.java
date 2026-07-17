@@ -16,9 +16,9 @@ public class EmptyAnimatable implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-	    controllers.add(new AnimationController<>(this, ShapeShifterCurseFabric.MOD_ID, animationState -> {
-		    animationState.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
-		    return PlayState.CONTINUE;
+        controllers.add(new AnimationController<EmptyAnimatable>(this, ShapeShifterCurseFabric.MOD_ID, animationState -> {
+            animationState.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
+            return PlayState.CONTINUE;
         }));
     }
 

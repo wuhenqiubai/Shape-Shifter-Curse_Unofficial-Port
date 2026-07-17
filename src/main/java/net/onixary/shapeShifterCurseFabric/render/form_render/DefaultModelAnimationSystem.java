@@ -390,8 +390,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
                 this.extraPartsMap.add(new Pair<>(key, extraPartsMap.get(key).getAsString()));
             }
         }
-	    this.leftArmGeoBoneID = "bipedLeftArm";
-	    this.rightArmGeoBoneID = "bipedRightArm";
+        this.leftArmGeoBoneID = "bipedLeftArm";
+        this.rightArmGeoBoneID = "bipedRightArm";
         if (json.has("first_person_render")) {
             JsonObject firstPersonRender = json.getAsJsonObject("first_person_render");
             if (firstPersonRender.has("left_arm")) {
@@ -471,7 +471,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    public void ProcessExtraBone(FormModel m, PlayerEntity player, String OriginFursBoneID, String AnimBoneID) {
+    public void ProcessExtraBone(FormModel m, PlayerEntity player, String AnimBoneID, String OriginFursBoneID) {
         GeoBone bone =  m.resetBone(OriginFursBoneID);
         Vec3f AnimPosition = AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.POSITION, new Vec3f(0, 0, 0));
         m.setPositionForBone(OriginFursBoneID, new Vec3d(AnimPosition.x(), -AnimPosition.y(), -AnimPosition.z()));
@@ -726,7 +726,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             // 有时AzureLib 未能及时注册 GeoBone 因此需要手动注册
             if (model.getAnimationProcessor().getRegisteredBones().isEmpty()) {
                 ShapeShifterCurseFabric.LOGGER.info("GeoBone 未注册, 尝试重新注册模型");
-                BakedGeoModel bakedGeoModel = model.getBakedModel(model.getModelResource(formRenderer.getAnimatable()));
+                BakedGeoModel bakedGeoModel = model.getBakedModel(model.getModelResource(formRenderer.realAnimatable));
                 model.getAnimationProcessor().setActiveModel(bakedGeoModel);
             }
             return null;
@@ -740,7 +740,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         model.resetBone(GeoBoneName);
-	    model.translatePositionForBone(GeoBoneName, FormRenderUtils.getPartPosition(arm));
+        model.translatePositionForBone(GeoBoneName, FormRenderUtils.getPartPosition(arm));
         model.translatePositionForBone(GeoBoneName, new Vec3d(5 * (IsRenderRight ? -1.0 : 1.0), 2, 0));
         model.setRotationForBone(GeoBoneName, FormRenderUtils.getPartRotation(arm));
         model.invertRotForPart(GeoBoneName, false, true, true);

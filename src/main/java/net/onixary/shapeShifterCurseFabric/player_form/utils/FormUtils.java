@@ -294,7 +294,7 @@ public class FormUtils {
         FormUtils._loadForm(player, component.getFallbackForm());
     }
 
-    public static boolean isFormCanUse(PlayerEntity player, IForm form) {
+    public static boolean isFormCanUse(@Nullable PlayerEntity player, @Nullable IForm form) {
         boolean canUse = true;
         if (form instanceof IFormWithCondition iFormWithCondition) {
             canUse &= iFormWithCondition.checkCanUse(player);

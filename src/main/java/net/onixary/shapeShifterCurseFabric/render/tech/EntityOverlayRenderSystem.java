@@ -7,6 +7,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
+import software.bernie.geckolib.renderer.GeoObjectRenderer;
 
 import java.util.ArrayList;
 
@@ -18,12 +19,12 @@ public class EntityOverlayRenderSystem {
         public abstract void render(Entity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light);
     }
 
-	public static ArrayList<OverlayData> overlayDataList = new ArrayList<>();
+    public static ArrayList<OverlayData> overlayDataList = new ArrayList<OverlayData>();
 
     static {
         overlayDataList.add(new OverlayData() {
             private static CocoonModel cocoonModel = new CocoonModel();
-	        private static GeoObjectRenderer<EmptyAnimatable> cocoonRenderer = new GeoObjectRenderer<>(cocoonModel);
+            private static GeoObjectRenderer<EmptyAnimatable> cocoonRenderer = new GeoObjectRenderer<EmptyAnimatable>(cocoonModel);
 
             @Override
             public boolean canRender(Entity entity, float yaw, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {

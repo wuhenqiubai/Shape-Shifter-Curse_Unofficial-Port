@@ -274,12 +274,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of(MOD_ID, "form_argument_type"),
                 FormArgumentType.class,
-                ConstantArgumentSerializer.of(FormArgumentType::new)
-        );
-        ArgumentTypeRegistry.registerArgumentType(
-                Identifier.of(MOD_ID, "custom_form_argument_type"),
-                DynamicFormArgumentType.class,
-                ConstantArgumentSerializer.of(DynamicFormArgumentType::new)
+                new FormArgumentType.Form_ArgumentType_Serializer()
         );
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of(MOD_ID, "string_enum_argument_type"),
