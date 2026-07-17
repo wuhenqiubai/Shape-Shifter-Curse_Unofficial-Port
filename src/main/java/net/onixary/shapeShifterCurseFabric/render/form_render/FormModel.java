@@ -40,6 +40,8 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public int modelID = -1;
 
     public boolean SlimOnly = false;
+
+    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
     public boolean WideOnly = false;
     public boolean UseMultiplyMask = false;
     public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
@@ -459,15 +461,28 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return (GeoBone) b;
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3d rot) {
+    public final GeoBone setRotationForBone(String bone_name, Vec3d raw) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
         }
-        b.setRotX((float)rot.x);
-        b.setRotY((float)rot.y);
-        b.setRotZ((float)rot.z);
-        return (GeoBone) b;
+        Vec3d prev = prevBoneRotation.get(bone_name);
+        double rx, ry, rz;
+        if (prev != null) {
+            rx = prev.x + wrapRadiansDelta(raw.x - prev.x);
+            ry = prev.y + wrapRadiansDelta(raw.y - prev.y);
+            rz = prev.z + wrapRadiansDelta(raw.z - prev.z);
+        } else {
+            rx = raw.x;
+            ry = raw.y;
+            rz = raw.z;
+        }
+        Vec3d corrected = new Vec3d(rx, ry, rz);
+        b.setRotX((float) corrected.x);
+        b.setRotY((float) corrected.y);
+        b.setRotZ((float) corrected.z);
+        prevBoneRotation.put(bone_name, corrected);
+        return b;
     }
 
     private static double wrapRadiansDelta(double delta) {
@@ -521,7 +536,10 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public final GeoBone resetBone(String bone_name) {
         setPositionForBone(bone_name, new Vec3d(0,0,0));
-        setRotationForBone(bone_name, new Vec3d(0,0,0));
+        var b = this.getCachedGeoBone(bone_name);
+        if (b != null) {
+            b.setRotX(0); b.setRotY(0); b.setRotZ(0);
+        }
         setModelPositionForBone(bone_name, Vec3d.ZERO);
         return setScaleForBone(bone_name, new Vec3d(1,1,1));
     }

@@ -67,6 +67,7 @@ public class ModPacketsS2C {
         BytePayload.registerS2C(SET_NO_JUMP_TICK);
         BytePayload.registerS2C(OPEN_FORM_COLOR_SELECT_MENU);
         BytePayload.registerS2C(MODIFY_FCD_DATA);
+        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
 
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(SYNC_CURSED_MOON_DATA), (payload, ctx) -> {
             boolean isCursedMoon = payload.data().readBoolean();
