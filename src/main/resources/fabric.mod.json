@@ -144,7 +144,7 @@
     "origins": ">0.0.0",
     "enchantedlib": ">0.3.0",
     "optifabric": "*",
-    "geckolib": "<4.0.0"
+    "geckolib": "<4.7.0"
   },
   "recommends": {
     "firstperson": "*",
