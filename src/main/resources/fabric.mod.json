@@ -138,13 +138,13 @@
     "pehkui": ">=3.8.3",
     "satin": ">=2.0.0",
     "player_animation_library": ">=1.0.11",
-    "geckolib": ">=4.0.0"
+    "geckolib": ">=4.7.0"
   },
   "breaks": {
     "origins": ">0.0.0",
     "enchantedlib": ">0.3.0",
     "optifabric": "*",
-    "geckolib": "<4.0.0"
+    "geckolib": "<4.7.0"
   },
   "recommends": {
     "firstperson": "*",
