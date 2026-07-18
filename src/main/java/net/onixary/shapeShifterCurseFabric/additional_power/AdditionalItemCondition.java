@@ -21,6 +21,8 @@ public class AdditionalItemCondition {
                 ShapeShifterCurseFabric.identifier("is_weapon"),
                 new SerializableData(),
                 (data, pair) -> {
+//                (data, itemstack) -> {
+//                    Collection<EntityAttributeModifier> modifiers = itemstack.getItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(EntityAttributes.GENERIC_ATTACK_DAMAGE);
                     ItemStack itemstack = pair.getRight();
                     var attrComponent = itemstack.get(DataComponentTypes.ATTRIBUTE_MODIFIERS);
                     double totalAdd = 0;

@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -34,7 +33,6 @@ import net.onixary.shapeShifterCurseFabric.additional_power.*;
 import net.onixary.shapeShifterCurseFabric.advancement.*;
 import net.onixary.shapeShifterCurseFabric.advancement.misc.CriterionAdditions;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
-import net.onixary.shapeShifterCurseFabric.command.DynamicFormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.FormArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.MiscArgumentType;
 import net.onixary.shapeShifterCurseFabric.command.ShapeShifterCurseCommand;
@@ -75,6 +73,7 @@ import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManag
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.DefaultAccessory;
 import net.onixary.shapeShifterCurseFabric.util.*;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -241,6 +240,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         ManaRegistries.register();
         DefaultAccessory.init();
+        AuthServer.init();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 获取主世界作为默认世界
@@ -272,12 +272,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of(MOD_ID, "form_argument_type"),
                 FormArgumentType.class,
-                ConstantArgumentSerializer.of(FormArgumentType::new)
-        );
-        ArgumentTypeRegistry.registerArgumentType(
-                Identifier.of(MOD_ID, "custom_form_argument_type"),
-                DynamicFormArgumentType.class,
-                ConstantArgumentSerializer.of(DynamicFormArgumentType::new)
+                new FormArgumentType.Form_ArgumentType_Serializer()
         );
         ArgumentTypeRegistry.registerArgumentType(
                 Identifier.of(MOD_ID, "string_enum_argument_type"),

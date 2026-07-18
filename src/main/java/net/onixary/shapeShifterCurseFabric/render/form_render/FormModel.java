@@ -8,11 +8,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_form.IForm;
-import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
@@ -22,6 +19,7 @@ import software.bernie.geckolib.model.GeoModel;
 
 import java.util.*;
 
+@SuppressWarnings("removal")
 public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
     public static HashMap<PlayerEntity, Boolean> SlimMap = new HashMap<>();
@@ -42,6 +40,8 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public int modelID = -1;
 
     public boolean SlimOnly = false;
+
+    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
     public boolean WideOnly = false;
     public boolean UseMultiplyMask = false;
     public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
@@ -103,6 +103,22 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public List<List<String>> BCD_TailChainHead = new ArrayList<>();
     public List<List<String>> BCD_WingChainL = new ArrayList<>();
     public List<List<String>> BCD_WingChainR = new ArrayList<>();
+
+    public static class NeckIkConfig {
+        public String mount = "neck_mount";
+        public String head = "ik_head";
+        public List<String> chain = new ArrayList<>();
+        public char yawAxis = 'y';
+        public char pitchAxis = 'x';
+        public float yawSign = -1.0f;
+        public float pitchSign = 1.0f;
+        public float[] yawWeights = new float[0];
+        public float[] pitchWeights = new float[0];
+        public float maxYawDeg = 85.0f;
+        public float maxPitchUpDeg = 55.0f;
+        public float maxPitchDownDeg = 45.0f;
+    }
+    // NECK FEATURES END
 
     public FormModel(JsonObject json) {
         this.modelJson = json;
@@ -261,7 +277,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
                 JsonArray array = entry.getValue().getAsJsonArray();
                 List<String> chain = new ArrayList<>();
                 for (int i = 0; i < array.size(); i++) {
-	                chain.add(base + "_" + array.get(i).getAsString());
+                    chain.add(base + "_" + array.get(i).getAsString());
                 }
                 ChainData.add(chain);
             }
@@ -270,25 +286,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public void loadBCD() {
-        BCD_TailChain.clear();
-        BCD_TailChainHead.clear();
-        BCD_WingChainL.clear();
-        BCD_WingChainR.clear();
-        JsonObject bcdJson = JsonHelper.getObject(this.modelJson, "builtin_controller_data", null);
-        if (bcdJson != null) {
-            if (bcdJson.has("tail_chain")) {
-                BCD_TailChain = loadChainData(bcdJson.getAsJsonObject("tail_chain"));
-            }
-            if (bcdJson.has("tail_chain_head")) {
-                BCD_TailChainHead = loadChainData(bcdJson.getAsJsonObject("tail_chain_head"));
-            }
-            if (bcdJson.has("wing_chain_l")) {
-                BCD_WingChainL = loadChainData(bcdJson.getAsJsonObject("wing_chain_l"));
-            }
-            if (bcdJson.has("wing_chain_r")) {
-                BCD_WingChainR = loadChainData(bcdJson.getAsJsonObject("wing_chain_r"));
-            }
-        }
+        // BCD 目前没参数了 之前的迁移至DefaultModelAnimationSystem里了 不过这套系统还留着 后续想加新参数可以在这里写
     }
 
     public void setPlayer(PlayerEntity player, boolean slim) {
@@ -327,6 +325,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
         boolean uslim = useSlim(slim);
         Identifier Resource = uslim ? this.TextureResource_Slim : this.TextureResource;
         Identifier ResourceMask = uslim ? this.TextureMaskResource_Slim : this.TextureMaskResource;
+        if (this.entity != null) {
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            if (formSkin != null) {
+                Identifier SkinResource = formSkin.getSkinTexture(uslim);
+                if (SkinResource != null) {
+                    return SkinResource;
+                }
+            }
+        }
         if (ResourceMask != null) {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "texture_slim" : "texture", Resource, ResourceMask, UseMultiplyMask);
@@ -344,6 +351,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
         boolean uslim = useSlim(slim);
         Identifier Resource = uslim ? this.OverlayTextureResource_Slim : this.OverlayTextureResource;
         Identifier ResourceMask = uslim ? this.OverlayTextureMaskResource_Slim : this.OverlayTextureMaskResource;
+        if (this.entity != null) {
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            if (formSkin != null) {
+                Identifier SkinResource = formSkin.getSkinOverlayTexture(uslim);
+                if (SkinResource != null) {
+                    return SkinResource;
+                }
+            }
+        }
         if (ResourceMask != null) {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "overlay_texture_slim" : "overlay_texture", Resource, ResourceMask, UseMultiplyMask);
@@ -361,6 +377,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
         boolean uslim = useSlim(slim);
         Identifier Resource = uslim ? this.EmissiveTextureResource_Slim : this.EmissiveTextureResource;
         Identifier ResourceMask = uslim ? this.EmissiveTextureMaskResource_Slim : this.EmissiveTextureMaskResource;
+        if (this.entity != null) {
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            if (formSkin != null) {
+                Identifier SkinResource = formSkin.getSkinEmissiveTexture(uslim);
+                if (SkinResource != null) {
+                    return SkinResource;
+                }
+            }
+        }
         if (ResourceMask != null) {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "emissive_texture_slim" : "emissive_texture", Resource, ResourceMask, UseMultiplyMask);
@@ -401,7 +426,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final HashMap<String, GeoBone> geoBoneCache = new HashMap<>();
-    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
 
     public final @Nullable GeoBone getCachedGeoBone(String name) {
         GeoBone bone = geoBoneCache.get(name);
@@ -415,110 +439,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return bone;
     }
 
-    public final void setRotationForTailBones(float limbAngle, float limbDistance, float age, float tailDragAmount, float tailDragAmountVertical) {
-        IForm curForm = FormTextureUtils.getPlayerForm_Render(entity);
-        boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
-        float SWAY_RATE = 0.33333334F * 0.5F;
-        float SWAY_SCALE = 0.05F;
-        if(BCD_TailChain.isEmpty()) {return;}
-        for (List<String> tailChain : BCD_TailChain) {
-	        GeoBone firstTail = this.getCachedGeoBone(tailChain.getFirst());
-            if (firstTail == null) {
-                continue;
-            }
-            float tailSway = SWAY_SCALE * MathHelper.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
-            float tailBalance = MathHelper.cos(limbAngle * 0.6662F) * 0.325F * limbDistance;
-            if(!isFeral){
-                firstTail.setRotY(-MathHelper.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
-            } else {
-                firstTail.setRotZ(MathHelper.lerp(limbDistance, tailSway, tailBalance) + tailDragAmount * 0.75F);
-            }
-            firstTail.setRotX(-tailDragAmountVertical * 0.75f);
-            float offset = 0.0F;
-            for(int i = 1; i < tailChain.size(); i++){
-                GeoBone chainBone = this.getCachedGeoBone(tailChain.get(i));
-                if (chainBone == null) {continue;}
-                float decayFactor = 0.75F + offset * 0.15F;  // 链骨权重衰减：越远越柔
-                if(!isFeral){
-                    chainBone.setRotY(- MathHelper.lerp(limbDistance, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * decayFactor);
-                } else{
-                    chainBone.setRotZ(MathHelper.lerp(limbDistance, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * decayFactor);
-                }
-                chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
-                offset += 0.75F;
-            }
-        }
-    }
 
-    public final void setRotationForHeadTailBones(float headAngle, float age, float tailDragAmount, float tailDragAmountVertical){
-        float SWAY_RATE = 0.33333334F * 0.5F;
-        float SWAY_SCALE = 0.05F;
-        if (BCD_TailChainHead.isEmpty()) {return;}
-        for (List<String> tailChain : BCD_TailChainHead) {
-	        GeoBone firstHeadTail = this.getCachedGeoBone(tailChain.getFirst());
-            if (firstHeadTail == null) {
-                continue;
-            }
-            float headTailSway = SWAY_SCALE * MathHelper.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
-            float headTailBalance = MathHelper.cos(headAngle * 0.6662F) * 0.325F * 0.1f;
-            firstHeadTail.setRotY(-MathHelper.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
-            firstHeadTail.setRotX(-tailDragAmountVertical * 0.75f);
-            float offset = 0.0F;
-            for (int i = 1; i < tailChain.size(); i++){
-                GeoBone chainBone = this.getCachedGeoBone(tailChain.get(i));
-                if (chainBone == null) {continue;}
-                chainBone.setRotY(- MathHelper.lerp(0.1f, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
-                chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
-                offset += 0.75F;
-            }
-        }
-    }
 
-    public final void setRotationForWingBones(float limbAngle, float limbDistance, float age, float tailDragAmountVertical){
-        float swayAngle = age * 20.0F * (float) (Math.PI / 180.0) + limbAngle;
-        float sway_base = MathHelper.cos(swayAngle) * (float) Math.PI * 0.15F + limbDistance;
-        float sway_l = (float) -(Math.PI / 4) + sway_base;
-        float sway_r = (float) (Math.PI / 4) - sway_base;
-
-        if (BCD_WingChainL != null) {
-            for (List<String> wingChain : BCD_WingChainL) {
-	            GeoBone firstWing = this.getCachedGeoBone(wingChain.getFirst());
-                if (firstWing == null) { continue; }
-                firstWing.setRotY(sway_l);
-                firstWing.setRotX(-tailDragAmountVertical * 0.35f);
-                float offset = 0.0F;
-                for (int i = 1; i < wingChain.size(); i++) {
-                    GeoBone chainBone = this.getCachedGeoBone(wingChain.get(i));
-                    if (chainBone == null) { continue; }
-                    chainBone.setRotX(-tailDragAmountVertical * 0.75f * offset);
-                    offset += 0.75F;
-                }
-            }
-        }
-        if (BCD_WingChainR != null) {
-            for (List<String> wingChain : BCD_WingChainR) {
-	            GeoBone firstWing = this.getCachedGeoBone(wingChain.getFirst());
-                if (firstWing == null)  continue;
-                firstWing.setRotY(sway_r);
-                firstWing.setRotX(-tailDragAmountVertical * 0.35f);
-                float offset = 0.0F;
-                for (int i = 1; i < wingChain.size(); i++) {
-                    GeoBone chainBone = this.getCachedGeoBone(wingChain.get(i));
-                    if (chainBone == null) { continue; }
-                    chainBone.setRotX(-tailDragAmountVertical * 0.75f * offset);
-                    offset += 0.75F;
-                }
-            }
-        }
-    }
-
-    public final void translatePositionForBone(String bone_name, Vec3d pos) {
+    public final GeoBone translatePositionForBone(String bone_name, Vec3d pos) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
-            return;
+            return null;
         }
         var posOut = new Vec3d(pos.x + b.getPosX(), (float)pos.y + b.getPosY(),(float)pos.z + b.getPosZ());
-        this.setPositionForBone(bone_name, posOut);
+        return this.setPositionForBone(bone_name, posOut);
     }
 
     public final GeoBone setPositionForBone(String bone_name, Vec3d pos) {
@@ -529,7 +458,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         b.setPosX((float)pos.x);
         b.setPosY((float)pos.y);
         b.setPosZ((float)pos.z);
-        return b;
+        return (GeoBone) b;
     }
 
     public final GeoBone setRotationForBone(String bone_name, Vec3d raw) {
@@ -573,7 +502,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
             return null;
         }
         b.setModelPosition(new Vector3d(pos.x, pos.y, pos.z));
-        return b;
+        return (GeoBone) b;
     }
 
     public final GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
@@ -588,26 +517,29 @@ public class FormModel extends GeoModel<FormAnimatable> {
         b.setScaleX((float)scale.x);
         b.setScaleY((float)scale.y);
         b.setScaleZ((float)scale.z);
-        return b;
+        return (GeoBone) b;
     }
 
     public final GeoBone setScaleForBone(String bone_name, Vec3f scale) {
         return setScaleForBone(bone_name, new Vec3d(scale.x(), scale.y(), scale.z()));
     }
 
-    public final void invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
+    public final GeoBone invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
         var b = getCachedGeoBone(bone_name);
-        if (b == null) {return;}
+        if (b == null) {return null;}
         var r =b.getRotationVector().mul(x ? -1 : 1, y ? -1 : 1, z ? -1 : 1);
         b.setRotX((float) r.x);
         b.setRotY((float) r.y);
         b.setRotZ((float) r.z);
+        return b;
     }
 
     public final GeoBone resetBone(String bone_name) {
-        prevBoneRotation.remove(bone_name);
         setPositionForBone(bone_name, new Vec3d(0,0,0));
-        setRotationForBone(bone_name, new Vec3d(0,0,0));
+        var b = this.getCachedGeoBone(bone_name);
+        if (b != null) {
+            b.setRotX(0); b.setRotY(0); b.setRotZ(0);
+        }
         setModelPositionForBone(bone_name, Vec3d.ZERO);
         return setScaleForBone(bone_name, new Vec3d(1,1,1));
     }
@@ -615,6 +547,16 @@ public class FormModel extends GeoModel<FormAnimatable> {
     @Override
     public Identifier getModelResource(FormAnimatable animatable) {
         PlayerEntity player = animatable.e;
+        // Skin Model System Not Implemented
+        // if (player != null) {
+        //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
+        //     if (formSkin != null) {
+        //         Identifier formModel = formSkin.getSkinModel(useSlim(SlimMap.getOrDefault(player, false)));
+        //         if (formModel != null) {
+        //             return formModel;
+        //         }
+        //     }
+        // }
         return getModelResource(SlimMap.getOrDefault(player, false));
     }
 

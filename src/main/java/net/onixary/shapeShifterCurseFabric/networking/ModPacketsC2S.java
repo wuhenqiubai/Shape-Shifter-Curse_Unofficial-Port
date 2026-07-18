@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
@@ -22,6 +23,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
 
 import java.util.UUID;
 
@@ -76,11 +78,22 @@ public class ModPacketsC2S {
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(SET_FORM), ModPacketsC2S::receiveSetForm);
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_SERVER), ModPacketsC2S::onUpdatePowerAnimationData);
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(REQUEST_POWER_ANIM_DATA), ModPacketsC2S::onRequestPowerAnimationData);
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), ModPacketsC2S::receivePatronAuthFile);
     }
 
     public static void sendDetachRequest(ServerPlayerEntity player) {
         PacketByteBuf buf = PacketByteBufs.create();
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(JUMP_DETACH_REQUEST_ID),  buf));
+    }
+
+    private static void receivePatronAuthFile(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        byte[] data = payload.data().readByteArray();
+        if (data != null) {
+            ServerPlayerEntity player = ctx.player();
+            if (player != null) {
+                AuthServer.loadPatronAuthFile(player, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+            }
+        }
     }
 
     private static void onUpdatePlayerCustomConfig(BytePayload payload, ServerPlayNetworking.Context ctx) {
@@ -188,5 +201,6 @@ public class ModPacketsC2S {
         BytePayload.registerC2S(SET_FORM);
         BytePayload.registerC2S(UPDATE_POWER_ANIM_DATA_TO_SERVER);
         BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
+        BytePayload.registerC2S(ModPackets.UPLOAD_PATRON_AUTH_FILE);
     }
 }

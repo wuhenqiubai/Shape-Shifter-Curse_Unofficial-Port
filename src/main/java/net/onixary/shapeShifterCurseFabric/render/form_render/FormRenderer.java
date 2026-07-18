@@ -5,19 +5,18 @@ import software.bernie.geckolib.renderer.GeoObjectRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
+    public FormAnimatable realAnimatable = null;
     public FormModel realModel = null;
 
     public FormRenderer(JsonObject modelJson) {
         super(new FormModel(modelJson));
         this.realModel = (FormModel) this.model;
-        this.animatable = new FormAnimatable();
+        this.realAnimatable = new FormAnimatable();
+        this.animatable = this.realAnimatable;
     }
 
     public void setPlayer(PlayerEntity player, boolean slim) {
-        if (this.animatable == null) {
-            this.animatable = new FormAnimatable();
-        }
-        this.animatable.setPlayer(player);
+        this.realAnimatable.setPlayer(player);
         this.realModel.setPlayer(player, slim);
     }
 }
