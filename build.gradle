@@ -109,7 +109,7 @@ repositories {
         url = "https://jitpack.io"
     }
     maven {
-        url = "https://maven.terraformersmc.com"
+        url "https://maven.terraformersmc.com/releases/"
     }
 
     // player animator
