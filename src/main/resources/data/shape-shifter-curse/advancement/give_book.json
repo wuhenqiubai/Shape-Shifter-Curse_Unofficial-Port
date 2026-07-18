@@ -5,11 +5,6 @@
 		}
 	},
 	"rewards": {
-		"recipes": []
-	},
-	"requirements": [
-		[
-			"first_join"
-		]
-	]
+		"function": "shape-shifter-curse:delay_give_book"
+	}
 }
