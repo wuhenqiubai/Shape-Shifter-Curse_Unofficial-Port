@@ -8,7 +8,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.player.PlayerEntity;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.renderer.GeoObjectRenderer;
-import net.minecraft.entity.player.PlayerEntity;
 
 public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
     public FormAnimatable realAnimatable = null;
@@ -27,8 +26,8 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
     }
 
     @Override
-    public void renderRecursively(MatrixStack poseStack, FormAnimatable animatable, GeoBone bone, RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void renderRecursively(MatrixStack poseStack, FormAnimatable animatable, GeoBone bone, RenderLayer renderType, VertexConsumerProvider bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         FormEyeBlinkController.applyForRenderedBone(animatable, bone);
-        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, red, green, blue, alpha);
+        super.renderRecursively(poseStack, animatable, bone, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
     }
 }
