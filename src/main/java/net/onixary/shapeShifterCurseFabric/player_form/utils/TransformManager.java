@@ -83,6 +83,14 @@ public class TransformManager {
         return true;
     }
 
+    public static boolean forceTransform(PlayerEntity player, IForm form, boolean immediately) {
+        FormUtils.clearPlayerFormHistory(player);
+        if (immediately) {
+            return immediatelyTransform(player, form);
+        }
+        return startTransform(player, form, null);
+    }
+
     public static boolean immediatelyTransform(PlayerEntity player, IForm form) {
         if (form.isPlayerForm(player) || !(player instanceof ServerPlayerEntity serverPlayerEntity)) {
             return true;
@@ -109,7 +117,7 @@ public class TransformManager {
         IForm form = data.transformEndForm;
         EffectManager.clearTransformativeEffect(player);
         FormUtils._setForm(player, form);
-        FormUtils.updateFormHistory(player, data.transformStartForm, form);
+        FormUtils.updateFormHistory(player, form);
         sendClientFirstPersonReset(player);
     }
 

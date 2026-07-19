@@ -102,6 +102,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             nowForm = FormUtils.parseForm(nowFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
         }
         if (tag.contains("formHistory")) {
+            formHistory.clear();
             NbtList history = tag.getList("formHistory", NbtElement.STRING_TYPE);
             formHistory.clear();
             for (NbtElement element : history) {
@@ -152,6 +153,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             instinctRate = 0f;
         }
         if (tag.contains("instinctEffects")) {
+            instinctEffects.clear();
             NbtCompound effects = tag.getCompound("instinctEffects");
             for (String key : effects.getKeys()) {
                 instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompound(key)));

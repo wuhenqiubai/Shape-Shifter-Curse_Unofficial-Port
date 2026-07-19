@@ -15,18 +15,16 @@ import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeySegment;
 import org.jetbrains.annotations.Nullable;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT;
-
-import java.util.List;
-import java.util.Map;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 // 纯服务端类，所有send方法都只在这里调用
 // This is a pure server-side class, all send methods are called only here
@@ -312,6 +310,12 @@ public class ModPacketsS2CServer {
         buf.writeString(arg3);
         buf.writeString(arg4);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
+    }
+
+    public static void requestPatronAuthFile(ServerPlayerEntity player) {
+        PacketByteBuf buf = PacketByteBufs.create();
+        buf.writeUuid(player.getUuid());
+        ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
     }
 
     public static void sendNewSubKey(ServerPlayerEntity player, KeySegment newKey) {
