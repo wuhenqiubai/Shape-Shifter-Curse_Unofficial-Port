@@ -5,12 +5,11 @@ import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -53,46 +52,46 @@ import static net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX.begi
 public class ModPacketsS2C {
 
     public static void register() {
-//        BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
-//        BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
-//        BytePayload.registerS2C(ModPackets.SYNC_TRANSFORM_STATE);
-//        BytePayload.registerS2C(ModPackets.SYNC_BAT_ATTACH_STATE);
-//        BytePayload.registerS2C(ModPackets.RESET_FIRST_PERSON);
-//        BytePayload.registerS2C(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
-//        BytePayload.registerS2C(ModPackets.SYNC_FORCE_SNEAK_STATE);
-//        BytePayload.registerS2C(ModPackets.UPDATE_DYNAMIC_FORM);
-//        BytePayload.registerS2C(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT);
-//        BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
-//        BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
-//        BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
-//        BytePayload.registerS2C(ModPackets.UPDATE_PATRON_LEVEL);
-//        BytePayload.registerS2C(ModPackets.OPEN_PATRON_FORM_SELECT_MENU);
-//        BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
-//        BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
-//        BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
-//        BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
-//        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
-//        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_CURSED_MOON_DATA, ModPacketsS2C::receiveCursedMoonData);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_FORM_CHANGE, ModPacketsS2C::receiveFormChange);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_TRANSFORM_STATE, ModPacketsS2C::receiveTransformState);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_BAT_ATTACH_STATE, ModPacketsS2C::receiveBatAttachState);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.RESET_FIRST_PERSON, ModPacketsS2C::receiveResetFirstPerson);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE, ModPacketsS2C::receiveOtherPlayerBatAttachState);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SYNC_FORCE_SNEAK_STATE, ModPacketsS2C::receiveForceSneakState);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_DYNAMIC_FORM, ModPacketsS2C::handleUpdateDynamicForm);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT, ModPacketsS2C::handleRemoveDynamicExcept);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.LOGIN_PACKET, ModPacketsS2C::onPlayerConnectServer);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.ACTIVE_VIRTUAL_TOTEM, ModPacketsS2C::receiveActiveVirtualTotem);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT, ModPacketsS2C::receivePowerAnimationData);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.UPDATE_PATRON_LEVEL, ModPacketsS2C::receiveUpdatePatronLevel);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_PATRON_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenPatronFormSelectMenu);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_FORM_SELECT_MENU, ModPacketsS2C::receiveOpenFormSelectMenu);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.SET_NO_JUMP_TICK, ModPacketsS2C::receiveSetNoJumpTick);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.OPEN_FORM_COLOR_SELECT_MENU, ModPacketsS2C::receiveOpenFCSMenu);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.MODIFY_FCD_DATA, ModPacketsS2C::receiveModifyFCDData);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.REQUEST_PATRON_AUTH_FILE, ModPacketsS2C::receiveRequestPatronAuthFile);
-        ClientPlayNetworking.registerGlobalReceiver(ModPackets.MELT_AUTH_SUB_KEY, ModPacketsS2C::receiveNewSubKey);
+        BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
+        BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
+        BytePayload.registerS2C(ModPackets.SYNC_TRANSFORM_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.RESET_FIRST_PERSON);
+        BytePayload.registerS2C(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_FORCE_SNEAK_STATE);
+        BytePayload.registerS2C(ModPackets.UPDATE_DYNAMIC_FORM);
+        BytePayload.registerS2C(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT);
+        BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
+        BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
+        BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
+        BytePayload.registerS2C(ModPackets.UPDATE_PATRON_LEVEL);
+        BytePayload.registerS2C(ModPackets.OPEN_PATRON_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
+        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
+        BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), ModPacketsS2C::receiveCursedMoonData);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), ModPacketsS2C::receiveFormChange);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), ModPacketsS2C::receiveTransformState);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_BAT_ATTACH_STATE), ModPacketsS2C::receiveBatAttachState);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.RESET_FIRST_PERSON), ModPacketsS2C::receiveResetFirstPerson);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE), ModPacketsS2C::receiveOtherPlayerBatAttachState);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORCE_SNEAK_STATE), ModPacketsS2C::receiveForceSneakState);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_DYNAMIC_FORM), ModPacketsS2C::handleUpdateDynamicForm);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT), ModPacketsS2C::handleRemoveDynamicExcept);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.LOGIN_PACKET), ModPacketsS2C::onPlayerConnectServer);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.ACTIVE_VIRTUAL_TOTEM), ModPacketsS2C::receiveActiveVirtualTotem);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT), ModPacketsS2C::receivePowerAnimationData);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_PATRON_LEVEL), ModPacketsS2C::receiveUpdatePatronLevel);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_PATRON_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenPatronFormSelectMenu);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenFormSelectMenu);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), ModPacketsS2C::receiveSetNoJumpTick);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), ModPacketsS2C::receiveOpenFCSMenu);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MODIFY_FCD_DATA), ModPacketsS2C::receiveModifyFCDData);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), ModPacketsS2C::receiveRequestPatronAuthFile);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), ModPacketsS2C::receiveNewSubKey);
     }
 
     /* 重构后不需要了 仅用于参考旧实现逻辑
@@ -111,20 +110,22 @@ public class ModPacketsS2C {
     }
      */
 
-    public static void receiveCursedMoonData(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        boolean isCursedMoon = buf.readBoolean();
-        client.execute(() -> {
+    public static void receiveCursedMoonData(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        boolean isCursedMoon = payload.data().readBoolean();
+        ctx.client().execute(() -> {
             CursedMoonClient.isCursedMoon = isCursedMoon;
             CursedMoonClient.middayMessageSent = false;
         });
     }
 
-    // 接收形态变化同步包
-    public static void receiveFormChange(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        Identifier newFormID = buf.readIdentifier();
+    /**
+     * 接收形态变化同步包
+     */
+    public static void receiveFormChange(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        Identifier newFormID = payload.data().readIdentifier();
 
-        client.execute(() -> {
-            if (client.player != null) {
+        ctx.client().execute(() -> {
+            if (ctx.client().player != null) {
                 // 触发动画重新初始化
                 ShapeShifterCurseFabricClient.refreshPlayerAnimations();
 
@@ -134,18 +135,19 @@ public class ModPacketsS2C {
         });
     }
 
-    // 接收变身状态同步包
-    public static void receiveTransformState(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                           PacketByteBuf buf, PacketSender responseSender) {
-        UUID playerUuid = buf.readUuid();
-        boolean isTransforming = buf.readBoolean();
-        String fromForm = buf.readString();
-        String toForm = buf.readString();
+    /**
+     * 接收变身状态同步包
+     */
+    public static void receiveTransformState(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        UUID playerUuid = payload.data().readUuid();
+        boolean isTransforming = payload.data().readBoolean();
+        String fromForm = payload.data().readString();
+        String toForm = payload.data().readString();
 
-        client.execute(() -> {
-            if (client.player != null) {
+        ctx.client().execute(() -> {
+            if (ctx.client().player != null) {
                 ShapeShifterCurseFabricClient.updateTransformState(playerUuid, isTransforming, fromForm.isEmpty() ? null : fromForm, toForm.isEmpty() ? null : toForm);
-                if (client.player.getUuid().equals(playerUuid)) {
+                if (ctx.client().player.getUuid().equals(playerUuid)) {
                     if (isTransforming) {
                         TransformManager.transformTimer = 0;
                         ShapeShifterCurseFabricClient.emitTransformParticle(StaticParams.TRANSFORM_FX_DURATION_IN);
@@ -160,103 +162,107 @@ public class ModPacketsS2C {
         });
     }
 
-    // 接收FirstPerson重置包
-    public static void receiveResetFirstPerson(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        client.execute(TransformManager::executeClientFirstPersonReset);
+    /**
+     * 接收FirstPerson重置包
+     */
+    public static void receiveResetFirstPerson(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        ctx.client().execute(TransformManager::executeClientFirstPersonReset);
     }
 
-    // 接收蝙蝠吸附状态同步包
-    public static void receiveBatAttachState(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                             PacketByteBuf buf, PacketSender responseSender) {
-        boolean isAttached = buf.readBoolean();
-        int attachTypeOrdinal = buf.readInt();
+    /**
+     * 接收蝙蝠吸附状态同步包
+     */
+    public static void receiveBatAttachState(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        boolean isAttached = payload.data().readBoolean();
+        int attachTypeOrdinal = payload.data().readInt();
 
         BlockPos attachedPos;
-        if (buf.readBoolean()) {
-            attachedPos = buf.readBlockPos();
+        if (payload.data().readBoolean()) {
+            attachedPos = payload.data().readBlockPos();
         } else {
             attachedPos = null;
         }
 
         Direction attachedSide;
-        if (buf.readBoolean()) {
-            attachedSide = Direction.byId(buf.readInt());
+        if (payload.data().readBoolean()) {
+            attachedSide = Direction.byId(payload.data().readInt());
         } else {
             attachedSide = null;
         }
 
-        client.execute(() -> {
-            if (client.player != null) {
+        ctx.client().execute(() -> {
+            if (ctx.client().player != null) {
                 // 获取客户端的BatBlockAttachPower并同步状态
-                BatBlockAttachPower.syncClientState(client.player, isAttached, attachTypeOrdinal, attachedPos, attachedSide);
+                BatBlockAttachPower.syncClientState(ctx.client().player, isAttached, attachTypeOrdinal, attachedPos, attachedSide);
             }
         });
     }
 
-    // 接收其他玩家的蝙蝠吸附状态同步包
-    public static void receiveOtherPlayerBatAttachState(MinecraftClient client, ClientPlayNetworkHandler handler,
-                                                        PacketByteBuf buf, PacketSender responseSender) {
-        UUID targetPlayerUuid = buf.readUuid();
-        boolean isAttached = buf.readBoolean();
-        int attachType = buf.readInt();
+    /**
+     * 接收其他玩家的蝙蝠吸附状态同步包
+     */
+    public static void receiveOtherPlayerBatAttachState(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        UUID targetPlayerUuid = payload.data().readUuid();
+        boolean isAttached = payload.data().readBoolean();
+        int attachType = payload.data().readInt();
 
         BlockPos attachedPos;
         Direction attachedSide;
 
-        if (buf.readBoolean()) {
-            attachedPos = buf.readBlockPos();
+        if (payload.data().readBoolean()) {
+            attachedPos = payload.data().readBlockPos();
         } else {
             attachedPos = null;
         }
 
-        if (buf.readBoolean()) {
-            attachedSide = Direction.byId(buf.readInt());
+        if (payload.data().readBoolean()) {
+            attachedSide = Direction.byId(payload.data().readInt());
         } else {
             attachedSide = null;
         }
 
-        client.execute(() -> {
+        ctx.client().execute(() -> {
             ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached,
                     attachType, attachedPos, attachedSide);
         });
     }
 
-    private static void receiveForceSneakState(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        boolean shouldForce = buf.readBoolean();
-        client.execute(() -> {
+    private static void receiveForceSneakState(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        boolean shouldForce = payload.data().readBoolean();
+        ctx.client().execute(() -> {
             ClientPlayerStateManager.shouldForceSneak = shouldForce;
         });
     }
 
-    private static void handleUpdateDynamicForm(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    private static void handleUpdateDynamicForm(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 读取String -> JsonObject
         JsonObject allFrom = new JsonObject();
-        int formCount = buf.readInt();
+        int formCount = payload.data().readInt();
         for (int i = 0; i < formCount; i++) {
-            String formName = buf.readString();
-            String jsonStr = buf.readString();
+            String formName = payload.data().readString();
+            String jsonStr = payload.data().readString();
             JsonObject jsonObject = new Gson().fromJson(jsonStr, JsonObject.class);
             allFrom.add(formName, jsonObject);
         }
-        client.execute(() -> {
+        ctx.client().execute(() -> {
             RegPlayerForms.ApplyDynamicPlayerForms(allFrom);
         });
     }
 
-    private static void handleRemoveDynamicExcept(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    private static void handleRemoveDynamicExcept(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 读取String -> JsonObject
         List<Identifier> except = new ArrayList<>();
-        int formCount = buf.readInt();
+        int formCount = payload.data().readInt();
         for (int i = 0; i < formCount; i++) {
-            String formName = buf.readString();
+            String formName = payload.data().readString();
             except.add(Identifier.tryParse(formName));
         }
-        client.execute(() -> {
+        ctx.client().execute(() -> {
             RegPlayerForms.removeDynamicPlayerFormsExcept(except);
         });
     }
 
-    public static void onPlayerConnectServer(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    public static void onPlayerConnectServer(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 还原FPM设置 或许可以通过注入式修改配置来减少此类Bug 比如在FPM读取offset时修改返回值
         TransformManager.executeClientFirstPersonReset();
         new Thread(() -> {
@@ -335,41 +341,42 @@ public class ModPacketsS2C {
         sendUpdateCustomSetting(false);
     }
 
-    public static void receiveActiveVirtualTotem(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+    public static void receiveActiveVirtualTotem(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // LivingEntity entity, int virtualTotemType, ItemStack totemStack
-        if (client.world == null) {
+        if (ctx.client().world == null) {
             ShapeShifterCurseFabric.LOGGER.error("World is null when receiving active virtual totem packet");
             return;
         }
-        PlayerEntity playerEntity = client.world.getPlayerByUuid(buf.readUuid());
+        PlayerEntity playerEntity = ctx.client().world.getPlayerByUuid(payload.data().readUuid());
         if (playerEntity == null) {
             ShapeShifterCurseFabric.LOGGER.warn("Can't find player entity when receiving active virtual totem packet");
             return;
         }
-        Identifier virtualTotemType = buf.readIdentifier();
-        ItemStack totemStack = buf.readItemStack();
+        Identifier virtualTotemType = payload.data().readIdentifier();
+        RegistryByteBuf regBuf = new RegistryByteBuf(payload.data(), ctx.client().world.getRegistryManager());
+        ItemStack totemStack = ItemStack.OPTIONAL_PACKET_CODEC.decode(regBuf);
         // ConcurrentModificationException 需要把这个操作放到Client线程而非Network线程
-        client.execute(() -> VirtualTotemPower.process_virtual_totem_type(playerEntity, virtualTotemType, totemStack));
+        ctx.client().execute(() -> VirtualTotemPower.process_virtual_totem_type(playerEntity, virtualTotemType, totemStack));
     }
 
-    public static void receivePowerAnimationData(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        UUID playerUuid = buf.readUuid();
+    public static void receivePowerAnimationData(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        UUID playerUuid = payload.data().readUuid();
         @Nullable Identifier animationId;
-        if (buf.readBoolean()) {
-            animationId = buf.readIdentifier();
+        if (payload.data().readBoolean()) {
+            animationId = payload.data().readIdentifier();
         }
         else {
             animationId = null;
         }
-        int animationCount = buf.readInt();
-        int animationLength = buf.readInt();
-        if (client.world == null) {
+        int animationCount = payload.data().readInt();
+        int animationLength = payload.data().readInt();
+        if (ctx.client().world == null) {
             ShapeShifterCurseFabric.LOGGER.error("World is null when receiving update power anim data packet");
             return;
         }
-        PlayerEntity playerEntity = client.world.getPlayerByUuid(playerUuid);
+        PlayerEntity playerEntity = ctx.client().world.getPlayerByUuid(playerUuid);
         // ShapeShifterCurseFabric.LOGGER.info("Received power animation data for player " + playerUuid + " animationId " + animationId + " animationCount " + animationCount + " animationLength " + animationLength);
-        client.execute(() -> {
+        ctx.client().execute(() -> {
             if (playerEntity instanceof IPlayerAnimController animPlayer) {
                 animPlayer.shape_shifter_curse$setAnimationData(animationId, animationCount, animationLength);
             } else {
@@ -398,32 +405,32 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA),  buf));
     }
 
-    public static void receiveUpdatePatronLevel(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        int PairCount = buf.readInt();
+    public static void receiveUpdatePatronLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        int PairCount = payload.data().readInt();
         HashMap<UUID, Integer> map = new HashMap<>();
         for (int i = 0; i < PairCount; i++) {
-            UUID uuid = buf.readUuid();
-            int level = buf.readInt();
+            UUID uuid = payload.data().readUuid();
+            int level = payload.data().readInt();
             map.put(uuid, level);
         }
-        client.execute(() -> {
+        ctx.client().execute(() -> {
             PatronUtils.ApplyPatronLevel(map);
         });
     }
 
-    public static void receiveOpenPatronFormSelectMenu(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        client.execute(() -> {
-            Screen screen = new PatronFormSelectScreen(Text.literal("PatronFromSelectScreen"), client.player);
-            client.setScreen(screen);
+    public static void receiveOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        ctx.client().execute(() -> {
+            Screen screen = new PatronFormSelectScreen(Text.literal("PatronFromSelectScreen"), ctx.client().player);
+            ctx.client().setScreen(screen);
         });
     }
 
-    public static void receiveOpenFormSelectMenu(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        String targetName = buf.readString();
-        UUID targetUUID = buf.readUuid();
-        client.execute(() -> {
+    public static void receiveOpenFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        String targetName = payload.data().readString();
+        UUID targetUUID = payload.data().readUuid();
+        ctx.client().execute(() -> {
             Screen screen = new NormalFormSelectScreen(Text.literal("FormSelectScreen"), targetName, targetUUID);
-            client.setScreen(screen);
+            ctx.client().setScreen(screen);
         });
     }
 
@@ -441,38 +448,38 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM),  buf));
     }
 
-    public static void receiveSetNoJumpTick(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        int tick = buf.readInt();
-        client.execute(() -> {
-            if (client.player instanceof IJumpController jumpController) {
+    public static void receiveSetNoJumpTick(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        int tick = payload.data().readInt();
+        ctx.client().execute(() -> {
+            if (ctx.client().player instanceof IJumpController jumpController) {
                 jumpController.shape_shifter_curse$setNoJumpTick(tick);
             }
         });
     }
 
-    public static void receiveOpenFCSMenu(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        client.execute(() -> {
+    public static void receiveOpenFCSMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        ctx.client().execute(() -> {
             if (ShapeShifterCurseFabric.clientConfig.fcs_use_v1_menu) {
                 if (FormColorSelectMenu.instance == null) {
                     Screen screen = new FormColorSelectMenu(Text.literal("text.shape-shifter-curse.config.form_color_select_menu"));
-                    client.setScreen(screen);
+                    ctx.client().setScreen(screen);
                 }
             } else {
                 if (FormColorSelectMenuV2.instance == null) {
                     Screen screen = new FormColorSelectMenuV2(Text.literal("text.shape-shifter-curse.config.form_color_select_menu_v2"));
-                    client.setScreen(screen);
+                    ctx.client().setScreen(screen);
                 }
             }
         });
     }
 
-    public static void receiveModifyFCDData(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        String commandType = buf.readString();
-        Identifier formID = buf.readIdentifier();
-        String arg1 = buf.readString();
-        String arg2 = buf.readString();
-        String arg3 = buf.readString();
-        String arg4 = buf.readString();
+    public static void receiveModifyFCDData(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        String commandType = payload.data().readString();
+        Identifier formID = payload.data().readIdentifier();
+        String arg1 = payload.data().readString();
+        String arg2 = payload.data().readString();
+        String arg3 = payload.data().readString();
+        String arg4 = payload.data().readString();
         // commandType ->
         // save ->
         //     formID
@@ -559,8 +566,8 @@ public class ModPacketsS2C {
                 switch (arg1) {
                     case "enable_default_color" -> {
                         ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor = !ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor;
-                        if (client.player != null) {
-                            client.player.sendMessage(Text.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor), true);
+                        if (ctx.client().player != null) {
+                            ctx.client().player.sendMessage(Text.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor), true);
                         }
                     }
                 }
@@ -572,24 +579,24 @@ public class ModPacketsS2C {
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append("All Custom Form Color Settings For %s:\n|".formatted(formID));
                         ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
-                        if (client.player != null) {
-                            client.player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                        if (ctx.client().player != null) {
+                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
                         }
                     }
                     case "global" -> {
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append("All Custom Global Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.customSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
-                        if (client.player != null) {
-                            client.player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                        if (ctx.client().player != null) {
+                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
                         }
                     }
                     case "form_default" -> {
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append("All Default Form Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
-                        if (client.player != null) {
-                            client.player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                        if (ctx.client().player != null) {
+                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
                         }
                     }
                 }
@@ -606,16 +613,16 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
     }
 
-    private static void receiveRequestPatronAuthFile(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        UUID playerID = buf.readUuid();
-        client.execute(() -> {
+    private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        UUID playerID = payload.data().readUuid();
+        ctx.client().execute(() -> {
             AuthClient.requestAuthFile(playerID);
         });
     }
 
-    private static void receiveNewSubKey(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
-        PacketByteBuf keyBuf = new PacketByteBuf(Unpooled.wrappedBuffer(buf.readByteArray()));
-        client.execute(() -> {
+    private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        PacketByteBuf keyBuf = new PacketByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
+        ctx.client().execute(() -> {
             AuthClient.loadServerKey(keyBuf);
         });
     }
