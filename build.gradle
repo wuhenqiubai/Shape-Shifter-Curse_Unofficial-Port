@@ -200,6 +200,7 @@ dependencies {
     modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
     modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
     modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
+    modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
 
     modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
     modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
