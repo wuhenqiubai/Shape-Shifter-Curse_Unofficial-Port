@@ -16,36 +16,40 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = AnimationManager.class, remap = false)
 public class TacZ_Anim {
-    @Inject(method = "onFire", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onFire", at = @At("HEAD"), cancellable = true, remap = false)
     private void onFire(GunShootEvent event, CallbackInfo ci) {
-        if (event.getShooter() instanceof AbstractClientPlayerEntity player) {
+        Object shooter = event.getShooter();
+        if (shooter instanceof AbstractClientPlayerEntity player) {
             IForm form = FormTextureUtils.getPlayerForm_Render(player);
             if (form.getBodyType() == PlayerFormBodyType.FERAL) {
                 ci.cancel();
             }
         }
     }
-    @Inject(method = "onReload", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onReload", at = @At("HEAD"), cancellable = true, remap = false)
     private void onReload(GunReloadEvent event, CallbackInfo ci) {
-        if (event.getEntity() instanceof AbstractClientPlayerEntity player) {
+        Object entity = event.getEntity();
+        if (entity instanceof AbstractClientPlayerEntity player) {
             IForm form = FormTextureUtils.getPlayerForm_Render(player);
             if (form.getBodyType() == PlayerFormBodyType.FERAL) {
                 ci.cancel();
             }
         }
     }
-    @Inject(method = "onMelee", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onMelee", at = @At("HEAD"), cancellable = true, remap = false)
     private void onMelee(GunMeleeEvent event, CallbackInfo ci) {
-        if (event.getShooter() instanceof AbstractClientPlayerEntity player) {
+        Object shooter = event.getShooter();
+        if (shooter instanceof AbstractClientPlayerEntity player) {
             IForm form = FormTextureUtils.getPlayerForm_Render(player);
             if (form.getBodyType() == PlayerFormBodyType.FERAL) {
                 ci.cancel();
             }
         }
     }
-    @Inject(method = "onDraw", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "onDraw", at = @At("HEAD"), cancellable = true, remap = false)
     private void onDraw(GunDrawEvent event, CallbackInfo ci) {
-        if (event.getEntity() instanceof AbstractClientPlayerEntity player) {
+        Object entity = event.getEntity();
+        if (entity instanceof AbstractClientPlayerEntity player) {
             IForm form = FormTextureUtils.getPlayerForm_Render(player);
             if (form.getBodyType() == PlayerFormBodyType.FERAL) {
                 ci.cancel();

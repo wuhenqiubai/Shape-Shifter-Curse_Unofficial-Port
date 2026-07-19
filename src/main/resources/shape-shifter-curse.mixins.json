@@ -104,6 +104,7 @@
       "PlayerMovementControlMixin",
       "PlayerRotationRendererMixin",
       "accessor.ApoliClientAccessor",
+      "integration.TacZ_AnimThird",
       "render.AbstractClientPlayerEntityMixin",
       "render.LivingEntityRendererMixin",
       "render.OverlayRenderMixin",

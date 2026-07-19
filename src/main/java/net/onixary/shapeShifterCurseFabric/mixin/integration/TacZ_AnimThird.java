@@ -13,9 +13,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(InnerThirdPersonManager.class)
+@Mixin(value = InnerThirdPersonManager.class, remap = false)
 public class TacZ_AnimThird {
-    @Inject(method = "setRotationAnglesHead", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setRotationAnglesHead", at = @At("HEAD"), cancellable = true, remap = false)
     private static void setRotationAnglesHead(LivingEntity entityIn, ModelPart rightArm, ModelPart leftArm, ModelPart body, ModelPart head, float limbSwingAmount, CallbackInfo ci) {
         if (entityIn instanceof PlayerEntity player && !MinecraftClient.getInstance().isPaused()) {
             IForm form = FormTextureUtils.getPlayerForm_Render(player);
