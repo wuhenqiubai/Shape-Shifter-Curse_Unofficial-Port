@@ -1,5 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.util.modifier.Modifier;
@@ -24,6 +27,7 @@ import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.additional_power.*;
@@ -217,6 +221,18 @@ public abstract class LivingEntityMixin {
         }
     }
 
+    // Origins的LikeWaterPower
+    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V", ordinal = 1))
+    public Vec3d likeWaterMixin(Vec3d movementInput, @Local(ordinal = 0) double d) {
+        LivingEntity self = (LivingEntity) (Object) this;
+        if(AdditionalPowers.LIKE_WATER.isActive((LivingEntity) (Object) this)) {
+            if (Math.abs(self.getVelocity().y - d / 16.0D) < 0.025D) {
+                return new Vec3d(movementInput.x, 0, movementInput.z);
+            }
+        }
+        return movementInput;
+    }
+
     // todo: 直接强制修改hasModifyWaterSpeed似乎会导致广泛的与其他模组的mixin冲突，暂时禁用
     /*
     @Unique
@@ -348,10 +364,10 @@ public abstract class LivingEntityMixin {
         }
     }
 
-    @Redirect(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damageShield(F)V"))
-    private void damageShield(LivingEntity instance, float amount) {
+    @WrapOperation(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;damageShield(F)V"))
+    private void damageShield(LivingEntity instance, float amount, Operation<Void> original) {
         if (!this.bypassNextShieldDamage) {
-            instance.damageShield(amount);
+            original.call(instance, amount);
         }
         this.bypassNextShieldDamage = false;
     }
