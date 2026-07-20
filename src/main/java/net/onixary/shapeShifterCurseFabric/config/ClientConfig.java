@@ -59,10 +59,6 @@ public class ClientConfig implements ConfigData {
     @Comment("Enable Better Combat fix. Default: true")
     public boolean enableBetterCombatFix = true;  // 启用Better Combat Fix
 
-    @ConfigEntry.Category("Integration")
-    @Comment("Enable TacZ third-person gun pose compatibility. Default: true")
-    public boolean enableTacZFix = true;  // 启用TacZ兼容
-
     @ConfigEntry.Category("Patron")
     @Comment("Auto-download Patron authorization file. Default: true")
     public boolean autoDownloadPatronAuthorizationFile = true;  // 自动下载赞助者授权文件
