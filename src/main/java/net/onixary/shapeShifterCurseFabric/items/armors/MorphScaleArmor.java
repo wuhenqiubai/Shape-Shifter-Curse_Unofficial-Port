@@ -37,7 +37,6 @@ public class MorphScaleArmor extends ArmorItem implements GeoItem {
         consumer.accept(new GeoRenderProvider() {
             private GeoArmorRenderer<MorphScaleArmor> renderer;
 
-            @SuppressWarnings("unchecked")
             @Override
             public <T extends LivingEntity> BipedEntityModel<?> getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<T> original) {
                 if (this.renderer == null) {

@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.PlayerEntityRenderer;
@@ -12,7 +13,9 @@ import net.minecraft.client.render.entity.model.BipedEntityModel;
 import net.minecraft.client.render.entity.model.PlayerEntityModel;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.MathHelper;
@@ -32,6 +35,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.spongepowered.asm.mixin.Unique;
 import software.bernie.geckolib.cache.object.BakedGeoModel;
 import software.bernie.geckolib.cache.object.GeoBone;
 
@@ -694,6 +698,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.invertRotForPart(RM_LeftArmGeoBoneID, false, true, true);
         model.invertRotForPart(RM_LeftLegGeoBoneID, false, true, true);
         model.invertRotForPart(RM_RightLegGeoBoneID, false, true, true);
+        applyTacZGunPose(player, model, renderer);
         if (eyeBlinkController != null) {
             eyeBlinkController.update(model, player, tickDelta);
         }
@@ -787,5 +792,71 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         head.pitch = euler.x();
         head.yaw = -euler.y();
         head.roll = -euler.z();
+    }
+
+    private static final boolean TACZ_LOADED;
+    private static java.lang.reflect.Method TACZ_GET_GUN;
+    private static java.lang.reflect.Method TACZ_GET_DISPLAY;
+    private static java.lang.reflect.Method TACZ_GET_ANIM_KEY;
+    private static java.lang.reflect.Method TACZ_GET_ANIMATION;
+    private static java.lang.reflect.Method TACZ_ANIMATE_HOLD;
+
+    static {
+        boolean loaded = false;
+        try {
+            Class.forName("com.tacz.guns.api.item.IGun");
+            Class<?> iGun = Class.forName("com.tacz.guns.api.item.IGun");
+            TACZ_GET_GUN = iGun.getMethod("getIGunOrNull", ItemStack.class);
+            Class<?> timelessAPI = Class.forName("com.tacz.guns.api.TimelessAPI");
+            TACZ_GET_DISPLAY = timelessAPI.getMethod("getGunDisplay", ItemStack.class);
+            Class<?> displayCls = Class.forName("com.tacz.guns.client.resource.GunDisplayInstance");
+            TACZ_GET_ANIM_KEY = displayCls.getMethod("getThirdPersonAnimation");
+            Class<?> tpManager = Class.forName("com.tacz.guns.api.client.other.ThirdPersonManager");
+            TACZ_GET_ANIMATION = tpManager.getMethod("getAnimation", String.class);
+            Class<?> tpAnim = Class.forName("com.tacz.guns.api.client.other.IThirdPersonAnimation");
+            TACZ_ANIMATE_HOLD = tpAnim.getMethod("animateGunHold",
+                    LivingEntity.class, ModelPart.class, ModelPart.class, ModelPart.class, ModelPart.class);
+            loaded = true;
+        } catch (Exception e) {
+            loaded = false;
+        }
+        TACZ_LOADED = loaded;
+    }
+
+    private void applyTacZGunPose(PlayerEntity player, FormModel model, PlayerEntityRenderer renderer) {
+        if (!TACZ_LOADED) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: TACZ_LOADED=false"); return; }
+        if (!ShapeShifterCurseFabric.clientConfig.enableTacZFix) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: config disabled"); return; }
+        if (FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: feral"); return; }
+
+        try {
+            ItemStack stack = player.getMainHandStack();
+            if (stack.isEmpty()) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: empty hand"); return; }
+            Object gun = TACZ_GET_GUN.invoke(null, stack);
+            if (gun == null) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: not a gun"); return; }
+            java.util.Optional<?> displayOpt = (java.util.Optional<?>) TACZ_GET_DISPLAY.invoke(null, stack);
+            if (displayOpt.isEmpty()) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: no display"); return; }
+            Object display = displayOpt.get();
+            String animKey = (String) TACZ_GET_ANIM_KEY.invoke(display);
+            Object animation = TACZ_GET_ANIMATION.invoke(null, animKey);
+            if (animation == null) { ShapeShifterCurseFabric.LOGGER.info("TacZ apply: no animation for key=" + animKey); return; }
+
+            PlayerEntityModel<?> playerModel = renderer.getModel();
+            TACZ_ANIMATE_HOLD.invoke(animation, player,
+                    playerModel.rightArm, playerModel.leftArm,
+                    playerModel.body, playerModel.head);
+            Vec3d arm = FormRenderUtils.getPartRotation(playerModel.rightArm);
+//            ShapeShifterCurseFabric.LOGGER.info("TacZ rightArm after hold: " + arm);
+
+            GeoBone rBone = model.getCachedGeoBone(RM_RightArmGeoBoneID);
+            if (rBone != null) { rBone.setRotX((float)arm.x); rBone.setRotY((float)-arm.y); rBone.setRotZ((float)-arm.z); }
+            GeoBone lBone = model.getCachedGeoBone(RM_LeftArmGeoBoneID);
+            Vec3d lArm = FormRenderUtils.getPartRotation(playerModel.leftArm);
+            if (lBone != null) { lBone.setRotX((float)lArm.x); lBone.setRotY((float)-lArm.y); lBone.setRotZ((float)-lArm.z); }
+            Vec3d bod = FormRenderUtils.getPartRotation(playerModel.body);
+            GeoBone bBone = model.getCachedGeoBone(RM_BodyGeoBoneID);
+            if (bBone != null) { bBone.setRotX((float)bod.x); bBone.setRotY((float)-bod.y); bBone.setRotZ((float)bod.z); }
+        } catch (Exception e) {
+            ShapeShifterCurseFabric.LOGGER.warn("TacZ animateGunHold failed: " + e.getMessage());
+        }
     }
 }

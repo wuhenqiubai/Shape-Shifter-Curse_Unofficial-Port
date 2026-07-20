@@ -17,11 +17,6 @@ public class SneakEdgeCheckMixin {
         return getOriginalOrModifiedStepHeight(instance, original);
     }
 
-    @WrapOperation(method = "method_30263", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;getStepHeight()F"))
-    private float modifyStepHeightForEdgeCheck(PlayerEntity instance, Operation<Float> original) {
-        return getOriginalOrModifiedStepHeight(instance, original);
-    }
-
     @Unique
     private float getOriginalOrModifiedStepHeight(PlayerEntity playerEntity, Operation<Float> operation) {
         // 检查是否有ModifyStepHeightPower设置了不影响力边缘检测
