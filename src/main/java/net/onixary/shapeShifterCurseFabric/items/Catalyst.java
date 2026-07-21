@@ -12,6 +12,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
 
 import java.util.List;
 
@@ -39,8 +40,11 @@ public class Catalyst extends Item {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        // 实际效果在ItemStackMixin的注入中进行处理
         super.finishUsing(stack, world, user);
+
+        if (user instanceof PlayerEntity player) {
+            TransformRelatedItems.OnUseCatalyst(player, stack);
+        }
 
         if (user instanceof PlayerEntity playerEntity) {
             if (playerEntity.getAbilities().creativeMode) {

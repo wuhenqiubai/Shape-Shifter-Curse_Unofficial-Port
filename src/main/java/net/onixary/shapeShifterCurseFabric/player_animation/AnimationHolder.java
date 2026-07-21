@@ -61,38 +61,69 @@ public class AnimationHolder {
     @Nullable
     public Animation getAnimation() {
         if (!isEnabled) return null;
+
         return animation;
     }
 
     public AnimationHolder setAnimation(Animation animation) {
         this.animation = animation;
+
         return this;
     }
 
 	/**
 	 * @return 此动画持有者是否启用（禁用时 {@link #getAnimation()} 返回 null）
 	 */
-    public boolean isEnabled() { return isEnabled; }
-    public AnimationHolder setEnabled(boolean condition) { this.isEnabled = condition; return this;
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+
+    public AnimationHolder setEnabled(boolean condition) {
+        this.isEnabled = condition;
+
+        return this;
     }
 
 	/** @return 播放速度倍率 */
-    public float getSpeed() { return speed; }
-    public AnimationHolder setSpeed(float speed) { this.speed = speed; return this;
+    public float getSpeed() {
+        return speed;
+    }
+
+    public AnimationHolder setSpeed(float speed) {
+        this.speed = speed;
+
+        return this;
     }
 
 	/** @return 淡入过渡时间（tick） */
-    public int getFade() { return fade; }
-    public AnimationHolder setFade(int fade) { this.fade = fade; return this;
+    public int getFade() {
+        return fade;
+    }
+
+    public AnimationHolder setFade(int fade) {
+        this.fade = fade;
+
+        return this;
     }
 
 	/** @return 缓动类型，null 表示使用默认线性 */
     @Nullable
-    public EasingType getEasingType() { return easingType; }
-    public AnimationHolder setEasingType(EasingType easingType) { this.easingType = easingType; return this;
+    public EasingType getEasingType() {
+        return easingType;
+    }
+
+    public AnimationHolder setEasingType(EasingType easingType) {
+        this.easingType = easingType;
+        return this;
     }
 
 	/** @return 是否跳过淡入过渡（用于不兼容平滑过渡的动画） */
-    public boolean isSkipFade() { return skipFade; }
-    public AnimationHolder setSkipFade(boolean s) { this.skipFade = s; return this; }
+    public boolean isSkipFade() {
+        return skipFade;
+    }
+
+    public AnimationHolder setSkipFade(boolean s) {
+        this.skipFade = s;
+        return this;
+    }
 }

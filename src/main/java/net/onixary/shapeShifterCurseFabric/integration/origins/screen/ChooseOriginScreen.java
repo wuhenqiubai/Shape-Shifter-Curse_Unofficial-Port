@@ -1,10 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 
+import com.mojang.authlib.properties.PropertyMap;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -45,12 +48,11 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 			Origin origin = OriginRegistry.get(originId);
 			if(origin.isChoosable()) {
 				ItemStack displayItem = origin.getDisplayItem();
-				/* SkullOwner NBT API changed in 1.21 — player head rendering needs component migration
 				if(displayItem.getItem() == Items.PLAYER_HEAD) {
-					if(!displayItem.hasNbt() || !displayItem.getNbt().contains("SkullOwner")) {
-						displayItem.getOrCreateNbt().putString("SkullOwner", player.getDisplayName().getString());
+					if(displayItem.get(DataComponentTypes.PROFILE) == null) {
+						displayItem.set(DataComponentTypes.PROFILE, new ProfileComponent(java.util.Optional.of(player.getDisplayName().getString()), java.util.Optional.empty(), new PropertyMap()));
 					}
-				} */
+				}
 				this.originSelection.add(origin);
 			}
 		});
@@ -59,7 +61,7 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 			return impDelta == 0 ? a.getOrder() - b.getOrder() : impDelta;
 		});
 		maxSelection = originSelection.size();
-		if (currentLayer.isRandomAllowed() && !currentLayer.getRandomOrigins(player).isEmpty()) {
+		if(currentLayer.isRandomAllowed() && currentLayer.getRandomOrigins(player).size() > 0) {
 			maxSelection += 1;
 		}
 		if(maxSelection == 0) {
@@ -94,7 +96,7 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 			}).dimensions(guiLeft + windowWidth + 20, this.height / 2 - 10, 20, 20).build());
 		}
 		addDrawableChild(ButtonWidget.builder(Text.translatable(Origins.MODID + ".gui.select"), b -> {
-			PacketByteBuf buf = PacketByteBufs.create();
+			PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
 			if(currentOrigin == originSelection.size()) {
 				buf.writeString(layerList.get(currentLayerIndex).getIdentifier().toString());
 				ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.CHOOSE_RANDOM_ORIGIN),  buf));

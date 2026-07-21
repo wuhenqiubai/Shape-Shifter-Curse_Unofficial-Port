@@ -26,7 +26,6 @@ public class BatEntityRenderer extends MobEntityRenderer<BatEntity, net.minecraf
         matrixStack.scale(0.35F, 0.35F, 0.35F);
     }
 
-    @Override
     protected void setupTransforms(BatEntity batEntity, MatrixStack matrixStack, float f, float g, float h, float scale) {
         if (batEntity.isRoosting()) {
             matrixStack.translate(0.0F, -0.1F, 0.0F);

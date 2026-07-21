@@ -92,7 +92,7 @@ public class AdditionalPowers {
         register(ClimbingEXPower.createFactory());
     }
 
-    public static void register(PowerFactory<?> powerFactory) {
-	    Registry.register(ApoliRegistries.POWER_FACTORY, powerFactory.getSerializerId(), powerFactory);
+    public static PowerFactory<?> register(PowerFactory<?> powerFactory) {
+        return Registry.register(ApoliRegistries.POWER_FACTORY, powerFactory.getSerializerId(), powerFactory);
     }
 }

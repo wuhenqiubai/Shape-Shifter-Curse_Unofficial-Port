@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
 import net.minecraft.block.Block;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.item.Items;
 import net.minecraft.item.ToolMaterial;
 import net.minecraft.recipe.Ingredient;
@@ -37,6 +38,6 @@ public class AuxiliaryAxeToolMaterial implements ToolMaterial {
 
     @Override
     public Ingredient getRepairIngredient() {
-        return Ingredient.ofItems(Items.DIAMOND);
+        return Ingredient.ofItems(new ItemConvertible[]{Items.DIAMOND});
     }
 }

@@ -17,18 +17,6 @@ public class CustomEdiblePlayerAMixin {
     @Shadow
     protected ItemStack activeItemStack;
 
-    @ModifyExpressionValue(method = "shouldSpawnConsumptionEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getMaxUseTime(Lnet/minecraft/entity/LivingEntity;)I"))
-    private int shouldSpawnConsumptionEffects$getMaxUseTime(int original) {
-        if ((Object)this instanceof PlayerEntity playerEntity) {
-            FoodComponent fc = getPowerFoodComponent(playerEntity, activeItemStack);
-            if (fc == null) {
-                return original;
-            }
-            return fc.eatSeconds() < 1.0f ? 16 : 32;
-        }
-        return original;
-    }
-
     @ModifyExpressionValue(method = "onTrackedDataSet", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getMaxUseTime(Lnet/minecraft/entity/LivingEntity;)I"))
     private int onTrackedDataSet$getMaxUseTime(int original) {
         if ((Object)this instanceof PlayerEntity playerEntity) {

@@ -16,7 +16,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -94,7 +93,6 @@ public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity,
         }
     }
 
-	@Unique
     private boolean shouldHideItem(LivingEntity entity) {
         if (entity instanceof AbstractClientPlayerEntity player) {
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);

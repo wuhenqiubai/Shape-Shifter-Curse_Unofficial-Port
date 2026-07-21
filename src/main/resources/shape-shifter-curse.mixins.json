@@ -5,7 +5,7 @@
 	"compatibilityLevel": "JAVA_21",
 	"plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
 	"mixins": [
-        "AdvancementFixMixin",
+
         "AreaEffectCloudEntityMixin",
         "ArmorSlotMixin",
         "ArrowEntityMixin",
@@ -43,6 +43,7 @@
         "PotionEntityMixin",
         "PotionItemMixin",
         "PotionStackMixin",
+        "ServerAdvancementMixin",
         "ServerPlayerEntityForceInputMixin",
         "ServerPlayerEntityMixin",
         "ShearsItemMixin",

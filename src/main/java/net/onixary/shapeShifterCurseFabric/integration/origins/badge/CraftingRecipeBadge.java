@@ -11,13 +11,18 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.*;
+import net.minecraft.recipe.CraftingRecipe;
+import net.minecraft.recipe.Ingredient;
+import net.minecraft.recipe.RecipeEntry;
+import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.util.math.MathHelper;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
+import net.onixary.shapeShifterCurseFabric.integration.origins.screen.tooltip.CraftingRecipeTooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
@@ -41,15 +46,13 @@ public record CraftingRecipeBadge(Identifier spriteId,
         return true;
     }
 
-    private DefaultedList<ItemStack> peekInputs(float time) {
+    public DefaultedList<ItemStack> peekInputs(float time) {
+        int seed = MathHelper.floor(time / 30);
         DefaultedList<ItemStack> inputs = DefaultedList.ofSize(9, ItemStack.EMPTY);
         List<Ingredient> ingredients = this.recipe.value().getIngredients();
-        int seed = MathHelper.floor(time / 30);
-        for (int index = 0; index < ingredients.size(); index++) {
+        for(int index = 0; index < ingredients.size(); ++index) {
             ItemStack[] stacks = ingredients.get(index).getMatchingStacks();
-            if (stacks.length > 0) {
-                inputs.set(index, stacks[seed % stacks.length]);
-            }
+            if(stacks.length > 0) inputs.set(index, stacks[seed % stacks.length]);
         }
         return inputs;
     }
@@ -59,7 +62,8 @@ public record CraftingRecipeBadge(Identifier spriteId,
     public List<TooltipComponent> getTooltipComponents(PowerType<?> powerType, int widthLimit, float time, TextRenderer textRenderer) {
         MinecraftClient client = MinecraftClient.getInstance();
         List<TooltipComponent> tooltips = new LinkedList<>();
-        if (client.world == null) {
+        if(MinecraftClient.getInstance().world == null) {
+            Origins.LOGGER.warn("Could not construct crafting recipe badge, because world was null");
             return tooltips;
         }
         DynamicRegistryManager registryManager = client.world.getRegistryManager();
@@ -75,13 +79,15 @@ public record CraftingRecipeBadge(Identifier spriteId,
         if (client.options.advancedItemTooltips) {
             Text recipeIdText = Text.literal(recipe.id().toString()).formatted(Formatting.DARK_GRAY);
             widthLimit = Math.max(130, textRenderer.getWidth(recipeIdText));
-            if (prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
-            if (suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
+            if(prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
+            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, this.peekInputs(time), outputStackReference.get()));
+            if(suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
             TooltipBadge.addLines(tooltips, recipeIdText, textRenderer, widthLimit);
         } else {
             widthLimit = 130;
-            if (prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
-            if (suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
+            if(prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
+            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, this.peekInputs(time), outputStackReference.get()));
+            if(suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
         }
         return tooltips;
     }

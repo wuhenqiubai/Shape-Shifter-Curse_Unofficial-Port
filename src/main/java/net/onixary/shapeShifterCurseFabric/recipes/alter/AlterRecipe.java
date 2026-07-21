@@ -25,23 +25,6 @@ import java.util.function.Function;
 
 // 类熔炉配方 多输入物品 单种燃料 多输出物品
 public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
-
-    @Override
-    public boolean matches(AlterRecipeInput input, World world) {
-        if (this.id.equals(EmptyRecipeId)) {
-            return false;
-        }
-        boolean noPass = false;
-	    noPass |= !this.input1.test(input.getStackInSlot(InputSlotIndex));
-	    noPass |= !this.input2.test(input.getStackInSlot(InputSlotIndex + 1));
-	    noPass |= !this.input3.test(input.getStackInSlot(InputSlotIndex + 2));
-	    noPass |= !this.input4.test(input.getStackInSlot(InputSlotIndex + 3));
-	    noPass |= !this.input5.test(input.getStackInSlot(InputSlotIndex + 4));
-	    noPass |= !this.input6.test(input.getStackInSlot(InputSlotIndex + 5));
-	    noPass |= !this.input7.test(input.getStackInSlot(InputSlotIndex + 6));
-        return !noPass;
-    }
-
     public static final RecipeType<AlterRecipe> ALTER_RECIPE = RecipeUtils.registerRecipeType(ShapeShifterCurseFabric.identifier("alter"));
     public static final Identifier EmptyRecipeId = ShapeShifterCurseFabric.identifier("empty_alter_recipe");
 
@@ -92,12 +75,28 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
             if (list.size() >= 5) {
                 return list.get(4);
             } else {
-                return list.getFirst();
+                return list.get(0);
             }
         } else {
             return ItemStack.EMPTY;
         }
     }
+
+	@Override
+	public boolean matches(AlterRecipeInput input, World world) {
+		if (this.id.equals(EmptyRecipeId)) {
+			return false;
+		}
+		boolean noPass = false;
+		noPass |= !this.input1.test(input.getStackInSlot(InputSlotIndex));
+		noPass |= !this.input2.test(input.getStackInSlot(InputSlotIndex + 1));
+		noPass |= !this.input3.test(input.getStackInSlot(InputSlotIndex + 2));
+		noPass |= !this.input4.test(input.getStackInSlot(InputSlotIndex + 3));
+		noPass |= !this.input5.test(input.getStackInSlot(InputSlotIndex + 4));
+		noPass |= !this.input6.test(input.getStackInSlot(InputSlotIndex + 5));
+		noPass |= !this.input7.test(input.getStackInSlot(InputSlotIndex + 6));
+		return !noPass;
+	}
 
     @Override
     public ItemStack craft(AlterRecipeInput input, RegistryWrapper.WrapperLookup lookup) {

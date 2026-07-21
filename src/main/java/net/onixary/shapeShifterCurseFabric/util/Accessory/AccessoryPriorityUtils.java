@@ -60,7 +60,7 @@ public class AccessoryPriorityUtils {
             }
             if (!highestPriorityPlugins.isEmpty()) {
                 Collections.sort(highestPriorityPlugins);
-	            highestPriorityPlugin = highestPriorityPlugins.getFirst();
+                highestPriorityPlugin = highestPriorityPlugins.get(0);
             }
         }
         return highestPriorityPlugin;
