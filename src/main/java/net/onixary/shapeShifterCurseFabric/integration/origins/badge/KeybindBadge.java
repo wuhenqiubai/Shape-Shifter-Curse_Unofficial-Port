@@ -27,8 +27,8 @@ public record KeybindBadge(Identifier spriteId, String text) implements Badge {
     }
 
 	public static void addLines(List<TooltipComponent> tooltips, Text text, TextRenderer textRenderer, int widthLimit) {
-		if (textRenderer.getWidth(text) > widthLimit) {
-			for (OrderedText orderedText : textRenderer.wrapLines(text, widthLimit)) {
+        if(textRenderer.getWidth(text) > widthLimit) {
+            for(OrderedText orderedText : textRenderer.wrapLines(text, widthLimit)) {
 				tooltips.add(new OrderedTextTooltipComponent(orderedText));
 			}
 		} else {
@@ -40,7 +40,7 @@ public record KeybindBadge(Identifier spriteId, String text) implements Badge {
     public List<TooltipComponent> getTooltipComponents(PowerType<?> powerType, int widthLimit, float time, TextRenderer textRenderer) {
         List<TooltipComponent> tooltips = new LinkedList<>();
 	    Text keyText;
-	    keyText = ((MutableText) Text.of("["))
+        keyText = ((MutableText)Text.of("["))
 			    .append(KeyBinding.getLocalizedName(PowerKeyManager.getKeyIdentifier(powerType.getIdentifier())).get())
 			    .append(Text.of("]"));
 	    addLines(tooltips, Text.translatable(text, keyText), textRenderer, widthLimit);

@@ -26,7 +26,7 @@ public class InstinctValueCondition {
             return false;
         }
 
-        Comparison comparison = data.get("comparison");
+        Comparison comparison = (Comparison) data.get("comparison");
         if (comparison == null) {
             return false;
         }

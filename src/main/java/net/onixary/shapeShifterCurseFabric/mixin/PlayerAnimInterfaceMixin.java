@@ -171,7 +171,11 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
         PlayerEntity realThis = (PlayerEntity) (Object) this;
-	    this.isLoadedAnim = !realThis.getWorld().isClient;
+        if (realThis.getWorld().isClient) {
+            this.isLoadedAnim = false;
+        } else {
+            this.isLoadedAnim = true;
+        }
     }
 
     @Inject(method = "tick", at = @At("HEAD"))

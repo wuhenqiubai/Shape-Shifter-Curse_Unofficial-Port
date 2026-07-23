@@ -22,7 +22,6 @@ import net.minecraft.resource.ResourceType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
-import net.onixary.shapeShifterCurseFabric.integration.origins.command.OriginCommand;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
@@ -38,8 +37,6 @@ import org.apache.logging.log4j.Logger;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
-//import io.github.apace100.origins.registry.*;
-
 public class Origins implements ModInitializer, OrderedResourceListenerInitializer {
 
 	public static final String MODID = "origins";
@@ -49,14 +46,6 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 	public static ServerConfig config;
 	private static ConfigSerializer<ServerConfig> configSerializer;
-
-	public static void serializeConfig() {
-		try {
-			configSerializer.serialize(config);
-		} catch (ConfigSerializer.SerializationException e) {
-			Origins.LOGGER.error("Failed serialization of config file: {}", e.getMessage());
-		}
-	}
 
 	@Override
 	public void onInitialize() {
@@ -74,7 +63,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 				SEMVER[i] = Integer.parseInt(splitVersion[i]);
 			}
 		});
-		LOGGER.info("Origins {} is initializing. Have fun!", VERSION);
+		LOGGER.info("Origins " + VERSION + " is initializing. Have fun!");
 
 		AutoConfig.register(ServerConfig.class,
 			(definition, configClass) -> {
@@ -96,12 +85,22 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		ModLoot.registerLootTables();
 		Origin.init();
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> OriginCommand.register(dispatcher));
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+			//OriginCommand.register(dispatcher);
+		});
 		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((content) -> {
 			//content.add(ModItems.ORB_OF_ORIGIN);
 		});
 
 		net.minecraft.advancement.criterion.Criteria.register(ChoseOriginCriterion.ID.toString(), ChoseOriginCriterion.INSTANCE);
+	}
+
+	public static void serializeConfig() {
+		try {
+			configSerializer.serialize(config);
+		} catch (ConfigSerializer.SerializationException e) {
+			Origins.LOGGER.error("Failed serialization of config file: " + e.getMessage());
+		}
 	}
 
 	public static Identifier identifier(String path) {

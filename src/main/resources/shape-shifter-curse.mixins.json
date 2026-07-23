@@ -5,7 +5,6 @@
 	"compatibilityLevel": "JAVA_21",
 	"plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
 	"mixins": [
-
         "AreaEffectCloudEntityMixin",
         "ArmorSlotMixin",
         "ArrowEntityMixin",
@@ -87,6 +86,7 @@
         "CustomEdibleHeldItemRendererMixin",
         "DisablePlayerRotationRendererMixin",
         "ElytraEntityModelMixin",
+        "EntityRenderDispatcherMixin",
         "EntityRenderDispatcherSafetyMixin",
         "EntityRendererMixin",
         "FeralPlayerEntityRendererMixin",

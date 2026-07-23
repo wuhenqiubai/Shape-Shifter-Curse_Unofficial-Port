@@ -14,7 +14,7 @@ import java.util.function.Consumer;
 
 public class ItemCooldownCA {
     public static void registerCondition(Consumer<ConditionFactory<Entity>> registerFunc) {
-	    registerFunc.accept(new ConditionFactory<>(
+        registerFunc.accept(new ConditionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("is_item_in_cooldown"),
 			    new SerializableData()
 					    .add("item", SerializableDataTypes.ITEM, null),
@@ -32,7 +32,7 @@ public class ItemCooldownCA {
     }
 
     public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("set_item_cooldown"),
 			    new SerializableData()
 					    .add("item", SerializableDataTypes.ITEM, null)

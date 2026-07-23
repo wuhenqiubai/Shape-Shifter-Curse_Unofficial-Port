@@ -16,7 +16,7 @@ public class HungerManagerMixin {
     @Shadow
     private int foodTickTimer;
 
-    @Inject(method = "update", at = @At("HEAD"))
+    @Inject(method = "update", at = @At("HEAD"), cancellable = true)
     public void update(PlayerEntity player, CallbackInfo ci) {
         PowerHolderComponent.getPowers(player, ModifyFoodHealPower.class).forEach(power -> {
             if (power.CanApply(player)) {

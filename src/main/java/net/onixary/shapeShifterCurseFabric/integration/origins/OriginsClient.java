@@ -8,10 +8,10 @@ import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
+import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModBlocks;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.PowerKeyManager;
-import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 
 public class OriginsClient implements ClientModInitializer {
 

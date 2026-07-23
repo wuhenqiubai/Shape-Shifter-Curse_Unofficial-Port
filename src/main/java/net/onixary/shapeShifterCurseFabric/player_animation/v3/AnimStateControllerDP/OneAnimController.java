@@ -36,6 +36,6 @@ public class OneAnimController extends AbstractAnimStateControllerDP {
     @Override
     public AbstractAnimStateController loadFormJson(JsonObject jsonObject) {
         this.animationHolderData = AnimUtils.readAnimInJson(jsonObject, "anim", null);
-	    return null;
+        return this;
     }
 }

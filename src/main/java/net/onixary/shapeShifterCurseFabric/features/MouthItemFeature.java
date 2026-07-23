@@ -22,7 +22,10 @@ import net.minecraft.util.UseAction;
 import net.minecraft.util.math.RotationAxis;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
-import net.onixary.shapeShifterCurseFabric.render.form_render.*;
+import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
+import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
+import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderer;
+import net.onixary.shapeShifterCurseFabric.render.form_render.IModifyHead_MAS;
 import net.onixary.shapeShifterCurseFabric.util.FeralRenderUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 
@@ -134,10 +137,7 @@ public class MouthItemFeature<T extends LivingEntity, M extends EntityModel<T> &
 
     private void renderShieldOnBack(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, T livingEntity, ItemStack itemStack, boolean isLeftHand) {
         matrixStack.push();
-	    var _ed = MinecraftClient.getInstance().getEntityRenderDispatcher();
-	    if (_ed == null) return;
-	    var eR = (PlayerEntityRenderer) _ed.getRenderer(livingEntity);
-	    if (eR == null) return;
+        var eR = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
         var body = eR.getModel().body;
         body.rotate(matrixStack);
         // --- 格挡时盾牌的调整 ---
@@ -153,10 +153,7 @@ public class MouthItemFeature<T extends LivingEntity, M extends EntityModel<T> &
 
     private void renderDefaultItemOnBack(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, T livingEntity, ItemStack itemStack) {
         matrixStack.push();
-	    var _ed = MinecraftClient.getInstance().getEntityRenderDispatcher();
-	    if (_ed == null) return;
-	    var eR = (PlayerEntityRenderer) _ed.getRenderer(livingEntity);
-	    if (eR == null) return;
+        var eR = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
         var body = eR.getModel().body;
         body.rotate(matrixStack);
         matrixStack.translate(0.0F, 0.5F, 0.25F);

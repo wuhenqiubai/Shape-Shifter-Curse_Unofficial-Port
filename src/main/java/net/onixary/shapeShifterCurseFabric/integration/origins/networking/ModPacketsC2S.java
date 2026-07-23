@@ -20,153 +20,151 @@ import java.util.Random;
 public class ModPacketsC2S {
 
     public static void register() {
-        BytePayload.registerC2S(ModPackets.CHOOSE_ORIGIN);
-        BytePayload.registerC2S(ModPackets.CHOOSE_RANDOM_ORIGIN);
-        BytePayload.registerS2C(ModPackets.ORIGIN_LIST);
-        BytePayload.registerS2C(ModPackets.LAYER_LIST);
-        BytePayload.registerS2C(ModPackets.OPEN_ORIGIN_SCREEN);
-        BytePayload.registerS2C(ModPackets.CONFIRM_ORIGIN);
+        registerClient();
 
-	    ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.CHOOSE_ORIGIN), (payload, context) -> chooseOrigin(context.player(), payload.data()));
-	    ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.CHOOSE_RANDOM_ORIGIN), (payload, context) -> chooseRandomOrigin(context.player(), payload.data()));
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.CHOOSE_ORIGIN), ModPacketsC2S::chooseOrigin);
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.CHOOSE_RANDOM_ORIGIN), ModPacketsC2S::chooseRandomOrigin);
     }
 
-    private static void chooseOrigin(ServerPlayerEntity player, PacketByteBuf buf) {
+    public static void registerClient() {
+        BytePayload.registerC2S(ModPackets.CHOOSE_ORIGIN);
+        BytePayload.registerC2S(ModPackets.CHOOSE_RANDOM_ORIGIN);
+    }
+
+    private static void chooseOrigin(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        ServerPlayerEntity player = ctx.player();
+        PacketByteBuf buf = payload.data();
         String originId = buf.readString(32767);
         String layerId = buf.readString(32767);
 
-	    if (player.getServer() == null) {
-		    Origins.LOGGER.warn("Player server is null");
-		    return;
-	    }
+        if (player.getServer() == null) {
+            Origins.LOGGER.warn("Player server is null");
+            return;
+        }
 
         player.getServer().execute(() -> {
             OriginComponent component = ModComponents.ORIGIN.get(player);
-	        if (component == null) {
-		        Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());
-		        return;
-	        }
+            if (component == null) {
+                Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());
+                return;
+            }
 
-	        Identifier layerIdentifier = Identifier.tryParse(layerId);
-	        if (layerIdentifier == null) {
-		        Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
-		        return;
-	        }
+            Identifier layerIdentifier = Identifier.tryParse(layerId);
+            if (layerIdentifier == null) {
+                Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
+                return;
+            }
 
-	        OriginLayer layer = OriginLayers.getLayer(layerIdentifier);
-	        if (layer == null) {
-		        Origins.LOGGER.warn("Layer not found: {}", layerIdentifier);
-		        return;
-	        }
+            OriginLayer layer = OriginLayers.getLayer(layerIdentifier);
+            if (layer == null) {
+                Origins.LOGGER.warn("Layer not found: {}", layerIdentifier);
+                return;
+            }
 
-	        if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
+            if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
                 Identifier id = Identifier.tryParse(originId);
-		        if (id == null) {
-			        Origins.LOGGER.warn("Invalid origin ID: {}", originId);
-			        return;
-		        }
+                if (id == null) {
+                    Origins.LOGGER.warn("Invalid origin ID: {}", originId);
+                    return;
+                }
 
-		        Origin origin = OriginRegistry.get(id);
-		        if (origin == null) {
-			        Origins.LOGGER.warn("Origin not found: {}", id);
-			        return;
-		        }
+                Origin origin = OriginRegistry.get(id);
+                if (origin == null) {
+                    Origins.LOGGER.warn("Origin not found: {}", id);
+                    return;
+                }
 
-		        if (origin.isChoosable() && layer.contains(origin, player)) {
-			        boolean hadOriginBefore = component.hadOriginBefore();
-			        boolean hadAllOrigins = component.hasAllOrigins();
-			        component.setOrigin(layer, origin);
-			        component.checkAutoChoosingLayers(player, false);
-			        component.sync();
-			        if (component.hasAllOrigins() && !hadAllOrigins) {
-				        OriginComponent.onChosen(player, hadOriginBefore);
-			        }
-			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-			        Origins.LOGGER.info("Player {} chose Origin: {}, for layer: {}", playerName, originId, layerId);
-		        } else {
-			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-			        Origins.LOGGER.info("Player {} tried to choose unchoosable Origin for layer {}: {}. ", playerName, layerId, originId);
-			        component.setOrigin(layer, Origin.EMPTY);
-		        }
-		        confirmOrigin(player, layer, component.getOrigin(layer));
-		        component.sync();
-	        } else {
-		        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-		        Origins.LOGGER.warn("Player {} tried to choose origin for layer {} while having one already.", playerName, layerId);
+                if (origin.isChoosable() && layer.contains(origin, player)) {
+                    boolean hadOriginBefore = component.hadOriginBefore();
+                    boolean hadAllOrigins = component.hasAllOrigins();
+                    component.setOrigin(layer, origin);
+                    component.checkAutoChoosingLayers(player, false);
+                    component.sync();
+                    if (component.hasAllOrigins() && !hadAllOrigins) {
+                        OriginComponent.onChosen(player, hadOriginBefore);
+                    }
+                    Origins.LOGGER.info("Player {} chose Origin: {}, for layer: {}", player.getName().getString(), originId, layerId);
+                } else {
+                    Origins.LOGGER.info("Player {} tried to choose unchoosable Origin for layer {}: {}.", player.getName().getString(), layerId, originId);
+                    component.setOrigin(layer, Origin.EMPTY);
+                }
+                confirmOrigin(player, layer, component.getOrigin(layer));
+                component.sync();
+            } else {
+                Origins.LOGGER.warn("Player {} tried to choose origin for layer {} while having one already.", player.getName().getString(), layerId);
             }
         });
     }
 
-    private static void chooseRandomOrigin(ServerPlayerEntity player, PacketByteBuf buf) {
+    private static void chooseRandomOrigin(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        ServerPlayerEntity player = ctx.player();
+        PacketByteBuf buf = payload.data();
         String layerId = buf.readString(32767);
 
-	    if (player.getServer() == null) {
-		    Origins.LOGGER.warn("Player server is null");
-		    return;
-	    }
+        if (player.getServer() == null) {
+            Origins.LOGGER.warn("Player server is null");
+            return;
+        }
 
         player.getServer().execute(() -> {
             OriginComponent component = ModComponents.ORIGIN.get(player);
-	        if (component == null) {
-		        Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());
-		        return;
-	        }
+            if (component == null) {
+                Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());
+                return;
+            }
 
-	        Identifier layerIdentifier = Identifier.tryParse(layerId);
-	        if (layerIdentifier == null) {
-		        Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
-		        return;
-	        }
+            Identifier layerIdentifier = Identifier.tryParse(layerId);
+            if (layerIdentifier == null) {
+                Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
+                return;
+            }
 
-	        OriginLayer layer = OriginLayers.getLayer(layerIdentifier);
-	        if (layer == null) {
-		        Origins.LOGGER.warn("Layer not found: {}", layerIdentifier);
-		        return;
-	        }
+            OriginLayer layer = OriginLayers.getLayer(layerIdentifier);
+            if (layer == null) {
+                Origins.LOGGER.warn("Layer not found: {}", layerIdentifier);
+                return;
+            }
 
-	        if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
+            if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
                 List<Identifier> randomOrigins = layer.getRandomOrigins(player);
-		        if (layer.isRandomAllowed() && randomOrigins != null && !randomOrigins.isEmpty()) {
+                if (layer.isRandomAllowed() && randomOrigins != null && !randomOrigins.isEmpty()) {
                     Identifier randomOrigin = randomOrigins.get(new Random().nextInt(randomOrigins.size()));
                     Origin origin = OriginRegistry.get(randomOrigin);
-			        if (origin == null) {
-				        Origins.LOGGER.warn("Random origin not found: {}", randomOrigin);
-				        return;
-			        }
+                    if (origin == null) {
+                        Origins.LOGGER.warn("Random origin not found: {}", randomOrigin);
+                        return;
+                    }
 
                     boolean hadOriginBefore = component.hadOriginBefore();
                     boolean hadAllOrigins = component.hasAllOrigins();
                     component.setOrigin(layer, origin);
                     component.checkAutoChoosingLayers(player, false);
                     component.sync();
-			        if (component.hasAllOrigins() && !hadAllOrigins) {
+                    if (component.hasAllOrigins() && !hadAllOrigins) {
                         OriginComponent.onChosen(player, hadOriginBefore);
                     }
-			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-			        Origins.LOGGER.info("Player {} was randomly assigned the following Origin: {}, for layer: {}", playerName, randomOrigin, layerId);
+                    Origins.LOGGER.info("Player {} was randomly assigned the following Origin: {}, for layer: {}", player.getName().getString(), randomOrigin, layerId);
                 } else {
-			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-			        Origins.LOGGER.info("Player {} tried to choose a random Origin for layer {}, which is not allowed!", playerName, layerId);
+                    Origins.LOGGER.info("Player {} tried to choose a random Origin for layer {}, which is not allowed!", player.getName().getString(), layerId);
                     component.setOrigin(layer, Origin.EMPTY);
                 }
                 confirmOrigin(player, layer, component.getOrigin(layer));
                 component.sync();
             } else {
-		        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-		        Origins.LOGGER.warn("Player {} tried to choose origin for layer {} while having one already.", playerName, layerId);
+                Origins.LOGGER.warn("Player {} tried to choose origin for layer {} while having one already.", player.getName().getString(), layerId);
             }
         });
     }
 
     private static void confirmOrigin(ServerPlayerEntity player, OriginLayer layer, Origin origin) {
-	    if (layer == null || origin == null) {
-		    Origins.LOGGER.warn("Cannot confirm origin: layer or origin is null");
-		    return;
-	    }
+        if (layer == null || origin == null) {
+            Origins.LOGGER.warn("Cannot confirm origin: layer or origin is null");
+            return;
+        }
 
         PacketByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(layer.getIdentifier());
         buf.writeIdentifier(origin.getIdentifier());
-	    ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
     }
 }

@@ -40,4 +40,5 @@ public class EnchantmentHelperMixin {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
         }
     }
+    // TODO：hasSoulSpeed和getPossibleEntries在1.21没了，之后找替代
 }

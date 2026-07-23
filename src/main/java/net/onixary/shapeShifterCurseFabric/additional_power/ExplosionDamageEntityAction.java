@@ -5,10 +5,15 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.TntEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -50,10 +55,12 @@ public class ExplosionDamageEntityAction {
         int s = MathHelper.floor(ExplosionPos.getY() + (double)q + 1.0);
         int t = MathHelper.floor(ExplosionPos.getZ() - (double)q - 1.0);
         int u = MathHelper.floor(ExplosionPos.getZ() + (double)q + 1.0);
-        List<Entity> list = entity.getWorld().getOtherEntities(entity, new Box(k, r, t, l, s, u));
-	    for (Entity target_entity : list) {
-		    if (entityCondition == null || entityCondition.test(new Pair<>(entity, target_entity))) {
-			    double w = Math.sqrt(target_entity.squaredDistanceTo(ExplosionPos)) / (double) q;
+	    List<Entity> list = entity.getWorld().getOtherEntities(entity, new Box((double)k, (double)r, (double)t, (double)l, (double)s, (double)u));
+	    for(int v = 0; v < list.size(); ++v) {
+		    Entity target_entity = (Entity) list.get(v);
+		    // isImmuneToExplosion() removed in 1.21; base impl always returns false
+            if (entityCondition == null || entityCondition.test(new Pair<>(entity, target_entity))) {
+			    double w = Math.sqrt(target_entity.squaredDistanceTo(ExplosionPos)) / (double)q;
 			    if (w <= 1.0) {
 				    double x = target_entity.getX() - ExplosionPos.getX();
 				    double y = (target_entity instanceof TntEntity ? target_entity.getY() : target_entity.getEyeY()) - ExplosionPos.getY();
@@ -63,14 +70,16 @@ public class ExplosionDamageEntityAction {
 					    x /= aa;
 					    y /= aa;
 					    z /= aa;
-					    double ab = Explosion.getExposure(ExplosionPos, target_entity);
+                        double ab = (double) Explosion.getExposure(ExplosionPos, target_entity);
 					    double ac = (1.0 - w) * ab;
-					    if (explosion_damage_entity) {
-						    target_entity.damage(source, (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)));
+                        if(explosion_damage_entity){
+                            target_entity.damage(source, (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
 					    }
 					    double ad;
 					    if (target_entity instanceof LivingEntity livingEntity) {
-						    ad = ac; // ProtectionEnchantment API changed in 1.21; blast resistance handled by explosion system
+						    RegistryEntry<Enchantment> blastProtEntry = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(Enchantments.BLAST_PROTECTION);
+							int blastProtLevel = EnchantmentHelper.getEquipmentLevel(blastProtEntry, livingEntity);
+							ad = blastProtLevel > 0 ? ac * MathHelper.clamp(1.0 - (double)blastProtLevel * 0.15, 0.0, 1.0) : ac;
 					    } else {
 						    ad = ac;
 					    }

@@ -25,7 +25,7 @@ public class IronGolemEntityMixin extends GolemEntity implements Angerable {
 
     @Inject(at = @At("TAIL"), method = "initGoals")
     private void addGoals(CallbackInfo info) {
-	    Goal goal = new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, AdditionalPowers.HOSTILE_IRON_GOLEM::isActive);
+        Goal goal = new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, 10, true, false, AdditionalPowers.HOSTILE_IRON_GOLEM::isActive);;
 	    this.targetSelector.add(3, goal);
     }
 

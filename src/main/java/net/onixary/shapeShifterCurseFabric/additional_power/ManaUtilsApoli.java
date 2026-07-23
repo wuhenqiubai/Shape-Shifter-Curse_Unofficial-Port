@@ -21,7 +21,7 @@ public class ManaUtilsApoli {
     private static final Logger log = LoggerFactory.getLogger(ManaUtilsApoli.class);
 
     public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("set_mana"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
@@ -32,7 +32,7 @@ public class ManaUtilsApoli {
 				    }
 			    })
         );
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("gain_mana"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
@@ -43,7 +43,7 @@ public class ManaUtilsApoli {
 				    }
 			    })
         );
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("consume_mana"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
@@ -54,7 +54,7 @@ public class ManaUtilsApoli {
 				    }
 			    })
         );
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("gain_mana_with_time"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d)
@@ -70,7 +70,7 @@ public class ManaUtilsApoli {
     }
 
     public static void registerCondition(Consumer<ConditionFactory<Entity>> registerFunc) {
-	    registerFunc.accept(new ConditionFactory<>(
+        registerFunc.accept(new ConditionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("has_mana"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
@@ -83,7 +83,7 @@ public class ManaUtilsApoli {
 				    return false;
 			    }
         ));
-	    registerFunc.accept(new ConditionFactory<>(
+        registerFunc.accept(new ConditionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("has_mana_percent"),
 			    new SerializableData()
 					    .add("mana_percent", SerializableDataTypes.DOUBLE, 0.0d),
@@ -96,7 +96,7 @@ public class ManaUtilsApoli {
 				    return false;
 			    }
         ));
-	    registerFunc.accept(new ConditionFactory<>(
+        registerFunc.accept(new ConditionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("mana_compare"),
 			    new SerializableData()
 					    .add("comparison", ApoliDataTypes.COMPARISON, null)
@@ -109,7 +109,7 @@ public class ManaUtilsApoli {
 				    return false;
 			    }
         ));
-	    registerFunc.accept(new ConditionFactory<>(
+        registerFunc.accept(new ConditionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("mana_percent_compare"),
 			    new SerializableData()
 					    .add("comparison", ApoliDataTypes.COMPARISON, null)

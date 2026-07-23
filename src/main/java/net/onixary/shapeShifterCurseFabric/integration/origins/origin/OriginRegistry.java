@@ -22,12 +22,12 @@ public class OriginRegistry {
         return origin;
     }
 
-    protected static void update(Identifier id, Origin origin) {
+    protected static Origin update(Identifier id, Origin origin) {
         if(idToOrigin.containsKey(id)) {
             Origin old = idToOrigin.get(id);
             idToOrigin.remove(id);
         }
-	    register(id, origin);
+        return register(id, origin);
     }
 
     public static int size() {

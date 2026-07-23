@@ -45,9 +45,6 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 .orElse(originalVelocity);
     }
 
-    @Unique
-    public int noJumpTick = 0;
-
     @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
         if (this.noJumpTick > 0) {
@@ -61,6 +58,9 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
             this.noJumpTick--;
         }
     }
+
+    @Unique
+    public int noJumpTick = 0;
 
     @Override
     public void shape_shifter_curse$setNoJumpTick(int tick) {

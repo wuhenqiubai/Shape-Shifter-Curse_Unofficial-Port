@@ -41,7 +41,7 @@ public class FireArrowAction {
     }
 
     public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
-	    ActionRegister.accept(new ActionFactory<>(
+        ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("fire_arrow"),
 			    new SerializableData()
 					    .add("damage", SerializableDataTypes.FLOAT, 2.0f)
@@ -67,7 +67,6 @@ public class FireArrowAction {
 					    for (int i = 0; i < count; i++) {
 						    spawnFireArrow(livingEntity, damage, speed, spread, fireTime, noGravity, critical, hasOwner, projectileAction);
 					    }
-				    }
-			    }));
+                }}));
     }
 }

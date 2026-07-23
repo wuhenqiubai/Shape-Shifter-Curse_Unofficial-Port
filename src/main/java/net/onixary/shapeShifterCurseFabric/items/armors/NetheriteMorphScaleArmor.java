@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
     public NetheriteMorphScaleArmor(Type type) {
         super(NetheriteMorphscaleArmorMaterial.ENTRY, type, new Settings().maxCount(1).fireproof()
-                .maxDamage(type.getMaxDamage(26)));
+                .maxDamage(type.getMaxDamage(37)));
         GeoItem.registerSyncedAnimatable(this);
     }
 

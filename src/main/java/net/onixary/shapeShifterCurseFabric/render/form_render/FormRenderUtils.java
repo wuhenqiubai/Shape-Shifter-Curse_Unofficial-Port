@@ -224,7 +224,7 @@ public class FormRenderUtils {
             Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.of("origins", "origin"), formID);
             if (formRenderer == null) {
-                ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: DynamicForm.ModelID is not null, but the model is not registered: {}", formID);
+                ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: PlayerFormDynamic.ModelID is not null, but the model is not registered: {}", formID);
                 return new ArrayList<>();
             }
             formRenderers.add(formRenderer);

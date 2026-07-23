@@ -3,12 +3,9 @@ package net.onixary.shapeShifterCurseFabric.networking;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -26,7 +23,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
 
 import java.util.UUID;
@@ -92,16 +88,6 @@ public class ModPacketsC2S {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(JUMP_DETACH_REQUEST_ID),  buf));
     }
 
-    private static void receivePatronAuthFile(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        byte[] data = payload.data().readByteArray();
-        if (data != null) {
-            ServerPlayerEntity player = ctx.player();
-            if (player != null) {
-                AuthServer.loadPatronAuthFile(player, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
-            }
-        }
-    }
-
     private static void onUpdatePlayerCustomConfig(BytePayload payload, ServerPlayNetworking.Context ctx) {
         PacketByteBuf buf = payload.data();
         boolean keepOriginalSkin = buf.readBoolean();
@@ -142,31 +128,6 @@ public class ModPacketsC2S {
         RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
     }
 
-    private static void receiveSetPatronForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        PacketByteBuf buf = payload.data();
-        ServerPlayerEntity player = ctx.player();
-        IForm form = RegPlayerForms.getPlayerForm(Identifier.tryParse(buf.readString()));
-        if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUuid())) {
-            TransformManager.startTransform(player, form, null);
-        }
-    }
-
-    private static void receiveSetForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        PacketByteBuf buf = payload.data();
-        ServerPlayerEntity player = ctx.player();
-        UUID target = buf.readUuid();
-        Identifier formID = Identifier.tryParse(buf.readString());
-        if (target.equals(player.getUuid()) || player.hasPermissionLevel(2)) {
-            ServerPlayerEntity targetPlayer = player.getServer().getPlayerManager().getPlayer(target);
-            if (targetPlayer != null) {
-                IForm form = RegPlayerForms.getPlayerForm(formID);
-                if (form != null) {
-                    TransformManager.startTransform(targetPlayer, form, null);
-                }
-            }
-        }
-    }
-
     private static void onUpdatePowerAnimationData(BytePayload payload, ServerPlayNetworking.Context ctx) {
         PacketByteBuf buf = payload.data();
         ServerPlayerEntity player = ctx.player();
@@ -195,6 +156,41 @@ public class ModPacketsC2S {
         }
     }
 
+    private static void receiveSetForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        PacketByteBuf buf = payload.data();
+        ServerPlayerEntity player = ctx.player();
+        UUID target = buf.readUuid();
+        Identifier formID = Identifier.tryParse(buf.readString());
+        if (target.equals(player.getUuid()) || player.hasPermissionLevel(2)) {
+            ServerPlayerEntity targetPlayer = player.getServer().getPlayerManager().getPlayer(target);
+            if (targetPlayer != null) {
+                IForm form = RegPlayerForms.getPlayerForm(formID);
+                if (form != null) {
+                    TransformManager.startTransform(targetPlayer, form, null);
+                }
+            }
+        }
+    }
+
+    private static void receiveSetPatronForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        PacketByteBuf buf = payload.data();
+        ServerPlayerEntity player = ctx.player();
+        IForm form = RegPlayerForms.getPlayerForm(Identifier.tryParse(buf.readString()));
+        if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUuid())) {
+            TransformManager.startTransform(player, form, null);
+        }
+    }
+
+    private static void receivePatronAuthFile(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        byte[] data = payload.data().readByteArray();
+        if (data != null) {
+            ServerPlayerEntity player = ctx.player();
+            if (player != null) {
+                AuthServer.loadPatronAuthFile(player, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
+            }
+        }
+    }
+
     /** Called from client initializer: registers C2S payload codecs so the client can send. */
     public static void registerClient() {
         BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
@@ -210,81 +206,4 @@ public class ModPacketsC2S {
         BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
         BytePayload.registerC2S(ModPackets.UPLOAD_PATRON_AUTH_FILE);
     }
-
-    private static void receiveSetForm(MinecraftServer minecraftServer, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler serverPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
-        UUID targetPlayerUuid = packetByteBuf.readUuid();
-        PlayerEntity target = minecraftServer.getPlayerManager().getPlayer(targetPlayerUuid);
-        if (target == null) {
-            ShapeShifterCurseFabric.LOGGER.warn("[SetForm] Player {} not found", targetPlayerUuid);
-        }
-        Identifier formId = packetByteBuf.readIdentifier();
-        IForm form = RegPlayerForms.getPlayerForm(formId);
-        boolean immediately = packetByteBuf.readBoolean();
-        // 网络包可以伪造 所以加个权限验证
-        if (playerEntity.getCommandSource().hasPermissionLevel(2) || playerEntity.getAbilities().creativeMode) {
-            minecraftServer.execute(() -> {
-                if (target == null) {
-                    ShapeShifterCurseFabric.LOGGER.warn("[SetForm] Player is null");
-                    return;
-                }
-                TransformManager.forceTransform(target, form, immediately);
-            });
-            return;
-        }
-    }
-
-    private static void receiveSetPatronForm(MinecraftServer minecraftServer, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler serverPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
-        if (!PatronUtils.EnablePatronFeature) {
-            ShapeShifterCurseFabric.LOGGER.error("Player {} tried to use patron form but patron feature is disabled", playerEntity.getDisplayName().getString());
-            return;
-        }
-        Identifier formId = packetByteBuf.readIdentifier();
-        IForm form = RegPlayerForms.getPlayerForm(formId);
-
-        if (minecraftServer.getCommandSource().hasPermissionLevel(2) || playerEntity.getAbilities().creativeMode) {
-            // 权限等级2时跳过反作弊 毕竟可以用setForm了
-            minecraftServer.execute(() -> {
-                if (playerEntity == null) {
-                    ShapeShifterCurseFabric.LOGGER.warn("[SetPatronForm] Player is null");
-                    return;
-                }
-                TransformManager.forceTransform(playerEntity, form, false);
-            });
-            return;
-        }
-        if (form instanceof DynamicForm pfd) {
-            minecraftServer.execute(() -> {
-                if (playerEntity == null) {
-                    ShapeShifterCurseFabric.LOGGER.warn("[SetPatronForm] Player is null");
-                    return;
-                }
-                if (pfd.IsPlayerCanUse(playerEntity)) {
-                    TransformManager.forceTransform(playerEntity, pfd, false);
-                }
-                else {
-                    // 一般情况下，这里不会执行，因为客户端在发送请求前已经进行了检查 如果触发了这里，说明客户端和服务器之间的数据不同步(小概率 如果不同步早就掉线了) 或者是客户端作弊(大概率)
-                    ShapeShifterCurseFabric.LOGGER.warn("Player {} tried to use form {} but they are not allowed", playerEntity.getDisplayName().getString(), formId.toString());
-                }
-            });
-        }
-        else if (form != null){
-            // 如果是已发布版本 100% 是客户端作弊 一般只会在测试时触发(因为测试版需要填充所有表单用来测试UI)
-            ShapeShifterCurseFabric.LOGGER.warn("Player {} tried to use form {} but it is not a dynamic form", playerEntity.getDisplayName().getString(), formId.toString());
-        }
-        else {
-            // 可能是不同步问题
-            ShapeShifterCurseFabric.LOGGER.warn("Player {} tried to use form {} but it does not exist", playerEntity.getDisplayName().getString(), formId.toString());
-        }
-        return;
-    }
-
-    private static void receivePatronAuthFile(MinecraftServer minecraftServer, ServerPlayerEntity playerEntity, ServerPlayNetworkHandler serverPlayNetworkHandler, PacketByteBuf packetByteBuf, PacketSender packetSender) {
-        byte[] data = packetByteBuf.readByteArray();
-        if (data != null) {
-            minecraftServer.execute(() -> {
-                AuthServer.loadPatronAuthFile(playerEntity, new PacketByteBuf(Unpooled.wrappedBuffer(data)));
-            });
-        }
-    }
 }
-

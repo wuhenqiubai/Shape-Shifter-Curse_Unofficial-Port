@@ -10,13 +10,11 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Pair;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class ModifyEntityLootPower extends Power {
-    private final ConditionFactory<Pair<World, ItemStack>>.Instance FromItemCondition;
+    private final ConditionFactory<ItemStack>.Instance FromItemCondition;
     private final float chance;
     private final Item targetItem;
     private final ItemStack targetItemStack;
@@ -29,8 +27,8 @@ public class ModifyEntityLootPower extends Power {
         this.targetItemStack = data.get("target_item_stack");
     }
 
-    public ItemStack ApplyModifyDrop(ItemStack itemStack, Random randomSource, World world) {
-        if (!FromItemCondition.test(new Pair<>(world, itemStack))) {
+    public ItemStack ApplyModifyDrop(ItemStack itemStack, Random randomSource) {
+        if (!FromItemCondition.test(itemStack)) {
             return itemStack;
         }
         if (randomSource.nextFloat() < this.chance) {

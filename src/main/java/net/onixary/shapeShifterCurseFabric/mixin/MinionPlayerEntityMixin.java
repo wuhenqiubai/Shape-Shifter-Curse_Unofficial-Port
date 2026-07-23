@@ -28,7 +28,7 @@ public abstract class MinionPlayerEntityMixin implements IPlayerEntityMinion {
     @Unique
     private @Nullable PlayerMinionComponent getPlayerMinionComponent() {
         try {
-	        return RegPlayerMinionComponent.PLAYER_MINION_DATA.get(this);
+            return RegPlayerMinionComponent.PLAYER_MINION_DATA.get((PlayerEntity)(Object)this);
         } catch (Exception e) {
             ShapeShifterCurseFabric.LOGGER.error("Failed to get PlayerMinionComponent", e);
             return null;
@@ -36,11 +36,13 @@ public abstract class MinionPlayerEntityMixin implements IPlayerEntityMinion {
     }
 
     @Unique
-    private void syncPlayerMinionComponent() {
+    private boolean syncPlayerMinionComponent() {
         try {
-	        RegPlayerMinionComponent.PLAYER_MINION_DATA.sync(this);
+            RegPlayerMinionComponent.PLAYER_MINION_DATA.sync((PlayerEntity)(Object)this);
+            return true;
         } catch (Exception e) {
             ShapeShifterCurseFabric.LOGGER.error("Failed to sync PlayerMinionComponent", e);
+            return false;
         }
     }
 
@@ -50,7 +52,7 @@ public abstract class MinionPlayerEntityMixin implements IPlayerEntityMinion {
         if (playerMinionComponent != null) {
             return playerMinionComponent.minions;
         } else {
-	        return new ConcurrentHashMap<>();
+            return new ConcurrentHashMap<Identifier, ArrayList<UUID>>();
         }
     }
 
@@ -79,16 +81,18 @@ public abstract class MinionPlayerEntityMixin implements IPlayerEntityMinion {
     }
 
     @Override
-    public void shape_shifter_curse$removeMinion(Identifier MinionID, UUID minionUUID) {
+    public boolean shape_shifter_curse$removeMinion(Identifier MinionID, UUID minionUUID) {
         boolean result = this.shape_shifter_curse$getMinionsByMinionID(MinionID).remove(minionUUID);
         this.syncPlayerMinionComponent();
+        return result;
     }
 
     @Override
-    public <T extends IMinion<? extends LivingEntity>> void shape_shifter_curse$addMinion(T minion) {
+    public <T extends IMinion<? extends LivingEntity>> boolean shape_shifter_curse$addMinion(T minion) {
         this.shape_shifter_curse$getMinionsByMinionID(minion.getMinionTypeID()).add(minion.getSelf().getUuid());
         minion.setOwner((PlayerEntity)(Object)this);
         this.syncPlayerMinionComponent();
+        return true;
     }
 
     @Override

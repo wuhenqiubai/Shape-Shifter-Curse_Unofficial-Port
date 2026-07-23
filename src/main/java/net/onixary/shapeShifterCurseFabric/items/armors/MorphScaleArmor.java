@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class MorphScaleArmor extends ArmorItem implements GeoItem {
     public MorphScaleArmor(Type type) {
         super(MorphscaleArmorMaterial.ENTRY, type, new Settings().maxCount(1)
-                .maxDamage(type.getMaxDamage(22)));
+                .maxDamage(type.getMaxDamage(33)));
         GeoItem.registerSyncedAnimatable(this);
     }
 

@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.player.PlayerEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -14,7 +15,7 @@ public class FormAnimatable implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController<>(this, ShapeShifterCurseFabric.MOD_ID, animationState -> {
+        controllerRegistrar.add(new AnimationController<FormAnimatable>(this, ShapeShifterCurseFabric.MOD_ID, animationState -> {
 	        animationState.setAnimation(RawAnimation.begin().then("idle", Animation.LoopType.LOOP));
 	        return PlayState.CONTINUE;
         }));

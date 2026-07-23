@@ -287,6 +287,9 @@ public class FormRenderFeature <T extends PlayerEntity, M extends BipedEntityMod
             // 从 PlayerEntityRendererMixin.renderOverlayTexture 提取的代码并进行修改
             Identifier OverlayTextureID = formModel.getOverlayTextureResource(playerEntityModel.thinArms);
             if (OverlayTextureID != null) {
+                // 玩家看自己绝对是非隐身
+                // boolean bl = this.isVisible(player);
+                // boolean bl2 = !bl && !player.isInvisibleTo(MinecraftClient.getInstance().player);
                 RenderLayer OverlayLayer = null;
                 if ((FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled) {
                     OverlayLayer = RenderLayer.getEntityCutoutNoCullZOffset(OverlayTextureID);

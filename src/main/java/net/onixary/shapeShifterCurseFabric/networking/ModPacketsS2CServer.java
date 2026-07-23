@@ -58,7 +58,7 @@ public class ModPacketsS2CServer {
         buf.writeUuid(player.getUuid());
         buf.writeBoolean(isTransforming);
         buf.writeString(fromForm == null ? "" : fromForm.toString());
-        buf.writeString(toForm == null ? "" : toForm.toString());
+        buf.writeString(toForm== null ? "" : toForm.toString());
         for (ServerPlayerEntity p : player.getServerWorld().getPlayers()) {
             PacketByteBuf copy = PacketByteBufs.copy(buf);
             ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), copy));

@@ -19,10 +19,10 @@ public class Form_Spider1 extends NormalForm {
     }
 
     public static final AnimUtils.AnimationHolderData ANIM_IDLE =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_1_idle"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_1_idle"));
 
     public static final AnimUtils.AnimationHolderData ANIM_MOVE =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_1_move"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_1_move"));
 
     public static final AbstractAnimStateController IDLE_CONTROLLER =
             new WithSneakAnimController(ANIM_IDLE, ANIM_IDLE);
@@ -38,12 +38,16 @@ public class Form_Spider1 extends NormalForm {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {
-	        return switch (state) {
-		        case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
-		        case ANIM_STATE_WALK -> MOVE_CONTROLLER;
-		        case ANIM_STATE_SPRINT -> MOVE_CONTROLLER;
-		        default -> null;
-	        };
+            switch (state) {
+                case ANIM_STATE_IDLE:
+                    return IDLE_CONTROLLER;
+                case ANIM_STATE_WALK:
+                    return MOVE_CONTROLLER;
+                case ANIM_STATE_SPRINT:
+                    return MOVE_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

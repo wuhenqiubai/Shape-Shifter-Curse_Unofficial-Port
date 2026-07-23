@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin.projectile;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.power.Power;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -39,10 +38,11 @@ public abstract class EntitySnowballTransformMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void checkFluidCollision(CallbackInfo ci) {
         // 检查当前实体是否为雪球
-	    if (!((Object) this instanceof SnowballEntity snowball)) {
+        if (!((Object) this instanceof SnowballEntity)) {
             return;
         }
 
+        SnowballEntity snowball = (SnowballEntity) (Object) this;
 	    World world = snowball.getWorld();
 
         // 避免重复转换
@@ -58,7 +58,7 @@ public abstract class EntitySnowballTransformMixin {
 
         boolean hasTransformPower = PowerHolderComponent.getPowers(player, SnowballBlockTransformPower.class)
                 .stream()
-		        .anyMatch(Power::isActive);
+                .anyMatch(power -> power.isActive());
 
         if (!hasTransformPower) {
             return;
@@ -85,10 +85,11 @@ public abstract class EntitySnowballTransformMixin {
     @Inject(method = "updateWaterState", at = @At("HEAD"))
     private void onEnterWater(CallbackInfoReturnable<Boolean> cir) {
         // 检查当前实体是否为雪球
-	    if (!((Object) this instanceof SnowballEntity snowball)) {
+        if (!((Object) this instanceof SnowballEntity)) {
             return;
         }
 
+        SnowballEntity snowball = (SnowballEntity) (Object) this;
 	    World world = snowball.getWorld();
 
         if (hasTransformedFluid || world.isClient) {
@@ -102,7 +103,7 @@ public abstract class EntitySnowballTransformMixin {
 
         boolean hasTransformPower = PowerHolderComponent.getPowers(player, SnowballBlockTransformPower.class)
                 .stream()
-		        .anyMatch(Power::isActive);
+                .anyMatch(power -> power.isActive());
 
         if (!hasTransformPower) {
             return;

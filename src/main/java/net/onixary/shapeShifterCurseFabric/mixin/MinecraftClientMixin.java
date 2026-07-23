@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(MinecraftClient.class)
 public abstract class MinecraftClientMixin {
 
-    @Inject(method = "doAttack", at = @At("HEAD"))
+    @Inject(method = "doAttack", at = @At("HEAD"), cancellable = true)
     private void ATTACK(CallbackInfoReturnable<Boolean> cir) {
         //System.out.println("MinecraftClientMixin - doAttack");
         //playTestAnimation();

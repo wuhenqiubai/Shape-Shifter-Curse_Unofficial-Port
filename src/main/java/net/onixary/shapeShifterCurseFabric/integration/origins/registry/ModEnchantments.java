@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
-import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
-import net.minecraft.enchantment.Enchantment;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 public class ModEnchantments {
 
@@ -14,4 +14,9 @@ public class ModEnchantments {
         // Enchantment registration is handled by JSON data files in 1.21.
         // No Java registration needed.
     }
+
+//    private static Enchantment register(String path, Enchantment enchantment) {
+//        Registry.register(Registries.ENCHANTMENT, new Identifier(Origins.MODID, path), enchantment);
+//        return enchantment;
+//    }
 }
