@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -29,6 +30,7 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimContro
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
+import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
@@ -265,18 +267,21 @@ public class ModPacketsS2C {
     public static void onPlayerConnectServer(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 还原FPM设置 或许可以通过注入式修改配置来减少此类Bug 比如在FPM读取offset时修改返回值
         TransformManager.executeClientFirstPersonReset();
-        new Thread(() -> {
-            // 延时5s, 等待服务器component加载完成 重复12次 共计1min
-            for (int i = 0; i < 60; i++) {
-                try {
-                    Thread.sleep(1000);
-                    sendUpdateCustomSetting();
-                    return;
-                } catch (Exception ignored) {
-                }
-            }
+        retrySendCustomSetting(60); // 60 ticks = 3s, start checking; attempt every 20 ticks = 1s for 60 attempts = 1min max
+    }
+
+    private static void retrySendCustomSetting(int attemptsLeft) {
+        if (attemptsLeft <= 0) {
             ShapeShifterCurseFabric.LOGGER.error("Failed to send custom setting to server after 60 seconds");
-        }).start();
+            return;
+        }
+        new ClientTicker(MinecraftClient.getInstance(), () -> {
+            try {
+                sendUpdateCustomSetting();
+            } catch (Exception e) {
+                retrySendCustomSetting(attemptsLeft - 1);
+            }
+        }, 20, true).start();
     }
 
     public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {

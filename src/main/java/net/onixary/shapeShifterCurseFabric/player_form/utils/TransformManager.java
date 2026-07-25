@@ -5,6 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketByteBuf;
@@ -13,19 +14,20 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.effect.PlayerTransformEffectManager;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
+import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 public class TransformManager {
     public static class PlayerTransformData {
@@ -221,16 +223,12 @@ public class TransformManager {
             fpm.getConfig().xOffset = 0;
             fpm.getConfig().sitXOffset = 0;
             fpm.getConfig().sneakXOffset = 0;
-            new Thread(() -> {
-                for (int i = 0; i < 20; i++) {
-                    try {
-                        Thread.sleep(50);
-                    } catch (InterruptedException ignored) { }
-                    fpm.getConfig().xOffset = 0;
-                    fpm.getConfig().sitXOffset = 0;
-                    fpm.getConfig().sneakXOffset = 0;
-                }
-            }).start();
+            ClientTicker ticker = new ClientTicker(MinecraftClient.getInstance(), () -> {
+                fpm.getConfig().xOffset = 0;
+                fpm.getConfig().sitXOffset = 0;
+                fpm.getConfig().sneakXOffset = 0;
+            }, 20);
+            ticker.start();
         }
     }
 
