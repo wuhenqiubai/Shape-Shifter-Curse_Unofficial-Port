@@ -21,7 +21,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.ITransformReason;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
-import net.onixary.shapeShifterCurseFabric.util.ServerTicker;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
@@ -82,26 +81,31 @@ public class FormUtils {
             }
         }
         else {
-            retryApplyPower(player, powerId, powerSource, 40); // 40 ticks = 2s max
-        }
-    }
-
-    private static void retryApplyPower(PlayerEntity player, Identifier powerId, Identifier powerSource, int attemptsLeft) {
-        if (attemptsLeft <= 0) {
-            ShapeShifterCurseFabric.LOGGER.warn("Failed to apply power {} for player {} after 2 seconds", powerId, player.getName());
-            return;
-        }
-        new ServerTicker(() -> {
-            if (PowerTypeRegistry.contains(powerId)) {
-                PowerType<?> powerType = PowerTypeRegistry.get(powerId);
-                if (powerType != null) {
-                    PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(player);
-                    powerHolder.addPower(powerType, powerSource);
+            new Thread(() -> {
+                try {
+                    boolean FoundPower = false;
+                    for (int i = 0; i < 20; i++) {
+                        Thread.sleep(100);
+                        if (PowerTypeRegistry.contains(powerId)) {
+                            FoundPower = true;
+                            break;
+                        }
+                    }
+                    if (FoundPower) {
+                        PowerType<?> powerType = PowerTypeRegistry.get(powerId);
+                        if (powerType != null) {
+                            PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(player);
+                            powerHolder.addPower(powerType, powerSource);
+                        }
+                    }
+                    else {
+                        ShapeShifterCurseFabric.LOGGER.warn("Failed to apply power " + powerId.toString() + " for player " + player.getName() + " after 2 seconds");
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
-            } else {
-                retryApplyPower(player, powerId, powerSource, attemptsLeft - 1);
-            }
-        }, 1, true).start();
+            }).start();
+        }
     }
 
     public static void removePower(PlayerEntity player, Identifier powerId, Identifier powerSource) {

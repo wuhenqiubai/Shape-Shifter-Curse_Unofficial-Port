@@ -1,3 +1,4 @@
+// src/main/java/net/onixary/shapeShifterCurseFabric/util/ServerTicker.java
 package net.onixary.shapeShifterCurseFabric.util;
 
 import net.minecraft.client.MinecraftClient;
@@ -6,36 +7,19 @@ public class ClientTicker implements ClientTickable {
     private final MinecraftClient client;
     private final Runnable task;
     private int ticksRemaining;
-    private final boolean runOnce;
 
-    /**
-     * @param task         每 tick 执行的任务（runOnce=false时）或延时后执行一次的任务（runOnce=true时）
-     * @param durationTicks 持续时间（tick 数），20 ticks = 1 秒
-     * @param runOnce       true = 延时后只执行一次（替代 Thread.sleep），false = 每 tick 执行一次（原行为）
-     */
-    public ClientTicker(MinecraftClient client, Runnable task, int durationTicks, boolean runOnce) {
+    public ClientTicker(MinecraftClient client, Runnable task, int durationTicks) {
         this.client = client;
         this.task = task;
         this.ticksRemaining = durationTicks;
-        this.runOnce = runOnce;
-    }
-
-    /** 向后兼容：默认 runOnce=false，每 tick 执行 */
-    public ClientTicker(MinecraftClient client, Runnable task, int durationTicks) {
-        this(client, task, durationTicks, false);
     }
 
     @Override
     public void tick() {
+        //ShapeShifterCurseFabric.LOGGER.info("Client ticker tick");
         if (ticksRemaining > 0) {
-            if (!runOnce) {
-                task.run();
-            }
+            task.run();
             ticksRemaining--;
-            if (runOnce && ticksRemaining == 0) {
-                task.run();
-                TickManager.removeTickable(this);
-            }
         } else {
             TickManager.removeTickable(this);
         }

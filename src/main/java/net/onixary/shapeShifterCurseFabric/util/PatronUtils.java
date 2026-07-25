@@ -68,10 +68,10 @@ public class PatronUtils {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-                PatronUtils.UpdatePatronData(server);
-                if (commonConfig.enablePatronFormSystem) {
-                    PatronUtils.CheckDataPackUpdate(server);
-                }
+            PatronUtils.UpdatePatronData(server);
+            if (commonConfig.enablePatronFormSystem) {
+                PatronUtils.CheckDataPackUpdate(server);
+            }
         }).start();
     }
 
