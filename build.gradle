@@ -166,10 +166,8 @@ dependencies {
 
     // Apoli + Calio by Apace100
     // 1.21.1 alpha versions are on Ladysnake snapshots maven
-    modImplementation "io.github.apace100:apoli:${project.apoli_version}"
-    include "io.github.apace100:apoli:${project.apoli_version}"
-    modImplementation "io.github.apace100:calio:${project.calio_version}"
-    include "io.github.apace100:calio:${project.calio_version}"
+//    modImplementation "io.github.apace100:apoli:${project.apoli_version}"
+    include "com.github.BluSpring:Apoli-Legacy:versions~1.21.5-SNAPSHOT"
 
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
@@ -194,23 +192,23 @@ dependencies {
     modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
 
     // Trinkets
-    modCompileOnly "dev.emi:trinkets:${project.trinkets_version}"
+    modCompileOnly "maven.modrinth:trinkets-canary:${project.trinkets_version}"
 
-    modCompileOnly "maven.modrinth:iris:zsoi0dso"
-    modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
-    modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
-    modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
-    modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
-    modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
-
-    modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
-    modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
-
-    modCompileOnly "maven.modrinth:vivecraft:Q589olkQ"
-
-
-    // Tough as nails
-    modCompileOnly "maven.modrinth:tough-as-nails:dLxSK1xF"
+//    modCompileOnly "maven.modrinth:iris:zsoi0dso"
+//    modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
+//    modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
+//    modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
+//    modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
+//    modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
+//
+//    modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
+//    modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
+//
+//    modCompileOnly "maven.modrinth:vivecraft:Q589olkQ"
+//
+//
+//    // Tough as nails
+//    modCompileOnly "maven.modrinth:tough-as-nails:dLxSK1xF"
 
 }
 

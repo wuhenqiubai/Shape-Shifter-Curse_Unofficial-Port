@@ -227,7 +227,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         // network package
         ModPacketsC2S.register();
 
-        //TransformFX.INSTANCE.registerCallbacks();
         TransformOverlay.INSTANCE.init();
         save_timer = 0;
 
