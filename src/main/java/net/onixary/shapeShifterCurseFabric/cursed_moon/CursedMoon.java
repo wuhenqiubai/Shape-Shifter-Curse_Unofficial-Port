@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.ITransformReason;
@@ -72,7 +73,7 @@ public class CursedMoon {
         component.lastTransformByCure = false;
         component.BeforeCursedMoonAppliedForm = null;
         component.AfterCursedMoonAppliedForm = null;
-        if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
+        if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player) && ShapeShifterCurseFabric.commonConfig.enableCursedMoonTransform) {
             IForm nowForm = component.nowForm;
             IForm targetForm = component.nowForm._getNextForm(player, ITransformReason.CursedMoon);
             if (!nowForm.isEquals(targetForm)) {
@@ -85,6 +86,7 @@ public class CursedMoon {
             }
         }
         component.sync();
+        SSCEvent.CURSED_MOON_BEGIN.invoker().onEvent(player);
     }
 
     public static void applyEndCursedMoonEffect(World world, PlayerEntity player) {
@@ -122,6 +124,7 @@ public class CursedMoon {
         component.BeforeCursedMoonAppliedForm = null;
         component.AfterCursedMoonAppliedForm = null;
         component.sync();
+        SSCEvent.CURSED_MOON_END.invoker().onEvent(player);
     }
 
     public static void serverTick(MinecraftServer minecraftServer) {

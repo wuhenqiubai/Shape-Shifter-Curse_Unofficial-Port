@@ -7,10 +7,10 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.component.type.FoodComponent;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.component.type.FoodComponent;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -31,7 +31,7 @@ public class CustomEdiblePower extends Power {
                 .nutrition(data.getInt("hunger"))
                 .saturationModifier(data.getFloat("saturation_modifier"));
         if (data.getBoolean("meat")) {
-            // .meat() removed in 1.21
+            // .meat() removed in 1.21 — 1.21 的 FoodComponent 已无 meat 属性，改由 ItemTags.WOLF_FOOD 处理
         }
         if (data.getBoolean("always_edible")) {
             foodComponentBuilder.alwaysEdible();

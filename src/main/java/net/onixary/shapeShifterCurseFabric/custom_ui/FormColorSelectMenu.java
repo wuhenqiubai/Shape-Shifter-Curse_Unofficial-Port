@@ -5,7 +5,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.widget.*;
+import net.minecraft.client.gui.widget.ButtonWidget;
+import net.minecraft.client.gui.widget.ClickableWidget;
+import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.client.texture.TextureManager;
 import net.minecraft.entity.LivingEntity;
@@ -492,7 +495,19 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     public int decodeColor(String Color) {
-	    return FormColorSelectMenuV2.decodeColor(Color);
+        Integer color = null;
+        try {
+            if (Color.startsWith("#")) {
+                color = Integer.parseUnsignedInt(Color.substring(1), 16);
+            } else {
+                color = Integer.parseUnsignedInt(Color, 10);
+            }
+        } catch (Exception ignored) {
+        }
+        if (color == null) {
+            return 0x00FFFFFF;
+        }
+        return color;
     }
 
     public String encodeColor(int Color) {
@@ -582,16 +597,24 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.addDrawableChild(new TextWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, textRenderer).setTextColor(0xDDDDDD));
         // Normal Button
         // 85,5,45,15 - 获取服务器数据
-        this.addDrawableChild(ButtonWidget.builder(DownloadFromServer, button -> loadData(true)).position(BPosX + 85, BPosY + 5).size(45, 15).build()
+        this.addDrawableChild(ButtonWidget.builder(DownloadFromServer, button -> {
+            loadData(true);
+        }).position(BPosX + 85, BPosY + 5).size(45, 15).build()
         );
         // 85,23,45,15 - 发送到服务器
-        this.addDrawableChild(ButtonWidget.builder(UploadToServer, button -> ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepOriginalSkin, this.enableFormColorSystem)).position(BPosX + 85, BPosY + 23).size(45, 15).build()
+        this.addDrawableChild(ButtonWidget.builder(UploadToServer, button -> {
+            ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepOriginalSkin, this.enableFormColorSystem);
+        }).position(BPosX + 85, BPosY + 23).size(45, 15).build()
         );
         // 85,41,45,15 - 获取客户端数据(配置)
-        this.addDrawableChild(ButtonWidget.builder(DownloadFromClient, button -> loadData(false)).position(BPosX + 85, BPosY + 41).size(45, 15).build()
+        this.addDrawableChild(ButtonWidget.builder(DownloadFromClient, button -> {
+            loadData(false);
+        }).position(BPosX + 85, BPosY + 41).size(45, 15).build()
         );
         // 85,59,45,15 - 发送到客户端(配置)
-        this.addDrawableChild(ButtonWidget.builder(UploadToClient, button -> this.saveDataToClient(true, true)).position(BPosX + 85, BPosY + 59).size(45, 15).build()
+        this.addDrawableChild(ButtonWidget.builder(UploadToClient, button -> {
+            this.saveDataToClient(true, true);
+        }).position(BPosX + 85, BPosY + 59).size(45, 15).build()
         );
         // 85,77,45,15 - 从剪切板获取
         this.addDrawableChild(ButtonWidget.builder(DownloadFromClipboard, button -> {
@@ -620,9 +643,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.addDrawableChild(formScrollButton);
         this.formNameLabel = formScrollButton;
         // 20,128,15,15 Form Scroll Left Button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("<"), button -> this.scrollFormID(-1, true)).position(BPosX + 20, BPosY + 128).size(15, 15).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal("<"), button -> {
+            this.scrollFormID(-1, true);
+        }).position(BPosX + 20, BPosY + 128).size(15, 15).build());
         // 115,128,15,15 Form Scroll Right Button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal(">"), button -> this.scrollFormID(1, true)).position(BPosX + 115, BPosY + 128).size(15, 15).build());
+        this.addDrawableChild(ButtonWidget.builder(Text.literal(">"), button -> {
+            this.scrollFormID(1, true);
+        }).position(BPosX + 115, BPosY + 128).size(15, 15).build());
         this.reloadFormIDName();
         // Config Pair
         // 139,27,75,11 - PrimaryColor Label
@@ -632,7 +659,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,27,70,11 - PrimaryColor Input
         TextFieldWidget primaryColorInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 27, 70, 11, null, EmptyText);
         primaryColorInput.setMaxLength(9);
-        primaryColorInput.setChangedListener((text) -> this.onConfigChanged());
+        primaryColorInput.setChangedListener((text) -> {
+            this.onConfigChanged();
+        });
         this.addDrawableChild(primaryColorInput);
         this.config_panel_01.add(primaryColorInput);
         this.primaryColorEditBox = primaryColorInput;
@@ -643,7 +672,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,41,70,11 - AccentColor1 Input
         TextFieldWidget accentColor1Input = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 41, 70, 11, null, EmptyText);
         accentColor1Input.setMaxLength(9);
-        accentColor1Input.setChangedListener((text) -> this.onConfigChanged());
+        accentColor1Input.setChangedListener((text) -> {
+            this.onConfigChanged();
+        });
         this.addDrawableChild(accentColor1Input);
         this.config_panel_01.add(accentColor1Input);
         this.accentColor1EditBox = accentColor1Input;
@@ -654,7 +685,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,55,70,11 - AccentColor2 Input
         TextFieldWidget accentColor2Input = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 55, 70, 11, null, EmptyText);
         accentColor2Input.setMaxLength(9);
-        accentColor2Input.setChangedListener((text) -> this.onConfigChanged());
+        accentColor2Input.setChangedListener((text) -> {
+            this.onConfigChanged();
+        });
         this.addDrawableChild(accentColor2Input);
         this.config_panel_01.add(accentColor2Input);
         this.accentColor2EditBox = accentColor2Input;
@@ -665,7 +698,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,69,70,11 - EyeColorA Input
         TextFieldWidget eyeColorAInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 69, 70, 11, null, EmptyText);
         eyeColorAInput.setMaxLength(9);
-        eyeColorAInput.setChangedListener((text) -> this.onConfigChanged());
+        eyeColorAInput.setChangedListener((text) -> {
+            this.onConfigChanged();
+        });
         this.addDrawableChild(eyeColorAInput);
         this.config_panel_01.add(eyeColorAInput);
         this.eyeColorAEditBox = eyeColorAInput;
@@ -676,7 +711,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,83,70,11 - EyeColorB Input
         TextFieldWidget eyeColorBInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 83, 70, 11, null, EmptyText);
         eyeColorBInput.setMaxLength(9);
-        eyeColorBInput.setChangedListener((text) -> this.onConfigChanged());
+        eyeColorBInput.setChangedListener((text) -> {
+            this.onConfigChanged();
+        });
         this.addDrawableChild(eyeColorBInput);
         this.config_panel_01.add(eyeColorBInput);
         this.eyeColorBEditBox = eyeColorBInput;
@@ -1015,8 +1052,11 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void RenderEntity(DrawContext context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        float f = (float)Math.atan(mouseX / 40.0F);
-        float g = (float)Math.atan(mouseY / 40.0F);
+        float f = (float)Math.atan((double)(mouseX / 40.0F));
+        float g = (float)Math.atan((double)(mouseY / 40.0F));
+        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
+        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
+        quaternionf.mul(quaternionf2);
         float h = entity.bodyYaw;
         float i = entity.getYaw();
         float j = entity.getPitch();
@@ -1029,10 +1069,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         entity.setPitch(-g * 20.0F);
         entity.headYaw = entity.getYaw();
         entity.prevHeadYaw = entity.getYaw();
-        Quaternionf quaternionf = new Quaternionf().rotateZ((float)Math.PI);
-        Quaternionf quaternionf2 = new Quaternionf().rotateX(f * 20.0F * ((float)Math.PI / 180F));
-        quaternionf2.mul(quaternionf);
-        InventoryScreen.drawEntity(context, (float)x, (float)y, (float)size, new org.joml.Vector3f(), quaternionf, quaternionf2, entity);
+        InventoryScreen.drawEntity(context, x, y, size, new org.joml.Vector3f(), quaternionf, quaternionf2, entity);
         entity.bodyYaw = h;
         entity.prevBodyYaw = m;
         entity.setYaw(i);
@@ -1436,11 +1473,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                     this.saveCustomColorData(ButtonType, Index);
                 }
             }
-        }), (textSupplier) -> textSupplier.get().copy(), 0);
+        }), (textSupplier) -> (MutableText)textSupplier.get(), 0);
 
         // X+15,Y+0,50,15 slot name input
         TextFieldWidget textFieldWidget = new TextFieldWidget(this.textRenderer, X + 15, Y, 50, 15, EmptyText);
-        textFieldWidget.setChangedListener((text) -> this.saveSlotName(ButtonType, Index));
+        textFieldWidget.setChangedListener((text) -> {
+            this.saveSlotName(ButtonType, Index);
+        });
 
         // X+65,Y+0,15,15 delete Button
         FCS_ButtonWidget deleteButtonWidget = new FCS_ButtonWidget(X + 65, Y, EmptyText, (button -> {
@@ -1449,7 +1488,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                     this.deleteSaveData(ButtonType, Index);
                 }
             }
-        }), (textSupplier) -> textSupplier.get().copy(), 30);
+        }), (textSupplier) -> (MutableText)textSupplier.get(), 30);
         switch (ButtonType) {
             case 0:
                 formLocalSettingButtons.add(new Pair<>(updButtonWidget, deleteButtonWidget));

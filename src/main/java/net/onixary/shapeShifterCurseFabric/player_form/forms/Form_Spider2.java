@@ -35,7 +35,7 @@ public class Form_Spider2 extends NormalForm {
 
     // v3动画系统
     public static final AnimUtils.AnimationHolderData ANIM_SNEAK_IDLE =
-        new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_2_sneak_idle"), 1.0f, 6);
+        new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_2_sneak_idle"));
 
     public static final AbstractAnimStateController IDLE_CONTROLLER = 
         new WithSneakAnimController(null, ANIM_SNEAK_IDLE);
@@ -48,10 +48,12 @@ public class Form_Spider2 extends NormalForm {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {
-	        return switch (state) {
-		        case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
-		        default -> null;
-	        };
+            switch (state) {
+                case ANIM_STATE_IDLE:
+                    return IDLE_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

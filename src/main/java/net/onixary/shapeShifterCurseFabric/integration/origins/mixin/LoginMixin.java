@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
 import io.netty.buffer.Unpooled;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.PacketByteBuf;
@@ -74,7 +73,7 @@ public abstract class LoginMixin {
             if(component.hasAllOrigins()) {
                 OriginComponent.onChosen(player, false);
             } else {
-                PacketByteBuf data = PacketByteBufs.create();
+				PacketByteBuf data = new PacketByteBuf(Unpooled.buffer());
                 data.writeBoolean(true);
                 sendToPlayer(player, ModPackets.OPEN_ORIGIN_SCREEN, data);
             }

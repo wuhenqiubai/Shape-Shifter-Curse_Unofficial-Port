@@ -20,27 +20,27 @@ public class Form_Spider3 extends NormalForm {
 
     // v3动画系统
     public static final AnimUtils.AnimationHolderData ANIM_IDLE = 
-        new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_idle"), 1.0f, 6);
+        new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_idle"));
     public static final AnimUtils.AnimationHolderData ANIM_RUN =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_run"), 1.0f, 6).setSpeed(1.8f);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_run")).setSpeed(1.8f);
     public static final AnimUtils.AnimationHolderData ANIM_WALK =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_walk"), 1.0f, 6).setSpeed(1.2f);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_walk")).setSpeed(1.2f);
     public static final AnimUtils.AnimationHolderData ANIM_SNEAK_IDLE =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_sneak_idle"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_sneak_idle"));
     public static final AnimUtils.AnimationHolderData ANIM_SNEAK_WALK =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_sneak_walk"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_sneak_walk"));
     public static final AnimUtils.AnimationHolderData ANIM_SWIM_IDLE =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_swim_idle"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_swim_idle"));
     public static final AnimUtils.AnimationHolderData ANIM_JUMP =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_jump"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_jump"));
     public static final AnimUtils.AnimationHolderData ANIM_FALL =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_fall"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_fall"));
     public static final AnimUtils.AnimationHolderData ANIM_CLIMB =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_climb"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_climb"));
     public static final AnimUtils.AnimationHolderData ANIM_CLIMB_IDLE =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_climb_idle"));
     public static final AnimUtils.AnimationHolderData ANIM_FLY =
-            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_creative_flight"), 1.0f, 6);
+            new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_creative_flight"));
     public static final AnimUtils.AnimationHolderData ANIM_RIDE =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("spider_3_ride"));
     public static final AnimUtils.AnimationHolderData ANIM_SLEEP =

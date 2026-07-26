@@ -12,6 +12,7 @@ import net.minecraft.item.Items;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.world.TeleportTarget;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
 
@@ -42,7 +43,8 @@ public class EnderianPearlEntity extends ThrownItemEntity {
       }
 
       if (!this.getWorld().isClient && !this.isRemoved()) {
-	      if (entity instanceof ServerPlayerEntity serverPlayerEntity) {
+         if (entity instanceof ServerPlayerEntity) {
+            ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity)entity;
 		      if (serverPlayerEntity.networkHandler.isConnectionOpen() && serverPlayerEntity.getWorld() == this.getWorld() && !serverPlayerEntity.isSleeping()) {
 
                if (entity.hasVehicle()) {
@@ -72,4 +74,11 @@ public class EnderianPearlEntity extends ThrownItemEntity {
 
    }
 
+   public Entity teleportTo(TeleportTarget target) {
+      Entity entity = this.getOwner();
+      if (entity != null && entity.getWorld().getRegistryKey() != target.world().getRegistryKey()) {
+         this.setOwner(null);
+      }
+      return super.teleportTo(target);
+   }
 }

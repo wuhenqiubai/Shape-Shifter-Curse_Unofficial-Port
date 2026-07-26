@@ -106,8 +106,8 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
     }
 
     private void RenderEntity(DrawContext context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        float f = (float)Math.atan(mouseX / 40.0F);
-        float g = (float)Math.atan(mouseY / 40.0F);
+        float f = (float)Math.atan((double)(mouseX / 40.0F));
+        float g = (float)Math.atan((double)(mouseY / 40.0F));
         Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
         Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
         quaternionf.mul(quaternionf2);

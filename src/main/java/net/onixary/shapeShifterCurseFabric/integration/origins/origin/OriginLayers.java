@@ -5,15 +5,16 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
-import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
-import net.onixary.shapeShifterCurseFabric.integration.origins.integration.OriginDataLoadedCallback;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 import net.minecraft.util.profiler.Profiler;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
+import net.onixary.shapeShifterCurseFabric.integration.origins.integration.OriginDataLoadedCallback;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OriginLayers extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
 
@@ -35,7 +36,7 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
             minLayerPriority = Integer.MIN_VALUE;
             jel.forEach(je -> {
                 try {
-	                Origins.LOGGER.info("Trying to read layer file: {}", id);
+                    Origins.LOGGER.info("Trying to read layer file: " + id);
                     JsonObject jo = je.getAsJsonObject();
                     boolean replace = JsonHelper.getBoolean(jo, "replace", false);
                     int priority = JsonHelper.getInt(jo, "loading_priority", 0);
@@ -49,14 +50,14 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
                         layerList.add(jo);
                     }
                 } catch (Exception e) {
-	                Origins.LOGGER.error("There was a problem reading Origin layer file {} (skipping): {}", id.toString(), e.getMessage());
+                    Origins.LOGGER.error("There was a problem reading Origin layer file " + id.toString() + " (skipping): " + e.getMessage());
                 }
             });
         });
         // Merge phase
         for (Map.Entry<Identifier, HashMap<Integer, List<JsonObject>>> layerToLoad : layers.entrySet()) {
             Identifier layerId = layerToLoad.getKey();
-            List<Integer> keys = layerToLoad.getValue().keySet().stream().sorted().toList();
+            List<Integer> keys = layerToLoad.getValue().keySet().stream().sorted().collect(Collectors.toList());
             OriginLayer layer = null;
             for(Integer key : keys) {
                 for(JsonObject jo : layerToLoad.getValue().get(key)) {
@@ -69,7 +70,7 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
             }
             OriginLayers.layers.put(layerId, layer);
         }
-	    Origins.LOGGER.info("Finished loading origin layers from data files. Read {} layers.", layers.size());
+        Origins.LOGGER.info("Finished loading origin layers from data files. Read " + layers.size() + " layers.");
         OriginDataLoadedCallback.EVENT.invoker().onDataLoaded(false);
     }
 

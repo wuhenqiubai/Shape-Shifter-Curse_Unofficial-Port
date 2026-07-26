@@ -44,6 +44,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
     public boolean WideOnly = false;
     public boolean UseMultiplyMask = false;
+    public boolean UseAzureAnim = false;
     public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
     public Identifier ModelResource_Slim = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
 
@@ -206,6 +207,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
             this.FullBrightTextureMaskResource_Slim = null;
         }
 
+        this.UseAzureAnim = JsonHelper.getBoolean(this.modelJson, "use_azurelib_anim", false);
         this.Animation = Identifier.tryParse(JsonHelper.getString(this.modelJson, "animations", MissingAnimationString));
 
         this.Hidden_Hat = false;
@@ -225,43 +227,24 @@ public class FormModel extends GeoModel<FormAnimatable> {
             for (int i = 0; i < hiddenArray.size(); i++) {
                 String hidden = hiddenArray.get(i).getAsString();
                 switch (hidden) {
-                    case "hat" -> this.Hidden_Hat = true;
-                    case "head" -> this.Hidden_Head = true;
-                    case "body" -> this.Hidden_Body = true;
-                    case "jacket" -> this.Hidden_Jacket = true;
-                    case "leftArm" -> this.Hidden_LeftArm = true;
-                    case "rightArm" -> this.Hidden_RightArm = true;
-                    case "leftSleeve" -> this.Hidden_LeftSleeve = true;
-                    case "rightSleeve" -> this.Hidden_RightSleeve = true;
-                    case "leftLeg" -> this.Hidden_LeftLeg = true;
-                    case "rightLeg" -> this.Hidden_RightLeg = true;
-                    case "leftPants" -> this.Hidden_LeftPants = true;
-                    case "rightPants" -> this.Hidden_RightPants = true;
+                    case "hat" -> { this.Hidden_Hat = true; }
+                    case "head" -> { this.Hidden_Head = true; }
+                    case "body" -> { this.Hidden_Body = true; }
+                    case "jacket" -> { this.Hidden_Jacket = true; }
+                    case "leftArm" -> { this.Hidden_LeftArm = true; }
+                    case "rightArm" -> { this.Hidden_RightArm = true; }
+                    case "leftSleeve" -> { this.Hidden_LeftSleeve = true; }
+                    case "rightSleeve" -> { this.Hidden_RightSleeve = true; }
+                    case "leftLeg" -> { this.Hidden_LeftLeg = true; }
+                    case "rightLeg" -> { this.Hidden_RightLeg = true; }
+                    case "leftPants" -> { this.Hidden_LeftPants = true; }
+                    case "rightPants" -> { this.Hidden_RightPants = true; }
                 }
             }
         }
         this.AnimationSystem = null;
         if (this.modelJson.has("animation_system")) {
-	        String animationSystemId = JsonHelper.getString(this.modelJson, "animation_system", null);
-	        if (animationSystemId != null) {
-		        Identifier masId = Identifier.tryParse(animationSystemId);
-		        if (masId != null) {
-			        JsonObject config = this.modelJson.has("animation_system_config")
-					        ? this.modelJson.getAsJsonObject("animation_system_config")
-					        : null;
-
-			        try {
-				        IModelAnimationSystem system = FormRenderUtils.get_MAS(masId, config);
-				        if (system != null) {
-					        this.AnimationSystem = system;
-				        }
-			        } catch (Exception e) {
-				        ShapeShifterCurseFabric.LOGGER.warn("Failed to load animation system: {}", masId, e);
-			        }
-		        } else {
-			        ShapeShifterCurseFabric.LOGGER.warn("Invalid animation system identifier: {}", animationSystemId);
-		        }
-	        }
+            this.AnimationSystem = FormRenderUtils.get_MAS(Identifier.tryParse(JsonHelper.getString(this.modelJson, "animation_system", null)), this.modelJson.getAsJsonObject("animation_system_config"));
         }
         if (AnimationSystem == null) {
             this.AnimationSystem = FormRenderUtils.get_MAS(FormRenderUtils.DEFAULT_MAS, null);
@@ -461,39 +444,19 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return (GeoBone) b;
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3d raw) {
+    public final GeoBone setRotationForBone(String bone_name, Vec3d rot) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
         }
-        Vec3d prev = prevBoneRotation.get(bone_name);
-        double rx, ry, rz;
-        if (prev != null) {
-            rx = prev.x + wrapRadiansDelta(raw.x - prev.x);
-            ry = prev.y + wrapRadiansDelta(raw.y - prev.y);
-            rz = prev.z + wrapRadiansDelta(raw.z - prev.z);
-        } else {
-            rx = raw.x;
-            ry = raw.y;
-            rz = raw.z;
-        }
-        Vec3d corrected = new Vec3d(rx, ry, rz);
-        b.setRotX((float) corrected.x);
-        b.setRotY((float) corrected.y);
-        b.setRotZ((float) corrected.z);
-        prevBoneRotation.put(bone_name, corrected);
-        return b;
+        b.setRotX((float)rot.x);
+        b.setRotY((float)rot.y);
+        b.setRotZ((float)rot.z);
+        return (GeoBone) b;
     }
 
-    private static double wrapRadiansDelta(double delta) {
-        delta = delta % (2.0 * Math.PI);
-        if (delta > Math.PI) delta -= 2.0 * Math.PI;
-        if (delta <= -Math.PI) delta += 2.0 * Math.PI;
-        return delta;
-    }
-
-    public final void setRotationForBone(String bone_name, Vec3f rot) {
-        setRotationForBone(bone_name, new Vec3d(rot.x(), rot.y(), rot.z()));
+    public final GeoBone setRotationForBone(String bone_name, Vec3f rot) {
+        return setRotationForBone(bone_name, new Vec3d(rot.x(), rot.y(), rot.z()));
     }
 
     public final GeoBone setModelPositionForBone(String bone_name, Vec3d pos) {
@@ -536,10 +499,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public final GeoBone resetBone(String bone_name) {
         setPositionForBone(bone_name, new Vec3d(0,0,0));
-        var b = this.getCachedGeoBone(bone_name);
-        if (b != null) {
-            b.setRotX(0); b.setRotY(0); b.setRotZ(0);
-        }
+        setRotationForBone(bone_name, new Vec3d(0,0,0));
         setModelPositionForBone(bone_name, Vec3d.ZERO);
         return setScaleForBone(bone_name, new Vec3d(1,1,1));
     }
@@ -576,5 +536,12 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public Identifier getAnimationResource(FormAnimatable animatable) {
         return this.Animation;
     }
+
+//    @Override
+//    public void handleAnimations(FormAnimatable animatable, long instanceId, AnimationState<FormAnimatable> animationState, float partialTick) {
+//        if (this.UseAzureAnim) {
+//            super.handleAnimations(animatable, instanceId, animationState);
+//        }
+//    }
 
 }

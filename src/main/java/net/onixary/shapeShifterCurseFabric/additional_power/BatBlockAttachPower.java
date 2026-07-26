@@ -39,7 +39,7 @@ public class BatBlockAttachPower extends Power {
     private final int bottomAttachInterval;
 
     // 吸附状态
-    private static boolean isAttached = false;
+    private boolean isAttached = false;
     private AttachType attachType = AttachType.NONE;
     private BlockPos attachedBlockPos = null;
     private Direction attachedSide = null;
@@ -173,9 +173,12 @@ public class BatBlockAttachPower extends Power {
 	        MinecraftServer server = player.getWorld().getServer();
 	        if (server != null && attachedBlockPos != null && attachedSide != null) {
 		        // 添加小延迟确保位置设置生效
-		        server.execute(() -> {
-			        ModPacketsS2CServer.sendBatAttachState(serverPlayer, isAttached, attachType.ordinal(), attachedBlockPos, attachedSide);
-			        ModPacketsS2CServer.broadcastBatAttachState(serverPlayer, isAttached, attachType.ordinal(), attachedBlockPos, attachedSide);
+            player.getWorld().getServer().execute(() -> {
+                ModPacketsS2CServer.sendBatAttachState(serverPlayer, isAttached, attachType.ordinal(),
+                        attachedBlockPos, attachedSide);
+                // 广播给附近的其他玩家
+                ModPacketsS2CServer.broadcastBatAttachState(serverPlayer, isAttached, attachType.ordinal(),
+                        attachedBlockPos, attachedSide);
 		        });
 	        }
         }
@@ -265,6 +268,7 @@ public class BatBlockAttachPower extends Power {
         // 同步到客户端
         if (player instanceof ServerPlayerEntity serverPlayer) {
             ModPacketsS2CServer.sendBatAttachState(serverPlayer, false, AttachType.NONE.ordinal(), null, null);
+            // 广播给附近的其他玩家
             ModPacketsS2CServer.broadcastBatAttachState(serverPlayer, false, AttachType.NONE.ordinal(), null, null);
         }
 

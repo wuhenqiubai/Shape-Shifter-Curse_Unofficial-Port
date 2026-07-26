@@ -28,6 +28,6 @@ public class DewCoveredCobwebBlock extends Block {
 
     @Override
     public void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity) {
-        entity.slowMovement(state, new Vec3d(0.25F, 0.05F, 0.25F));
+        entity.slowMovement(state, new Vec3d((double)0.25F, (double)0.05F, (double)0.25F));
     }
 }

@@ -5,7 +5,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.SmithingScreenHandler;
 
 public interface ISmithingRecipeEX {
-    boolean overrideVanillaOnTakeOutput();
+    public boolean overrideVanillaOnTakeOutput();
 
-    void onTakeOutput(SmithingScreenHandler screenHandler, PlayerEntity player, ItemStack stack);
+    public void onTakeOutput(SmithingScreenHandler screenHandler, PlayerEntity player, ItemStack stack);
 }

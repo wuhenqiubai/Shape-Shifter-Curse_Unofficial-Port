@@ -31,7 +31,9 @@ public abstract class BlockDropMixin {
                 if (power.CanApply(cachedBlockPosition)) {
                     List<ItemStack> stackList = power.Apply(player.getRandom());
                     if (stackList != null) {
-	                    stackList.forEach((stack) -> dropStack(world, pos, stack.copy()));
+                        stackList.forEach((stack) -> {
+                            dropStack(world, pos, stack.copy());
+                        });
                         state.onStacksDropped((ServerWorld)world, pos, tool, true);
                         ci.cancel();
                     }

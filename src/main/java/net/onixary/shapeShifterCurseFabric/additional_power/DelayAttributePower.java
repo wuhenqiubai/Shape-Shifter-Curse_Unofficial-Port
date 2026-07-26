@@ -33,10 +33,10 @@ public class DelayAttributePower extends Power {
         this.TargetDelay = data.getInt("delay");
         this.NowDelay = this.TargetDelay;  // 确保玩家进入游戏时的属性会立即生效
         if (data.isPresent("modifier")) {
-            this.addModifier(data.get("modifier"));
+            this.addModifier((AttributedEntityAttributeModifier)data.get("modifier"));
         }
         if (data.isPresent("modifiers")) {
-            List<AttributedEntityAttributeModifier> modifierList = data.get("modifiers");
+            List<AttributedEntityAttributeModifier> modifierList = (List)data.get("modifiers");
             modifierList.forEach(this::addModifier);
         }
         this.setTicking(true);

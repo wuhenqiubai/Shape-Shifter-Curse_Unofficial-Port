@@ -147,7 +147,7 @@ public class OriginDisplayScreen extends Screen {
             int scrollbarY = 36;
             int maxScrollbarOffset = 141;
             float part = scrollPos / (float)currentMaxScroll;
-            scrollbarY += (int) ((maxScrollbarOffset - scrollbarY) * part);
+            scrollbarY += (maxScrollbarOffset - scrollbarY) * part;
             if(mouseX >= guiLeft + 156 && mouseX < guiLeft + 156 + 6) {
                 if(mouseY >= guiTop + scrollbarY && mouseY < guiTop + scrollbarY + 27) {
                     scrolling = true;
@@ -164,7 +164,7 @@ public class OriginDisplayScreen extends Screen {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if(this.scrolling) {
             int delta = (int)(mouseY - mouseDragStart);
-            int newScrollPos = Math.max(36, Math.min(141, scrollDragStart + delta));
+            int newScrollPos = (int)Math.max(36, Math.min(141, scrollDragStart + delta));
             float part = (newScrollPos - 36) / (float)(141 - 36);
             scrollPos = (int)(part * currentMaxScroll);
         }

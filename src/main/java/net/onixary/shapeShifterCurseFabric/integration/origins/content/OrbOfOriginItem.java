@@ -1,7 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.content;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -41,7 +42,7 @@ public class OrbOfOriginItem extends Item {
         if(!world.isClient) {
             OriginComponent component = ModComponents.ORIGIN.get(user);
             Map<OriginLayer, Origin> targets = getTargets(stack);
-	        if (!targets.isEmpty()) {
+            if(targets.size() > 0) {
                 for(Map.Entry<OriginLayer, Origin> target : targets.entrySet()) {
                     component.setOrigin(target.getKey(), target.getValue());
                 }
@@ -54,7 +55,7 @@ public class OrbOfOriginItem extends Item {
             }
             component.checkAutoChoosingLayers(user, false);
             component.sync();
-            PacketByteBuf data = PacketByteBufs.create();
+            PacketByteBuf data = new PacketByteBuf(Unpooled.buffer());
             data.writeBoolean(false);
 	        ServerPlayNetworking.send((ServerPlayerEntity) user, new BytePayload(BytePayload.id(ModPackets.OPEN_ORIGIN_SCREEN), data));
         }
@@ -97,7 +98,7 @@ public class OrbOfOriginItem extends Item {
 
         for (NbtElement nbtElement : targetList) {
             if(nbtElement instanceof NbtCompound targetNbt) {
-                if(targetNbt.contains("Layer", NbtElement.STRING_TYPE)) {
+                if(targetNbt.contains("Layer", NbtType.STRING)) {
                     try {
                         Identifier id = Identifier.tryParse(targetNbt.getString("Layer"));
 	                    if (id == null) {
@@ -110,14 +111,9 @@ public class OrbOfOriginItem extends Item {
 	                    }
 
                         Origin origin = Origin.EMPTY;
-                        if(targetNbt.contains("Origin", NbtElement.STRING_TYPE)) {
-                            Identifier originId = Identifier.tryParse(targetNbt.getString("Origin"));
-	                        if (originId != null) {
-		                        Origin registryOrigin = OriginRegistry.get(originId);
-		                        if (registryOrigin != null) {
-			                        origin = registryOrigin;
-		                        }
-	                        }
+                        if(targetNbt.contains("Origin", NbtType.STRING)) {
+                            Identifier originId = Identifier.of(targetNbt.getString("Origin"));
+                            origin = OriginRegistry.get(originId);
                         }
                         if(layer.isEnabled() && (layer.contains(origin) || origin.isSpecial())) {
                             targets.put(layer, origin);

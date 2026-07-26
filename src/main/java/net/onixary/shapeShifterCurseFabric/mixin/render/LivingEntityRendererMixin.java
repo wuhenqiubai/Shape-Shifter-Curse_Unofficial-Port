@@ -21,22 +21,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntityRenderer.class)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> {
-
-    @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"))
-    private void onRenderHead(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        if (livingEntity instanceof PlayerEntity player && (Object) this instanceof PlayerEntityRenderer) {
-            boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;
-            if (!pause && FabricLoader.getInstance().isModLoaded("firstperson")
-                    && MinecraftClient.getInstance().options.getPerspective().isFirstPerson()
-                    && player == MinecraftClient.getInstance().player) {
-                pause = true;
-            }
-            if (pause) {
-                EMFIntegration.pauseAllAnimations(player);
-            }
-        }
-    }
-
     @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;III)V", shift = At.Shift.BEFORE))
     private void renderPreProcessMixin(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
         if (livingEntity instanceof AbstractClientPlayerEntity abstractClientPlayerEntity && (Object) this instanceof PlayerEntityRenderer playerEntityRenderer) {
@@ -57,4 +41,20 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
             EMFIntegration.resumeAnimations(player);
         }
     }
+
+    @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"))
+    private void onRenderHead(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+        if (livingEntity instanceof PlayerEntity player && (Object) this instanceof PlayerEntityRenderer) {
+            boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;
+            if (!pause && FabricLoader.getInstance().isModLoaded("firstperson")
+                    && MinecraftClient.getInstance().options.getPerspective().isFirstPerson()
+                    && player == MinecraftClient.getInstance().player) {
+                pause = true;
+            }
+            if (pause) {
+                EMFIntegration.pauseAllAnimations(player);
+            }
+        }
+    }
+
 }

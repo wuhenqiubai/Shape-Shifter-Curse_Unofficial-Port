@@ -18,6 +18,36 @@ import net.minecraft.util.Identifier;
  */
 public abstract class AccessoryItem extends Item {
 
+	/**
+	 * 饰品槽位数据。包含槽位 ID 和索引。
+	 *
+	 * @param slot  槽位 ID（如 {@code trinkets:head}）
+	 * @param index 槽位内的索引
+	 */
+	public record SlotData(Identifier slot, int index) { }
+
+	/**
+	 * 饰品掉落规则。
+	 */
+	public enum DropRule {
+		/**
+		 * 死亡时保留
+		 */
+		KEEP,
+		/**
+		 * 死亡时掉落
+		 */
+		DROP,
+		/**
+		 * 死亡时销毁
+		 */
+		DESTROY,
+		/**
+		 * 使用默认规则
+		 */
+		DEFAULT
+	}
+
     public AccessoryItem(Settings settings) {
 	    super(settings);
 	    this.accessoryInit(settings);
@@ -56,36 +86,5 @@ public abstract class AccessoryItem extends Item {
     /** @return 此饰品的掉落规则 */
     public DropRule getDropRule(ItemStack stack, LivingEntity entity, SlotData slotData) {
         return DropRule.DEFAULT;
-    }
-
-	/**
-	 * 饰品掉落规则。
-	 */
-    public enum DropRule {
-		/**
-		 * 死亡时保留
-		 */
-		KEEP,
-		/**
-		 * 死亡时掉落
-		 */
-		DROP,
-		/**
-		 * 死亡时销毁
-		 */
-		DESTROY,
-		/**
-		 * 使用默认规则
-		 */
-		DEFAULT
-	}
-
-	/**
-	 * 饰品槽位数据。包含槽位 ID 和索引。
-	 *
-	 * @param slot  槽位 ID（如 {@code trinkets:head}）
-     * @param index 槽位内的索引
-     */
-    public record SlotData(Identifier slot, int index) {
     }
 }

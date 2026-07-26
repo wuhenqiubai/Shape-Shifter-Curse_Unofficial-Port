@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemConvertible;
 import net.minecraft.potion.Potion;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.registry.Registries;
@@ -15,11 +16,27 @@ import java.util.List;
 
 // 酿造配方实际上不属于原版配方系统 但是都叫Recipe了 还是放到RecipePackage里吧
 public class BrewingRecipeUtils {
-    public static void onLoadDynamicBrewingRecipesEnd() {
-	    // 动态配方存储在独立列表中，不再添加到原版配方注册表
-	    ShapeShifterCurseFabric.LOGGER.info("Loaded {} dynamic potion recipes and {} dynamic item recipes",
-			    POTION_RECIPES.size(), ITEM_RECIPES.size());
-    }
+
+	public static class DynamicRecipe<T> {
+		public final T input;
+		public final Ingredient ingredient;
+		public final T output;
+		public @Nullable Identifier targetForm;
+
+		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable Identifier targetForm) {
+			this.input = input;
+			this.ingredient = ingredient;
+			this.output = output;
+			this.targetForm = targetForm;
+		}
+
+		public boolean matchesInput(T otherInput) {
+			if (input instanceof RegistryEntry<?> entry && otherInput instanceof RegistryEntry<?> otherEntry) {
+				return entry.getKey().equals(otherEntry.getKey()) || entry.value() == otherEntry.value();
+			}
+			return input.equals(otherInput);
+		}
+	}
 
     private static final List<DynamicRecipe<Potion>> POTION_RECIPES = Lists.newArrayList();
     private static final List<DynamicRecipe<Item>> ITEM_RECIPES = Lists.newArrayList();
@@ -36,6 +53,12 @@ public class BrewingRecipeUtils {
 	public static List<DynamicRecipe<Item>> getItemRecipes() {
 		return ITEM_RECIPES;
     }
+
+	public static void onLoadDynamicBrewingRecipesEnd() {
+		// 动态配方存储在独立列表中，不再添加到原版配方注册表
+		ShapeShifterCurseFabric.LOGGER.info("Loaded {} dynamic potion recipes and {} dynamic item recipes",
+				POTION_RECIPES.size(), ITEM_RECIPES.size());
+	}
 
     public static void registerPotionRecipe(JsonObject recipeJson) {
         if (recipeJson == null) {
@@ -62,7 +85,7 @@ public class BrewingRecipeUtils {
             return;
         }
         Item ingredientItem = Registries.ITEM.get(ingredient);
-	    Ingredient ingredientObject = Ingredient.ofItems(ingredientItem);
+        Ingredient ingredientObject = Ingredient.ofItems(new ItemConvertible[]{ingredientItem});
         switch (recipeJson.get("type").getAsString()) {
             case "potion" -> {
                 Potion inputPotion = Registries.POTION.get(input);
@@ -75,46 +98,6 @@ public class BrewingRecipeUtils {
                 ITEM_RECIPES.add(new DynamicRecipe<>(inputItem, ingredientObject, outputItem, targetForm));
             }
         }
-    }
-
-    /*
-    ```json
-    {
-      "type": "potion",
-      "input": "shape-shifter-curse:moondust_potion",
-      "ingredient": "minecraft:bone",
-      "output": "shape-shifter-curse:to_anubis_wolf_0_potion",
-      "target_form": "example_namespace:example"
-    }
-    ```
-    ```json
-    {
-      "type": "item",
-      "input": "minecrafte:potion",
-      "ingredient": "minecraft:gunpowder",
-      "output": "minecraft:splash_potion"
-    }
-    ```
-     */
-
-	public static class DynamicRecipe<T> {
-		public final T input;
-		public final Ingredient ingredient;
-		public final T output;
-        public @Nullable Identifier targetForm;
-
-		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable Identifier targetForm) {
-			this.input = input;
-			this.ingredient = ingredient;
-			this.output = output;
-            this.targetForm = targetForm;
-        }
-
-		public boolean matchesInput(T otherInput) {
-			if (input instanceof RegistryEntry<?> entry && otherInput instanceof RegistryEntry<?> otherEntry) {
-				return entry.getKey().equals(otherEntry.getKey()) || entry.value() == otherEntry.value();
-			}
-			return input.equals(otherInput);
-		}
+        return;
     }
 }

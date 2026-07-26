@@ -25,11 +25,11 @@ public class AdditionalEntityActions {
         registerAction(TANAddThirstAction.createFactory());
     }
 
-    public static void registerAction(ActionFactory<Entity> actionFactory) {
-	    Registry.register(ApoliRegistries.ENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
+    public static ActionFactory<Entity> registerAction(ActionFactory<Entity> actionFactory) {
+        return Registry.register(ApoliRegistries.ENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 
-    public static void registerBIAction(ActionFactory<Pair<Entity, Entity>> actionFactory) {
-	    Registry.register(ApoliRegistries.BIENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
+    public static ActionFactory<Pair<Entity, Entity>> registerBIAction(ActionFactory<Pair<Entity, Entity>> actionFactory) {
+        return Registry.register(ApoliRegistries.BIENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 }

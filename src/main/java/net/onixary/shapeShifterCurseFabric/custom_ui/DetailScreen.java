@@ -34,7 +34,7 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
         int ButtonY = 10;
         int ButtonSizeX = 20;
         int ButtonSizeY = 20;
-	    ButtonWidget CloseButton = ButtonWidget.builder(Text.of("X"), (button) -> this.close()).position(ButtonX, ButtonY).size(ButtonSizeX, ButtonSizeY).build();
+        ButtonWidget CloseButton = ButtonWidget.builder(Text.of("X"), (button) -> {this.close();}).position(ButtonX, ButtonY).size(ButtonSizeX, ButtonSizeY).build();
         this.addDrawableChild(CloseButton);
     }
 

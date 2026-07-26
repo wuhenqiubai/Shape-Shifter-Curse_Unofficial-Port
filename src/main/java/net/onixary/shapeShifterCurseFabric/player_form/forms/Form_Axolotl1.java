@@ -17,16 +17,18 @@ public class Form_Axolotl1 extends NormalForm {
         super(formID);
     }
 
-    public static final AbstractAnimStateController SWIM_CONTROLLER = new SwimAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("axolotl_2_swimming_idle"), 1.0f, 6), null);
+    public static final AbstractAnimStateController SWIM_CONTROLLER = new SwimAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("axolotl_2_swimming_idle")), null);
 
     @Override
     public @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-	        return switch (animStateEnum) {
-		        case ANIM_STATE_SWIM -> SWIM_CONTROLLER;
-		        default -> null;
-	        };
+            switch (animStateEnum) {
+                case ANIM_STATE_SWIM:
+                    return SWIM_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

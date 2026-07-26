@@ -22,12 +22,12 @@ public class MustCrawlingCondition {
     }
 
     public static ConditionFactory<Entity> getFactory() {
-        return new ConditionFactory<>(
-		        ShapeShifterCurseFabric.identifier("must_crawling"),
-		        new SerializableData()
-				        .add("width", SerializableDataTypes.FLOAT, 0.6f)
-				        .add("height", SerializableDataTypes.FLOAT, 1.5f),
-		        MustCrawlingCondition::condition
+        return new ConditionFactory<Entity>(
+                ShapeShifterCurseFabric.identifier("must_crawling"),
+                new SerializableData()
+                        .add("width", SerializableDataTypes.FLOAT, 0.6f)
+                        .add("height", SerializableDataTypes.FLOAT, 1.5f),
+                MustCrawlingCondition::condition
         );
     }
 }

@@ -19,10 +19,18 @@ public class ManaRegistries {
     public static final ManaHandler EMPTY_MANA_HANDLER = new ManaHandler().setImmutable();
     public static final ManaHandler DEBUG_MANA_HANDLER = new ManaHandler()
             // 所有Hook执行时间不保证在同一Tick
-		    .setOnClientManaFull((component, player) -> player.sendMessage(Text.literal("[Client] 魔力值已满!").formatted(Formatting.GREEN)))
-		    .setOnClientManaEmpty((component, player) -> player.sendMessage(Text.literal("[Client] 魔力值已空!").formatted(Formatting.RED)))
-		    .setOnServerManaFull((component, player) -> player.sendMessage(Text.literal("[Server] 魔力值已满!").formatted(Formatting.GREEN)))
-		    .setOnServerManaEmpty((component, player) -> player.sendMessage(Text.literal("[Server] 魔力值已空!").formatted(Formatting.RED)))
+            .setOnClientManaFull((component, player) -> {
+                player.sendMessage(Text.literal("[Client] 魔力值已满!").formatted(Formatting.GREEN));
+            })
+            .setOnClientManaEmpty((component, player) -> {
+                player.sendMessage(Text.literal("[Client] 魔力值已空!").formatted(Formatting.RED));
+            })
+            .setOnServerManaFull((component, player) -> {
+                player.sendMessage(Text.literal("[Server] 魔力值已满!").formatted(Formatting.GREEN));
+            })
+            .setOnServerManaEmpty((component, player) -> {
+                player.sendMessage(Text.literal("[Server] 魔力值已空!").formatted(Formatting.RED));
+            })
             .setImmutable();
 
     // 给我自己拓展留的访问权限 修改时需要使用特殊方式 如果用错误修改方式修改可能会出现特殊Bug 优先使用提供的2个函数修改 manaHandler没有提供函数 因为有可能拓展使用相同的handler
@@ -40,18 +48,18 @@ public class ManaRegistries {
 
     public static final Identifier FAMILIAR_FOX_MANA = registerManaType(ShapeShifterCurseFabric.identifier("familiar_fox_mana"),
             new ManaUtils.ModifierList(
-		            new Pair<>(
+                    new Pair<Identifier, Pair<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("base_value"),
-				            new Pair<>(
+                            new Pair<Identifier, ManaUtils.Modifier>(
 						            MC_AlwaysTrue,
 						            new ManaUtils.Modifier(100d, 1.0d, 0d)
 				            )
 		            )
             ),
             new ManaUtils.ModifierList(
-		            new Pair<>(
+                    new Pair<Identifier, Pair<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("cursed_moon"),
-				            new Pair<>(
+                            new Pair<Identifier, ManaUtils.Modifier>(
 						            MC_IsCursedMoon,
 						            new ManaUtils.Modifier(0.02d, 1.0d, 0d)
 				            )
@@ -62,9 +70,9 @@ public class ManaRegistries {
 
     public static final Identifier WEB_RESOURCE = registerManaType(ShapeShifterCurseFabric.identifier("web_resource"),
             new ManaUtils.ModifierList(
-		            new Pair<>(
+                    new Pair<Identifier, Pair<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("base_value"),
-				            new Pair<>(
+                            new Pair<Identifier, ManaUtils.Modifier>(
 						            MC_AlwaysTrue,
 						            new ManaUtils.Modifier(100d, 1.0d, 0d)
 				            )

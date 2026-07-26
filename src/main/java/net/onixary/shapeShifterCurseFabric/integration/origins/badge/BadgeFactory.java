@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.badge;
 
 import io.github.apace100.calio.data.SerializableData;
-import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.registry.DataObjectFactory;
 import net.minecraft.util.Identifier;
 

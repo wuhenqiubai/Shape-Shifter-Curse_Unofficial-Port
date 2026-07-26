@@ -133,17 +133,13 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     @Override
     public void fromTag(NbtElement tag) {
         if (tag instanceof NbtCompound compound) {
-            // 1. 获取 RegistryLookup (同上，必须要有这个才能读 ItemStack)
             RegistryWrapper.WrapperLookup registries = this.entity.getRegistryManager();
-
-            NbtElement itemNbt = compound.get("stored_item"); // 先拿到元素
+            NbtElement itemNbt = compound.get("stored_item");
             if (itemNbt != null) {
-                // 2. 使用 Codec 读取
                 ItemStack.CODEC.parse(registries.getOps(NbtOps.INSTANCE), itemNbt)
                         .result()
                         .ifPresent(stack -> this.storedItem = stack);
             }
-
             this.bobbingAnimationTime = compound.getInt("bobbing_animation_time");
         }
     }
@@ -178,9 +174,9 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
                 (data, entity) -> {
                     ItemStorePower itemStorePower = findPower(entity, data.get("id"));
                     if (itemStorePower == null) return data.getBoolean("default");
-                    ConditionFactory<Pair<World, ItemStack>>.Instance condition = data.get("item_condition");
+                    ConditionFactory<ItemStack>.Instance condition = data.get("item_condition");
                     if (condition == null) return data.getBoolean("default");
-                    return condition.test(new Pair<>(entity.getWorld(), itemStorePower.storedItem));
+                    return condition.test(itemStorePower.storedItem);
                 }
         ));
     }

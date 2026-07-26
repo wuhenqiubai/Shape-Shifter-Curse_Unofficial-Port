@@ -96,7 +96,7 @@ public class Origin {
     }
 
     public boolean hasUpgrade() {
-	    return !this.upgrades.isEmpty();
+        return this.upgrades.size() > 0;
     }
 
     public Optional<OriginUpgrade> getUpgrade(AdvancementEntry advancement) {
@@ -227,8 +227,8 @@ public class Origin {
     @SuppressWarnings("unchecked")
     public static Origin createFromData(Identifier id, SerializableData.Instance data) {
         Origin origin = new Origin(id,
-		        data.get("icon"),
-		        data.get("impact"),
+            (ItemStack)data.get("icon"),
+            (Impact)data.get("impact"),
             data.getInt("order"),
             data.getInt("loading_priority"));
 
@@ -238,10 +238,10 @@ public class Origin {
 
         ((List<Identifier>)data.get("powers")).forEach(powerId -> {
             try {
-                PowerType<?> powerType = PowerTypeRegistry.get(powerId);
+                PowerType powerType = PowerTypeRegistry.get(powerId);
                 origin.add(powerType);
             } catch(IllegalArgumentException e) {
-	            Origins.LOGGER.error("Origin \"{}\" contained unregistered power: \"{}\"", id, powerId);
+                Origins.LOGGER.error("Origin \"" + id + "\" contained unregistered power: \"" + powerId + "\"");
             }
         });
 
@@ -267,13 +267,13 @@ public class Origin {
 
     @Override
     public String toString() {
-	    StringBuilder str = new StringBuilder("Origin(" + identifier.toString() + ")[");
+        String str = "Origin(" + identifier.toString() + ")[";
         for(PowerType<?> pt : powerTypes) {
-	        str.append(PowerTypeRegistry.getId(pt));
-	        str.append(",");
+            str += PowerTypeRegistry.getId(pt);
+            str += ",";
         }
-	    str = new StringBuilder(str.substring(0, str.length() - 1) + "]");
-	    return str.toString();
+        str = str.substring(0, str.length() - 1) + "]";
+        return str;
     }
 
     @Override

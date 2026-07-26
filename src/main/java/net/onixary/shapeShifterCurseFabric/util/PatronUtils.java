@@ -80,7 +80,7 @@ public class PatronUtils {
         if (dataPackZip == null) {
             return new LinkedList<>();
         }
-	    List<JsonObject> jsonObjects = new LinkedList<>();
+        List<JsonObject> jsonObjects = new LinkedList<JsonObject>();
         try {
             ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(dataPackZip));
             ZipEntry zipEntry = zipInputStream.getNextEntry();
@@ -283,11 +283,11 @@ public class PatronUtils {
                     pfd = DynamicForm.fromJson(null, jsonObject);
                 }
                 catch (IllegalArgumentException e) {
-                    ShapeShifterCurseFabric.LOGGER.error("Failed to parse DynamicForm from json No FormID", e);
+                    ShapeShifterCurseFabric.LOGGER.error("Failed to parse PlayerFormDynamic from json No FormID", e);
                     continue;
                 }
                 if (!pfd.getFormID().getNamespace().equals(RegPlayerForms.PatronNameSpace)) {
-                    ShapeShifterCurseFabric.LOGGER.warn("DataPack contains non-patron DynamicForm: {}", pfd.getFormID());
+                    ShapeShifterCurseFabric.LOGGER.warn("DataPack contains non-patron PlayerFormDynamic: {}", pfd.getFormID());
                     continue;
                 }
                 Identifier formID = RegPlayerForms.registerDynamicPlayerForm(pfd).getFormID();

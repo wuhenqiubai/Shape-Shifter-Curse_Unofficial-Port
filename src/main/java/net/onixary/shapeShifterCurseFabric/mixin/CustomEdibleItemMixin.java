@@ -6,6 +6,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
@@ -18,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowerFoodComponent;
 
-@Mixin(Item.class)
+@Mixin(value = Item.class)
 public abstract class CustomEdibleItemMixin {
 
     @Unique
@@ -60,6 +62,11 @@ public abstract class CustomEdibleItemMixin {
             return UseAction.EAT;
         }
         return original;
+    }
+
+    @ModifyReturnValue(method = "getEatSound", at = @At("RETURN"))
+    private SoundEvent replaceEatSound(SoundEvent original) {
+        return ssc$currentPlayer.get() != null ? SoundEvents.ENTITY_GENERIC_EAT : original;
     }
 
     @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)

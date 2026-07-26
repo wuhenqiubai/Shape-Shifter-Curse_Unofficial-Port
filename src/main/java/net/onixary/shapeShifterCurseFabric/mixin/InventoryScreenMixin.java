@@ -19,7 +19,7 @@ public class InventoryScreenMixin {
     private static void drawEntityHead(DrawContext context, int x, int y, int size, int mouseX, int mouseY, float f, float g, float h, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = true;
         prevBodyYaw = entity.prevBodyYaw;
-        float angle = (float)Math.atan(mouseX / 40.0F);
+        float angle = (float)Math.atan((double)(mouseX / 40.0F));
         entity.prevBodyYaw = 180.0F + angle * 20.0F;
         return;
     }
@@ -31,18 +31,15 @@ public class InventoryScreenMixin {
         return;
     }
 
-    // 1.21: Quaternionf overload of drawEntity was removed
-    /*
-    @Inject(method = "drawEntity", at = @At("HEAD"))
-    private static void drawEntityHead2(DrawContext context, int x, int y, int size, Quaternionf rotation, Quaternionf headRotation, LivingEntity entity, CallbackInfo ci) {
+    @Inject(method = "drawEntity(Lnet/minecraft/client/gui/DrawContext;IIIIIFFFLnet/minecraft/entity/LivingEntity;)V", at = @At("HEAD"))
+    private static void drawEntityHead2(DrawContext context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = true;
         return;
     }
 
-    @Inject(method = "drawEntity", at = @At("RETURN"))
-    private static void drawEntityTail2(DrawContext context, int x, int y, int size, Quaternionf rotation, Quaternionf headRotation, LivingEntity entity, CallbackInfo ci) {
+    @Inject(method = "drawEntity(Lnet/minecraft/client/gui/DrawContext;IIIIIFFFLnet/minecraft/entity/LivingEntity;)V", at = @At("RETURN"))
+    private static void drawEntityTail2(DrawContext context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = false;
         return;
     }
-    */
 }

@@ -12,6 +12,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
+import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -24,7 +26,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Consumer;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 
 public class TransformManager {
     public static class PlayerTransformData {
@@ -114,7 +115,12 @@ public class TransformManager {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.transformTargetForm = null;
         PlayerTransformData data = getPlayerData(player);
-        IForm form = data.transformEndForm;
+        // 最后一个参数无用 初始值由Event的Invoker设置为newForm
+        IForm form = SSCEvent.TRANSFORM_MANAGER_SET_FORM.invoker().onSetForm(player, data.transformStartForm, data.transformEndForm, null);
+        // 防止因为事件真给我传进去一个null导致崩溃
+        if (form == null) {
+            form = data.transformEndForm;
+        }
         EffectManager.clearTransformativeEffect(player);
         FormUtils._setForm(player, form);
         FormUtils.updateFormHistory(player, form);

@@ -41,6 +41,7 @@ public abstract class AbstractAnimStateControllerDP extends AbstractAnimStateCon
 	 * 从 JSON 对象加载控制器配置。
 	 *
 	 * @param jsonObject 控制器配置 JSON
+	 * @return
 	 */
-	public abstract void loadFormJson(JsonObject jsonObject);
+	public abstract AbstractAnimStateController loadFormJson(JsonObject jsonObject);
 }

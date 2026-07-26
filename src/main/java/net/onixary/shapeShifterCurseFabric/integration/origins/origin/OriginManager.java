@@ -6,11 +6,11 @@ import com.google.gson.JsonElement;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
-import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profiler;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -39,7 +39,7 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 						}
 					}
 				} catch(Exception e) {
-					Origins.LOGGER.error("There was a problem reading Origin file {} (skipping): {}", id.toString(), e.getMessage());
+					Origins.LOGGER.error("There was a problem reading Origin file " + id.toString() + " (skipping): " + e.getMessage());
 				}
 			});
 			if(OriginRegistry.contains(id)) {
@@ -58,7 +58,7 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 				}
 			}
 		});
-		Origins.LOGGER.info("Finished loading origins from data files. Registry contains {} origins.", OriginRegistry.size());
+		Origins.LOGGER.info("Finished loading origins from data files. Registry contains " + OriginRegistry.size() + " origins.");
 		if(hasConfigChanged.get()) {
 			Origins.serializeConfig();
 		}

@@ -25,7 +25,7 @@ public class NetheriteMorphscaleArmorMaterial {
         15,
         SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE,
         () -> Ingredient.ofItems(Items.NETHERITE_SCRAP),
-        List.of(new ArmorMaterial.Layer(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "netherite_morphscale"))),
+        List.of(new ArmorMaterial.Layer(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "netherite"))),
         2.0F,
         0.1F
     );

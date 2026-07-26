@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -16,18 +17,17 @@ import java.util.function.Consumer;
 @Mixin(LivingEntity.class)
 public abstract class EntityLootingMixin {
     @Unique
-    private void DropLootStack(ItemStack stack) {
+    private ItemEntity DropLootStack(ItemStack stack) {
         LivingEntity RealThis = (LivingEntity)(Object)this;
         LivingEntity Attacker = RealThis.getAttacker();
         if (Attacker instanceof PlayerEntity player) {
             AtomicReference<ItemStack> FinalStack = new AtomicReference<>(stack);
             PowerHolderComponent.getPowers(player, ModifyEntityLootPower.class).forEach(
-                    power -> FinalStack.set(power.ApplyModifyDrop(FinalStack.get(), RealThis.getRandom(), player.getWorld()))
+                    power -> FinalStack.set(power.ApplyModifyDrop(FinalStack.get(), RealThis.getRandom()))
             );
-	        RealThis.dropStack(FinalStack.get());
-	        return;
+            return RealThis.dropStack(FinalStack.get());
         }
-	    RealThis.dropStack(stack);
+        return RealThis.dropStack(stack);
     }
 
     @ModifyArg(method = "dropLoot", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;generateLoot(Lnet/minecraft/loot/context/LootContextParameterSet;JLjava/util/function/Consumer;)V"), index = 2)

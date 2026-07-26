@@ -27,7 +27,7 @@ public class BrewingRecipeRegistryMixin {
     }
 
     @Inject(method = "craft", at = @At("RETURN"))
-    private void onCraft(ItemStack ingredient, ItemStack input, CallbackInfoReturnable<ItemStack> cir) {
+    private static void craft(ItemStack ingredient, ItemStack input, CallbackInfoReturnable<ItemStack> cir) {
         if (input.isEmpty()) {
             return;
         }

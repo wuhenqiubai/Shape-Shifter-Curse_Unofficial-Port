@@ -22,7 +22,7 @@ public class ImmobilityEffect extends StatusEffect {
 
     @Override
     public boolean canApplyUpdateEffect(int duration, int amplifier) {
-        return true;
+        return true; // Apply effect every tick
     }
 
 

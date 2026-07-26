@@ -19,7 +19,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 public class PlayerClipAtLedgeMixin {
     @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
     private void clipAtLedge(CallbackInfoReturnable<Boolean> cir) {
-        if (!ShapeShifterCurseFabricClient.isClipAtLedge) {
+        if (ShapeShifterCurseFabricClient.isBlockingClipAtLedge) {
             cir.setReturnValue(false);
         }
     }

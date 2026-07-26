@@ -5,36 +5,35 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.RegPlayerFormComponent;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
-import net.onixary.shapeShifterCurseFabric.status_effects.TStatusApplier;
+import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
+import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 
 import java.util.Optional;
 
 public interface ITMob {
-	float getStatusChance();
+    public float getStatusChance();
+    public BaseTransformativeStatusEffect getStatusEffect();
+    public void TickCooldown();
+    public void ApplyCooldown();
+    public boolean IsInCooldown();
 
-	BaseTransformativeStatusEffect getStatusEffect();
-
-	void TickCooldown();
-
-	void ApplyCooldown();
-
-	boolean IsInCooldown();
-
-	default void TMob_Tick(MobEntity TMob) {
+    public default void TMob_Tick(MobEntity TMob) {
         TickCooldown();
 
         LivingEntity target = TMob.getTarget();
-		if (target instanceof PlayerEntity player && !this.IsInCooldown()) {
+        if (target instanceof PlayerEntity && !this.IsInCooldown()) {
+            PlayerEntity player = (PlayerEntity) target;
 
 			double distance = TMob.squaredDistanceTo(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
                 TMob.tryAttack(player);
-                TStatusApplier.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+                applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
                 this.ApplyCooldown();
             }
         }
@@ -51,13 +50,13 @@ public interface ITMob {
         }
     }
 
-	default Optional<Boolean> TMob_TryAttack(MobEntity TMob, Entity target) {
-        if(target instanceof PlayerEntity) {
-	        IForm currentForm = target.getComponent(RegPlayerFormComponent.PLAYER_FORM).nowForm;
-            if (currentForm.equals(RegPlayerForms.ORIGINAL_SHIFTER)) {
+    public default Optional<Boolean> TMob_TryAttack(MobEntity TMob, Entity target) {
+        if(target instanceof PlayerEntity player) {
+            IForm currentForm = FormUtils.getPlayerForm(player);
+            if (currentForm.isEquals(RegPlayerForms.ORIGINAL_SHIFTER)) {
                 boolean attacked = target.damage(TMob.getDamageSources().mobAttack(TMob), (float)TMob.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE));
                 if (attacked) {
-                    // applyDamageEffects removed in 1.21; use onAttacking which is called by tryAttack internally
+                    TMob.onAttacking(TMob);
                 }
                 return Optional.of(attacked);
             }
@@ -65,4 +64,15 @@ public interface ITMob {
         }
         return Optional.empty();
     }
+
+    public static void applyStatusByChance(float chance, PlayerEntity player, BaseTransformativeStatusEffect regStatusEffect) {
+        if (player instanceof ServerPlayerEntity playerEntity) {
+            TransformativeStatusInstance instance = EffectManager.getTransformativeEffect(playerEntity);
+            if (instance == null || instance.getTransformativeEffectType() == null || !instance.getTransformativeEffectType().getToForm(player).isEquals(regStatusEffect.getToForm(player))) {  // 如果当前效果的形态与regStatusEffect不同
+                if (Math.random() < chance && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
+                    EffectManager.overrideEffect(player, regStatusEffect);
+                }
+            }
+        }
+	}
 }

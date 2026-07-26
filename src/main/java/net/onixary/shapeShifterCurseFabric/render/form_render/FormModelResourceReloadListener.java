@@ -43,14 +43,14 @@ public class FormModelResourceReloadListener implements SimpleSynchronousResourc
                 LayerID = Identifier.of(parts[0], parts[1]);
                 FormID = Identifier.of(parts[2], parts[3]);
             } else {
-	            ShapeShifterCurseFabric.LOGGER.warn("Invalid ssc_form_model json file: {}", identifier);
+                ShapeShifterCurseFabric.LOGGER.warn("Invalid ssc_form_model json file: " + identifier);
             }
             try {
                 JsonObject json = JsonParser.parseString(new String(resourceMap.get(identifier).getInputStream().readAllBytes())).getAsJsonObject();
                 jsonMap.computeIfAbsent(LayerID, k -> new HashMap<>()).computeIfAbsent(FormID, k -> new ArrayList<>()).add(json);
             } catch (IOException e) {
-	            ShapeShifterCurseFabric.LOGGER.error("Error reading ssc_form_model json file: {}", identifier, e);
-            }
+                ShapeShifterCurseFabric.LOGGER.error("Error reading ssc_form_model json file: " + identifier, e);
+            };
         }
         // 解析文件
         // 最高load_priority的json会被加载 同load_priority先到者会被加载 无论能否被正常加载(好进行调试)
@@ -68,13 +68,13 @@ public class FormModelResourceReloadListener implements SimpleSynchronousResourc
                 }
                 if (HighestLoadPriorityJson == null) {
                     // 一般不可能发生 除非有人修改了这个函数 或者故意写一个-2147483648的加载顺序的Json
-	                ShapeShifterCurseFabric.LOGGER.warn("No ssc_form_model json file found for layer: {}, form: {}", layerID, formID);
+                    ShapeShifterCurseFabric.LOGGER.warn("No ssc_form_model json file found for layer: " + layerID + ", form: " + formID);
                     continue;
                 }
                 try {
                     FormRenderUtils.registerFormRenderer(layerID, formID, new FormRenderer(HighestLoadPriorityJson));
                 } catch (Exception e) {
-	                ShapeShifterCurseFabric.LOGGER.error("Error loading ssc_form_model json file: {}, form: {}", layerID, formID, e);
+                    ShapeShifterCurseFabric.LOGGER.error("Error loading ssc_form_model json file: " + layerID + ", form: " + formID, e);
                 }
             }
         }

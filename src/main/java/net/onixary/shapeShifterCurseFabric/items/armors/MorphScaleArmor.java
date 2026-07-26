@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 public class MorphScaleArmor extends ArmorItem implements GeoItem {
     public MorphScaleArmor(Type type) {
         super(MorphscaleArmorMaterial.ENTRY, type, new Settings().maxCount(1)
-                .maxDamage(type.getMaxDamage(22)));
+                .maxDamage(type.getMaxDamage(33)));
         GeoItem.registerSyncedAnimatable(this);
     }
 
@@ -42,7 +42,7 @@ public class MorphScaleArmor extends ArmorItem implements GeoItem {
                 if (this.renderer == null) {
                     this.renderer = new MorphscaleArmorRenderer();
                 }
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
+	            this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
                 return this.renderer;
             }
         });

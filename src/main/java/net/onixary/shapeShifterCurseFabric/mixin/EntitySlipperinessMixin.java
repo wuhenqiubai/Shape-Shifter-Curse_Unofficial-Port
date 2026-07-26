@@ -7,6 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 import net.onixary.shapeShifterCurseFabric.additional_power.ConditionedModifySlipperinessPower;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -18,10 +19,11 @@ public abstract class EntitySlipperinessMixin extends Entity {
         super(type, world);
     }
 
-    @ModifyVariable(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isOnGround()Z", ordinal = 2))
+    @ModifyVariable(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;isOnGround()Z", opcode = Opcodes.GETFIELD, ordinal = 2))
     private float modifySlipperiness(float original) {
-        Entity entity = this;
-	    if (entity instanceof PlayerEntity player) {
+        Entity entity = (Entity)(Object)this;
+        if (entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity)entity;
 		    PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
 
             for (ConditionedModifySlipperinessPower power : component.getPowers(ConditionedModifySlipperinessPower.class)) {

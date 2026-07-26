@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControl
 import com.google.gson.JsonObject;
 import net.minecraft.entity.player.PlayerEntity;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
@@ -41,8 +42,9 @@ public class SwimAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public void loadFormJson(JsonObject jsonObject) {
+    public AbstractAnimStateController loadFormJson(JsonObject jsonObject) {
         this.animationHolderData1 = AnimUtils.readAnimInJson(jsonObject, "anim", null);
         this.animationHolderData2 = AnimUtils.readAnimInJson(jsonObject, "swimAnim", null);
+	    return null;
     }
 }

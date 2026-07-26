@@ -7,6 +7,7 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeInstance;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.mob.AbstractSkeletonEntity;
@@ -40,7 +41,15 @@ public class AnubisWolfMinionEntity extends WolfEntity implements IMinion<Anubis
 
     @Override
     public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        return super.initialize(world, difficulty, spawnReason, entityData);
+        PassiveData data;
+        if (entityData instanceof PassiveData passiveData) {
+            passiveData.babyAllowed = false;
+            data = passiveData;
+        }
+        else {
+            data = new PassiveData(false);
+        }
+        return super.initialize(world, difficulty, spawnReason, data);
     }
 
     public int MinionLevel = 1;
@@ -105,7 +114,7 @@ public class AnubisWolfMinionEntity extends WolfEntity implements IMinion<Anubis
 
     @Override
     public boolean canHaveStatusEffect(StatusEffectInstance effect) {
-        var statusEffect = effect.getEffectType();
+        StatusEffect statusEffect = effect.getEffectType().value();
         return statusEffect != StatusEffects.REGENERATION && statusEffect != StatusEffects.POISON;
     }
 
@@ -186,10 +195,11 @@ public class AnubisWolfMinionEntity extends WolfEntity implements IMinion<Anubis
 
     @Override
     public void onAttacking(Entity target) {
-        // replaces applyDamageEffects() removed in 1.21
         if (target instanceof LivingEntity livingEntity) {
+            // 额外加5tick防止效果消失在伤害判定边缘
             livingEntity.addStatusEffect(new StatusEffectInstance(StatusEffects.WITHER, 20 * MinionLevel + 5, 2));
         }
+        super.onAttacking(target);
     }
 
     @Override
@@ -264,7 +274,6 @@ public class AnubisWolfMinionEntity extends WolfEntity implements IMinion<Anubis
             super(AnubisWolfMinionEntity.this, speed);
         }
 
-        @Override
         protected boolean isInDanger() {
             return this.mob.shouldEscapePowderSnow() || this.mob.isOnFire();
         }

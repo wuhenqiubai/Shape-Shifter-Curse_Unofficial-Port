@@ -32,12 +32,6 @@ public abstract class ItemStackMixin {
     @Unique
     private static final List<TransformativeStatusInstance> tsiList = new ArrayList<>();
 
-	/**
-	 * 注入到物品使用完成时的逻辑
-	 *
-	 * @param world 当前世界
-	 * @param user  使用物品的实体（可能是玩家）
-	 */
     @Inject(
             method = "finishUsing",
             at = @At("HEAD")

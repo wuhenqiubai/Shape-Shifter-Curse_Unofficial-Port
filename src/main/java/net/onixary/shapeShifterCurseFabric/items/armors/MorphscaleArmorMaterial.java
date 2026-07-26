@@ -25,7 +25,7 @@ public class MorphscaleArmorMaterial {
         10,
         SoundEvents.ITEM_ARMOR_EQUIP_DIAMOND,
         () -> Ingredient.ofItems(Items.DIAMOND),
-        List.of(new ArmorMaterial.Layer(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "morphscale"))),
+        List.of(new ArmorMaterial.Layer(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "diamond"))),
         1.0F,
         0.0F
     );

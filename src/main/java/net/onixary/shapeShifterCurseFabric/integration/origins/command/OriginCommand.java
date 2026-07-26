@@ -109,11 +109,8 @@ public class OriginCommand {
 				
 			}
 
-			if (processedTargets == 1) {
-				ServerPlayerEntity player = targets.iterator().next();
-				String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-				serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.set.success.single", playerName, Text.translatable(originLayer.getTranslationKey()), origin.getName()), true);
-			} else {
+			if (processedTargets == 1) serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.set.success.single", targets.iterator().next().getDisplayName().getString(), Text.translatable(originLayer.getTranslationKey()), origin.getName()), true);
+			else {
 				int finalProcessedTargets = processedTargets;
 				serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.set.success.multiple", finalProcessedTargets, Text.translatable(originLayer.getTranslationKey()), origin.getName()), true);
 			}
@@ -178,8 +175,7 @@ public class OriginCommand {
 		OriginLayer originLayer = LayerArgumentType.getLayer(commandContext, "layer");
 		Origin origin = originComponent.getOrigin(originLayer);
 
-		String targetName = target.getDisplayName() != null ? target.getDisplayName().getString() : target.getName().getString();
-		serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.get.result", targetName, Text.translatable(originLayer.getTranslationKey()), origin.getName(), origin.getIdentifier()), true);
+		serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.get.result", target.getDisplayName().getString(), Text.translatable(originLayer.getTranslationKey()), origin.getName(), origin.getIdentifier()), true);
 		
 		return 1;
 		
@@ -255,10 +251,8 @@ public class OriginCommand {
 
 			if (targets.size() > 1) serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.random.success.multiple", targets.size(), Text.translatable(originLayer.getTranslationKey())), true);
 			else if (targets.size() == 1) {
-				ServerPlayerEntity player = targets.iterator().next();
 				Origin finalOrigin = origin;
-				String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-				serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.random.success.single", playerName, finalOrigin.getName(), Text.translatable(originLayer.getTranslationKey())), false);
+				serverCommandSource.sendFeedback(() -> Text.translatable("commands.origin.random.success.single", targets.iterator().next().getDisplayName().getString(), finalOrigin.getName(), Text.translatable(originLayer.getTranslationKey())), false);
 			}
 
 			return targets.size();
@@ -273,9 +267,9 @@ public class OriginCommand {
 	}
 
 	/**
-	 * 	Randomize the origins of the specified entities in all the origin layers that allows to be randomized.
+	 * 	Randomize the origins of the specified entities in all of the origin layers that allows to be randomized.
 	 * 	@param commandContext the command context
-	 *    @return the number of players that had their origins randomized in all the origin layers that allows to be randomized
+	 * 	@return the number of players that had their origins randomized in all of the origin layers that allows to be randomized
 	 * 	@throws CommandSyntaxException if the entity is not found or if the entity is not an instance of {@link ServerPlayerEntity}
 	 */
 	private static int randomizeOrigins(CommandContext<ServerCommandSource> commandContext, TargetType targetType) throws CommandSyntaxException {
@@ -331,10 +325,10 @@ public class OriginCommand {
 		if (originComponent.hasAllOrigins() && !hadAllOrigins) OriginComponent.onChosen(target, hadOriginBefore);
 
 		Origins.LOGGER.info(
-				"Player {} was randomly assigned the origin {} for layer {}",
-				target.getDisplayName() != null ? target.getDisplayName().getString() : target.getName().getString(),
-				origin.getIdentifier().toString(),
-				originLayer.getIdentifier().toString()
+			"Player {} was randomly assigned the origin {} for layer {}",
+			target.getDisplayName().getString(),
+			origin.getIdentifier().toString(),
+			originLayer.getIdentifier().toString()
 		);
 
 		return origin;

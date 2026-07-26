@@ -1,16 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
-import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
-import net.onixary.shapeShifterCurseFabric.integration.origins.content.TemporaryCobwebBlock;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.block.Block;
 import net.minecraft.block.MapColor;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
+import net.onixary.shapeShifterCurseFabric.integration.origins.content.TemporaryCobwebBlock;
 
 public class ModBlocks {
 
@@ -25,9 +24,9 @@ public class ModBlocks {
     }
 
     private static void register(String blockName, Block block, boolean withBlockItem) {
-        Registry.register(Registries.BLOCK, RegistryKey.of(Registries.BLOCK.getKey(), Identifier.of(Origins.MODID, blockName)), block);
+        Registry.register(Registries.BLOCK, Identifier.of(Origins.MODID, blockName), block);
         if(withBlockItem) {
-            Registry.register(Registries.ITEM, RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(Origins.MODID, blockName)), new BlockItem(block, new Item.Settings()));
+            Registry.register(Registries.ITEM, Identifier.of(Origins.MODID, blockName), new BlockItem(block, new Item.Settings()));
         }
     }
 }
