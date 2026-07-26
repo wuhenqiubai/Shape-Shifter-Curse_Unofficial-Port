@@ -46,11 +46,6 @@ repositories {
     mavenCentral()
     //}
 
-    // The Maven with the mods source (AzureDoom Maven - no longer needed for GeckoLib)
-
-    //Owo
-    maven { url 'https://maven.wispforest.io/releases/' }
-
     exclusiveContent {
 
         forRepository {
@@ -112,12 +107,6 @@ repositories {
         url "https://maven.terraformersmc.com/releases/"
     }
 
-    // player animator
-    maven {
-        name "KosmX's maven"
-        url 'https://maven.kosmx.dev/'
-    }
-
     maven {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
@@ -174,9 +163,6 @@ dependencies {
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
     })
-
-    // Origins by Apace100
-    //modImplementation "com.github.apace100:origins-fabric:${project.origins_version}"
 
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
