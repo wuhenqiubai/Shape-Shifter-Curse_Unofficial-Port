@@ -23,7 +23,6 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.Transfo
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
 
-import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,31 +112,16 @@ public class TransformativeEntitySpawning {
         });
     }
 
-    // Structure.settings 是 protected final，StructureSettings 是 record→ 用 Builder + 反射写入
-    private static final Field STRUCTURE_SETTINGS_FIELD;
-
-    static {
-        try {
-            STRUCTURE_SETTINGS_FIELD = Structure.class.getDeclaredField("settings");
-            STRUCTURE_SETTINGS_FIELD.setAccessible(true);
-        } catch (NoSuchFieldException e) {
-            throw new RuntimeException("Failed to access Structure.settings field", e);
-        }
-    }
-
+    // Structure.settings 是 protected final → AW 中已设置 accessible + mutable，可直接赋值
     private static void addStructureSpawn(Structure structure, MobCategory category, StructureSpawnOverride override) {
         if (structure == null) return;
-        try {
-            Map<MobCategory, StructureSpawnOverride> spawns = new HashMap<>(structure.spawnOverrides());
-            spawns.put(category, override);
-            Structure.StructureSettings newSettings = new Structure.StructureSettings.Builder(structure.biomes())
-                .spawnOverrides(Map.copyOf(spawns))
-                .generationStep(structure.step())
-                .terrainAdapation(structure.terrainAdaptation())
-                .build();
-            STRUCTURE_SETTINGS_FIELD.set(structure, newSettings);
-        } catch (IllegalAccessException e) {
-            ShapeShifterCurseFabric.LOGGER.error("Failed to set structure spawn overrides for {}", structure, e);
-        }
+        Map<MobCategory, StructureSpawnOverride> spawns = new HashMap<>(structure.spawnOverrides());
+        spawns.put(category, override);
+        Structure.StructureSettings newSettings = new Structure.StructureSettings.Builder(structure.biomes())
+            .spawnOverrides(Map.copyOf(spawns))
+            .generationStep(structure.step())
+            .terrainAdapation(structure.terrainAdaptation())
+            .build();
+        structure.settings = newSettings;
     }
 }

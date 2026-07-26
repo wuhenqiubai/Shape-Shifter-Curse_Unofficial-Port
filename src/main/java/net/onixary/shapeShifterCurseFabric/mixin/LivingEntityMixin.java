@@ -276,7 +276,7 @@ public abstract class LivingEntityMixin {
         return g;
     }
 
-    @ModifyArgs(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;multiply(DDD)Lnet/minecraft/util/math/Vec3d;", ordinal = 0))
+    @ModifyArgs(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;", ordinal = 0))
     private void modifyInWaterFlexibility(Args args) {
         if ((LivingEntity)(Object)this instanceof Player player) {
             double targetSpeedX = args.get(0);
