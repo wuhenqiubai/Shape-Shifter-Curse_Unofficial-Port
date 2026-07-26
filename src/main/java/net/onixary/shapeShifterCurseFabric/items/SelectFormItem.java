@@ -1,47 +1,47 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 
 import java.util.List;
 
 public class SelectFormItem extends Item {
-    public SelectFormItem(Settings settings) {
+    public SelectFormItem(Properties settings) {
         super(settings);
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (!world.isClient) {
-            ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayerEntity) user, user);
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (!world.isClientSide) {
+            ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) user, user);
         }
         return super.use(world, user, hand);
     }
 
     @Override
-    public ActionResult useOnEntity(ItemStack stack, PlayerEntity user, LivingEntity entity, Hand hand) {
-        if (entity instanceof PlayerEntity player) {
-            if (!user.getWorld().isClient) {
-                ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayerEntity) user, player);
+    public InteractionResult interactLivingEntity(ItemStack stack, Player user, LivingEntity entity, InteractionHand hand) {
+        if (entity instanceof Player player) {
+            if (!user.level().isClientSide) {
+                ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) user, player);
             }
-            return ActionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
-        return super.useOnEntity(stack, user, entity, hand);
+        return super.interactLivingEntity(stack, user, entity, hand);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.translatable("item.shape-shifter-curse.select_form_item.tooltip").formatted(Formatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.select_form_item.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

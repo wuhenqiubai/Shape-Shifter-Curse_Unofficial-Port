@@ -8,10 +8,10 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Box;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.AABB;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.List;
@@ -44,14 +44,14 @@ public class ActionOnEntityInRangePower extends Power{
 
     @Override
     public void tick() {
-        if (!(entity instanceof PlayerEntity player) || player.isSpectator()) {
+        if (!(entity instanceof Player player) || player.isSpectator()) {
             return;
         }
 
         if (tickCounter++ % detectionInterval == 0) {
             // 1. 检测范围内的所有实体
-            Box searchBox = Box.from(player.getPos()).expand(actionRadius);
-            List<Entity> entities = player.getWorld().getOtherEntities(
+            AABB searchBox = AABB.unitCubeFromLowerCorner(player.position()).inflate(actionRadius);
+            List<Entity> entities = player.level().getEntities(
                     player,
                     searchBox,
                     e -> entityCondition == null || entityCondition.test(e)

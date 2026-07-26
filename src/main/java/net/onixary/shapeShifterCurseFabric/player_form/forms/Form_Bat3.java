@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.*;
@@ -19,22 +19,22 @@ import org.jetbrains.annotations.Nullable;
 
 
 public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
-    public Form_Bat3(Identifier formID) {
+    public Form_Bat3(ResourceLocation formID) {
         super(formID);
     }
 
     @Override
-    public Vec3d getCapeIdleLoc(AbstractClientPlayerEntity player) {
-        if (player.isOnGround()) {
-            return new Vec3d(0.0f, 0.7f, 0.2f);
+    public Vec3 getCapeIdleLoc(AbstractClientPlayer player) {
+        if (player.onGround()) {
+            return new Vec3(0.0f, 0.7f, 0.2f);
         }
         else {
-            return new Vec3d(0.0, 0.0, 0.125);
+            return new Vec3(0.0, 0.0, 0.125);
         }
     }
 
     @Override
-    public float getCapeBaseRotateAngle(AbstractClientPlayerEntity player) {
+    public float getCapeBaseRotateAngle(AbstractClientPlayer player) {
         return 100.0f;
     }
 
@@ -61,7 +61,7 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     public static final AbstractAnimStateController CLIMB_CONTROLLER = new ClimbAnimController(ANIM_CLIMB_IDLE, ANIM_CLIMB);
     public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
 
-    public @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {
@@ -104,18 +104,18 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     private static AnimationHolder POWER_ANIM_ATTACH_BOTTOM = AnimationHolder.EMPTY;
 
     @Override
-    public void registerPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+    public void registerPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
         POWER_ANIM_ATTACH_SIDE = new AnimationHolder(ShapeShifterCurseFabric.identifier("bat_3_attach_side"), true);
         POWER_ANIM_ATTACH_BOTTOM = new AnimationHolder(ShapeShifterCurseFabric.identifier("bat_3_attach_bottom"), true);
         super.registerPowerAnim(player, animSystemData);
     }
 
     @Override
-    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
-            return new Pair<>(true, POWER_ANIM_ATTACH_SIDE);
+            return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
         } else if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_BOTTOM)) {
-            return new Pair<>(true, POWER_ANIM_ATTACH_BOTTOM);
+            return new Tuple<>(true, POWER_ANIM_ATTACH_BOTTOM);
         }
         return super.getPowerAnim(player, animSystemData, powerAnimID);
     }

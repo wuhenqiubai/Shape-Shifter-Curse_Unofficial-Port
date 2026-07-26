@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,16 +18,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // 这一mixin与ViveCraft mod冲突，当其存在时禁用此mixin
 // This mixin conflicts with the ViveCraft mod, disable this mixin when it exists
-@Mixin(PlayerEntityRenderer.class)
-public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRenderer<AbstractClientPlayerEntity, PlayerEntityModel<AbstractClientPlayerEntity>> {
+@Mixin(PlayerRenderer.class)
+public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
 
-    public PlayerEntityRendererFallFlyingMixin(EntityRendererFactory.Context ctx, PlayerEntityModel<AbstractClientPlayerEntity> model, float shadowRadius) {
+    public PlayerEntityRendererFallFlyingMixin(EntityRendererProvider.Context ctx, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 
 
-    @Inject(method = "setupTransforms(Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/client/util/math/MatrixStack;FFFF)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V"),
+    @Inject(method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V"),
             slice = {
                 @Slice(
                         from = @At(value = "INVOKE", target = "Ljava/lang/Math;acos(D)D"),
@@ -36,7 +36,7 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             },
             cancellable = true
     )
-    public void setupTransformsInject(AbstractClientPlayerEntity abstractClientPlayerEntity, MatrixStack matrixStack, float f, float g, float h, float scale, CallbackInfo ci) {
+    public void setupTransformsInject(AbstractClientPlayer abstractClientPlayerEntity, PoseStack matrixStack, float f, float g, float h, float scale, CallbackInfo ci) {
         // 如果 vivecraft 对此Inject仍不兼容 把下面代码解除注释
         /*
         if (FabricLoader.getInstance().isModLoaded("vivecraft")) {
@@ -50,18 +50,18 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
         }
         else{
             // 补充变量
-            Vec3d vec3d = abstractClientPlayerEntity.getRotationVec(h);
-            Vec3d vec3d2 = abstractClientPlayerEntity.lerpVelocity(h);
-            double d = vec3d2.horizontalLengthSquared();
-            double e = vec3d.horizontalLengthSquared();
+            Vec3 vec3d = abstractClientPlayerEntity.getViewVector(h);
+            Vec3 vec3d2 = abstractClientPlayerEntity.getDeltaMovementLerped(h);
+            double d = vec3d2.horizontalDistanceSqr();
+            double e = vec3d.horizontalDistanceSqr();
             double l = (vec3d2.x * vec3d.x + vec3d2.z * vec3d.z) / Math.sqrt(d * e);
             double m = vec3d2.x * vec3d.z - vec3d2.z * vec3d.x;
 
             // Feral形态的特殊旋转
-            matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float)Math.PI));
-            matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(0.0F)); // 不向下倾斜
+            matrixStack.mulPose(Axis.YP.rotationDegrees((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float)Math.PI));
+            matrixStack.mulPose(Axis.XP.rotationDegrees(0.0F)); // 不向下倾斜
             // 你可以在这里添加任何额外的旋转
-            matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90.0F)); // 使翅膀向上
+            matrixStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 使翅膀向上
             ci.cancel();
         }
     }

@@ -7,10 +7,10 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 public class ModifyBlockDropPower extends Power {
-    private final ConditionFactory<CachedBlockPosition>.Instance blockCondition;
+    private final ConditionFactory<BlockInWorld>.Instance blockCondition;
     private final float chance;
     private final List<ItemStack> targetItemStack;
 
@@ -30,14 +30,14 @@ public class ModifyBlockDropPower extends Power {
         this.targetItemStack = Objects.requireNonNullElseGet(data.get("target_item_stack_list"), LinkedList::new);
     }
 
-    public boolean CanApply(CachedBlockPosition blockPosition) {
+    public boolean CanApply(BlockInWorld blockPosition) {
         if (this.blockCondition != null) {
             return this.blockCondition.test(blockPosition);
         }
         return true;
     }
 
-    public @Nullable List<ItemStack> Apply(Random randomSource) {
+    public @Nullable List<ItemStack> Apply(RandomSource randomSource) {
         if (randomSource.nextFloat() < this.chance) {
             return this.targetItemStack;
         }

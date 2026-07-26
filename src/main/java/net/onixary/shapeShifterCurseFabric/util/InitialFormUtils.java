@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class InitialFormUtils {
-    public static @NotNull IForm getInitialForm(PlayerEntity player) {
+    public static @NotNull IForm getInitialForm(Player player) {
         IForm form = _getInitialForm(player);
         IForm targetForm = form;
         targetForm = SSCEvent.ON_GET_INITIAL_FORM.invoker().onGetForm(player, form, targetForm);
@@ -22,7 +22,7 @@ public class InitialFormUtils {
         return targetForm;
     }
 
-    public static @NotNull IForm _getInitialForm(PlayerEntity player) {
+    public static @NotNull IForm _getInitialForm(Player player) {
         // "namespace:id:weight"
         if (!ShapeShifterCurseFabric.commonConfig.enableInitialForm) {
             return RegPlayerForms.ORIGINAL_BEFORE_ENABLE;  // 默认形态
@@ -72,7 +72,7 @@ public class InitialFormUtils {
                 return validForms.keySet().iterator().next();
             }
 
-            Random random = player.getRandom();
+            RandomSource random = player.getRandom();
             int randomValue = random.nextInt(totalWeight);
 
             int cumulative = 0;

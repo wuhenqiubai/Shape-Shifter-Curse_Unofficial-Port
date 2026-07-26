@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.client.input.Input;
-import net.minecraft.client.input.KeyboardInput;
+import net.minecraft.client.player.Input;
+import net.minecraft.client.player.KeyboardInput;
 import net.onixary.shapeShifterCurseFabric.client.ClientPlayerStateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +36,7 @@ public abstract class KeyboardInputMixin extends Input {
         }*/
 
         if (ClientPlayerStateManager.shouldForceSneak) {
-            this.sneaking = true;
+            this.shiftKeyDown = true;
         }
     }
 }

@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.entity.AreaEffectCloudEntity;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.AreaEffectCloud;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,31 +15,31 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Map;
 
-@Mixin(AreaEffectCloudEntity.class)
+@Mixin(AreaEffectCloud.class)
 public class AreaEffectCloudEntityMixin implements CTPUtils.CTPFormIDHolder {
     @Unique
-    private Identifier ctpFormID = null;
+    private ResourceLocation ctpFormID = null;
 
     @Final
     @Shadow
-    private Map<Entity, Integer> affectedEntities;
+    private Map<Entity, Integer> victims;
 
     @Override
-    public Identifier getCTPFormID() {
+    public ResourceLocation getCTPFormID() {
         return this.ctpFormID;
     }
 
     @Override
-    public void setCTPFormID(Identifier formID) {
+    public void setCTPFormID(ResourceLocation formID) {
         this.ctpFormID = formID;
     }
 
     @Inject(method="tick", at = @At("TAIL"))
     public void tick(CallbackInfo ci) {
-        if (((AreaEffectCloudEntity)(Object)this).age % 5 == 0) {
+        if (((AreaEffectCloud)(Object)this).tickCount % 5 == 0) {
             if (this.ctpFormID != null) {
-                for (Map.Entry<Entity, Integer> entry : this.affectedEntities.entrySet()) {
-                    if (entry.getKey() instanceof PlayerEntity player) {
+                for (Map.Entry<Entity, Integer> entry : this.victims.entrySet()) {
+                    if (entry.getKey() instanceof Player player) {
                         CTPUtils.setTransformativePotionForm(player, this.ctpFormID);
                     }
                 }

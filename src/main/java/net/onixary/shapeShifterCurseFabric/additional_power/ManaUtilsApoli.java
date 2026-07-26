@@ -6,10 +6,10 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.apoli.util.Comparison;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Pair;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import org.slf4j.Logger;
@@ -20,13 +20,13 @@ import java.util.function.Consumer;
 public class ManaUtilsApoli {
     private static final Logger log = LoggerFactory.getLogger(ManaUtilsApoli.class);
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("set_mana"),
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, e) -> {
-				    if (e instanceof ServerPlayerEntity playerEntity) {
+				    if (e instanceof ServerPlayer playerEntity) {
 					    double mana = data.get("mana");
 					    ManaUtils.setPlayerMana(playerEntity, mana);
 				    }
@@ -37,7 +37,7 @@ public class ManaUtilsApoli {
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, e) -> {
-				    if (e instanceof ServerPlayerEntity playerEntity) {
+				    if (e instanceof ServerPlayer playerEntity) {
 					    double mana = data.get("mana");
 					    ManaUtils.gainPlayerMana(playerEntity, mana);
 				    }
@@ -48,7 +48,7 @@ public class ManaUtilsApoli {
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, e) -> {
-				    if (e instanceof ServerPlayerEntity playerEntity) {
+				    if (e instanceof ServerPlayer playerEntity) {
 					    double mana = data.get("mana");
 					    ManaUtils.consumePlayerMana(playerEntity, mana);
 				    }
@@ -60,7 +60,7 @@ public class ManaUtilsApoli {
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d)
 					    .add("time", SerializableDataTypes.INT, 0),
 			    (data, e) -> {
-				    if (e instanceof ServerPlayerEntity playerEntity) {
+				    if (e instanceof ServerPlayer playerEntity) {
 					    double mana = data.get("mana");
 					    int time = data.get("time");
 					    ManaUtils.gainPlayerManaWithTime(playerEntity, mana, time);
@@ -75,7 +75,7 @@ public class ManaUtilsApoli {
 			    new SerializableData()
 					    .add("mana", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, e) -> {
-				    if (e instanceof PlayerEntity player) {
+				    if (e instanceof Player player) {
 					    double mana = data.get("mana");
 					    boolean manaAbove = ManaUtils.isPlayerManaAbove(player, mana);
 					    return manaAbove;
@@ -88,7 +88,7 @@ public class ManaUtilsApoli {
 			    new SerializableData()
 					    .add("mana_percent", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, e) -> {
-				    if (e instanceof PlayerEntity player) {
+				    if (e instanceof Player player) {
 					    double mana_percent = data.get("mana_percent");
 					    boolean manaAbove = ManaUtils.getPlayerManaPercent(player, 0.0d) >= mana_percent;
 					    return manaAbove;
@@ -103,7 +103,7 @@ public class ManaUtilsApoli {
 					    .add("compare_to", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, entity) -> {
 				    Comparison comparison = data.get("comparison");
-				    if (comparison != null && entity instanceof PlayerEntity player) {
+				    if (comparison != null && entity instanceof Player player) {
 					    return comparison.compare(ManaUtils.getPlayerMana(player), data.getDouble("compare_to"));
 				    }
 				    return false;
@@ -116,7 +116,7 @@ public class ManaUtilsApoli {
 					    .add("compare_to", SerializableDataTypes.DOUBLE, 0.0d),
 			    (data, entity) -> {
 				    Comparison comparison = data.get("comparison");
-				    if (comparison != null && entity instanceof PlayerEntity player) {
+				    if (comparison != null && entity instanceof Player player) {
 					    return comparison.compare(ManaUtils.getPlayerManaPercent(player, 0.0d), data.getDouble("compare_to"));
 				    }
 				    return false;

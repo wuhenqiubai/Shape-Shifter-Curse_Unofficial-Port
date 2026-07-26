@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form.ability;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,42 +11,42 @@ import java.util.Collections;
 import java.util.List;
 
 public class NormalFormLayer implements IFormLayer {
-    private Identifier layerID = null;
-    private List<Identifier> powerID = new ArrayList<>();
+    private ResourceLocation layerID = null;
+    private List<ResourceLocation> powerID = new ArrayList<>();
 
     @Override
-    public @NotNull Identifier getID() {
+    public @NotNull ResourceLocation getID() {
         return layerID;
     }
 
-    public NormalFormLayer setID(@NotNull Identifier new_id) {
+    public NormalFormLayer setID(@NotNull ResourceLocation new_id) {
         this.layerID = new_id;
         return this;
     }
 
     @Override
-    public void __setID(@NotNull Identifier id) {
+    public void __setID(@NotNull ResourceLocation id) {
         this.setID(id);
     }
 
     @Override
-    public @NotNull List<Identifier> getPowerID(@Nullable PlayerEntity player) {
+    public @NotNull List<ResourceLocation> getPowerID(@Nullable Player player) {
         return powerID;
     }
 
-    public NormalFormLayer setPower(@NotNull List<Identifier> powerIDList) {
+    public NormalFormLayer setPower(@NotNull List<ResourceLocation> powerIDList) {
         this.powerID = powerIDList;
         return this;
     }
 
-    public NormalFormLayer setPower(@NotNull Identifier... powerID) {
+    public NormalFormLayer setPower(@NotNull ResourceLocation... powerID) {
         this.powerID.clear();
         Collections.addAll(this.powerID, powerID);
         return this;
     }
 
     @Override
-    public void __setPowerID(@NotNull List<Identifier> powerIDList) {
+    public void __setPowerID(@NotNull List<ResourceLocation> powerIDList) {
         this.setPower(powerIDList);
     }
 
@@ -63,17 +63,17 @@ public class NormalFormLayer implements IFormLayer {
     */
 
     // 数据包用 后续可能会把Layers给迁移到硬编码(差不多和形态系统一样 主硬编码 副数据包)
-    public static NormalFormLayer fromJson(@NotNull Identifier id, @NotNull JsonObject json) {
+    public static NormalFormLayer fromJson(@NotNull ResourceLocation id, @NotNull JsonObject json) {
         NormalFormLayer layer = new NormalFormLayer();
         if (json.has("id")) {
-            layer.setID(Identifier.of(json.get("id").getAsString()));
+            layer.setID(ResourceLocation.parse(json.get("id").getAsString()));
         } else {
             layer.setID(id);
         }
         JsonObject powerJson = json.getAsJsonObject("power");
-        List<Identifier> powerID = new ArrayList<>();
+        List<ResourceLocation> powerID = new ArrayList<>();
         for (String key : powerJson.keySet()) {
-            powerID.add(Identifier.of(key));
+            powerID.add(ResourceLocation.parse(key));
         }
         layer.setPower(powerID);
         return layer;

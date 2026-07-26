@@ -5,8 +5,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class ModifyFoodHealPower extends Power {
@@ -45,8 +45,8 @@ public class ModifyFoodHealPower extends Power {
         }
     }
 
-    public boolean CanApply(PlayerEntity player) {
-        return player.getHungerManager().getFoodLevel() >= 18 && player.canFoodHeal();  // 饱食度大于等于18且可以回血
+    public boolean CanApply(Player player) {
+        return player.getFoodData().getFoodLevel() >= 18 && player.isHurt();  // 饱食度大于等于18且可以回血
     }
 
     public static PowerFactory<?> createFactory() {

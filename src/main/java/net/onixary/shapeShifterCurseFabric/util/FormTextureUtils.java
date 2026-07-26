@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class FormTextureUtils {
     public interface TempFormTextureProcessor {
         // 需要自行实现缓存 Model的缓存带内存泄漏
-        Identifier getTexture(int modelID, String category, Identifier texture, Identifier mask, boolean OnlyMultiply);
+        ResourceLocation getTexture(int modelID, String category, ResourceLocation texture, ResourceLocation mask, boolean OnlyMultiply);
     }
 
     public interface TempCustomSkinConfigOverrider {
@@ -36,7 +36,7 @@ public class FormTextureUtils {
     public interface TempFormModelProcessor {
         IForm getForm();
 
-        Identifier getLayerID();
+        ResourceLocation getLayerID();
     }
 
     public static boolean useTempFormTexture = false;
@@ -47,8 +47,8 @@ public class FormTextureUtils {
     public static boolean useTempFormModel = false;
     public static TempFormModelProcessor tempFormModelProcessor = null;
 
-    public static IForm getPlayerForm_Render(PlayerEntity player) {
-        if (useTempFormModel && Objects.equals(player, MinecraftClient.getInstance().player)) {
+    public static IForm getPlayerForm_Render(Player player) {
+        if (useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
             IForm form = tempFormModelProcessor.getForm();
             if (form != null) {
                 return form;
@@ -85,13 +85,13 @@ public class FormTextureUtils {
         }
     }
 
-    public static NativeImage toNativeImage(Identifier texture) {
+    public static NativeImage toNativeImage(ResourceLocation texture) {
         NativeImage nativeImage = null;
-        ResourceManager RM = MinecraftClient.getInstance().getResourceManager();
+        ResourceManager RM = Minecraft.getInstance().getResourceManager();
         Resource resource = null;
         try {
             resource = RM.getResourceOrThrow(texture);
-            InputStream inputStream = resource.getInputStream();
+            InputStream inputStream = resource.open();
             nativeImage = NativeImage.read(inputStream);
         } catch (IOException e) {
             ShapeShifterCurseFabric.LOGGER.warn("Failed to load texture: " + texture);
@@ -210,17 +210,17 @@ public class FormTextureUtils {
         int RC = 0, GC = 0, BC = 0;
         for (int x = 0; x < textureWidth; x++) {
             for (int y = 0; y < textureHeight; y++) {
-                int Mask = maskImage.getColor(x, y);
+                int Mask = maskImage.getPixelRGBA(x, y);
                 if ((Mask & 0x00FF0000) > 0) {
-                    B += getGreyScale(image.getColor(x, y));
+                    B += getGreyScale(image.getPixelRGBA(x, y));
                     BC ++;
                 }
                 else if ((Mask & 0x0000FF00) > 0) {
-                    G += getGreyScale(image.getColor(x, y));
+                    G += getGreyScale(image.getPixelRGBA(x, y));
                     GC ++;
                 }
                 else if ((Mask & 0x000000FF) > 0) {
-                    R += getGreyScale(image.getColor(x, y));
+                    R += getGreyScale(image.getPixelRGBA(x, y));
                     RC ++;
                 }
             }
@@ -291,13 +291,13 @@ public class FormTextureUtils {
         return Color;
     }
 
-    public static Identifier BakeTexture(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
-        TextureManager TM = MinecraftClient.getInstance().getTextureManager();
+    public static ResourceLocation BakeTexture(ResourceLocation texture, ResourceLocation mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
+        TextureManager TM = Minecraft.getInstance().getTextureManager();
         // 客户端会在每次重载资源包时数据溢出 溢出量不高 等以后再优化吧
-        return TM.registerDynamicTexture("masked_texture", BakeTextureNoMemLeak(texture, mask, colorSetting, OnlyMultiply));
+        return TM.register("masked_texture", BakeTextureNoMemLeak(texture, mask, colorSetting, OnlyMultiply));
     }
 
-    public static NativeImageBackedTexture BakeTextureNoMemLeak(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply) {
+    public static DynamicTexture BakeTextureNoMemLeak(ResourceLocation texture, ResourceLocation mask, ColorSetting colorSetting, boolean OnlyMultiply) {
         if (texture == null || mask == null) return null;
         NativeImage textureImage = toNativeImage(texture);
         NativeImage maskImage = toNativeImage(mask);
@@ -306,14 +306,14 @@ public class FormTextureUtils {
         Triple<Integer, Integer, Integer> MaskLayerAverageGreyScale = getAverageGreyScale(textureImage, maskImage);
         for (int x = 0; x < textureWidth; x++) {
             for (int y = 0; y < textureHeight; y++) {
-                textureImage.setColor(x, y, ProcessPixel(textureImage.getColor(x, y), maskImage.getColor(x, y), colorSetting, MaskLayerAverageGreyScale, OnlyMultiply));
+                textureImage.setPixelRGBA(x, y, ProcessPixel(textureImage.getPixelRGBA(x, y), maskImage.getPixelRGBA(x, y), colorSetting, MaskLayerAverageGreyScale, OnlyMultiply));
             }
         }
-        return new NativeImageBackedTexture(textureImage);
+        return new DynamicTexture(textureImage);
     }
 
     // 仅渲染使用 会处理isEnableFormColor
-    public static @Nullable ColorSetting getPlayerColorSetting(PlayerEntity player) {
+    public static @Nullable ColorSetting getPlayerColorSetting(Player player) {
         try {
             PlayerSkinComponent component = RegPlayerSkinComponent.SKIN_SETTINGS.get(player);
             if (!component.isEnableFormColor()) {

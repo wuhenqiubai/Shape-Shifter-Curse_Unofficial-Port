@@ -4,10 +4,10 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Consumer;
@@ -23,15 +23,15 @@ public class ItemCooldownCA {
 				    if (item == null) {
 					    return false;
 				    }
-				    if (e instanceof PlayerEntity player) {
-					    return player.getItemCooldownManager().isCoolingDown(item);
+				    if (e instanceof Player player) {
+					    return player.getCooldowns().isOnCooldown(item);
 				    }
 				    return false;
 			    }
         ));
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("set_item_cooldown"),
 			    new SerializableData()
@@ -43,8 +43,8 @@ public class ItemCooldownCA {
 				    if (item == null) {
 					    return;
 				    }
-				    if (entity instanceof PlayerEntity player) {
-					    player.getItemCooldownManager().set(item, cooldown);
+				    if (entity instanceof Player player) {
+					    player.getCooldowns().addCooldown(item, cooldown);
 				    }
 			    }
         ));

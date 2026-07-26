@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.util;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
@@ -12,12 +12,12 @@ import java.util.UUID;
 public class ClientUtils {
     public static boolean isOpenInventoryScreen = false;
 
-    public static PlayerEntity getPlayer() {
+    public static Player getPlayer() {
         if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             throw new RuntimeException("Cannot invoke this method in a non-client environment");
             // return null;
         }
-        return MinecraftClient.getInstance().player;
+        return Minecraft.getInstance().player;
     }
 
     public static boolean CanDisplayGUI() {
@@ -25,13 +25,13 @@ public class ClientUtils {
             throw new RuntimeException("Cannot invoke this method in a non-client environment");
             // return true;
         }
-        return !MinecraftClient.getInstance().options.hudHidden;
+        return !Minecraft.getInstance().options.hideGui;
     }
 
     public static @Nullable UUID getPlayerUUID() {
         if (FabricLoader.getInstance().getEnvironmentType() != EnvType.CLIENT) {
             throw new RuntimeException("Cannot invoke this method in a non-client environment");
         }
-        return MinecraftClient.getInstance().getSession().getUuidOrNull();
+        return Minecraft.getInstance().getUser().getProfileId();
     }
 }

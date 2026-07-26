@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.feature.HeldItemFeatureRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.ModelWithArms;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.client.model.ArmedModel;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.additional_power.HideTPHeldItemPower;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
@@ -21,8 +21,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(value = HeldItemFeatureRenderer.class, priority = 99999999)
-public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity, M extends EntityModel<T> & ModelWithArms> {
+@Mixin(value = ItemInHandLayer.class, priority = 99999999)
+public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity, M extends EntityModel<T> & ArmedModel> {
     /*private LivingEntity cachedEntity; // 缓存 livingEntity
 
     @Inject(
@@ -70,12 +70,12 @@ public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity,
 
     @Inject(at =
     @At(value = "HEAD"),
-            method = "render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;ILnet/minecraft/entity/LivingEntity;FFFFFF)V",
+            method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V",
             cancellable = true
     )
     private void hideHeldItem(
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             LivingEntity entity,
             float limbAngle,
@@ -94,7 +94,7 @@ public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity,
     }
 
     private boolean shouldHideItem(LivingEntity entity) {
-        if (entity instanceof AbstractClientPlayerEntity player) {
+        if (entity instanceof AbstractClientPlayer player) {
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
             //ShapeShifterCurseFabric.LOGGER.info("Is Feral Form : " + isFeral);

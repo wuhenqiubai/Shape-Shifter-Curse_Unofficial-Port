@@ -1,19 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.additional_power.AlwaysSprintSwimmingPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public class PlayerEntitySprintSwimmingMixin {
 
-    @ModifyArg(method = "addExhaustion", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/HungerManager;addExhaustion(F)V"), index = 0)
+    @ModifyArg(method = "causeFoodExhaustion", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/food/FoodData;addExhaustion(F)V"), index = 0)
     private float modifySwimmingHungerConsumption(float exhaustion) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         if (player.isSwimming()) {
             return PowerHolderComponent.getPowers(player, AlwaysSprintSwimmingPower.class).stream()
                     .map(power -> exhaustion * power.getHungerMultiplier())
@@ -23,9 +23,9 @@ public class PlayerEntitySprintSwimmingMixin {
         return exhaustion;
     }
 
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"), index = 0)
-    private Vec3d modifyVerticalVelocity(Vec3d originalVelocity) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"), index = 0)
+    private Vec3 modifyVerticalVelocity(Vec3 originalVelocity) {
+        Player player = (Player) (Object) this;
 
         if (PowerHolderComponent.hasPower(player, AlwaysSprintSwimmingPower.class)){
             // 只有在冲刺时才修改Y轴速度
@@ -33,8 +33,8 @@ public class PlayerEntitySprintSwimmingMixin {
                 return originalVelocity;
             } else {
                 // 保持原有的X和Z速度，但不修改Y速度
-                Vec3d currentVelocity = player.getVelocity();
-                return new Vec3d(originalVelocity.x, currentVelocity.y, originalVelocity.z);
+                Vec3 currentVelocity = player.getDeltaMovement();
+                return new Vec3(originalVelocity.x, currentVelocity.y, originalVelocity.z);
             }
         }
         return originalVelocity;

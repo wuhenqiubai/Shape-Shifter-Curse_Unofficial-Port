@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.items.trinkets;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.accessory.AccessoryItem;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
@@ -15,21 +15,21 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
     static {
         TrinketUtils.registerAccessoryMixinAuto(ShapeShifterCurseFabric.identifier("custom_trinket"), false);
     }
-    private static final Identifier DEFAULT_IDENTIFIER = ShapeShifterCurseFabric.identifier("custom_trinket");
+    private static final ResourceLocation DEFAULT_IDENTIFIER = ShapeShifterCurseFabric.identifier("custom_trinket");
 
-    public CustomTrinket(Settings settings) {
+    public CustomTrinket(Properties settings) {
         super(settings);
     }
 
-    private @NotNull Identifier getAccessoryID(ItemStack stack) {
+    private @NotNull ResourceLocation getAccessoryID(ItemStack stack) {
         // getNbt() removed in 1.21; use component-based access
-        var customData = stack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+        var customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (customData == null) {
             return DEFAULT_IDENTIFIER;
         }
-        NbtCompound nbt = customData.copyNbt();
+        CompoundTag nbt = customData.copyTag();
         if (nbt.contains("custom_accessory_id")) {
-            Identifier identifier = Identifier.tryParse(nbt.getString("custom_accessory_id"));
+            ResourceLocation identifier = ResourceLocation.tryParse(nbt.getString("custom_accessory_id"));
             if (identifier != null) {
                 return identifier;
             }
@@ -39,14 +39,14 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
 
     @Override
     public boolean canEquip(ItemStack stack, LivingEntity entity, AccessoryItem.SlotData slot) {
-        var customData = stack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+        var customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (customData == null) {
             return false;
         }
-        NbtCompound nbt = customData.copyNbt();
+        CompoundTag nbt = customData.copyTag();
         if (nbt.contains("custom_accessory_slots")) {
-            NbtList slots = nbt.getList("custom_accessory_slots", 8);
-            Identifier slotFinalName = slot.slot();
+            ListTag slots = nbt.getList("custom_accessory_slots", 8);
+            ResourceLocation slotFinalName = slot.slot();
             for (int i = 0; i < slots.size(); i++) {
                 if (slots.getString(i).equals(slotFinalName.toString())) {
                     return true;
@@ -58,20 +58,20 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
 
     @Override
     public void onEquip(ItemStack stack, LivingEntity entity, AccessoryItem.SlotData slot) {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             TrinketUtils.ApplyAccessoryPowerOnEquip(player, getAccessoryID(stack));
         }
     }
 
     @Override
     public void onUnequip(ItemStack stack, LivingEntity entity, AccessoryItem.SlotData slot) {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             TrinketUtils.ApplyAccessoryPowerOnUnEquip(player, getAccessoryID(stack));
         }
     }
 
     @Override
-    public void onFormChange(ItemStack stack, AccessoryItem.SlotData slot, PlayerEntity player) {
+    public void onFormChange(ItemStack stack, AccessoryItem.SlotData slot, Player player) {
         TrinketUtils.ApplyAccessoryPowerOnPlayerFormChange(player, getAccessoryID(stack));
     }
 }

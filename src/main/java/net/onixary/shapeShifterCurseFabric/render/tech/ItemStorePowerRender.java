@@ -3,11 +3,11 @@ package net.onixary.shapeShifterCurseFabric.render.tech;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
 
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemStorePowerRender {
-    private static final Identifier WIDGETS_TEXTURE = Identifier.of("textures/gui/sprites/hud/hotbar_offhand_left.png");
+    private static final ResourceLocation WIDGETS_TEXTURE = ResourceLocation.parse("textures/gui/sprites/hud/hotbar_offhand_left.png");
 
     public static interface itemStorePowerRenderInterface {
         public int getSlot();
@@ -25,7 +25,7 @@ public class ItemStorePowerRender {
         }
     }
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final Minecraft mc = Minecraft.getInstance();
     private static final List<itemStorePowerRenderInterface> tempPower = new ArrayList<itemStorePowerRenderInterface>();
     private static int timer = 0;
     private static final int MaxSlot = 12;
@@ -62,16 +62,16 @@ public class ItemStorePowerRender {
         timer++;
     }
 
-    private static void renderSlot(DrawContext context, float tickDelta, itemStorePowerRenderInterface power) {
-        Pair<Integer, Integer> SlotBegin = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.itemStorePowerPosType, ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetX - (NowCol * 20), ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetY - (NowRow * 20));
+    private static void renderSlot(GuiGraphics context, float tickDelta, itemStorePowerRenderInterface power) {
+        Tuple<Integer, Integer> SlotBegin = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.itemStorePowerPosType, ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetX - (NowCol * 20), ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetY - (NowRow * 20));
         int SlotX = power.getSlot() % SlotPerRow;
         int SlotY = power.getSlot() / SlotPerRow;
-        int SlotXFinal = SlotBegin.getLeft() + SlotX;
-        int SlotYFinal = SlotBegin.getRight() + SlotY;
-        context.getMatrices().push();
-        context.getMatrices().translate(0.0f, 0.0f, -90.0f);
-        context.drawTexture(WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 29, 24);
-        context.getMatrices().pop();
+        int SlotXFinal = SlotBegin.getA() + SlotX;
+        int SlotYFinal = SlotBegin.getB() + SlotY;
+        context.pose().pushPose();
+        context.pose().translate(0.0f, 0.0f, -90.0f);
+        context.blit(WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 29, 24);
+        context.pose().popPose();
         ItemStack stack = power.getStack();
         if (stack.isEmpty()) {
             return;
@@ -79,21 +79,21 @@ public class ItemStorePowerRender {
         float g = power.getBobbingAnimationTime() - tickDelta;
         if (g > 0.0f) {
             float h = 1.0f + g / 5.0f;
-            context.getMatrices().push();
-            context.getMatrices().translate(SlotXFinal + 8, SlotYFinal + 12, 0.0f);
-            context.getMatrices().scale(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
-            context.getMatrices().translate(-(SlotXFinal + 8), -(SlotYFinal + 12), 0.0f);
+            context.pose().pushPose();
+            context.pose().translate(SlotXFinal + 8, SlotYFinal + 12, 0.0f);
+            context.pose().scale(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
+            context.pose().translate(-(SlotXFinal + 8), -(SlotYFinal + 12), 0.0f);
         }
-        context.drawItem(mc.player, stack, SlotXFinal, SlotYFinal, power.getSlot());
+        context.renderItem(mc.player, stack, SlotXFinal, SlotYFinal, power.getSlot());
         if (g > 0.0f) {
-            context.getMatrices().pop();
+            context.pose().popPose();
         }
-        context.drawItemInSlot(mc.textRenderer, stack, SlotXFinal, SlotYFinal);
+        context.renderItemDecorations(mc.font, stack, SlotXFinal, SlotYFinal);
     }
 
-    public static void render(DrawContext context, float tickDelta) {
+    public static void render(GuiGraphics context, float tickDelta) {
         timerTick();
-        if (!mc.options.hudHidden) {
+        if (!mc.options.hideGui) {
             RenderSystem.enableBlend();
             for (itemStorePowerRenderInterface power : tempPower) {
                 if (power != null) {

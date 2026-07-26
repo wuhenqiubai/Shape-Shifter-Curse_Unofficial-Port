@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.item.Item.TooltipContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.LingeringPotionItem;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.LingeringPotionItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.alchemy.PotionContents;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomPotions;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -21,20 +21,20 @@ import java.util.List;
 
 @Mixin(LingeringPotionItem.class)
 public class LingeringPotionItemMixin {
-    @Inject(method = "appendTooltip", at = @At("RETURN"))
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type, CallbackInfo ci) {
-	    PotionContentsComponent potionContents = stack.getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
+    @Inject(method = "appendHoverText", at = @At("RETURN"))
+    public void appendTooltip(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type, CallbackInfo ci) {
+	    PotionContents potionContents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
 	    var potionEntry = potionContents.potion().orElse(null);
 	    if (potionEntry == null || potionEntry.value() != RegCustomPotions.CUSTOM_STATUE_FORM_POTION) {
             return;
         }
 
-	    var nbt = stack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+	    var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
-        Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyNbt());
+        ResourceLocation CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
         if (CTPFormID != null) {
-            Text formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
-            tooltip.add(Text.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
+            Component formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
+            tooltip.add(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
         }
     }
 }

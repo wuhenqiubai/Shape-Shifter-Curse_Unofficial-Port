@@ -1,13 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.WitchEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.world.World;
-
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.UUID;
 
@@ -51,13 +50,13 @@ public class AttackEntityDataTracker {
     public static final HashMap<UUID, Long> lastAttackPillagerTimeMap = new HashMap<>();
     public static final HashMap<UUID, Long> lastAttackWitchTimeMap = new HashMap<>();
 
-    public static void onPlayerAttack(PlayerEntity player, Entity target, World world) {
-        if (target instanceof WitchEntity) {
-            lastAttackWitchTimeMap.put(player.getUuid(), world.getTime());
+    public static void onPlayerAttack(Player player, Entity target, Level world) {
+        if (target instanceof Witch) {
+            lastAttackWitchTimeMap.put(player.getUUID(), world.getGameTime());
         }
         if (target instanceof LivingEntity livingEntity) {
-            if (livingEntity.getType().isIn(ModTags.Illager_Tag)) {
-                lastAttackPillagerTimeMap.put(player.getUuid(), world.getTime());
+            if (livingEntity.getType().is(ModTags.Illager_Tag)) {
+                lastAttackPillagerTimeMap.put(player.getUUID(), world.getGameTime());
             }
         }
     }
@@ -65,7 +64,7 @@ public class AttackEntityDataTracker {
     public static void init() {
         AttackEntityCallback.EVENT.register((player, world, hand, entity, hitResult) -> {
             onPlayerAttack(player, entity, world);
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
     }
 }

@@ -7,12 +7,12 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class VirtualShieldPower extends Power {
@@ -30,19 +30,19 @@ public class VirtualShieldPower extends Power {
     }
 
     public boolean blockDamage(DamageSource source) {
-        Vec3d vec3d;
-        PersistentProjectileEntity persistentProjectileEntity;
-        Entity attacker = source.getSource();
-        boolean bl = attacker instanceof PersistentProjectileEntity && (persistentProjectileEntity = (PersistentProjectileEntity) attacker).getPierceLevel() > 0;
-	    if (!source.isIn(DamageTypeTags.BYPASSES_SHIELD) && (this.activeShieldCondition == null || this.activeShieldCondition.test(this.entity)) && !bl && (vec3d = source.getPosition()) != null) {
-            Vec3d vec3d2 = this.entity.getRotationVec(1.0f);
-            Vec3d vec3d3 = vec3d.relativize(this.entity.getPos()).normalize();
-            vec3d3 = new Vec3d(vec3d3.x, 0.0, vec3d3.z);
-            if (vec3d3.dotProduct(vec3d2) < 0.0) {
+        Vec3 vec3d;
+        AbstractArrow persistentProjectileEntity;
+        Entity attacker = source.getDirectEntity();
+        boolean bl = attacker instanceof AbstractArrow && (persistentProjectileEntity = (AbstractArrow) attacker).getPierceLevel() > 0;
+	    if (!source.is(DamageTypeTags.BYPASSES_SHIELD) && (this.activeShieldCondition == null || this.activeShieldCondition.test(this.entity)) && !bl && (vec3d = source.getSourcePosition()) != null) {
+            Vec3 vec3d2 = this.entity.getViewVector(1.0f);
+            Vec3 vec3d3 = vec3d.vectorTo(this.entity.position()).normalize();
+            vec3d3 = new Vec3(vec3d3.x, 0.0, vec3d3.z);
+            if (vec3d3.dot(vec3d2) < 0.0) {
                 if (this.takenDamageAction != null) {
                     this.takenDamageAction.accept(this.entity);
                 }
-                if (attacker instanceof LivingEntity livingEntity && livingEntity.disablesShield()) {
+                if (attacker instanceof LivingEntity livingEntity && livingEntity.canDisableShield()) {
                     if (this.shieldBreakAction != null) {
                         this.shieldBreakAction.accept(this.entity);
                     }

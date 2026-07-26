@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.items.armors;
 
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -20,14 +20,14 @@ import java.util.function.Consumer;
 
 public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
     public NetheriteMorphScaleArmor(Type type) {
-        super(NetheriteMorphscaleArmorMaterial.ENTRY, type, new Settings().maxCount(1).fireproof()
-                .maxDamage(type.getMaxDamage(37)));
+        super(NetheriteMorphscaleArmorMaterial.ENTRY, type, new Properties().stacksTo(1).fireResistant()
+                .durability(type.getDurability(37)));
         GeoItem.registerSyncedAnimatable(this);
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.translatable("item.shape-shifter-curse.morphscale_armor.tooltip").formatted(Formatting.YELLOW));
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.morphscale_armor.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 
 
@@ -39,7 +39,7 @@ public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
             private GeoArmorRenderer<NetheriteMorphScaleArmor> renderer;
 
             @Override
-            public <T extends LivingEntity> BipedEntityModel<?> getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, BipedEntityModel<T> original) {
+            public <T extends LivingEntity> HumanoidModel<?> getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<T> original) {
                 if (this.renderer == null) {
                     this.renderer = new NetheriteMorphscaleArmorRenderer();
                 }

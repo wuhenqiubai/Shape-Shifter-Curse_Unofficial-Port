@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.client;
 
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import io.github.apace100.apoli.ApoliClient;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
@@ -7,20 +9,17 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgram;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
@@ -36,9 +35,13 @@ import net.onixary.shapeShifterCurseFabric.minion.MinionRegisterClient;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.render.render_layer.FurGradientRenderLayer;
-import net.onixary.shapeShifterCurseFabric.util.*;
+import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
+import net.onixary.shapeShifterCurseFabric.util.FormColorData;
+import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import net.onixary.shapeShifterCurseFabric.util.TickManager;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import org.lwjgl.glfw.GLFW;
 
@@ -55,33 +58,33 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 	public static final FormColorData formColorData = new FormColorData();
 
-	public static MinecraftClient getClient() {
-		return MinecraftClient.getInstance();
+	public static Minecraft getClient() {
+		return Minecraft.getInstance();
 	}
-	private static ShaderProgram furGradientShader;
+	private static ShaderInstance furGradientShader;
 
-	public static KeyBinding makeSound;
-	public static KeyBinding useActiveSkill1PowerKeybind;
-	public static KeyBinding useActiveSkill2PowerKeybind;
-	public static KeyBinding useActiveSkill3PowerKeybind;
-	public static KeyBinding useActiveSkill4PowerKeybind;
-	public static KeyBinding useActiveSkill5PowerKeybind;
-	public static KeyBinding useActiveSkill6PowerKeybind;
+	public static KeyMapping makeSound;
+	public static KeyMapping useActiveSkill1PowerKeybind;
+	public static KeyMapping useActiveSkill2PowerKeybind;
+	public static KeyMapping useActiveSkill3PowerKeybind;
+	public static KeyMapping useActiveSkill4PowerKeybind;
+	public static KeyMapping useActiveSkill5PowerKeybind;
+	public static KeyMapping useActiveSkill6PowerKeybind;
 
 	public static boolean isBlockingClipAtLedge = false;
 
-	public static void openBookScreen(PlayerEntity user) {
-		if (!(MinecraftClient.getInstance().currentScreen instanceof BookOfShapeShifterScreenV2_P1)) {
+	public static void openBookScreen(Player user) {
+		if (!(Minecraft.getInstance().screen instanceof BookOfShapeShifterScreenV2_P1)) {
 			BookOfShapeShifterScreenV2_P1 bookScreen = new BookOfShapeShifterScreenV2_P1();
 			bookScreen.currentPlayer = user;
-			MinecraftClient.getInstance().setScreen(bookScreen);
+			Minecraft.getInstance().setScreen(bookScreen);
 		}
 	}
-	public static void openStartBookScreen(PlayerEntity user) {
-		if (!(MinecraftClient.getInstance().currentScreen instanceof StartBookScreenV2)) {
+	public static void openStartBookScreen(Player user) {
+		if (!(Minecraft.getInstance().screen instanceof StartBookScreenV2)) {
 			StartBookScreenV2 startScreen = new StartBookScreenV2();
 			startScreen.currentPlayer = user;
-			MinecraftClient.getInstance().setScreen(startScreen);
+			Minecraft.getInstance().setScreen(startScreen);
 		}
 	}
 
@@ -96,14 +99,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	}
 
 
-	private static void onClientTick(MinecraftClient minecraftClient){
+	private static void onClientTick(Minecraft minecraftClient){
 		TickManager.tickClientAll();
-		ClientPlayerEntity clientPlayer = minecraftClient.player;
+		LocalPlayer clientPlayer = minecraftClient.player;
 		if(clientPlayer == null){
 			return;
 		}
 		// Mana System
-		if (!MinecraftClient.getInstance().isPaused()) {
+		if (!Minecraft.getInstance().isPaused()) {
 			ManaUtils.manaTick(minecraftClient.player);
 			// Transform overlay tick (black screen + nausea)
 			TransformManager.clientTick();
@@ -112,7 +115,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	}
 
 	public static void emitTransformParticle(int duration) {
-		ClientPlayerEntity clientPlayer = MinecraftClient.getInstance().player;
+		LocalPlayer clientPlayer = Minecraft.getInstance().player;
 		if(clientPlayer == null){
 			return;
 		}
@@ -121,7 +124,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// similar to DOTween in Unity
 		Runnable particleTask = () -> {
 			for (int i = 0; i < 2; i++) {
-				clientPlayer.getWorld().addParticle(StaticParams.PLAYER_TRANSFORM_PARTICLE,
+				clientPlayer.level().addParticle(StaticParams.PLAYER_TRANSFORM_PARTICLE,
 					clientPlayer.getX() + (clientPlayer.getRandom().nextDouble() - 0.5) * 0.9,
 					clientPlayer.getY() + clientPlayer.getRandom().nextDouble() * 1.5 + 1,
 					clientPlayer.getZ() + (clientPlayer.getRandom().nextDouble() - 0.5) * 0.9,
@@ -131,20 +134,20 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		};
 
 		// Get the Minecraft client instance
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		// Create and start the client ticker
 		ClientTicker ticker = new ClientTicker(client, particleTask, duration);
 		ticker.start();
 	}
 
 	public static void applyInstinctThresholdEffect() {
-		ClientPlayerEntity clientPlayer = MinecraftClient.getInstance().player;
+		LocalPlayer clientPlayer = Minecraft.getInstance().player;
 		if(clientPlayer == null){
 			return;
 		}
 
 		for (int i = 0; i < 1; i++) {
-			clientPlayer.getWorld().addParticle(StaticParams.PLAYER_TRANSFORM_PARTICLE,
+			clientPlayer.level().addParticle(StaticParams.PLAYER_TRANSFORM_PARTICLE,
 				clientPlayer.getX() + (clientPlayer.getRandom().nextDouble() - 0.5) * 0.5,
 				clientPlayer.getY() + clientPlayer.getRandom().nextDouble() * 1,
 				clientPlayer.getZ() + (clientPlayer.getRandom().nextDouble() - 0.5) * 0.5,
@@ -154,7 +157,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 	// 添加动画刷新方法
 	public static void refreshPlayerAnimations() {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client.player != null) {
 			ShapeShifterCurseFabric.LOGGER.info("Refreshing player animations on client");
 			// 强制重新初始化动画系统
@@ -206,11 +209,11 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	{
 		CoreShaderRegistrationCallback.EVENT.register(context -> {
 			// 1. 定义着色器的 Identifier
-			Identifier shaderId = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
+			ResourceLocation shaderId = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
 
 			// 2. 使用 context.register 方法注册
 			//    这个方法会处理底层的加载逻辑
-			context.register(shaderId, VertexFormats.POSITION_COLOR_TEXTURE_OVERLAY_LIGHT_NORMAL, program -> {
+			context.register(shaderId, DefaultVertexFormat.NEW_ENTITY, program -> {
 				// 3. 将加载好的 ShaderProgram 实例保存到我们的静态变量中
 				ShapeShifterCurseFabricClient.furGradientShader = program;
 			});
@@ -236,7 +239,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		ClientTickEvents.END_CLIENT_TICK.register(ShapeShifterCurseFabricClient::onClientTick);
 		// 客户端能力处理
 		ClientTickEvents.START_CLIENT_TICK.register((minecraftClient) -> {
-			ClientPlayerEntity clientPlayer = minecraftClient.player;
+			LocalPlayer clientPlayer = minecraftClient.player;
 			if(clientPlayer == null){
 				return;
 			}
@@ -251,7 +254,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			CustomEdiblePower.OnClientTick(clientPlayer);
 		});
 
-		makeSound = new KeyBinding("key.shape-shifter-curse.make_sound", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, "category." + MOD_ID);
+		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, "category." + MOD_ID);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);
 		KeyBindingHelper.registerKeyBinding(makeSound);
 
@@ -262,14 +265,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// 打开菜单 5->6
 		// 切换能力 6->5
 		// 这2个分配给常用技能 一般推荐绑鼠标侧键上
-		useActiveSkill1PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_1", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill2PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_2", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill1PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill2PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
 		// 这2个介于常用和非常用之间 尽量别放类似火球这种能力 如果鼠标侧键多也可以绑侧键上
-		useActiveSkill3PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_3", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill4PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_4", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
-		useActiveSkill5PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_5", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill6PowerKeybind = new KeyBinding("key.shape-shifter-curse.active_skill_6", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_1", useActiveSkill1PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_2", useActiveSkill2PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_3", useActiveSkill3PowerKeybind);
@@ -290,12 +293,12 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			if (AdditionalPowers.TOGGLE_CLIP_AT_LEDGE.isActive(client.player)) {
 				if (!isBlockingClipAtLedge) {
 					isBlockingClipAtLedge = true;
-					client.player.sendMessage(Text.translatable("message.shape-shifter-curse.clip_at_ledge.off"), true);
+					client.player.displayClientMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.off"), true);
 				}
 			} else {
 				if (isBlockingClipAtLedge) {
 					isBlockingClipAtLedge = false;
-					client.player.sendMessage(Text.translatable("message.shape-shifter-curse.clip_at_ledge.on"), true);
+					client.player.displayClientMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.on"), true);
 				}
 			}
 		});
@@ -305,7 +308,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		AuthClient.init();
 	}
 
-	public static ShaderProgram getFurGradientShader() {
+	public static ShaderInstance getFurGradientShader() {
 		return furGradientShader;
 	}
 

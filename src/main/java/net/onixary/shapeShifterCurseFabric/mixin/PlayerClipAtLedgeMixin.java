@@ -1,23 +1,23 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Box;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 
 @Environment(EnvType.CLIENT)
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public class PlayerClipAtLedgeMixin {
-    @Inject(method = "clipAtLedge", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isStayingOnGroundSurface", at = @At("HEAD"), cancellable = true)
     private void clipAtLedge(CallbackInfoReturnable<Boolean> cir) {
         if (ShapeShifterCurseFabricClient.isBlockingClipAtLedge) {
             cir.setReturnValue(false);
@@ -26,11 +26,11 @@ public class PlayerClipAtLedgeMixin {
 
     /** In 1.21.1 adjustMovementForSneaking delegates the space check to isSpaceAroundPlayerEmpty.
      *  Wrap the World.isSpaceEmpty call inside that method to fix step-height clipping at ledges. */
-    @WrapOperation(method = "isSpaceAroundPlayerEmpty", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isSpaceEmpty(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Z"))
-    private boolean fixStepHeightClipAtLedge(World world, Entity entity, Box box, Operation<Boolean> original) {
-        PlayerEntity self = (PlayerEntity) (Object) this;
-        if (!box.contains(self.getPos())) {
-            box = box.withMaxY(self.getPos().y);
+    @WrapOperation(method = "canFallAtLeast", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;noCollision(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Z"))
+    private boolean fixStepHeightClipAtLedge(Level world, Entity entity, AABB box, Operation<Boolean> original) {
+        Player self = (Player) (Object) this;
+        if (!box.contains(self.position())) {
+            box = box.setMaxY(self.position().y);
         }
         return original.call(world, entity, box);
     }

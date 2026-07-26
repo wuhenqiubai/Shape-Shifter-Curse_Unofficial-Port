@@ -1,38 +1,38 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat;
 
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.render.entity.model.BatEntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.passive.BatEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.BatModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.ambient.Bat;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
-public class BatEntityRenderer extends MobEntityRenderer<BatEntity, net.minecraft.client.render.entity.model.BatEntityModel> {
-    private static final Identifier TEXTURE = Identifier.of(MOD_ID, "textures/entity/mob/t_bat.png");
+public class BatEntityRenderer extends MobRenderer<Bat, net.minecraft.client.model.BatModel> {
+    private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/entity/mob/t_bat.png");
 
-    public BatEntityRenderer(EntityRendererFactory.Context context) {
-        super(context, new BatEntityModel(context.getPart(EntityModelLayers.BAT)), 0.25F);
+    public BatEntityRenderer(EntityRendererProvider.Context context) {
+        super(context, new BatModel(context.bakeLayer(ModelLayers.BAT)), 0.25F);
     }
 
-    public Identifier getTexture(BatEntity batEntity) {
+    public ResourceLocation getTextureLocation(Bat batEntity) {
         return TEXTURE;
     }
 
-    protected void scale(BatEntity batEntity, MatrixStack matrixStack, float f) {
+    protected void scale(Bat batEntity, PoseStack matrixStack, float f) {
         matrixStack.scale(0.35F, 0.35F, 0.35F);
     }
 
-    protected void setupTransforms(BatEntity batEntity, MatrixStack matrixStack, float f, float g, float h, float scale) {
-        if (batEntity.isRoosting()) {
+    protected void setupRotations(Bat batEntity, PoseStack matrixStack, float f, float g, float h, float scale) {
+        if (batEntity.isResting()) {
             matrixStack.translate(0.0F, -0.1F, 0.0F);
         } else {
-            matrixStack.translate(0.0F, MathHelper.cos(f * 0.3F) * 0.1F, 0.0F);
+            matrixStack.translate(0.0F, Mth.cos(f * 0.3F) * 0.1F, 0.0F);
         }
 
-        super.setupTransforms(batEntity, matrixStack, f, g, h, scale);
+        super.setupRotations(batEntity, matrixStack, f, g, h, scale);
     }
 }

@@ -5,9 +5,9 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
@@ -275,7 +275,7 @@ public class PatronUtils {
     // **** 此DataPack非标准数据包 为单层 <id>.json 的ssc_form文件 ****
     private static void UpdateDataPack(MinecraftServer server) {
         List<JsonObject> jsonObjects = ReadDataPackZip(getNewestDataPack());
-        List<Identifier> patronForms = new ArrayList<>();
+        List<ResourceLocation> patronForms = new ArrayList<>();
         if (jsonObjects != null) {
             for (JsonObject jsonObject : jsonObjects) {
                 DynamicForm pfd = null;
@@ -290,12 +290,12 @@ public class PatronUtils {
                     ShapeShifterCurseFabric.LOGGER.warn("DataPack contains non-patron PlayerFormDynamic: {}", pfd.getFormID());
                     continue;
                 }
-                Identifier formID = RegPlayerForms.registerDynamicPlayerForm(pfd).getFormID();
+                ResourceLocation formID = RegPlayerForms.registerDynamicPlayerForm(pfd).getFormID();
                 if (!patronForms.contains(formID)) {
                     patronForms.add(formID);
                 }
             }
-            for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+            for (ServerPlayer player : server.getPlayerList().getPlayers()) {
                 ModPacketsS2CServer.updatePatronForms(player, patronForms);
             }
         }

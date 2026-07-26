@@ -5,11 +5,11 @@ import io.github.apace100.apoli.power.ModifyFoodPower;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -30,9 +30,9 @@ public class AppleSkin {
     }
 
     @Inject(method = "canConsume", at = @At("HEAD"), cancellable = true)
-    private static void shapeShifterCurseFabric$canConsume(PlayerEntity player, FoodComponent foodComponent, CallbackInfoReturnable<Boolean> cir) {
+    private static void shapeShifterCurseFabric$canConsume(Player player, FoodProperties foodComponent, CallbackInfoReturnable<Boolean> cir) {
         if (player != null && foodComponent != null) {
-            boolean CanConsume = player.canConsume(foodComponent.canAlwaysEat());
+            boolean CanConsume = player.canEat(foodComponent.canAlwaysEat());
             if (CanConsume) {
                 cir.setReturnValue(true);
             }
@@ -40,15 +40,15 @@ public class AppleSkin {
     }
 
     @Inject(method = "getDefaultFoodValues", at = @At("HEAD"), cancellable = true)
-    private static void shapeShifterCurseFabric$getDefaultFoodValues(ItemStack itemStack, CallbackInfoReturnable<FoodComponent> cir) {
+    private static void shapeShifterCurseFabric$getDefaultFoodValues(ItemStack itemStack, CallbackInfoReturnable<FoodProperties> cir) {
         if (itemStack == null) return;
 
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) return;
 
         // Get base food values from SSC custom edible power or item defaults
-        FoodComponent itemFood = CustomEdibleUtils.getPowerFoodComponent(player, itemStack);
-        itemFood = itemFood != null ? itemFood : itemStack.get(DataComponentTypes.FOOD);
+        FoodProperties itemFood = CustomEdibleUtils.getPowerFoodComponent(player, itemStack);
+        itemFood = itemFood != null ? itemFood : itemStack.get(DataComponents.FOOD);
         if (itemFood == null) return;
 
         // Apply Apoli ModifyFoodPower modifiers (restored from upstream)
@@ -71,7 +71,7 @@ public class AppleSkin {
                 : (float) ModifierUtil.applyModifiers(player, saturationModifiers, itemFood.saturation());
 
         if (hunger != itemFood.nutrition() || saturation != itemFood.saturation()) {
-            cir.setReturnValue(new FoodComponent(hunger, saturation, itemFood.canAlwaysEat(),
+            cir.setReturnValue(new FoodProperties(hunger, saturation, itemFood.canAlwaysEat(),
                     itemFood.eatSeconds(), itemFood.usingConvertsTo(), itemFood.effects()));
         }
     }

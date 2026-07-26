@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -23,25 +23,25 @@ public interface ITMob {
     public void ApplyCooldown();
     public boolean IsInCooldown();
 
-    public default void TMob_Tick(MobEntity TMob) {
+    public default void TMob_Tick(Mob TMob) {
         TickCooldown();
 
         LivingEntity target = TMob.getTarget();
-        if (target instanceof PlayerEntity && !this.IsInCooldown()) {
-            PlayerEntity player = (PlayerEntity) target;
+        if (target instanceof Player && !this.IsInCooldown()) {
+            Player player = (Player) target;
 
-			double distance = TMob.squaredDistanceTo(player);
+			double distance = TMob.distanceToSqr(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                TMob.tryAttack(player);
+                TMob.doHurtTarget(player);
                 applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
                 this.ApplyCooldown();
             }
         }
 
         // 生成粒子效果
-        if (TMob.getWorld().isClient) {
+        if (TMob.level().isClientSide) {
             for (int i = 0; i < 1; i++) {
-                TMob.getWorld().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
+                TMob.level().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
                         TMob.getX() + (TMob.getRandom().nextDouble() - 0.5) * 0.5,
                         TMob.getY() + TMob.getRandom().nextDouble() * 0.5,
                         TMob.getZ() + (TMob.getRandom().nextDouble() - 0.5) * 0.5,
@@ -50,13 +50,13 @@ public interface ITMob {
         }
     }
 
-    public default Optional<Boolean> TMob_TryAttack(MobEntity TMob, Entity target) {
-        if(target instanceof PlayerEntity player) {
+    public default Optional<Boolean> TMob_TryAttack(Mob TMob, Entity target) {
+        if(target instanceof Player player) {
             IForm currentForm = FormUtils.getPlayerForm(player);
             if (currentForm.isEquals(RegPlayerForms.ORIGINAL_SHIFTER)) {
-                boolean attacked = target.damage(TMob.getDamageSources().mobAttack(TMob), (float)TMob.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE));
+                boolean attacked = target.hurt(TMob.damageSources().mobAttack(TMob), (float)TMob.getAttributeValue(Attributes.ATTACK_DAMAGE));
                 if (attacked) {
-                    TMob.onAttacking(TMob);
+                    TMob.setLastHurtMob(TMob);
                 }
                 return Optional.of(attacked);
             }
@@ -65,8 +65,8 @@ public interface ITMob {
         return Optional.empty();
     }
 
-    public static void applyStatusByChance(float chance, PlayerEntity player, BaseTransformativeStatusEffect regStatusEffect) {
-        if (player instanceof ServerPlayerEntity playerEntity) {
+    public static void applyStatusByChance(float chance, Player player, BaseTransformativeStatusEffect regStatusEffect) {
+        if (player instanceof ServerPlayer playerEntity) {
             TransformativeStatusInstance instance = EffectManager.getTransformativeEffect(playerEntity);
             if (instance == null || instance.getTransformativeEffectType() == null || !instance.getTransformativeEffectType().getToForm(player).isEquals(regStatusEffect.getToForm(player))) {  // 如果当前效果的形态与regStatusEffect不同
                 if (Math.random() < chance && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {

@@ -3,11 +3,14 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.additional_power.*;
+import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
+import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
+import net.onixary.shapeShifterCurseFabric.additional_power.SlowdownPercentPower;
+import net.onixary.shapeShifterCurseFabric.additional_power.SprintingStateTracker;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,12 +22,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public class PlayerMovementControlMixin {
 
     @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
-    private void preventTravelWhenAttached(Vec3d movementInput, CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+    private void preventTravelWhenAttached(Vec3 movementInput, CallbackInfo ci) {
+        Player player = (Player) (Object) this;
 
         // 添加空值检查
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(player);
@@ -40,14 +43,14 @@ public class PlayerMovementControlMixin {
 
         if (attachPower != null) {
             // 完全取消移动，类似蜂蜜块的效果
-            player.setVelocity(0, 0, 0);
+            player.setDeltaMovement(0, 0, 0);
             ci.cancel();
         }
     }
 
-    @Inject(method = "getMovementSpeed()F", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getSpeed()F", at = @At("RETURN"), cancellable = true)
     private void zeroMovementSpeedWhenAttached(CallbackInfoReturnable<Float> cir) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
 
         // 添加空值检查
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(player);
@@ -62,9 +65,9 @@ public class PlayerMovementControlMixin {
 
     }
 
-    @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)
     private void handleJump(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
 
         // 添加空值检查
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(player);
@@ -80,8 +83,8 @@ public class PlayerMovementControlMixin {
 
         if (attachPower != null) {
             // 处理跳跃取消吸附
-            if (player.getWorld().isClient()) {
-                PacketByteBuf buf = PacketByteBufs.create();
+            if (player.level().isClientSide()) {
+                FriendlyByteBuf buf = PacketByteBufs.create();
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
             }
             ci.cancel();
@@ -91,16 +94,16 @@ public class PlayerMovementControlMixin {
         JumpEventCondition.setJumping(player, true);
 
         // 发送网络包到服务器
-        if (player.getWorld().isClient()) {
-            PacketByteBuf buf = PacketByteBufs.create();
-            buf.writeUuid(player.getUuid());
+        if (player.level().isClientSide()) {
+            FriendlyByteBuf buf = PacketByteBufs.create();
+            buf.writeUUID(player.getUUID());
             ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID),  buf));
         }
     }
 
-    @Inject(method = "checkFallFlying", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "tryToStartFallFlying", at = @At("HEAD"), cancellable = true)
     private void preventElytraCheckWhenAttached(CallbackInfoReturnable<Boolean> cir) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
 
         // 添加空值检查
         PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(player);
@@ -116,8 +119,8 @@ public class PlayerMovementControlMixin {
 
         if (attachPower != null) {
 
-            if (player.getWorld().isClient()) {
-                PacketByteBuf buf = PacketByteBufs.create();
+            if (player.level().isClientSide()) {
+                FriendlyByteBuf buf = PacketByteBufs.create();
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
             }
 
@@ -132,11 +135,11 @@ public class PlayerMovementControlMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void trackSprintingState(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
 
         boolean wasSprintingLastTick = SprintingStateTracker.wasSprintingLastTick(player);
         boolean isCurrentlySprinting = player.isSprinting();
-        boolean isCurrentlySneaking = player.isSneaking();
+        boolean isCurrentlySneaking = player.isShiftKeyDown();
 
         // 先更新疾跑状态（这会在开始疾跑时重置触发标志）
         SprintingStateTracker.updateSprintingState(player, isCurrentlySprinting);
@@ -149,9 +152,9 @@ public class PlayerMovementControlMixin {
             SprintingStateTracker.setTriggered(player);
 
             // 发送网络包到服务器
-            if (player.getWorld().isClient()) {
-                PacketByteBuf buf = PacketByteBufs.create();
-                buf.writeUuid(player.getUuid());
+            if (player.level().isClientSide()) {
+                FriendlyByteBuf buf = PacketByteBufs.create();
+                buf.writeUUID(player.getUUID());
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.SPRINTING_TO_SNEAKING_EVENT_ID),  buf));
             }
         }
@@ -159,18 +162,18 @@ public class PlayerMovementControlMixin {
 
     @Inject(method = "remove", at = @At("HEAD"))
     private void cleanupSprintingState(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         SprintingStateTracker.removePlayer(player);
     }
 
-    @ModifyVariable(method = "slowMovement", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private Vec3d SlowdownPercentMixin(Vec3d multiplier) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+    @ModifyVariable(method = "makeStuckInBlock", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private Vec3 SlowdownPercentMixin(Vec3 multiplier) {
+        Player player = (Player) (Object) this;
         List<SlowdownPercentPower> slowdownPower = PowerHolderComponent.getPowers(player, SlowdownPercentPower.class);
         float slowdownPercent = 1.0f;
         for (SlowdownPercentPower power : slowdownPower) {
             slowdownPercent *= power.Multiplier;
         }
-        return multiplier.multiply(slowdownPercent);
+        return multiplier.scale(slowdownPercent);
     }
 }

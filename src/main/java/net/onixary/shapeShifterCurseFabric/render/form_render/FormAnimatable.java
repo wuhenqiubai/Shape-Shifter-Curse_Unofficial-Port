@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.Minecraft;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -21,9 +21,9 @@ public class FormAnimatable implements GeoAnimatable {
         }));
     }
 
-    public PlayerEntity e;
+    public Player e;
 
-    public void setPlayer(PlayerEntity e) {
+    public void setPlayer(Player e) {
         this.e = e;
     }
 
@@ -34,6 +34,6 @@ public class FormAnimatable implements GeoAnimatable {
 
     @Override
     public double getTick(Object o) {
-	    return MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(true);
+	    return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
     }
 }

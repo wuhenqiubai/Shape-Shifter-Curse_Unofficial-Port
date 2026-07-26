@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.phys.Vec3;
 
 public interface ModifyCapeRender {
-    public Vec3d getCapeIdleLoc(AbstractClientPlayerEntity player);
+    public Vec3 getCapeIdleLoc(AbstractClientPlayer player);
 
-    public float getCapeBaseRotateAngle(AbstractClientPlayerEntity player);
+    public float getCapeBaseRotateAngle(AbstractClientPlayer player);
 
     public boolean NeedModifyXRotationAngle();
 }

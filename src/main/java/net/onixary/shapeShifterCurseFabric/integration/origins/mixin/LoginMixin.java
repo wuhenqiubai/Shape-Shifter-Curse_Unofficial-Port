@@ -2,13 +2,13 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.ClientConnection;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.server.PlayerManager;
-import net.minecraft.server.network.ConnectedClientData;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.Connection;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.CommonListenerCookie;
+import net.minecraft.server.players.PlayerList;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPackets;
@@ -28,26 +28,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @SuppressWarnings("rawtypes")
-@Mixin(PlayerManager.class)
+@Mixin(PlayerList.class)
 public abstract class LoginMixin {
 
-    @Shadow public abstract List<ServerPlayerEntity> getPlayerList();
+    @Shadow public abstract List<ServerPlayer> getPlayers();
 
-    @Inject(at = @At("TAIL"), method = "onPlayerConnect")
-    private void openOriginsGui(ClientConnection connection, ServerPlayerEntity player, ConnectedClientData clientData, CallbackInfo ci) {
+    @Inject(at = @At("TAIL"), method = "placeNewPlayer")
+    private void openOriginsGui(Connection connection, ServerPlayer player, CommonListenerCookie clientData, CallbackInfo ci) {
         OriginComponent component = ModComponents.ORIGIN.get(player);
-        net.minecraft.registry.DynamicRegistryManager registryLookup = player.getWorld().getRegistryManager();
+        net.minecraft.core.RegistryAccess registryLookup = player.level().registryAccess();
 
-        RegistryByteBuf originListData = new RegistryByteBuf(Unpooled.buffer(), registryLookup);
+        RegistryFriendlyByteBuf originListData = new RegistryFriendlyByteBuf(Unpooled.buffer(), registryLookup);
         originListData.writeInt(OriginRegistry.size() - 1);
         OriginRegistry.entries().forEach((entry) -> {
             if(entry.getValue() != Origin.EMPTY) {
-                originListData.writeIdentifier(entry.getKey());
+                originListData.writeResourceLocation(entry.getKey());
                 entry.getValue().write(originListData);
             }
         });
 
-        RegistryByteBuf originLayerData = new RegistryByteBuf(Unpooled.buffer(), registryLookup);
+        RegistryFriendlyByteBuf originLayerData = new RegistryFriendlyByteBuf(Unpooled.buffer(), registryLookup);
         originLayerData.writeInt(OriginLayers.size());
         OriginLayers.getLayers().forEach((layer) -> {
             layer.write(originLayerData);
@@ -63,7 +63,7 @@ public abstract class LoginMixin {
 
         BadgeManager.sync(player);
 
-        List<ServerPlayerEntity> playerList = getPlayerList();
+        List<ServerPlayer> playerList = getPlayers();
         playerList.forEach(spe -> ModComponents.ORIGIN.syncWith(spe, (ComponentProvider)player));
         OriginComponent.sync(player);
         if(!component.hasAllOrigins()) {
@@ -73,7 +73,7 @@ public abstract class LoginMixin {
             if(component.hasAllOrigins()) {
                 OriginComponent.onChosen(player, false);
             } else {
-				PacketByteBuf data = new PacketByteBuf(Unpooled.buffer());
+				FriendlyByteBuf data = new FriendlyByteBuf(Unpooled.buffer());
                 data.writeBoolean(true);
                 sendToPlayer(player, ModPackets.OPEN_ORIGIN_SCREEN, data);
             }
@@ -81,7 +81,7 @@ public abstract class LoginMixin {
     }
 
 	@Unique
-    private static void sendToPlayer(ServerPlayerEntity player, Identifier id, PacketByteBuf buf) {
+    private static void sendToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(id),  buf));
     }
 }

@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.entity.EntityPose;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.command.CommandOutput;
-import net.minecraft.util.Nameable;
-import net.minecraft.world.World;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -16,43 +16,43 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerEntity.class)
-public abstract class PlayerEntityPoseMixin extends LivingEntity implements Nameable, CommandOutput {
+@Mixin(Player.class)
+public abstract class PlayerEntityPoseMixin extends LivingEntity implements Nameable, CommandSource {
 
     @Shadow public abstract boolean isSwimming();
 
-    protected PlayerEntityPoseMixin(EntityType<? extends LivingEntity> entityType, World world) {
+    protected PlayerEntityPoseMixin(EntityType<? extends LivingEntity> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(method = "updatePose", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "updatePlayerPose", at = @At("HEAD"), cancellable = true)
     private void forcePose(CallbackInfo ci) {
-        PlayerEntity player = (PlayerEntity) (Object) this;
+        Player player = (Player) (Object) this;
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
         if(isFeral){
-            if (this.wouldNotSuffocateInPose(EntityPose.SWIMMING)) {
-                EntityPose entityPose;
+            if (this.wouldNotSuffocateAtTargetPose(Pose.SWIMMING)) {
+                Pose entityPose;
                 if (this.isFallFlying()) {
-                    entityPose = EntityPose.FALL_FLYING;
+                    entityPose = Pose.FALL_FLYING;
                 } else if (this.isSleeping()) {
-                    entityPose = EntityPose.STANDING;
+                    entityPose = Pose.STANDING;
                 } else if (this.isSwimming()) {
-                    entityPose = EntityPose.STANDING;
-                } else if (this.isUsingRiptide()) {
-                    entityPose = EntityPose.SPIN_ATTACK;
-                } else if (this.isSneaking()) {
-                    entityPose = EntityPose.CROUCHING;
+                    entityPose = Pose.STANDING;
+                } else if (this.isAutoSpinAttack()) {
+                    entityPose = Pose.SPIN_ATTACK;
+                } else if (this.isShiftKeyDown()) {
+                    entityPose = Pose.CROUCHING;
                 } else {
-                    entityPose = EntityPose.STANDING;
+                    entityPose = Pose.STANDING;
                 }
 
-                EntityPose entityPose2;
-                if (!this.isSpectator() && !this.hasVehicle() && !this.wouldNotSuffocateInPose(entityPose)) {
-                    if (this.wouldNotSuffocateInPose(EntityPose.CROUCHING)) {
-                        entityPose2 = EntityPose.CROUCHING;
+                Pose entityPose2;
+                if (!this.isSpectator() && !this.isPassenger() && !this.wouldNotSuffocateAtTargetPose(entityPose)) {
+                    if (this.wouldNotSuffocateAtTargetPose(Pose.CROUCHING)) {
+                        entityPose2 = Pose.CROUCHING;
                     } else {
-                        entityPose2 = EntityPose.STANDING;
+                        entityPose2 = Pose.STANDING;
                     }
                 } else {
                     entityPose2 = entityPose;

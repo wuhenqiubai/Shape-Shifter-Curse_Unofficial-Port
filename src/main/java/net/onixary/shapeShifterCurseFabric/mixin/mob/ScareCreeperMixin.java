@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.FleeEntityGoal;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.ai.goal.PrioritizedGoal;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.mixin.accessor.MobEntityAccessor;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,25 +19,25 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.Set;
 import java.util.function.Predicate;
 
-@Mixin(CreeperEntity.class)
+@Mixin(Creeper.class)
 public abstract class ScareCreeperMixin {
 
-    @Inject(at = @At("TAIL"), method = "initGoals")
+    @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
         GoalSelector goalSelector = ((MobEntityAccessor) this).getGoalSelector();
         GoalSelector targetSelector = ((MobEntityAccessor) this).getTargetSelector();
-        Goal goal = new FleeEntityGoal<>((CreeperEntity) (Object) this, PlayerEntity.class, AdditionalPowers.SCARE_CREEPERS::isActive, 3.0F, 1.0D, 1.2D, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test);
-        goalSelector.add(3, goal);
-        Set<PrioritizedGoal> goals = targetSelector.getGoals();
-        for (PrioritizedGoal prioritizedGoal : goals) {
-            if (prioritizedGoal.getGoal() instanceof ActiveTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && atg.targetClass == PlayerEntity.class) {
-                Predicate<LivingEntity> targetPredicate = atg.targetPredicate.predicate;
+        Goal goal = new AvoidEntityGoal<>((Creeper) (Object) this, Player.class, AdditionalPowers.SCARE_CREEPERS::isActive, 3.0F, 1.0D, 1.2D, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
+        goalSelector.addGoal(3, goal);
+        Set<WrappedGoal> goals = targetSelector.getAvailableGoals();
+        for (WrappedGoal prioritizedGoal : goals) {
+            if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && atg.targetType == Player.class) {
+                Predicate<LivingEntity> targetPredicate = atg.targetConditions.selector;
                 if (targetPredicate == null) {
                     targetPredicate = e -> !AdditionalPowers.SCARE_CREEPERS.isActive(e);
                 } else {
                     targetPredicate = targetPredicate.and(e -> !AdditionalPowers.SCARE_CREEPERS.isActive(e));
                 }
-                atg.targetPredicate.setPredicate(targetPredicate);
+                atg.targetConditions.selector(targetPredicate);
             }
         }
     }

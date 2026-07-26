@@ -2,11 +2,11 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.RestrictArmorPower;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.util.ModTags;
 import net.onixary.shapeShifterCurseFabric.util.MorphScaleTagLoader;
 import org.spongepowered.asm.mixin.Final;
@@ -17,22 +17,22 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(targets = "net.minecraft.screen.slot.ArmorSlot")
+@Mixin(targets = "net.minecraft.world.inventory.ArmorSlot")
 public abstract class ArmorSlotMixin {
     @Unique
     private static final String MSI_TAG = "MorphScaleItem";
 
-    @Shadow @Final private LivingEntity entity;
-    @Shadow @Final private EquipmentSlot equipmentSlot;
+    @Shadow @Final private LivingEntity owner;
+    @Shadow @Final private EquipmentSlot slot;
 
-    @Inject(method = "canInsert", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "mayPlace", at = @At("RETURN"), cancellable = true)
     private void preventRestrictedArmorInsert(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
         if (isMorphScaleItem(stack)) {
             cir.setReturnValue(true);
             return;
         }
-        for (RestrictArmorPower rap : PowerHolderComponent.KEY.get(this.entity).getPowers(RestrictArmorPower.class)) {
-            if (!rap.canEquip(stack, this.equipmentSlot)) {
+        for (RestrictArmorPower rap : PowerHolderComponent.KEY.get(this.owner).getPowers(RestrictArmorPower.class)) {
+            if (!rap.canEquip(stack, this.slot)) {
                 cir.setReturnValue(false);
                 return;
             }
@@ -44,9 +44,9 @@ public abstract class ArmorSlotMixin {
 
     @Unique
     private static boolean isMorphScaleItem(ItemStack stack) {
-        if (stack.isIn(ModTags.MorphScaleItem_Tag)) return true;
-        if (MorphScaleTagLoader.getMorphScaleItems().contains(Registries.ITEM.getId(stack.getItem()).toString())) return true;
-        var c = stack.get(DataComponentTypes.CUSTOM_DATA);
-        return c != null && c.copyNbt().getBoolean(MSI_TAG);
+        if (stack.is(ModTags.MorphScaleItem_Tag)) return true;
+        if (MorphScaleTagLoader.getMorphScaleItems().contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())) return true;
+        var c = stack.get(DataComponents.CUSTOM_DATA);
+        return c != null && c.copyTag().getBoolean(MSI_TAG);
     }
 }

@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
@@ -12,17 +12,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class Form_SnowFox3_Sub_WhiteWeasel extends NormalSubForm implements IPatronForm {
-    public Form_SnowFox3_Sub_WhiteWeasel(Identifier formID) {
+    public Form_SnowFox3_Sub_WhiteWeasel(ResourceLocation formID) {
         super(formID, RegPlayerForms.SNOW_FOX_3);
     }
 
     @Override
-    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
-        return new Pair<>(Identifier.of("origins", "origin"), Identifier.of(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
+        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
-    public boolean checkCanUse(@Nullable PlayerEntity player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
+    public boolean checkCanUse(@Nullable Player player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
         if (patronData == null || player == null) {
             return false;
         }

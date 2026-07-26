@@ -10,20 +10,14 @@ import io.github.apace100.apoli.power.factory.action.BiEntityActions;
 import io.github.apace100.apoli.power.factory.action.BlockActions;
 import io.github.apace100.apoli.power.factory.action.EntityActions;
 import io.github.apace100.apoli.power.factory.action.ItemActions;
-import io.github.apace100.apoli.power.factory.condition.BiEntityConditions;
-import io.github.apace100.apoli.power.factory.condition.BlockConditions;
-import io.github.apace100.apoli.power.factory.condition.DamageConditions;
-import io.github.apace100.apoli.power.factory.condition.EntityConditions;
-import io.github.apace100.apoli.power.factory.condition.FluidConditions;
-import io.github.apace100.apoli.power.factory.condition.ItemConditions;
-import io.github.apace100.apoli.power.factory.condition.BiomeConditions;
+import io.github.apace100.apoli.power.factory.condition.*;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -77,15 +71,15 @@ public class OriginsPowerTypes {
                 var values = new java.util.ArrayList<>();
                 registry.forEach(values::add);
                 for (var value : values) {
-                    Identifier apoliId = switch (value) {
+                    ResourceLocation apoliId = switch (value) {
                         case io.github.apace100.apoli.power.factory.PowerFactory pf -> pf.getSerializerId();
                         case io.github.apace100.apoli.power.factory.condition.ConditionFactory<?> cf -> cf.getSerializerId();
                         case io.github.apace100.apoli.power.factory.action.ActionFactory<?> af -> af.getSerializerId();
                         default -> null;
                     };
                     if (apoliId != null && "apoli".equals(apoliId.getNamespace())) {
-                        Identifier originsId = Origins.identifier(apoliId.getPath());
-                        if (!registry.containsId(originsId)) {
+                        ResourceLocation originsId = Origins.identifier(apoliId.getPath());
+                        if (!registry.containsKey(originsId)) {
                             Registry.register(registry, originsId, value);
                         }
                     }
@@ -95,7 +89,7 @@ public class OriginsPowerTypes {
                 Origins.LOGGER.error("Failed to alias registry", e);
             }
             // Debug: check if apoli:multiple was aliased
-            if (!ApoliRegistries.POWER_FACTORY.containsId(Origins.identifier("multiple"))) {
+            if (!ApoliRegistries.POWER_FACTORY.containsKey(Origins.identifier("multiple"))) {
                 Origins.LOGGER.warn("origins:multiple not found in POWER_FACTORY after alias!");
             }
         }

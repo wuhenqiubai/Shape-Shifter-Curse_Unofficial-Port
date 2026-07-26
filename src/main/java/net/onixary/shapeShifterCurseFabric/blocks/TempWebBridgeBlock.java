@@ -1,49 +1,53 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
 import com.mojang.serialization.MapCodec;
-import net.minecraft.block.*;
-import net.minecraft.item.ItemStack;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class TempWebBridgeBlock extends HorizontalFacingBlock {
+public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
     public static final int MAX_AGE = 3;
-    public static final IntProperty AGE = Properties.AGE_3;
-    public static final DirectionProperty HORIZONTAL_FACING = Properties.HORIZONTAL_FACING;
+    public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
+    public static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
 
-    private static final VoxelShape voxelShape = Block.createCuboidShape(0.0F, 14.0F, 0.0F, 16.0F, 16.0F, 16.0F);
-    private static final VoxelShape voxelShape2 = Block.createCuboidShape(0.0F, 0.0F, 0.0F, 2.0F, 16.0F, 2.0F);
-    private static final VoxelShape voxelShape3 = Block.createCuboidShape(14.0F, 0.0F, 0.0F, 16.0F, 16.0F, 2.0F);
-    private static final VoxelShape voxelShape4 = Block.createCuboidShape(0.0F, 0.0F, 14.0F, 2.0F, 16.0F, 16.0F);
-    private static final VoxelShape voxelShape5 = Block.createCuboidShape(14.0F, 0.0F, 14.0F, 16.0F, 16.0F, 16.0F);
-    private static final VoxelShape NORMAL_OUTLINE_SHAPE = VoxelShapes.union(voxelShape, voxelShape2, voxelShape3, voxelShape4, voxelShape5);
+    private static final VoxelShape voxelShape = Block.box(0.0F, 14.0F, 0.0F, 16.0F, 16.0F, 16.0F);
+    private static final VoxelShape voxelShape2 = Block.box(0.0F, 0.0F, 0.0F, 2.0F, 16.0F, 2.0F);
+    private static final VoxelShape voxelShape3 = Block.box(14.0F, 0.0F, 0.0F, 16.0F, 16.0F, 2.0F);
+    private static final VoxelShape voxelShape4 = Block.box(0.0F, 0.0F, 14.0F, 2.0F, 16.0F, 16.0F);
+    private static final VoxelShape voxelShape5 = Block.box(14.0F, 0.0F, 14.0F, 16.0F, 16.0F, 16.0F);
+    private static final VoxelShape NORMAL_OUTLINE_SHAPE = Shapes.or(voxelShape, voxelShape2, voxelShape3, voxelShape4, voxelShape5);
 
-    public TempWebBridgeBlock(AbstractBlock.Settings settings) {
+    public TempWebBridgeBlock(BlockBehaviour.Properties settings) {
         super(settings);
-        this.setDefaultState(this.stateManager.getDefaultState().with(AGE, 0).with(HORIZONTAL_FACING, Direction.NORTH));
+        this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0).setValue(HORIZONTAL_FACING, Direction.NORTH));
     }
 
     @Override
-    protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
-        return createCodec(TempWebBridgeBlock::new);
+    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+        return simpleCodec(TempWebBridgeBlock::new);
     }
 
-    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        this.scheduledTick(state, world, pos, random);
+    public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        this.tick(state, world, pos, random);
     }
 
-    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         // if ((random.nextInt(3) == 0 || this.canIncreaseAge(world, pos, 4)) && this.increaseAge(state, world, pos)) {
         //     BlockPos.Mutable mutable = new BlockPos.Mutable();
         //     for(Direction direction : Direction.values()) {
@@ -65,22 +69,22 @@ public class TempWebBridgeBlock extends HorizontalFacingBlock {
             BlockRemoved = this.increaseAge(state, world, pos);
         }
         if (!BlockRemoved) {
-            world.scheduleBlockTick(pos, this, MathHelper.nextInt(random, 150, 300));  // 7.5s~15s
+            world.scheduleTick(pos, this, Mth.nextInt(random, 150, 300));  // 7.5s~15s
         }
-        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
+            mutable.setWithOffset(pos, direction);
             BlockState blockState = world.getBlockState(mutable);
-            if (blockState.isOf(this)) {
-                world.scheduleBlockTick(mutable, this, MathHelper.nextInt(random, 150, 300));
+            if (blockState.is(this)) {
+                world.scheduleTick(mutable, this, Mth.nextInt(random, 150, 300));
             }
         }
     }
 
-    private boolean increaseAge(BlockState state, World world, BlockPos pos) {
-        int i = state.get(AGE);
+    private boolean increaseAge(BlockState state, Level world, BlockPos pos) {
+        int i = state.getValue(AGE);
         if (i < 3) {
-            world.setBlockState(pos, state.with(AGE, i + 1), 2);
+            world.setBlock(pos, state.setValue(AGE, i + 1), 2);
             return false;
         } else {
             world.removeBlock(pos, false);
@@ -97,13 +101,13 @@ public class TempWebBridgeBlock extends HorizontalFacingBlock {
     //     super.neighborUpdate(state, world, pos, sourceBlock, sourcePos, notify);
     // }
 
-    private boolean canIncreaseAge(BlockView world, BlockPos pos, int maxNeighbors) {
+    private boolean canIncreaseAge(BlockGetter world, BlockPos pos, int maxNeighbors) {
         int i = 0;
-        BlockPos.Mutable mutable = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
 
         for(Direction direction : Direction.values()) {
-            mutable.set(pos, direction);
-            if (world.getBlockState(mutable).isOf(this)) {
+            mutable.setWithOffset(pos, direction);
+            if (world.getBlockState(mutable).is(this)) {
                 ++i;
                 if (i >= maxNeighbors) {
                     return false;
@@ -114,28 +118,28 @@ public class TempWebBridgeBlock extends HorizontalFacingBlock {
         return true;
     }
 
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(AGE, HORIZONTAL_FACING);
     }
 
-    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
+    public ItemStack getPickStack(BlockGetter world, BlockPos pos, BlockState state) {
         return ItemStack.EMPTY;
     }
 
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        if (context.isAbove(VoxelShapes.fullCube(), pos, true) && !context.isDescending()) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        if (context.isAbove(Shapes.block(), pos, true) && !context.isDescending()) {
             return NORMAL_OUTLINE_SHAPE;
         } else {
-            return VoxelShapes.empty();
+            return Shapes.empty();
         }
     }
 
-    public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
-        return VoxelShapes.fullCube();
+    public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
+        return Shapes.block();
     }
 
     @Override
-    public boolean isTransparent(BlockState state, BlockView world, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state, BlockGetter world, BlockPos pos) {
         return true;
     }
 }

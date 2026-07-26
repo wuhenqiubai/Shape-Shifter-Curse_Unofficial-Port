@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -19,12 +19,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class Form_Spider2 extends NormalForm {
     
-    public Form_Spider2(Identifier formID) {
+    public Form_Spider2(ResourceLocation formID) {
         super(formID);
     }
 
     @Override
-    public @Nullable IForm getPrevForm(PlayerEntity player, ITransformReason reason) {
+    public @Nullable IForm getPrevForm(Player player, ITransformReason reason) {
         if (reason.getReasonType().equals(ITransformReason.ItemReasonID) && reason instanceof ITransformReason.ITransformReasonWithArg<?> reasonEX && reasonEX.getArg() instanceof ItemStack itemStack) {
             if (itemStack.getItem().equals(RegCustomItem.POWERFUL_INHIBITOR)) {
                 return RegPlayerForms.SPIDER_0;
@@ -42,9 +42,9 @@ public class Form_Spider2 extends NormalForm {
 
     @Override
     public @Nullable AbstractAnimStateController getAnimStateController(
-            PlayerEntity player, 
+            Player player, 
             AnimSystem.AnimSystemData animSystemData, 
-            @NotNull Identifier animStateID) {
+            @NotNull ResourceLocation animStateID) {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {

@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.ModifyTypeTagPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 /**
- * Intercepts {@link EntityType#isIn(TagKey)} to also check
+ * Intercepts {@link EntityType#is(TagKey)} to also check
  * {@link ModifyTypeTagPower}. The entity context is provided via
  * {@link ModifyTypeTagPower#CURRENT_ENTITY} ThreadLocal, which is
  * set by {@link InTagConditionMixin} before the tag check.
@@ -18,9 +18,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(EntityType.class)
 public abstract class ModifyTypeTagMixin {
 
-    @Inject(method = "isIn", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "is", at = @At("RETURN"), cancellable = true)
     private void calio$modifyIsIn(TagKey<?> tagKey, CallbackInfoReturnable<Boolean> cir) {
-        if (!tagKey.isOf(RegistryKeys.ENTITY_TYPE)) {
+        if (!tagKey.isFor(Registries.ENTITY_TYPE)) {
             return;
         }
         if (cir.getReturnValue()) {

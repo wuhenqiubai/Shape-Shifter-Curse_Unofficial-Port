@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 
 import com.google.common.collect.Lists;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ProfileComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.ResolvableProfile;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.OriginsClient;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
@@ -23,13 +23,13 @@ import java.util.HashMap;
 
 public class ViewOriginScreen extends OriginDisplayScreen {
 
-	private final ArrayList<Pair<OriginLayer, Origin>> originLayers;
+	private final ArrayList<Tuple<OriginLayer, Origin>> originLayers;
 	private int currentLayer = 0;
-	private ButtonWidget chooseOriginButton;
+	private Button chooseOriginButton;
 
 	public ViewOriginScreen() {
-		super(Text.translatable(Origins.MODID + ".screen.view_origin"), false);
-		PlayerEntity player = MinecraftClient.getInstance().player;
+		super(Component.translatable(Origins.MODID + ".screen.view_origin"), false);
+		Player player = Minecraft.getInstance().player;
 		HashMap<OriginLayer, Origin> origins = null;
 		if (player != null) {
 			origins = ModComponents.ORIGIN.get(player).getOrigins();
@@ -39,21 +39,21 @@ public class ViewOriginScreen extends OriginDisplayScreen {
 		origins.forEach((layer, origin) -> {
 			ItemStack displayItem = origin.getDisplayItem();
 			if(displayItem.getItem() == Items.PLAYER_HEAD) {
-				ProfileComponent profile = displayItem.get(DataComponentTypes.PROFILE);
+				ResolvableProfile profile = displayItem.get(DataComponents.PROFILE);
 				if (profile == null || profile.name().isEmpty()) {
 					if (player != null) {
-						displayItem.set(DataComponentTypes.PROFILE, new ProfileComponent(player.getGameProfile()));
+						displayItem.set(DataComponents.PROFILE, new ResolvableProfile(player.getGameProfile()));
 					}
 				}
 			}
 			if((origin != Origin.EMPTY || layer.getOriginOptionCount(player) > 0) && !layer.isHidden()) {
-				originLayers.add(new Pair<>(layer, origin));
+				originLayers.add(new Tuple<>(layer, origin));
 			}
 		});
-		originLayers.sort(Comparator.comparing(Pair::getLeft));
+		originLayers.sort(Comparator.comparing(Tuple::getA));
 		if (!this.originLayers.isEmpty()) {
-			Pair<OriginLayer, Origin> current = originLayers.get(currentLayer);
-			showOrigin(current.getRight(), current.getLeft(), false);
+			Tuple<OriginLayer, Origin> current = originLayers.get(currentLayer);
+			showOrigin(current.getB(), current.getA(), false);
 		} else {
 			showOrigin(null, null, false);
 		}
@@ -68,46 +68,46 @@ public class ViewOriginScreen extends OriginDisplayScreen {
 	protected void init() {
 		super.init();
 		if (!originLayers.isEmpty() && OriginsClient.isServerRunningOrigins) {
-			addDrawableChild(chooseOriginButton = ButtonWidget.builder(Text.translatable(Origins.MODID + ".gui.choose"), b -> MinecraftClient.getInstance().setScreen(new ChooseOriginScreen(Lists.newArrayList(originLayers.get(currentLayer).getLeft()), 0, false))).dimensions(guiLeft + windowWidth / 2 - 50, guiTop + windowHeight - 40, 100, 20).build());
+			addRenderableWidget(chooseOriginButton = Button.builder(Component.translatable(Origins.MODID + ".gui.choose"), b -> Minecraft.getInstance().setScreen(new ChooseOriginScreen(Lists.newArrayList(originLayers.get(currentLayer).getA()), 0, false))).bounds(guiLeft + windowWidth / 2 - 50, guiTop + windowHeight - 40, 100, 20).build());
 
-			PlayerEntity player = MinecraftClient.getInstance().player;
-			chooseOriginButton.active = chooseOriginButton.visible = originLayers.get(currentLayer).getRight() == Origin.EMPTY && originLayers.get(currentLayer).getLeft().getOriginOptionCount(player) > 0;
+			Player player = Minecraft.getInstance().player;
+			chooseOriginButton.active = chooseOriginButton.visible = originLayers.get(currentLayer).getB() == Origin.EMPTY && originLayers.get(currentLayer).getA().getOriginOptionCount(player) > 0;
 			if(originLayers.size() > 1) {
-				addDrawableChild(ButtonWidget.builder(Text.of("<"), b -> {
+				addRenderableWidget(Button.builder(Component.nullToEmpty("<"), b -> {
 					currentLayer = (currentLayer - 1 + originLayers.size()) % originLayers.size();
-					Pair<OriginLayer, Origin> current = originLayers.get(currentLayer);
-					showOrigin(current.getRight(), current.getLeft(), false);
-					chooseOriginButton.active = chooseOriginButton.visible = current.getRight() == Origin.EMPTY && current.getLeft().getOriginOptionCount(player) > 0;
-				}).dimensions(guiLeft - 40,this.height / 2 - 10, 20, 20).build());
-				addDrawableChild(ButtonWidget.builder(Text.of(">"), b -> {
+					Tuple<OriginLayer, Origin> current = originLayers.get(currentLayer);
+					showOrigin(current.getB(), current.getA(), false);
+					chooseOriginButton.active = chooseOriginButton.visible = current.getB() == Origin.EMPTY && current.getA().getOriginOptionCount(player) > 0;
+				}).bounds(guiLeft - 40,this.height / 2 - 10, 20, 20).build());
+				addRenderableWidget(Button.builder(Component.nullToEmpty(">"), b -> {
 					currentLayer = (currentLayer + 1) % originLayers.size();
-					Pair<OriginLayer, Origin> current = originLayers.get(currentLayer);
-					showOrigin(current.getRight(), current.getLeft(), false);
-					chooseOriginButton.active = chooseOriginButton.visible = current.getRight() == Origin.EMPTY && current.getLeft().getOriginOptionCount(player) > 0;
-				}).dimensions(guiLeft + windowWidth + 20, this.height / 2 - 10, 20, 20).build());
+					Tuple<OriginLayer, Origin> current = originLayers.get(currentLayer);
+					showOrigin(current.getB(), current.getA(), false);
+					chooseOriginButton.active = chooseOriginButton.visible = current.getB() == Origin.EMPTY && current.getA().getOriginOptionCount(player) > 0;
+				}).bounds(guiLeft + windowWidth + 20, this.height / 2 - 10, 20, 20).build());
 			}
 		}
-		addDrawableChild(ButtonWidget.builder(Text.translatable(Origins.MODID + ".gui.close"), b -> MinecraftClient.getInstance().setScreen(null)).dimensions(guiLeft + windowWidth / 2 - 50, guiTop + windowHeight + 5, 100, 20).build());
+		addRenderableWidget(Button.builder(Component.translatable(Origins.MODID + ".gui.close"), b -> Minecraft.getInstance().setScreen(null)).bounds(guiLeft + windowWidth / 2 - 50, guiTop + windowHeight + 5, 100, 20).build());
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
 		if (originLayers.isEmpty()) {
 			if(OriginsClient.isServerRunningOrigins) {
-				context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable(Origins.MODID + ".gui.view_origin.empty").getString(), width / 2, guiTop + 48, 0xFFFFFF);
+				context.drawCenteredString(this.font, Component.translatable(Origins.MODID + ".gui.view_origin.empty").getString(), width / 2, guiTop + 48, 0xFFFFFF);
 			} else {
-				context.drawCenteredTextWithShadow(this.textRenderer, Text.translatable(Origins.MODID + ".gui.view_origin.not_installed").getString(), width / 2, guiTop + 48, 0xFFFFFF);
+				context.drawCenteredString(this.font, Component.translatable(Origins.MODID + ".gui.view_origin.not_installed").getString(), width / 2, guiTop + 48, 0xFFFFFF);
 			}
 		}
 	}
 
 	@Override
-	protected Text getTitleText() {
+	protected Component getTitleText() {
 		if (getCurrentLayer().shouldOverrideViewOriginTitle()) {
-			return Text.translatable(getCurrentLayer().getTitleViewOriginTranslationKey());
+			return Component.translatable(getCurrentLayer().getTitleViewOriginTranslationKey());
 		}
-		return Text.translatable(Origins.MODID + ".gui.view_origin.title", Text.translatable(getCurrentLayer().getTranslationKey()));
+		return Component.translatable(Origins.MODID + ".gui.view_origin.title", Component.translatable(getCurrentLayer().getTranslationKey()));
 	}
 
 }

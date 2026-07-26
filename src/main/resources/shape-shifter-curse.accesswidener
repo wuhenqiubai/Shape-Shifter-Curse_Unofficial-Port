@@ -33,3 +33,27 @@ accessible field net/minecraft/entity/ai/goal/TrackTargetGoal checkCanNavigate Z
 accessible field net/minecraft/entity/ai/goal/ActiveTargetGoal reciprocalChance I
 accessible field net/minecraft/entity/ai/goal/ActiveTargetGoal targetPredicate Lnet/minecraft/entity/ai/TargetPredicate;
 accessible field net/minecraft/entity/ai/TargetPredicate predicate Ljava/util/function/Predicate;
+accessible field net/minecraft/server/level/ServerPlayerGameMode isDestroyingBlock Z
+accessible class net/minecraft/world/entity/animal/Wolf$WolfAvoidEntityGoal
+accessible field net/minecraft/client/gui/components/MultiLineTextWidget centered Z
+accessible field net/minecraft/client/gui/components/MultiLineTextWidget cache Lnet/minecraft/util/SingleKeyCache;
+accessible method net/minecraft/client/gui/components/MultiLineTextWidget getFreshCacheKey ()Lnet/minecraft/client/gui/components/MultiLineTextWidget$CacheKey;
+accessible field net/minecraft/client/gui/Font fonts Ljava/util/function/Function;
+accessible field net/minecraft/client/gui/Font filterFishyGlyphs Z
+accessible method net/minecraft/client/gui/Font adjustColor (I)I
+accessible method net/minecraft/client/gui/Font renderText (Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)F
+accessible field net/minecraft/world/level/levelgen/structure/Structure settings Lnet/minecraft/world/level/levelgen/structure/Structure$StructureSettings;
+accessible field net/minecraft/world/entity/AgeableMob$AgeableMobGroupData shouldSpawnBaby Z
+accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetConditions Lnet/minecraft/world/entity/ai/targeting/TargetingConditions;
+accessible field net/minecraft/client/model/PlayerModel slim Z
+accessible field net/minecraft/world/inventory/ItemCombinerMenu inputSlots Lnet/minecraft/world/Container;
+accessible field net/minecraft/world/inventory/SmithingMenu level Lnet/minecraft/world/level/Level;
+accessible field net/minecraft/world/inventory/ItemCombinerMenu access Lnet/minecraft/world/inventory/ContainerLevelAccess;
+accessible method net/minecraft/world/inventory/SmithingMenu shrinkStackInSlot (I)V
+accessible method net/minecraft/world/entity/LivingEntity onEffectRemoved (Lnet/minecraft/world/effect/MobEffectInstance;)V
+accessible method net/minecraft/client/gui/Font renderText (Lnet/minecraft/util/FormattedCharSequence;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)F
+accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer getWhiteOverlayProgress (Lnet/minecraft/world/entity/LivingEntity;F)F
+accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer isBodyVisible (Lnet/minecraft/world/entity/LivingEntity;)Z
+accessible field net/minecraft/world/level/levelgen/structure/Structure$StructureSettings spawnOverrides Ljava/util/Map;
+accessible field net/minecraft/world/entity/ai/targeting/TargetingConditions selector Ljava/util/function/Predicate;
+accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetType Ljava/lang/Class;

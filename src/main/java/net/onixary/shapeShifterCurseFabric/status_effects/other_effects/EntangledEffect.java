@@ -1,35 +1,35 @@
 package net.onixary.shapeShifterCurseFabric.status_effects.other_effects;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.EntangledEffectUtils;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 
-public class EntangledEffect extends StatusEffect {
-    public EntangledEffect(StatusEffectCategory category, int color) {
+public class EntangledEffect extends MobEffect {
+    public EntangledEffect(MobEffectCategory category, int color) {
         super(category, color);
     }
 
     @Override
-    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return duration >= 1;
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
-        RegistryEntry<StatusEffect> entangled = Registries.STATUS_EFFECT.getEntry(RegOtherStatusEffects.ENTANGLED_EFFECT);
-        StatusEffectInstance instance = entity.getStatusEffect(entangled);
+    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+        Holder<MobEffect> entangled = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.ENTANGLED_EFFECT);
+        MobEffectInstance instance = entity.getEffect(entangled);
         if (instance != null) {
             int NowDuration = instance.getDuration();
             int CurrentLevel = instance.getAmplifier();
             int TargetLevel = NowDuration / EntangledEffectUtils.ENTANGLED_DURATION_PER_LEVEL;
             if (CurrentLevel != TargetLevel) {
-                entity.removeStatusEffect(entangled);
-                entity.addStatusEffect(new StatusEffectInstance(entangled, NowDuration, TargetLevel));
+                entity.removeEffect(entangled);
+                entity.addEffect(new MobEffectInstance(entangled, NowDuration, TargetLevel));
             }
         }
         return true;

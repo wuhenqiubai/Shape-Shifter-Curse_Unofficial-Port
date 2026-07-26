@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.power;
 
 import io.github.apace100.apoli.power.ActionOnCallbackPower;
 import io.github.apace100.apoli.power.PowerType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Consumer;
 

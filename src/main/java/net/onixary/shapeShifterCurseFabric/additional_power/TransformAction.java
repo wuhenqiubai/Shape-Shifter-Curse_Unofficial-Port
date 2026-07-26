@@ -3,10 +3,10 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -18,8 +18,8 @@ import java.util.function.Consumer;
 
 public class TransformAction {
     public static void TransformToFormAction(SerializableData.Instance data, Entity entity) {
-        if (entity instanceof PlayerEntity pe) {
-            Identifier formId = data.get("form_id");
+        if (entity instanceof Player pe) {
+            ResourceLocation formId = data.get("form_id");
             boolean instant = data.get("instant");
             boolean force = data.get("force");
             if (formId == null) {
@@ -44,16 +44,16 @@ public class TransformAction {
     }
 
     public static void GiveCustomTransformEffect(SerializableData.Instance data, Entity entity) {
-        if (entity instanceof PlayerEntity player) {
-            Identifier formId = data.get("form_id");
+        if (entity instanceof Player player) {
+            ResourceLocation formId = data.get("form_id");
             if (formId != null) {
                 CTPUtils.setTransformativePotionForm(player, formId);
-                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantEffect(player, player, player, 0, 1.0d);
+                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantenousEffect(player, player, player, 0, 1.0d);
             }
         }
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("transform_to_form"),
                 new SerializableData()

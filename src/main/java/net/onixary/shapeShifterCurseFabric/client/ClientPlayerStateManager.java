@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.client;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
 
 import java.util.HashMap;

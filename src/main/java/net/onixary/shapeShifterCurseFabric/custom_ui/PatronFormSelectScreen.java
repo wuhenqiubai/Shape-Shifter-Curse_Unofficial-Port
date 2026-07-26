@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -19,23 +19,23 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class PatronFormSelectScreen extends Screen {
-    private static final Identifier page_texID = Identifier.of(MOD_ID,"textures/gui/patron_form_select_menu.png");
-    private final ClientPlayerEntity player;
+    private static final ResourceLocation page_texID = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/patron_form_select_menu.png");
+    private final LocalPlayer player;
 
-    private List<Identifier> availableForms;
+    private List<ResourceLocation> availableForms;
     private int nowPage = 0;
     private static final int pageSize = 16;
-    private final List<Identifier> buttonForms = new ArrayList<>();
-    private final List<ButtonWidget> buttonWidgetList = new ArrayList<>();
+    private final List<ResourceLocation> buttonForms = new ArrayList<>();
+    private final List<Button> buttonWidgetList = new ArrayList<>();
 
-    public PatronFormSelectScreen(Text title, ClientPlayerEntity player) {
+    public PatronFormSelectScreen(Component title, LocalPlayer player) {
         super(title);
         this.player = player;
     }
 
-    private List<Identifier> getAvailableForms() {
-        List<Identifier> availableForms = new ArrayList<>();
-        for (Identifier formID : RegPlayerForms.dynamicPlayerForms) {
+    private List<ResourceLocation> getAvailableForms() {
+        List<ResourceLocation> availableForms = new ArrayList<>();
+        for (ResourceLocation formID : RegPlayerForms.dynamicPlayerForms) {
             IForm form = RegPlayerForms.getPlayerForm(formID);
             if (form instanceof DynamicForm pfd) {
                 if (pfd.IsPatronForm && pfd.IsPlayerCanUse(player)) {
@@ -54,7 +54,7 @@ public class PatronFormSelectScreen extends Screen {
         return availableForms;
     }
 
-    private void SendSetPatronForm(Identifier formID) {
+    private void SendSetPatronForm(ResourceLocation formID) {
         ModPacketsS2C.sendSetPatronForm(formID);
     }
 
@@ -77,12 +77,12 @@ public class PatronFormSelectScreen extends Screen {
             return;
         }
         for (int i = 0; i < buttonForms.size(); i++) {
-            ButtonWidget buttonWidget = buttonWidgetList.get(i);
+            Button buttonWidget = buttonWidgetList.get(i);
             if (buttonForms.get(i) != null) {
                 try {
                     buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getContentText(CodexData.ContentType.NAME));
                 } catch (Exception e) {
-                    buttonWidget.setMessage(Text.of(buttonForms.get(i).toString()));
+                    buttonWidget.setMessage(Component.nullToEmpty(buttonForms.get(i).toString()));
                 }
                 buttonWidget.visible = true;
             }
@@ -106,25 +106,25 @@ public class PatronFormSelectScreen extends Screen {
             for (int Row = 0; Row < 8; Row++) {
                 int ButtonX = ButtonStartX + Col * (ButtonWidth + 20);
                 int ButtonY = ButtonStartY + Row * (ButtonHeight + 5);
-                ButtonWidget button = ButtonWidget.builder(Text.of("<-------->"), (buttonWidget) -> {
+                Button button = Button.builder(Component.nullToEmpty("<-------->"), (buttonWidget) -> {
                     int ID = buttonWidgetList.indexOf(buttonWidget);
                     if (ID >= 0 && ID < buttonForms.size()) {
                         if (buttonForms.get(ID) != null) {
                             SendSetPatronForm(buttonForms.get(ID));
                         }
                     }
-                    this.close();
-                }).size(ButtonWidth, ButtonHeight).position(ButtonX, ButtonY).build();
+                    this.onClose();
+                }).size(ButtonWidth, ButtonHeight).pos(ButtonX, ButtonY).build();
                 button.visible = false;
                 buttonWidgetList.add(button);
-                addDrawableChild(button);
+                addRenderableWidget(button);
             }
         }
         // 翻页
-        ButtonWidget PagePrevButton = ButtonWidget.builder(Text.of("<"), (buttonWidget) -> PrevPage()).size(20, 20).position(width / 2 - 130, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
-        this.addDrawableChild(PagePrevButton);
-        ButtonWidget PageNextButton = ButtonWidget.builder(Text.of(">"), (buttonWidget) -> NextPage()).size(20, 20).position(width / 2 + 110, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
-        this.addDrawableChild(PageNextButton);
+        Button PagePrevButton = Button.builder(Component.nullToEmpty("<"), (buttonWidget) -> PrevPage()).size(20, 20).pos(width / 2 - 130, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
+        this.addRenderableWidget(PagePrevButton);
+        Button PageNextButton = Button.builder(Component.nullToEmpty(">"), (buttonWidget) -> NextPage()).size(20, 20).pos(width / 2 + 110, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
+        this.addRenderableWidget(PageNextButton);
         LoadPage();
         super.init();
     }
@@ -150,26 +150,26 @@ public class PatronFormSelectScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
     }
 
-    private void renderTexture(DrawContext context) {
+    private void renderTexture(GuiGraphics context) {
         // 最小 UI 420x227 翻页按钮 [80,207 20x20] [320,207 20x20] 按钮
         int TexturePosX = width / 2 - 210;
         int TexturePosY = height / 2 - 112;
-        context.drawTexture(page_texID, TexturePosX, TexturePosY, 0, 0, 420, 227, 420, 227);
+        context.blit(page_texID, TexturePosX, TexturePosY, 0, 0, 420, 227, 420, 227);
     }
 
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderTexture(context);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 }

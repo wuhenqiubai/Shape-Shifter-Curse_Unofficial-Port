@@ -1,93 +1,93 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.InventoryProvider;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.ai.pathing.NavigationType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.stat.Stats;
-import net.minecraft.state.StateManager;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.ItemActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Util;
-import net.minecraft.util.function.BooleanBiFunction;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
-import net.minecraft.world.event.GameEvent;
+import net.minecraft.Util;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.WorldlyContainerHolder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.BooleanOp;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.util.ModTags;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public class WebComposterBlock extends Block implements InventoryProvider {
+public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     public static final int MIN_LEVEL = 0;
     public static final int MAX_LEVEL = 3;
-    public static final IntProperty LEVEL = IntProperty.of("level", 0, 4);
-    private static final VoxelShape RAYCAST_SHAPE = VoxelShapes.fullCube();
+    public static final IntegerProperty LEVEL = IntegerProperty.create("level", 0, 4);
+    private static final VoxelShape RAYCAST_SHAPE = Shapes.block();
     private static final VoxelShape[] LEVEL_TO_COLLISION_SHAPE = Util.make(new VoxelShape[5], (shapes) -> {
         for(int i = 0; i < 4; ++i) {
-            shapes[i] = VoxelShapes.combineAndSimplify(RAYCAST_SHAPE, Block.createCuboidShape(2.0F, Math.max(2, 1 + i * 4), 2.0F, 14.0F, 16.0F, 14.0F), BooleanBiFunction.ONLY_FIRST);
+            shapes[i] = Shapes.join(RAYCAST_SHAPE, Block.box(2.0F, Math.max(2, 1 + i * 4), 2.0F, 14.0F, 16.0F, 14.0F), BooleanOp.ONLY_FIRST);
         }
 
         shapes[4] = shapes[3];
     });
 
-	public static final IntProperty COCOON_COUNT = IntProperty.of("cocoons_count", 0, 64);
+	public static final IntegerProperty COCOON_COUNT = IntegerProperty.create("cocoons_count", 0, 64);
     public static Item ResultItem = RegCustomItem.SPIDER_FLUID_COCOON;
-    public static Function<Random, Integer> ResultCount = (random) -> 4 + random.nextInt(3);
+    public static Function<RandomSource, Integer> ResultCount = (random) -> 4 + random.nextInt(3);
 
     public static boolean canIncrease(ItemStack itemStack) {
-        if (itemStack.isIn(ModTags.Meat_Tag)) {
+        if (itemStack.is(ModTags.Meat_Tag)) {
             return true;
         }
-        FoodComponent foodComponent = itemStack.get(DataComponentTypes.FOOD);
+        FoodProperties foodComponent = itemStack.get(DataComponents.FOOD);
 	    return foodComponent != null;
     }
 
     public static float getIncreaseChance(ItemStack itemStack) {
-        FoodComponent foodComponent = itemStack.get(DataComponentTypes.FOOD);
+        FoodProperties foodComponent = itemStack.get(DataComponents.FOOD);
         if (foodComponent != null) {
             return 0.55f;
         }
         return 0.5f;
     }
 
-    public WebComposterBlock(Settings settings) {
+    public WebComposterBlock(Properties settings) {
         super(settings);
-	    this.setDefaultState(this.stateManager.getDefaultState().with(LEVEL, MIN_LEVEL).with(COCOON_COUNT, 0));
+	    this.registerDefaultState(this.stateDefinition.any().setValue(LEVEL, MIN_LEVEL).setValue(COCOON_COUNT, 0));
     }
 
-    public static void playEffects(World world, BlockPos pos, boolean fill) {
+    public static void playEffects(Level world, BlockPos pos, boolean fill) {
         BlockState blockState = world.getBlockState(pos);
-        world.playSoundAtBlockCenter(pos, fill ? SoundEvents.BLOCK_COMPOSTER_FILL_SUCCESS : SoundEvents.BLOCK_COMPOSTER_FILL, SoundCategory.BLOCKS, 1.0F, 1.0F, false);
-        double d = blockState.getOutlineShape(world, pos).getEndingCoord(Direction.Axis.Y, 0.5F, 0.5F) + (double)0.03125F;
+        world.playLocalSound(pos, fill ? SoundEvents.COMPOSTER_FILL_SUCCESS : SoundEvents.COMPOSTER_FILL, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+        double d = blockState.getShape(world, pos).max(Direction.Axis.Y, 0.5F, 0.5F) + (double)0.03125F;
         double e = 0.13125F;
         double f = 0.7375F;
-        Random random = world.getRandom();
+        RandomSource random = world.getRandom();
 
         for(int i = 0; i < 10; ++i) {
             double g = random.nextGaussian() * 0.02;
@@ -98,239 +98,239 @@ public class WebComposterBlock extends Block implements InventoryProvider {
 
     }
 
-    public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return LEVEL_TO_COLLISION_SHAPE[state.get(LEVEL)];
+    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+        return LEVEL_TO_COLLISION_SHAPE[state.getValue(LEVEL)];
     }
 
-    public VoxelShape getRaycastShape(BlockState state, BlockView world, BlockPos pos) {
+    public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
         return RAYCAST_SHAPE;
     }
 
-    public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return LEVEL_TO_COLLISION_SHAPE[0];
     }
 
-    public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean notify) {
-        if (state.get(LEVEL) == MAX_LEVEL) {
-            world.scheduleBlockTick(pos, state.getBlock(), 20);
+    public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean notify) {
+        if (state.getValue(LEVEL) == MAX_LEVEL) {
+            world.scheduleTick(pos, state.getBlock(), 20);
         }
 
     }
 
     @Override
-    protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        int i = state.get(LEVEL);
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        int i = state.getValue(LEVEL);
         if (i < MAX_LEVEL + 1 && canIncrease(stack)) {
-            if (i < MAX_LEVEL && !world.isClient) {
+            if (i < MAX_LEVEL && !world.isClientSide) {
                 BlockState blockState = addToComposter(player, state, world, pos, stack);
-                world.syncWorldEvent(1500, pos, state != blockState ? 1 : 0);
-                player.incrementStat(Stats.USED.getOrCreateStat(stack.getItem()));
-                if (!player.getAbilities().creativeMode) {
-                    stack.decrement(1);
+                world.levelEvent(1500, pos, state != blockState ? 1 : 0);
+                player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
+                if (!player.getAbilities().instabuild) {
+                    stack.shrink(1);
                 }
             }
-            return ItemActionResult.success(world.isClient);
+            return ItemInteractionResult.sidedSuccess(world.isClientSide);
         }
-        return super.onUseWithItem(stack, state, world, pos, player, hand, hit);
+        return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
 
     @Override
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-        int i = state.get(LEVEL);
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+        int i = state.getValue(LEVEL);
         if (i == MAX_LEVEL + 1) {
-            if (!world.isClient) {
+            if (!world.isClientSide) {
                 emptyFullComposter(player, state, world, pos);
             }
-            return ActionResult.success(world.isClient);
+            return InteractionResult.sidedSuccess(world.isClientSide);
         }
-        return ActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
-    public static BlockState compost(Entity user, BlockState state, ServerWorld world, ItemStack stack, BlockPos pos) {
-        int i = state.get(LEVEL);
+    public static BlockState compost(Entity user, BlockState state, ServerLevel world, ItemStack stack, BlockPos pos) {
+        int i = state.getValue(LEVEL);
         if (i < MAX_LEVEL && canIncrease(stack)) {
             BlockState blockState = addToComposter(user, state, world, pos, stack);
-            stack.decrement(1);
+            stack.shrink(1);
             return blockState;
         } else {
             return state;
         }
     }
 
-    public static void emptyFullComposter(Entity user, BlockState state, World world, BlockPos pos) {
-        if (!world.isClient) {
-            Vec3d vec3d = Vec3d.add(pos, 0.5F, 1.01, 0.5F).addRandom(world.random, 0.7F);
-	        ItemEntity itemEntity = new ItemEntity(world, vec3d.getX(), vec3d.getY(), vec3d.getZ(), new ItemStack(ResultItem, state.get(COCOON_COUNT)));
-            itemEntity.setToDefaultPickupDelay();
-            world.spawnEntity(itemEntity);
+    public static void emptyFullComposter(Entity user, BlockState state, Level world, BlockPos pos) {
+        if (!world.isClientSide) {
+            Vec3 vec3d = Vec3.atLowerCornerWithOffset(pos, 0.5F, 1.01, 0.5F).offsetRandom(world.random, 0.7F);
+	        ItemEntity itemEntity = new ItemEntity(world, vec3d.x(), vec3d.y(), vec3d.z(), new ItemStack(ResultItem, state.getValue(COCOON_COUNT)));
+            itemEntity.setDefaultPickUpDelay();
+            world.addFreshEntity(itemEntity);
         }
 
         BlockState blockState = emptyComposter(user, state, world, pos);
-        world.playSound(null, pos, SoundEvents.BLOCK_COMPOSTER_EMPTY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        world.playSound(null, pos, SoundEvents.COMPOSTER_EMPTY, SoundSource.BLOCKS, 1.0F, 1.0F);
     }
 
-    static BlockState emptyComposter(@Nullable Entity user, BlockState state, WorldAccess world, BlockPos pos) {
-	    BlockState blockState = state.with(LEVEL, 0).with(COCOON_COUNT, 0);
-	    world.setBlockState(pos, blockState, 3);
-	    world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(user, blockState));
+    static BlockState emptyComposter(@Nullable Entity user, BlockState state, LevelAccessor world, BlockPos pos) {
+	    BlockState blockState = state.setValue(LEVEL, 0).setValue(COCOON_COUNT, 0);
+	    world.setBlock(pos, blockState, 3);
+	    world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(user, blockState));
 	    return blockState;
     }
 
-	static void setComposterItemCount(@Nullable Entity user, BlockState state, WorldAccess world, BlockPos pos, int count) {
+	static void setComposterItemCount(@Nullable Entity user, BlockState state, LevelAccessor world, BlockPos pos, int count) {
 		if (count == 0) {
 			emptyComposter(user, state, world, pos);
 		} else {
-			BlockState blockState = state.with(LEVEL, state.get(LEVEL)).with(COCOON_COUNT, count);
-			world.setBlockState(pos, blockState, 3);
-			world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(user, blockState));
+			BlockState blockState = state.setValue(LEVEL, state.getValue(LEVEL)).setValue(COCOON_COUNT, count);
+			world.setBlock(pos, blockState, 3);
+			world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(user, blockState));
 		}
     }
 
-    static BlockState addToComposter(@Nullable Entity user, BlockState state, WorldAccess world, BlockPos pos, ItemStack stack) {
-        int i = state.get(LEVEL);
+    static BlockState addToComposter(@Nullable Entity user, BlockState state, LevelAccessor world, BlockPos pos, ItemStack stack) {
+        int i = state.getValue(LEVEL);
         float f = getIncreaseChance(stack);
         if ((i != 0 || !(f > 0.0F)) && !(world.getRandom().nextDouble() < (double)f)) {
             return state;
         } else {
             int j = i + 1;
-	        BlockState blockState = state.with(LEVEL, j).with(COCOON_COUNT, state.get(COCOON_COUNT));
-            world.setBlockState(pos, blockState, 3);
-            world.emitGameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Emitter.of(user, blockState));
+	        BlockState blockState = state.setValue(LEVEL, j).setValue(COCOON_COUNT, state.getValue(COCOON_COUNT));
+            world.setBlock(pos, blockState, 3);
+            world.gameEvent(GameEvent.BLOCK_CHANGE, pos, GameEvent.Context.of(user, blockState));
             if (j == MAX_LEVEL) {
-                world.scheduleBlockTick(pos, state.getBlock(), 20);
+                world.scheduleTick(pos, state.getBlock(), 20);
             }
 
             return blockState;
         }
     }
 
-    public void scheduledTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
-        if (state.get(LEVEL) == MAX_LEVEL) {
+    public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
+        if (state.getValue(LEVEL) == MAX_LEVEL) {
             int count = ResultCount.apply(random);
-	        world.setBlockState(pos, state.with(LEVEL, MAX_LEVEL + 1).with(COCOON_COUNT, count), 3);
-            world.playSound(null, pos, SoundEvents.BLOCK_COMPOSTER_READY, SoundCategory.BLOCKS, 1.0F, 1.0F);
+	        world.setBlock(pos, state.setValue(LEVEL, MAX_LEVEL + 1).setValue(COCOON_COUNT, count), 3);
+            world.playSound(null, pos, SoundEvents.COMPOSTER_READY, SoundSource.BLOCKS, 1.0F, 1.0F);
         }
 
     }
 
-    public boolean hasComparatorOutput(BlockState state) {
+    public boolean hasAnalogOutputSignal(BlockState state) {
         return true;
     }
 
-    public int getComparatorOutput(BlockState state, World world, BlockPos pos) {
-        return state.get(LEVEL);
+    public int getAnalogOutputSignal(BlockState state, Level world, BlockPos pos) {
+        return state.getValue(LEVEL);
     }
 
-    protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
+    protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 	    builder.add(LEVEL, COCOON_COUNT);
     }
 
-    public boolean canPathfindThrough(BlockState state, BlockView world, BlockPos pos, NavigationType type) {
+    public boolean canPathfindThrough(BlockState state, BlockGetter world, BlockPos pos, PathComputationType type) {
         return false;
     }
 
-    public SidedInventory getInventory(BlockState state, WorldAccess world, BlockPos pos) {
-        int i = state.get(LEVEL);
+    public WorldlyContainer getContainer(BlockState state, LevelAccessor world, BlockPos pos) {
+        int i = state.getValue(LEVEL);
         if (i == MAX_LEVEL + 1) {
-	        return new WebComposterBlock.FullComposterInventory(state, world, pos, new ItemStack(ResultItem, state.get(COCOON_COUNT)));
+	        return new WebComposterBlock.FullComposterInventory(state, world, pos, new ItemStack(ResultItem, state.getValue(COCOON_COUNT)));
         } else {
             return i < MAX_LEVEL ? new ComposterInventory(state, world, pos) : new DummyInventory();
         }
     }
 
-    static class DummyInventory extends SimpleInventory implements SidedInventory {
+    static class DummyInventory extends SimpleContainer implements WorldlyContainer {
         public DummyInventory() {
             super(0);
         }
 
-        public int[] getAvailableSlots(Direction side) {
+        public int[] getSlotsForFace(Direction side) {
             return new int[0];
         }
 
-        public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
             return false;
         }
 
-        public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
             return false;
         }
     }
 
-    static class FullComposterInventory extends SimpleInventory implements SidedInventory {
+    static class FullComposterInventory extends SimpleContainer implements WorldlyContainer {
         private final BlockState state;
-        private final WorldAccess world;
+        private final LevelAccessor world;
         private final BlockPos pos;
         private boolean dirty;
 
-        public FullComposterInventory(BlockState state, WorldAccess world, BlockPos pos, ItemStack outputItem) {
+        public FullComposterInventory(BlockState state, LevelAccessor world, BlockPos pos, ItemStack outputItem) {
             super(outputItem);
             this.state = state;
             this.world = world;
             this.pos = pos;
         }
 
-        public int getMaxCountPerStack() {
+        public int getMaxStackSize() {
 	        return 64;
         }
 
-        public int[] getAvailableSlots(Direction side) {
+        public int[] getSlotsForFace(Direction side) {
             return side == Direction.DOWN ? new int[]{0} : new int[0];
         }
 
-        public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
             return false;
         }
 
-        public boolean canExtract(int slot, ItemStack stack, Direction dir) {
-            return !this.dirty && dir == Direction.DOWN && stack.isOf(ResultItem);
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
+            return !this.dirty && dir == Direction.DOWN && stack.is(ResultItem);
         }
 
-        public void markDirty() {
+        public void setChanged() {
 	        this.dirty = true;
-	        if (this.getStack(0).isEmpty()) {
+	        if (this.getItem(0).isEmpty()) {
 		        WebComposterBlock.emptyComposter(null, this.state, this.world, this.pos);
 	        } else {
-		        WebComposterBlock.setComposterItemCount(null, this.state, this.world, this.pos, this.getStack(0).getCount());
+		        WebComposterBlock.setComposterItemCount(null, this.state, this.world, this.pos, this.getItem(0).getCount());
 	        }
         }
     }
 
-    static class ComposterInventory extends SimpleInventory implements SidedInventory {
+    static class ComposterInventory extends SimpleContainer implements WorldlyContainer {
         private final BlockState state;
-        private final WorldAccess world;
+        private final LevelAccessor world;
         private final BlockPos pos;
         private boolean dirty;
 
-        public ComposterInventory(BlockState state, WorldAccess world, BlockPos pos) {
+        public ComposterInventory(BlockState state, LevelAccessor world, BlockPos pos) {
             super(1);
             this.state = state;
             this.world = world;
             this.pos = pos;
         }
 
-        public int getMaxCountPerStack() {
+        public int getMaxStackSize() {
             return 1;
         }
 
-        public int[] getAvailableSlots(Direction side) {
+        public int[] getSlotsForFace(Direction side) {
             return side == Direction.UP ? new int[]{0} : new int[0];
         }
 
-        public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+        public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
             return !this.dirty && dir == Direction.UP && WebComposterBlock.canIncrease(stack);
         }
 
-        public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+        public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
             return false;
         }
 
-        public void markDirty() {
-            ItemStack itemStack = this.getStack(0);
+        public void setChanged() {
+            ItemStack itemStack = this.getItem(0);
             if (!itemStack.isEmpty()) {
                 this.dirty = true;
                 BlockState blockState = WebComposterBlock.addToComposter(null, this.state, this.world, this.pos, itemStack);
-                this.world.syncWorldEvent(1500, this.pos, blockState != this.state ? 1 : 0);
-                this.removeStack(0);
+                this.world.levelEvent(1500, this.pos, blockState != this.state ? 1 : 0);
+                this.removeItemNoUpdate(0);
             }
 
         }

@@ -1,38 +1,38 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
 
 public class SpiderFluidCocoon extends Item {
-    public SpiderFluidCocoon(Settings settings) {
+    public SpiderFluidCocoon(Properties settings) {
         super(settings
-                .maxCount(64)
+                .stacksTo(64)
                 .food(
-                        new FoodComponent.Builder()
+                        new FoodProperties.Builder()
                                 .nutrition(6)
                                 .saturationModifier(0.8f)
-                                .statusEffect(new StatusEffectInstance(StatusEffects.POISON, 150, 0), 1.0f)
+                                .effect(new MobEffectInstance(MobEffects.POISON, 150, 0), 1.0f)
                                 .build()
                 ));
     }
 
     @Override
-    public SoundEvent getEatSound(){
-        return SoundEvents.ENTITY_GENERIC_DRINK;
+    public SoundEvent getEatingSound(){
+        return SoundEvents.GENERIC_DRINK;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").formatted(Formatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

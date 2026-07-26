@@ -3,20 +3,20 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
 import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.SpawnLocationTypes;
-import net.minecraft.entity.SpawnRestriction;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.collection.Pool;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.StructureSpawns;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.SpawnSettings;
-import net.minecraft.world.gen.structure.Structure;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacementTypes;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.MobSpawnSettings;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.structure.Structure;
+import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TransformativeAxolotlEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
@@ -29,61 +29,61 @@ import java.util.stream.Collectors;
 public class TransformativeEntitySpawning {
     public static void addEntitySpawns() {
         // T_OCELOT
-        SpawnRestriction.register(
+        SpawnPlacements.register(
                 ShapeShifterCurseFabric.T_OCELOT,
-                SpawnLocationTypes.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING,
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING,
                 TransformativeOcelotEntity::canCustomSpawn
         );
         BiomeModifications.addSpawn(
-                BiomeSelectors.includeByKey(BiomeKeys.JUNGLE)
-                        .or(BiomeSelectors.includeByKey(BiomeKeys.BAMBOO_JUNGLE)),
-                SpawnGroup.MONSTER,
+                BiomeSelectors.includeByKey(Biomes.JUNGLE)
+                        .or(BiomeSelectors.includeByKey(Biomes.BAMBOO_JUNGLE)),
+                MobCategory.MONSTER,
                 ShapeShifterCurseFabric.T_OCELOT,
                 10,
                 1,
                 3
         );
         // T_AXOLOTL
-        SpawnRestriction.register(
+        SpawnPlacements.register(
                 ShapeShifterCurseFabric.T_AXOLOTL,
-                SpawnLocationTypes.IN_WATER,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                SpawnPlacementTypes.IN_WATER,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 TransformativeAxolotlEntity::canCustomSpawn
         );
         BiomeModifications.addSpawn(
-                BiomeSelectors.includeByKey(BiomeKeys.LUSH_CAVES),
-                SpawnGroup.AXOLOTLS,
+                BiomeSelectors.includeByKey(Biomes.LUSH_CAVES),
+                MobCategory.AXOLOTLS,
                 ShapeShifterCurseFabric.T_AXOLOTL,
                 8,
                 4,
                 6
         );
         // T_BAT
-        SpawnRestriction.register(
+        SpawnPlacements.register(
                 ShapeShifterCurseFabric.T_BAT,
-                SpawnLocationTypes.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 TransformativeBatEntity::canCustomSpawn
         );
         BiomeModifications.addSpawn(
                 BiomeSelectors.tag(BiomeTags.IS_OVERWORLD),
-                SpawnGroup.AMBIENT,
+                MobCategory.AMBIENT,
                 ShapeShifterCurseFabric.T_BAT,
                 8,
                 1,
                 3
         );
         // T_WOLF
-        SpawnRestriction.register(
+        SpawnPlacements.register(
                 ShapeShifterCurseFabric.T_WOLF,
-                SpawnLocationTypes.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 TransformativeWolfEntity::canCustomSpawn
         );
         BiomeModifications.addSpawn(
-                BiomeSelectors.includeByKey(BiomeKeys.DESERT),
-                SpawnGroup.CREATURE,
+                BiomeSelectors.includeByKey(Biomes.DESERT),
+                MobCategory.CREATURE,
                 ShapeShifterCurseFabric.T_WOLF,
                 2,  // 1/2 兔子的权重
                 1,
@@ -91,20 +91,20 @@ public class TransformativeEntitySpawning {
         );
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            Structure structure = server.getOverworld().getRegistryManager().get(RegistryKeys.STRUCTURE).get(Identifier.of("minecraft", "desert_pyramid"));
+            Structure structure = server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE).get(ResourceLocation.fromNamespaceAndPath("minecraft", "desert_pyramid"));
             if (structure != null) {
-                Map<SpawnGroup, StructureSpawns> oldSpawns = structure.getStructureSpawns();
-                Map<SpawnGroup, StructureSpawns> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                spawns.put(SpawnGroup.CREATURE, new StructureSpawns(StructureSpawns.BoundingBox.PIECE, Pool.of(new SpawnSettings.SpawnEntry(ShapeShifterCurseFabric.T_WOLF, 20, 3, 5))));
-                structure.config.spawnOverrides = spawns;
+                Map<MobCategory, StructureSpawnOverride> oldSpawns = structure.spawnOverrides();
+                Map<MobCategory, StructureSpawnOverride> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                spawns.put(MobCategory.CREATURE, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3, 5))));
+                structure.settings.spawnOverrides = spawns;
             }
-            for (RegistryEntry<Structure> structureEntry : server.getOverworld().getRegistryManager().get(RegistryKeys.STRUCTURE).iterateEntries(TagKey.of(RegistryKeys.STRUCTURE, Identifier.of("minecraft", "mineshaft")))) {
+            for (Holder<Structure> structureEntry : server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE).getTagOrEmpty(TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("minecraft", "mineshaft")))) {
                 structure = structureEntry.value();
                 if (structure != null) {
-                    Map<SpawnGroup, StructureSpawns> oldSpawns = structure.getStructureSpawns();
-                    Map<SpawnGroup, StructureSpawns> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                    spawns.put(SpawnGroup.MONSTER, new StructureSpawns(StructureSpawns.BoundingBox.PIECE, Pool.of(new SpawnSettings.SpawnEntry(ShapeShifterCurseFabric.T_SPIDER, 5, 1, 2))));
-                    structure.config.spawnOverrides = spawns;
+                    Map<MobCategory, StructureSpawnOverride> oldSpawns = structure.spawnOverrides();
+                    Map<MobCategory, StructureSpawnOverride> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+                    spawns.put(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1, 2))));
+                    structure.settings.spawnOverrides = spawns;
                 }
             }
         });

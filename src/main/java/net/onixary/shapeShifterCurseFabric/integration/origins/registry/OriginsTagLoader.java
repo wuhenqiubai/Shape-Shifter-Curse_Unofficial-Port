@@ -2,18 +2,21 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
 import io.github.apace100.calio.Calio;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.tags.TagKey;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Ensures origins namespace tags are available in Calio's REGISTRY_TAGS
@@ -24,13 +27,13 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
     private static final Logger LOGGER = LoggerFactory.getLogger(OriginsTagLoader.class);
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return Origins.identifier("origins_tags");
     }
 
     @Override
-    public void reload(ResourceManager manager) {
-        Map<TagKey<?>, Collection<RegistryEntry<?>>> registryTags = Calio.REGISTRY_TAGS.get();
+    public void onResourceManagerReload(ResourceManager manager) {
+        Map<TagKey<?>, Collection<Holder<?>>> registryTags = Calio.REGISTRY_TAGS.get();
         if (registryTags == null) {
             registryTags = new HashMap<>();
             Calio.REGISTRY_TAGS.set(registryTags);
@@ -39,27 +42,27 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
         int count = 0;
 
         // Scan ALL namespaces for tag files to ensure they're available at parse time
-        count += registerTags(registryTags, RegistryKeys.ITEM, manager, "items");
-        count += registerTags(registryTags, RegistryKeys.BLOCK, manager, "blocks");
-        count += registerTags(registryTags, RegistryKeys.ENTITY_TYPE, manager, "entity_type");
-        count += registerTags(registryTags, RegistryKeys.DAMAGE_TYPE, manager, "damage_type");
+        count += registerTags(registryTags, Registries.ITEM, manager, "items");
+        count += registerTags(registryTags, Registries.BLOCK, manager, "blocks");
+        count += registerTags(registryTags, Registries.ENTITY_TYPE, manager, "entity_type");
+        count += registerTags(registryTags, Registries.DAMAGE_TYPE, manager, "damage_type");
 
         LOGGER.info("Registered {} missing tags across all namespaces", count);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private int registerTags(Map<TagKey<?>, Collection<RegistryEntry<?>>> registryTags,
-                             RegistryKey<? extends Registry<?>> registryKey,
+    private int registerTags(Map<TagKey<?>, Collection<Holder<?>>> registryTags,
+                             ResourceKey<? extends Registry<?>> registryKey,
                              ResourceManager manager,
                              String registryDir) {
         int count = 0;
-        for (Identifier path : manager.findResources("tags/" + registryDir,
+        for (ResourceLocation path : manager.listResources("tags/" + registryDir,
                 id -> id.getPath().endsWith(".json"))
                 .keySet()) {
             // path: origin/tags/items/ignore_diet.json
             String ns = path.getNamespace();
             String fileName = path.getPath().substring(path.getPath().lastIndexOf('/') + 1).replace(".json", "");
-            TagKey<?> tagKey = TagKey.of((RegistryKey) registryKey, Identifier.of(ns, fileName));
+            TagKey<?> tagKey = TagKey.create((ResourceKey) registryKey, ResourceLocation.fromNamespaceAndPath(ns, fileName));
             if (!registryTags.containsKey(tagKey)) {
                 registryTags.put(tagKey, Collections.emptyList());
                 count++;

@@ -1,22 +1,22 @@
 package net.onixary.shapeShifterCurseFabric.mana;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 
 public class ManaHandler {
     // 由于在Server端上没有ClientPlayerEntity 所以通一使用PlayerEntity
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientInit;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerInit;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaTick;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaTick;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaFull;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaFull;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaEmpty;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaEmpty;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaChange;
-    private @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaChange;
+    private @NotNull BiConsumer<ManaComponent, Player> onClientInit;
+    private @NotNull BiConsumer<ManaComponent, Player> onServerInit;
+    private @NotNull BiConsumer<ManaComponent, Player> onClientManaTick;
+    private @NotNull BiConsumer<ManaComponent, Player> onServerManaTick;
+    private @NotNull BiConsumer<ManaComponent, Player> onClientManaFull;
+    private @NotNull BiConsumer<ManaComponent, Player> onServerManaFull;
+    private @NotNull BiConsumer<ManaComponent, Player> onClientManaEmpty;
+    private @NotNull BiConsumer<ManaComponent, Player> onServerManaEmpty;
+    private @NotNull BiConsumer<ManaComponent, Player> onClientManaChange;
+    private @NotNull BiConsumer<ManaComponent, Player> onServerManaChange;
     private boolean Immutable = false;
 
     public ManaHandler() {
@@ -33,16 +33,16 @@ public class ManaHandler {
         this.Immutable = false;
     }
 
-    public ManaHandler(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientInit,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerInit,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaTick,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaTick,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaFull,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaFull,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaEmpty,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaEmpty,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaChange,
-                       @NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaChange
+    public ManaHandler(@NotNull BiConsumer<ManaComponent, Player> onClientInit,
+                       @NotNull BiConsumer<ManaComponent, Player> onServerInit,
+                       @NotNull BiConsumer<ManaComponent, Player> onClientManaTick,
+                       @NotNull BiConsumer<ManaComponent, Player> onServerManaTick,
+                       @NotNull BiConsumer<ManaComponent, Player> onClientManaFull,
+                       @NotNull BiConsumer<ManaComponent, Player> onServerManaFull,
+                       @NotNull BiConsumer<ManaComponent, Player> onClientManaEmpty,
+                       @NotNull BiConsumer<ManaComponent, Player> onServerManaEmpty,
+                       @NotNull BiConsumer<ManaComponent, Player> onClientManaChange,
+                       @NotNull BiConsumer<ManaComponent, Player> onServerManaChange
     ) {
         this.onClientInit = onClientInit;
         this.onServerInit = onServerInit;
@@ -57,84 +57,84 @@ public class ManaHandler {
         this.Immutable = false;
     }
 
-    public ManaHandler setOnClientInit(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientInit) {
+    public ManaHandler setOnClientInit(@NotNull BiConsumer<ManaComponent, Player> onClientInit) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onClientInit = onClientInit;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnClientInit() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnClientInit() {
         return this.onClientInit;
     }
-    public ManaHandler setOnServerInit(@NotNull BiConsumer<ManaComponent, PlayerEntity> onServerInit) {
+    public ManaHandler setOnServerInit(@NotNull BiConsumer<ManaComponent, Player> onServerInit) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onServerInit = onServerInit;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnServerInit() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnServerInit() {
         return this.onServerInit;
     }
-    public ManaHandler setOnClientManaTick(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaTick) {
+    public ManaHandler setOnClientManaTick(@NotNull BiConsumer<ManaComponent, Player> onClientManaTick) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onClientManaTick = onClientManaTick;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnClientManaTick() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnClientManaTick() {
         return this.onClientManaTick;
     }
-    public ManaHandler setOnServerManaTick(@NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaTick) {
+    public ManaHandler setOnServerManaTick(@NotNull BiConsumer<ManaComponent, Player> onServerManaTick) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onServerManaTick = onServerManaTick;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnServerManaTick() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnServerManaTick() {
         return this.onServerManaTick;
     }
-    public ManaHandler setOnClientManaFull(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaFull) {
+    public ManaHandler setOnClientManaFull(@NotNull BiConsumer<ManaComponent, Player> onClientManaFull) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onClientManaFull = onClientManaFull;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnClientManaFull() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnClientManaFull() {
         return this.onClientManaFull;
     }
-    public ManaHandler setOnServerManaFull(@NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaFull) {
+    public ManaHandler setOnServerManaFull(@NotNull BiConsumer<ManaComponent, Player> onServerManaFull) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onServerManaFull = onServerManaFull;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnServerManaFull() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnServerManaFull() {
         return this.onServerManaFull;
     }
-    public ManaHandler setOnClientManaEmpty(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaEmpty) {
+    public ManaHandler setOnClientManaEmpty(@NotNull BiConsumer<ManaComponent, Player> onClientManaEmpty) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onClientManaEmpty = onClientManaEmpty;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnClientManaEmpty() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnClientManaEmpty() {
         return this.onClientManaEmpty;
     }
-    public ManaHandler setOnServerManaEmpty(@NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaEmpty) {
+    public ManaHandler setOnServerManaEmpty(@NotNull BiConsumer<ManaComponent, Player> onServerManaEmpty) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onServerManaEmpty = onServerManaEmpty;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnServerManaEmpty() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnServerManaEmpty() {
         return this.onServerManaEmpty;
     }
-    public ManaHandler setOnClientManaChange(@NotNull BiConsumer<ManaComponent, PlayerEntity> onClientManaChange) {
+    public ManaHandler setOnClientManaChange(@NotNull BiConsumer<ManaComponent, Player> onClientManaChange) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onClientManaChange = onClientManaChange;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnClientManaChange() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnClientManaChange() {
         return this.onClientManaChange;
     }
-    public ManaHandler setOnServerManaChange(@NotNull BiConsumer<ManaComponent, PlayerEntity> onServerManaChange) {
+    public ManaHandler setOnServerManaChange(@NotNull BiConsumer<ManaComponent, Player> onServerManaChange) {
         if (this.Immutable) { throw new RuntimeException("Cannot modify a immutable ManaHandler"); }
         this.onServerManaChange = onServerManaChange;
         return this;
     }
-    public @NotNull BiConsumer<ManaComponent, PlayerEntity> getOnServerManaChange() {
+    public @NotNull BiConsumer<ManaComponent, Player> getOnServerManaChange() {
         return this.onServerManaChange;
     }
     public ManaHandler setImmutable() {

@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.additional_power.BurnDamageModifierPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,12 +15,12 @@ import java.util.List;
 @Mixin(LivingEntity.class)
 public class LivingEntityBurnDamageMixin {
 
-    @ModifyArg(method = "damage", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;applyDamage(Lnet/minecraft/entity/damage/DamageSource;F)V"), index = 1)
+    @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"), index = 1)
     private float modifyBurnDamage(DamageSource source, float amount) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
-        if (entity.isOnFire() && (source.isIn(DamageTypeTags.IS_FIRE)
-                && !entity.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)))
+        if (entity.isOnFire() && (source.is(DamageTypeTags.IS_FIRE)
+                && !entity.hasEffect(MobEffects.FIRE_RESISTANCE)))
         {
             List<BurnDamageModifierPower> powers = PowerHolderComponent.getPowers(entity, BurnDamageModifierPower.class);
             float totalModifier = powers

@@ -1,26 +1,26 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.AttackWithOwnerGoal;
-import net.minecraft.entity.ai.goal.TrackOwnerAttackerGoal;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.UUID;
 
 // 推荐直接继承MinionBase而非单独实现IMinion接口
 
-public abstract class MinionBase extends TameableEntity implements IMinion<MinionBase> {
-    public MinionBase(EntityType<? extends MinionBase> entityType, World world) {
+public abstract class MinionBase extends TamableAnimal implements IMinion<MinionBase> {
+    public MinionBase(EntityType<? extends MinionBase> entityType, Level world) {
         super(entityType, world);
     }
 
-    public void InitMinion(PlayerEntity player) {
+    public void InitMinion(Player player) {
         if (player instanceof IPlayerEntityMinion iPlayerEntityMinion) {
             iPlayerEntityMinion.shape_shifter_curse$addMinion(this);
         }
@@ -30,21 +30,21 @@ public abstract class MinionBase extends TameableEntity implements IMinion<Minio
         }
     }
 
-    public Identifier minionTypeID;
+    public ResourceLocation minionTypeID;
 
     @Override
-    public Identifier getMinionTypeID() {
+    public ResourceLocation getMinionTypeID() {
         return this.minionTypeID;
     }
 
     @Override
     public UUID getMinionOwnerUUID() {
-        return super.getOwnerUuid();
+        return super.getOwnerUUID();
     }
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        this.setOwnerUuid(uuid);
+        this.setOwnerUUID(uuid);
     }
 
     @Override
@@ -53,8 +53,8 @@ public abstract class MinionBase extends TameableEntity implements IMinion<Minio
     }
 
     @Override
-    public World getWorld() {
-        return super.getWorld();
+    public Level level() {
+        return super.level();
     }
 
     public double getMinionDisappearRange() {
@@ -62,44 +62,44 @@ public abstract class MinionBase extends TameableEntity implements IMinion<Minio
     }
 
     public boolean shouldExist() {
-        if (this.getWorld().isClient) {
+        if (this.level().isClientSide) {
             return true;
         }
         if (this.getMinionOwnerUUID() == null) {
             return false;
         }
-        PlayerEntity owner = this.getWorld().getPlayerByUuid(this.getMinionOwnerUUID());
+        Player owner = this.level().getPlayerByUUID(this.getMinionOwnerUUID());
         if (owner == null) {
             return false;
         }
-        if (this.squaredDistanceTo(owner) > this.getMinionDisappearRange()) {
+        if (this.distanceToSqr(owner) > this.getMinionDisappearRange()) {
             return false;
         }
         if (owner instanceof IPlayerEntityMinion iPlayerEntityMinion) {
-            return iPlayerEntityMinion.shape_shifter_curse$minionExist(this.getMinionTypeID(), this.getUuid());
+            return iPlayerEntityMinion.shape_shifter_curse$minionExist(this.getMinionTypeID(), this.getUUID());
         }
         return false;
     }
 
     @Override
-    protected void initGoals() {
-        this.targetSelector.add(1, new TrackOwnerAttackerGoal(this));
-        this.targetSelector.add(2, new AttackWithOwnerGoal(this));
+    protected void registerGoals() {
+        this.targetSelector.addGoal(1, new OwnerHurtByTargetGoal(this));
+        this.targetSelector.addGoal(2, new OwnerHurtTargetGoal(this));
     }
 
     @Override
-    public void setOwner(PlayerEntity player) {
-        super.setOwner(player);
+    public void tame(Player player) {
+        super.tame(player);
     }
 
     @Override
-    public void writeCustomDataToNbt(NbtCompound nbt) {
-        super.writeCustomDataToNbt(nbt);
+    public void addAdditionalSaveData(CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
     }
 
     @Override
-    public void readCustomDataFromNbt(NbtCompound nbt) {
-        super.readCustomDataFromNbt(nbt);
+    public void readAdditionalSaveData(CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
     }
 
     @Override
@@ -112,11 +112,11 @@ public abstract class MinionBase extends TameableEntity implements IMinion<Minio
 
     // 从玩家召唤物列表中移除
     @Override
-    public void onDeath(DamageSource source) {
-        if (this.getMinionOwnerUUID() != null && this.getWorld().getPlayerByUuid(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
-            iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUuid());
+    public void die(DamageSource source) {
+        if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
+            iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
-        this.setOwner(null);
-        super.onDeath(source);
+        this.tame(null);
+        super.die(source);
     }
 }

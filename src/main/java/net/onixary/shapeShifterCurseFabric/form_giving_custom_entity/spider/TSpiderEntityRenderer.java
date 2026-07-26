@@ -2,29 +2,30 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.MobEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModelLayers;
-import net.minecraft.client.render.entity.model.SpiderEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.model.SpiderModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.resources.ResourceLocation;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
-@Environment(EnvType.CLIENT)
-public class TSpiderEntityRenderer extends MobEntityRenderer<TransformativeSpiderEntity, SpiderEntityModel<TransformativeSpiderEntity>> {
-	private static final Identifier TEXTURE = Identifier.of(MOD_ID, "textures/entity/mob/t_spider.png");
+import com.mojang.blaze3d.vertex.PoseStack;
 
-	public TSpiderEntityRenderer(EntityRendererFactory.Context context) {
-		super(context, new SpiderEntityModel<>(context.getPart(EntityModelLayers.SPIDER)), 0.8F);
+@Environment(EnvType.CLIENT)
+public class TSpiderEntityRenderer extends MobRenderer<TransformativeSpiderEntity, SpiderModel<TransformativeSpiderEntity>> {
+	private static final ResourceLocation TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/entity/mob/t_spider.png");
+
+	public TSpiderEntityRenderer(EntityRendererProvider.Context context) {
+		super(context, new SpiderModel<>(context.bakeLayer(ModelLayers.SPIDER)), 0.8F);
 	}
 
-	public Identifier getTexture(TransformativeSpiderEntity ocelotEntity) {
+	public ResourceLocation getTextureLocation(TransformativeSpiderEntity ocelotEntity) {
 		return TEXTURE;
 	}
 
 	@Override
-	protected void scale(TransformativeSpiderEntity entity, MatrixStack matrices, float amount) {
+	protected void scale(TransformativeSpiderEntity entity, PoseStack matrices, float amount) {
 		matrices.scale(0.5f, 0.5f, 0.5f);
 	}
 }

@@ -5,15 +5,15 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
 
 public class AddSustainedInstinctPower extends Power {
 
-    private final Identifier instinctEffectID;
+    private final ResourceLocation instinctEffectID;
     private final float value;
     private final int duration;
 
@@ -47,7 +47,7 @@ public class AddSustainedInstinctPower extends Power {
     }
 
     public void tick() {
-        if (entity instanceof ServerPlayerEntity SPE && this.instinctEffectID != null){
+        if (entity instanceof ServerPlayer SPE && this.instinctEffectID != null){
             InstinctUtils.addInstinctEffect(SPE, this.instinctEffectID, this.value, this.duration, false);
         }
 //        if(entity instanceof ServerPlayerEntity && instinctEffectType != null && instinctEffectType.isSustained()) {

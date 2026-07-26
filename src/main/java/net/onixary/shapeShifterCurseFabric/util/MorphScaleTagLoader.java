@@ -4,8 +4,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,13 +26,13 @@ public class MorphScaleTagLoader implements SimpleSynchronousResourceReloadListe
     }
 
     @Override
-    public Identifier getFabricId() {
+    public ResourceLocation getFabricId() {
         return ShapeShifterCurseFabric.identifier("morph_scale_tag_loader");
     }
 
     @Override
-    public void reload(ResourceManager manager) {
-        var resources = manager.findResources("tags/items",
+    public void onResourceManagerReload(ResourceManager manager) {
+        var resources = manager.listResources("tags/items",
                 id -> id.getNamespace().equals(ShapeShifterCurseFabric.MOD_ID)
                         && id.getPath().endsWith("morph_scale_item.json"));
         if (resources.isEmpty()) {
@@ -43,7 +43,7 @@ public class MorphScaleTagLoader implements SimpleSynchronousResourceReloadListe
 
         Set<String> items = new HashSet<>();
         for (var entry : resources.entrySet()) {
-            try (var reader = new InputStreamReader(entry.getValue().getInputStream(), StandardCharsets.UTF_8)) {
+            try (var reader = new InputStreamReader(entry.getValue().open(), StandardCharsets.UTF_8)) {
                 JsonObject json = JsonParser.parseReader(reader).getAsJsonObject();
                 for (JsonElement value : json.getAsJsonArray("values")) {
                     String id;

@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.*;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenu;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -27,26 +27,26 @@ import java.util.function.Consumer;
 
 public class FormColorData {
     public boolean enableDefaultFormColor = true;
-    public final HashMap<Identifier, FormTextureUtils.ColorSetting> formDefaultSetting = new HashMap<>();
+    public final HashMap<ResourceLocation, FormTextureUtils.ColorSetting> formDefaultSetting = new HashMap<>();
 
     public final HashMap<String, FormTextureUtils.ColorSetting> customSetting = new HashMap<>();
-    public final HashMap<Identifier, HashMap<String, FormTextureUtils.ColorSetting>> customSettingByForm = new HashMap<>();
+    public final HashMap<ResourceLocation, HashMap<String, FormTextureUtils.ColorSetting>> customSettingByForm = new HashMap<>();
 
     public static int GlobalSlotCount = 9;
     public static int LocalSlotCount = 3;
 
-    public final HashMap<Identifier, List<String>> FormColorSelectMenu_Form_Local_Names = new HashMap<>();
+    public final HashMap<ResourceLocation, List<String>> FormColorSelectMenu_Form_Local_Names = new HashMap<>();
     public final List<String> FormColorSelectMenu_Global_Names = new ArrayList<String>();
-    public final HashMap<Identifier, String> FormColorSelectMenu_Form_Default_Names = new HashMap<>();
+    public final HashMap<ResourceLocation, String> FormColorSelectMenu_Form_Default_Names = new HashMap<>();
 
-    public final List<Identifier> unlockedForms = new ArrayList<Identifier>();
+    public final List<ResourceLocation> unlockedForms = new ArrayList<ResourceLocation>();
 
     // V2 UI用的数据 由于UI没设计完 部分值不确定
     public static int V2_GlobalSlotCount = 9;
     public final List<String> V2_FormColorSelectMenu_Global_Names = new ArrayList<String>();
 
-    public NbtCompound dumpColorSetting(FormTextureUtils.ColorSetting colorSetting) {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag dumpColorSetting(FormTextureUtils.ColorSetting colorSetting) {
+        CompoundTag nbt = new CompoundTag();
         nbt.putInt("primaryColor", colorSetting.getPrimaryColor());
         nbt.putInt("accentColor1", colorSetting.getAccentColor1());
         nbt.putInt("accentColor2", colorSetting.getAccentColor2());
@@ -58,65 +58,65 @@ public class FormColorData {
         return nbt;
     }
 
-    public FormTextureUtils.ColorSetting loadColorSetting(NbtCompound nbt) {
+    public FormTextureUtils.ColorSetting loadColorSetting(CompoundTag nbt) {
         return new FormTextureUtils.ColorSetting(nbt.getInt("primaryColor"), nbt.getInt("accentColor1"), nbt.getInt("accentColor2"), nbt.getInt("eyeColorA"), nbt.getInt("eyeColorB"), nbt.getBoolean("primaryGreyReverse"), nbt.getBoolean("accent1GreyReverse"), nbt.getBoolean("accent2GreyReverse"));
     }
 
-    public NbtCompound saveCompound() {
-        NbtCompound nbt = new NbtCompound();
+    public CompoundTag saveCompound() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putBoolean("enableDefaultFormColor", enableDefaultFormColor);
-        NbtCompound formDefaultSettingNbt = new NbtCompound();
-        for (Identifier form : formDefaultSetting.keySet()) {
+        CompoundTag formDefaultSettingNbt = new CompoundTag();
+        for (ResourceLocation form : formDefaultSetting.keySet()) {
             formDefaultSettingNbt.put(form.toString(), dumpColorSetting(formDefaultSetting.get(form)));
         }
         nbt.put("formDefaultSetting", formDefaultSettingNbt);
-        NbtCompound customSettingNbt = new NbtCompound();
+        CompoundTag customSettingNbt = new CompoundTag();
         for (String name : customSetting.keySet()) {
             customSettingNbt.put(name, dumpColorSetting(customSetting.get(name)));
         }
         nbt.put("customSetting", customSettingNbt);
-        NbtCompound customSettingByFormNbt = new NbtCompound();
-        for (Identifier form : customSettingByForm.keySet()) {
-            NbtCompound formNbt = new NbtCompound();
+        CompoundTag customSettingByFormNbt = new CompoundTag();
+        for (ResourceLocation form : customSettingByForm.keySet()) {
+            CompoundTag formNbt = new CompoundTag();
             for (String name : customSettingByForm.get(form).keySet()) {
                 formNbt.put(name, dumpColorSetting(customSettingByForm.get(form).get(name)));
             }
             customSettingByFormNbt.put(form.toString(), formNbt);
         }
         nbt.put("customSettingByForm", customSettingByFormNbt);
-        NbtCompound formColorSelectMenuNbt = new NbtCompound();
-        for (Identifier form : FormColorSelectMenu_Form_Local_Names.keySet()) {
-            NbtList nbtList = new NbtList();
+        CompoundTag formColorSelectMenuNbt = new CompoundTag();
+        for (ResourceLocation form : FormColorSelectMenu_Form_Local_Names.keySet()) {
+            ListTag nbtList = new ListTag();
             for (String name : FormColorSelectMenu_Form_Local_Names.get(form)) {
-                nbtList.add(NbtString.of(name));
+                nbtList.add(StringTag.valueOf(name));
             }
             formColorSelectMenuNbt.put(form.toString(), nbtList);
         }
         nbt.put("FCS_form_local_setting_names", formColorSelectMenuNbt);
-        NbtList nbtList = new NbtList();
+        ListTag nbtList = new ListTag();
         for (String name : FormColorSelectMenu_Global_Names) {
-            nbtList.add(NbtString.of(name));
+            nbtList.add(StringTag.valueOf(name));
         }
         nbt.put("FCS_global_setting_names", nbtList);
-        NbtCompound formColorSelectMenuDefaultNbt = new NbtCompound();
-        for (Identifier form : FormColorSelectMenu_Form_Default_Names.keySet()) {
+        CompoundTag formColorSelectMenuDefaultNbt = new CompoundTag();
+        for (ResourceLocation form : FormColorSelectMenu_Form_Default_Names.keySet()) {
             formColorSelectMenuDefaultNbt.putString(form.toString(), FormColorSelectMenu_Form_Default_Names.get(form));
         }
         nbt.put("FCS_form_default_setting_names", formColorSelectMenuDefaultNbt);
-        NbtList nbtList2 = new NbtList();
+        ListTag nbtList2 = new ListTag();
         for (String name : V2_FormColorSelectMenu_Global_Names) {
-            nbtList2.add(NbtString.of(name));
+            nbtList2.add(StringTag.valueOf(name));
         }
         nbt.put("V2_FCS_global_setting_names", nbtList2);
-        NbtList nbtList3 = new NbtList();
-        for (Identifier form : unlockedForms) {
-            nbtList3.add(NbtString.of(form.toString()));
+        ListTag nbtList3 = new ListTag();
+        for (ResourceLocation form : unlockedForms) {
+            nbtList3.add(StringTag.valueOf(form.toString()));
         }
         nbt.put("unlockedForms", nbtList3);
         return nbt;
     }
 
-    public void loadCompound(NbtCompound compound) {
+    public void loadCompound(CompoundTag compound) {
         formDefaultSetting.clear();
         customSetting.clear();
         customSettingByForm.clear();
@@ -127,18 +127,18 @@ public class FormColorData {
             enableDefaultFormColor = compound.getBoolean("enableDefaultFormColor");
         }
         if (compound.contains("formDefaultSetting")) {
-            NbtCompound formDefaultSettingNbt = compound.getCompound("formDefaultSetting");
-            for (String form : formDefaultSettingNbt.getKeys()) {
+            CompoundTag formDefaultSettingNbt = compound.getCompound("formDefaultSetting");
+            for (String form : formDefaultSettingNbt.getAllKeys()) {
                 try {
-                    formDefaultSetting.put(Identifier.tryParse(form), loadColorSetting(formDefaultSettingNbt.getCompound(form)));
+                    formDefaultSetting.put(ResourceLocation.tryParse(form), loadColorSetting(formDefaultSettingNbt.getCompound(form)));
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.warn("Failed to load form default color setting for " + form + ": " + e.getMessage());
                 }
             }
         }
         if (compound.contains("customSetting")) {
-            NbtCompound customSettingNbt = compound.getCompound("customSetting");
-            for (String name : customSettingNbt.getKeys()) {
+            CompoundTag customSettingNbt = compound.getCompound("customSetting");
+            for (String name : customSettingNbt.getAllKeys()) {
                 try {
                     customSetting.put(name, loadColorSetting(customSettingNbt.getCompound(name)));
                 } catch (Exception e) {
@@ -147,11 +147,11 @@ public class FormColorData {
             }
         }
         if (compound.contains("customSettingByForm")) {
-            NbtCompound customSettingByFormNbt = compound.getCompound("customSettingByForm");
-            for (String form : customSettingByFormNbt.getKeys()) {
-                Identifier formId = Identifier.tryParse(form);
-                NbtCompound formNbt = customSettingByFormNbt.getCompound(form);
-                for (String name : formNbt.getKeys()) {
+            CompoundTag customSettingByFormNbt = compound.getCompound("customSettingByForm");
+            for (String form : customSettingByFormNbt.getAllKeys()) {
+                ResourceLocation formId = ResourceLocation.tryParse(form);
+                CompoundTag formNbt = customSettingByFormNbt.getCompound(form);
+                for (String name : formNbt.getAllKeys()) {
                     try {
                         customSettingByForm.computeIfAbsent(formId, k -> new HashMap<>()).put(name, loadColorSetting(formNbt.getCompound(name)));
                     } catch (Exception e) {
@@ -161,48 +161,48 @@ public class FormColorData {
             }
         }
         if (compound.contains("FCS_form_local_setting_names")) {
-            NbtCompound nbtList = compound.getCompound("FCS_form_local_setting_names");
-            for (String form : nbtList.getKeys()) {
-                Identifier formId = Identifier.tryParse(form);
+            CompoundTag nbtList = compound.getCompound("FCS_form_local_setting_names");
+            for (String form : nbtList.getAllKeys()) {
+                ResourceLocation formId = ResourceLocation.tryParse(form);
                 List<String> formSlotNames = FormColorSelectMenu_Form_Local_Names.computeIfAbsent(formId, k -> new ArrayList<>());
-                NbtList nbtList2 = nbtList.getList(form, NbtElement.STRING_TYPE);
+                ListTag nbtList2 = nbtList.getList(form, Tag.TAG_STRING);
                 for (int i = 0; i < nbtList2.size(); i++) {
                     formSlotNames.add(nbtList2.getString(i));
                 }
             }
         }
         if (compound.contains("FCS_global_setting_names")) {
-            NbtList nbtList = compound.getList("FCS_global_setting_names", NbtElement.STRING_TYPE);
+            ListTag nbtList = compound.getList("FCS_global_setting_names", Tag.TAG_STRING);
             for (int i = 0; i < nbtList.size(); i++) {
                 FormColorSelectMenu_Global_Names.add(nbtList.getString(i));
             }
         }
         if (compound.contains("FCS_form_default_setting_names")) {
-            NbtCompound nbtList = compound.getCompound("FCS_form_default_setting_names");
-            for (String form : nbtList.getKeys()) {
-                Identifier formId = Identifier.tryParse(form);
+            CompoundTag nbtList = compound.getCompound("FCS_form_default_setting_names");
+            for (String form : nbtList.getAllKeys()) {
+                ResourceLocation formId = ResourceLocation.tryParse(form);
                 FormColorSelectMenu_Form_Default_Names.put(formId, nbtList.getString(form));
             }
         }
         if (compound.contains("V2_FCS_global_setting_names")) {
-            NbtList nbtList = compound.getList("V2_FCS_global_setting_names", NbtElement.STRING_TYPE);
+            ListTag nbtList = compound.getList("V2_FCS_global_setting_names", Tag.TAG_STRING);
             for (int i = 0; i < nbtList.size(); i++) {
                 V2_FormColorSelectMenu_Global_Names.add(nbtList.getString(i));
             }
         }
         if (compound.contains("unlockedForms")) {
-            NbtList nbtList = compound.getList("unlockedForms", NbtElement.STRING_TYPE);
+            ListTag nbtList = compound.getList("unlockedForms", Tag.TAG_STRING);
             for (int i = 0; i < nbtList.size(); i++) {
-                unlockedForms.add(Identifier.tryParse(nbtList.getString(i)));
+                unlockedForms.add(ResourceLocation.tryParse(nbtList.getString(i)));
             }
         }
     }
 
-    public boolean isUnlock(Identifier form) {
+    public boolean isUnlock(ResourceLocation form) {
         return unlockedForms.contains(form);
     }
 
-    public void unlockForm(Identifier form) {
+    public void unlockForm(ResourceLocation form) {
         if (unlockedForms.contains(form)) {
             return;
         }
@@ -225,7 +225,7 @@ public class FormColorData {
         this.writeToConfig();
     }
 
-    public static List<Consumer<Identifier>> onFormChangeListeners = new ArrayList<>();
+    public static List<Consumer<ResourceLocation>> onFormChangeListeners = new ArrayList<>();
 
     // 移除V1后记得删
     static {
@@ -235,7 +235,7 @@ public class FormColorData {
     }
 
     // 挂一个钩子在网络接受形态上 比如客户端的SYNC_FORM_CHANGE接收函数上
-    public void onClientFormChange(Identifier form) {
+    public void onClientFormChange(ResourceLocation form) {
         if (this.enableDefaultFormColor && ShapeShifterCurseFabric.playerCustomConfig.enable_form_default_color_system && this.formDefaultSetting.containsKey(form)) {
             ModPacketsS2C.sendUpdateCustomColor(this.formDefaultSetting.get(form), false, false,false, false);
         }
@@ -269,7 +269,7 @@ public class FormColorData {
         Path configPath = getConfigPath();
         if (Files.exists(configPath)) {
             try {
-                NbtCompound compound = NbtIo.readCompressed(configPath, NbtSizeTracker.ofUnlimitedBytes());
+                CompoundTag compound = NbtIo.readCompressed(configPath, NbtAccounter.unlimitedHeap());
                 this.loadCompound(compound);
             } catch (IOException e) {
                 ShapeShifterCurseFabric.LOGGER.error("Failed to load form color data from config file: " + e);
@@ -373,7 +373,7 @@ public class FormColorData {
         }
     }
 
-    public String getName_LocalFormSlot(Identifier formID, int index) {
+    public String getName_LocalFormSlot(ResourceLocation formID, int index) {
         List<String> list = this.FormColorSelectMenu_Form_Local_Names.get(formID);
         if (list != null && index < list.size()) {
             return list.get(index);
@@ -381,7 +381,7 @@ public class FormColorData {
         return "";
     }
 
-    public void setName_LocalFormSlot(Identifier formID, int index, String name) {
+    public void setName_LocalFormSlot(ResourceLocation formID, int index, String name) {
         if (index > LocalSlotCount) {
             return;
         }
@@ -433,16 +433,16 @@ public class FormColorData {
         V2_FormColorSelectMenu_Global_Names.set(index, name);
     }
 
-    public String getName_DefaultSlot(Identifier formID) {
+    public String getName_DefaultSlot(ResourceLocation formID) {
         return this.FormColorSelectMenu_Form_Default_Names.getOrDefault(formID, "");
     }
 
-    public void setName_DefaultSlot(Identifier formID, String name) {
+    public void setName_DefaultSlot(ResourceLocation formID, String name) {
         this.FormColorSelectMenu_Form_Default_Names.put(formID, name);
     }
 
     public static @Nullable FormTextureUtils.ColorSetting getPlayerColorSetting(boolean ABGR) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
+        Player player = Minecraft.getInstance().player;
         if (player == null) {
             return null;
         }
@@ -490,12 +490,12 @@ public class FormColorData {
         );
     }
 
-    public static Text toCopyableText(String text, String copyText) {
-        return Text.literal(text).styled(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText)));
+    public static Component toCopyableText(String text, String copyText) {
+        return Component.literal(text).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText)));
     }
 
-    public static Text appendCopyableText(Text text, String copyText) {
-        return text.copy().styled(style -> style.withClickEvent(
+    public static Component appendCopyableText(Component text, String copyText) {
+        return text.copy().withStyle(style -> style.withClickEvent(
                 new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText)
         ));
     }

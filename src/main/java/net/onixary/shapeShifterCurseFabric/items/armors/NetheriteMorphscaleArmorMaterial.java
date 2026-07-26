@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.items.armors;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ArmorMaterial;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.List;
@@ -23,13 +23,13 @@ public class NetheriteMorphscaleArmorMaterial {
             ArmorItem.Type.BOOTS, 3
         ),
         15,
-        SoundEvents.ITEM_ARMOR_EQUIP_NETHERITE,
-        () -> Ingredient.ofItems(Items.NETHERITE_SCRAP),
-        List.of(new ArmorMaterial.Layer(Identifier.of(ShapeShifterCurseFabric.MOD_ID, "netherite"))),
+        SoundEvents.ARMOR_EQUIP_NETHERITE,
+        () -> Ingredient.of(Items.NETHERITE_SCRAP),
+        List.of(new ArmorMaterial.Layer(ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "netherite"))),
         2.0F,
         0.1F
     );
 
-    public static final RegistryEntry<ArmorMaterial> ENTRY = Registry.registerReference(Registries.ARMOR_MATERIAL,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "netherite_morphscale"), INSTANCE);
+    public static final Holder<ArmorMaterial> ENTRY = Registry.registerForHolder(BuiltInRegistries.ARMOR_MATERIAL,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "netherite_morphscale"), INSTANCE);
 }

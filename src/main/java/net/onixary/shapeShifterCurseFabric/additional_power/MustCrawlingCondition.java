@@ -3,18 +3,18 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class MustCrawlingCondition {
     private static boolean IsHeadNotCollide(Entity e, float width, float height) {
-        if (e.noClip || e.isSpectator()) {
+        if (e.noPhysics || e.isSpectator()) {
             return true;
         }
-        Vec3d vec3d = e.getPos();
-        return e.getWorld().isSpaceEmpty(e, new Box(vec3d.x - width / 2.0, vec3d.y, vec3d.z - width / 2.0, vec3d.x + width / 2.0, vec3d.y + height, vec3d.z + width / 2.0).contract(1.0E-7));
+        Vec3 vec3d = e.position();
+        return e.level().noCollision(e, new AABB(vec3d.x - width / 2.0, vec3d.y, vec3d.z - width / 2.0, vec3d.x + width / 2.0, vec3d.y + height, vec3d.z + width / 2.0).deflate(1.0E-7));
     }
 
     public static boolean condition(SerializableData.Instance data, Entity e) {
