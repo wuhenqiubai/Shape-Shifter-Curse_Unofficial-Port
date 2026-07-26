@@ -17,7 +17,7 @@ import java.util.List;
 
 @Mixin(SmithingMenu.class)
 public class SmithingScreenHandlerMixin {
-    @Inject(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ItemCombinerMenu;onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V", shift = At.Shift.AFTER), cancellable = true)
+    @Inject(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ContainerLevelAccess;execute(Ljava/util/function/BiConsumer;)V"), cancellable = true)
     public void onTake(Player player, ItemStack itemStack, CallbackInfo ci) {
         SmithingMenu realThis = (SmithingMenu) (Object) this;
         SmithingRecipeInput recipeInput = new SmithingRecipeInput(realThis.inputSlots.getItem(0), realThis.inputSlots.getItem(1), realThis.inputSlots.getItem(2));

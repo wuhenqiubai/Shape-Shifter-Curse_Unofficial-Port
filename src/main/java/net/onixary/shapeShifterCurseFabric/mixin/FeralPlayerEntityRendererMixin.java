@@ -22,7 +22,7 @@ public abstract class FeralPlayerEntityRendererMixin {
     /**
      * 取消潜行时的模型下压动画
      */
-    @Inject(method = "getPositionOffset*", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "getRenderOffset*", at = @At("RETURN"), cancellable = true)
     private void cancelSneakOffset(AbstractClientPlayer abstractClientPlayerEntity, float f, CallbackInfoReturnable<Vec3> ci)
     {
         if(abstractClientPlayerEntity instanceof AbstractClientPlayer){
