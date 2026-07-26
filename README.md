@@ -10,11 +10,11 @@
 > 在发布稳定版本后会偶尔发布我的小巧思。
 
 >
-> **基于上游commit**: [70d9d99](https://github.com/onixary/shape-shifter-curse-fabric/commit/70d9d99efdc1ed0459bcb28eb073d00978dd0c37)
+> **基于上游commit**: [7dc57bf2](https://github.com/onixary/shape-shifter-curse-fabric/commits/master/)
 > 
 ## 已知问题
 
-- 极其不稳定
+- 目前大部分已知问题在 [#Issue10](https://github.com/wuhenqiubai/Shape-Shifter-Curse_Unofficial-Port/issues/10) 中有说明。
 
 ---
 
@@ -32,9 +32,6 @@
 | 贡献者                                         | 角色                                  |
 |-----------------------------------------------|---------------------------------------|
 | [wuhenqiubai](https://github.com/wuhenqiubai) | 移植版维护                |
-| [Claude Code (Anthropic)](https://claude.com/product/claude-code)                       | 代码辅助 |
+| [Claude Code](https://claude.com/product/claude-code)                       | 代码辅助 |
 | [onixary](https://github.com/onixary)         | 原作者                 |
 | [xu233333](https://github.com/xu233333)       | 原作者                 |
-
-> **移植版下载**: 请从 [GitHub Releases](https://github.com/wuhenqiubai/Shape-Shifter-Curse_Unofficial-Port/releases)
-> 页面查找
