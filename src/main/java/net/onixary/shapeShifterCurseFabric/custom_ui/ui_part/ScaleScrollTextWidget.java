@@ -1,18 +1,18 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.MultilineTextWidget;
-import net.minecraft.text.OrderedText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class ScaleScrollTextWidget extends MultilineTextWidget implements WidgetEXUtils.IWidgetEX {
+public class ScaleScrollTextWidget extends MultiLineTextWidget implements WidgetEXUtils.IWidgetEX {
     private final float Scale;
     private boolean shadow;
 
@@ -27,17 +27,17 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
     private final List<WidgetEXUtils.IWidgetEX> widgetList = List.of();
     private WidgetEXUtils.WidgetRect rect;
 
-    private List<OrderedText> texts = new ArrayList<>();
-    private List<OrderedText> currentTexts = new ArrayList<>();
+    private List<FormattedCharSequence> texts = new ArrayList<>();
+    private List<FormattedCharSequence> currentTexts = new ArrayList<>();
 
     public boolean enableScrollableIconRender = false;
     public int IconSize = 8;
-    public Identifier IconTexID = ShapeShifterCurseFabric.identifier("textures/gui/scrollable_icon.png");
+    public ResourceLocation IconTexID = ShapeShifterCurseFabric.identifier("textures/gui/scrollable_icon.png");
 
     public int textsLineCount = 0;
     public int scroll = 0;
 
-    public ScaleScrollTextWidget(int x, int y, int width, int maxRow, float Scale, Text message, TextRenderer textRenderer) {
+    public ScaleScrollTextWidget(int x, int y, int width, int maxRow, float Scale, Component message, Font textRenderer) {
         super(x, y, message, textRenderer);
         this.Scale = Scale;
         this.rect = new WidgetEXUtils.WidgetRect(x, y, width, maxRow * 9);
@@ -110,7 +110,7 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
 
     private void calculateText() {
         try {
-            this.texts = this.getTextRenderer().wrapLines(this.getMessage(), this.getTextWidth());
+            this.texts = this.getFont().split(this.getMessage(), this.getTextWidth());
             this.textsLineCount = this.texts.size();
             this.calculateCurrentText();
             this.textDone = true;
@@ -143,7 +143,7 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
         this.scroll = 0;
     }
 
-    public void reloadText(Text message) {
+    public void reloadText(Component message) {
         this.setMessage(message);
         this.reloadText();
     }
@@ -170,7 +170,7 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
     }
 
     @Override
-    public MultilineTextWidget setMaxWidth(int maxWidth) {
+    public MultiLineTextWidget setMaxWidth(int maxWidth) {
         this.realWidth = maxWidth;
         this.MaxWidth = Math.round(maxWidth * (1 / this.Scale));
         super.setMaxWidth(this.MaxWidth + this.modMaxWidth);
@@ -178,7 +178,7 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
     }
 
     @Override
-    public MultilineTextWidget setMaxRows(int maxRows) {
+    public MultiLineTextWidget setMaxRows(int maxRows) {
         this.realHeight = maxRows * 9;
         this.MaxRows = Math.round(maxRows * (1 / this.Scale));
         super.setMaxRows(this.MaxRows);
@@ -199,37 +199,37 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
         return (int) (super.getHeight() * this.Scale);
     }
 
-    private void drawCenterWithShadow(DrawContext context, List<OrderedText> lines, int x, int y, int lineHeight, int color) {
+    private void drawCenterWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
         int i = y;
-        TextRenderer textRenderer = this.getTextRenderer();
-        for(OrderedText line : lines) {
-            context.drawTextWithShadow(textRenderer, line, x - textRenderer.getWidth(line) / 2, i, color);
+        Font textRenderer = this.getFont();
+        for(FormattedCharSequence line : lines) {
+            context.drawString(textRenderer, line, x - textRenderer.width(line) / 2, i, color);
             i += lineHeight;
         }
     }
 
-    public void drawWithShadow(DrawContext context, List<OrderedText> lines, int x, int y, int lineHeight, int color) {
+    public void drawWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
         int i = y;
-        TextRenderer textRenderer = this.getTextRenderer();
-        for(OrderedText line : lines) {
-            context.drawTextWithShadow(textRenderer, line, x, i, color);
+        Font textRenderer = this.getFont();
+        for(FormattedCharSequence line : lines) {
+            context.drawString(textRenderer, line, x, i, color);
             i += lineHeight;
         }
 
     }
 
-    public void drawWithOutShadow(DrawContext context, List<OrderedText> lines, int x, int y, int lineHeight, int color) {
+    public void drawWithOutShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
         int i = y;
-        TextRenderer textRenderer = this.getTextRenderer();
-        for(OrderedText line : lines) {
-            context.drawText(textRenderer, line, x, i, color, false);
+        Font textRenderer = this.getFont();
+        for(FormattedCharSequence line : lines) {
+            context.drawString(textRenderer, line, x, i, color, false);
             i += lineHeight;
         }
 
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.textDone) {
             this.calculateText();
         }
@@ -237,15 +237,15 @@ public class ScaleScrollTextWidget extends MultilineTextWidget implements Widget
         int j = this.getY();
         if (this.enableScrollableIconRender) {
             if (this.scroll > 0) {
-                context.drawTexture(IconTexID, i + realWidth - IconSize, j, 0, 0, IconSize, IconSize, IconSize, IconSize * 2);
+                context.blit(IconTexID, i + realWidth - IconSize, j, 0, 0, IconSize, IconSize, IconSize, IconSize * 2);
             }
             if (this.scroll < this.texts.size() - this.MaxRows) {
-                context.drawTexture(IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize * 2);
+                context.blit(IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize * 2);
             }
         }
-        Objects.requireNonNull(this.getTextRenderer());
+        Objects.requireNonNull(this.getFont());
         int k = Math.round(9 * this.Scale);
-        int l = this.getTextColor();
+        int l = this.getColor();
         if (this.centered) {
             this.drawCenterWithShadow(context, this.currentTexts, i + this.getWidth() / 2, j, k, l);
         } else {

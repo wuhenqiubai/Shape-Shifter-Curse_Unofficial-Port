@@ -5,15 +5,15 @@ import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
@@ -122,7 +122,7 @@ public class ModPacketsS2C {
      * 接收形态变化同步包
      */
     public static void receiveFormChange(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        Identifier newFormID = payload.data().readIdentifier();
+        ResourceLocation newFormID = payload.data().readResourceLocation();
 
         ctx.client().execute(() -> {
             if (ctx.client().player != null) {
@@ -139,15 +139,15 @@ public class ModPacketsS2C {
      * 接收变身状态同步包
      */
     public static void receiveTransformState(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID playerUuid = payload.data().readUuid();
+        UUID playerUuid = payload.data().readUUID();
         boolean isTransforming = payload.data().readBoolean();
-        String fromForm = payload.data().readString();
-        String toForm = payload.data().readString();
+        String fromForm = payload.data().readUtf();
+        String toForm = payload.data().readUtf();
 
         ctx.client().execute(() -> {
             if (ctx.client().player != null) {
                 ShapeShifterCurseFabricClient.updateTransformState(playerUuid, isTransforming, fromForm.isEmpty() ? null : fromForm, toForm.isEmpty() ? null : toForm);
-                if (ctx.client().player.getUuid().equals(playerUuid)) {
+                if (ctx.client().player.getUUID().equals(playerUuid)) {
                     if (isTransforming) {
                         TransformManager.transformTimer = 0;
                         ShapeShifterCurseFabricClient.emitTransformParticle(StaticParams.TRANSFORM_FX_DURATION_IN);
@@ -185,7 +185,7 @@ public class ModPacketsS2C {
 
         Direction attachedSide;
         if (payload.data().readBoolean()) {
-            attachedSide = Direction.byId(payload.data().readInt());
+            attachedSide = Direction.from3DDataValue(payload.data().readInt());
         } else {
             attachedSide = null;
         }
@@ -202,7 +202,7 @@ public class ModPacketsS2C {
      * 接收其他玩家的蝙蝠吸附状态同步包
      */
     public static void receiveOtherPlayerBatAttachState(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID targetPlayerUuid = payload.data().readUuid();
+        UUID targetPlayerUuid = payload.data().readUUID();
         boolean isAttached = payload.data().readBoolean();
         int attachType = payload.data().readInt();
 
@@ -216,7 +216,7 @@ public class ModPacketsS2C {
         }
 
         if (payload.data().readBoolean()) {
-            attachedSide = Direction.byId(payload.data().readInt());
+            attachedSide = Direction.from3DDataValue(payload.data().readInt());
         } else {
             attachedSide = null;
         }
@@ -239,8 +239,8 @@ public class ModPacketsS2C {
         JsonObject allFrom = new JsonObject();
         int formCount = payload.data().readInt();
         for (int i = 0; i < formCount; i++) {
-            String formName = payload.data().readString();
-            String jsonStr = payload.data().readString();
+            String formName = payload.data().readUtf();
+            String jsonStr = payload.data().readUtf();
             JsonObject jsonObject = new Gson().fromJson(jsonStr, JsonObject.class);
             allFrom.add(formName, jsonObject);
         }
@@ -251,11 +251,11 @@ public class ModPacketsS2C {
 
     private static void handleRemoveDynamicExcept(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 读取String -> JsonObject
-        List<Identifier> except = new ArrayList<>();
+        List<ResourceLocation> except = new ArrayList<>();
         int formCount = payload.data().readInt();
         for (int i = 0; i < formCount; i++) {
-            String formName = payload.data().readString();
-            except.add(Identifier.tryParse(formName));
+            String formName = payload.data().readUtf();
+            except.add(ResourceLocation.tryParse(formName));
         }
         ctx.client().execute(() -> {
             RegPlayerForms.removeDynamicPlayerFormsExcept(except);
@@ -280,7 +280,7 @@ public class ModPacketsS2C {
     }
 
     public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(sendExtraData);
         if (sendExtraData) {
             buf.writeBoolean(keepOriginalSkin);
@@ -307,7 +307,7 @@ public class ModPacketsS2C {
 
     // 临时先放这里，以后再整理
     public static void sendUpdateCustomSetting(boolean ForceUpdate) {
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         boolean autoSyncConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_config;
         if (!ForceUpdate && !autoSyncConfig) return;
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.keep_original_skin);
@@ -343,38 +343,38 @@ public class ModPacketsS2C {
 
     public static void receiveActiveVirtualTotem(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // LivingEntity entity, int virtualTotemType, ItemStack totemStack
-        if (ctx.client().world == null) {
+        if (ctx.client().level == null) {
             ShapeShifterCurseFabric.LOGGER.error("World is null when receiving active virtual totem packet");
             return;
         }
-        PlayerEntity playerEntity = ctx.client().world.getPlayerByUuid(payload.data().readUuid());
+        Player playerEntity = ctx.client().level.getPlayerByUUID(payload.data().readUUID());
         if (playerEntity == null) {
             ShapeShifterCurseFabric.LOGGER.warn("Can't find player entity when receiving active virtual totem packet");
             return;
         }
-        Identifier virtualTotemType = payload.data().readIdentifier();
-        RegistryByteBuf regBuf = new RegistryByteBuf(payload.data(), ctx.client().world.getRegistryManager());
-        ItemStack totemStack = ItemStack.OPTIONAL_PACKET_CODEC.decode(regBuf);
+        ResourceLocation virtualTotemType = payload.data().readResourceLocation();
+        RegistryFriendlyByteBuf regBuf = new RegistryFriendlyByteBuf(payload.data(), ctx.client().level.registryAccess());
+        ItemStack totemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(regBuf);
         // ConcurrentModificationException 需要把这个操作放到Client线程而非Network线程
         ctx.client().execute(() -> VirtualTotemPower.process_virtual_totem_type(playerEntity, virtualTotemType, totemStack));
     }
 
     public static void receivePowerAnimationData(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID playerUuid = payload.data().readUuid();
-        @Nullable Identifier animationId;
+        UUID playerUuid = payload.data().readUUID();
+        @Nullable ResourceLocation animationId;
         if (payload.data().readBoolean()) {
-            animationId = payload.data().readIdentifier();
+            animationId = payload.data().readResourceLocation();
         }
         else {
             animationId = null;
         }
         int animationCount = payload.data().readInt();
         int animationLength = payload.data().readInt();
-        if (ctx.client().world == null) {
+        if (ctx.client().level == null) {
             ShapeShifterCurseFabric.LOGGER.error("World is null when receiving update power anim data packet");
             return;
         }
-        PlayerEntity playerEntity = ctx.client().world.getPlayerByUuid(playerUuid);
+        Player playerEntity = ctx.client().level.getPlayerByUUID(playerUuid);
         // ShapeShifterCurseFabric.LOGGER.info("Received power animation data for player " + playerUuid + " animationId " + animationId + " animationCount " + animationCount + " animationLength " + animationLength);
         ctx.client().execute(() -> {
             if (playerEntity instanceof IPlayerAnimController animPlayer) {
@@ -385,11 +385,11 @@ public class ModPacketsS2C {
         });
     }
 
-    public static void sendPowerAnimationDataToServer(@Nullable Identifier animationId, int animationCount, int animationLength) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void sendPowerAnimationDataToServer(@Nullable ResourceLocation animationId, int animationCount, int animationLength) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         if (animationId != null) {
             buf.writeBoolean(true);
-            buf.writeIdentifier(animationId);
+            buf.writeResourceLocation(animationId);
         }
         else {
             buf.writeBoolean(false);
@@ -400,8 +400,8 @@ public class ModPacketsS2C {
     }
 
     public static void sendRequestPlayerAnimationData(UUID targetPlayerUUID) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(targetPlayerUUID);
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(targetPlayerUUID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA),  buf));
     }
 
@@ -409,7 +409,7 @@ public class ModPacketsS2C {
         int PairCount = payload.data().readInt();
         HashMap<UUID, Integer> map = new HashMap<>();
         for (int i = 0; i < PairCount; i++) {
-            UUID uuid = payload.data().readUuid();
+            UUID uuid = payload.data().readUUID();
             int level = payload.data().readInt();
             map.put(uuid, level);
         }
@@ -420,30 +420,30 @@ public class ModPacketsS2C {
 
     public static void receiveOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
         ctx.client().execute(() -> {
-            Screen screen = new PatronFormSelectScreen(Text.literal("PatronFromSelectScreen"), ctx.client().player);
+            Screen screen = new PatronFormSelectScreen(Component.literal("PatronFromSelectScreen"), ctx.client().player);
             ctx.client().setScreen(screen);
         });
     }
 
     public static void receiveOpenFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        String targetName = payload.data().readString();
-        UUID targetUUID = payload.data().readUuid();
+        String targetName = payload.data().readUtf();
+        UUID targetUUID = payload.data().readUUID();
         ctx.client().execute(() -> {
-            Screen screen = new NormalFormSelectScreen(Text.literal("FormSelectScreen"), targetName, targetUUID);
+            Screen screen = new NormalFormSelectScreen(Component.literal("FormSelectScreen"), targetName, targetUUID);
             ctx.client().setScreen(screen);
         });
     }
 
-    public static void sendSetPatronForm(Identifier formID) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeIdentifier(formID);
+    public static void sendSetPatronForm(ResourceLocation formID) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeResourceLocation(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM),  buf));
     }
 
-    public static void sendSetForm(Identifier formID, UUID target, boolean immediate) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(target);
-        buf.writeIdentifier(formID);
+    public static void sendSetForm(ResourceLocation formID, UUID target, boolean immediate) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(target);
+        buf.writeResourceLocation(formID);
         buf.writeBoolean(immediate);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM),  buf));
     }
@@ -461,12 +461,12 @@ public class ModPacketsS2C {
         ctx.client().execute(() -> {
             if (ShapeShifterCurseFabric.clientConfig.fcs_use_v1_menu) {
                 if (FormColorSelectMenu.instance == null) {
-                    Screen screen = new FormColorSelectMenu(Text.literal("text.shape-shifter-curse.config.form_color_select_menu"));
+                    Screen screen = new FormColorSelectMenu(Component.literal("text.shape-shifter-curse.config.form_color_select_menu"));
                     ctx.client().setScreen(screen);
                 }
             } else {
                 if (FormColorSelectMenuV2.instance == null) {
-                    Screen screen = new FormColorSelectMenuV2(Text.literal("text.shape-shifter-curse.config.form_color_select_menu_v2"));
+                    Screen screen = new FormColorSelectMenuV2(Component.literal("text.shape-shifter-curse.config.form_color_select_menu_v2"));
                     ctx.client().setScreen(screen);
                 }
             }
@@ -474,12 +474,12 @@ public class ModPacketsS2C {
     }
 
     public static void receiveModifyFCDData(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        String commandType = payload.data().readString();
-        Identifier formID = payload.data().readIdentifier();
-        String arg1 = payload.data().readString();
-        String arg2 = payload.data().readString();
-        String arg3 = payload.data().readString();
-        String arg4 = payload.data().readString();
+        String commandType = payload.data().readUtf();
+        ResourceLocation formID = payload.data().readResourceLocation();
+        String arg1 = payload.data().readUtf();
+        String arg2 = payload.data().readUtf();
+        String arg3 = payload.data().readUtf();
+        String arg4 = payload.data().readUtf();
         // commandType ->
         // save ->
         //     formID
@@ -567,7 +567,7 @@ public class ModPacketsS2C {
                     case "enable_default_color" -> {
                         ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor = !ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor;
                         if (ctx.client().player != null) {
-                            ctx.client().player.sendMessage(Text.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor), true);
+                            ctx.client().player.displayClientMessage(Component.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor), true);
                         }
                     }
                 }
@@ -580,7 +580,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Custom Form Color Settings For %s:\n|".formatted(formID));
                         ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
                         }
                     }
                     case "global" -> {
@@ -588,7 +588,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Custom Global Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.customSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
                         }
                     }
                     case "form_default" -> {
@@ -596,7 +596,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Default Form Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.sendMessage(Text.literal(stringBuilder.toString()), false);
+                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
                         }
                     }
                 }
@@ -608,20 +608,20 @@ public class ModPacketsS2C {
         if (authFile == null) {
             return;
         }
-        PacketByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeByteArray(authFile.getRaw());
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
     }
 
     private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID playerID = payload.data().readUuid();
+        UUID playerID = payload.data().readUUID();
         ctx.client().execute(() -> {
             AuthClient.requestAuthFile(playerID);
         });
     }
 
     private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        PacketByteBuf keyBuf = new PacketByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
+        FriendlyByteBuf keyBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
         ctx.client().execute(() -> {
             AuthClient.loadServerKey(keyBuf);
         });

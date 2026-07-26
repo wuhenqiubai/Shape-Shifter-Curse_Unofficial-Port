@@ -3,8 +3,8 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.integration.toughasnails.ToughAsNailsPowerUtils;
 import net.onixary.shapeShifterCurseFabric.integration.toughasnails.ToughAsNailsThirstIntegration;
@@ -16,7 +16,7 @@ public class TANAddThirstAction {
                 new SerializableData()
                         .add("amount", SerializableDataTypes.INT, 0),
                 (data, entity) -> {
-                    if (!(entity instanceof PlayerEntity player) || player.getWorld().isClient()) {
+                    if (!(entity instanceof Player player) || player.level().isClientSide()) {
                         return;
                     }
                     if (!ToughAsNailsPowerUtils.isToughAsNailsLoaded()) {

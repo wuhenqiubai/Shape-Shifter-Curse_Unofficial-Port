@@ -2,10 +2,10 @@ package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
@@ -36,7 +36,7 @@ public final class AuthServer {
     private static final HashMap<UUID, AuthFile> PATRON_AUTH_FILES = new HashMap<>();
     private static boolean isInit = false;
 
-    public static void loadPatronAuthFile(ServerPlayerEntity player, PacketByteBuf buf) {
+    public static void loadPatronAuthFile(ServerPlayer player, FriendlyByteBuf buf) {
         AuthFile authFile = AuthUtils.readAuthFile(buf);
         if (authFile == null) {
             return;
@@ -49,7 +49,7 @@ public final class AuthServer {
         if (AuthUtils.loadKey(keySegment)) {
             MinecraftServer server = player.getServer();
             if (server != null) {
-                for (ServerPlayerEntity serverPlayerEntity : server.getPlayerManager().getPlayerList()) {
+                for (ServerPlayer serverPlayerEntity : server.getPlayerList().getPlayers()) {
                     ModPacketsS2CServer.sendNewSubKey(serverPlayerEntity, keySegment);
                 }
             }
@@ -57,16 +57,16 @@ public final class AuthServer {
         if (!AuthUtils.isKeyCanUse(keySegment)) {
             return;
         }
-        AuthFile oldAuthFile = PATRON_AUTH_FILES.get(player.getUuid());
-        PATRON_AUTH_FILES.put(player.getUuid(), authFile);
+        AuthFile oldAuthFile = PATRON_AUTH_FILES.get(player.getUUID());
+        PATRON_AUTH_FILES.put(player.getUUID(), authFile);
         if (oldAuthFile != null) {
             oldAuthFile.onUpdate(player, authFile);
         }
         authFile.onGain(player);
     }
 
-    public static AuthFile getPatronAuthFile(PlayerEntity player) {
-        return getPatronAuthFile(player.getUuid());
+    public static AuthFile getPatronAuthFile(Player player) {
+        return getPatronAuthFile(player.getUUID());
     }
 
     public static AuthFile getPatronAuthFile(UUID uuid) {
@@ -75,7 +75,7 @@ public final class AuthServer {
 
     public static void checkPatronAuthFile(MinecraftServer server) {
         for (UUID uuid : PATRON_AUTH_FILES.keySet()) {
-            PlayerEntity player = server.getPlayerManager().getPlayer(uuid);
+            Player player = server.getPlayerList().getPlayer(uuid);
             if (player == null) {
                 continue;
             }
@@ -97,7 +97,7 @@ public final class AuthServer {
         }
     }
 
-    public static void checkPatronStatus(PlayerEntity player) {
+    public static void checkPatronStatus(Player player) {
         IForm nowForm = FormUtils.getPlayerForm(player);
         if (!FormUtils.isFormCanUse(player, nowForm)) {
             FormUtils.applyFallback(player);
@@ -111,13 +111,13 @@ public final class AuthServer {
         isInit = true;
         AuthUtils.init();
         ServerTickEvents.END_SERVER_TICK.register(server -> {
-            long nowTick = server.getTicks();
+            long nowTick = server.getTickCount();
             if (nowTick % 300 == 0) {  // 15sec
                 checkPatronAuthFile(server);
             }
             if (nowTick % 1200 == 0) {  // 1min
                 long nowTime = System.currentTimeMillis() / 1000;
-                for (PlayerEntity player : server.getPlayerManager().getPlayerList()) {
+                for (Player player : server.getPlayerList().getPlayers()) {
                     AuthFile authFile = getPatronAuthFile(player);
                     PatronDataSegment dataSegment = PatronDataSegment.getPatronDataSegment(player);
                     if (authFile != null && dataSegment != null && nowTime > dataSegment.getExpireTime()) {
@@ -127,7 +127,7 @@ public final class AuthServer {
             }
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            ServerPlayerEntity player = handler.getPlayer();
+            ServerPlayer player = handler.getPlayer();
             ModPacketsS2CServer.requestPatronAuthFile(player);
             new Thread(() -> {
                 try {

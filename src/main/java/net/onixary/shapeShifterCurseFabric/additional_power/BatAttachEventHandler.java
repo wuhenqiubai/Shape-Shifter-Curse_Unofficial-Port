@@ -4,10 +4,10 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.fabric.api.entity.event.v1.ServerEntityWorldChangeEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 
 public class BatAttachEventHandler {
 
@@ -15,37 +15,37 @@ public class BatAttachEventHandler {
         // 处理右键点击方块
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
 
-            if (world.isClient()) {
-                return ActionResult.PASS;
+            if (world.isClientSide()) {
+                return InteractionResult.PASS;
             }
 
-            if (hand != Hand.MAIN_HAND) {
-                return ActionResult.PASS;
+            if (hand != InteractionHand.MAIN_HAND) {
+                return InteractionResult.PASS;
             }
 
             // 获取玩家的 BatBlockAttachPower
             BatBlockAttachPower attachPower = getBatAttachPower(player);
             if (attachPower == null) {
-                return ActionResult.PASS;
+                return InteractionResult.PASS;
             }
 
             // 如果已经吸附，取消吸附
             if (attachPower.isAttached()) {
                 attachPower.handleRightClick(player);
-                return ActionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
 
             // 尝试吸附
             if (attachPower.tryAttach(player, hitResult)) {
-                return ActionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             }
 
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
 
         // 处理方块破坏事件
         PlayerBlockBreakEvents.AFTER.register((world, player, pos, state, blockEntity) -> {
-            if (world.isClient()) {
+            if (world.isClientSide()) {
                 return;
             }
             BatBlockAttachPower attachPower = getBatAttachPower(player);
@@ -66,7 +66,7 @@ public class BatAttachEventHandler {
         });
     }
 
-    static BatBlockAttachPower getBatAttachPower(PlayerEntity player) {
+    static BatBlockAttachPower getBatAttachPower(Player player) {
         return PowerHolderComponent.getPowers(player, BatBlockAttachPower.class)
                 .stream()
                 .findFirst()

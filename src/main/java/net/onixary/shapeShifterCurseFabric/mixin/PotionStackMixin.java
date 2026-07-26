@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.PotionItem;
 import net.onixary.shapeShifterCurseFabric.additional_power.ModifyPotionStackPower;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class PotionStackMixin {
 
     @Shadow @Final
-    public Inventory inventory;
+    public Container container;
 
     /*
     @Redirect(
@@ -42,10 +42,10 @@ public abstract class PotionStackMixin {
         return itemStack.getMaxCount();
     }
      */
-    @Inject(method = "getMaxItemCount(Lnet/minecraft/item/ItemStack;)I", at=@At(value = "RETURN"), cancellable = true)
+    @Inject(method = "getMaxStackSize(Lnet/minecraft/world/item/ItemStack;)I", at=@At(value = "RETURN"), cancellable = true)
     private void modifyPotionStackSize(ItemStack itemStack, CallbackInfoReturnable<Integer> cir) {
-        if (this.inventory instanceof PlayerInventory) {
-            PlayerEntity player = ((PlayerInventory) this.inventory).player;
+        if (this.container instanceof Inventory) {
+            Player player = ((Inventory) this.container).player;
             if (itemStack.getItem() instanceof PotionItem) {
                 int StackCount = PowerHolderComponent.getPowers(player, ModifyPotionStackPower.class)
                         .stream()

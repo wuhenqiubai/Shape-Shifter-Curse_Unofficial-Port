@@ -6,11 +6,10 @@ import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginUpgrade;
-import net.minecraft.util.Identifier;
-
 import java.util.List;
 
 public final class OriginsDataTypes {
@@ -46,7 +45,7 @@ public final class OriginsDataTypes {
             if (!(jsonElement instanceof JsonPrimitive jsonPrimitive) || !jsonPrimitive.isString()) {
                 throw new JsonSyntaxException("Expected a JSON object or string.");
             }
-            Identifier originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive);
+            ResourceLocation originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive);
             return new OriginLayer.ConditionedOrigin(null, Lists.newArrayList(originId));
         },
         CONDITIONED_ORIGIN::write

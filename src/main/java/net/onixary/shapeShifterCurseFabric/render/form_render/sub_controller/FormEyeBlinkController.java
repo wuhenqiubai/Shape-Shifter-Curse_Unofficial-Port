@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render.sub_controller;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
@@ -21,7 +21,7 @@ public final class FormEyeBlinkController {
     private static final int DEFAULT_MIN_BLINK_INTERVAL_TICK = 60;
     private static final int DEFAULT_MAX_BLINK_INTERVAL_TICK = 140;
     private static final int DEFAULT_BLINK_TICK = 4;
-    private static final ICachedDataMap<UUID, PlayerEntity, BlinkState> STATE_MAP = new CachedDataMap<>(player -> new BlinkState(), Entity::getUuid);
+    private static final ICachedDataMap<UUID, Player, BlinkState> STATE_MAP = new CachedDataMap<>(player -> new BlinkState(), Entity::getUUID);
 
     // "eye_blink": {
     //     "eye": "eyeRoot",
@@ -41,7 +41,7 @@ public final class FormEyeBlinkController {
         }
     }
 
-    public void update(FormModel model, PlayerEntity player, float tickDelta) {
+    public void update(FormModel model, Player player, float tickDelta) {
         if (EYE_ROOT_BONE == null) {
             return;
         }
@@ -67,29 +67,29 @@ public final class FormEyeBlinkController {
         private boolean wasSleeping = false;
         private float currentScaleY = 1.0f;
 
-        private void update(PlayerEntity player, float tickDelta, BlinkConfig config, FormEyeBlinkController controller) {
+        private void update(Player player, float tickDelta, BlinkConfig config, FormEyeBlinkController controller) {
             if (player.isSleeping()) {
                 this.wasSleeping = true;
                 this.blinking = false;
                 this.waitTicksRemaining = -1;
                 this.blinkTicksElapsed = 0;
-                this.lastAge = player.age;
+                this.lastAge = player.tickCount;
                 this.currentScaleY = controller.CLOSED_SCALE;
                 return;
             }
 
             if (this.lastAge == Integer.MIN_VALUE || this.wasSleeping) {
                 scheduleNextWait(config, controller);
-                this.lastAge = player.age;
+                this.lastAge = player.tickCount;
                 this.wasSleeping = false;
             }
 
-            if (player.age != this.lastAge) {
-                int elapsedTicks = MathHelper.clamp(player.age - this.lastAge, 1, 100);
+            if (player.tickCount != this.lastAge) {
+                int elapsedTicks = Mth.clamp(player.tickCount - this.lastAge, 1, 100);
                 for (int i = 0; i < elapsedTicks; i++) {
                     advanceOneTick(config, controller);
                 }
-                this.lastAge = player.age;
+                this.lastAge = player.tickCount;
             }
 
             this.currentScaleY = calculateScaleY(tickDelta, config, controller);
@@ -129,9 +129,9 @@ public final class FormEyeBlinkController {
                 return controller.OPEN_SCALE;
             }
 
-            float progress = MathHelper.clamp((this.blinkTicksElapsed + tickDelta) / config.blinkTicks, 0.0f, 1.0f);
+            float progress = Mth.clamp((this.blinkTicksElapsed + tickDelta) / config.blinkTicks, 0.0f, 1.0f);
             float closeAmount = progress <= 0.5f ? progress * 2.0f : (1.0f - progress) * 2.0f;
-            return MathHelper.lerp(closeAmount, controller.OPEN_SCALE, controller.CLOSED_SCALE);
+            return Mth.lerp(closeAmount, controller.OPEN_SCALE, controller.CLOSED_SCALE);
         }
     }
 

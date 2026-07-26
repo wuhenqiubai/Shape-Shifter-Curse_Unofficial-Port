@@ -2,11 +2,11 @@ package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Lifecycle;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.SimpleRegistry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import org.jetbrains.annotations.Nullable;
@@ -35,11 +35,11 @@ public class AnimRegistry {
             this.defaultAnimationData = defaultAnimationData;
         }
 
-        public @Nullable AnimationHolder getAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+        public @Nullable AnimationHolder getAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
             return this.defaultAnimation;
         }
 
-        public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+        public void registerAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
             if (this.IsRegistered) {
                 return;
             }
@@ -50,7 +50,7 @@ public class AnimRegistry {
         }
 
         // 用于动画系统 不推荐覆写 修改逻辑推荐覆写getAnim + registerAnim
-        public @Nullable AnimationHolder ANIM_SYSTEM_GET_CURRENT_ANIM(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+        public @Nullable AnimationHolder ANIM_SYSTEM_GET_CURRENT_ANIM(Player player, AnimSystem.AnimSystemData animSystemData) {
             if (!this.IsRegistered) {
                 this.registerAnim(player, animSystemData);
             }
@@ -58,45 +58,45 @@ public class AnimRegistry {
         }
     }
 
-    public static RegistryKey<Registry<AnimState>> animStateRegistryKey = RegistryKey.ofRegistry(ShapeShifterCurseFabric.identifier("anim_state"));
-    public static Registry<AnimState> animStateRegistry = new SimpleRegistry<>(animStateRegistryKey, Lifecycle.stable());
+    public static ResourceKey<Registry<AnimState>> animStateRegistryKey = ResourceKey.createRegistryKey(ShapeShifterCurseFabric.identifier("anim_state"));
+    public static Registry<AnimState> animStateRegistry = new MappedRegistry<>(animStateRegistryKey, Lifecycle.stable());
 
-    public static RegistryKey<Registry<Function<JsonObject, AbstractAnimStateController>>> animStateControllerRegistryKey = RegistryKey.ofRegistry(ShapeShifterCurseFabric.identifier("anim_state_controller"));
-    public static Registry<Function<JsonObject, AbstractAnimStateController>> animStateControllerRegistry = new SimpleRegistry<>(animStateControllerRegistryKey, Lifecycle.stable());
+    public static ResourceKey<Registry<Function<JsonObject, AbstractAnimStateController>>> animStateControllerRegistryKey = ResourceKey.createRegistryKey(ShapeShifterCurseFabric.identifier("anim_state_controller"));
+    public static Registry<Function<JsonObject, AbstractAnimStateController>> animStateControllerRegistry = new MappedRegistry<>(animStateControllerRegistryKey, Lifecycle.stable());
 
-    public static RegistryKey<Registry<AbstractAnimFSM>> animFSMRegistryKey = RegistryKey.ofRegistry(ShapeShifterCurseFabric.identifier("anim_fsm"));
-    public static Registry<AbstractAnimFSM> animFSMRegistry = new SimpleRegistry<>(animFSMRegistryKey, Lifecycle.stable());
+    public static ResourceKey<Registry<AbstractAnimFSM>> animFSMRegistryKey = ResourceKey.createRegistryKey(ShapeShifterCurseFabric.identifier("anim_fsm"));
+    public static Registry<AbstractAnimFSM> animFSMRegistry = new MappedRegistry<>(animFSMRegistryKey, Lifecycle.stable());
 
-    public static RegistryKey<Registry<PowerDefaultAnim>> powerAnimIDRegistryKey = RegistryKey.ofRegistry(ShapeShifterCurseFabric.identifier("power_anim_id"));
-    public static Registry<PowerDefaultAnim> powerAnimIDRegistry = new SimpleRegistry<>(powerAnimIDRegistryKey, Lifecycle.stable());
+    public static ResourceKey<Registry<PowerDefaultAnim>> powerAnimIDRegistryKey = ResourceKey.createRegistryKey(ShapeShifterCurseFabric.identifier("power_anim_id"));
+    public static Registry<PowerDefaultAnim> powerAnimIDRegistry = new MappedRegistry<>(powerAnimIDRegistryKey, Lifecycle.stable());
 
-    public static Identifier registerAnimState(Identifier identifier, AnimState animState) {
+    public static ResourceLocation registerAnimState(ResourceLocation identifier, AnimState animState) {
         Registry.register(animStateRegistry, identifier, animState);
         return identifier;
     }
 
     // 用于数据包
-    public static Identifier registerAnimStateController(Identifier identifier, Function<JsonObject, AbstractAnimStateController> animStateController) {
+    public static ResourceLocation registerAnimStateController(ResourceLocation identifier, Function<JsonObject, AbstractAnimStateController> animStateController) {
         Registry.register(animStateControllerRegistry, identifier, animStateController);
         return identifier;
     }
 
-    public static Identifier registerAnimFSM(Identifier identifier, AbstractAnimFSM animFSM) {
+    public static ResourceLocation registerAnimFSM(ResourceLocation identifier, AbstractAnimFSM animFSM) {
         Registry.register(animFSMRegistry, identifier, animFSM);
         return identifier;
     }
 
-    public static Identifier registerPowerDefaultAnim(Identifier identifier, PowerDefaultAnim powerDefaultAnim) {
+    public static ResourceLocation registerPowerDefaultAnim(ResourceLocation identifier, PowerDefaultAnim powerDefaultAnim) {
         Registry.register(powerAnimIDRegistry, identifier, powerDefaultAnim);
         return identifier;
     }
 
-    public static @Nullable AnimState getAnimState(Identifier identifier) {
+    public static @Nullable AnimState getAnimState(ResourceLocation identifier) {
         return animStateRegistry.get(identifier);
     }
 
     // 每个Form里都有一个预设了不同参数的AnimStateController
-    public static @Nullable AbstractAnimStateController getAnimStateController(Identifier identifier, JsonObject jsonData) {
+    public static @Nullable AbstractAnimStateController getAnimStateController(ResourceLocation identifier, JsonObject jsonData) {
         Function<JsonObject, AbstractAnimStateController> animStateController = animStateControllerRegistry.get(identifier);
         if (animStateController != null) {
             return animStateController.apply(jsonData);
@@ -104,15 +104,15 @@ public class AnimRegistry {
         return null;
     }
 
-    public static @Nullable Function<JsonObject, AbstractAnimStateController> getAnimStateControllerSupplier(Identifier identifier) {
+    public static @Nullable Function<JsonObject, AbstractAnimStateController> getAnimStateControllerSupplier(ResourceLocation identifier) {
         return animStateControllerRegistry.get(identifier);
     }
 
-    public static @Nullable AbstractAnimFSM getAnimFSM(Identifier identifier) {
+    public static @Nullable AbstractAnimFSM getAnimFSM(ResourceLocation identifier) {
         return animFSMRegistry.get(identifier);
     }
 
-    public static @Nullable PowerDefaultAnim getPowerDefaultAnim(Identifier identifier) {
+    public static @Nullable PowerDefaultAnim getPowerDefaultAnim(ResourceLocation identifier) {
         return powerAnimIDRegistry.get(identifier);
     }
 

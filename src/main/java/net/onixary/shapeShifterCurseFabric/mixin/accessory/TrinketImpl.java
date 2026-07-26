@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin.accessory;
 
 import dev.emi.trinkets.api.*;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.items.accessory.AccessoryItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -22,7 +22,7 @@ public class TrinketImpl implements Trinket {
     private AccessoryItem.SlotData getSlotData(SlotReference slot) {
         SlotType slotType = slot.inventory().getSlotType();
         return slotDataCache.computeIfAbsent(slot.hashCode(), k ->
-            new AccessoryItem.SlotData(Identifier.of("trinket", "%s/%s".formatted(slotType.getGroup(), slotType.getName())), slot.index()));
+            new AccessoryItem.SlotData(ResourceLocation.fromNamespaceAndPath("trinket", "%s/%s".formatted(slotType.getGroup(), slotType.getName())), slot.index()));
     }
 
     @Inject(method = "accessoryInit", at = @At("HEAD"))

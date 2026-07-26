@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.status_effects;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.CustomTransformativeStatue;
@@ -15,7 +15,7 @@ public class RegTStatusEffect {
     private RegTStatusEffect(){}
 
     // 记录所有变身状态效果
-    public static final List<Identifier> TRANSFORMATIVE_STATUS_EFFECTS = new ArrayList<>();
+    public static final List<ResourceLocation> TRANSFORMATIVE_STATUS_EFFECTS = new ArrayList<>();
 
     public static final BaseTransformativeStatusEffect TO_BAT_0_EFFECT = register("to_bat_0_effect", new TransformativeStatus(RegPlayerForms.BAT_0));
     public static final BaseTransformativeStatusEffect TO_AXOLOTL_0_EFFECT = register("to_axolotl_0_effect", new TransformativeStatus(RegPlayerForms.AXOLOTL_0));
@@ -42,14 +42,14 @@ public class RegTStatusEffect {
 
     private static <T extends BaseTransformativeStatusEffect> T register(String path, T effect) {
         // 固定MOD_ID的注册方法
-        Identifier id = Identifier.of(ShapeShifterCurseFabric.MOD_ID, path);
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path);
         return register(id, effect);
     }
 
-    public static <T extends BaseTransformativeStatusEffect> T register(Identifier path, T effect) {
+    public static <T extends BaseTransformativeStatusEffect> T register(ResourceLocation path, T effect) {
         // 拓展Mod的注册方法
         TRANSFORMATIVE_STATUS_EFFECTS.add(path);
-        return Registry.register(Registries.STATUS_EFFECT, path, effect);
+        return Registry.register(BuiltInRegistries.MOB_EFFECT, path, effect);
     }
 
     /* 使用EffectManager.hasTransformativeEffect(PlayerEntity)代替

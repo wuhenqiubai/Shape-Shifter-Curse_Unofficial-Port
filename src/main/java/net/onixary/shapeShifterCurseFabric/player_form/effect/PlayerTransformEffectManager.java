@@ -1,41 +1,41 @@
 package net.onixary.shapeShifterCurseFabric.player_form.effect;
 
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 
 public class PlayerTransformEffectManager {
 
-    public static void applyStartTransformEffect(ServerPlayerEntity player, int duration) {
+    public static void applyStartTransformEffect(ServerPlayer player, int duration) {
         // add darkness effect
-        StatusEffectInstance darknessEffect = new StatusEffectInstance(StatusEffects.BLINDNESS, duration);
-        player.addStatusEffect(darknessEffect);
+        MobEffectInstance darknessEffect = new MobEffectInstance(MobEffects.BLINDNESS, duration);
+        player.addEffect(darknessEffect);
 
         // add immobility effect
-        StatusEffectInstance immobilityEffect = new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 245);
-        player.addStatusEffect(immobilityEffect);
+        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 245);
+        player.addEffect(immobilityEffect);
 
 	    ModPacketsS2CServer.sendNoJumpTick(player, duration);
     }
 
-    public static void applyEndTransformEffect(ServerPlayerEntity player, int duration) {
+    public static void applyEndTransformEffect(ServerPlayer player, int duration) {
         // add nausea effect
-        StatusEffectInstance nauseaEffect = new StatusEffectInstance(StatusEffects.NAUSEA, duration);
-        player.addStatusEffect(nauseaEffect);
+        MobEffectInstance nauseaEffect = new MobEffectInstance(MobEffects.CONFUSION, duration);
+        player.addEffect(nauseaEffect);
 
         // add immobility effect
-        StatusEffectInstance immobilityEffect = new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 245);
-        player.addStatusEffect(immobilityEffect);
+        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 245);
+        player.addEffect(immobilityEffect);
 
 	    ModPacketsS2CServer.sendNoJumpTick(player, duration);
     }
 
-    public static void applyFinaleTransformEffect(ServerPlayerEntity player, int duration){
+    public static void applyFinaleTransformEffect(ServerPlayer player, int duration){
 
         // slowness effect remain some time
-        StatusEffectInstance immobilityEffect = new StatusEffectInstance(StatusEffects.SLOWNESS, duration, 200);
-        player.addStatusEffect(immobilityEffect);
+        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 200);
+        player.addEffect(immobilityEffect);
 
     }
 }

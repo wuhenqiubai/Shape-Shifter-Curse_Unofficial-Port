@@ -2,14 +2,14 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
@@ -22,8 +22,8 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX {
-    private static final Identifier StartBook_TexID = Identifier.of(MOD_ID, "textures/gui/start_book.png");
-    public PlayerEntity currentPlayer;
+    private static final ResourceLocation StartBook_TexID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/start_book.png");
+    public Player currentPlayer;
 
     public static final int BookSizeX = 360;
     public static final int BookSizeY = 330;
@@ -33,7 +33,7 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
     public static final int ButtonSizeY = 30;
 
     public StartBookScreenV2() {
-        super(Text.of("ShapeShifterCurse_StartBook_Screen_V2"));
+        super(Component.nullToEmpty("ShapeShifterCurse_StartBook_Screen_V2"));
     }
 
     @Override
@@ -47,48 +47,48 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
         // 渲染文字
         int TextPosX = width / 2 - TextSizeX / 2;
         int TextPosY = height / 2 - TextSizeY / 2 + TextPosYFix;
-        ScaleScrollTextWidget StartBookLabel = new ScaleScrollTextWidget(TextPosX, TextPosY, TextSizeX, TextSizeY / 9, 1.0f, Text.translatable("screen.shape-shifter-curse.book_of_shape_shifter.start_content_text"), textRenderer);
+        ScaleScrollTextWidget StartBookLabel = new ScaleScrollTextWidget(TextPosX, TextPosY, TextSizeX, TextSizeY / 9, 1.0f, Component.translatable("screen.shape-shifter-curse.book_of_shape_shifter.start_content_text"), font);
         StartBookLabel.setEnableScrollableIconRender(true);
-        this.addWidget(StartBookLabel);
-        this.addDrawableChild(StartBookLabel);
+        this.addWidget((WidgetEXUtils.IWidgetEX) StartBookLabel);
+        this.addRenderableWidget(StartBookLabel);
         // 渲染按钮
         int BookBottomY = height / 2 + BookSizeY / 2;
         int ButtonPosX = width / 2 - ButtonSizeX / 2;
         int ButtonPosY = BookBottomY + ButtonPosYFix;
-        this.addDrawableChild(ButtonWidget.builder(
-                Text.translatable("screen.shape-shifter-curse.book_of_shape_shifter.start_button_text"),
+        this.addRenderableWidget(Button.builder(
+                Component.translatable("screen.shape-shifter-curse.book_of_shape_shifter.start_button_text"),
                 button -> {
-                    PacketByteBuf buf = new PacketByteBuf(Unpooled.buffer());
+                    FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
                     // buf.writeUuid(currentPlayer.getUuid());
                     // 发送到服务端
                     ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.VALIDATE_START_BOOK_BUTTON),  buf));
-                    if(MinecraftClient.getInstance().currentScreen instanceof StartBookScreenV2){
-                        MinecraftClient.getInstance().setScreen(null);
+                    if(Minecraft.getInstance().screen instanceof StartBookScreenV2){
+                        Minecraft.getInstance().setScreen(null);
                     }
-                    this.close(); // 关闭当前界面
+                    this.onClose(); // 关闭当前界面
                 }
-        ).size(ButtonSizeX, ButtonSizeY).position(ButtonPosX, ButtonPosY).build());
+        ).size(ButtonSizeX, ButtonSizeY).pos(ButtonPosX, ButtonPosY).build());
     }
 
-    private void RenderBook(DrawContext context) {
+    private void RenderBook(GuiGraphics context) {
         int BookPosX = width / 2 - BookSizeX / 2;
         int BookPosY = height / 2 - BookSizeY / 2;
-        context.drawTexture(StartBook_TexID, BookPosX, BookPosY, 0, 0, BookSizeX, BookSizeY, BookSizeX, BookSizeY);
+        context.blit(StartBook_TexID, BookPosX, BookPosY, 0, 0, BookSizeX, BookSizeY, BookSizeX, BookSizeY);
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         // No blur — book texture serves as the background
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.RenderBook(context);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 

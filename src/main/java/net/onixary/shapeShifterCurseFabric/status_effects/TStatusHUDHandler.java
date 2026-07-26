@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.status_effects;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.effect.MobEffectInstance;
 
 // 暂时弃用，描述放在书页UI中
 public class TStatusHUDHandler {
@@ -14,7 +14,7 @@ public class TStatusHUDHandler {
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (screen instanceof InventoryScreen) {
                 ScreenEvents.afterRender(screen).register((_screen, context, mouseX, mouseY, delta) -> {
-                    if (MinecraftClient.getInstance().player == null) return;
+                    if (Minecraft.getInstance().player == null) return;
 
                     // 原版状态栏的起始坐标（需根据版本调整）
                     int baseX = width - 120;
@@ -22,24 +22,24 @@ public class TStatusHUDHandler {
 
                     // 遍历所有药水效果
                     int index = 0;
-                    for (StatusEffectInstance effect : MinecraftClient.getInstance().player.getStatusEffects()) {
-                        if (effect.getEffectType() instanceof BaseTransformativeStatusEffect) {
-                            Text description = Text.translatable(effect.getTranslationKey() + ".description");
+                    for (MobEffectInstance effect : Minecraft.getInstance().player.getActiveEffects()) {
+                        if (effect.getEffect() instanceof BaseTransformativeStatusEffect) {
+                            Component description = Component.translatable(effect.getDescriptionId() + ".description");
 
-                            MatrixStack matrices = context.getMatrices();
-                            matrices.push();
+                            PoseStack matrices = context.pose();
+                            matrices.pushPose();
                             matrices.scale(0.5f, 0.5f, 1.0f); // 缩放为 75% 大小
                             // 计算 Y 坐标（每个效果间隔 20 像素）
                             int y = baseY + (index * (int)(20 / 0.5));
 
-                            context.drawTextWithShadow(
-                                    client.textRenderer,
+                            context.drawString(
+                                    client.font,
                                     description,
                                     (int)(baseX / 0.5f),
                                     (int)(y / 0.5f),
                                     0xFFFFFF
                             );
-                            matrices.pop();
+                            matrices.popPose();
                         }
                         index++;
                     }

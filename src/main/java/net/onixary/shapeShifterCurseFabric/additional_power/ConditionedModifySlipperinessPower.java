@@ -7,28 +7,28 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Predicate;
 
 public class ConditionedModifySlipperinessPower extends ValueModifyingPower {
-    private final Predicate<CachedBlockPosition> predicate;
+    private final Predicate<BlockInWorld> predicate;
     private final ConditionFactory<LivingEntity>.Instance condition;
     private final float slipperinessModifier;
 
-    public ConditionedModifySlipperinessPower(PowerType<?> type, LivingEntity entity, Predicate<CachedBlockPosition> predicate, ConditionFactory<LivingEntity>.Instance condition, float slipperinessModifier) {
+    public ConditionedModifySlipperinessPower(PowerType<?> type, LivingEntity entity, Predicate<BlockInWorld> predicate, ConditionFactory<LivingEntity>.Instance condition, float slipperinessModifier) {
         super(type, entity);
         this.predicate = predicate;
         this.condition = condition;
         this.slipperinessModifier = slipperinessModifier;
     }
 
-    public boolean doesApply(WorldView world, BlockPos pos) {
-        CachedBlockPosition cbp = new CachedBlockPosition(world, pos, true);
+    public boolean doesApply(LevelReader world, BlockPos pos) {
+        BlockInWorld cbp = new BlockInWorld(world, pos, true);
 
         return predicate.test(cbp) && (condition == null || condition.test(entity));
     }

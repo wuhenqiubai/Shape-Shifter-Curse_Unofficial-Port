@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -14,15 +12,18 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+
 public class TransformingController extends AbstractAnimStateController {
     private static AnimationHolder anim_on_transform_default = AnimationHolder.EMPTY;
     private static AnimationHolder anim_on_transform_normal_to_feral = AnimationHolder.EMPTY;
     private static AnimationHolder anim_on_transform_feral_to_normal = AnimationHolder.EMPTY;
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
-        String fromFormName = ShapeShifterCurseFabricClient.getClientTransformFromForm(player.getUuid());
-        String toFormName = ShapeShifterCurseFabricClient.getClientTransformToForm(player.getUuid());
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
+        String fromFormName = ShapeShifterCurseFabricClient.getClientTransformFromForm(player.getUUID());
+        String toFormName = ShapeShifterCurseFabricClient.getClientTransformToForm(player.getUUID());
         IForm transformCurrentForm = null;
         IForm transformToForm = null;
         try {
@@ -56,15 +57,15 @@ public class TransformingController extends AbstractAnimStateController {
     }
 
     @Override
-    public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData data) {
-        anim_on_transform_default = new AnimationHolder(Identifier.of(MOD_ID, "player_on_transform"), true);
-        anim_on_transform_normal_to_feral = new AnimationHolder(Identifier.of(MOD_ID, "player_on_transform_normal_to_feral"), true);
-        anim_on_transform_feral_to_normal = new AnimationHolder(Identifier.of(MOD_ID, "player_on_transform_feral_to_normal"), true);
+    public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
+        anim_on_transform_default = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform"), true);
+        anim_on_transform_normal_to_feral = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_normal_to_feral"), true);
+        anim_on_transform_feral_to_normal = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_feral_to_normal"), true);
         super.registerAnim(player, data);
     }
 
     @Override
-    public boolean isEnabled(PlayerEntity player, AnimSystem.AnimSystemData data) {
-        return ShapeShifterCurseFabricClient.isClientTransforming(player.getUuid());
+    public boolean isEnabled(Player player, AnimSystem.AnimSystemData data) {
+        return ShapeShifterCurseFabricClient.isClientTransforming(player.getUUID());
     }
 }

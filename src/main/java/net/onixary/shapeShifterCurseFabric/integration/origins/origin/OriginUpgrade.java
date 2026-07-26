@@ -3,14 +3,14 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.origin;
 import com.google.gson.JsonElement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.OriginsDataTypes;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 @Deprecated
-public record OriginUpgrade(Identifier advancementCondition, Identifier upgradeToOrigin, @Nullable String announcement) {
+public record OriginUpgrade(ResourceLocation advancementCondition, ResourceLocation upgradeToOrigin, @Nullable String announcement) {
 
     public static final SerializableData DATA = new SerializableData()
         .add("condition", SerializableDataTypes.IDENTIFIER)
@@ -18,12 +18,12 @@ public record OriginUpgrade(Identifier advancementCondition, Identifier upgradeT
         .add("announcement", SerializableDataTypes.STRING, null);
 
     @Deprecated
-    public Identifier getAdvancementCondition() {
+    public ResourceLocation getAdvancementCondition() {
         return advancementCondition;
     }
 
     @Deprecated
-    public Identifier getUpgradeToOrigin() {
+    public ResourceLocation getUpgradeToOrigin() {
         return upgradeToOrigin;
     }
 
@@ -45,11 +45,11 @@ public record OriginUpgrade(Identifier advancementCondition, Identifier upgradeT
         return new OriginUpgrade(data.get("condition"), data.get("origin"), data.get("announcement"));
     }
 
-    public void write(RegistryByteBuf buffer) {
+    public void write(RegistryFriendlyByteBuf buffer) {
         OriginsDataTypes.UPGRADE.send(buffer, this);
     }
 
-    public static OriginUpgrade read(RegistryByteBuf buffer) {
+    public static OriginUpgrade read(RegistryFriendlyByteBuf buffer) {
         return fromData(DATA.read(buffer));
     }
 

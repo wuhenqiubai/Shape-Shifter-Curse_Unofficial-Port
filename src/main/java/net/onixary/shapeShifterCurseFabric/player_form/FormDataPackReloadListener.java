@@ -4,8 +4,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 
@@ -15,20 +15,20 @@ import java.util.List;
 
 public class FormDataPackReloadListener implements SimpleSynchronousResourceReloadListener {
     @Override
-    public Identifier getFabricId() {
-        return Identifier.of(ShapeShifterCurseFabric.MOD_ID, "ssc_form");
+    public ResourceLocation getFabricId() {
+        return ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "ssc_form");
     }
 
     @Override
-    public void reload(ResourceManager manager) {
+    public void onResourceManagerReload(ResourceManager manager) {
         // ssc_form
         RegPlayerForms.ClearAllDynamicPlayerForms();
-        manager.findResources("ssc_form", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
+        manager.listResources("ssc_form", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
             // shape-shifter-curse:ssc_form/example.json -> shape-shifter-curse:example
-            Identifier formID = Identifier.of(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(9));
+            ResourceLocation formID = ResourceLocation.fromNamespaceAndPath(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(9));
             JsonObject formData;
             try {
-                formData = JsonParser.parseString(new String(resource.getInputStream().readAllBytes())).getAsJsonObject();
+                formData = JsonParser.parseString(new String(resource.open().readAllBytes())).getAsJsonObject();
             } catch (IOException e) {
                 ShapeShifterCurseFabric.LOGGER.error("Failed to load form data for " + formID);
                 return;
@@ -42,19 +42,19 @@ public class FormDataPackReloadListener implements SimpleSynchronousResourceRelo
         });
         // origins_power_extra
         FormUtils.extraPowerRegistry.clear();
-        manager.findResources("origins_power_extra", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
-            Identifier ID = Identifier.of(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(20));
+        manager.listResources("origins_power_extra", identifier -> identifier.getPath().endsWith(".json")).forEach((identifier, resource) -> {
+            ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(identifier.getNamespace(), identifier.getPath().replace(".json", "").substring(20));
             JsonObject ExtraPowerData;
-            Identifier LayerID;
-            Identifier OriginID;
-            List<Identifier> ExtraPowerIDs = new LinkedList<>();
+            ResourceLocation LayerID;
+            ResourceLocation OriginID;
+            List<ResourceLocation> ExtraPowerIDs = new LinkedList<>();
             try {
-                ExtraPowerData = JsonParser.parseString(new String(resource.getInputStream().readAllBytes())).getAsJsonObject();
-                LayerID = Identifier.tryParse(ExtraPowerData.get("TargetLayerID").getAsString());
-                OriginID = Identifier.tryParse(ExtraPowerData.get("TargetOriginsID").getAsString());
+                ExtraPowerData = JsonParser.parseString(new String(resource.open().readAllBytes())).getAsJsonObject();
+                LayerID = ResourceLocation.tryParse(ExtraPowerData.get("TargetLayerID").getAsString());
+                OriginID = ResourceLocation.tryParse(ExtraPowerData.get("TargetOriginsID").getAsString());
                 JsonArray PowerIDs = ExtraPowerData.get("ExtraPowers").getAsJsonArray();
                 for (int i = 0; i < PowerIDs.size(); i++) {
-                    ExtraPowerIDs.add(Identifier.tryParse(PowerIDs.get(i).getAsString()));
+                    ExtraPowerIDs.add(ResourceLocation.tryParse(PowerIDs.get(i).getAsString()));
                 }
             } catch (Exception e) {
                 ShapeShifterCurseFabric.LOGGER.error("Failed to load extra power data for " + ID);

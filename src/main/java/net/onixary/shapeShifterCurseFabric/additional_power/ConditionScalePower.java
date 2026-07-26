@@ -5,8 +5,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import virtuoel.pehkui.api.ScaleData;
 import virtuoel.pehkui.api.ScaleTypes;
@@ -26,7 +26,7 @@ public class ConditionScalePower extends Power {
 
     public ConditionScalePower(PowerType<?> type, LivingEntity entity, float scale, float eye_scale, float original_scale, float original_eye_scale) {
         super(type, entity);
-        if(entity instanceof ServerPlayerEntity) {
+        if(entity instanceof ServerPlayer) {
             this.scaleDataWidth = ScaleTypes.WIDTH.getScaleData(entity);
             this.scaleDataHeight = ScaleTypes.HEIGHT.getScaleData(entity);
             this.scaleDataEyeHeight = ScaleTypes.EYE_HEIGHT.getScaleData(entity);

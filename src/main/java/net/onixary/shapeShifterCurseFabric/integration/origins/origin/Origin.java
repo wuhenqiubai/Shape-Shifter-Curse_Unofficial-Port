@@ -9,15 +9,15 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.advancement.AdvancementEntry;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.OriginsDataTypes;
@@ -45,7 +45,7 @@ public class Origin {
     public static final Origin EMPTY;
 
     static {
-        EMPTY = register(new Origin(Identifier.of(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
+        EMPTY = register(new Origin(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
     }
 
     public static void init() {
@@ -57,17 +57,17 @@ public class Origin {
     }
 
     public static HashMap<OriginLayer, Origin> get(Entity entity) {
-        if(entity instanceof PlayerEntity) {
-            return get((PlayerEntity)entity);
+        if(entity instanceof Player) {
+            return get((Player)entity);
         }
         return new HashMap<>();
     }
 
-    public static HashMap<OriginLayer, Origin> get(PlayerEntity player) {
+    public static HashMap<OriginLayer, Origin> get(Player player) {
         return ModComponents.ORIGIN.get(player).getOrigins();
     }
 
-    private Identifier identifier;
+    private ResourceLocation identifier;
     private List<PowerType<?>> powerTypes = new LinkedList<>();
     private final ItemStack displayItem;
     private final Impact impact;
@@ -81,7 +81,7 @@ public class Origin {
     private String nameTranslationKey;
     private String descriptionTranslationKey;
 
-    public Origin(Identifier id, ItemStack icon, Impact impact, int order, int loadingPriority) {
+    public Origin(ResourceLocation id, ItemStack icon, Impact impact, int order, int loadingPriority) {
         this.identifier = id;
         this.displayItem = icon.copy();
         this.impact = impact;
@@ -99,7 +99,7 @@ public class Origin {
         return this.upgrades.size() > 0;
     }
 
-    public Optional<OriginUpgrade> getUpgrade(AdvancementEntry advancement) {
+    public Optional<OriginUpgrade> getUpgrade(AdvancementHolder advancement) {
         for(OriginUpgrade upgrade : upgrades) {
             if(upgrade.getAdvancementCondition().equals(advancement.id())) {
                 return Optional.of(upgrade);
@@ -108,7 +108,7 @@ public class Origin {
         return Optional.empty();
     }
 
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return identifier;
     }
 
@@ -190,8 +190,8 @@ public class Origin {
         return nameTranslationKey;
     }
 
-    public MutableText getName() {
-        return Text.translatable(getOrCreateNameTranslationKey());
+    public MutableComponent getName() {
+        return Component.translatable(getOrCreateNameTranslationKey());
     }
 
     public String getOrCreateDescriptionTranslationKey() {
@@ -202,15 +202,15 @@ public class Origin {
         return descriptionTranslationKey;
     }
 
-    public MutableText getDescription() {
-        return Text.translatable(getOrCreateDescriptionTranslationKey());
+    public MutableComponent getDescription() {
+        return Component.translatable(getOrCreateDescriptionTranslationKey());
     }
 
     public int getOrder() {
         return this.order;
     }
 
-    public void write(RegistryByteBuf buffer) {
+    public void write(RegistryFriendlyByteBuf buffer) {
         SerializableData.Instance data = DATA.new Instance();
         data.set("icon", displayItem);
         data.set("impact", impact);
@@ -225,7 +225,7 @@ public class Origin {
     }
 
     @SuppressWarnings("unchecked")
-    public static Origin createFromData(Identifier id, SerializableData.Instance data) {
+    public static Origin createFromData(ResourceLocation id, SerializableData.Instance data) {
         Origin origin = new Origin(id,
             (ItemStack)data.get("icon"),
             (Impact)data.get("impact"),
@@ -236,7 +236,7 @@ public class Origin {
             origin.setUnchoosable();
         }
 
-        ((List<Identifier>)data.get("powers")).forEach(powerId -> {
+        ((List<ResourceLocation>)data.get("powers")).forEach(powerId -> {
             try {
                 PowerType powerType = PowerTypeRegistry.get(powerId);
                 origin.add(powerType);
@@ -256,12 +256,12 @@ public class Origin {
     }
 
     @Environment(EnvType.CLIENT)
-    public static Origin read(RegistryByteBuf buffer) {
-        Identifier identifier = Identifier.tryParse(buffer.readString(32767));
+    public static Origin read(RegistryFriendlyByteBuf buffer) {
+        ResourceLocation identifier = ResourceLocation.tryParse(buffer.readUtf(32767));
         return createFromData(identifier, DATA.read(buffer));
     }
 
-    public static Origin fromJson(Identifier id, JsonObject json) {
+    public static Origin fromJson(ResourceLocation id, JsonObject json) {
         return createFromData(id, DATA.read(json));
     }
 

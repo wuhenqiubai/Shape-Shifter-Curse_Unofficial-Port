@@ -1,25 +1,25 @@
 package net.onixary.shapeShifterCurseFabric.features;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import dev.tr7zw.firstperson.FirstPersonModelCore;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.Version;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.feature.FeatureRenderer;
-import net.minecraft.client.render.entity.feature.FeatureRendererContext;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.RenderLayerParent;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
@@ -28,16 +28,16 @@ import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import java.util.Optional;
 
 @Environment(EnvType.CLIENT)
-public class ExtraItemFeatureRenderer <T extends LivingEntity, M extends EntityModel<T>> extends FeatureRenderer<T, M> {
+public class ExtraItemFeatureRenderer <T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
     //private final HeldItemRenderer heldItemRenderer;
     private final CustomFeralItemRenderer customFeralItemRenderer;
     private static final boolean IS_FIRST_PERSON_MOD_LOADED = FabricLoader.getInstance().isModLoaded("firstperson");
     private static boolean IS_FIRST_PERSON_MOD_NEW_VERSION = false;
     private static boolean IS_FIRST_PERSON_MOD_VERSION_CHECK_FAIL = false;
 
-    public ExtraItemFeatureRenderer(FeatureRendererContext<T, M> context, EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
+    public ExtraItemFeatureRenderer(RenderLayerParent<T, M> context, EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
         super(context);
-        this.customFeralItemRenderer = new CustomFeralItemRenderer(MinecraftClient.getInstance(), entityRenderDispatcher, itemRenderer);
+        this.customFeralItemRenderer = new CustomFeralItemRenderer(Minecraft.getInstance(), entityRenderDispatcher, itemRenderer);
     }
 
     static {
@@ -56,8 +56,8 @@ public class ExtraItemFeatureRenderer <T extends LivingEntity, M extends EntityM
 
     @Override
     public void render(
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             T livingEntity,
             float limbAngle,
@@ -68,11 +68,11 @@ public class ExtraItemFeatureRenderer <T extends LivingEntity, M extends EntityM
             float headPitch
     ) {
 
-        if (livingEntity instanceof AbstractClientPlayerEntity player) {
+        if (livingEntity instanceof AbstractClientPlayer player) {
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
 
-            if (isFeral && MinecraftClient.getInstance().options.getPerspective().isFirstPerson() && player == MinecraftClient.getInstance().player) {
+            if (isFeral && Minecraft.getInstance().options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player) {
 
                 if(IS_FIRST_PERSON_MOD_LOADED) {
                     // Feral形态的forstperson配置必须固定为-25 offset，否则会导致物品位置不正确以及模型看不到
@@ -94,36 +94,36 @@ public class ExtraItemFeatureRenderer <T extends LivingEntity, M extends EntityM
                     // 已知Bug 在开启 FirstPersonModel 并启用时 且在第一人称时 物品位置不对
                     if (fpm.isEnabled()) {
                         // 仅限开启FirstPersonModel时渲染额外物品
-                        matrices.push();
+                        matrices.pushPose();
                         //var eR = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(player);
                         //var head = eR.getModel().head;
                         // FirstPerson Mod会直接将head.pivot移动到某个非常远的位置来“隐藏”头部，所以需要直接定义好一个固定位置
                         // Vec3d posOffset = new Vec3d(0.0F, 0.0F, 0.0F);
                         // Vec3d rotCenter = ShapeShifterCurseFabric.feralItemCenter;
-                        Vec3d rotCenter = new Vec3d(0.0F, -4.0F, -6.0F);
+                        Vec3 rotCenter = new Vec3(0.0F, -4.0F, -6.0F);
                         matrices.translate(rotCenter.x / 16.0F, rotCenter.y / 16.0F, rotCenter.z / 16.0F);
                         //Vec3d posOffset = ShapeShifterCurseFabric.feralItemPosOffset;
-                        Vec3d posOffset = new Vec3d(-12.0F, 15.0F, 4.0F);
-                        matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(headYaw));
-                        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(headPitch));
-                        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(240.0F));
+                        Vec3 posOffset = new Vec3(-12.0F, 15.0F, 4.0F);
+                        matrices.mulPose(Axis.YP.rotationDegrees(headYaw));
+                        matrices.mulPose(Axis.XP.rotationDegrees(headPitch));
+                        matrices.mulPose(Axis.ZP.rotationDegrees(240.0F));
                         matrices.translate(posOffset.x / 16.0F, posOffset.y / 16.0F, posOffset.z / 16.0F);
-                        float pitch = MathHelper.lerp(tickDelta, player.prevPitch, player.getPitch());
-                        float equipProgress = 1.0F - MathHelper.lerp(tickDelta, customFeralItemRenderer.prevEquipProgressMainHand, customFeralItemRenderer.equipProgressMainHand);
+                        float pitch = Mth.lerp(tickDelta, player.xRotO, player.getXRot());
+                        float equipProgress = 1.0F - Mth.lerp(tickDelta, customFeralItemRenderer.prevEquipProgressMainHand, customFeralItemRenderer.equipProgressMainHand);
                         // 调用第一人称物品渲染逻辑
                         customFeralItemRenderer.renderFirstPersonItem(
                                 player,
                                 tickDelta,
                                 pitch,
-                                Hand.MAIN_HAND,
-                                player.getHandSwingProgress(tickDelta),
-                                player.getMainHandStack(),
+                                InteractionHand.MAIN_HAND,
+                                player.getAttackAnim(tickDelta),
+                                player.getMainHandItem(),
                                 equipProgress,
                                 matrices,
                                 vertexConsumers,
                                 light
                         );
-                        matrices.pop();
+                        matrices.popPose();
                     }
                 }
             }

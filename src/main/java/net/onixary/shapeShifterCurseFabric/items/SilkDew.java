@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.item.Item;
+import net.minecraft.world.item.Item;
 
 public class SilkDew extends Item {
-    public SilkDew(Settings settings) {
+    public SilkDew(Properties settings) {
         super(settings);
     }
 }

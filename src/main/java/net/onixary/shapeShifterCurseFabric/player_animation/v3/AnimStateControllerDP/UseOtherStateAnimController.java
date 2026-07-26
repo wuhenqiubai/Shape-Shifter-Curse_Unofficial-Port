@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
@@ -10,9 +10,9 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.jetbrains.annotations.Nullable;
 
 public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
-    public @Nullable Identifier otherStateId;
+    public @Nullable ResourceLocation otherStateId;
 
-    public UseOtherStateAnimController(@Nullable Identifier otherStateId) {
+    public UseOtherStateAnimController(@Nullable ResourceLocation otherStateId) {
         super();
         this.otherStateId = otherStateId;
     }
@@ -21,7 +21,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
         super(jsonData);
     }
 
-    private @Nullable AbstractAnimStateController getOtherStateController(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    private @Nullable AbstractAnimStateController getOtherStateController(Player player, AnimSystem.AnimSystemData data) {
         if (this.otherStateId == null) {
             return null;
         }
@@ -29,7 +29,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public boolean isRegistered(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public boolean isRegistered(Player player, AnimSystem.AnimSystemData data) {
         AbstractAnimStateController otherStateController = this.getOtherStateController(player, data);
         if (otherStateController != null) {
             return otherStateController.isRegistered(player, data);
@@ -38,7 +38,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
         AbstractAnimStateController otherStateController = this.getOtherStateController(player, data);
         if (otherStateController != null) {
             otherStateController.registerAnim(player, data);
@@ -47,7 +47,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
         AbstractAnimStateController otherStateController = this.getOtherStateController(player, data);
         if (otherStateController != null) {
             if (!otherStateController.isRegistered(player, data)) {
@@ -64,7 +64,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
     @Override
     public AbstractAnimStateController loadFormJson(JsonObject jsonData) {
         if (jsonData != null && jsonData.has("StateControllerId") && jsonData.get("StateControllerId").isJsonPrimitive())  {
-            this.otherStateId = Identifier.tryParse(jsonData.get("StateControllerId").getAsString());
+            this.otherStateId = ResourceLocation.tryParse(jsonData.get("StateControllerId").getAsString());
         } else {
             this.otherStateId = null;
         }

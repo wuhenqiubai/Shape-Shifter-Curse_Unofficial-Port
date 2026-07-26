@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.data;
 
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
 
 public class StaticParams {
     private StaticParams() {
@@ -31,7 +31,7 @@ public class StaticParams {
     // FX settings
     public static final int TRANSFORM_FX_DURATION_IN = 3 * 20; // 2 seconds
     public static final int TRANSFORM_FX_DURATION_OUT = 5 * 20; // 4 seconds
-    public static final ParticleEffect PLAYER_TRANSFORM_PARTICLE = ParticleTypes.ENCHANT;
+    public static final ParticleOptions PLAYER_TRANSFORM_PARTICLE = ParticleTypes.ENCHANT;
     // ----------------------------------------
     // transformative mob settings
     // transformative mob default attack damage
@@ -41,7 +41,7 @@ public class StaticParams {
     public static final double CUSTOM_MOB_DEFAULT_ATTACK_RANGE = 3.0;
 
     // transformative mob default emission particle
-    public static final ParticleEffect CUSTOM_MOB_DEFAULT_PARTICLE = ParticleTypes.ENCHANT;
+    public static final ParticleOptions CUSTOM_MOB_DEFAULT_PARTICLE = ParticleTypes.ENCHANT;
     // ----------------------------------------
     // mod data
     // bat

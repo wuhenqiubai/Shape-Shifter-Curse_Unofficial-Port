@@ -4,12 +4,12 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Predicate;
@@ -18,20 +18,20 @@ public class SpawnParticlesInCircleAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
         // 检查世界是否为服务器世界
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) {
+        if (!(entity.level() instanceof ServerLevel serverWorld)) {
             return;
         }
 
         // 获取配置参数
-        ParticleEffect particleEffect = data.get("particle");
-        Predicate<Pair<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
+        ParticleOptions particleEffect = data.get("particle");
+        Predicate<Tuple<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
 
         boolean force = data.getBoolean("force");
         float speed = data.getFloat("speed");
         int count = Math.max(0, data.getInt("count"));
 
         // 获取扩散/偏移参数
-        Vec3d spread = data.get("spread");
+        Vec3 spread = data.get("spread");
         double offsetX = data.getDouble("offset_x");
         double offsetY = data.getDouble("offset_y");
         double offsetZ = data.getDouble("offset_z");
@@ -41,11 +41,11 @@ public class SpawnParticlesInCircleAction {
         int sampleCount = Math.max(1, data.getInt("sample_count"));
 
         // 计算基础位置（环的中心）
-        Vec3d entityPos = entity.getPos();
-        Vec3d basePos = entityPos.add(offsetX, offsetY, offsetZ);
+        Vec3 entityPos = entity.position();
+        Vec3 basePos = entityPos.add(offsetX, offsetY, offsetZ);
 
         // 计算扩散向量（相对于实体尺寸）
-        Vec3d delta = spread.multiply(entity.getWidth(), entity.getEyeHeight(entity.getPose()), entity.getWidth());
+        Vec3 delta = spread.multiply(entity.getBbWidth(), entity.getEyeHeight(entity.getPose()), entity.getBbWidth());
 
         // 遍历环上的每个采样点
         for (int i = 0; i < sampleCount; i++) {
@@ -57,22 +57,22 @@ public class SpawnParticlesInCircleAction {
             double zOffset = radius * Math.sin(angle);
 
             // 计算最终粒子生成位置（Y轴保持不变，在XZ平面上形成环）
-            Vec3d particlePos = basePos.add(xOffset, 0, zOffset);
+            Vec3 particlePos = basePos.add(xOffset, 0, zOffset);
 
             // 为每个符合条件的玩家生成粒子
-            for (ServerPlayerEntity player : serverWorld.getPlayers()) {
-                if (biEntityCondition == null || biEntityCondition.test(new Pair<>(entity, player))) {
-                    serverWorld.spawnParticles(
+            for (ServerPlayer player : serverWorld.players()) {
+                if (biEntityCondition == null || biEntityCondition.test(new Tuple<>(entity, player))) {
+                    serverWorld.sendParticles(
                             player,
                             particleEffect,
                             force,
-                            particlePos.getX(),
-                            particlePos.getY(),
-                            particlePos.getZ(),
+                            particlePos.x(),
+                            particlePos.y(),
+                            particlePos.z(),
                             count,
-                            delta.getX(),
-                            delta.getY(),
-                            delta.getZ(),
+                            delta.x(),
+                            delta.y(),
+                            delta.z(),
                             speed
                     );
                 }
@@ -89,7 +89,7 @@ public class SpawnParticlesInCircleAction {
                         .add("count", SerializableDataTypes.INT, 1)
                         .add("speed", SerializableDataTypes.FLOAT, 0.0F)
                         .add("force", SerializableDataTypes.BOOLEAN, false)
-                        .add("spread", SerializableDataTypes.VECTOR, new Vec3d(0.5, 0.5, 0.5))
+                        .add("spread", SerializableDataTypes.VECTOR, new Vec3(0.5, 0.5, 0.5))
                         .add("offset_x", SerializableDataTypes.DOUBLE, 0.0D)
                         .add("offset_y", SerializableDataTypes.DOUBLE, 0.5D)
                         .add("offset_z", SerializableDataTypes.DOUBLE, 0.0D)

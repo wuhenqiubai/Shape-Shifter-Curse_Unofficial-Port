@@ -3,9 +3,9 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -16,20 +16,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // 取消feral的潜行下压
 @Environment(EnvType.CLIENT) // 仅客户端渲染逻辑
-@Mixin(PlayerEntityRenderer.class)
+@Mixin(PlayerRenderer.class)
 public abstract class FeralPlayerEntityRendererMixin {
 
     /**
      * 取消潜行时的模型下压动画
      */
-    @Inject(method = "getPositionOffset*", at = @At("RETURN"), cancellable = true)
-    private void cancelSneakOffset(AbstractClientPlayerEntity abstractClientPlayerEntity, float f, CallbackInfoReturnable<Vec3d> ci)
+    @Inject(method = "getRenderOffset*", at = @At("RETURN"), cancellable = true)
+    private void cancelSneakOffset(AbstractClientPlayer abstractClientPlayerEntity, float f, CallbackInfoReturnable<Vec3> ci)
     {
-        if(abstractClientPlayerEntity instanceof AbstractClientPlayerEntity){
+        if(abstractClientPlayerEntity instanceof AbstractClientPlayer){
             IForm curForm = FormTextureUtils.getPlayerForm_Render(abstractClientPlayerEntity);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
             if(isFeral){
-                ci.setReturnValue(Vec3d.ZERO);
+                ci.setReturnValue(Vec3.ZERO);
             }
         }
     }

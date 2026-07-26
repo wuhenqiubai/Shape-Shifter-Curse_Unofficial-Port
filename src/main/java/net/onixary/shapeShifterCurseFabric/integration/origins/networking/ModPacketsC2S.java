@@ -2,9 +2,9 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
@@ -32,10 +32,10 @@ public class ModPacketsC2S {
     }
 
     private static void chooseOrigin(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        ServerPlayerEntity player = ctx.player();
-        PacketByteBuf buf = payload.data();
-        String originId = buf.readString(32767);
-        String layerId = buf.readString(32767);
+        ServerPlayer player = ctx.player();
+        FriendlyByteBuf buf = payload.data();
+        String originId = buf.readUtf(32767);
+        String layerId = buf.readUtf(32767);
 
         if (player.getServer() == null) {
             Origins.LOGGER.warn("Player server is null");
@@ -49,7 +49,7 @@ public class ModPacketsC2S {
                 return;
             }
 
-            Identifier layerIdentifier = Identifier.tryParse(layerId);
+            ResourceLocation layerIdentifier = ResourceLocation.tryParse(layerId);
             if (layerIdentifier == null) {
                 Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
                 return;
@@ -62,7 +62,7 @@ public class ModPacketsC2S {
             }
 
             if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
-                Identifier id = Identifier.tryParse(originId);
+                ResourceLocation id = ResourceLocation.tryParse(originId);
                 if (id == null) {
                     Origins.LOGGER.warn("Invalid origin ID: {}", originId);
                     return;
@@ -97,9 +97,9 @@ public class ModPacketsC2S {
     }
 
     private static void chooseRandomOrigin(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        ServerPlayerEntity player = ctx.player();
-        PacketByteBuf buf = payload.data();
-        String layerId = buf.readString(32767);
+        ServerPlayer player = ctx.player();
+        FriendlyByteBuf buf = payload.data();
+        String layerId = buf.readUtf(32767);
 
         if (player.getServer() == null) {
             Origins.LOGGER.warn("Player server is null");
@@ -113,7 +113,7 @@ public class ModPacketsC2S {
                 return;
             }
 
-            Identifier layerIdentifier = Identifier.tryParse(layerId);
+            ResourceLocation layerIdentifier = ResourceLocation.tryParse(layerId);
             if (layerIdentifier == null) {
                 Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
                 return;
@@ -126,9 +126,9 @@ public class ModPacketsC2S {
             }
 
             if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
-                List<Identifier> randomOrigins = layer.getRandomOrigins(player);
+                List<ResourceLocation> randomOrigins = layer.getRandomOrigins(player);
                 if (layer.isRandomAllowed() && randomOrigins != null && !randomOrigins.isEmpty()) {
-                    Identifier randomOrigin = randomOrigins.get(new Random().nextInt(randomOrigins.size()));
+                    ResourceLocation randomOrigin = randomOrigins.get(new Random().nextInt(randomOrigins.size()));
                     Origin origin = OriginRegistry.get(randomOrigin);
                     if (origin == null) {
                         Origins.LOGGER.warn("Random origin not found: {}", randomOrigin);
@@ -156,15 +156,15 @@ public class ModPacketsC2S {
         });
     }
 
-    private static void confirmOrigin(ServerPlayerEntity player, OriginLayer layer, Origin origin) {
+    private static void confirmOrigin(ServerPlayer player, OriginLayer layer, Origin origin) {
         if (layer == null || origin == null) {
             Origins.LOGGER.warn("Cannot confirm origin: layer or origin is null");
             return;
         }
 
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeIdentifier(layer.getIdentifier());
-        buf.writeIdentifier(origin.getIdentifier());
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeResourceLocation(layer.getIdentifier());
+        buf.writeResourceLocation(origin.getIdentifier());
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
     }
 }

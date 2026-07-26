@@ -1,28 +1,28 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.pattern.CachedBlockPosition;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import org.jetbrains.annotations.Nullable;
 
-public class CachedBlockPositionData extends CachedBlockPosition {
+public class CachedBlockPositionData extends BlockInWorld {
     private final BlockState stateCache;
     private final BlockEntity blockEntityCache;
 
-    public CachedBlockPositionData(WorldView world, BlockPos pos, boolean forceLoad, BlockState state, @Nullable BlockEntity blockEntity) {
+    public CachedBlockPositionData(LevelReader world, BlockPos pos, boolean forceLoad, BlockState state, @Nullable BlockEntity blockEntity) {
         super(world, pos, forceLoad);
         this.stateCache = state;
         this.blockEntityCache = blockEntity;
     }
 
-    public BlockState getBlockState() {
+    public BlockState getState() {
         return this.stateCache;
     }
 
     @Nullable
-    public BlockEntity getBlockEntity() {
+    public BlockEntity getEntity() {
         return this.blockEntityCache;
     }
 }

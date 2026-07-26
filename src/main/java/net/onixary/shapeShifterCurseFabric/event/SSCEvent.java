@@ -2,10 +2,8 @@ package net.onixary.shapeShifterCurseFabric.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,28 +13,28 @@ public class SSCEvent {
     // 而且由于oldForm从Component上读取 虽然大概率不会为null 但是还是需要判断一下
     @FunctionalInterface
     public static interface FormChange {
-        void onFormChange(@NotNull PlayerEntity player, @Nullable IForm oldForm, @NotNull IForm newForm);
+        void onFormChange(@NotNull Player player, @Nullable IForm oldForm, @NotNull IForm newForm);
     }
 
     @FunctionalInterface
     public static interface TransformManagerSetForm {
-        @NotNull IForm onSetForm(@NotNull PlayerEntity player, @Nullable IForm oldForm, @NotNull IForm newForm, @NotNull IForm finalForm);
+        @NotNull IForm onSetForm(@NotNull Player player, @Nullable IForm oldForm, @NotNull IForm newForm, @NotNull IForm finalForm);
     }
 
     @FunctionalInterface
     public static interface NormalPlayerEvent {
-        void onEvent(@NotNull PlayerEntity player);
+        void onEvent(@NotNull Player player);
     }
 
     // 改函数参数比较麻烦 我得重新编译一下外部挂载Mixin(Curios兼容补丁) 暂时先这么写吧 等有需求再加个Slot和ItemStack参数
     @FunctionalInterface
     public static interface AccessoryModifyEvent {
-        void onEvent(@NotNull PlayerEntity player, @NotNull Identifier itemID, @NotNull String pluginID);
+        void onEvent(@NotNull Player player, @NotNull ResourceLocation itemID, @NotNull String pluginID);
     }
 
     @FunctionalInterface
     public static interface OnGetForm {
-        @Nullable IForm onGetForm(@NotNull PlayerEntity player, @NotNull IForm form, @Nullable IForm middleForm);
+        @Nullable IForm onGetForm(@NotNull Player player, @NotNull IForm form, @Nullable IForm middleForm);
     }
 
     public static final Event<FormChange> FORM_CHANGE_START = EventFactory.createArrayBacked(FormChange.class, callbacks -> (player, oldForm, newForm) -> {

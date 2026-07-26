@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.FleeEntityGoal;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.GoalSelector;
-import net.minecraft.entity.mob.CreeperEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.predicate.entity.EntityPredicates;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.GoalSelector;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.monster.Creeper;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.OriginsPowerTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,21 +18,21 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(CreeperEntity.class)
-public abstract class ScareCreepersMixin extends HostileEntity {
-    protected ScareCreepersMixin(EntityType<? extends HostileEntity> entityType, World world) {
+@Mixin(Creeper.class)
+public abstract class ScareCreepersMixin extends Monster {
+    protected ScareCreepersMixin(EntityType<? extends Monster> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(at = @At("TAIL"), method = "initGoals")
+    @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
-        Goal goal = new FleeEntityGoal<>(this, PlayerEntity.class, OriginsPowerTypes.SCARE_CREEPERS::isActive, 6.0F, 1.0D, 1.2D, EntityPredicates.EXCEPT_CREATIVE_OR_SPECTATOR::test);
-        this.goalSelector.add(3, goal);
+        Goal goal = new AvoidEntityGoal<>(this, Player.class, OriginsPowerTypes.SCARE_CREEPERS::isActive, 6.0F, 1.0D, 1.2D, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
+        this.goalSelector.addGoal(3, goal);
     }
 
-    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/ai/goal/GoalSelector;add(ILnet/minecraft/entity/ai/goal/Goal;)V", ordinal = 8), method = "initGoals")
+    @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V", ordinal = 8), method = "registerGoals")
     private void redirectTargetGoal(GoalSelector goalSelector, int priority, Goal goal) {
-	    Goal newGoal = new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, e -> !OriginsPowerTypes.SCARE_CREEPERS.isActive(e));
-        goalSelector.add(priority, newGoal);
+	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, e -> !OriginsPowerTypes.SCARE_CREEPERS.isActive(e));
+        goalSelector.addGoal(priority, newGoal);
     }
 }

@@ -4,25 +4,25 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
 import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity;
 
 public class SummonMinionWolfNearbyAction {
-    public static void action(SerializableData.Instance data, Pair<Entity, Entity> entities) {
-        Entity Owner = entities.getLeft();
-        Entity SpawnNearbyTarget = entities.getRight();
+    public static void action(SerializableData.Instance data, Tuple<Entity, Entity> entities) {
+        Entity Owner = entities.getA();
+        Entity SpawnNearbyTarget = entities.getB();
         if (data.isPresent("reverse") && data.getBoolean("reverse")) {
-            Owner = entities.getRight();
-            SpawnNearbyTarget = entities.getLeft();
+            Owner = entities.getB();
+            SpawnNearbyTarget = entities.getA();
         }
         int MinionLevel = data.getInt("minion_level");
         int MinionCount = data.getInt("count");
@@ -30,7 +30,7 @@ public class SummonMinionWolfNearbyAction {
         int Cooldown = data.getInt("cooldown");
         ActionFactory<Entity>.Instance OwnerAction = data.get("owner_action");
         ActionFactory<Entity>.Instance TargetAction = data.get("target_action");
-        if (Owner instanceof ServerPlayerEntity player) {
+        if (Owner instanceof ServerPlayer player) {
             boolean IsSummonSuccess = false;
             for (int i = 0; i < MinionCount; i++) {
                 if (player instanceof IPlayerEntityMinion playerEntityMinion) {
@@ -45,11 +45,11 @@ public class SummonMinionWolfNearbyAction {
                     ShapeShifterCurseFabric.LOGGER.warn("Can't spawn minion, player is not IPlayerEntityMinion");
                     return;
                 }
-                BlockPos targetPos = MinionRegister.getNearbyEmptySpace(SpawnNearbyTarget.getWorld(), player.getRandom(), SpawnNearbyTarget.getBlockPos(), 3, 1, 1, 4);
+                BlockPos targetPos = MinionRegister.getNearbyEmptySpace(SpawnNearbyTarget.level(), player.getRandom(), SpawnNearbyTarget.blockPosition(), 3, 1, 1, 4);
                 if (targetPos == null) {
-                    targetPos = SpawnNearbyTarget.getBlockPos();
+                    targetPos = SpawnNearbyTarget.blockPosition();
                 }
-                if (SpawnNearbyTarget.getWorld() instanceof ServerWorld world) {
+                if (SpawnNearbyTarget.level() instanceof ServerLevel world) {
                     AnubisWolfMinionEntity anubisWolfMinionEntity = MinionRegister.SpawnMinion(MinionRegister.ANUBIS_WOLF_MINION, world, targetPos, player);
                     if (anubisWolfMinionEntity != null) {
                         anubisWolfMinionEntity.setMinionLevel(MinionLevel);
@@ -70,16 +70,16 @@ public class SummonMinionWolfNearbyAction {
                     TargetAction.accept(SpawnNearbyTarget);
                 }
                 // 添加音效与粒子效果
-                if (!(player.getWorld() instanceof ServerWorld serverWorld)) {
+                if (!(player.level() instanceof ServerLevel serverWorld)) {
                     return;
                 }
-                player.getWorld().playSound(null, player.getBlockPos(), SoundEvents.ENTITY_WOLF_GROWL, player.getSoundCategory(), 1.0f, 1.5f);
-                serverWorld.spawnParticles(player, ParticleTypes.SOUL_FIRE_FLAME, true, player.getBlockPos().getX() + 0.5f, player.getBlockPos().getY() + 0.5f, player.getBlockPos().getZ() + 0.5f, 8, 0, 0, 0, 0);
+                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_GROWL, player.getSoundSource(), 1.0f, 1.5f);
+                serverWorld.sendParticles(player, ParticleTypes.SOUL_FIRE_FLAME, true, player.blockPosition().getX() + 0.5f, player.blockPosition().getY() + 0.5f, player.blockPosition().getZ() + 0.5f, 8, 0, 0, 0, 0);
             }
         }
     }
 
-    public static ActionFactory<Pair<Entity, Entity>> createBIFactory() {
+    public static ActionFactory<Tuple<Entity, Entity>> createBIFactory() {
         return new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("bi_summon_anubis_wolf_minion"),
                 new SerializableData()
@@ -105,7 +105,7 @@ public class SummonMinionWolfNearbyAction {
                         .add("owner_action", ApoliDataTypes.ENTITY_ACTION, null)
                         .add("target_action", ApoliDataTypes.ENTITY_ACTION, null)  // 没用 但是防止解析错误 但是会正常执行
                         .add("reverse", SerializableDataTypes.BOOLEAN, false),  // 没用 但是防止解析错误
-		        (data, entity) -> action(data, new Pair<>(entity, entity))
+		        (data, entity) -> action(data, new Tuple<>(entity, entity))
         );
     }
 }

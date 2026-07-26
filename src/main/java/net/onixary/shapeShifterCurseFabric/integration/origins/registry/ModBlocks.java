@@ -1,19 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.Block;
-import net.minecraft.block.MapColor;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.material.MapColor;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.content.TemporaryCobwebBlock;
 
 public class ModBlocks {
 
-    public static final Block TEMPORARY_COBWEB = new TemporaryCobwebBlock(FabricBlockSettings.create().mapColor(MapColor.WHITE_GRAY).solid().noCollision().requiresTool().strength(4.0F));
+    public static final Block TEMPORARY_COBWEB = new TemporaryCobwebBlock(FabricBlockSettings.of().mapColor(MapColor.WOOL).forceSolidOn().noCollission().requiresCorrectToolForDrops().strength(4.0F));
 
     public static void register() {
         register("temporary_cobweb", TEMPORARY_COBWEB, false);
@@ -24,9 +24,9 @@ public class ModBlocks {
     }
 
     private static void register(String blockName, Block block, boolean withBlockItem) {
-        Registry.register(Registries.BLOCK, Identifier.of(Origins.MODID, blockName), block);
+        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(Origins.MODID, blockName), block);
         if(withBlockItem) {
-            Registry.register(Registries.ITEM, Identifier.of(Origins.MODID, blockName), new BlockItem(block, new Item.Settings()));
+            Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(Origins.MODID, blockName), new BlockItem(block, new Item.Properties()));
         }
     }
 }

@@ -2,34 +2,34 @@ package net.onixary.shapeShifterCurseFabric.advancement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancement.criterion.AbstractCriterion;
-import net.minecraft.predicate.entity.LootContextPredicate;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.advancements.critereon.ContextAwarePredicate;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.Optional;
 
-public class OnEnableMod extends AbstractCriterion<OnEnableMod.Condition> {
-    public static final Identifier ID = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "on_enable_mod");
+public class OnEnableMod extends SimpleCriterionTrigger<OnEnableMod.Condition> {
+    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "on_enable_mod");
 
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return ID;
     }
 
-    public void trigger(ServerPlayerEntity player) {
+    public void trigger(ServerPlayer player) {
         trigger(player, Condition::requirementsMet);
     }
 
     @Override
-    public Codec<Condition> getConditionsCodec() {
+    public Codec<Condition> codec() {
         return Condition.CODEC;
     }
 
-    public record Condition(Optional<LootContextPredicate> player) implements AbstractCriterion.Conditions {
+    public record Condition(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
         public static final Codec<Condition> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                LootContextPredicate.CODEC.optionalFieldOf("player").forGetter(Condition::player)
+                ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Condition::player)
             ).apply(instance, Condition::new)
         );
 

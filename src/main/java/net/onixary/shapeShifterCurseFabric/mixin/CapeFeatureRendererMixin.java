@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.feature.CapeFeatureRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.layers.CapeLayer;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.ModifyCapeRender;
@@ -20,25 +20,25 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(CapeFeatureRenderer.class)
+@Mixin(CapeLayer.class)
 public class CapeFeatureRendererMixin {
 
-    private AbstractClientPlayerEntity currentPlayer;
+    private AbstractClientPlayer currentPlayer;
 
     @Inject(method = "render*", at = @At("HEAD"))
-    private void capturePlayer(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
-                               int i, AbstractClientPlayerEntity player, float f, float g, float h,
+    private void capturePlayer(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider,
+                               int i, AbstractClientPlayer player, float f, float g, float h,
                                float j, float k, float l, CallbackInfo ci) {
         this.currentPlayer = player;
     }
 
     @ModifyArg(method = "render*",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/util/math/MatrixStack;translate(FFF)V"),
+                    target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"),
             index = 1)
     private float modifyTranslateY(float y) {
         if (currentPlayer != null) {
-            Vec3d idlePos = getCapeIdleLoc(currentPlayer);
+            Vec3 idlePos = getCapeIdleLoc(currentPlayer);
             return (float) idlePos.y;
         }
         return y;
@@ -46,11 +46,11 @@ public class CapeFeatureRendererMixin {
 
     @ModifyArg(method = "render*",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/util/math/MatrixStack;translate(FFF)V"),
+                    target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"),
             index = 2)
     private float modifyTranslateZ(float z) {
         if (currentPlayer != null) {
-            Vec3d idlePos = getCapeIdleLoc(currentPlayer);
+            Vec3 idlePos = getCapeIdleLoc(currentPlayer);
             return (float) idlePos.z;
         }
         return z;
@@ -58,18 +58,18 @@ public class CapeFeatureRendererMixin {
 
     @Inject(method = "render*",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/util/math/MatrixStack;multiply(Lorg/joml/Quaternionf;)V",
+                    target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V",
                     ordinal = 0))
-    private void addCapeUpwardRotation(MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider,
-                                       int i, AbstractClientPlayerEntity player, float f, float g, float h,
+    private void addCapeUpwardRotation(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider,
+                                       int i, AbstractClientPlayer player, float f, float g, float h,
                                        float j, float k, float l, CallbackInfo ci) {
         float baseRotation = getCapeBaseRotateAngle(player);
-        matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(baseRotation));
+        matrixStack.mulPose(Axis.XP.rotationDegrees(baseRotation));
     }
 
     @ModifyArg(method = "render",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/util/math/RotationAxis;rotationDegrees(F)Lorg/joml/Quaternionf;",
+                    target = "Lcom/mojang/math/Axis;rotationDegrees(F)Lorg/joml/Quaternionf;",
                     ordinal = 0),
             index = 0)
     private float modifyXRotationAngle(float angle) {
@@ -97,22 +97,22 @@ public class CapeFeatureRendererMixin {
 
     // helper func
     @Unique
-    private Vec3d getCapeIdleLoc(AbstractClientPlayerEntity player) {
+    private Vec3 getCapeIdleLoc(AbstractClientPlayer player) {
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         if (curForm instanceof ModifyCapeRender mcr) {
             return mcr.getCapeIdleLoc(player);
         }
         if (curForm.getBodyType() == PlayerFormBodyType.FERAL) {
-            return new Vec3d(0.0f, -0.2f, 0.3f);
+            return new Vec3(0.0f, -0.2f, 0.3f);
         }
         else {
-            return new Vec3d(0.0, 0.0, 0.125);
+            return new Vec3(0.0, 0.0, 0.125);
         }
     }
 
     // 获取披风的基础旋转角度
     @Unique
-    private float getCapeBaseRotateAngle(AbstractClientPlayerEntity player) {
+    private float getCapeBaseRotateAngle(AbstractClientPlayer player) {
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         if (curForm instanceof ModifyCapeRender mcr) {
             return mcr.getCapeBaseRotateAngle(player);
@@ -122,7 +122,7 @@ public class CapeFeatureRendererMixin {
     }
 
     @Unique
-    private boolean NeedModifyXRotationAngle(AbstractClientPlayerEntity player) {
+    private boolean NeedModifyXRotationAngle(AbstractClientPlayer player) {
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         if (curForm instanceof ModifyCapeRender mcr) {
             return mcr.NeedModifyXRotationAngle();

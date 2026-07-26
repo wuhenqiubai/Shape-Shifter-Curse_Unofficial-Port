@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.potion.Potion;
-import net.minecraft.recipe.BrewingRecipeRegistry;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionBrewing;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
 import net.onixary.shapeShifterCurseFabric.recipes.BrewingRecipeUtils;
 import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,16 +17,16 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(BrewingRecipeRegistry.class)
+@Mixin(PotionBrewing.class)
 public class BrewingRecipeRegistryMixin {
 	@Unique
-    private static void setTargetForm(ItemStack stack, net.minecraft.util.Identifier formID) {
-        NbtCompound nbt = stack.getOrDefault(DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt();
+    private static void setTargetForm(ItemStack stack, net.minecraft.resources.ResourceLocation formID) {
+        CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         CTPUtils.setCTPFormIDToNBT(nbt, formID);
-        stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
     }
 
-    @Inject(method = "craft", at = @At("RETURN"))
+    @Inject(method = "mix", at = @At("RETURN"))
     private static void craft(ItemStack ingredient, ItemStack input, CallbackInfoReturnable<ItemStack> cir) {
         if (input.isEmpty()) {
             return;
@@ -48,8 +48,8 @@ public class BrewingRecipeRegistryMixin {
         }
 
         // Check mod's dynamic potion recipes
-	    PotionContentsComponent potionContents = input.getOrDefault(DataComponentTypes.POTION_CONTENTS, PotionContentsComponent.DEFAULT);
-	    RegistryEntry<Potion> potionEntry = potionContents.potion().orElse(null);
+	    PotionContents potionContents = input.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+	    Holder<Potion> potionEntry = potionContents.potion().orElse(null);
 	    if (potionEntry == null) {
             return;
         }

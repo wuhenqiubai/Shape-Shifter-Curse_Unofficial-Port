@@ -11,11 +11,11 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.tag.FluidTags;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.mixin.accessor.ApoliClientAccessor;
 
@@ -40,7 +40,7 @@ public class LevitatePower extends Power implements Active {
 
     @Override
     public void onUse() {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             //handleLevitationInput(player);
             this.isKeyActive = true;
             PowerHolderComponent.syncPower(entity, this.type);
@@ -85,14 +85,14 @@ public class LevitatePower extends Power implements Active {
     //     }
     // }
 
-    private void processLevitate(PlayerEntity player) {
+    private void processLevitate(Player player) {
         // 飞行逻辑由客户端处理 或许需要反作弊系统
         this.isLevitate = true;
         player.setNoGravity(true);
     }
 
     // 空中缓降
-    private void processStopLevitate(PlayerEntity player) {
+    private void processStopLevitate(Player player) {
         this.isLevitate = false;
         player.setNoGravity(false);
         // this.HasModifyUpVelocity = false;
@@ -100,7 +100,7 @@ public class LevitatePower extends Power implements Active {
 
     @Override
     public void tick() {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             if(player.getFluidHeight(FluidTags.WATER) > 0.0F || player.getFluidHeight(FluidTags.LAVA) > 0.0F){
                 this.resetLevitateState();
                 return;
@@ -118,7 +118,7 @@ public class LevitatePower extends Power implements Active {
 
             this.wasActiveLastTick = this.isKeyActive;
             this.isKeyActive = false;
-            if(entity.isOnGround()){
+            if(entity.onGround()){
                 this.resetLevitateState();
             }
             PowerHolderComponent.syncPower(entity, this.type);
@@ -126,19 +126,19 @@ public class LevitatePower extends Power implements Active {
     }
 
     @Environment(EnvType.CLIENT)
-    private void ClientProcessLevitate(PlayerEntity player) {
-        Vec3d velocity = player.getVelocity();
+    private void ClientProcessLevitate(Player player) {
+        Vec3 velocity = player.getDeltaMovement();
         if(this.ascendProgress < this.maxAscendDuration) {
-            player.setVelocity(velocity.x, this.ascentSpeed * easeOutQuadProgress(), velocity.z);
+            player.setDeltaMovement(velocity.x, this.ascentSpeed * easeOutQuadProgress(), velocity.z);
             this.ascendProgress++;
         }
         else {
-            player.setVelocity(velocity.x, 0, velocity.z);
+            player.setDeltaMovement(velocity.x, 0, velocity.z);
         }
     }
 
     @Environment(EnvType.CLIENT)
-    private void ClientProcessStopLevitate(PlayerEntity player) {
+    private void ClientProcessStopLevitate(Player player) {
         // 应该会自动同步 就不用手动同步了
         // player.setNoGravity(false);
     }
@@ -146,15 +146,15 @@ public class LevitatePower extends Power implements Active {
     @Environment(EnvType.CLIENT)
     public boolean clientIsActive() {
         // 由于客户端无法得到服务器上isKeyActive的值，所以需要通过按键状态来判定.
-        KeyBinding keyBinding = ApoliClientAccessor.get_idToKeyBindingMap().get(this.key.key);
+        KeyMapping keyBinding = ApoliClientAccessor.get_idToKeyBindingMap().get(this.key.key);
         if (keyBinding != null) {
-            return keyBinding.isPressed();
+            return keyBinding.isDown();
         }
         return false;
     }
 
     @Environment(EnvType.CLIENT)
-    public void clientTick(PlayerEntity player) {
+    public void clientTick(Player player) {
         // 上面的数据不一定会同步到客户端 由外部调用 复制时记得给外部添加调用
         if(player.getFluidHeight(FluidTags.WATER) > 0.0F || player.getFluidHeight(FluidTags.LAVA) > 0.0F){
             this.resetLevitateState();
@@ -169,7 +169,7 @@ public class LevitatePower extends Power implements Active {
         }
         this.wasActiveLastTick = this.isKeyActive;
         this.isKeyActive = false;
-        if(entity.isOnGround()){
+        if(entity.onGround()){
             this.resetLevitateState();
         }
     }

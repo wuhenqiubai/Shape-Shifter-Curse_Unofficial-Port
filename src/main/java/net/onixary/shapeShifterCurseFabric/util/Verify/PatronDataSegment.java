@@ -1,9 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
@@ -27,18 +25,18 @@ public final class PatronDataSegment implements IDataSegment {
     private final long expireTime;
     private final HashMap<String, byte[]> extraData = new HashMap<>();
 
-    PatronDataSegment(PacketByteBuf buf) {
+    PatronDataSegment(FriendlyByteBuf buf) {
         this.type = buf.readInt();
         this.version = buf.readInt();
         buf.skipBytes(4);
-        this.uuid = buf.readUuid();
+        this.uuid = buf.readUUID();
         this.level = buf.readShort();
         long startTime = buf.readLong();
         long expiresIn = buf.readLong();
         this.expireTime = startTime + expiresIn;
         int extraDataCount = buf.readShort();
         for (int i = 0; i < extraDataCount; i++) {
-            String key = buf.readString(256);
+            String key = buf.readUtf(256);
             byte[] value = buf.readByteArray(4096);
             extraData.put(key, value);
         }
@@ -72,7 +70,7 @@ public final class PatronDataSegment implements IDataSegment {
     }
 
     @Override
-    public void onGain(PlayerEntity player) {
+    public void onGain(Player player) {
         PATRON_AUTH_DATA.put(uuid, this);
     }
 
@@ -82,7 +80,7 @@ public final class PatronDataSegment implements IDataSegment {
     }
 
     @Override
-    public void onLost(PlayerEntity player) {
+    public void onLost(Player player) {
         PATRON_AUTH_DATA.remove(uuid);
         if (!FormUtils.isFormCanUse(player, FormUtils.getPlayerForm(player))) {
             FormUtils.applyFallback(player);
@@ -95,7 +93,7 @@ public final class PatronDataSegment implements IDataSegment {
     }
 
     @Override
-    public void onUpdate_New(PlayerEntity player, IDataSegment newDataSegment) {
+    public void onUpdate_New(Player player, IDataSegment newDataSegment) {
         if (!(newDataSegment instanceof PatronDataSegment patronDataSegment)) {
             ShapeShifterCurseFabric.LOGGER.error("Invalid data segment type");
             return;
@@ -106,21 +104,21 @@ public final class PatronDataSegment implements IDataSegment {
         }
     }
 
-    public static boolean isPatronFormCanUse(@Nullable PlayerEntity player, @NotNull IPatronForm form) {
+    public static boolean isPatronFormCanUse(@Nullable Player player, @NotNull IPatronForm form) {
         if (player == null) return false;
         UUID uuid = null;
-        if (player.isMainPlayer()) {
+        if (player.isLocalPlayer()) {
             uuid = AuthClient.getLocalPlayerUUID();
         }
         if (uuid == null) {
-            uuid = player.getUuid();
+            uuid = player.getUUID();
         }
         PatronDataSegment dataSegment = PATRON_AUTH_DATA.get(uuid);
         return form.checkCanUse(player, uuid, dataSegment);
     }
 
-    public static @Nullable PatronDataSegment getPatronDataSegment(PlayerEntity player) {
-        return getPatronDataSegment(player.getUuid());
+    public static @Nullable PatronDataSegment getPatronDataSegment(Player player) {
+        return getPatronDataSegment(player.getUUID());
     }
 
     public static @Nullable PatronDataSegment getPatronDataSegment(UUID uuid) {

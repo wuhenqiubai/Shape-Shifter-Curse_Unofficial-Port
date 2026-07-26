@@ -4,10 +4,10 @@ import io.github.apace100.apoli.power.EffectImmunityPower;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.effect.MobEffect;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,8 +16,8 @@ import java.util.Optional;
 
 public class OptionalEffectImmunityPower {
 
-    public static @Nullable StatusEffect getStatusEffect(Identifier effectID) {
-        Optional<StatusEffect> result = Registries.STATUS_EFFECT.getOrEmpty(effectID);
+    public static @Nullable MobEffect getStatusEffect(ResourceLocation effectID) {
+        Optional<MobEffect> result = BuiltInRegistries.MOB_EFFECT.getOptional(effectID);
         return result.orElse(null);
     }
 
@@ -31,17 +31,17 @@ public class OptionalEffectImmunityPower {
                 (data) -> (type, player) -> {
                     EffectImmunityPower power = new EffectImmunityPower(type, player, data.get("inverted"));
                     if (data.isPresent("effect")) {
-                        StatusEffect effect = getStatusEffect(data.get("effect"));
+                        MobEffect effect = getStatusEffect(data.get("effect"));
                         if (effect != null) {
-                            power.addEffect((RegistryEntry<StatusEffect>) effect);
+                            power.addEffect((Holder<MobEffect>) effect);
                         }
                     }
                     if (data.isPresent("effects")) {
-                        List<Identifier> effectIDs = data.get("effects");
-                        for (Identifier effectID : effectIDs) {
-                            StatusEffect effect = getStatusEffect(effectID);
+                        List<ResourceLocation> effectIDs = data.get("effects");
+                        for (ResourceLocation effectID : effectIDs) {
+                            MobEffect effect = getStatusEffect(effectID);
                             if (effect != null) {
-                                power.addEffect((RegistryEntry<StatusEffect>) effect);
+                                power.addEffect((Holder<MobEffect>) effect);
                             }
                         }
                     }

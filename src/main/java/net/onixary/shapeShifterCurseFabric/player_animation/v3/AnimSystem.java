@@ -6,12 +6,12 @@ import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController.TransformingController;
@@ -30,28 +30,28 @@ public class AnimSystem {
 	public static class AnimSystemData {
 		public IForm playerForm;
 		public boolean IsOnGround = true;
-		public Vec3d LastPosition;
+		public Vec3 LastPosition;
         public long ContinueSwingAnimCounter = 0;  // 持续增长使用long防止溢出 顺便可以不用做最大值判断
 		public boolean IsWalking = false;
-        public NbtCompound customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
+        public CompoundTag customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
 
-		public AnimSystemData(PlayerEntity player) {
+		public AnimSystemData(Player player) {
 			this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-			this.customData = new NbtCompound();
-			this.LastPosition = player.getPos();
+			this.customData = new CompoundTag();
+			this.LastPosition = player.position();
 		}
 	}
-    public final PlayerEntity player;  // 玩家实体 理论上如果当前玩家实体被卸载了 那么这个AnimSystem也应该被卸载
+    public final Player player;  // 玩家实体 理论上如果当前玩家实体被卸载了 那么这个AnimSystem也应该被卸载
 
     public AnimSystemData data;
 
-	public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
+	public static final ResourceLocation defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
 
-	public Identifier nowAnimFSMID = defaultAnimFSMID;
+	public ResourceLocation nowAnimFSMID = defaultAnimFSMID;
 
     public final List<AbstractAnimStateController> PreProcessControllers;
 
-    public @Nullable Identifier nowPlayingPowerAnimationID = null;
+    public @Nullable ResourceLocation nowPlayingPowerAnimationID = null;
 	public @Nullable Animation nowPlayingPowerAnimation = null;
     public int NPPA_Length = -1;
 	public int NPPA_NowTick = 0;
@@ -61,7 +61,7 @@ public class AnimSystem {
         return Objects.requireNonNull(AnimRegistry.getAnimFSM(nowAnimFSMID));
     }
 
-    public AnimSystem(PlayerEntity player) {
+    public AnimSystem(Player player) {
         this.player = player;
         this.data = new AnimSystemData(player);
         this.PreProcessControllers = new ArrayList<>();
@@ -90,20 +90,20 @@ public class AnimSystem {
         return null;
     }
 
-    public static boolean checkOnGroundSuper(PlayerEntity player) {
-        if (player.isOnGround()) {
+    public static boolean checkOnGroundSuper(Player player) {
+        if (player.onGround()) {
             return true;
         }
         if (player.getAbilities().flying) {
             return false;
         }
-        return !player.getWorld().isSpaceEmpty(player.getBoundingBox().offset(0, -0.01, 0).withMaxY(player.getY()));
+        return !player.level().noCollision(player.getBoundingBox().move(0, -0.01, 0).setMaxY(player.getY()));
     }
 
     private void PreProcessAnimSystemData() {
         this.data.playerForm = FormTextureUtils.getPlayerForm_Render(this.player);
-        this.data.IsWalking = !this.data.LastPosition.equals(this.player.getPos());
-        if (this.player.handSwinging) {
+        this.data.IsWalking = !this.data.LastPosition.equals(this.player.position());
+        if (this.player.swinging) {
             this.data.ContinueSwingAnimCounter ++;
         }
         else {
@@ -114,7 +114,7 @@ public class AnimSystem {
     }
 
     private void EndProcessAnimSystemData() {
-        this.data.LastPosition = this.player.getPos();
+        this.data.LastPosition = this.player.position();
     }
 
     private void NPPA_Tick() {
@@ -129,7 +129,7 @@ public class AnimSystem {
         }
     }
 
-    private void NPPA_SetAnimation(@NotNull Identifier animID, @Nullable AnimationHolder anim) {
+    private void NPPA_SetAnimation(@NotNull ResourceLocation animID, @Nullable AnimationHolder anim) {
         if (animID.equals(this.nowPlayingPowerAnimationID)) {
             return;
         }
@@ -152,7 +152,7 @@ public class AnimSystem {
         }
     }
 
-    private @Nullable Identifier getPowerAnimID() {
+    private @Nullable ResourceLocation getPowerAnimID() {
         if (this.player instanceof IPlayerAnimController iPlayerAnimController) {
             return iPlayerAnimController.shape_shifter_curse$getPowerAnimationID();
         } else {
@@ -165,14 +165,14 @@ public class AnimSystem {
         this.PreProcessAnimSystemData();
         @Nullable AnimationHolder anim = this.getPreProcessAnimation();
         if (anim == null) {
-            @Nullable Identifier powerAnimID = this.getPowerAnimID();
+            @Nullable ResourceLocation powerAnimID = this.getPowerAnimID();
             if (powerAnimID != null) {
                 if (!this.data.playerForm.isPowerAnimRegistered(this.player, this.data)) {
                     this.data.playerForm.registerPowerAnim(this.player, this.data);
                 }
-                Pair<Boolean, @Nullable AnimationHolder> result = this.data.playerForm.getPowerAnim(this.player, this.data, powerAnimID);
-                if (result.getLeft()) {
-                    return result.getRight();
+                Tuple<Boolean, @Nullable AnimationHolder> result = this.data.playerForm.getPowerAnim(this.player, this.data, powerAnimID);
+                if (result.getA()) {
+                    return result.getB();
                 }
                 @Nullable AnimRegistry.PowerDefaultAnim resultPowerDefaultAnim = AnimRegistry.getPowerDefaultAnim(powerAnimID);
                 if (resultPowerDefaultAnim == null) {
@@ -181,11 +181,11 @@ public class AnimSystem {
                 anim = resultPowerDefaultAnim.ANIM_SYSTEM_GET_CURRENT_ANIM(this.player, this.data);
                 this.NPPA_SetAnimation(powerAnimID, anim);
             } else {
-                Pair<@Nullable Identifier, @NotNull Identifier> result = this.getAnimFSM().update(this.player, this.data);
-                if (result.getLeft() != null) {
-                    this.nowAnimFSMID = result.getLeft();
+                Tuple<@Nullable ResourceLocation, @NotNull ResourceLocation> result = this.getAnimFSM().update(this.player, this.data);
+                if (result.getA() != null) {
+                    this.nowAnimFSMID = result.getA();
                 }
-                Identifier animStateControllerID = result.getRight();
+                ResourceLocation animStateControllerID = result.getB();
                 AbstractAnimStateController animStateController = this.data.playerForm.getAnimStateController(this.player, this.data, animStateControllerID);
                 if (animStateController == null) {
                     AnimRegistry.AnimState resultAnimState = Objects.requireNonNull(AnimRegistry.getAnimState(animStateControllerID));
@@ -201,8 +201,8 @@ public class AnimSystem {
 	    return anim;
     }
 
-	public static @NotNull Vec3f getPlayerBone3DTransform(PlayerEntity player, @NotNull String boneName, @NotNull TransformType type, @NotNull Vec3f defaultValue) {
-		if (!(player instanceof AbstractClientPlayerEntity clientPlayer) || !(clientPlayer instanceof IAnimatedPlayer animatedPlayer))
+	public static @NotNull Vec3f getPlayerBone3DTransform(Player player, @NotNull String boneName, @NotNull TransformType type, @NotNull Vec3f defaultValue) {
+		if (!(player instanceof AbstractClientPlayer clientPlayer) || !(clientPlayer instanceof IAnimatedPlayer animatedPlayer))
 			return defaultValue;
 		PlayerAnimManager manager = animatedPlayer.playerAnimLib$getAnimManager();
 		if (manager == null || !manager.isActive()) return defaultValue;

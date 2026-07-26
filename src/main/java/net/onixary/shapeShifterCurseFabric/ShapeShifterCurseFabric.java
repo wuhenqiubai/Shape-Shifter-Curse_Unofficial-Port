@@ -12,23 +12,23 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.advancement.criterion.Criteria;
-import net.minecraft.entity.EntityDimensions;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnGroup;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.additional_power.*;
 import net.onixary.shapeShifterCurseFabric.advancement.*;
 import net.onixary.shapeShifterCurseFabric.advancement.misc.CriterionAdditions;
@@ -98,69 +98,69 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public static CommonConfig commonConfig;
 
     // 用于在游戏内测试调参用的临时变量
-    public static Vec3d feralItemCenter = new Vec3d(0.0F, 0.0F, 0.0F);
-    public static Vec3d feralItemPosOffset = new Vec3d(0.0F, 0.0F, 0.0F);
+    public static Vec3 feralItemCenter = new Vec3(0.0F, 0.0F, 0.0F);
+    public static Vec3 feralItemPosOffset = new Vec3(0.0F, 0.0F, 0.0F);
     public static float feralItemEulerX = 0.0F;
 
     // Reg custom advancement criterion
-    public static final OnEnableMod ON_ENABLE_MOD = Criteria.register(OnEnableMod.ID.toString(), new OnEnableMod());
-    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = Criteria.register(OnOpenBookOfShapeShifter.ID.toString(), new OnOpenBookOfShapeShifter());
-    public static final OnEndCursedMoon ON_END_CURSED_MOON = Criteria.register(OnEndCursedMoon.ID.toString(), new OnEndCursedMoon());
-    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = Criteria.register(OnEndCursedMoonCured.ID.toString(), new OnEndCursedMoonCured());
-    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = Criteria.register(OnEndCursedMoonCuredForm2.ID.toString(), new OnEndCursedMoonCuredForm2());
-    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = Criteria.register(OnGetTransformEffect.ID.toString(), new OnGetTransformEffect());
-    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = Criteria.register(OnSleepWhenHaveTransformEffect.ID.toString(), new OnSleepWhenHaveTransformEffect());
-    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = Criteria.register(OnTransformByCatalyst.ID.toString(), new OnTransformByCatalyst());
-    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = Criteria.register(OnTransformByCure.ID.toString(), new OnTransformByCure());
-    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = Criteria.register(OnUseGoldenApple.ID.toString(), new OnUseGoldenApple());
-    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = Criteria.register(OnTransformByCureFinal.ID.toString(), new OnTransformByCureFinal());
-    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = Criteria.register(OnTransformEffectFade.ID.toString(), new OnTransformEffectFade());
-    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = Criteria.register(OnTriggerCursedMoon.ID.toString(), new OnTriggerCursedMoon());
-    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = Criteria.register(OnTriggerCursedMoonForm2.ID.toString(), new OnTriggerCursedMoonForm2());
-    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = Criteria.register(OnFirstJoinWithMod.ID.toString(), new OnFirstJoinWithMod());
-    public static final OnFirstTransformEnableFormList ON_FIRST_TRANSFORM_ENABLE_FORM_LIST = Criteria.register(OnFirstTransformEnableFormList.ID.toString(), new OnFirstTransformEnableFormList());
+    public static final OnEnableMod ON_ENABLE_MOD = CriteriaTriggers.register(OnEnableMod.ID.toString(), new OnEnableMod());
+    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = CriteriaTriggers.register(OnOpenBookOfShapeShifter.ID.toString(), new OnOpenBookOfShapeShifter());
+    public static final OnEndCursedMoon ON_END_CURSED_MOON = CriteriaTriggers.register(OnEndCursedMoon.ID.toString(), new OnEndCursedMoon());
+    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = CriteriaTriggers.register(OnEndCursedMoonCured.ID.toString(), new OnEndCursedMoonCured());
+    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = CriteriaTriggers.register(OnEndCursedMoonCuredForm2.ID.toString(), new OnEndCursedMoonCuredForm2());
+    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = CriteriaTriggers.register(OnGetTransformEffect.ID.toString(), new OnGetTransformEffect());
+    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = CriteriaTriggers.register(OnSleepWhenHaveTransformEffect.ID.toString(), new OnSleepWhenHaveTransformEffect());
+    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = CriteriaTriggers.register(OnTransformByCatalyst.ID.toString(), new OnTransformByCatalyst());
+    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = CriteriaTriggers.register(OnTransformByCure.ID.toString(), new OnTransformByCure());
+    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = CriteriaTriggers.register(OnUseGoldenApple.ID.toString(), new OnUseGoldenApple());
+    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = CriteriaTriggers.register(OnTransformByCureFinal.ID.toString(), new OnTransformByCureFinal());
+    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = CriteriaTriggers.register(OnTransformEffectFade.ID.toString(), new OnTransformEffectFade());
+    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = CriteriaTriggers.register(OnTriggerCursedMoon.ID.toString(), new OnTriggerCursedMoon());
+    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = CriteriaTriggers.register(OnTriggerCursedMoonForm2.ID.toString(), new OnTriggerCursedMoonForm2());
+    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = CriteriaTriggers.register(OnFirstJoinWithMod.ID.toString(), new OnFirstJoinWithMod());
+    public static final OnFirstTransformEnableFormList ON_FIRST_TRANSFORM_ENABLE_FORM_LIST = CriteriaTriggers.register(OnFirstTransformEnableFormList.ID.toString(), new OnFirstTransformEnableFormList());
 
-    public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = Criteria.register(CriterionAdditions.OnTransformForm.ID.toString(), CriterionAdditions.createOnTransformForm());
-    public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = Criteria.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());
+    public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = CriteriaTriggers.register(CriterionAdditions.OnTransformForm.ID.toString(), CriterionAdditions.createOnTransformForm());
+    public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = CriteriaTriggers.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());
 
     // Reg custom entities
     // Bat
     public static final EntityType<TransformativeBatEntity> T_BAT = Registry.register(
-            Registries.ENTITY_TYPE,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
-            FabricEntityTypeBuilder.create(SpawnGroup.AMBIENT, TransformativeBatEntity::new)
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
+            FabricEntityTypeBuilder.create(MobCategory.AMBIENT, TransformativeBatEntity::new)
                     .dimensions(EntityDimensions.fixed(0.5f, 0.9f))
                     .build()
     );
     // Axolotl
     public static final EntityType<TransformativeAxolotlEntity> T_AXOLOTL = Registry.register(
-            Registries.ENTITY_TYPE,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
-            FabricEntityTypeBuilder.create(SpawnGroup.AXOLOTLS, TransformativeAxolotlEntity::new)
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
+            FabricEntityTypeBuilder.create(MobCategory.AXOLOTLS, TransformativeAxolotlEntity::new)
                     .dimensions(EntityDimensions.fixed(0.75f, 0.42f))
                     .build()
     );
     // Ocelot
     public static final EntityType<TransformativeOcelotEntity> T_OCELOT = Registry.register(
-            Registries.ENTITY_TYPE,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, TransformativeOcelotEntity::new)
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
+            FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeOcelotEntity::new)
                     .dimensions(EntityDimensions.fixed(0.6f, 0.7f))
                     .build()
     );
 
     public static final EntityType<TransformativeWolfEntity> T_WOLF = Registry.register(
-            Registries.ENTITY_TYPE,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
-            FabricEntityTypeBuilder.create(SpawnGroup.CREATURE, TransformativeWolfEntity::new)
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
+            FabricEntityTypeBuilder.create(MobCategory.CREATURE, TransformativeWolfEntity::new)
                 .dimensions(EntityDimensions.fixed(0.6f, 0.85f))
                 .build()
     );
 
     public static final EntityType<TransformativeSpiderEntity> T_SPIDER = Registry.register(
-            Registries.ENTITY_TYPE,
-            Identifier.of(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MONSTER, TransformativeSpiderEntity::new)
+            BuiltInRegistries.ENTITY_TYPE,
+            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
+            FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeSpiderEntity::new)
                     .dimensions(EntityDimensions.fixed(1.4f, 0.9f))
                     .build()
     );
@@ -169,8 +169,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     private int save_timer = 0;
 
 
-    public static Identifier identifier(String path) {
-        return Identifier.of(MOD_ID, path);
+    public static ResourceLocation identifier(String path) {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
     }
 
 
@@ -244,7 +244,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 获取主世界作为默认世界
-            ServerWorld overworld = server.getOverworld();
+            ServerLevel overworld = server.overworld();
             // 更新Patron状态
             PatronUtils.OnServerLoad(server);
             TransformManager.onServerInit();
@@ -252,10 +252,10 @@ public class ShapeShifterCurseFabric implements ModInitializer {
             AccessoryUtils.onStartServer();
         });
         // 获取动态Form(DataPack)
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new FormDataPackReloadListener());
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new TrinketDataPackReloadListener());
-        ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new BrewingRecipeReloadListener());
-        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> server.getPlayerManager().getPlayerList().forEach((player) -> {
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FormDataPackReloadListener());
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new TrinketDataPackReloadListener());
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new BrewingRecipeReloadListener());
+        ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> server.getPlayerList().getPlayers().forEach((player) -> {
             ModPacketsS2CServer.updateDynamicForm(player);
             PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
             if (RegPlayerForms.getPlayerForm(component.nowFormID) == null) {
@@ -270,17 +270,17 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ShapeShifterCurseCommand.register(dispatcher));
         ArgumentTypeRegistry.registerArgumentType(
-                Identifier.of(MOD_ID, "form_argument_type"),
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "form_argument_type"),
                 FormArgumentType.class,
                 new FormArgumentType.Form_ArgumentType_Serializer()
         );
         ArgumentTypeRegistry.registerArgumentType(
-                Identifier.of(MOD_ID, "string_enum_argument_type"),
+                ResourceLocation.fromNamespaceAndPath(MOD_ID, "string_enum_argument_type"),
                 MiscArgumentType.Enum_ArgumentType.class,
                 new MiscArgumentType.Enum_ArgumentType_Serializer()
         );
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            PlayerEntity player = handler.player;
+            Player player = handler.player;
             // 清空玩家召唤物
             MinionRegister.DisSpawnAllMinion(player);
             // 由CCA+原版存储代替
@@ -293,21 +293,21 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         // Reg listeners
         ServerTickEvents.END_SERVER_TICK.register(this::onPlayerServerTick);
         EntitySleepEvents.STOP_SLEEPING.register((entity, world) -> {
-            if (entity instanceof PlayerEntity) {
+            if (entity instanceof Player) {
                 onPlayerEndSleeping(entity);
             }
         });
         // allow sleep when status effect is active
         EntitySleepEvents.ALLOW_SLEEP_TIME.register((entity, world, pos) -> {
-            if (entity instanceof PlayerEntity) {
+            if (entity instanceof Player) {
                 if (EffectManager.hasTransformativeEffect(entity)) {
-                    return ActionResult.success(true);
+                    return InteractionResult.sidedSuccess(true);
                 }
                 else{
-                    return ActionResult.PASS;
+                    return InteractionResult.PASS;
                 }
             }
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
 
         /// Debug instinct: unregister this to see instinct debug info
@@ -365,7 +365,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     }
 
     private void onPlayerEndSleeping(LivingEntity entity) {
-        if (entity instanceof ServerPlayerEntity player) {
+        if (entity instanceof ServerPlayer player) {
             // handle transformative effects
             //LOGGER.info(EffectManager.EFFECT_ATTACHMENT.toString());
             //PlayerEffectAttachment attachment = player.getAttached(EffectManager.EFFECT_ATTACHMENT);
@@ -375,20 +375,20 @@ public class ShapeShifterCurseFabric implements ModInitializer {
                 EffectManager.ActiveTransformativeEffect(player);
                 // 触发自定义成就
                 ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT.trigger(player);
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.origin_form_sleep_when_attached").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_sleep_when_attached").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         }
     }
 
     private void onPlayerServerTick(MinecraftServer minecraftServer) {
-        List<ServerPlayerEntity> players = minecraftServer.getPlayerManager().getPlayerList();
+        List<ServerPlayer> players = minecraftServer.getPlayerList().getPlayers();
         if (players.isEmpty()) return;
 
         TransformManager.serverTick(minecraftServer);
         CursedMoon.serverTick(minecraftServer);
         InstinctUtils.serverTick(minecraftServer);
 
-        for(ServerPlayerEntity player : players) {
+        for(ServerPlayer player : players) {
             // handle instinct tick
             TickManager.tickServerAll();
 

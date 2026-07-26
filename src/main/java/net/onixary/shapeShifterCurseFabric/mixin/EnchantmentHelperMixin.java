@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.onixary.shapeShifterCurseFabric.additional_power.LootingPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.SoulSpeedPower;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,11 +32,11 @@ public class EnchantmentHelperMixin {
         return powerSoulSpeed.get();
     }
 
-    @Inject(method = "getEquipmentLevel", at = @At("RETURN"), cancellable = true)
-    private static void getEquipmentLevelMixin(RegistryEntry<Enchantment> enchantment, LivingEntity entity, CallbackInfoReturnable<Integer> cir) {
-        if (enchantment.matchesKey(Enchantments.LOOTING)) {
+    @Inject(method = "getEnchantmentLevel", at = @At("RETURN"), cancellable = true)
+    private static void getEquipmentLevelMixin(Holder<Enchantment> enchantment, LivingEntity entity, CallbackInfoReturnable<Integer> cir) {
+        if (enchantment.is(Enchantments.LOOTING)) {
             cir.setReturnValue(getLootingLevel(entity, cir.getReturnValue()));
-        } else if (enchantment.matchesKey(Enchantments.SOUL_SPEED)) {
+        } else if (enchantment.is(Enchantments.SOUL_SPEED)) {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
         }
     }

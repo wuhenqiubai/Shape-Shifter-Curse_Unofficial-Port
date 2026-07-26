@@ -170,3 +170,4 @@ build_*.txt
 /projects/
 /.codegraph/
 /CLAUDE.md
+/remappedSrc/

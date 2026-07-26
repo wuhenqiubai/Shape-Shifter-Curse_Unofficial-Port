@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -18,7 +18,7 @@ import java.util.Set;
 // 新形态变形引擎代码
 
 public interface IForm {
-    public @NotNull Identifier getFormID();
+    public @NotNull ResourceLocation getFormID();
 
     // HasSlowFall 整合进 flag 系统
     public @NotNull Set<String> getFormFlag();
@@ -30,21 +30,21 @@ public interface IForm {
     public void setFormGroup(IFormGroup group, int formTier);
 
     // 临时能力系统 等Origins移除后再写
-    public @NotNull Pair<Identifier, Identifier> getFormLayer();
+    public @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer();
 
-    public default @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
+    public default @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
         return null;
     }
 
     public @NotNull PlayerFormBodyType getBodyType();
 
     // 将 Name 合并进 ContentType
-    public default @NotNull Text getContentText(CodexData.ContentType type) {
-        return Text.translatable("codex.form." + this.getFormID().getNamespace() + "." + this.getFormID().getPath() + "." + type.toString().toLowerCase());
+    public default @NotNull Component getContentText(CodexData.ContentType type) {
+        return Component.translatable("codex.form." + this.getFormID().getNamespace() + "." + this.getFormID().getPath() + "." + type.toString().toLowerCase());
     }
 
     // 变形系统
-    public default @NotNull IForm _getNextForm(PlayerEntity player, ITransformReason reason) {
+    public default @NotNull IForm _getNextForm(Player player, ITransformReason reason) {
         IForm nextForm = getNextForm(player, reason);
         if (nextForm == null) {
             nextForm = reason.getFallBackNextForm(player, this);
@@ -60,7 +60,7 @@ public interface IForm {
         return nextForm;
     }
 
-    public default @NotNull IForm _getPrevForm(PlayerEntity player, ITransformReason reason) {
+    public default @NotNull IForm _getPrevForm(Player player, ITransformReason reason) {
         IForm prevForm = getPrevForm(player, reason);
         if (prevForm == null) {
             prevForm = reason.getFallBackPrevForm(player, this);
@@ -77,15 +77,15 @@ public interface IForm {
     }
 
     // 选择性处理 如果不匹配则必须返回null
-    public default @Nullable IForm getNextForm(PlayerEntity player, ITransformReason reason) {
+    public default @Nullable IForm getNextForm(Player player, ITransformReason reason) {
         return null;
     }
 
-    public default @Nullable IForm getPrevForm(PlayerEntity player, ITransformReason reason) {
+    public default @Nullable IForm getPrevForm(Player player, ITransformReason reason) {
         return null;
     }
 
-    public default @NotNull IForm getDefaultNextForm(PlayerEntity player, ITransformReason reason) {
+    public default @NotNull IForm getDefaultNextForm(Player player, ITransformReason reason) {
         IFormGroup group = this.getFormGroup();
         int tier = this.getFormTier() + 1;
         IForm result = null;
@@ -95,7 +95,7 @@ public interface IForm {
         return result == null ? this : result;
     }
 
-    public default @NotNull IForm getDefaultPrevForm(PlayerEntity player, ITransformReason reason) {
+    public default @NotNull IForm getDefaultPrevForm(Player player, ITransformReason reason) {
         IForm prevForm = FormUtils.getPrevForm(player);
         int tier = this.getFormTier() - 1;
         if (prevForm != null && prevForm.getFormTier() == tier) {
@@ -110,38 +110,38 @@ public interface IForm {
     }
 
     // 动画系统
-    public default @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
+    public default @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
         return null;
     }
 
-    public default void registerPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) { }
+    public default void registerPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData) { }
 
-    public default boolean isPowerAnimRegistered(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+    public default boolean isPowerAnimRegistered(Player player, AnimSystem.AnimSystemData animSystemData) {
         return true;
     }
 
-    public default @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
-        return new Pair<>(false, null);
+    public default @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
+        return new Tuple<>(false, null);
     }
 
     default void onRegister() { }
 
     // 3个Hook 顺序为当前形态onTransform_To 目标形态onTransform_From 目标形态onTransform_Finish
-    default void onTransform_From(PlayerEntity player, IForm prevForm) { }
+    default void onTransform_From(Player player, IForm prevForm) { }
 
-    default void onTransform_Finish(PlayerEntity player) { }
+    default void onTransform_Finish(Player player) { }
 
-    default void onTransform_To(PlayerEntity player, IForm nextForm) { }
+    default void onTransform_To(Player player, IForm nextForm) { }
 
     // 应用Layer后
-    default void afterApplyLayer(PlayerEntity player) { }
+    default void afterApplyLayer(Player player) { }
 
     // 所有Power修改结束
-    default void onApplyPowerEnd(PlayerEntity player) { }
+    default void onApplyPowerEnd(Player player) { }
 
     // Scale 系统
     // 先这样写 等我之后翻一下 pehkui 的代码
-    public void applyScale(PlayerEntity player);
+    public void applyScale(Player player);
 
     // Interface 没法重载boolean equal(Object)函数
     default boolean isEquals(IForm form) {
@@ -157,12 +157,12 @@ public interface IForm {
         return ThisMasterForm.isEquals(FormMasterForm);
     }
 
-    default boolean isPlayerForm(PlayerEntity player) {
+    default boolean isPlayerForm(Player player) {
         IForm playerForm = FormUtils.getPlayerForm(player);
         return this.isEquals(playerForm);
     }
 
-    default boolean isPlayerFormSoft(PlayerEntity player) {
+    default boolean isPlayerFormSoft(Player player) {
         IForm playerForm = FormUtils.getPlayerForm(player);
         return this.isSoftEquals(playerForm);
     }

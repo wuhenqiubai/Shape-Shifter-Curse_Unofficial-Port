@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.util.Accessory;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.items.accessory.AccessoryItem;
@@ -27,7 +27,7 @@ public class AccessoryUtils {
             return true;
         }
 
-        public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity);
+        public Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity);
 
         public List<@Nullable ItemStack> getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName);
 
@@ -36,23 +36,23 @@ public class AccessoryUtils {
         public void setEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index, ItemStack stack);
     }
 
-    public static void onPlayerEquip(PlayerEntity player, Identifier itemID, String pluginID) {
-        if (Registries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
+    public static void onPlayerEquip(Player player, ResourceLocation itemID, String pluginID) {
+        if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
         TrinketUtils.ApplyAccessoryPowerOnEquip(player, itemID);
         SSCEvent.ACCESSORY_EQUIP.invoker().onEvent(player, itemID, pluginID);
     }
 
-    public static void onPlayerUnEquip(PlayerEntity player, Identifier itemID, String pluginID) {
-        if (Registries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
+    public static void onPlayerUnEquip(Player player, ResourceLocation itemID, String pluginID) {
+        if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
         TrinketUtils.ApplyAccessoryPowerOnUnEquip(player, itemID);
         SSCEvent.ACCESSORY_UNEQUIP.invoker().onEvent(player, itemID, pluginID);
     }
 
-    public static boolean CanAutoExecute(Identifier itemID, String pluginID) {
+    public static boolean CanAutoExecute(ResourceLocation itemID, String pluginID) {
         return TrinketUtils.getAccessoryMixinAuto(itemID);
     }
 
@@ -67,18 +67,18 @@ public class AccessoryUtils {
         if (accessoryModInterfaces.isEmpty()) {
             return;
         }
-        List<Pair<AccessoryIO, Integer>> list = new ArrayList<>();
+        List<Tuple<AccessoryIO, Integer>> list = new ArrayList<>();
         for (Map.Entry<String, AccessoryIO> entry : accessoryModInterfaces.entrySet()) {
             if (entry.getValue().canLoaded()) {
-                list.add(new Pair<>(entry.getValue(), entry.getValue().priority()));
+                list.add(new Tuple<>(entry.getValue(), entry.getValue().priority()));
                 activeAccessoryModInterfaces.put(entry.getKey(), entry.getValue());
             } else {
                 ShapeShifterCurseFabric.LOGGER.warn("Accessory Mod: " + entry.getKey() + " can't loaded");
             }
         }
-        list.sort((o1, o2) -> o2.getRight() - o1.getRight());
+        list.sort((o1, o2) -> o2.getB() - o1.getB());
         if (!list.isEmpty()) {
-            nowAccessoryMod = list.get(0).getLeft();
+            nowAccessoryMod = list.get(0).getA();
         }
         for (Map.Entry<String, AccessoryIO> entry : accessoryModInterfaces.entrySet()) {
             if (entry.getValue() == nowAccessoryMod) {
@@ -100,7 +100,7 @@ public class AccessoryUtils {
     public static String nowAccessoryModID = "";
     public static AccessoryIO nowAccessoryMod = null;
 
-    public static @Nullable Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity, @Nullable String accessoryModID) {
+    public static @Nullable Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity, @Nullable String accessoryModID) {
         if (nowAccessoryMod == null) {
             return null;
         }

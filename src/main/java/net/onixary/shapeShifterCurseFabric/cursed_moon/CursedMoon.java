@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.cursed_moon;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
@@ -29,42 +29,42 @@ public class CursedMoon {
         return Arrays.stream(curseMoonPhase).anyMatch(phase -> phase == moonPhase);
     }
 
-    public static boolean isCursedMoonDay(World world) {
-        if (world.isClient) {
+    public static boolean isCursedMoonDay(Level world) {
+        if (world.isClientSide) {
             return CursedMoonClient.isCursedMoon;
         }
         int moonPhase = world.getMoonPhase();
         return isCursedMoonByPhase(moonPhase);
     }
 
-    public static boolean isNight(World world) {
-        long timeDayMoon = world.getTimeOfDay() % 24000;
+    public static boolean isNight(Level world) {
+        long timeDayMoon = world.getDayTime() % 24000;
         return timeDayMoon > 12000L && timeDayMoon < 23000L;
     }
 
-    public static boolean isInCursedMoon(World world) {
+    public static boolean isInCursedMoon(Level world) {
         return isCursedMoonDay(world) && isNight(world);
     }
 
-    public static void applyStartCursedMoonEffect(World world, PlayerEntity player) {
+    public static void applyStartCursedMoonEffect(Level world, Player player) {
         // java16+ 真神奇的写法
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
         }
         if (PlayerFormComponent.COMPONENT.get(player).isCursedMoonApplied) {
             return;
         }
-        boolean isOverworld = player.getWorld().getRegistryKey() == World.OVERWORLD;
+        boolean isOverworld = player.level().dimension() == Level.OVERWORLD;
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
             if (isOverworld) {
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.on_cursed_moon_before_enable").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_before_enable").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         } else {
             if(isOverworld){
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.on_cursed_moon").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
             else{
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.on_cursed_moon_nether").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
             ShapeShifterCurseFabric.ON_TRIGGER_CURSED_MOON.trigger(serverPlayer);
         }
@@ -89,31 +89,31 @@ public class CursedMoon {
         SSCEvent.CURSED_MOON_BEGIN.invoker().onEvent(player);
     }
 
-    public static void applyEndCursedMoonEffect(World world, PlayerEntity player) {
-        if (!(player instanceof ServerPlayerEntity serverPlayer)) {
+    public static void applyEndCursedMoonEffect(Level world, Player player) {
+        if (!(player instanceof ServerPlayer serverPlayer)) {
             return;
         }
         if (!PlayerFormComponent.COMPONENT.get(player).isCursedMoonApplied) {
             return;
         }
-        boolean isOverworld = player.getWorld().getRegistryKey() == World.OVERWORLD;
+        boolean isOverworld = player.level().dimension() == Level.OVERWORLD;
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
             if (isOverworld) {
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.end_cursed_moon_before_enable").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.end_cursed_moon_before_enable").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         } else {
             // 要不是可以用别的手段降级(比如我拓展的幻形石) 我直接查当前形态与AfterCursedMoonAppliedForm的等级差就行
             if (component.lastTransformByCure) {
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.end_cursed_moon_by_cure").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.end_cursed_moon_by_cure").withStyle(ChatFormatting.LIGHT_PURPLE));
                 ShapeShifterCurseFabric.ON_END_CURSED_MOON_CURED.trigger(serverPlayer);
                 if (component.AfterCursedMoonAppliedForm != null && component.AfterCursedMoonAppliedForm.getFormTier() == 1) {
                     ShapeShifterCurseFabric.ON_END_CURSED_MOON_CURED_FORM_2.trigger(serverPlayer);
                 }
             } else if(RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)){
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.end_cursed_moon_special").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.end_cursed_moon_special").withStyle(ChatFormatting.LIGHT_PURPLE));
             } else if (component.BeforeCursedMoonAppliedForm != null && component.AfterCursedMoonAppliedForm != null && component.AfterCursedMoonAppliedForm.isPlayerForm(player)) {
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.end_cursed_moon").formatted(Formatting.LIGHT_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.end_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
                 ShapeShifterCurseFabric.ON_END_CURSED_MOON.trigger(serverPlayer);
             }
         }
@@ -128,28 +128,28 @@ public class CursedMoon {
     }
 
     public static void serverTick(MinecraftServer minecraftServer) {
-        World world = minecraftServer.getWorld(World.OVERWORLD);
-        if (world.isClient) return;
-        long timeOfDay = world.getTimeOfDay();
+        Level world = minecraftServer.getLevel(Level.OVERWORLD);
+        if (world.isClientSide) return;
+        long timeOfDay = world.getDayTime();
         long nowDay = timeOfDay / 24000;
         long dayTime = timeOfDay % 24000;
         if (nowDay != day) {
             day = nowDay;
-            for (PlayerEntity player : minecraftServer.getPlayerManager().getPlayerList()) {
-                if (player instanceof ServerPlayerEntity serverPlayer) {
+            for (Player player : minecraftServer.getPlayerList().getPlayers()) {
+                if (player instanceof ServerPlayer serverPlayer) {
                     ModPacketsS2CServer.sendCursedMoonData(serverPlayer, isCursedMoonDay(world));
                 }
             }
         }
         if (isInCursedMoon(world)) {
-            for (PlayerEntity player : minecraftServer.getPlayerManager().getPlayerList()) {
+            for (Player player : minecraftServer.getPlayerList().getPlayers()) {
                 if(player.isSleeping() && !ShapeShifterCurseFabric.commonConfig.allowSleepInCursedMoon){
-                    player.wakeUp();
+                    player.stopSleeping();
                 }
                 applyStartCursedMoonEffect(world, player);
             }
         } else {
-            for (PlayerEntity player : minecraftServer.getPlayerManager().getPlayerList()) {
+            for (Player player : minecraftServer.getPlayerList().getPlayers()) {
                 applyEndCursedMoonEffect(world, player);
             }
         }
@@ -166,7 +166,7 @@ public class CursedMoon {
         return Optional.empty();
     }
 
-    public static void forceTriggerCursedMoon(ServerWorld world) {
+    public static void forceTriggerCursedMoon(ServerLevel world) {
         int currentPhase = world.getMoonPhase();
         Optional<Integer> nextCursedPhase = getNextCurseMoonPhase(currentPhase);
         if (nextCursedPhase.isEmpty()) {
@@ -180,22 +180,22 @@ public class CursedMoon {
         if (daysToSkip == 0) daysToSkip = 8; // 如果已经是诅咒月相，跳到下一个
 
         // 调整世界时间到目标月相
-        long currentTime = world.getTimeOfDay();
+        long currentTime = world.getDayTime();
         long newTime = currentTime + (daysToSkip * 24000L);
-        world.setTimeOfDay(newTime);
+        world.setDayTime(newTime);
 
         ShapeShifterCurseFabric.LOGGER.info("CursedMoon manually triggered! Skipped " + daysToSkip + " days to reach moon phase " + targetPhase);
 
         // 向所有玩家发送消息
-        for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {
             if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
-                player.sendMessage(Text.translatable("info.shape-shifter-curse.cursed_moon_forced").formatted(Formatting.DARK_PURPLE));
+                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.cursed_moon_forced").withStyle(ChatFormatting.DARK_PURPLE));
             }
         }
 
         // 立即向所有在线玩家同步状态
         boolean currentIsNight = isNight(world);
-        for (ServerPlayerEntity player : world.getServer().getPlayerManager().getPlayerList()) {
+        for (ServerPlayer player : world.getServer().getPlayerList().getPlayers()) {
             ModPacketsS2CServer.sendCursedMoonData(player, true);
         }
     }

@@ -4,14 +4,14 @@ import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.GameRules;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
@@ -32,9 +32,9 @@ public class PlayerEventHandler {
     public static void register() {
         // join event
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            if (handler.player.getWorld().isClient()) return;
+            if (handler.player.level().isClientSide()) return;
 
-            ServerPlayerEntity player = handler.player;
+            ServerPlayer player = handler.player;
 
             RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
             // 成就仅一次触发 不如直接由成就系统管理是否为初次进入
@@ -75,7 +75,7 @@ public class PlayerEventHandler {
             EffectManager.ReloadPlayerEffect(player);
 
             // 修改为使用新的月相判定系统
-            ServerWorld world = server.getOverworld();
+            ServerLevel world = server.overworld();
 
             // 立即同步当前状态给玩家
             ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(world));
@@ -92,8 +92,8 @@ public class PlayerEventHandler {
 
                 // 在主线程中执行同步
                 server.execute(() -> {
-                    if (player.networkHandler != null && !player.isDisconnected()) {
-                        ServerWorld currentWorld = player.getServerWorld();
+                    if (player.connection != null && !player.hasDisconnected()) {
+                        ServerLevel currentWorld = player.serverLevel();
                         ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(currentWorld));
                     }
                 });
@@ -114,7 +114,7 @@ public class PlayerEventHandler {
         // copy event
         ServerPlayerEvents.COPY_FROM.register((oldPlayer, newPlayer, alive) -> {
             // 仅在服务端执行
-            if (newPlayer.getWorld().isClient()) return;
+            if (newPlayer.level().isClientSide()) return;
 
             copyTransformativeEffect(oldPlayer, newPlayer);
             copyFormAndAbility(oldPlayer, newPlayer);
@@ -123,7 +123,7 @@ public class PlayerEventHandler {
 
         //load event
         ServerWorldEvents.LOAD.register((server, world) -> {
-            for (ServerPlayerEntity player : world.getPlayers()) {
+            for (ServerPlayer player : world.players()) {
                 IForm form = FormUtils.getPlayerForm(player);
                 if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
                     FormUtils.applyFallback(player);
@@ -152,7 +152,7 @@ public class PlayerEventHandler {
                 // CursedMoon.resetMoonEffect(player);
 
                 // Set doDaylightCycle to true forced
-                server.getGameRules().get(GameRules.DO_DAYLIGHT_CYCLE).set(true, server);
+                server.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, server);
                 MobTeamManager.registerTeam(world);
             }
         });
@@ -175,7 +175,7 @@ public class PlayerEventHandler {
         ServerTickEvents.END_SERVER_TICK.register(server -> JumpEventCondition.tick());
     }
 
-    private static void copyTransformativeEffect(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer) {
+    private static void copyTransformativeEffect(ServerPlayer oldPlayer, ServerPlayer newPlayer) {
         /* 重构后不需要了 仅用于参考旧实现逻辑
         // transformative effect attachment
         PlayerEffectAttachment oldAttachment = oldPlayer.getAttached(EffectManager.EFFECT_ATTACHMENT);
@@ -208,14 +208,14 @@ public class PlayerEventHandler {
             return;
         }
         EffectManager.clearTransformativeEffect(newPlayer);
-        newPlayer.addStatusEffect(transformativeStatusInstance);
+        newPlayer.addEffect(transformativeStatusInstance);
     }
 
-    private static void copyFormAndAbility(ServerPlayerEntity oldPlayer, ServerPlayerEntity newPlayer) {
+    private static void copyFormAndAbility(ServerPlayer oldPlayer, ServerPlayer newPlayer) {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
-        NbtCompound nbt = new NbtCompound();
-        var lookup = Objects.requireNonNull(oldPlayer.getServer()).getRegistryManager();
+        CompoundTag nbt = new CompoundTag();
+        var lookup = Objects.requireNonNull(oldPlayer.getServer()).registryAccess();
         oldComponent.writeToNbt(nbt, lookup);
         newComponent.readFromNbt(nbt, lookup);
         // CCA 的 ALWAYS_COPY 已自动复制了组件和 origin。
@@ -223,15 +223,15 @@ public class PlayerEventHandler {
         // 只需应用 scale 并通知客户端即可。
         IForm form = newComponent.nowForm;
         form.applyScale(newPlayer);
-        if (!newPlayer.getWorld().isClient()) {
+        if (!newPlayer.level().isClientSide()) {
             ModPacketsS2CServer.sendFormChange(newPlayer, form.getFormID());
         }
     }
 
-    private static void handleEntityTeam(ServerWorld world){
+    private static void handleEntityTeam(ServerLevel world){
         Scoreboard scoreboard = world.getScoreboard();
-        Team sorceryTeam = scoreboard.getTeam(MobTeamManager.SORCERY_TEAM_NAME);
-        for (Entity entity : world.iterateEntities()) {
+        PlayerTeam sorceryTeam = scoreboard.getPlayerTeam(MobTeamManager.SORCERY_TEAM_NAME);
+        for (Entity entity : world.getAllEntities()) {
             // Sorcery Team
             if (entity.getType() == EntityType.EVOKER
             || entity.getType() == EntityType.WITCH
@@ -240,7 +240,7 @@ public class PlayerEventHandler {
             || entity.getType() == EntityType.RAVAGER)
             {
                 if (sorceryTeam != null) {
-                    scoreboard.addScoreHolderToTeam(entity.getNameForScoreboard(), sorceryTeam);
+                    scoreboard.addPlayerToTeam(entity.getScoreboardName(), sorceryTeam);
                 }
             }
         }

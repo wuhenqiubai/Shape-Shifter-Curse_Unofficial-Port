@@ -4,16 +4,16 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Pair;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.TempWebBridgeBlock;
@@ -25,22 +25,22 @@ public class WebBridgeAction {
     public record WebLadderConfig(int SideBlockNum, int BottomBlockNum, int TopBlockNum, boolean LargerLadder, float LargerLadderCountPercent) {}
     public record WebBridgeConfig(int Length, int Width) {}
 
-    public static boolean SetWebBlock(World world, BlockPos pos, Block WebBlock, Direction facing) {
+    public static boolean SetWebBlock(Level world, BlockPos pos, Block WebBlock, Direction facing) {
         BlockState blockState = world.getBlockState(pos);
-        if (blockState.isAir() || blockState.isOf(WebBlock)) {
-            BlockState state = WebBlock.getDefaultState().with(TempWebBridgeBlock.HORIZONTAL_FACING, facing);
-            world.setBlockState(pos, state);
+        if (blockState.isAir() || blockState.is(WebBlock)) {
+            BlockState state = WebBlock.defaultBlockState().setValue(TempWebBridgeBlock.HORIZONTAL_FACING, facing);
+            world.setBlockAndUpdate(pos, state);
             return true;
         }
         return false;
     }
 
-    public static void BuildWebLadder(World world, BlockHitResult blockHitResult, WebLadderConfig config, Block LadderBlock) {
+    public static void BuildWebLadder(Level world, BlockHitResult blockHitResult, WebLadderConfig config, Block LadderBlock) {
         BlockPos pos = blockHitResult.getBlockPos();
-        Direction direction = blockHitResult.getSide();
+        Direction direction = blockHitResult.getDirection();
 
         Direction[] horizontalDirections = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-        Random random = world.getRandom();
+        RandomSource random = world.getRandom();
 
         BlockPos NowPos = null;
         Direction LadderDirection = null;
@@ -49,17 +49,17 @@ public class WebBridgeAction {
 
         switch (direction) {
             case UP -> {
-                NowPos = pos.up();
+                NowPos = pos.above();
                 LadderDirection = Direction.UP;
                 Length = config.TopBlockNum;
             }
             case DOWN -> {
-                NowPos = pos.down();
+                NowPos = pos.below();
                 LadderDirection = Direction.DOWN;
                 Length = config.BottomBlockNum;
             }
             case NORTH, WEST, EAST, SOUTH -> {
-                NowPos = pos.offset(direction);
+                NowPos = pos.relative(direction);
                 LadderDirection = Direction.DOWN;
                 Length = config.SideBlockNum;
             }
@@ -83,11 +83,11 @@ public class WebBridgeAction {
                 SetWebBlock(world, NowPos.south(), LadderBlock, randomFacing);
                 LargerLadderCount--;
             }
-            NowPos = NowPos.offset(LadderDirection);
+            NowPos = NowPos.relative(LadderDirection);
         }
     }
 
-    public static void BuildWebBridge(World world, BlockPos pos, Direction direction, WebBridgeConfig config, Block WebBlock) {
+    public static void BuildWebBridge(Level world, BlockPos pos, Direction direction, WebBridgeConfig config, Block WebBlock) {
         BlockPos NowPos = pos;
         BlockPos TempPos = pos;
         Direction TempDirection = direction;
@@ -96,45 +96,45 @@ public class WebBridgeAction {
         }
         // 预定义水平方向数组，用于随机选择
         Direction[] horizontalDirections = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
-        Random random = world.getRandom();
+        RandomSource random = world.getRandom();
         
         for (int k = -config.Width; k <= config.Width; k++) {
             for (int m = -config.Width; m <= config.Width; m++) {
                 Direction randomFacing = horizontalDirections[random.nextInt(horizontalDirections.length)];
-                SetWebBlock(world, pos.add(k, 0, m), WebBlock, randomFacing);
+                SetWebBlock(world, pos.offset(k, 0, m), WebBlock, randomFacing);
             }
         }
         for (int i = 0; i < config.Length; i++) {
             Direction randomFacing = horizontalDirections[random.nextInt(horizontalDirections.length)];
             SetWebBlock(world, NowPos, WebBlock, randomFacing);
             TempPos = NowPos;
-            TempDirection = direction.rotateYClockwise();
+            TempDirection = direction.getClockWise();
             for (int j = 0; j < config.Width; j++) {
-                TempPos = TempPos.offset(TempDirection);
+                TempPos = TempPos.relative(TempDirection);
                 randomFacing = horizontalDirections[random.nextInt(horizontalDirections.length)];
                 SetWebBlock(world, TempPos, WebBlock, randomFacing);
             }
             TempPos = NowPos;
-            TempDirection = direction.rotateYCounterclockwise();
+            TempDirection = direction.getCounterClockWise();
             for (int j = 0; j < config.Width; j++) {
-                TempPos = TempPos.offset(TempDirection);
+                TempPos = TempPos.relative(TempDirection);
                 randomFacing = horizontalDirections[random.nextInt(horizontalDirections.length)];
                 SetWebBlock(world, TempPos, WebBlock, randomFacing);
             }
-            NowPos = NowPos.offset(direction);
+            NowPos = NowPos.relative(direction);
         }
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("web_bridge"),
                 new SerializableData()
                         .add("web_bridge_length", SerializableDataTypes.INT, 16)
                         .add("web_bridge_width", SerializableDataTypes.INT, 0),
                 (data, entity) -> {
-                    BlockPos pos = entity.getBlockPos().down();
-                    if (entity.isSneaking()) {
-                        pos = pos.up();
+                    BlockPos pos = entity.blockPosition().below();
+                    if (entity.isShiftKeyDown()) {
+                        pos = pos.above();
                         // 如果需要俯仰角控制就取消下面的注释 并且把上面的 "pos = pos.up();" 给注释掉
                         // Vec3d player_pos = entity.getPos();
                         // if (player_pos.getY() - pos.up().getY() > 0.025) {
@@ -149,8 +149,8 @@ public class WebBridgeAction {
                         //     pos = pos.up();
                         // }
                     }
-                    Direction direction = entity.getHorizontalFacing();
-                    BuildWebBridge(entity.getWorld(), pos, direction, new WebBridgeConfig(data.getInt("web_bridge_length"), data.getInt("web_bridge_width")), RegCustomBlock.TEMP_WEB_BRIDGE);
+                    Direction direction = entity.getDirection();
+                    BuildWebBridge(entity.level(), pos, direction, new WebBridgeConfig(data.getInt("web_bridge_length"), data.getInt("web_bridge_width")), RegCustomBlock.TEMP_WEB_BRIDGE);
                 }
         ));
 
@@ -166,8 +166,8 @@ public class WebBridgeAction {
                 (data, entity) -> {
                     if (entity instanceof LivingEntity livingEntity) {
                         WebBullet webBullet = new WebBullet(livingEntity, data.getInt("tier"), data.getBoolean("enable_entangled_effect"), data.getBoolean("enable_top_block_build"));
-                        webBullet.setVelocity(livingEntity, livingEntity.getPitch(), livingEntity.getYaw(), 0.0f, data.getFloat("speed"), data.getFloat("divergence"));
-                        livingEntity.getWorld().spawnEntity(webBullet);
+                        webBullet.shootFromRotation(livingEntity, livingEntity.getXRot(), livingEntity.getYRot(), 0.0f, data.getFloat("speed"), data.getFloat("divergence"));
+                        livingEntity.level().addFreshEntity(webBullet);
                         data.<Consumer<Entity>>ifPresent("projectile_action", projectileAction -> projectileAction.accept(webBullet));
                     }
                 }

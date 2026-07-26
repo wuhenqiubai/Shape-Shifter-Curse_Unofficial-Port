@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
 
@@ -12,10 +12,10 @@ import java.util.List;
 
 public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
     private final Screen PreviousScreen;
-    private final Text DetailText;
+    private final Component DetailText;
 
-    public DetailScreen(Screen PreviousScreen, Text DetailText) {
-        super(Text.of("Detail Screen"));
+    public DetailScreen(Screen PreviousScreen, Component DetailText) {
+        super(Component.nullToEmpty("Detail Screen"));
         this.PreviousScreen = PreviousScreen;
         this.DetailText = DetailText;
     }
@@ -26,33 +26,33 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
         int TextSizeX = width - TextX * 2;
         int TextSizeY = height - 60;
         int TextDefaultColor = 0xFFFFFF;
-        ScaleScrollTextWidget DetailTextWidget = (ScaleScrollTextWidget) new ScaleScrollTextWidget(TextX, TextY, TextSizeX, TextSizeY / 9, 1.0f, DetailText, textRenderer).setTextColor(TextDefaultColor);
+        ScaleScrollTextWidget DetailTextWidget = (ScaleScrollTextWidget) new ScaleScrollTextWidget(TextX, TextY, TextSizeX, TextSizeY / 9, 1.0f, DetailText, font).setColor(TextDefaultColor);
         DetailTextWidget.setEnableScrollableIconRender(true);
-        this.addWidget(DetailTextWidget);
-        this.addDrawableChild(DetailTextWidget);
+        this.addWidget((WidgetEXUtils.IWidgetEX) DetailTextWidget);
+        this.addRenderableWidget(DetailTextWidget);
         int ButtonX = width - 30;
         int ButtonY = 10;
         int ButtonSizeX = 20;
         int ButtonSizeY = 20;
-        ButtonWidget CloseButton = ButtonWidget.builder(Text.of("X"), (button) -> {this.close();}).position(ButtonX, ButtonY).size(ButtonSizeX, ButtonSizeY).build();
-        this.addDrawableChild(CloseButton);
+        Button CloseButton = Button.builder(Component.nullToEmpty("X"), (button) -> {this.onClose();}).pos(ButtonX, ButtonY).size(ButtonSizeX, ButtonSizeY).build();
+        this.addRenderableWidget(CloseButton);
     }
 
     @Override
-    public void close() {
-	    if (this.client != null) {
-		    this.client.setScreen(this.PreviousScreen);
+    public void onClose() {
+	    if (this.minecraft != null) {
+		    this.minecraft.setScreen(this.PreviousScreen);
 	    }
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         context.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 

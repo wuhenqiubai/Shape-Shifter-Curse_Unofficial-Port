@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 
 import java.security.PublicKey;
 import java.util.Arrays;
@@ -16,7 +16,7 @@ public final class KeySegment {
     private final int[] supportDataTypes;
     private final PublicKey publicKey;
 
-    KeySegment(PacketByteBuf buf) {
+    KeySegment(FriendlyByteBuf buf) {
         this.raw = AuthUtils.getBufArray(buf);
         buf.skipBytes(4);  // Length
         this.type = buf.readInt();

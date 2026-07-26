@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.recipes;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.SmithingScreenHandler;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.item.ItemStack;
 
 public interface ISmithingRecipeEX {
     public boolean overrideVanillaOnTakeOutput();
 
-    public void onTakeOutput(SmithingScreenHandler screenHandler, PlayerEntity player, ItemStack stack);
+    public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack);
 }

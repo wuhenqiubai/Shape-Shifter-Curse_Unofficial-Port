@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
@@ -18,12 +18,12 @@ public class EmptyController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public boolean isRegistered(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public boolean isRegistered(Player player, AnimSystem.AnimSystemData data) {
         return true;
     }
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
         return null;
     }
 

@@ -6,8 +6,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class KeepSneakingPower extends Power {
@@ -19,9 +19,9 @@ public class KeepSneakingPower extends Power {
         this.condition = condition;
     }
 
-    public boolean shouldForceSneak(PlayerEntity player) {
+    public boolean shouldForceSneak(Player player) {
         // 在水中时不强制潜行
-        if (player.isSubmergedInWater() || player.isInsideWaterOrBubbleColumn()) {
+        if (player.isUnderWater() || player.isInWaterOrBubble()) {
             return false;
         }
 

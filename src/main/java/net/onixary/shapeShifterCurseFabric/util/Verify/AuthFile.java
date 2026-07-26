@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -20,7 +20,7 @@ public final class AuthFile {
     private KeySegment keySegment;
     private IDataSegment[] dataSegments;
 
-    AuthFile(PacketByteBuf buf) {
+    AuthFile(FriendlyByteBuf buf) {
         this.raw = AuthUtils.getBufArray(buf);;
         try {
             this.read(buf);
@@ -29,7 +29,7 @@ public final class AuthFile {
         }
     }
 
-    private void read(PacketByteBuf buf) throws IOException {
+    private void read(FriendlyByteBuf buf) throws IOException {
         int rollBack = 0;
         AuthUtils.requireTrue(Arrays.equals(AuthUtils.getBufArray(buf.readBytes(MAGIC_NUMBER_LENGTH)), MAGIC_NUMBER), "MAGIC_NUMBER does not match");
         int version = buf.readInt();
@@ -39,13 +39,13 @@ public final class AuthFile {
         int keySegmentLength = buf.readInt();
         buf.setIndex(rollBack, buf.capacity());
         // 解析密钥段
-        PacketByteBuf keyBuf = new PacketByteBuf(buf.readBytes(keySegmentLength));
+        FriendlyByteBuf keyBuf = new FriendlyByteBuf(buf.readBytes(keySegmentLength));
         this.keySegment = new KeySegment(keyBuf);
         // 读取数据段Bytes
         rollBack = buf.readerIndex();
         int dataSegmentLength = buf.readInt();
         buf.setIndex(rollBack, buf.capacity());
-        PacketByteBuf dataBuf = new PacketByteBuf(buf.readBytes(dataSegmentLength));
+        FriendlyByteBuf dataBuf = new FriendlyByteBuf(buf.readBytes(dataSegmentLength));
         // 验证数据段
         byte[] signature = AuthUtils.getBufArray(buf.readBytes(114));
         byte[] data = AuthUtils.getBufArray(dataBuf.readBytes(dataBuf.readableBytes()));
@@ -69,11 +69,11 @@ public final class AuthFile {
             dataBuf.skipBytes(8);
             int dataLength = dataBuf.readInt();
             dataBuf.setIndex(rollBack, dataBuf.capacity());
-            this.dataSegments[i] = AuthUtils.readDataSegment(new PacketByteBuf(dataBuf.readBytes(dataLength)));
+            this.dataSegments[i] = AuthUtils.readDataSegment(new FriendlyByteBuf(dataBuf.readBytes(dataLength)));
         }
     }
 
-    public void onGain(PlayerEntity player) {
+    public void onGain(Player player) {
         for (IDataSegment segment : this.dataSegments) {
             if (segment == null) {
                 return;
@@ -91,7 +91,7 @@ public final class AuthFile {
         }
     }
 
-    public void onLost(PlayerEntity player) {
+    public void onLost(Player player) {
         for (IDataSegment segment : this.dataSegments) {
             if (segment == null) {
                 return;
@@ -109,7 +109,7 @@ public final class AuthFile {
         }
     }
 
-    public void onUpdate(PlayerEntity player, AuthFile newAuthFile) {
+    public void onUpdate(Player player, AuthFile newAuthFile) {
         for (IDataSegment segment : this.dataSegments) {
             for (IDataSegment newSegment : newAuthFile.dataSegments) {
                 if (segment != null && newSegment != null && segment.isSameSlot(newSegment)) {
@@ -144,7 +144,7 @@ public final class AuthFile {
         return obj instanceof AuthFile && Arrays.equals(((AuthFile) obj).raw, this.raw);
     }
 
-    public boolean removeDataSegment(PlayerEntity player, IDataSegment dataSegment) {
+    public boolean removeDataSegment(Player player, IDataSegment dataSegment) {
         for (int i = 0; i < this.dataSegments.length; i++) {
             if (this.dataSegments[i].equals(dataSegment)) {
                 this.dataSegments[i].onLost(player);

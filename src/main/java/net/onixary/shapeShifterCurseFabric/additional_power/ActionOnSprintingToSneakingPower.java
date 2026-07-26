@@ -6,9 +6,9 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Predicate;
@@ -25,7 +25,7 @@ public class ActionOnSprintingToSneakingPower extends Power {
     }
 
     public void executeAction() {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             // 检查condition是否满足
             if (entityCondition == null || entityCondition.test(player)) {
                 // 执行action

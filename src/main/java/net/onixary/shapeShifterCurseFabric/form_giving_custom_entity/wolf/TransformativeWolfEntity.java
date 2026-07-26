@@ -1,29 +1,32 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.goal.*;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.AbstractSkeletonEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.LlamaEntity;
-import net.minecraft.entity.passive.TurtleEntity;
-import net.minecraft.entity.passive.WolfEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.LocalDifficulty;
-import net.minecraft.world.ServerWorldAccess;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.DifficultyInstance;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.*;
+import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
+import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.animal.Turtle;
+import net.minecraft.world.entity.animal.Wolf;
+import net.minecraft.world.entity.animal.horse.Llama;
+import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.TWolfFriendlyPower;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
@@ -34,54 +37,54 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_ANUBIS_WOLF_0_EFFECT;
 
-public class TransformativeWolfEntity extends WolfEntity implements ITMob {
-    public TransformativeWolfEntity(EntityType<? extends WolfEntity> entityType, World world) {
+public class TransformativeWolfEntity extends Wolf implements ITMob {
+    public TransformativeWolfEntity(EntityType<? extends Wolf> entityType, Level world) {
         super(entityType, world);
     }
 
     @Override
-    public EntityData initialize(ServerWorldAccess world, LocalDifficulty difficulty, SpawnReason spawnReason, @Nullable EntityData entityData) {
-        return super.initialize(world, difficulty, spawnReason, entityData);
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData) {
+        return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
     private float cooldown = 0;
 
     @Override
-    protected void initGoals() {
-        this.goalSelector.add(1, new SwimGoal(this));
-        this.goalSelector.add(1, new EscapeDangerGoal(this, 1.5));
-        this.goalSelector.add(2, new SitGoal(this));
-        this.goalSelector.add(3, new WolfEntity.AvoidLlamaGoal<>(this, LlamaEntity.class, 24.0F, 1.5, 1.5));
-        this.goalSelector.add(4, new PounceAtTargetGoal(this, 0.4F));
-        this.goalSelector.add(5, new MeleeAttackGoal(this, 1.0, true));
-        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0));
-        this.goalSelector.add(7, new WanderAroundFarGoal(this, 1.0));
-        this.goalSelector.add(8, new WolfBegGoal(this, 8.0F));
-        this.goalSelector.add(10, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.add(10, new LookAroundGoal(this));
-        this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true));
-        this.targetSelector.add(2, (new RevengeGoal(this)).setGroupRevenge());
-        this.targetSelector.add(3, new UntamedActiveTargetGoal<>(this, TurtleEntity.class, false, null));
-        this.targetSelector.add(4, new ActiveTargetGoal<>(this, AbstractSkeletonEntity.class, false));
-        this.targetSelector.add(5, new UniversalAngerGoal<>(this, true));
+    protected void registerGoals() {
+        this.goalSelector.addGoal(1, new FloatGoal(this));
+        this.goalSelector.addGoal(1, new PanicGoal(this, 1.5));
+        this.goalSelector.addGoal(2, new SitWhenOrderedToGoal(this));
+        this.goalSelector.addGoal(3, new Wolf.WolfAvoidEntityGoal<>(this, Llama.class, 24.0F, 1.5, 1.5));
+        this.goalSelector.addGoal(4, new LeapAtTargetGoal(this, 0.4F));
+        this.goalSelector.addGoal(5, new MeleeAttackGoal(this, 1.0, true));
+        this.goalSelector.addGoal(6, new BreedGoal(this, 1.0));
+        this.goalSelector.addGoal(7, new WaterAvoidingRandomStrollGoal(this, 1.0));
+        this.goalSelector.addGoal(8, new BegGoal(this, 8.0F));
+        this.goalSelector.addGoal(10, new LookAtPlayerGoal(this, Player.class, 8.0F));
+        this.goalSelector.addGoal(10, new RandomLookAroundGoal(this));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        this.targetSelector.addGoal(2, (new HurtByTargetGoal(this)).setAlertOthers());
+        this.targetSelector.addGoal(3, new NonTameRandomTargetGoal<>(this, Turtle.class, false, null));
+        this.targetSelector.addGoal(4, new NearestAttackableTargetGoal<>(this, AbstractSkeleton.class, false));
+        this.targetSelector.addGoal(5, new ResetUniversalAngerTargetGoal<>(this, true));
     }
 
-    public static DefaultAttributeContainer.Builder createAttributes() {
+    public static AttributeSupplier.Builder createAttributes() {
         // 我觉得把逆天攻击距离移除之后 攻击力高点也没多大问题
-        return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 12.0)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 3.0f)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.2);
+        return Mob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 12.0)
+                .add(Attributes.ATTACK_DAMAGE, 3.0f)
+                .add(Attributes.MOVEMENT_SPEED, 0.2);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeWolfEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeWolfEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
         BlockPos NowCheckPos = pos;
         // 脚下如果藏有TNT 则不生成 防止沙漠神殿自爆
         for (int i = 0; i < 5; i++) {
             if (world.getBlockState(NowCheckPos).getBlock() == Blocks.TNT) {
                 return false;
             }
-            NowCheckPos = NowCheckPos.down();
+            NowCheckPos = NowCheckPos.below();
         }
         float Chance = ShapeShifterCurseFabric.commonConfig.transformativeWolfSpawnChance;
         if (Chance <= 0.0f) { return false; }
@@ -90,13 +93,13 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     }
 
     @Override
-    public boolean canTarget(LivingEntity target) {
-        if (target instanceof PlayerEntity playerEntity) {
+    public boolean canAttack(LivingEntity target) {
+        if (target instanceof Player playerEntity) {
             if (PowerHolderComponent.hasPower(playerEntity, TWolfFriendlyPower.class)) {
                 return false;
             }
         }
-        return super.canTarget(target);
+        return super.canAttack(target);
     }
 
     @Override
@@ -108,9 +111,9 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
         }
 
         // 生成粒子效果
-        if (this.getWorld().isClient) {
+        if (this.level().isClientSide) {
             for (int i = 0; i < 1; i++) {
-                this.getWorld().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
+                this.level().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
                         this.getX() + (this.random.nextDouble() - 0.5) * 0.5,
                         this.getY() + this.random.nextDouble() * 0.5,
                         this.getZ() + (this.random.nextDouble() - 0.5) * 0.5,
@@ -120,48 +123,48 @@ public class TransformativeWolfEntity extends WolfEntity implements ITMob {
     }
 
     @Override
-    public void onAttacking(Entity target) {
+    public void setLastHurtMob(Entity target) {
         // 在applyStatusByChance里面已经判断形态了 无需在外面判断
-        if (target instanceof PlayerEntity player) {
+        if (target instanceof Player player) {
             TStatusApplier.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        if(target instanceof PlayerEntity) {
-            this.onAttacking(target);
-            boolean attacked = target.damage(this.getDamageSources().mobAttack(this), (float)this.getAttributeValue(EntityAttributes.GENERIC_ATTACK_DAMAGE));
+    public boolean doHurtTarget(Entity target) {
+        if(target instanceof Player) {
+            this.setLastHurtMob(target);
+            boolean attacked = target.hurt(this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
             return attacked;
         }
-        return super.tryAttack(target);
+        return super.doHurtTarget(target);
     }
 
     // 禁止与此生物交互 防止使用Wolf的驯服逻辑
     @Override
-    public ActionResult interactMob(PlayerEntity player, Hand hand) {
-        return ActionResult.PASS;
+    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+        return InteractionResult.PASS;
     }
 
     @Override
-    public void setOwner(PlayerEntity player) {
+    public void tame(Player player) {
         return;
     }
 
     @Override
-    protected RegistryKey<LootTable> getLootTableId() {
-        return RegistryKey.of(RegistryKeys.LOOT_TABLE, Identifier.of(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf"));
+    protected ResourceKey<LootTable> getDefaultLootTable() {
+        return ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf"));
     }
 
-    protected RegistryKey<LootTable> getLootTableKey() {
-        return RegistryKey.of(
-                RegistryKeys.LOOT_TABLE,
-                Identifier.of(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf")
+    protected ResourceKey<LootTable> getLootTableKey() {
+        return ResourceKey.create(
+                Registries.LOOT_TABLE,
+                ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf")
         );
     }
 
     @Override
-    public void setTamed(boolean tamed, boolean updateAttributes) {
+    public void setTame(boolean tamed, boolean updateAttributes) {
     }
 
     @Override

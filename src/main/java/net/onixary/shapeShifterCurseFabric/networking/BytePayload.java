@@ -1,11 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -13,38 +12,38 @@ import java.util.concurrent.ConcurrentHashMap;
  * to Fabric 1.21 CustomPayload API.
  * Each packet ID still uses an Identifier; the payload wraps the raw buf.
  */
-public record BytePayload(Id<BytePayload> id, PacketByteBuf data) implements CustomPayload {
+public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements CustomPacketPayload {
 
-    private static final ConcurrentHashMap<Identifier, Id<BytePayload>> IDS = new ConcurrentHashMap<>();
-    private static final java.util.HashSet<Identifier> REGISTERED_S2C = new java.util.HashSet<>();
-    private static final java.util.HashSet<Identifier> REGISTERED_C2S = new java.util.HashSet<>();
+    private static final ConcurrentHashMap<ResourceLocation, Type<BytePayload>> IDS = new ConcurrentHashMap<>();
+    private static final java.util.HashSet<ResourceLocation> REGISTERED_S2C = new java.util.HashSet<>();
+    private static final java.util.HashSet<ResourceLocation> REGISTERED_C2S = new java.util.HashSet<>();
 
-    public static Id<BytePayload> id(Identifier identifier) {
-	    return IDS.computeIfAbsent(identifier, Id::new);
+    public static Type<BytePayload> id(ResourceLocation identifier) {
+	    return IDS.computeIfAbsent(identifier, Type::new);
     }
 
     /** Create a per-ID CODEC whose decoder returns the correct Id */
-    private static PacketCodec<PacketByteBuf, BytePayload> codecFor(Id<BytePayload> pid) {
-        return PacketCodec.of(
+    private static StreamCodec<FriendlyByteBuf, BytePayload> codecFor(Type<BytePayload> pid) {
+        return StreamCodec.ofMember(
             (payload, buf) -> buf.writeBytes(payload.data.readBytes(payload.data.readableBytes())),
-            buf -> new BytePayload(pid, new PacketByteBuf(buf.readBytes(buf.readableBytes())))
+            buf -> new BytePayload(pid, new FriendlyByteBuf(buf.readBytes(buf.readableBytes())))
         );
     }
 
     /** Shorthand: register S2C (idempotent) */
-    public static void registerS2C(Identifier identifier) {
+    public static void registerS2C(ResourceLocation identifier) {
         if (REGISTERED_S2C.add(identifier)) {
             PayloadTypeRegistry.playS2C().register(id(identifier), codecFor(id(identifier)));
         }
     }
 
     /** Shorthand: register C2S (idempotent) */
-    public static void registerC2S(Identifier identifier) {
+    public static void registerC2S(ResourceLocation identifier) {
         if (REGISTERED_C2S.add(identifier)) {
             PayloadTypeRegistry.playC2S().register(id(identifier), codecFor(id(identifier)));
         }
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() { return id; }
+    public Type<? extends CustomPacketPayload> type() { return id; }
 }

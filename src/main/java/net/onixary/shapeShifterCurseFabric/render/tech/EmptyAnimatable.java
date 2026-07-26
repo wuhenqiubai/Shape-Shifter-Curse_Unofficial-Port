@@ -1,15 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
+import net.minecraft.client.Minecraft;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
-import software.bernie.geckolib.animation.Animation;
-import software.bernie.geckolib.animation.AnimationController;
-import software.bernie.geckolib.animation.RawAnimation;
-import software.bernie.geckolib.animation.PlayState;
-import net.minecraft.client.MinecraftClient;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import software.bernie.geckolib.animation.*;
 
 public class EmptyAnimatable implements GeoAnimatable {
     AnimatableInstanceCache cache = new SingletonAnimatableInstanceCache(this);
@@ -29,6 +25,6 @@ public class EmptyAnimatable implements GeoAnimatable {
 
     @Override
     public double getTick(Object object) {
-        return MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
     }
 }

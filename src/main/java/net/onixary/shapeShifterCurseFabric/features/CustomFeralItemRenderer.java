@@ -3,39 +3,35 @@ package net.onixary.shapeShifterCurseFabric.features;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.map.MapState;
-import net.minecraft.util.Arm;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.*;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class CustomFeralItemRenderer {
-	private static final RenderLayer MAP_BACKGROUND = RenderLayer.getText(Identifier.of("textures/map/map_background.png"));
-	private static final RenderLayer MAP_BACKGROUND_CHECKERBOARD = RenderLayer.getText(Identifier.of("textures/map/map_background_checkerboard.png"));
+	private static final RenderType MAP_BACKGROUND = RenderType.text(ResourceLocation.parse("textures/map/map_background.png"));
+	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(ResourceLocation.parse("textures/map/map_background_checkerboard.png"));
 	private static final float field_32735 = -0.4F;
 	private static final float field_32736 = 0.2F;
 	private static final float field_32737 = -0.2F;
@@ -106,7 +102,7 @@ public class CustomFeralItemRenderer {
 	private static final float field_32732 = 0.0F;
 	private static final float field_32733 = 0.2F;
 	private static final float field_32734 = 0.1F;
-	private final MinecraftClient client;
+	private final Minecraft client;
 	public ItemStack mainHand = ItemStack.EMPTY;
 	private ItemStack offHand = ItemStack.EMPTY;
 	public float equipProgressMainHand;
@@ -116,7 +112,7 @@ public class CustomFeralItemRenderer {
 	private final EntityRenderDispatcher entityRenderDispatcher;
 	private final ItemRenderer itemRenderer;
 
-	public CustomFeralItemRenderer(MinecraftClient client, EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
+	public CustomFeralItemRenderer(Minecraft client, EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
 		this.client = client;
 		this.entityRenderDispatcher = entityRenderDispatcher;
 		this.itemRenderer = itemRenderer;
@@ -125,24 +121,24 @@ public class CustomFeralItemRenderer {
 	public void renderItem(
 		LivingEntity entity,
 		ItemStack stack,
-		ModelTransformationMode renderMode,
+		ItemDisplayContext renderMode,
 		boolean leftHanded,
-		MatrixStack matrices,
-		VertexConsumerProvider vertexConsumers,
+		PoseStack matrices,
+		MultiBufferSource vertexConsumers,
 		int light
 	) {
 		if (!stack.isEmpty()) {
 			this.itemRenderer
-				.renderItem(
+				.renderStatic(
 					entity,
 					stack,
 					renderMode,
 					leftHanded,
 					matrices,
 					vertexConsumers,
-					entity.getWorld(),
+					entity.level(),
 					light,
-					OverlayTexture.DEFAULT_UV,
+					OverlayTexture.NO_OVERLAY,
 					entity.getId() + renderMode.ordinal()
 				);
 		}
@@ -150,177 +146,177 @@ public class CustomFeralItemRenderer {
 
 	private float getMapAngle(float tickDelta) {
 		float f = 1.0F - tickDelta / 45.0F + 0.1F;
-		f = MathHelper.clamp(f, 0.0F, 1.0F);
-		return -MathHelper.cos(f * (float) Math.PI) * 0.5F + 0.5F;
+		f = Mth.clamp(f, 0.0F, 1.0F);
+		return -Mth.cos(f * (float) Math.PI) * 0.5F + 0.5F;
 	}
 
-	private void renderArm(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, Arm arm) {
+	private void renderArm(PoseStack matrices, MultiBufferSource vertexConsumers, int light, HumanoidArm arm) {
 		if (this.client.player == null) {
 			return;
 		}
-		RenderSystem.setShaderTexture(0, this.client.player.getSkinTextures().texture());
-		PlayerEntityRenderer playerEntityRenderer = (PlayerEntityRenderer)this.entityRenderDispatcher.<AbstractClientPlayerEntity>getRenderer(this.client.player);
-		matrices.push();
-		float f = arm == Arm.RIGHT ? 1.0F : -1.0F;
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(92.0F));
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(45.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * -41.0F));
+		RenderSystem.setShaderTexture(0, this.client.player.getSkin().texture());
+		PlayerRenderer playerEntityRenderer = (PlayerRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(this.client.player);
+		matrices.pushPose();
+		float f = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
+		matrices.mulPose(Axis.YP.rotationDegrees(92.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(45.0F));
+		matrices.mulPose(Axis.ZP.rotationDegrees(f * -41.0F));
 		matrices.translate(f * 0.3F, -1.1F, 0.45F);
-		if (arm == Arm.RIGHT) {
-			playerEntityRenderer.renderRightArm(matrices, vertexConsumers, light, this.client.player);
+		if (arm == HumanoidArm.RIGHT) {
+			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light, this.client.player);
 		} else {
-			playerEntityRenderer.renderLeftArm(matrices, vertexConsumers, light, this.client.player);
+			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light, this.client.player);
 		}
 
-		matrices.pop();
+		matrices.popPose();
 	}
 
 	private void renderMapInOneHand(
-		MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, Arm arm, float swingProgress, ItemStack stack
+		PoseStack matrices, MultiBufferSource vertexConsumers, int light, float equipProgress, HumanoidArm arm, float swingProgress, ItemStack stack
 	) {
 		if (this.client.player == null) {
 			return;
 		}
 
-		float f = arm == Arm.RIGHT ? 1.0F : -1.0F;
+		float f = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		matrices.translate(f * 0.125F, -0.125F, 0.0F);
 		if (!this.client.player.isInvisible()) {
-			matrices.push();
-			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * 10.0F));
+			matrices.pushPose();
+			matrices.mulPose(Axis.ZP.rotationDegrees(f * 10.0F));
 			this.renderArmHoldingItem(matrices, vertexConsumers, light, equipProgress, swingProgress, arm);
-			matrices.pop();
+			matrices.popPose();
 		}
 
-		matrices.push();
+		matrices.pushPose();
 		matrices.translate(f * 0.51F, -0.08F + equipProgress * -1.2F, -0.75F);
-		float g = MathHelper.sqrt(swingProgress);
-		float h = MathHelper.sin(g * (float) Math.PI);
+		float g = Mth.sqrt(swingProgress);
+		float h = Mth.sin(g * (float) Math.PI);
 		float i = -0.5F * h;
-		float j = 0.4F * MathHelper.sin(g * (float) (Math.PI * 2));
-		float k = -0.3F * MathHelper.sin(swingProgress * (float) Math.PI);
+		float j = 0.4F * Mth.sin(g * (float) (Math.PI * 2));
+		float k = -0.3F * Mth.sin(swingProgress * (float) Math.PI);
 		matrices.translate(f * i, j - 0.3F * h, k);
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(h * -45.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * h * -30.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(h * -45.0F));
+		matrices.mulPose(Axis.YP.rotationDegrees(f * h * -30.0F));
 		this.renderFirstPersonMap(matrices, vertexConsumers, light, stack);
-		matrices.pop();
+		matrices.popPose();
 	}
 
 	private void renderMapInBothHands(
-		MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float pitch, float equipProgress, float swingProgress
+		PoseStack matrices, MultiBufferSource vertexConsumers, int light, float pitch, float equipProgress, float swingProgress
 	) {
 		if (this.client.player == null) {
 			return;
 		}
 
-		float f = MathHelper.sqrt(swingProgress);
-		float g = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
-		float h = -0.4F * MathHelper.sin(f * (float) Math.PI);
+		float f = Mth.sqrt(swingProgress);
+		float g = -0.2F * Mth.sin(swingProgress * (float) Math.PI);
+		float h = -0.4F * Mth.sin(f * (float) Math.PI);
 		matrices.translate(0.0F, -g / 2.0F, h);
 		float i = this.getMapAngle(pitch);
 		matrices.translate(0.0F, 0.04F + equipProgress * -1.2F + i * -0.5F, -0.72F);
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(i * -85.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(i * -85.0F));
 		if (!this.client.player.isInvisible()) {
-			matrices.push();
-			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
-			this.renderArm(matrices, vertexConsumers, light, Arm.RIGHT);
-			this.renderArm(matrices, vertexConsumers, light, Arm.LEFT);
-			matrices.pop();
+			matrices.pushPose();
+			matrices.mulPose(Axis.YP.rotationDegrees(90.0F));
+			this.renderArm(matrices, vertexConsumers, light, HumanoidArm.RIGHT);
+			this.renderArm(matrices, vertexConsumers, light, HumanoidArm.LEFT);
+			matrices.popPose();
 		}
 
-		float j = MathHelper.sin(f * (float) Math.PI);
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(j * 20.0F));
+		float j = Mth.sin(f * (float) Math.PI);
+		matrices.mulPose(Axis.XP.rotationDegrees(j * 20.0F));
 		matrices.scale(2.0F, 2.0F, 2.0F);
 		this.renderFirstPersonMap(matrices, vertexConsumers, light, this.mainHand);
 	}
 
-	private void renderFirstPersonMap(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int swingProgress, ItemStack stack) {
-		if (this.client.world == null || stack == null || vertexConsumers == null) {
+	private void renderFirstPersonMap(PoseStack matrices, MultiBufferSource vertexConsumers, int swingProgress, ItemStack stack) {
+		if (this.client.level == null || stack == null || vertexConsumers == null) {
 			return;
 		}
 
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(180.0F));
+		matrices.mulPose(Axis.YP.rotationDegrees(180.0F));
+		matrices.mulPose(Axis.ZP.rotationDegrees(180.0F));
 		matrices.scale(0.38F, 0.38F, 0.38F);
 		matrices.translate(-0.5F, -0.5F, 0.0F);
 		matrices.scale(0.0078125F, 0.0078125F, 0.0078125F);
-		MapIdComponent mapId = stack.get(DataComponentTypes.MAP_ID);
-		MapState mapState = FilledMapItem.getMapState(mapId, this.client.world);
+		MapId mapId = stack.get(DataComponents.MAP_ID);
+		MapItemSavedData mapState = MapItem.getSavedData(mapId, this.client.level);
 		VertexConsumer vertexConsumer = vertexConsumers.getBuffer(mapState == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
-		if (vertexConsumer == null || matrices.peek() == null) {
+		if (vertexConsumer == null || matrices.last() == null) {
 			return;
 		}
-		Matrix4f matrix4f = matrices.peek().getPositionMatrix();
-		vertexConsumer.vertex(matrix4f, -7.0F, 135.0F, 0.0F).color(255, 255, 255, 255).texture(0.0F, 1.0F).light(swingProgress);
-		vertexConsumer.vertex(matrix4f, 135.0F, 135.0F, 0.0F).color(255, 255, 255, 255).texture(1.0F, 1.0F).light(swingProgress);
-		vertexConsumer.vertex(matrix4f, 135.0F, -7.0F, 0.0F).color(255, 255, 255, 255).texture(1.0F, 0.0F).light(swingProgress);
-		vertexConsumer.vertex(matrix4f, -7.0F, -7.0F, 0.0F).color(255, 255, 255, 255).texture(0.0F, 0.0F).light(swingProgress);
+		Matrix4f matrix4f = matrices.last().pose();
+		vertexConsumer.addVertex(matrix4f, -7.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(swingProgress);
+		vertexConsumer.addVertex(matrix4f, 135.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setLight(swingProgress);
+		vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(swingProgress);
+		vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(swingProgress);
 		if (mapState != null) {
-			this.client.gameRenderer.getMapRenderer().draw(matrices, vertexConsumers, mapId, mapState, false, swingProgress);
+			this.client.gameRenderer.getMapRenderer().render(matrices, vertexConsumers, mapId, mapState, false, swingProgress);
 		}
 	}
 
-	private void renderArmHoldingItem(MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float equipProgress, float swingProgress, Arm arm) {
+	private void renderArmHoldingItem(PoseStack matrices, MultiBufferSource vertexConsumers, int light, float equipProgress, float swingProgress, HumanoidArm arm) {
 		if (this.client.player == null) {
 			return;
 		}
 
-		boolean bl = arm != Arm.LEFT;
+		boolean bl = arm != HumanoidArm.LEFT;
 		float f = bl ? 1.0F : -1.0F;
-		float g = MathHelper.sqrt(swingProgress);
-		float h = -0.3F * MathHelper.sin(g * (float) Math.PI);
-		float i = 0.4F * MathHelper.sin(g * (float) (Math.PI * 2));
+		float g = Mth.sqrt(swingProgress);
+		float h = -0.3F * Mth.sin(g * (float) Math.PI);
+		float i = 0.4F * Mth.sin(g * (float) (Math.PI * 2));
 		// 减少摆动幅度
 		//float j = -0.4F * MathHelper.sin(swingProgress * (float) Math.PI);
-		float j = -0.1F * MathHelper.sin(swingProgress * (float) Math.PI);
+		float j = -0.1F * Mth.sin(swingProgress * (float) Math.PI);
 		matrices.translate(f * (h + 0.64000005F), i + -0.6F + equipProgress * -0.6F, j + -0.71999997F);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * 45.0F));
-		float k = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
-		float l = MathHelper.sin(g * (float) Math.PI);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * l * 70.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * k * -20.0F));
-		AbstractClientPlayerEntity abstractClientPlayerEntity = this.client.player;
-		RenderSystem.setShaderTexture(0, abstractClientPlayerEntity.getSkinTextures().texture());
+		matrices.mulPose(Axis.YP.rotationDegrees(f * 45.0F));
+		float k = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
+		float l = Mth.sin(g * (float) Math.PI);
+		matrices.mulPose(Axis.YP.rotationDegrees(f * l * 70.0F));
+		matrices.mulPose(Axis.ZP.rotationDegrees(f * k * -20.0F));
+		AbstractClientPlayer abstractClientPlayerEntity = this.client.player;
+		RenderSystem.setShaderTexture(0, abstractClientPlayerEntity.getSkin().texture());
 		matrices.translate(f * -1.0F, 3.6F, 3.5F);
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(f * 120.0F));
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(200.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(f * -135.0F));
+		matrices.mulPose(Axis.ZP.rotationDegrees(f * 120.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(200.0F));
+		matrices.mulPose(Axis.YP.rotationDegrees(f * -135.0F));
 		matrices.translate(f * 5.6F, 0.0F, 0.0F);
-		PlayerEntityRenderer playerEntityRenderer = (PlayerEntityRenderer)this.entityRenderDispatcher
-			.<AbstractClientPlayerEntity>getRenderer(abstractClientPlayerEntity);
+		PlayerRenderer playerEntityRenderer = (PlayerRenderer)this.entityRenderDispatcher
+			.<AbstractClientPlayer>getRenderer(abstractClientPlayerEntity);
 		if (bl) {
-			playerEntityRenderer.renderRightArm(matrices, vertexConsumers, light, abstractClientPlayerEntity);
+			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light, abstractClientPlayerEntity);
 		} else {
-			playerEntityRenderer.renderLeftArm(matrices, vertexConsumers, light, abstractClientPlayerEntity);
+			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light, abstractClientPlayerEntity);
 		}
 	}
 
-	private void applyEatOrDrinkTransformation(MatrixStack matrices, float tickDelta, Arm arm, ItemStack stack) {
+	private void applyEatOrDrinkTransformation(PoseStack matrices, float tickDelta, HumanoidArm arm, ItemStack stack) {
 		if (this.client.player == null || stack == null) {
 			return;
 		}
 
-		float f = (float)this.client.player.getItemUseTimeLeft() - tickDelta + 1.0F;
-		float g = f / (float)stack.getMaxUseTime(this.client.player);
+		float f = (float)this.client.player.getUseItemRemainingTicks() - tickDelta + 1.0F;
+		float g = f / (float)stack.getUseDuration(this.client.player);
 		if (g < 0.8F) {
-			float h = MathHelper.abs(MathHelper.cos(f / 4.0F * (float) Math.PI) * 0.1F);
+			float h = Mth.abs(Mth.cos(f / 4.0F * (float) Math.PI) * 0.1F);
 			matrices.translate(0.0F, h, 0.0F);
 		}
 
 		float h = 1.0F - (float)Math.pow((double)g, 27.0);
-		int i = arm == Arm.RIGHT ? 1 : -1;
+		int i = arm == HumanoidArm.RIGHT ? 1 : -1;
 		matrices.translate(h * 0.6F * (float)i, h * -0.5F, h * 0.0F);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * h * 90.0F));
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(h * 10.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)i * h * 30.0F));
+		matrices.mulPose(Axis.YP.rotationDegrees((float)i * h * 90.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(h * 10.0F));
+		matrices.mulPose(Axis.ZP.rotationDegrees((float)i * h * 30.0F));
 	}
 
-	private void applyBrushTransformation(MatrixStack matrices, float tickDelta, Arm arm, ItemStack stack, float equipProgress) {
+	private void applyBrushTransformation(PoseStack matrices, float tickDelta, HumanoidArm arm, ItemStack stack, float equipProgress) {
 		if (this.client.player == null || stack == null) {
 			return;
 		}
 
 		this.applyEquipOffset(matrices, arm, equipProgress);
-		float f = (float)(this.client.player.getItemUseTimeLeft() % 10);
+		float f = (float)(this.client.player.getUseItemRemainingTicks() % 10);
 		float g = f - tickDelta + 1.0F;
 		float h = 1.0F - g / 10.0F;
 		float i = -90.0F;
@@ -328,71 +324,71 @@ public class CustomFeralItemRenderer {
 		float k = 150.0F;
 		float l = -15.0F;
 		int m = 2;
-		float n = -15.0F + 75.0F * MathHelper.cos(h * 2.0F * (float) Math.PI);
-		if (arm != Arm.RIGHT) {
+		float n = -15.0F + 75.0F * Mth.cos(h * 2.0F * (float) Math.PI);
+		if (arm != HumanoidArm.RIGHT) {
 			matrices.translate(0.1, 0.83, 0.35);
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-80.0F));
-			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(-90.0F));
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(n));
+			matrices.mulPose(Axis.XP.rotationDegrees(-80.0F));
+			matrices.mulPose(Axis.YP.rotationDegrees(-90.0F));
+			matrices.mulPose(Axis.XP.rotationDegrees(n));
 			matrices.translate(-0.3, 0.22, 0.35);
 		} else {
 			matrices.translate(-0.25, 0.22, 0.35);
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-80.0F));
-			matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
-			matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(0.0F));
-			matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(n));
+			matrices.mulPose(Axis.XP.rotationDegrees(-80.0F));
+			matrices.mulPose(Axis.YP.rotationDegrees(90.0F));
+			matrices.mulPose(Axis.ZP.rotationDegrees(0.0F));
+			matrices.mulPose(Axis.XP.rotationDegrees(n));
 		}
 	}
 
-	private void applySwingOffset(MatrixStack matrices, Arm arm, float swingProgress) {
-		int i = arm == Arm.RIGHT ? 1 : -1;
-		float f = MathHelper.sin(swingProgress * swingProgress * (float) Math.PI);
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * (45.0F + f * -20.0F)));
-		float g = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-		matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)i * g * -20.0F));
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(g * -80.0F));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * -45.0F));
+	private void applySwingOffset(PoseStack matrices, HumanoidArm arm, float swingProgress) {
+		int i = arm == HumanoidArm.RIGHT ? 1 : -1;
+		float f = Mth.sin(swingProgress * swingProgress * (float) Math.PI);
+		matrices.mulPose(Axis.YP.rotationDegrees((float)i * (45.0F + f * -20.0F)));
+		float g = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
+		matrices.mulPose(Axis.ZP.rotationDegrees((float)i * g * -20.0F));
+		matrices.mulPose(Axis.XP.rotationDegrees(g * -80.0F));
+		matrices.mulPose(Axis.YP.rotationDegrees((float)i * -45.0F));
 	}
 
-	private void applyEquipOffset(MatrixStack matrices, Arm arm, float equipProgress) {
-		int i = arm == Arm.RIGHT ? 1 : -1;
+	private void applyEquipOffset(PoseStack matrices, HumanoidArm arm, float equipProgress) {
+		int i = arm == HumanoidArm.RIGHT ? 1 : -1;
 		matrices.translate((float)i * 0.56F, -0.52F + equipProgress * -0.6F, -0.72F);
 	}
 
-	public void renderItem(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers, ClientPlayerEntity player, int light) {
-		if (player == null || this.client.world == null) {
+	public void renderItem(float tickDelta, PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, LocalPlayer player, int light) {
+		if (player == null || this.client.level == null) {
 			return;
 		}
 
-		float f = player.getHandSwingProgress(tickDelta);
-		Hand hand = MoreObjects.firstNonNull(player.preferredHand, Hand.MAIN_HAND);
-		float g = MathHelper.lerp(tickDelta, player.prevPitch, player.getPitch());
+		float f = player.getAttackAnim(tickDelta);
+		InteractionHand hand = MoreObjects.firstNonNull(player.swingingArm, InteractionHand.MAIN_HAND);
+		float g = Mth.lerp(tickDelta, player.xRotO, player.getXRot());
 		CustomFeralItemRenderer.HandRenderType handRenderType = getHandRenderType(player);
-		float h = MathHelper.lerp(tickDelta, player.lastRenderPitch, player.renderPitch);
-		float i = MathHelper.lerp(tickDelta, player.lastRenderYaw, player.renderYaw);
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees((player.getPitch(tickDelta) - h) * 0.1F));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((player.getYaw(tickDelta) - i) * 0.1F));
+		float h = Mth.lerp(tickDelta, player.xBobO, player.xBob);
+		float i = Mth.lerp(tickDelta, player.yBobO, player.yBob);
+		matrices.mulPose(Axis.XP.rotationDegrees((player.getViewXRot(tickDelta) - h) * 0.1F));
+		matrices.mulPose(Axis.YP.rotationDegrees((player.getViewYRot(tickDelta) - i) * 0.1F));
 		if (handRenderType.renderMainHand) {
-			float j = hand == Hand.MAIN_HAND ? f : 0.0F;
-			float k = 1.0F - MathHelper.lerp(tickDelta, this.prevEquipProgressMainHand, this.equipProgressMainHand);
-			this.renderFirstPersonItem(player, tickDelta, g, Hand.MAIN_HAND, j, this.mainHand, k, matrices, vertexConsumers, light);
+			float j = hand == InteractionHand.MAIN_HAND ? f : 0.0F;
+			float k = 1.0F - Mth.lerp(tickDelta, this.prevEquipProgressMainHand, this.equipProgressMainHand);
+			this.renderFirstPersonItem(player, tickDelta, g, InteractionHand.MAIN_HAND, j, this.mainHand, k, matrices, vertexConsumers, light);
 		}
 
 		if (handRenderType.renderOffHand) {
-			float j = hand == Hand.OFF_HAND ? f : 0.0F;
-			float k = 1.0F - MathHelper.lerp(tickDelta, this.prevEquipProgressOffHand, this.equipProgressOffHand);
-			this.renderFirstPersonItem(player, tickDelta, g, Hand.OFF_HAND, j, this.offHand, k, matrices, vertexConsumers, light);
+			float j = hand == InteractionHand.OFF_HAND ? f : 0.0F;
+			float k = 1.0F - Mth.lerp(tickDelta, this.prevEquipProgressOffHand, this.equipProgressOffHand);
+			this.renderFirstPersonItem(player, tickDelta, g, InteractionHand.OFF_HAND, j, this.offHand, k, matrices, vertexConsumers, light);
 		}
 
-		vertexConsumers.draw();
+		vertexConsumers.endBatch();
 	}
 
 	@VisibleForTesting
-	static CustomFeralItemRenderer.HandRenderType getHandRenderType(ClientPlayerEntity player) {
-		ItemStack itemStack = player.getMainHandStack();
-		ItemStack itemStack2 = player.getOffHandStack();
-		boolean bl = itemStack.isOf(Items.BOW) || itemStack2.isOf(Items.BOW);
-		boolean bl2 = itemStack.isOf(Items.CROSSBOW) || itemStack2.isOf(Items.CROSSBOW);
+	static CustomFeralItemRenderer.HandRenderType getHandRenderType(LocalPlayer player) {
+		ItemStack itemStack = player.getMainHandItem();
+		ItemStack itemStack2 = player.getOffhandItem();
+		boolean bl = itemStack.is(Items.BOW) || itemStack2.is(Items.BOW);
+		boolean bl2 = itemStack.is(Items.CROSSBOW) || itemStack2.is(Items.CROSSBOW);
 		if (!bl && !bl2) {
 			return CustomFeralItemRenderer.HandRenderType.RENDER_BOTH_HANDS;
 		} else if (player.isUsingItem()) {
@@ -402,15 +398,15 @@ public class CustomFeralItemRenderer {
 		}
 	}
 
-	private static CustomFeralItemRenderer.HandRenderType getUsingItemHandRenderType(ClientPlayerEntity player) {
+	private static CustomFeralItemRenderer.HandRenderType getUsingItemHandRenderType(LocalPlayer player) {
 		if (player == null) {
 			return CustomFeralItemRenderer.HandRenderType.RENDER_BOTH_HANDS;
 		}
 
-		ItemStack itemStack = player.getActiveItem();
-		Hand hand = player.getActiveHand();
-		if (!itemStack.isOf(Items.BOW) && !itemStack.isOf(Items.CROSSBOW)) {
-			return hand == Hand.MAIN_HAND && isChargedCrossbow(player.getOffHandStack())
+		ItemStack itemStack = player.getUseItem();
+		InteractionHand hand = player.getUsedItemHand();
+		if (!itemStack.is(Items.BOW) && !itemStack.is(Items.CROSSBOW)) {
+			return hand == InteractionHand.MAIN_HAND && isChargedCrossbow(player.getOffhandItem())
 					? CustomFeralItemRenderer.HandRenderType.RENDER_MAIN_HAND_ONLY
 					: CustomFeralItemRenderer.HandRenderType.RENDER_BOTH_HANDS;
 		} else {
@@ -422,65 +418,65 @@ public class CustomFeralItemRenderer {
 		if (stack == null) {
 			return false;
 		}
-		return stack.isOf(Items.CROSSBOW) && CrossbowItem.isCharged(stack);
+		return stack.is(Items.CROSSBOW) && CrossbowItem.isCharged(stack);
 	}
 
 	public void renderFirstPersonItem(
-		AbstractClientPlayerEntity player,
+		AbstractClientPlayer player,
 		float tickDelta,
 		float pitch,
-		Hand hand,
+		InteractionHand hand,
 		float swingProgress,
 		ItemStack item,
 		float equipProgress,
-		MatrixStack matrices,
-		VertexConsumerProvider vertexConsumers,
+		PoseStack matrices,
+		MultiBufferSource vertexConsumers,
 		int light
 	) {
 		if (player == null || matrices == null || vertexConsumers == null) {
 			return;
 		}
 
-		if (!player.isUsingSpyglass()) {
-			boolean bl = hand == Hand.MAIN_HAND;
-			Arm arm = bl ? player.getMainArm() : player.getMainArm().getOpposite();
-			matrices.push();
+		if (!player.isScoping()) {
+			boolean bl = hand == InteractionHand.MAIN_HAND;
+			HumanoidArm arm = bl ? player.getMainArm() : player.getMainArm().getOpposite();
+			matrices.pushPose();
 			if (item.isEmpty()) {
 				// do not render arm
 
 				//if (bl && !player.isInvisible()) {
 				//	this.renderArmHoldingItem(matrices, vertexConsumers, light, equipProgress, swingProgress, arm);
 				//}
-			} else if (item.isOf(Items.FILLED_MAP)) {
+			} else if (item.is(Items.FILLED_MAP)) {
 				if (bl && this.offHand.isEmpty()) {
 					this.renderMapInBothHands(matrices, vertexConsumers, light, pitch, equipProgress, swingProgress);
 				} else {
 					this.renderMapInOneHand(matrices, vertexConsumers, light, equipProgress, arm, swingProgress, item);
 				}
-			} else if (item.isOf(Items.CROSSBOW)) {
+			} else if (item.is(Items.CROSSBOW)) {
 				boolean bl2 = CrossbowItem.isCharged(item);
-				boolean bl3 = arm == Arm.RIGHT;
+				boolean bl3 = arm == HumanoidArm.RIGHT;
 				int i = bl3 ? 1 : -1;
-				if (player.isUsingItem() && player.getItemUseTimeLeft() > 0 && player.getActiveHand() == hand) {
+				if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
 					this.applyEquipOffset(matrices, arm, equipProgress);
 					matrices.translate((float)i * -0.4785682F, -0.094387F, 0.05731531F);
-					matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-11.935F));
-					matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * 65.3F));
-					matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)i * -9.785F));
+					matrices.mulPose(Axis.XP.rotationDegrees(-11.935F));
+					matrices.mulPose(Axis.YP.rotationDegrees((float)i * 65.3F));
+					matrices.mulPose(Axis.ZP.rotationDegrees((float)i * -9.785F));
 					float f = 0;
 					if (this.client.player != null) {
-						f = (float)item.getMaxUseTime(this.client.player) - ((float)this.client.player.getItemUseTimeLeft() - tickDelta + 1.0F);
+						f = (float)item.getUseDuration(this.client.player) - ((float)this.client.player.getUseItemRemainingTicks() - tickDelta + 1.0F);
 					}
 					float g = 0;
 					if (this.client.player != null) {
-						g = f / (float) CrossbowItem.getPullTime(item, this.client.player);
+						g = f / (float) CrossbowItem.getChargeDuration(item, this.client.player);
 					}
 					if (g > 1.0F) {
 						g = 1.0F;
 					}
 
 					if (g > 0.1F) {
-						float h = MathHelper.sin((f - 0.1F) * 1.3F);
+						float h = Mth.sin((f - 0.1F) * 1.3F);
 						float j = g - 0.1F;
 						float k = h * j;
 						matrices.translate(k * 0.0F, k * 0.004F, k * 0.0F);
@@ -488,34 +484,34 @@ public class CustomFeralItemRenderer {
 
 					matrices.translate(g * 0.0F, g * 0.0F, g * 0.04F);
 					matrices.scale(1.0F, 1.0F, 1.0F + g * 0.2F);
-					matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees((float)i * 45.0F));
+					matrices.mulPose(Axis.YN.rotationDegrees((float)i * 45.0F));
 				} else {
-					float fx = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-					float gx = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) (Math.PI * 2));
-					float h = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
+					float fx = -0.4F * Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
+					float gx = 0.2F * Mth.sin(Mth.sqrt(swingProgress) * (float) (Math.PI * 2));
+					float h = -0.2F * Mth.sin(swingProgress * (float) Math.PI);
 					matrices.translate((float)i * fx, gx, h);
 					this.applyEquipOffset(matrices, arm, equipProgress);
 					this.applySwingOffset(matrices, arm, swingProgress);
 					if (bl2 && swingProgress < 0.001F && bl) {
 						matrices.translate((float)i * -0.641864F, 0.0F, 0.0F);
-						matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)i * 10.0F));
+						matrices.mulPose(Axis.YP.rotationDegrees((float)i * 10.0F));
 					}
 				}
 
 				this.renderItem(
 					player,
 					item,
-					bl3 ? ModelTransformationMode.FIRST_PERSON_RIGHT_HAND : ModelTransformationMode.FIRST_PERSON_LEFT_HAND,
+					bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					!bl3,
 					matrices,
 					vertexConsumers,
 					light
 				);
 			} else {
-				boolean bl2 = arm == Arm.RIGHT;
-				if (player.isUsingItem() && player.getItemUseTimeLeft() > 0 && player.getActiveHand() == hand) {
+				boolean bl2 = arm == HumanoidArm.RIGHT;
+				if (player.isUsingItem() && player.getUseItemRemainingTicks() > 0 && player.getUsedItemHand() == hand) {
 					int l = bl2 ? 1 : -1;
-					switch (item.getUseAction()) {
+					switch (item.getUseAnimation()) {
 						case NONE:
 							this.applyEquipOffset(matrices, arm, equipProgress);
 							break;
@@ -530,12 +526,12 @@ public class CustomFeralItemRenderer {
 						case BOW:
 							this.applyEquipOffset(matrices, arm, equipProgress);
 							matrices.translate((float)l * -0.2785682F, 0.18344387F, 0.15731531F);
-							matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-13.935F));
-							matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)l * 35.3F));
-							matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)l * -9.785F));
+							matrices.mulPose(Axis.XP.rotationDegrees(-13.935F));
+							matrices.mulPose(Axis.YP.rotationDegrees((float)l * 35.3F));
+							matrices.mulPose(Axis.ZP.rotationDegrees((float)l * -9.785F));
 							float mx = 0;
 							if (this.client.player != null) {
-								mx = (float)item.getMaxUseTime(this.client.player) - ((float)this.client.player.getItemUseTimeLeft() - tickDelta + 1.0F);
+								mx = (float)item.getUseDuration(this.client.player) - ((float)this.client.player.getUseItemRemainingTicks() - tickDelta + 1.0F);
 							}
 							float fxx = mx / 20.0F;
 							fxx = (fxx * fxx + fxx * 2.0F) / 3.0F;
@@ -544,7 +540,7 @@ public class CustomFeralItemRenderer {
 							}
 
 							if (fxx > 0.1F) {
-								float gx = MathHelper.sin((mx - 0.1F) * 1.3F);
+								float gx = Mth.sin((mx - 0.1F) * 1.3F);
 								float h = fxx - 0.1F;
 								float j = gx * h;
 								matrices.translate(j * 0.0F, j * 0.004F, j * 0.0F);
@@ -552,17 +548,17 @@ public class CustomFeralItemRenderer {
 
 							matrices.translate(fxx * 0.0F, fxx * 0.0F, fxx * 0.04F);
 							matrices.scale(1.0F, 1.0F, 1.0F + fxx * 0.2F);
-							matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees((float)l * 45.0F));
+							matrices.mulPose(Axis.YN.rotationDegrees((float)l * 45.0F));
 							break;
 						case SPEAR:
 							this.applyEquipOffset(matrices, arm, equipProgress);
 							matrices.translate((float)l * -0.5F, 0.7F, 0.1F);
-							matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-55.0F));
-							matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)l * 35.3F));
-							matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)l * -9.785F));
+							matrices.mulPose(Axis.XP.rotationDegrees(-55.0F));
+							matrices.mulPose(Axis.YP.rotationDegrees((float)l * 35.3F));
+							matrices.mulPose(Axis.ZP.rotationDegrees((float)l * -9.785F));
 							float m = 0;
 							if (this.client.player != null) {
-								m = (float)item.getMaxUseTime(this.client.player) - ((float)this.client.player.getItemUseTimeLeft() - tickDelta + 1.0F);
+								m = (float)item.getUseDuration(this.client.player) - ((float)this.client.player.getUseItemRemainingTicks() - tickDelta + 1.0F);
 							}
 							float fx = m / 10.0F;
 							if (fx > 1.0F) {
@@ -570,7 +566,7 @@ public class CustomFeralItemRenderer {
 							}
 
 							if (fx > 0.1F) {
-								float gx = MathHelper.sin((m - 0.1F) * 1.3F);
+								float gx = Mth.sin((m - 0.1F) * 1.3F);
 								float h = fx - 0.1F;
 								float j = gx * h;
 								matrices.translate(j * 0.0F, j * 0.004F, j * 0.0F);
@@ -578,21 +574,21 @@ public class CustomFeralItemRenderer {
 
 							matrices.translate(0.0F, 0.0F, fx * 0.2F);
 							matrices.scale(1.0F, 1.0F, 1.0F + fx * 0.2F);
-							matrices.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees((float)l * 45.0F));
+							matrices.mulPose(Axis.YN.rotationDegrees((float)l * 45.0F));
 							break;
 						case BRUSH:
 							this.applyBrushTransformation(matrices, tickDelta, arm, item, equipProgress);
 					}
-				} else if (player.isUsingRiptide()) {
+				} else if (player.isAutoSpinAttack()) {
 					this.applyEquipOffset(matrices, arm, equipProgress);
 					int l = bl2 ? 1 : -1;
 					matrices.translate((float)l * -0.4F, 0.8F, 0.3F);
-					matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees((float)l * 65.0F));
-					matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float)l * -85.0F));
+					matrices.mulPose(Axis.YP.rotationDegrees((float)l * 65.0F));
+					matrices.mulPose(Axis.ZP.rotationDegrees((float)l * -85.0F));
 				} else {
-					float n = -0.4F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-					float mxx = 0.2F * MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) (Math.PI * 2));
-					float fxxx = -0.2F * MathHelper.sin(swingProgress * (float) Math.PI);
+					float n = -0.4F * Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
+					float mxx = 0.2F * Mth.sin(Mth.sqrt(swingProgress) * (float) (Math.PI * 2));
+					float fxxx = -0.2F * Mth.sin(swingProgress * (float) Math.PI);
 					int o = bl2 ? 1 : -1;
 					matrices.translate((float)o * n, mxx, fxxx);
 					this.applyEquipOffset(matrices, arm, equipProgress);
@@ -602,7 +598,7 @@ public class CustomFeralItemRenderer {
 				this.renderItem(
 					player,
 					item,
-					bl2 ? ModelTransformationMode.FIRST_PERSON_RIGHT_HAND : ModelTransformationMode.FIRST_PERSON_LEFT_HAND,
+					bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					!bl2,
 					matrices,
 					vertexConsumers,
@@ -610,7 +606,7 @@ public class CustomFeralItemRenderer {
 				);
 			}
 
-			matrices.pop();
+			matrices.popPose();
 		}
 	}
 
@@ -621,26 +617,26 @@ public class CustomFeralItemRenderer {
 
 		this.prevEquipProgressMainHand = this.equipProgressMainHand;
 		this.prevEquipProgressOffHand = this.equipProgressOffHand;
-		ClientPlayerEntity clientPlayerEntity = this.client.player;
-		ItemStack itemStack = clientPlayerEntity.getMainHandStack();
-		ItemStack itemStack2 = clientPlayerEntity.getOffHandStack();
-		if (ItemStack.areEqual(this.mainHand, itemStack)) {
+		LocalPlayer clientPlayerEntity = this.client.player;
+		ItemStack itemStack = clientPlayerEntity.getMainHandItem();
+		ItemStack itemStack2 = clientPlayerEntity.getOffhandItem();
+		if (ItemStack.matches(this.mainHand, itemStack)) {
 			this.mainHand = itemStack;
 		}
 
-		if (ItemStack.areEqual(this.offHand, itemStack2)) {
+		if (ItemStack.matches(this.offHand, itemStack2)) {
 			this.offHand = itemStack2;
 		}
 
-		if (clientPlayerEntity.isRiding()) {
-			this.equipProgressMainHand = MathHelper.clamp(this.equipProgressMainHand - 0.4F, 0.0F, 1.0F);
-			this.equipProgressOffHand = MathHelper.clamp(this.equipProgressOffHand - 0.4F, 0.0F, 1.0F);
+		if (clientPlayerEntity.isHandsBusy()) {
+			this.equipProgressMainHand = Mth.clamp(this.equipProgressMainHand - 0.4F, 0.0F, 1.0F);
+			this.equipProgressOffHand = Mth.clamp(this.equipProgressOffHand - 0.4F, 0.0F, 1.0F);
 		} else {
-			float f = clientPlayerEntity.getAttackCooldownProgress(1.0F);
+			float f = clientPlayerEntity.getAttackStrengthScale(1.0F);
 			this.equipProgressMainHand = this.equipProgressMainHand
-					+ MathHelper.clamp((this.mainHand == itemStack ? f * f * f : 0.0F) - this.equipProgressMainHand, -0.4F, 0.4F);
+					+ Mth.clamp((this.mainHand == itemStack ? f * f * f : 0.0F) - this.equipProgressMainHand, -0.4F, 0.4F);
 			this.equipProgressOffHand = this.equipProgressOffHand
-				+ MathHelper.clamp((float)(this.offHand == itemStack2 ? 1 : 0) - this.equipProgressOffHand, -0.4F, 0.4F);
+				+ Mth.clamp((float)(this.offHand == itemStack2 ? 1 : 0) - this.equipProgressOffHand, -0.4F, 0.4F);
 		}
 
 		if (this.equipProgressMainHand < 0.1F) {
@@ -652,8 +648,8 @@ public class CustomFeralItemRenderer {
 		}
 	}
 
-	public void resetEquipProgress(Hand hand) {
-		if (hand == Hand.MAIN_HAND) {
+	public void resetEquipProgress(InteractionHand hand) {
+		if (hand == InteractionHand.MAIN_HAND) {
 			this.equipProgressMainHand = 0.0F;
 		} else {
 			this.equipProgressOffHand = 0.0F;
@@ -675,8 +671,8 @@ public class CustomFeralItemRenderer {
 			this.renderOffHand = renderOffHand;
 		}
 
-		public static CustomFeralItemRenderer.HandRenderType shouldOnlyRender(Hand hand) {
-			return hand == Hand.MAIN_HAND ? RENDER_MAIN_HAND_ONLY : RENDER_OFF_HAND_ONLY;
+		public static CustomFeralItemRenderer.HandRenderType shouldOnlyRender(InteractionHand hand) {
+			return hand == InteractionHand.MAIN_HAND ? RENDER_MAIN_HAND_ONLY : RENDER_OFF_HAND_ONLY;
 		}
 	}
 }

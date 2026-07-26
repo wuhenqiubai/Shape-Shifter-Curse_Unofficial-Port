@@ -3,8 +3,8 @@ package net.onixary.shapeShifterCurseFabric.util.Verify;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Pair;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +16,10 @@ import java.nio.file.Path;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
@@ -149,26 +152,26 @@ public final class AuthUtils {
         }
     }
 
-    private static final List<Pair<BiPredicate<Integer, Integer>, Function<PacketByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
+    private static final List<Tuple<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
 
-    public static void registerDataReader(BiPredicate<Integer, Integer> typeVersionPredicate, Function<PacketByteBuf, IDataSegment> dataReader) {
-        dataReaderRegistry.add(new Pair<>(typeVersionPredicate, dataReader));
+    public static void registerDataReader(BiPredicate<Integer, Integer> typeVersionPredicate, Function<FriendlyByteBuf, IDataSegment> dataReader) {
+        dataReaderRegistry.add(new Tuple<>(typeVersionPredicate, dataReader));
     }
 
     // 由于DataSegment没有对应验证 所以改为package private
-    static @Nullable IDataSegment readDataSegment(PacketByteBuf buf) {
+    static @Nullable IDataSegment readDataSegment(FriendlyByteBuf buf) {
         int type = buf.readInt();
         int version = buf.readInt();
-        for (Pair<BiPredicate<Integer, Integer>, Function<PacketByteBuf, IDataSegment>> reader : dataReaderRegistry) {
-            if (reader.getLeft().test(type, version)) {
+        for (Tuple<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>> reader : dataReaderRegistry) {
+            if (reader.getA().test(type, version)) {
                 buf.setIndex(0, buf.capacity());
-                return reader.getRight().apply(buf);
+                return reader.getB().apply(buf);
             }
         }
         return null;
     }
 
-    public static @Nullable AuthFile readAuthFile(PacketByteBuf buf) {
+    public static @Nullable AuthFile readAuthFile(FriendlyByteBuf buf) {
         try {
             return new AuthFile(buf);
         } catch (Exception e) {
@@ -176,7 +179,7 @@ public final class AuthUtils {
         }
     }
 
-    public static @Nullable KeySegment readKeySegment(PacketByteBuf buf) {
+    public static @Nullable KeySegment readKeySegment(FriendlyByteBuf buf) {
         try {
             return new KeySegment(buf);
         } catch (Exception e) {
@@ -185,7 +188,7 @@ public final class AuthUtils {
     }
 
     private static final HashMap<Integer, KeySegment> storedKeySegments = new HashMap<>();
-    private static final List<Pair<Long, KeySegment>> forgiveKeySegments = new ArrayList<>();
+    private static final List<Tuple<Long, KeySegment>> forgiveKeySegments = new ArrayList<>();
     private static final long forgiveTime = 60 * 30;  // 30分钟
     static {
         loadLocalKeySegments();
@@ -207,7 +210,7 @@ public final class AuthUtils {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath)) {
             for (Path path : stream) {
                 if (path.getFileName().toString().endsWith(".key")) {
-                    KeySegment keySegment = readKeySegment(new PacketByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(path))));
+                    KeySegment keySegment = readKeySegment(new FriendlyByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(path))));
                     if (keySegment != null) {
                         storedKeySegments.put(keySegment.getType(), keySegment);
                     }
@@ -246,7 +249,7 @@ public final class AuthUtils {
                 return false;
             } else {
                 storedKeySegments.put(keySegment.getType(), keySegment);
-                forgiveKeySegments.add(new Pair<>(System.currentTimeMillis() / 1000, storedKey));
+                forgiveKeySegments.add(new Tuple<>(System.currentTimeMillis() / 1000, storedKey));
                 saveKey(keySegment);
                 return true;
             }
@@ -255,7 +258,7 @@ public final class AuthUtils {
 
     public static void removeExpiredKey() {
         long currentTime = System.currentTimeMillis() / 1000;
-        forgiveKeySegments.removeIf(pair -> pair.getLeft() + forgiveTime < currentTime);
+        forgiveKeySegments.removeIf(pair -> pair.getA() + forgiveTime < currentTime);
     }
 
     public static boolean isKeyCanUse(@Nullable KeySegment keySegment) {
@@ -273,8 +276,8 @@ public final class AuthUtils {
         if (storedKey.getVersion() <= keySegment.getVersion()) {
             return true;
         }
-        for (Pair<Long, KeySegment> forgiveKeySegment : forgiveKeySegments) {
-            if (keySegment.softEquals(forgiveKeySegment.getRight())) {
+        for (Tuple<Long, KeySegment> forgiveKeySegment : forgiveKeySegments) {
+            if (keySegment.softEquals(forgiveKeySegment.getB())) {
                 return true;
             }
         }

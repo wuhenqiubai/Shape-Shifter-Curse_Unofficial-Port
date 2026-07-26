@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.mixin.render;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.render.OverlayTexture;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderer;
@@ -28,16 +28,16 @@ public abstract class OverlayRenderMixin<T extends LivingEntity, M extends Entit
     @Shadow
     protected M model;
 
-    @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+    @Inject(method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;III)V",
+                    target = "Lnet/minecraft/client/model/EntityModel;renderToBuffer(Lcom/mojang/blaze3d/vertex/PoseStack;Lcom/mojang/blaze3d/vertex/VertexConsumer;III)V",
                     shift = At.Shift.AFTER))
-    private void renderFormOverlay(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int light, CallbackInfo ci) {
-        if (!(livingEntity instanceof AbstractClientPlayerEntity player)) return;
+    private void renderFormOverlay(T livingEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, CallbackInfo ci) {
+        if (!(livingEntity instanceof AbstractClientPlayer player)) return;
         if (player.isInvisible() || player.isSpectator()) return;
-        if (!(((Object) this) instanceof PlayerEntityRenderer playerEntityRenderer)) return;
+        if (!(((Object) this) instanceof PlayerRenderer playerEntityRenderer)) return;
 
-	    PlayerEntityModel<AbstractClientPlayerEntity> playerEntityModel = playerEntityRenderer.getModel();
+	    PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
 
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
         for (FormRenderer formRenderer : formRendererList) {
@@ -46,21 +46,21 @@ public abstract class OverlayRenderMixin<T extends LivingEntity, M extends Entit
             if (formModel == null) continue;
 
             float hurtTime = player.hurtTime > 0 ? player.hurtTime - g : 0;
-            int overlay = OverlayTexture.packUv(
-                    OverlayTexture.getU(hurtTime),
-                    OverlayTexture.getV(player.hurtTime > 0 || player.deathTime > 0));
+            int overlay = OverlayTexture.pack(
+                    OverlayTexture.u(hurtTime),
+                    OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
 
-            Identifier overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.thinArms);
+            ResourceLocation overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
             if (overlayTexture != null) {
-                RenderLayer renderLayer = RenderLayer.getEntityTranslucent(overlayTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),
+                RenderType renderLayer = RenderType.entityTranslucent(overlayTexture);
+                playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),
                         light, overlay, 0xFFFFFFFF);
             }
 
-            Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.thinArms);
+            ResourceLocation emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
             if (emissiveTexture != null) {
-                RenderLayer renderLayer = RenderLayer.getEntityTranslucentEmissive(emissiveTexture);
-                playerEntityModel.render(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),
+                RenderType renderLayer = RenderType.entityTranslucentEmissive(emissiveTexture);
+                playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),
                         light, overlay, 0xFFFFFFFF);
             }
         }

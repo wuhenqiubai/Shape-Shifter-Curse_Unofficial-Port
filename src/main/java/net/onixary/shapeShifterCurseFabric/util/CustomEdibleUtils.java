@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 
 import java.util.HashMap;
@@ -14,50 +14,50 @@ import java.util.UUID;
 
 public class CustomEdibleUtils {
 
-    public static HashMap<UUID, HashMap<Identifier, FoodComponent>> customEdibleMap = new HashMap<>();
+    public static HashMap<UUID, HashMap<ResourceLocation, FoodProperties>> customEdibleMap = new HashMap<>();
 
-    public static FoodComponent getPowerFoodComponent(PlayerEntity user, ItemStack itemStack) {
+    public static FoodProperties getPowerFoodComponent(Player user, ItemStack itemStack) {
         if (user == null || itemStack == null || itemStack.isEmpty()) {
             return null;
         }
-        HashMap<Identifier, FoodComponent> customEdible = customEdibleMap.computeIfAbsent(user.getUuid(), k -> new HashMap<>());
-        return customEdible.getOrDefault(Registries.ITEM.getId(itemStack.getItem()), null);
+        HashMap<ResourceLocation, FoodProperties> customEdible = customEdibleMap.computeIfAbsent(user.getUUID(), k -> new HashMap<>());
+        return customEdible.getOrDefault(BuiltInRegistries.ITEM.getKey(itemStack.getItem()), null);
     }
 
-    public static void addCustomEdible(PlayerEntity user, Identifier itemId, FoodComponent foodComponent) {
-        HashMap<Identifier, FoodComponent> customEdible = customEdibleMap.computeIfAbsent(user.getUuid(), k -> new HashMap<>());
+    public static void addCustomEdible(Player user, ResourceLocation itemId, FoodProperties foodComponent) {
+        HashMap<ResourceLocation, FoodProperties> customEdible = customEdibleMap.computeIfAbsent(user.getUUID(), k -> new HashMap<>());
         customEdible.put(itemId, foodComponent);
     }
 
-    public static void addCustomEdibleWithList(PlayerEntity user, List<Identifier> itemIdList, FoodComponent foodComponent) {
-        HashMap<Identifier, FoodComponent> customEdible = customEdibleMap.computeIfAbsent(user.getUuid(), k -> new HashMap<>());
-        for (Identifier itemId : itemIdList) {
+    public static void addCustomEdibleWithList(Player user, List<ResourceLocation> itemIdList, FoodProperties foodComponent) {
+        HashMap<ResourceLocation, FoodProperties> customEdible = customEdibleMap.computeIfAbsent(user.getUUID(), k -> new HashMap<>());
+        for (ResourceLocation itemId : itemIdList) {
             customEdible.put(itemId, foodComponent);
         }
     }
 
-    public static void clearCustomEdible(PlayerEntity user, Identifier itemId) {
-        if (customEdibleMap.containsKey(user.getUuid())) {
-            customEdibleMap.get(user.getUuid()).remove(itemId);
+    public static void clearCustomEdible(Player user, ResourceLocation itemId) {
+        if (customEdibleMap.containsKey(user.getUUID())) {
+            customEdibleMap.get(user.getUUID()).remove(itemId);
         }
     }
 
-    public static void clearCustomEdibleWithList(PlayerEntity user, List<Identifier> itemIdList) {
-        if (customEdibleMap.containsKey(user.getUuid())) {
-            HashMap<Identifier, FoodComponent> customEdible = customEdibleMap.get(user.getUuid());
-            for (Identifier itemId : itemIdList) {
+    public static void clearCustomEdibleWithList(Player user, List<ResourceLocation> itemIdList) {
+        if (customEdibleMap.containsKey(user.getUUID())) {
+            HashMap<ResourceLocation, FoodProperties> customEdible = customEdibleMap.get(user.getUUID());
+            for (ResourceLocation itemId : itemIdList) {
                 customEdible.remove(itemId);
             }
         }
     }
 
-    public static void ReloadPlayerCustomEdible(PlayerEntity user) {
+    public static void ReloadPlayerCustomEdible(Player user) {
         try {
-            customEdibleMap.computeIfAbsent(user.getUuid(), k -> new HashMap<>()).clear();
-            HashMap<Identifier, FoodComponent> customEdible = customEdibleMap.get(user.getUuid());
+            customEdibleMap.computeIfAbsent(user.getUUID(), k -> new HashMap<>()).clear();
+            HashMap<ResourceLocation, FoodProperties> customEdible = customEdibleMap.get(user.getUUID());
             PowerHolderComponent.getPowers(user, CustomEdiblePower.class).forEach(
                     customEdiblePower -> {
-                        for (Identifier itemId : customEdiblePower.getItemIdList()) {
+                        for (ResourceLocation itemId : customEdiblePower.getItemIdList()) {
                             customEdible.put(itemId, customEdiblePower.getFoodComponent());
                         }
                     }

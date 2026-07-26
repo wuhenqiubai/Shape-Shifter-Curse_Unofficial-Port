@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form.ability;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -10,17 +10,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface IFormLayerGroup {
-    boolean isExists(@NotNull PlayerEntity player);
+    boolean isExists(@NotNull Player player);
 
-    @NotNull Identifier getGroupID();
+    @NotNull ResourceLocation getGroupID();
 
-    void __setGroupID(@NotNull Identifier groupID);
+    void __setGroupID(@NotNull ResourceLocation groupID);
 
-    @NotNull List<Identifier> getLayers();
+    @NotNull List<ResourceLocation> getLayers();
 
-    void __setLayers(@NotNull List<Identifier> layers);
+    void __setLayers(@NotNull List<ResourceLocation> layers);
 
-    default @NotNull Identifier transformLayerID(@NotNull PlayerEntity player, @Nullable Identifier layerID) {
+    default @NotNull ResourceLocation transformLayerID(@NotNull Player player, @Nullable ResourceLocation layerID) {
         if (layerID == null) {
             // 需要重载 可以实现一些特殊操作
             throw new NullPointerException("layerID is null");
@@ -29,19 +29,19 @@ public interface IFormLayerGroup {
     }
 
     // 给后续留的拓展接口 说不定未来客户端需要知道部分数据 反正目前不需要
-    default void write(@NotNull PacketByteBuf packetByteBuf) {
-        packetByteBuf.writeIdentifier(getGroupID());
-        packetByteBuf.writeCollection(getLayers(), PacketByteBuf::writeIdentifier);
+    default void write(@NotNull FriendlyByteBuf packetByteBuf) {
+        packetByteBuf.writeResourceLocation(getGroupID());
+        packetByteBuf.writeCollection(getLayers(), FriendlyByteBuf::writeResourceLocation);
     }
 
-    default void read(@NotNull PacketByteBuf packetByteBuf) {
-        __setGroupID(packetByteBuf.readIdentifier());
-        __setLayers(packetByteBuf.readCollection(ArrayList::new, PacketByteBuf::readIdentifier));
+    default void read(@NotNull FriendlyByteBuf packetByteBuf) {
+        __setGroupID(packetByteBuf.readResourceLocation());
+        __setLayers(packetByteBuf.readCollection(ArrayList::new, FriendlyByteBuf::readResourceLocation));
     }
 
-    default void onAddGroup(@NotNull PlayerEntity player, @NotNull Identifier newLayer) {
+    default void onAddGroup(@NotNull Player player, @NotNull ResourceLocation newLayer) {
     }
 
-    default void onRemoveGroup(@NotNull PlayerEntity player, @NotNull Identifier oldLayer) {
+    default void onRemoveGroup(@NotNull Player player, @NotNull ResourceLocation oldLayer) {
     }
 }

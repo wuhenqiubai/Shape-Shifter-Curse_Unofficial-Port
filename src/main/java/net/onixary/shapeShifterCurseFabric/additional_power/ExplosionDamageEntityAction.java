@@ -5,21 +5,21 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.event.GameEvent;
-import net.minecraft.world.explosion.Explosion;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.PrimedTnt;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.List;
@@ -31,7 +31,7 @@ public class ExplosionDamageEntityAction {
         // 额外加入可选的EntityAction以及是否对实体应用爆炸伤害的设置
         // entity_action -> 额外的实体action; explosion_damage_entity -> 爆炸是否伤害实体
         int Power = data.getInt("power");
-        ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition = data.get("entity_condition");
+        ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition = data.get("entity_condition");
         ActionFactory<Entity>.Instance entityAction = data.get("entity_action");
         boolean explosion_damage_entity = data.get("explosion_damage_entity");
         explosion(entity, Power, entityCondition, entityAction, explosion_damage_entity);
@@ -39,55 +39,55 @@ public class ExplosionDamageEntityAction {
 
     private static void explosion(Entity entity,
                                   int power,
-                                  ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition,
+                                  ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition,
                                   ActionFactory<Entity>.Instance entityAction,
                                   boolean explosion_damage_entity
     ) {
-        Vec3d ExplosionPos = entity.getPos();
-        DamageSource source = entity.getWorld().getDamageSources().explosion(entity, entity);
-        entity.getWorld().emitGameEvent(entity, GameEvent.EXPLODE, new Vec3d(ExplosionPos.getX(), ExplosionPos.getY(), ExplosionPos.getZ()));
+        Vec3 ExplosionPos = entity.position();
+        DamageSource source = entity.level().damageSources().explosion(entity, entity);
+        entity.level().gameEvent(entity, GameEvent.EXPLODE, new Vec3(ExplosionPos.x(), ExplosionPos.y(), ExplosionPos.z()));
 
         // 从net.minecraft.world.explosion.Explosion类中collectBlocksAndDamageEntities函数提取的代码
         float q = power * 2.0F;
-        int k = MathHelper.floor(ExplosionPos.getX() - (double)q - 1.0);
-        int l = MathHelper.floor(ExplosionPos.getX() + (double)q + 1.0);
-        int r = MathHelper.floor(ExplosionPos.getY() - (double)q - 1.0);
-        int s = MathHelper.floor(ExplosionPos.getY() + (double)q + 1.0);
-        int t = MathHelper.floor(ExplosionPos.getZ() - (double)q - 1.0);
-        int u = MathHelper.floor(ExplosionPos.getZ() + (double)q + 1.0);
-	    List<Entity> list = entity.getWorld().getOtherEntities(entity, new Box((double)k, (double)r, (double)t, (double)l, (double)s, (double)u));
+        int k = Mth.floor(ExplosionPos.x() - (double)q - 1.0);
+        int l = Mth.floor(ExplosionPos.x() + (double)q + 1.0);
+        int r = Mth.floor(ExplosionPos.y() - (double)q - 1.0);
+        int s = Mth.floor(ExplosionPos.y() + (double)q + 1.0);
+        int t = Mth.floor(ExplosionPos.z() - (double)q - 1.0);
+        int u = Mth.floor(ExplosionPos.z() + (double)q + 1.0);
+	    List<Entity> list = entity.level().getEntities(entity, new AABB((double)k, (double)r, (double)t, (double)l, (double)s, (double)u));
 	    for(int v = 0; v < list.size(); ++v) {
 		    Entity target_entity = (Entity) list.get(v);
 		    // isImmuneToExplosion() removed in 1.21; base impl always returns false
-            if (entityCondition == null || entityCondition.test(new Pair<>(entity, target_entity))) {
-			    double w = Math.sqrt(target_entity.squaredDistanceTo(ExplosionPos)) / (double)q;
+            if (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity))) {
+			    double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double)q;
 			    if (w <= 1.0) {
-				    double x = target_entity.getX() - ExplosionPos.getX();
-				    double y = (target_entity instanceof TntEntity ? target_entity.getY() : target_entity.getEyeY()) - ExplosionPos.getY();
-				    double z = target_entity.getZ() - ExplosionPos.getZ();
+				    double x = target_entity.getX() - ExplosionPos.x();
+				    double y = (target_entity instanceof PrimedTnt ? target_entity.getY() : target_entity.getEyeY()) - ExplosionPos.y();
+				    double z = target_entity.getZ() - ExplosionPos.z();
 				    double aa = Math.sqrt(x * x + y * y + z * z);
 				    if (aa != 0.0) {
 					    x /= aa;
 					    y /= aa;
 					    z /= aa;
-                        double ab = (double) Explosion.getExposure(ExplosionPos, target_entity);
+                        double ab = (double) Explosion.getSeenPercent(ExplosionPos, target_entity);
 					    double ac = (1.0 - w) * ab;
                         if(explosion_damage_entity){
-                            target_entity.damage(source, (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
+                            target_entity.hurt(source, (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
 					    }
 					    double ad;
 					    if (target_entity instanceof LivingEntity livingEntity) {
-						    RegistryEntry<Enchantment> blastProtEntry = entity.getWorld().getRegistryManager().get(RegistryKeys.ENCHANTMENT).entryOf(Enchantments.BLAST_PROTECTION);
-							int blastProtLevel = EnchantmentHelper.getEquipmentLevel(blastProtEntry, livingEntity);
-							ad = blastProtLevel > 0 ? ac * MathHelper.clamp(1.0 - (double)blastProtLevel * 0.15, 0.0, 1.0) : ac;
+						    Holder<Enchantment> blastProtEntry = entity.level().registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.BLAST_PROTECTION);
+							int blastProtLevel = EnchantmentHelper.getEnchantmentLevel(blastProtEntry, livingEntity);
+							ad = blastProtLevel > 0 ? ac * Mth.clamp(1.0 - (double)blastProtLevel * 0.15, 0.0, 1.0) : ac;
 					    } else {
 						    ad = ac;
 					    }
 					    x *= ad;
 					    y *= ad;
 					    z *= ad;
-					    Vec3d vec3d2 = new Vec3d(x, y, z);
-					    target_entity.setVelocity(target_entity.getVelocity().add(vec3d2));
+					    Vec3 vec3d2 = new Vec3(x, y, z);
+					    target_entity.setDeltaMovement(target_entity.getDeltaMovement().add(vec3d2));
 					    // 加入额外可选的EntityAction
 					    if (entityAction != null) {
 						    entityAction.accept(target_entity);
