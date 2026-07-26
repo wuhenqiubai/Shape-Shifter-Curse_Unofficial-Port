@@ -2,13 +2,13 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.potion.Potion;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,9 +21,9 @@ public class BrewingRecipeUtils {
 		public final T input;
 		public final Ingredient ingredient;
 		public final T output;
-		public @Nullable Identifier targetForm;
+		public @Nullable ResourceLocation targetForm;
 
-		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable Identifier targetForm) {
+		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable ResourceLocation targetForm) {
 			this.input = input;
 			this.ingredient = ingredient;
 			this.output = output;
@@ -31,8 +31,8 @@ public class BrewingRecipeUtils {
 		}
 
 		public boolean matchesInput(T otherInput) {
-			if (input instanceof RegistryEntry<?> entry && otherInput instanceof RegistryEntry<?> otherEntry) {
-				return entry.getKey().equals(otherEntry.getKey()) || entry.value() == otherEntry.value();
+			if (input instanceof Holder<?> entry && otherInput instanceof Holder<?> otherEntry) {
+				return entry.unwrapKey().equals(otherEntry.unwrapKey()) || entry.value() == otherEntry.value();
 			}
 			return input.equals(otherInput);
 		}
@@ -73,28 +73,28 @@ public class BrewingRecipeUtils {
             ShapeShifterCurseFabric.LOGGER.error("recipe json has no input or ingredient or output");
             return;
         }
-        Identifier input = Identifier.tryParse(recipeJson.get("input").getAsString());
-        Identifier ingredient = Identifier.tryParse(recipeJson.get("ingredient").getAsString());
-        Identifier output = Identifier.tryParse(recipeJson.get("output").getAsString());
-        Identifier targetForm = null;
+        ResourceLocation input = ResourceLocation.tryParse(recipeJson.get("input").getAsString());
+        ResourceLocation ingredient = ResourceLocation.tryParse(recipeJson.get("ingredient").getAsString());
+        ResourceLocation output = ResourceLocation.tryParse(recipeJson.get("output").getAsString());
+        ResourceLocation targetForm = null;
         if (recipeJson.has("target_form")) {
-            targetForm = Identifier.tryParse(recipeJson.get("target_form").getAsString());
+            targetForm = ResourceLocation.tryParse(recipeJson.get("target_form").getAsString());
         }
         if (input == null || ingredient == null || output == null) {
             ShapeShifterCurseFabric.LOGGER.error("recipe json has invalid input or ingredient or output");
             return;
         }
-        Item ingredientItem = Registries.ITEM.get(ingredient);
-        Ingredient ingredientObject = Ingredient.ofItems(new ItemConvertible[]{ingredientItem});
+        Item ingredientItem = BuiltInRegistries.ITEM.get(ingredient);
+        Ingredient ingredientObject = Ingredient.of(new ItemLike[]{ingredientItem});
         switch (recipeJson.get("type").getAsString()) {
             case "potion" -> {
-                Potion inputPotion = Registries.POTION.get(input);
-                Potion outputPotion = Registries.POTION.get(output);
+                Potion inputPotion = BuiltInRegistries.POTION.get(input);
+                Potion outputPotion = BuiltInRegistries.POTION.get(output);
                 POTION_RECIPES.add(new DynamicRecipe<>(inputPotion, ingredientObject, outputPotion, targetForm));
             }
             case "item" -> {
-                Item inputItem = Registries.ITEM.get(input);
-                Item outputItem = Registries.ITEM.get(output);
+                Item inputItem = BuiltInRegistries.ITEM.get(input);
+                Item outputItem = BuiltInRegistries.ITEM.get(output);
                 ITEM_RECIPES.add(new DynamicRecipe<>(inputItem, ingredientObject, outputItem, targetForm));
             }
         }

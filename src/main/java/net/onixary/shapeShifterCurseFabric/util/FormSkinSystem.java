@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.NativeImage;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.util.Identifier;
+import com.mojang.blaze3d.platform.NativeImage;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
@@ -25,25 +25,25 @@ public class FormSkinSystem {
         public final boolean enableSkinModels;
         public final boolean enableSkinTextures;
         private boolean isSkinModelDynamic = false;
-        private @Nullable Identifier skinModel = null;
+        private @Nullable ResourceLocation skinModel = null;
         private boolean isSkinModelSlimDynamic = false;
-        private @Nullable Identifier skinModelSlim = null;
+        private @Nullable ResourceLocation skinModelSlim = null;
         private boolean isSkinTextureDynamic = false;
-        private @Nullable Identifier skinTexture = null;
+        private @Nullable ResourceLocation skinTexture = null;
         private boolean isSkinTextureSlimDynamic = false;
-        private @Nullable Identifier skinTextureSlim = null;
+        private @Nullable ResourceLocation skinTextureSlim = null;
         private boolean isSkinOverlayTextureDynamic = false;
-        private @Nullable Identifier skinOverlayTexture = null;
+        private @Nullable ResourceLocation skinOverlayTexture = null;
         private boolean isSkinOverlayTextureSlimDynamic = false;
-        private @Nullable Identifier skinOverlayTextureSlim = null;
+        private @Nullable ResourceLocation skinOverlayTextureSlim = null;
         private boolean isSkinEmissiveTextureDynamic = false;
-        private @Nullable Identifier skinEmissiveTexture = null;
+        private @Nullable ResourceLocation skinEmissiveTexture = null;
         private boolean isSkinEmissiveTextureSlimDynamic = false;
-        private @Nullable Identifier skinEmissiveTextureSlim = null;
+        private @Nullable ResourceLocation skinEmissiveTextureSlim = null;
         private boolean isSkinFullBrightTextureDynamic = false;
-        private @Nullable Identifier skinFullBrightTexture = null;
+        private @Nullable ResourceLocation skinFullBrightTexture = null;
         private boolean isSkinFullBrightTextureSlimDynamic = false;
-        private @Nullable Identifier skinFullBrightTextureSlim = null;
+        private @Nullable ResourceLocation skinFullBrightTextureSlim = null;
 
         public FormSkin(boolean enableSkinModels, boolean enableSkinTextures) {
             this.enableSkinModels = enableSkinModels;
@@ -55,92 +55,92 @@ public class FormSkinSystem {
         }
 
         private void CleanSkinTexture(boolean slim) {
-            TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (slim) {
                 if (this.isSkinTextureSlimDynamic) {
-                    Identifier id = this.skinTextureSlim;
+                    ResourceLocation id = this.skinTextureSlim;
                     this.skinTextureSlim = null;
                     this.isSkinTextureSlimDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             } else {
                 if (this.isSkinTextureDynamic) {
-                    Identifier id = this.skinTexture;
+                    ResourceLocation id = this.skinTexture;
                     this.skinTexture = null;
                     this.isSkinTextureDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             }
         }
 
         private void CleanSkinOverlayTexture(boolean slim) {
-            TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (slim) {
                 if (this.isSkinOverlayTextureSlimDynamic) {
-                    Identifier id = this.skinOverlayTextureSlim;
+                    ResourceLocation id = this.skinOverlayTextureSlim;
                     this.skinOverlayTextureSlim = null;
                     this.isSkinOverlayTextureSlimDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             } else {
                 if (this.isSkinOverlayTextureDynamic) {
-                    Identifier id = this.skinOverlayTexture;
+                    ResourceLocation id = this.skinOverlayTexture;
                     this.skinOverlayTexture = null;
                     this.isSkinOverlayTextureDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             }
         }
 
         private void CleanSkinEmissiveTexture(boolean slim) {
-            TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (slim) {
                 if (this.isSkinEmissiveTextureSlimDynamic) {
-                    Identifier id = this.skinEmissiveTextureSlim;
+                    ResourceLocation id = this.skinEmissiveTextureSlim;
                     this.skinEmissiveTextureSlim = null;
                     this.isSkinEmissiveTextureSlimDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             } else {
                 if (this.isSkinEmissiveTextureDynamic) {
-                    Identifier id = this.skinEmissiveTexture;
+                    ResourceLocation id = this.skinEmissiveTexture;
                     this.skinEmissiveTexture = null;
                     this.isSkinEmissiveTextureDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             }
         }
 
         private void CleanSkinFullBrightTexture(boolean slim) {
-            TextureManager textureManager = MinecraftClient.getInstance().getTextureManager();
+            TextureManager textureManager = Minecraft.getInstance().getTextureManager();
             if (slim) {
                 if (this.isSkinFullBrightTextureSlimDynamic) {
-                    Identifier id = this.skinFullBrightTextureSlim;
+                    ResourceLocation id = this.skinFullBrightTextureSlim;
                     this.skinFullBrightTextureSlim = null;
                     this.isSkinFullBrightTextureSlimDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             } else {
                 if (this.isSkinFullBrightTextureDynamic) {
-                    Identifier id = this.skinFullBrightTexture;
+                    ResourceLocation id = this.skinFullBrightTexture;
                     this.skinFullBrightTexture = null;
                     this.isSkinFullBrightTextureDynamic = false;
                     if (id != null) {
-                        textureManager.destroyTexture(id);
+                        textureManager.release(id);
                     }
                 }
             }
@@ -159,29 +159,29 @@ public class FormSkinSystem {
             this.CleanSkinFullBrightTexture(false);
         }
 
-        public Identifier getNextID() {
-            Identifier id = Identifier.of(IdNameSpace, IdPrefix + nowId);
+        public ResourceLocation getNextID() {
+            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(IdNameSpace, IdPrefix + nowId);
             nowId++;
             return id;
         }
 
-        public Identifier setSkinModel(NativeImage image, boolean slim) {
+        public ResourceLocation setSkinModel(NativeImage image, boolean slim) {
             throw new NotImplementedException();
         }
 
-        public Identifier getSkinModel(boolean slim) {
+        public ResourceLocation getSkinModel(boolean slim) {
             if (slim) {
                 return this.skinModelSlim;
             }
             return this.skinModel;
         }
 
-        public Identifier setSkinTexture(NativeImage image, boolean slim) {
+        public ResourceLocation setSkinTexture(NativeImage image, boolean slim) {
             this.CleanSkinTexture(slim);
             if (image != null) {
-                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
-                Identifier id = this.getNextID();
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
+                DynamicTexture texture = new DynamicTexture(image);
+                ResourceLocation id = this.getNextID();
+                Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinTextureSlimDynamic = true;
                     this.skinTextureSlim = id;
@@ -194,19 +194,19 @@ public class FormSkinSystem {
             return null;
         }
 
-        public Identifier getSkinTexture(boolean slim) {
+        public ResourceLocation getSkinTexture(boolean slim) {
             if (slim) {
                 return this.skinTextureSlim;
             }
             return this.skinTexture;
         }
 
-        public Identifier setSkinOverlayTexture(NativeImage image, boolean slim) {
+        public ResourceLocation setSkinOverlayTexture(NativeImage image, boolean slim) {
             this.CleanSkinOverlayTexture(slim);
             if (image != null) {
-                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
-                Identifier id = this.getNextID();
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
+                DynamicTexture texture = new DynamicTexture(image);
+                ResourceLocation id = this.getNextID();
+                Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinOverlayTextureSlimDynamic = true;
                     this.skinOverlayTextureSlim = id;
@@ -219,19 +219,19 @@ public class FormSkinSystem {
             return null;
         }
 
-        public Identifier getSkinOverlayTexture(boolean slim) {
+        public ResourceLocation getSkinOverlayTexture(boolean slim) {
             if (slim) {
                 return this.skinOverlayTextureSlim;
             }
             return this.skinOverlayTexture;
         }
 
-        public Identifier setSkinEmissiveTexture(NativeImage image, boolean slim) {
+        public ResourceLocation setSkinEmissiveTexture(NativeImage image, boolean slim) {
             this.CleanSkinEmissiveTexture(slim);
             if (image != null) {
-                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
-                Identifier id = this.getNextID();
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
+                DynamicTexture texture = new DynamicTexture(image);
+                ResourceLocation id = this.getNextID();
+                Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinEmissiveTextureSlimDynamic = true;
                     this.skinEmissiveTextureSlim = id;
@@ -244,19 +244,19 @@ public class FormSkinSystem {
             return null;
         }
 
-        public Identifier getSkinEmissiveTexture(boolean slim) {
+        public ResourceLocation getSkinEmissiveTexture(boolean slim) {
             if (slim) {
                 return this.skinEmissiveTextureSlim;
             }
             return this.skinEmissiveTexture;
         }
 
-        public Identifier setSkinFullBrightTexture(NativeImage image, boolean slim) {
+        public ResourceLocation setSkinFullBrightTexture(NativeImage image, boolean slim) {
             this.CleanSkinFullBrightTexture(slim);
             if (image != null) {
-                NativeImageBackedTexture texture = new NativeImageBackedTexture(image);
-                Identifier id = this.getNextID();
-                MinecraftClient.getInstance().getTextureManager().registerTexture(id, texture);
+                DynamicTexture texture = new DynamicTexture(image);
+                ResourceLocation id = this.getNextID();
+                Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinFullBrightTextureSlimDynamic = true;
                     this.skinFullBrightTextureSlim = id;
@@ -269,7 +269,7 @@ public class FormSkinSystem {
             return null;
         }
 
-        public Identifier getSkinFullBrightTexture(boolean slim) {
+        public ResourceLocation getSkinFullBrightTexture(boolean slim) {
             if (slim) {
                 return this.skinFullBrightTextureSlim;
             }
@@ -279,20 +279,20 @@ public class FormSkinSystem {
 
     public static boolean enablePlayerFormSkinSystem = false;
 
-    private static final HashMap<UUID, HashMap<Identifier, FormSkin>> PlayerFormSkinRegister = new HashMap<>();
+    private static final HashMap<UUID, HashMap<ResourceLocation, FormSkin>> PlayerFormSkinRegister = new HashMap<>();
 
-    public static @Nullable FormSkin getFormSkin(UUID uuid, Identifier FormID) {
+    public static @Nullable FormSkin getFormSkin(UUID uuid, ResourceLocation FormID) {
         if (!enablePlayerFormSkinSystem) {
             return null;
         }
         return PlayerFormSkinRegister.getOrDefault(uuid, new HashMap<>()).get(FormID);
     }
 
-    public static void registerFormSkin(UUID uuid, Identifier FormID, FormSkin formSkin) {
+    public static void registerFormSkin(UUID uuid, ResourceLocation FormID, FormSkin formSkin) {
         if (!enablePlayerFormSkinSystem) {
             return;
         }
-        HashMap<Identifier, FormSkin> map = PlayerFormSkinRegister.computeIfAbsent(uuid, k -> new HashMap<>());
+        HashMap<ResourceLocation, FormSkin> map = PlayerFormSkinRegister.computeIfAbsent(uuid, k -> new HashMap<>());
         if (map.containsKey(FormID)) {
             FormSkin old = map.get(FormID);
             old.Clean();

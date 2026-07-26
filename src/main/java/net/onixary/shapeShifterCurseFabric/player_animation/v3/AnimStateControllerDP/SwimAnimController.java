@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
@@ -26,7 +26,7 @@ public class SwimAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
         if (player.isSwimming()) {
             return this.animationHolder2;
         } else {
@@ -35,7 +35,7 @@ public class SwimAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
         this.animationHolder1 = this.animationHolderData1.build();
         this.animationHolder2 = this.animationHolderData2.build();
         super.registerAnim(player, data);

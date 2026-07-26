@@ -1,20 +1,20 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.onixary.shapeShifterCurseFabric.items.tools.DiamondMiningClaw;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class EnchantmentUtils {
-    public static  HashMap<RegistryKey<Enchantment>, HashSet<Class<? extends Item>>> enchantmentItemClassMap = new HashMap<>();
-    public static HashMap<RegistryKey<Enchantment>, HashSet<Identifier>> enchantmentItemIDMap = new HashMap<>();
+    public static  HashMap<ResourceKey<Enchantment>, HashSet<Class<? extends Item>>> enchantmentItemClassMap = new HashMap<>();
+    public static HashMap<ResourceKey<Enchantment>, HashSet<ResourceLocation>> enchantmentItemIDMap = new HashMap<>();
 
     static {
         registerEnchantmentItem(Enchantments.SHARPNESS, DiamondMiningClaw.class);
@@ -25,19 +25,19 @@ public class EnchantmentUtils {
         registerEnchantmentItem(Enchantments.LOOTING, DiamondMiningClaw.class);
     }
 
-    public static void registerEnchantmentItem(RegistryKey<Enchantment> enchantment, Class<? extends Item> itemClass) {
+    public static void registerEnchantmentItem(ResourceKey<Enchantment> enchantment, Class<? extends Item> itemClass) {
         enchantmentItemClassMap.computeIfAbsent(enchantment, k -> new HashSet<>()).add(itemClass);
     }
 
-    public static void registerEnchantmentItem(RegistryKey<Enchantment> enchantment, Identifier itemID) {
+    public static void registerEnchantmentItem(ResourceKey<Enchantment> enchantment, ResourceLocation itemID) {
         enchantmentItemIDMap.computeIfAbsent(enchantment, k -> new HashSet<>()).add(itemID);
     }
 
-    public static void registerEnchantmentItem(RegistryKey<Enchantment> enchantment, Item item) {
-        enchantmentItemIDMap.computeIfAbsent(enchantment, k -> new HashSet<>()).add(Registries.ITEM.getId(item));
+    public static void registerEnchantmentItem(ResourceKey<Enchantment> enchantment, Item item) {
+        enchantmentItemIDMap.computeIfAbsent(enchantment, k -> new HashSet<>()).add(BuiltInRegistries.ITEM.getKey(item));
     }
 
-    public static boolean isItemCanEnchantment(RegistryKey<Enchantment> enchantment, ItemStack itemStack) {
+    public static boolean isItemCanEnchantment(ResourceKey<Enchantment> enchantment, ItemStack itemStack) {
         if (enchantmentItemClassMap.containsKey(enchantment)) {
             for (Class<? extends Item> itemClass : enchantmentItemClassMap.get(enchantment)) {
                 if (itemClass.isInstance(itemStack.getItem())) {
@@ -46,8 +46,8 @@ public class EnchantmentUtils {
             }
         }
         if (enchantmentItemIDMap.containsKey(enchantment)) {
-            Identifier id = Registries.ITEM.getId(itemStack.getItem());
-            for (Identifier itemID : enchantmentItemIDMap.get(enchantment)) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(itemStack.getItem());
+            for (ResourceLocation itemID : enchantmentItemIDMap.get(enchantment)) {
                 if (itemID.equals(id)) {
                     return true;
                 }

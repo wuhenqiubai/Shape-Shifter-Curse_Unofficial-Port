@@ -4,11 +4,11 @@ import dev.emi.trinkets.api.SlotReference;
 import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.Registries;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -60,16 +60,16 @@ public class TrinketItemMixin {
     private final String pluginID = "trinkets";
 
     @Unique
-    public void onEquip(ItemStack stack, SlotReference slot, PlayerEntity player) {
-        Identifier ItemID = Registries.ITEM.getId(stack.getItem());
+    public void onEquip(ItemStack stack, SlotReference slot, Player player) {
+        ResourceLocation ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerEquip(player, ItemID, pluginID);
         }
     }
 
     @Unique
-    public void onUnequip(ItemStack stack, SlotReference slot, PlayerEntity player) {
-        Identifier ItemID = Registries.ITEM.getId(stack.getItem());
+    public void onUnequip(ItemStack stack, SlotReference slot, Player player) {
+        ResourceLocation ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerUnEquip(player, ItemID, pluginID);
         }
@@ -77,7 +77,7 @@ public class TrinketItemMixin {
 
     @Inject(at = {@At("TAIL")}, method = {"tick"})
     public void tick(CallbackInfo ci) {
-        if ((Object)this instanceof PlayerEntity player) {
+        if ((Object)this instanceof Player player) {
             if (!player.isRemoved()) {
                 Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
 	            TrinketsApi.getTrinketComponent(player).ifPresent((trinkets) -> trinkets.forEach((ref, stack) -> {
@@ -85,14 +85,14 @@ public class TrinketItemMixin {
 		            SlotType slotType = inventory.getSlotType();
 		            int index = ref.index();
 		            ItemStack oldStack = this.getOldStack(slotType, index);
-		            ItemStack newStack = inventory.getStack(index);
+		            ItemStack newStack = inventory.getItem(index);
 		            ItemStack newStackCopy = newStack.copy();
 		            String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
-		            if (!ItemStack.areEqual(newStack, oldStack)) {
+		            if (!ItemStack.matches(newStack, oldStack)) {
 			            this.onUnequip(oldStack, ref, player);
 			            this.onEquip(newStack, ref, player);
 		            }
-		            ItemStack tickedStack = inventory.getStack(index);
+		            ItemStack tickedStack = inventory.getItem(index);
 		            if (tickedStack.getItem() == newStackCopy.getItem()) {
 			            newlyEquippedTrinkets.put(newRef, tickedStack.copy());
 		            } else {

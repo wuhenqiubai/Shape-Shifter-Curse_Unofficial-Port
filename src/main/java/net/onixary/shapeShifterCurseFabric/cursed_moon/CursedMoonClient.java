@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.cursed_moon;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 import static net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.isCursedMoonDay;
 
@@ -13,16 +13,16 @@ public class CursedMoonClient {
     public static boolean isCursedMoon = false;  // 由同步包更新
     public static boolean middayMessageSent = false;  // 接收到同步包时自动置为 false
 
-    public static void clientTick(World world) {
+    public static void clientTick(Level world) {
         if (!isCursedMoonDay(world)) { return; }
-        long dayTime = world.getTimeOfDay() % 24000;
+        long dayTime = world.getDayTime() % 24000;
         if (dayTime >= 6000L && dayTime < 12500L && !middayMessageSent) {
-            PlayerEntity player = MinecraftClient.getInstance().player;
+            Player player = Minecraft.getInstance().player;
             if (player != null) {
-                if (player.getWorld().getRegistryKey() != World.OVERWORLD) {
-                    player.sendMessage(Text.translatable("info.shape-shifter-curse.before_cursed_moon_nether").formatted(Formatting.LIGHT_PURPLE));
+                if (player.level().dimension() != Level.OVERWORLD) {
+                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE));
                 } else {
-                    player.sendMessage(Text.translatable("info.shape-shifter-curse.before_cursed_moon").formatted(Formatting.LIGHT_PURPLE));
+                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
                 }
             }
             middayMessageSent = true;

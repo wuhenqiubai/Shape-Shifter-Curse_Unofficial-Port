@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.items.accessory;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * 饰品物品基类。提供饰品生命周期钩子（tick/装备/卸下/破坏）和掉落规则。
@@ -24,7 +24,7 @@ public abstract class AccessoryItem extends Item {
 	 * @param slot  槽位 ID（如 {@code trinkets:head}）
 	 * @param index 槽位内的索引
 	 */
-	public record SlotData(Identifier slot, int index) { }
+	public record SlotData(ResourceLocation slot, int index) { }
 
 	/**
 	 * 饰品掉落规则。
@@ -48,13 +48,13 @@ public abstract class AccessoryItem extends Item {
 		DEFAULT
 	}
 
-    public AccessoryItem(Settings settings) {
+    public AccessoryItem(Properties settings) {
 	    super(settings);
 	    this.accessoryInit(settings);
     }
 
     /** 初始化钩子，在构造器中调用。子类可在此覆写初始设置。 */
-    public void accessoryInit(Settings settings) {
+    public void accessoryInit(Properties settings) {
     }
 
     /** 每 tick 调用，用于处理饰品持续效果。 */

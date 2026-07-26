@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -16,10 +16,10 @@ import java.util.UUID;
 
 public class InstinctUtils {
     public static class InstinctEffect {
-        private final Identifier id;
+        private final ResourceLocation id;
         private final float value;
         private int duration;
-        public InstinctEffect(Identifier id, float value, int duration) {
+        public InstinctEffect(ResourceLocation id, float value, int duration) {
             this.id = id;
             this.value = value;
             this.duration = duration;
@@ -33,7 +33,7 @@ public class InstinctUtils {
             }
         }
 
-        public Identifier getId() {
+        public ResourceLocation getId() {
             return id;
         }
 
@@ -42,14 +42,14 @@ public class InstinctUtils {
             return duration >= 0;
         }
 
-        public void toNBT(NbtCompound nbt) {
+        public void toNBT(CompoundTag nbt) {
             nbt.putString("id", id.toString());
             nbt.putFloat("value", value);
             nbt.putInt("duration", duration);
         }
 
-        public static InstinctEffect fromNBT(NbtCompound nbt) {
-            return new InstinctEffect(Identifier.of(nbt.getString("id")), nbt.getFloat("value"), nbt.getInt("duration"));
+        public static InstinctEffect fromNBT(CompoundTag nbt) {
+            return new InstinctEffect(ResourceLocation.parse(nbt.getString("id")), nbt.getFloat("value"), nbt.getInt("duration"));
         }
     }
     // ServerSide Data
@@ -83,9 +83,9 @@ public class InstinctUtils {
         nowInstinctTick++;
         float instinctValue = getNowInstinct();
         if (instinctValue >= 80.0f && instinctValue < 99.99f) {
-           PlayerEntity player = ClientUtils.getPlayer();
+           Player player = ClientUtils.getPlayer();
            if (player != null) {
-               player.getWorld().addParticle(
+               player.level().addParticle(
                        StaticParams.PLAYER_TRANSFORM_PARTICLE,
                        player.getX() + (player.getRandom().nextDouble() - 0.5) * 0.5,
                        player.getY() + player.getRandom().nextDouble() * 1,
@@ -97,7 +97,7 @@ public class InstinctUtils {
     }
 
     // Both Side
-    public static float calcRate(HashMap<Identifier, InstinctEffect> effects, boolean checkExist) {
+    public static float calcRate(HashMap<ResourceLocation, InstinctEffect> effects, boolean checkExist) {
         if (checkExist) {
             effects.entrySet().removeIf(entry -> !entry.getValue().IsEffectExist());
         }
@@ -105,7 +105,7 @@ public class InstinctUtils {
     }
 
     // Both Side
-    public static float getBaseInstinctRate(PlayerEntity player) {
+    public static float getBaseInstinctRate(Player player) {
         IForm form = FormUtils.getPlayerForm(player);
         if (FormUtils.NoInstinct.hasFlag(form) || FormUtils.LockInstinct.hasFlag(form)) {
             return -100.0f;
@@ -116,17 +116,17 @@ public class InstinctUtils {
 
     // Server Side
     public static void serverTick(MinecraftServer server) {
-        boolean isInCursedMoon = CursedMoon.isInCursedMoon(server.getOverworld());
-        for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        boolean isInCursedMoon = CursedMoon.isInCursedMoon(server.overworld());
+        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
-            float prevRate = playerInstinctRate.getOrDefault(player.getUuid(), 0.0f);
+            float prevRate = playerInstinctRate.getOrDefault(player.getUUID(), 0.0f);
             float nowRate = getBaseInstinctRate(player);
-            if (isInCursedMoon || playerInstinctLock.getOrDefault(player.getUuid(), false)) {
+            if (isInCursedMoon || playerInstinctLock.getOrDefault(player.getUUID(), false)) {
                 nowRate = 0.0f;
             } else {
                 nowRate += calcRate(component.instinctEffects, true);
             }
-            playerInstinctRate.put(player.getUuid(), nowRate);
+            playerInstinctRate.put(player.getUUID(), nowRate);
             component.instinctValue += nowRate;
             component.instinctValue = Math.max(component.instinctValue, 0);
             component.instinctRate = nowRate;
@@ -137,14 +137,14 @@ public class InstinctUtils {
         }
     }
 
-    public static void clearInstinct(PlayerEntity player) {
+    public static void clearInstinct(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.instinctValue = 0.0f;
         component.instinctEffects.clear();
         component.sync();
     }
 
-    private static void checkThreshold(ServerPlayerEntity player, float instinctValue) {
+    private static void checkThreshold(ServerPlayer player, float instinctValue) {
         if (instinctValue >= StaticParams.INSTINCT_MAX) {
             IForm nowForm = FormUtils.getPlayerForm(player);
             IForm targetForm = nowForm._getNextForm(player, ITransformReason.Instinct);
@@ -155,11 +155,11 @@ public class InstinctUtils {
         }
     }
 
-    public static void addInstinctEffect(PlayerEntity player, InstinctEffect effect, boolean isImmediate) {
-        boolean isInCursedMoon = CursedMoon.isInCursedMoon(player.getWorld());
+    public static void addInstinctEffect(Player player, InstinctEffect effect, boolean isImmediate) {
+        boolean isInCursedMoon = CursedMoon.isInCursedMoon(player.level());
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         if (isImmediate) {
-            component.instinctValue += (isInCursedMoon || playerInstinctLock.getOrDefault(player.getUuid(), false)) ? 0 : effect.getValue(true);
+            component.instinctValue += (isInCursedMoon || playerInstinctLock.getOrDefault(player.getUUID(), false)) ? 0 : effect.getValue(true);
             component.instinctValue = Math.max(component.instinctValue, 0);
         } else {
             component.instinctEffects.put(effect.getId(), effect);
@@ -167,7 +167,7 @@ public class InstinctUtils {
         component.sync();
     }
 
-    public static void addInstinctEffect(PlayerEntity player, Identifier id, float value, int duration, boolean isImmediate) {
+    public static void addInstinctEffect(Player player, ResourceLocation id, float value, int duration, boolean isImmediate) {
         addInstinctEffect(player, new InstinctEffect(id, value, duration), isImmediate);
     }
 }

@@ -7,9 +7,9 @@ import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.animation.layered.modifier.AbstractFadeModifier;
 import com.zigythebird.playeranimcore.animation.layered.modifier.SpeedModifier;
 import com.zigythebird.playeranimcore.easing.EasingType;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,20 +18,20 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(AbstractClientPlayerEntity.class)
-public abstract class PlayerEntityAnimOverrideMixin extends PlayerEntity {
+@Mixin(AbstractClientPlayer.class)
+public abstract class PlayerEntityAnimOverrideMixin extends Player {
     @Unique
     PlayerAnimationController controller;
 
-    public PlayerEntityAnimOverrideMixin(ClientWorld world, GameProfile gameProfile) {
-        super(world, world.getSpawnPos(), world.getSpawnAngle(), gameProfile);
+    public PlayerEntityAnimOverrideMixin(ClientLevel world, GameProfile gameProfile) {
+        super(world, world.getSharedSpawnPos(), world.getSharedSpawnAngle(), gameProfile);
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
-    private void shape_shifter_curse$init(ClientWorld level, GameProfile profile, CallbackInfo info) {
-        controller = new PlayerAnimationController((AbstractClientPlayerEntity) (Object) this,
+    private void shape_shifter_curse$init(ClientLevel level, GameProfile profile, CallbackInfo info) {
+        controller = new PlayerAnimationController((AbstractClientPlayer) (Object) this,
                 (c, state, setter) -> null);
-        PlayerAnimationAccess.getPlayerAnimManager((AbstractClientPlayerEntity) (Object) this).addAnimLayer(1, controller);
+        PlayerAnimationAccess.getPlayerAnimManager((AbstractClientPlayer) (Object) this).addAnimLayer(1, controller);
         currentAnimation = null;
     }
 

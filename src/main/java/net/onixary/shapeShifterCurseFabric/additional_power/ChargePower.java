@@ -9,11 +9,11 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,7 +112,7 @@ public class ChargePower extends Power implements Active {
 
     public static final int TierCount = 10;
 
-    public @Nullable Identifier chargePowerID = null;
+    public @Nullable ResourceLocation chargePowerID = null;
     public int nowTier = 0;
     public int renderTier = 0;
     public Key ActiveKey;
@@ -195,14 +195,14 @@ public class ChargePower extends Power implements Active {
         PowerHolderComponent.syncPower(this.entity, this.getType());
     }
 
-    public NbtElement toTag() {
-        NbtCompound tag = new NbtCompound();
+    public Tag toTag() {
+        CompoundTag tag = new CompoundTag();
         tag.putInt("renderTier", this.renderTier);
         return tag;
     }
 
-    public void fromTag(NbtElement tag) {
-        this.renderTier = ((NbtCompound) tag).getInt("renderTier");
+    public void fromTag(Tag tag) {
+        this.renderTier = ((CompoundTag) tag).getInt("renderTier");
     }
 
     public static PowerFactory<?> createFactory() {

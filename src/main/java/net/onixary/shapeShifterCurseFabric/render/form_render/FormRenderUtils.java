@@ -1,18 +1,18 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.PlayerOriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
@@ -29,25 +29,25 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FormRenderUtils {
-    public static final HashMap<Identifier, Supplier<IModelAnimationSystem>> modelAnimationSystemRegistry = new HashMap<>();
-    public static final HashMap<Identifier, Predicate<PlayerEntity>> conditionRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, Supplier<IModelAnimationSystem>> modelAnimationSystemRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, Predicate<Player>> conditionRegistry = new HashMap<>();
     static {
         registerCondition(ShapeShifterCurseFabric.identifier("always_true"), player -> true);
         registerCondition(ShapeShifterCurseFabric.identifier("always_false"), player -> false);
-        registerCondition(ShapeShifterCurseFabric.identifier("is_sneaking"), Entity::isSneaking);
+        registerCondition(ShapeShifterCurseFabric.identifier("is_sneaking"), Entity::isShiftKeyDown);
         registerCondition(ShapeShifterCurseFabric.identifier("is_sprinting"), Entity::isSprinting);
     }
 
-    public static void registerCondition(Identifier identifier, Predicate<PlayerEntity> condition) {
+    public static void registerCondition(ResourceLocation identifier, Predicate<Player> condition) {
         conditionRegistry.put(identifier, condition);
     }
 
     public static boolean isRenderingInWorld = false;
 
     // { "layer(slot)": {"form": formRenderer} }
-    public static final HashMap<Identifier, HashMap<Identifier, FormRenderer>> formRendererRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, HashMap<ResourceLocation, FormRenderer>> formRendererRegistry = new HashMap<>();
 
-    public static final Identifier DEFAULT_MAS = register_MAS(ShapeShifterCurseFabric.identifier("default"), DefaultModelAnimationSystem::new);
+    public static final ResourceLocation DEFAULT_MAS = register_MAS(ShapeShifterCurseFabric.identifier("default"), DefaultModelAnimationSystem::new);
 
     public static class BoneBipedState {
         public final float x;
@@ -83,7 +83,7 @@ public class FormRenderUtils {
         }
 
         public BoneBipedState(ModelPart part) {
-            this(0f, 0f, 0f, part.pitch, part.yaw, part.roll, part.pivotX, part.pivotY, part.pivotZ, part.xScale, part.yScale, part.zScale);
+            this(0f, 0f, 0f, part.xRot, part.yRot, part.zRot, part.x, part.y, part.z, part.xScale, part.yScale, part.zScale);
             this.cachedPart = part;
         }
 
@@ -94,12 +94,12 @@ public class FormRenderUtils {
         }
 
         public void apply(ModelPart part) {
-            part.pitch = rot_x;
-            part.yaw = rot_y;
-            part.roll = rot_z;
-            part.pivotX = pivot_x;
-            part.pivotY = pivot_y;
-            part.pivotZ = pivot_z;
+            part.xRot = rot_x;
+            part.yRot = rot_y;
+            part.zRot = rot_z;
+            part.x = pivot_x;
+            part.y = pivot_y;
+            part.z = pivot_z;
             part.xScale = scale_x;
             part.yScale = scale_y;
             part.zScale = scale_z;
@@ -134,15 +134,15 @@ public class FormRenderUtils {
     public static void onClientInit() {
         WorldRenderEvents.END.register(context -> isRenderingInWorld = false);
         WorldRenderEvents.START.register(context -> isRenderingInWorld = true);
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new FormModelResourceReloadListener());
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FormModelResourceReloadListener());
     }
 
-    public static Identifier register_MAS(Identifier id, Supplier<IModelAnimationSystem> supplier) {
+    public static ResourceLocation register_MAS(ResourceLocation id, Supplier<IModelAnimationSystem> supplier) {
         modelAnimationSystemRegistry.put(id, supplier);
         return id;
     }
 
-    public static @Nullable IModelAnimationSystem get_MAS(Identifier id, @Nullable JsonObject json) {
+    public static @Nullable IModelAnimationSystem get_MAS(ResourceLocation id, @Nullable JsonObject json) {
 	    if (id == null) {
 		    return null;
 	    }
@@ -162,31 +162,31 @@ public class FormRenderUtils {
         return null;
     }
 
-    public static void registerFormRenderer(Identifier slotID, Identifier formID, FormRenderer renderer) {
+    public static void registerFormRenderer(ResourceLocation slotID, ResourceLocation formID, FormRenderer renderer) {
         formRendererRegistry.computeIfAbsent(slotID, k -> new HashMap<>()).put(formID, renderer);
     }
 
-    public static @Nullable FormRenderer getFormRenderer(Identifier slotID, Identifier formID) {
+    public static @Nullable FormRenderer getFormRenderer(ResourceLocation slotID, ResourceLocation formID) {
         return formRendererRegistry.getOrDefault(slotID, new HashMap<>()).get(formID);
     }
 
-    public static void loadFormRenderer(Identifier slotID, Identifier formID, FormRenderer renderer) {
+    public static void loadFormRenderer(ResourceLocation slotID, ResourceLocation formID, FormRenderer renderer) {
         formRendererRegistry.computeIfAbsent(slotID, k -> new HashMap<>()).put(formID, renderer);
     }
 
-    public static Vec3d getPartPosition(ModelPart part) {
-        var t = part.getTransform();
-        return new Vec3d(t.pivotX, t.pivotY, t.pivotZ).negate();
+    public static Vec3 getPartPosition(ModelPart part) {
+        var t = part.storePose();
+        return new Vec3(t.x, t.y, t.z).reverse();
     }
 
-    public static Vec3d getPartRotation(ModelPart part) {
-        var t = part.getTransform();
-        return new Vec3d(t.pitch, t.yaw, t.roll);
+    public static Vec3 getPartRotation(ModelPart part) {
+        var t = part.storePose();
+        return new Vec3(t.xRot, t.yRot, t.zRot);
     }
 
     @SuppressWarnings("removal")
-    public static MatrixStack computeModelMatrixStack(GeoBone bone) {
-        MatrixStack matrices = new MatrixStack();
+    public static PoseStack computeModelMatrixStack(GeoBone bone) {
+        PoseStack matrices = new PoseStack();
         if (bone == null) return matrices;
         List<GeoBone> chain = new ArrayList<>();
         for (GeoBone b = bone; b != null; b = b.getParent()) {
@@ -198,9 +198,9 @@ public class FormRenderUtils {
             GeoBone b = chain.get(i);
             matrices.translate(-b.getPosX(), b.getPosY(), b.getPosZ());
             matrices.translate(b.getPivotX(), b.getPivotY(), b.getPivotZ());
-            matrices.multiply(RotationAxis.POSITIVE_Z.rotation(b.getRotZ()));
-            matrices.multiply(RotationAxis.POSITIVE_Y.rotation(b.getRotY()));
-            matrices.multiply(RotationAxis.POSITIVE_X.rotation(b.getRotX()));
+            matrices.mulPose(Axis.ZP.rotation(b.getRotZ()));
+            matrices.mulPose(Axis.YP.rotation(b.getRotY()));
+            matrices.mulPose(Axis.XP.rotation(b.getRotX()));
             matrices.scale(b.getScaleX(), b.getScaleY(), b.getScaleZ());
             if (i < chain.size() - 1) {
                 matrices.translate(-b.getPivotX(), -b.getPivotY(), -b.getPivotZ());
@@ -209,20 +209,20 @@ public class FormRenderUtils {
         return matrices;
     }
 
-    public static Vec3d getPartScale(ModelPart part) {
-        return new Vec3d(part.xScale, part.yScale, part.zScale);
+    public static Vec3 getPartScale(ModelPart part) {
+        return new Vec3(part.xScale, part.yScale, part.zScale);
     }
 
-    public static @Nullable FormRenderer searchFirstRenderer(PlayerEntity player, Predicate<FormRenderer> predicate) {
+    public static @Nullable FormRenderer searchFirstRenderer(Player player, Predicate<FormRenderer> predicate) {
         return getPlayerAllFormRenderer(player).stream().filter(predicate).findFirst().orElse(null);
     }
 
     // Origins 版本核心 如果需要重构形态系统需要重新写一份这个函数
-    public static List<FormRenderer> getPlayerAllFormRenderer(PlayerEntity player) {
-        if (FormTextureUtils.useTempFormModel && Objects.equals(player, MinecraftClient.getInstance().player)) {
+    public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
+        if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
             List<FormRenderer> formRenderers = new ArrayList<>();
-            Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
-            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.of("origins", "origin"), formID);
+            ResourceLocation formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
+            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(ResourceLocation.fromNamespaceAndPath("origins", "origin"), formID);
             if (formRenderer == null) {
                 ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: PlayerFormDynamic.ModelID is not null, but the model is not registered: {}", formID);
                 return new ArrayList<>();
@@ -246,12 +246,12 @@ public class FormRenderUtils {
             //     }
             // }
             IForm playerFormBase = FormUtils.getPlayerForm(player);
-            Pair<Identifier, Identifier> currentLayer = playerFormBase.getRenderLayerOverride();
+            Tuple<ResourceLocation, ResourceLocation> currentLayer = playerFormBase.getRenderLayerOverride();
             if (currentLayer != null) {
                 List<FormRenderer> formRenderers = new ArrayList<>();
-                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getLeft(), currentLayer.getRight());
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
                 if (formRenderer == null) {
-                    ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", currentLayer.getLeft(), currentLayer.getRight());
+                    ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", currentLayer.getA(), currentLayer.getB());
                     return new ArrayList<>();
                 }
                 formRenderers.add(formRenderer);
@@ -262,8 +262,8 @@ public class FormRenderUtils {
         HashMap<OriginLayer, Origin> OriginData = poc.getOrigins();
         List<FormRenderer> formRenderers = new ArrayList<>();
         for (Map.Entry<OriginLayer, Origin> entry : OriginData.entrySet()) {
-            Identifier layer = entry.getKey().getIdentifier();
-            Identifier form = entry.getValue().getIdentifier();
+            ResourceLocation layer = entry.getKey().getIdentifier();
+            ResourceLocation form = entry.getValue().getIdentifier();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layer, form);
             if (formRenderer != null) {
                 formRenderers.add(formRenderer);

@@ -7,9 +7,9 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 import java.util.*;
@@ -24,7 +24,7 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 	}
 
 	@Override
-	protected void apply(Map<Identifier, List<JsonElement>> loader, ResourceManager manager, Profiler profiler) {
+	protected void apply(Map<ResourceLocation, List<JsonElement>> loader, ResourceManager manager, ProfilerFiller profiler) {
 		OriginRegistry.reset();
 		AtomicBoolean hasConfigChanged = new AtomicBoolean(false);
 		loader.forEach((id, jel) -> {
@@ -65,12 +65,12 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 	}
 
 	@Override
-	public Identifier getFabricId() {
-		return Identifier.of(Origins.MODID, "origins");
+	public ResourceLocation getFabricId() {
+		return ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origins");
 	}
 
 	@Override
-	public Collection<Identifier> getFabricDependencies() {
+	public Collection<ResourceLocation> getFabricDependencies() {
 		return Set.of(Apoli.identifier("powers"));
 	}
 }

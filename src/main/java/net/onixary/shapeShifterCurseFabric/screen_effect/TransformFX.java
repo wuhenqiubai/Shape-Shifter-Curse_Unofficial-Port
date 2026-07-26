@@ -1,23 +1,23 @@
 package net.onixary.shapeShifterCurseFabric.screen_effect;
 
+import com.mojang.blaze3d.pipeline.RenderTarget;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.onixary.shapeShifterCurseFabric.data.StaticParams;
+import org.jetbrains.annotations.Nullable;
 import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
 import org.ladysnake.satin.api.managed.ManagedShaderEffect;
 import org.ladysnake.satin.api.managed.ShaderEffectManager;
 import org.ladysnake.satin.api.managed.uniform.Uniform1f;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.util.Identifier;
-import net.onixary.shapeShifterCurseFabric.data.StaticParams;
-import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public final class TransformFX implements ShaderEffectRenderCallback, ClientTickEvents.EndTick {
-    public static final Identifier TRANSFORM_EFFECT_SHADER_ID = Identifier.of(MOD_ID, "shaders/post/transform_effect.json");
+    public static final ResourceLocation TRANSFORM_EFFECT_SHADER_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "shaders/post/transform_effect.json");
 
     public static final TransformFX INSTANCE = new TransformFX();
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Minecraft mc = Minecraft.getInstance();
     private final ManagedShaderEffect transformFXShader = ShaderEffectManager.getInstance().manage(TRANSFORM_EFFECT_SHADER_ID);
 
     private Uniform1f uniformSlider = transformFXShader.findUniform1f("Slider");
@@ -27,7 +27,7 @@ public final class TransformFX implements ShaderEffectRenderCallback, ClientTick
 
     private int ticks = 0;
     @Nullable
-    private Framebuffer framebuffer;
+    private RenderTarget framebuffer;
 
     public void registerCallbacks() {
         ShaderEffectRenderCallback.EVENT.register(this);
@@ -35,7 +35,7 @@ public final class TransformFX implements ShaderEffectRenderCallback, ClientTick
     }
 
     @Override
-    public void onEndTick(MinecraftClient client) {
+    public void onEndTick(Minecraft client) {
         ++ticks;
 
     }

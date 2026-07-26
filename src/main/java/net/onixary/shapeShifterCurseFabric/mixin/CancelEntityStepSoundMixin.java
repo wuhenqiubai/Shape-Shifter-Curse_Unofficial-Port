@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.state.BlockState;
 import net.onixary.shapeShifterCurseFabric.additional_power.NoStepSoundPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,8 +23,8 @@ public class CancelEntityStepSoundMixin {
     )
     private void disablePlayerStepSound(BlockPos pos, BlockState state, CallbackInfo ci) {
         // 类型检查确保是玩家实体
-        if ((Object)this instanceof PlayerEntity) {
-            if (PowerHolderComponent.hasPower((PlayerEntity) (Object)this, NoStepSoundPower.class)) {
+        if ((Object)this instanceof Player) {
+            if (PowerHolderComponent.hasPower((Player) (Object)this, NoStepSoundPower.class)) {
                 ci.cancel();
             }
         }

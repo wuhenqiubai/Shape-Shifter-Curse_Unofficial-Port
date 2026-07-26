@@ -3,22 +3,22 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.render.entity.model.BipedEntityModel;
-import net.minecraft.client.render.entity.model.PlayerEntityModel;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.Mth;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -41,7 +41,7 @@ import java.util.function.Predicate;
 
 public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModifyHead_MAS {
 
-    public final List<Pair<String, String>> extraPartsMap = new ArrayList<>();
+    public final List<Tuple<String, String>> extraPartsMap = new ArrayList<>();
 
     public String leftArmGeoBoneID = "bipedLeftArm";
     public String rightArmGeoBoneID = "bipedRightArm";
@@ -146,7 +146,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
     public static class NormalChainConfig {
         public final @NotNull List<List<String>> chain;
-        public Predicate<PlayerEntity> condition = player -> true;
+        public Predicate<Player> condition = player -> true;
         public boolean inverted = false;
 
         public NormalChainConfig(@Nullable JsonObject json) {
@@ -161,7 +161,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             }
             if (json.has("condition")) {
                 String conditionName = json.get("condition").getAsString();
-                Identifier conditionID = Identifier.tryParse(conditionName);
+                ResourceLocation conditionID = ResourceLocation.tryParse(conditionName);
                 if (FormRenderUtils.conditionRegistry.containsKey(conditionID)) {
                     this.condition = FormRenderUtils.conditionRegistry.get(conditionID);
                 } else {
@@ -173,7 +173,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             }
         }
 
-        public boolean canApply(PlayerEntity player) {
+        public boolean canApply(Player player) {
             return condition.test(player) ^ inverted;
         }
     }
@@ -242,10 +242,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
                 fixPitch = json.get("pitch_total").getAsFloat();
             }
             if (json.has("yaw_weights")) {
-                this.yawWeights = readWeights(JsonHelper.getArray(json, "yaw_weights", null), fixYaw, chainSize);
+                this.yawWeights = readWeights(GsonHelper.getAsJsonArray(json, "yaw_weights", null), fixYaw, chainSize);
             }
             if (json.has("pitch_weights")) {
-                this.pitchWeights = readWeights(JsonHelper.getArray(json, "pitch_weights", null), fixPitch, chainSize);
+                this.pitchWeights = readWeights(GsonHelper.getAsJsonArray(json, "pitch_weights", null), fixPitch, chainSize);
             }
             if (json.has("max_yaw_deg")) {
                 this.maxYawDegree = json.get("max_yaw_deg").getAsFloat();
@@ -332,8 +332,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    private static final ICachedDataMap<UUID, PlayerEntity, tailData> tailDataMap = new CachedDataMap<>(player -> new tailData(), Entity::getUuid);
-    private static final ICachedDataMap<UUID, PlayerEntity, neckData> neckDataMap = new CachedDataMap<>(neckData::new, Entity::getUuid);
+    private static final ICachedDataMap<UUID, Player, tailData> tailDataMap = new CachedDataMap<>(player -> new tailData(), Entity::getUUID);
+    private static final ICachedDataMap<UUID, Player, neckData> neckDataMap = new CachedDataMap<>(neckData::new, Entity::getUUID);
 
     private static class tailData {
         private float tailDragAmount = 0.0F;
@@ -348,9 +348,9 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         private float headPitch;
         private double lastRenderTick = -1d;
 
-        neckData(PlayerEntity player) {
-            headYaw = MathHelper.wrapDegrees(player.headYaw - player.bodyYaw);
-            headPitch = player.getPitch();
+        neckData(Player player) {
+            headYaw = Mth.wrapDegrees(player.yHeadRot - player.yBodyRot);
+            headPitch = player.getXRot();
         }
     }
 
@@ -393,7 +393,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         if (json.has("extra_parts_map")) {
             JsonObject extraPartsMap = json.getAsJsonObject("extra_parts_map");
             for (String key : extraPartsMap.keySet()) {
-                this.extraPartsMap.add(new Pair<>(key, extraPartsMap.get(key).getAsString()));
+                this.extraPartsMap.add(new Tuple<>(key, extraPartsMap.get(key).getAsString()));
             }
         }
         this.leftArmGeoBoneID = "bipedLeftArm";
@@ -485,15 +485,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    public void ProcessExtraBone(FormModel m, PlayerEntity player, String AnimBoneID, String OriginFursBoneID) {
+    public void ProcessExtraBone(FormModel m, Player player, String AnimBoneID, String OriginFursBoneID) {
         GeoBone bone =  m.resetBone(OriginFursBoneID);
         Vec3f AnimPosition = AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.POSITION, new Vec3f(0, 0, 0));
-        m.setPositionForBone(OriginFursBoneID, new Vec3d(AnimPosition.x(), -AnimPosition.y(), -AnimPosition.z()));
+        m.setPositionForBone(OriginFursBoneID, new Vec3(AnimPosition.x(), -AnimPosition.y(), -AnimPosition.z()));
         m.setRotationForBone(OriginFursBoneID, AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.ROTATION, new Vec3f(0, 0, 0)));
         m.invertRotForPart(OriginFursBoneID, false, true, true);
     }
 
-    public final void setRotationForTailBones(PlayerEntity player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmount, float tailDragAmountVertical) {
+    public final void setRotationForTailBones(Player player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmount, float tailDragAmountVertical) {
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
         float SWAY_RATE = 0.33333334F * 0.5F;
@@ -504,12 +504,12 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (firstTail == null) {
                 continue;
             }
-            float tailSway = SWAY_SCALE * MathHelper.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
-            float tailBalance = MathHelper.cos(limbAngle * 0.6662F) * 0.325F * limbDistance;
+            float tailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
+            float tailBalance = Mth.cos(limbAngle * 0.6662F) * 0.325F * limbDistance;
             if(!isFeral){
-                firstTail.setRotY(-MathHelper.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
+                firstTail.setRotY(-Mth.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
             } else {
-                firstTail.setRotZ(MathHelper.lerp(limbDistance, tailSway, tailBalance) + tailDragAmount * 0.75F);
+                firstTail.setRotZ(Mth.lerp(limbDistance, tailSway, tailBalance) + tailDragAmount * 0.75F);
             }
             firstTail.setRotX(-tailDragAmountVertical * 0.75f);
             float offset = 0.0F;
@@ -517,9 +517,9 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
                 if(!isFeral){
-                    chainBone.setRotY(- MathHelper.lerp(limbDistance, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                    chainBone.setRotY(- Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
                 } else{
-                    chainBone.setRotZ(MathHelper.lerp(limbDistance, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * 0.75F);
+                    chainBone.setRotZ(Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * 0.75F);
                 }
                 chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
@@ -527,7 +527,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    public final void setRotationForHeadTailBones(PlayerEntity player, FormModel model, float headAngle, float age, float tailDragAmount, float tailDragAmountVertical){
+    public final void setRotationForHeadTailBones(Player player, FormModel model, float headAngle, float age, float tailDragAmount, float tailDragAmountVertical){
         float SWAY_RATE = 0.33333334F * 0.5F;
         float SWAY_SCALE = 0.05F;
         if (this.headTailChain == null || !this.headTailChain.canApply(player)) { return; }
@@ -536,24 +536,24 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (firstHeadTail == null) {
                 continue;
             }
-            float headTailSway = SWAY_SCALE * MathHelper.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
-            float headTailBalance = MathHelper.cos(headAngle * 0.6662F) * 0.325F * 0.1f;
-            firstHeadTail.setRotY(-MathHelper.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
+            float headTailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
+            float headTailBalance = Mth.cos(headAngle * 0.6662F) * 0.325F * 0.1f;
+            firstHeadTail.setRotY(-Mth.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
             firstHeadTail.setRotX(-tailDragAmountVertical * 0.75f);
             float offset = 0.0F;
             for (int i = 1; i < tailChain.size(); i++){
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
-                chainBone.setRotY(- MathHelper.lerp(0.1f, SWAY_SCALE * MathHelper.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                chainBone.setRotY(- Mth.lerp(0.1f, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
                 chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
             }
         }
     }
 
-    public final void setRotationForWingBones(PlayerEntity player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmountVertical){
+    public final void setRotationForWingBones(Player player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmountVertical){
         float swayAngle = age * 20.0F * (float) (Math.PI / 180.0) + limbAngle;
-        float sway_base = MathHelper.cos(swayAngle) * (float) Math.PI * 0.15F + limbDistance;
+        float sway_base = Mth.cos(swayAngle) * (float) Math.PI * 0.15F + limbDistance;
         float sway_l = (float) -(Math.PI / 4) + sway_base;
         float sway_r = (float) (Math.PI / 4) - sway_base;
 
@@ -590,43 +590,43 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     // Yaw, Pitch
-    private Vec2f getLongNeckAngles(PlayerEntity player, float tickDelta, float fallbackHeadYaw, float fallbackHeadPitch) {
+    private Vec2 getLongNeckAngles(Player player, float tickDelta, float fallbackHeadYaw, float fallbackHeadPitch) {
         if (neckConfig == null) {
-            return new Vec2f(fallbackHeadYaw, fallbackHeadPitch);
+            return new Vec2(fallbackHeadYaw, fallbackHeadPitch);
         }
         neckData data = neckDataMap.get(player);
-        float viewYaw = player.getYaw(tickDelta);
-        float targetHeadPitch = player.getPitch(tickDelta);
-        float bodyYaw = LongNeckRenderUtils.lerpAngle(tickDelta, player.prevBodyYaw, player.bodyYaw);
-        float targetHeadYaw = MathHelper.wrapDegrees(viewYaw - bodyYaw);
-        double renderTick = player.age + tickDelta;
-        float deltaTicks = (float) MathHelper.clamp(renderTick - data.lastRenderTick, 0.0D, 1.0D);
+        float viewYaw = player.getViewYRot(tickDelta);
+        float targetHeadPitch = player.getViewXRot(tickDelta);
+        float bodyYaw = LongNeckRenderUtils.lerpAngle(tickDelta, player.yBodyRotO, player.yBodyRot);
+        float targetHeadYaw = Mth.wrapDegrees(viewYaw - bodyYaw);
+        double renderTick = player.tickCount + tickDelta;
+        float deltaTicks = (float) Mth.clamp(renderTick - data.lastRenderTick, 0.0D, 1.0D);
         data.lastRenderTick = renderTick;
 
         if (deltaTicks <= 0.0F) {
-            return new Vec2f(data.headYaw, data.headPitch);
+            return new Vec2(data.headYaw, data.headPitch);
         }
-        float yawLerp = MathHelper.clamp(deltaTicks * 0.45F, 0.0F, 1.0F);
-        float pitchLerp = MathHelper.clamp(deltaTicks * 0.35F, 0.0F, 1.0F);
+        float yawLerp = Mth.clamp(deltaTicks * 0.45F, 0.0F, 1.0F);
+        float pitchLerp = Mth.clamp(deltaTicks * 0.35F, 0.0F, 1.0F);
         data.headYaw = LongNeckRenderUtils.lerpAngleAwayFrom(yawLerp, data.headYaw, targetHeadYaw, 180.0F);
-        data.headPitch = MathHelper.lerp(pitchLerp, data.headPitch, targetHeadPitch);
+        data.headPitch = Mth.lerp(pitchLerp, data.headPitch, targetHeadPitch);
         if (!Float.isFinite(data.headYaw)) {
             data.headYaw = fallbackHeadYaw;
         }
         if (!Float.isFinite(data.headPitch)) {
             data.headPitch = fallbackHeadPitch;
         }
-        return new Vec2f(data.headYaw, data.headPitch);
+        return new Vec2(data.headYaw, data.headPitch);
     }
 
-    public void setRotationForNeckBones(PlayerEntity player, FormModel model, float headYaw, float headPitch) {
+    public void setRotationForNeckBones(Player player, FormModel model, float headYaw, float headPitch) {
         if (neckConfig == null) {
             return;
         }
-        float yawDeg = MathHelper.clamp(headYaw, -neckConfig.maxYawDegree, neckConfig.maxYawDegree);
-        float pitchDeg = MathHelper.clamp(headPitch, -neckConfig.maxPitchDegreeU, neckConfig.maxPitchDegreeD);
-        float yawRad = yawDeg * MathHelper.RADIANS_PER_DEGREE;
-        float pitchRad = pitchDeg * MathHelper.RADIANS_PER_DEGREE;
+        float yawDeg = Mth.clamp(headYaw, -neckConfig.maxYawDegree, neckConfig.maxYawDegree);
+        float pitchDeg = Mth.clamp(headPitch, -neckConfig.maxPitchDegreeU, neckConfig.maxPitchDegreeD);
+        float yawRad = yawDeg * Mth.DEG_TO_RAD;
+        float pitchRad = pitchDeg * Mth.DEG_TO_RAD;
         for (int i = 0; i <= neckConfig.chain.size(); i++) {
             GeoBone bone = neckConfig.getBoneByChain(model, i);
             if (bone == null) {
@@ -641,17 +641,17 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void beforeRender(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void beforeRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
-        float targetDrag = MathHelper.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
-        td.currentTailDragAmount = MathHelper.lerp(0.04f, td.currentTailDragAmount, targetDrag);
-        float targetDragVertical = MathHelper.lerp(tickDelta, td.tailDragAmountVerticalO, td.tailDragAmountVertical);
-        td.currentTailDragAmountVertical = MathHelper.lerp(0.04f, td.currentTailDragAmountVertical, targetDragVertical);
+        float targetDrag = Mth.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
+        td.currentTailDragAmount = Mth.lerp(0.04f, td.currentTailDragAmount, targetDrag);
+        float targetDragVertical = Mth.lerp(tickDelta, td.tailDragAmountVerticalO, td.tailDragAmountVertical);
+        td.currentTailDragAmountVertical = Mth.lerp(0.04f, td.currentTailDragAmountVertical, targetDragVertical);
     }
 
 
     @Override
-    public void processAnimation(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void processAnimation(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         model.resetBone(RM_HeadGeoBoneID);
         model.resetBone(RM_BodyGeoBoneID);
@@ -659,10 +659,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.resetBone(RM_RightArmGeoBoneID);
         model.resetBone(RM_LeftLegGeoBoneID);
         model.resetBone(RM_RightLegGeoBoneID);
-        for (Pair<String, String> pair : extraPartsMap) {
-            ProcessExtraBone(model, player, pair.getLeft(), pair.getRight());
+        for (Tuple<String, String> pair : extraPartsMap) {
+            ProcessExtraBone(model, player, pair.getA(), pair.getB());
         }
-        PlayerEntityModel<?> playerModel = renderer.getModel();
+        PlayerModel<?> playerModel = renderer.getModel();
         model.setRotationForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartRotation(playerModel.head));
         model.translatePositionForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartPosition(playerModel.head));
         model.translatePositionForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartPosition(playerModel.body));
@@ -670,16 +670,16 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.translatePositionForBone(RM_RightArmGeoBoneID, FormRenderUtils.getPartPosition(playerModel.rightArm));
         model.translatePositionForBone(RM_LeftLegGeoBoneID, FormRenderUtils.getPartPosition(playerModel.leftLeg));
         model.translatePositionForBone(RM_RightLegGeoBoneID, FormRenderUtils.getPartPosition(playerModel.rightLeg));
-        model.translatePositionForBone(RM_LeftArmGeoBoneID, new Vec3d(5, 2, 0));
-        model.translatePositionForBone(RM_RightArmGeoBoneID, new Vec3d(-5, 2, 0));
-        model.translatePositionForBone(RM_LeftLegGeoBoneID, new Vec3d(2, 12, 0));
-        model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3d(-2, 12, 0));
+        model.translatePositionForBone(RM_LeftArmGeoBoneID, new Vec3(5, 2, 0));
+        model.translatePositionForBone(RM_RightArmGeoBoneID, new Vec3(-5, 2, 0));
+        model.translatePositionForBone(RM_LeftLegGeoBoneID, new Vec3(2, 12, 0));
+        model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3(-2, 12, 0));
         model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
-        Vec2f neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
+        Vec2 neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
         this.setRotationForNeckBones(player, model, neckAngles.x, neckAngles.y);
-        this.setRotationForTailBones(player, model, limbAngle, limbDistance, player.age, td.currentTailDragAmount, td.currentTailDragAmountVertical);
-        this.setRotationForHeadTailBones(player, model, neckAngles.x, player.age, td.currentTailDragAmount, td.currentTailDragAmountVertical);
-        this.setRotationForWingBones(player, model, limbAngle, limbDistance, player.age, td.currentTailDragAmountVertical);
+        this.setRotationForTailBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
+        this.setRotationForHeadTailBones(player, model, neckAngles.x, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
+        this.setRotationForWingBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmountVertical);
         if (this.bodyTransform != null) this.bodyTransform.apply(model.getCachedGeoBone(RM_BodyGeoBoneID));
         model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
         model.setRotationForBone(RM_LeftArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftArm));
@@ -710,7 +710,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void afterRender(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void afterRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         if (neckConfig != null) {
             GeoBone neckRoot = neckConfig.getRoot(model);
             if (neckRoot != null) {
@@ -720,22 +720,22 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void finishRender(FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void finishRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         td.tailDragAmountO = td.tailDragAmount;
         td.tailDragAmount *= 0.75F;
-        td.tailDragAmount -= (float) (Math.toRadians((player.bodyYaw - player.prevBodyYaw)) * 0.55F);
-        td.tailDragAmount = MathHelper.clamp(td.tailDragAmount, -1.6F, 1.6F);
-        float verticalSpeed = (float) player.getVelocity().y;
-        float targetVerticalDrag = MathHelper.clamp(verticalSpeed * 1.5f, -1.6f, 1.6f);
+        td.tailDragAmount -= (float) (Math.toRadians((player.yBodyRot - player.yBodyRotO)) * 0.55F);
+        td.tailDragAmount = Mth.clamp(td.tailDragAmount, -1.6F, 1.6F);
+        float verticalSpeed = (float) player.getDeltaMovement().y;
+        float targetVerticalDrag = Mth.clamp(verticalSpeed * 1.5f, -1.6f, 1.6f);
         td.tailDragAmountVertical *= 0.8F;
         td.tailDragAmountVertical += targetVerticalDrag * 0.15F;
-        td.tailDragAmountVertical = MathHelper.clamp(td.tailDragAmountVertical, -1.6f, 1.6f);
+        td.tailDragAmountVertical = Mth.clamp(td.tailDragAmountVertical, -1.6f, 1.6f);
         td.tailDragAmountVerticalO = td.tailDragAmountVertical;
     }
 
     @Override
-    public @Nullable GeoBone beforeRenderFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, ModelPart arm, ModelPart sleeve) {
+    public @Nullable GeoBone beforeRenderFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         Optional<GeoBone> OptionalGeoBone = model.getBone(GeoBoneName);
@@ -753,19 +753,19 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public @Nullable GeoBone processAnimationFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerEntityRenderer renderer, PlayerEntity player, ModelPart arm, ModelPart sleeve) {
+    public @Nullable GeoBone processAnimationFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         model.resetBone(GeoBoneName);
         model.translatePositionForBone(GeoBoneName, FormRenderUtils.getPartPosition(arm));
-        model.translatePositionForBone(GeoBoneName, new Vec3d(5 * (IsRenderRight ? -1.0 : 1.0), 2, 0));
+        model.translatePositionForBone(GeoBoneName, new Vec3(5 * (IsRenderRight ? -1.0 : 1.0), 2, 0));
         model.setRotationForBone(GeoBoneName, FormRenderUtils.getPartRotation(arm));
         model.invertRotForPart(GeoBoneName, false, true, true);
         return geoBone;
     }
 
     @Override
-    public void modifyHeadPart(PlayerEntity player, BipedEntityModel<?> model, FormModel formModel) {
+    public void modifyHeadPart(Player player, HumanoidModel<?> model, FormModel formModel) {
         if (this.neckConfig == null) {
             return;
         }
@@ -777,17 +777,17 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         if (head == null) {
             return;
         }
-        MatrixStack headMatrix = FormRenderUtils.computeModelMatrixStack(neckHead);
-        Matrix4f matrix4f = headMatrix.peek().getPositionMatrix();
-        Vector4f headPos = headMatrix.peek().getPositionMatrix().transform(new Vector4f(0, 0, 0, 1));
-        head.pivotX = (float) (headPos.x);
-        head.pivotY = (float) (-headPos.y + 24);
-        head.pivotZ = (float) (-headPos.z);
+        PoseStack headMatrix = FormRenderUtils.computeModelMatrixStack(neckHead);
+        Matrix4f matrix4f = headMatrix.last().pose();
+        Vector4f headPos = headMatrix.last().pose().transform(new Vector4f(0, 0, 0, 1));
+        head.x = (float) (headPos.x);
+        head.y = (float) (-headPos.y + 24);
+        head.z = (float) (-headPos.z);
         Matrix3f rotationMatrix = matrix4f.get3x3(new Matrix3f());
         Vector3f euler = new Vector3f();
         rotationMatrix.getEulerAnglesZYX(euler);
-        head.pitch = euler.x();
-        head.yaw = -euler.y();
-        head.roll = -euler.z();
+        head.xRot = euler.x();
+        head.yRot = -euler.y();
+        head.zRot = -euler.z();
     }
 }

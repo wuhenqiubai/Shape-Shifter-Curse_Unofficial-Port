@@ -5,22 +5,22 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class ConditionedManaAttributePower extends Power {
-    private final @Nullable Identifier modifierID;
+    private final @Nullable ResourceLocation modifierID;
     private final @Nullable ManaUtils.Modifier maxManaModifier;
     private final @Nullable ManaUtils.Modifier regenManaModifier;
     private final boolean playerSide;
     private final int tickRate;
     private boolean isAdded = false;
 
-    public ConditionedManaAttributePower(PowerType<?> type, LivingEntity entity, @Nullable Identifier modifierID, @Nullable ManaUtils.Modifier maxManaModifier, @Nullable ManaUtils.Modifier manaRegenModifier, boolean playerSide, int tickRate)  {
+    public ConditionedManaAttributePower(PowerType<?> type, LivingEntity entity, @Nullable ResourceLocation modifierID, @Nullable ManaUtils.Modifier maxManaModifier, @Nullable ManaUtils.Modifier manaRegenModifier, boolean playerSide, int tickRate)  {
         super(type, entity);
         this.modifierID = modifierID;
         this.maxManaModifier = maxManaModifier;
@@ -31,7 +31,7 @@ public class ConditionedManaAttributePower extends Power {
     }
 
     public void tick() {
-        if (this.entity.age % this.tickRate == 0) {
+        if (this.entity.tickCount % this.tickRate == 0) {
             if (this.isActive()) {
                 if (!isAdded) {
                     this.AddAttr();
@@ -50,7 +50,7 @@ public class ConditionedManaAttributePower extends Power {
         if (modifierID == null) {
             return;
         }
-        if (this.entity instanceof ServerPlayerEntity playerEntity) {
+        if (this.entity instanceof ServerPlayer playerEntity) {
             if (maxManaModifier != null) {
                 ManaUtils.addMaxManaModifier(playerEntity, modifierID, maxManaModifier, playerSide);
             }
@@ -65,7 +65,7 @@ public class ConditionedManaAttributePower extends Power {
         if (modifierID == null) {
             return;
         }
-        if (this.entity instanceof ServerPlayerEntity playerEntity) {
+        if (this.entity instanceof ServerPlayer playerEntity) {
             if (maxManaModifier != null) {
                 ManaUtils.removeMaxManaModifier(playerEntity, modifierID, playerSide);
             }

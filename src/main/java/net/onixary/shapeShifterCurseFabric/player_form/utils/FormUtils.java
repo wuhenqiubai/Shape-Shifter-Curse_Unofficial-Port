@@ -3,10 +3,10 @@ package net.onixary.shapeShifterCurseFabric.player_form.utils;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
@@ -62,17 +62,17 @@ public class FormUtils {
     // 在此解释一下为什么要先变TechnicalFormOrigin后变目标Origin 因为形态能力还原依赖于不同Origin切换时的清除旧Power+添加新Power 如果Origin一样 就会导致饰品/子形态/额外能力挂载系统添加/删除的能力无法还原
     public static Origin TechnicalFormOrigin = null;
 
-    public static record ExtraPower(@NotNull Identifier LayerID, @NotNull Identifier FormID, @NotNull List<Identifier> PowerIDs) {
-        public @NotNull Identifier getLayerID() { return LayerID; }
-        public @NotNull Identifier getFormID() { return FormID; }
-        public @NotNull List<Identifier> getPowerIDs() { return PowerIDs; }
+    public static record ExtraPower(@NotNull ResourceLocation LayerID, @NotNull ResourceLocation FormID, @NotNull List<ResourceLocation> PowerIDs) {
+        public @NotNull ResourceLocation getLayerID() { return LayerID; }
+        public @NotNull ResourceLocation getFormID() { return FormID; }
+        public @NotNull List<ResourceLocation> getPowerIDs() { return PowerIDs; }
 
-        public boolean canApply(Identifier layerID, Identifier formID) {
+        public boolean canApply(ResourceLocation layerID, ResourceLocation formID) {
             return getLayerID().equals(layerID) && getFormID().equals(formID);
         }
     }
 
-    public static void applyPower(PlayerEntity player, Identifier powerId, Identifier powerSource) {
+    public static void applyPower(Player player, ResourceLocation powerId, ResourceLocation powerSource) {
         if (PowerTypeRegistry.contains(powerId)) {
             PowerType<?> powerType = PowerTypeRegistry.get(powerId);
             if (powerType != null) {
@@ -108,7 +108,7 @@ public class FormUtils {
         }
     }
 
-    public static void removePower(PlayerEntity player, Identifier powerId, Identifier powerSource) {
+    public static void removePower(Player player, ResourceLocation powerId, ResourceLocation powerSource) {
         PowerType<?> powerType = PowerTypeRegistry.get(powerId);
         if (powerType != null) {
             PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(player);
@@ -116,25 +116,25 @@ public class FormUtils {
         }
     }
 
-    public static final HashMap<Identifier, ExtraPower> extraPowerRegistry = new HashMap<>();
-    public static void registerExtraPower(Identifier identifier, ExtraPower extraPower) {
+    public static final HashMap<ResourceLocation, ExtraPower> extraPowerRegistry = new HashMap<>();
+    public static void registerExtraPower(ResourceLocation identifier, ExtraPower extraPower) {
         extraPowerRegistry.put(identifier, extraPower);
     }
 
-    public static void applyExtraPower(PlayerEntity player, Pair<Identifier, Identifier> layerData) {
+    public static void applyExtraPower(Player player, Tuple<ResourceLocation, ResourceLocation> layerData) {
         extraPowerRegistry.forEach((id, extraPower) -> {
-            if (extraPower.canApply(layerData.getLeft(), layerData.getRight())) {
-                extraPower.getPowerIDs().forEach(powerId -> applyPower(player, powerId, layerData.getRight()));
+            if (extraPower.canApply(layerData.getA(), layerData.getB())) {
+                extraPower.getPowerIDs().forEach(powerId -> applyPower(player, powerId, layerData.getB()));
             }
         });
     }
 
-    public static void applyLayer(PlayerEntity player, Pair<Identifier, Identifier> layerData) {
+    public static void applyLayer(Player player, Tuple<ResourceLocation, ResourceLocation> layerData) {
         // 临时 等移除Origins后再重新这部分
         OriginComponent component = ModComponents.ORIGIN.get(player);
-        OriginLayer layer = OriginLayers.getLayer(layerData.getLeft());
-        if (layer != null && layerData.getRight() != null) {
-            Origin origin = OriginRegistry.get(layerData.getRight());
+        OriginLayer layer = OriginLayers.getLayer(layerData.getA());
+        if (layer != null && layerData.getB() != null) {
+            Origin origin = OriginRegistry.get(layerData.getB());
             if(layer.contains(origin, player)){
                 if (TechnicalFormOrigin == null) {
                     TechnicalFormOrigin = OriginRegistry.get(ShapeShifterCurseFabric.identifier("technical_form"));
@@ -155,29 +155,29 @@ public class FormUtils {
         return Set.copyOf(flagSet);
     }
 
-    public static @Nullable IForm getForm(@NotNull Identifier formID) {
+    public static @Nullable IForm getForm(@NotNull ResourceLocation formID) {
         return RegPlayerForms.getPlayerForm(formID);
     }
 
-    public static @NotNull IForm parseForm(@Nullable Identifier formID, IForm defaultForm) {
+    public static @NotNull IForm parseForm(@Nullable ResourceLocation formID, IForm defaultForm) {
         if (formID == null) return defaultForm;
         IForm form = getForm(formID);
         return form != null ? form : defaultForm;
     }
 
-    public static @NotNull IForm getPlayerForm(PlayerEntity player) {
+    public static @NotNull IForm getPlayerForm(Player player) {
         return PlayerFormComponent.COMPONENT.get(player).nowForm;
     }
 
-    public static @NotNull List<IForm> getPlayerFormHistory(PlayerEntity player) {
+    public static @NotNull List<IForm> getPlayerFormHistory(Player player) {
         return PlayerFormComponent.COMPONENT.get(player).formHistory;
     }
 
-    public static void savePlayerFormHistory(PlayerEntity player) {
+    public static void savePlayerFormHistory(Player player) {
         PlayerFormComponent.COMPONENT.sync(player);
     }
 
-    public static void clearPlayerFormHistory(PlayerEntity player) {
+    public static void clearPlayerFormHistory(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.formHistory.clear();
         component.sync();
@@ -187,7 +187,7 @@ public class FormUtils {
         return form1 != null && form2 != null && form1.isEquals(form2);
     }
 
-    public static @Nullable IForm getPrevForm(PlayerEntity player) {
+    public static @Nullable IForm getPrevForm(Player player) {
         List<IForm> formHistory = getPlayerFormHistory(player);
         if (formHistory.size() > 1 && isFormEqual(getPlayerForm(player), formHistory.get(formHistory.size() - 1))) {
             return formHistory.get(formHistory.size() - 2);
@@ -195,7 +195,7 @@ public class FormUtils {
         return null;
     }
 
-    public static void ensureHistoryCurrent(PlayerEntity player) {
+    public static void ensureHistoryCurrent(Player player) {
         List<IForm> formHistory = getPlayerFormHistory(player);
         if (!formHistory.isEmpty() && !isFormEqual(getPlayerForm(player), formHistory.get(formHistory.size() - 1))) {
             formHistory.clear();
@@ -204,7 +204,7 @@ public class FormUtils {
         }
     }
 
-    public static void _loadForm(PlayerEntity player, IForm form) {
+    public static void _loadForm(Player player, IForm form) {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm oldForm = playerFormComponent.nowForm;
         playerFormComponent.setForm(form);
@@ -216,7 +216,7 @@ public class FormUtils {
         // 应用Scale
         form.applyScale(player);
         // 应用Power Origin -> OriginExtraPower -> AccessoryPower
-        Pair<Identifier, Identifier> layerPair = form.getFormLayer();
+        Tuple<ResourceLocation, ResourceLocation> layerPair = form.getFormLayer();
         applyLayer(player, layerPair);
         form.afterApplyLayer(player);
         TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
@@ -225,7 +225,7 @@ public class FormUtils {
         AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);
         SSCEvent.FORM_CHANGE_END.invoker().onFormChange(player, oldForm, form);
 
-        if (!player.getWorld().isClient() && player instanceof ServerPlayerEntity serverPlayer) {
+        if (!player.level().isClientSide() && player instanceof ServerPlayer serverPlayer) {
             try {
                 ModPacketsS2CServer.sendFormChange(serverPlayer, form.getFormID());
             } catch (Exception e) {
@@ -234,7 +234,7 @@ public class FormUtils {
         }
     }
 
-    public static void _setForm(PlayerEntity player, IForm form) {
+    public static void _setForm(Player player, IForm form) {
         IForm prevForm = getPlayerForm(player);
         prevForm.onTransform_To(player, form);
         form.onTransform_From(player, prevForm);
@@ -242,7 +242,7 @@ public class FormUtils {
         form.onTransform_Finish(player);
     }
 
-    public static void setForm(PlayerEntity player, IForm form) {
+    public static void setForm(Player player, IForm form) {
         _setForm(player, form);
         List<IForm> formHistory = getPlayerFormHistory(player);
         formHistory.clear();
@@ -251,14 +251,14 @@ public class FormUtils {
         savePlayerFormHistory(player);
     }
 
-    public static void pushFormHistory(PlayerEntity player, IForm form) {
+    public static void pushFormHistory(Player player, IForm form) {
         List<IForm> formHistory = getPlayerFormHistory(player);
         formHistory.add(form);
         checkHistorySize(formHistory, 20);
         savePlayerFormHistory(player);
     }
 
-    public static void checkAndPullFormHistory(PlayerEntity player, IForm lastForm, IForm prevForm) {
+    public static void checkAndPullFormHistory(Player player, IForm lastForm, IForm prevForm) {
         List<IForm> formHistory = getPlayerFormHistory(player);
         if (formHistory.size() > 1 && isFormEqual(formHistory.get(formHistory.size() - 1), lastForm) && isFormEqual(formHistory.get(formHistory.size() - 2), prevForm)) {
             formHistory.remove(formHistory.size() - 1);
@@ -275,7 +275,7 @@ public class FormUtils {
         }
     }
 
-    public static void updateFormHistory(PlayerEntity player, IForm form) {
+    public static void updateFormHistory(Player player, IForm form) {
         List<IForm> formHistory = getPlayerFormHistory(player);
         int lastIndex = -1;
         for (int i = formHistory.size() - 1; i >= 0; i--) {
@@ -293,12 +293,12 @@ public class FormUtils {
         savePlayerFormHistory(player);
     }
 
-    public static @NotNull IForm getFormNextLevel(PlayerEntity player, ITransformReason reason) {
+    public static @NotNull IForm getFormNextLevel(Player player, ITransformReason reason) {
         IForm form = getPlayerForm(player);
         return form._getNextForm(player, reason);
     }
 
-    public static @NotNull IForm getFormPrevLevel(PlayerEntity player, ITransformReason reason) {
+    public static @NotNull IForm getFormPrevLevel(Player player, ITransformReason reason) {
         IForm form = getPlayerForm(player);
         return form._getPrevForm(player, reason);
     }
@@ -313,12 +313,12 @@ public class FormUtils {
         return result;
     }
 
-    public static void applyFallback(PlayerEntity player) {
+    public static void applyFallback(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         FormUtils._loadForm(player, component.getFallbackForm());
     }
 
-    public static boolean isFormCanUse(@Nullable PlayerEntity player, @Nullable IForm form) {
+    public static boolean isFormCanUse(@Nullable Player player, @Nullable IForm form) {
         boolean canUse = true;
         if (form instanceof IFormWithCondition iFormWithCondition) {
             canUse &= iFormWithCondition.checkCanUse(player);

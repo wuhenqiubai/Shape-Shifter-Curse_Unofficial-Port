@@ -3,15 +3,15 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
 @Environment(EnvType.CLIENT)
-@Mixin(AbstractClientPlayerEntity.class)
+@Mixin(AbstractClientPlayer.class)
 public abstract class PlayerEntitySpeedFOVMixin {
 
     /**
@@ -42,13 +42,13 @@ public abstract class PlayerEntitySpeedFOVMixin {
 
     // 旧的会破坏望远镜等FOV修改 尝试用新的方法 为了减少冲突不用重定向
     // f *= ((float)this.getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED) / this.getAbilities().getWalkSpeed() + 1.0F) / 2.0F;
-    @ModifyExpressionValue(method = "getFovMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerAbilities;getWalkSpeed()F"))
+    @ModifyExpressionValue(method = "getFieldOfViewModifier", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Abilities;getWalkingSpeed()F"))
     private float shape_shifter_curse$modifyWalkSpeed(float original) {
-        var self = (AbstractClientPlayerEntity) (Object) this;
+        var self = (AbstractClientPlayer) (Object) this;
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(self)) {
             return original;
         }
-        float nowSpeed = (float) ((self).getAttributeValue(EntityAttributes.GENERIC_MOVEMENT_SPEED));
+        float nowSpeed = (float) ((self).getAttributeValue(Attributes.MOVEMENT_SPEED));
         return Math.min(nowSpeedMinMul * nowSpeed, Math.max(nowSpeedMaxMul * nowSpeed, original));
     }
 

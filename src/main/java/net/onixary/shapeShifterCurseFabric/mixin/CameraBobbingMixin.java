@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.GameRenderer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.FormCameraBobbingPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,9 +29,9 @@ import java.util.List;
 public class CameraBobbingMixin {
 
     @Inject(method = "bobView", at = @At("HEAD"), cancellable = true)
-    private void shape_shifter_curse$customBobView(MatrixStack matrices, float tickDelta, CallbackInfo ci) {
-        MinecraftClient client = MinecraftClient.getInstance();
-        if (!(client.getCameraEntity() instanceof PlayerEntity player)) return;
+    private void shape_shifter_curse$customBobView(PoseStack matrices, float tickDelta, CallbackInfo ci) {
+        Minecraft client = Minecraft.getInstance();
+        if (!(client.getCameraEntity() instanceof Player player)) return;
 
         List<FormCameraBobbingPower> powers = PowerHolderComponent.getPowers(player, FormCameraBobbingPower.class);
 
@@ -53,7 +53,7 @@ public class CameraBobbingMixin {
      * 根据 bobbingType 分派对应的晃动逻辑。
      */
     @Unique
-    private void shape_shifter_curse$applyBobbing(MatrixStack matrices, float tickDelta, PlayerEntity player, String bobbingType) {
+    private void shape_shifter_curse$applyBobbing(PoseStack matrices, float tickDelta, Player player, String bobbingType) {
         switch (bobbingType) {
             case "none"   -> { /* 完全无晃动，不做任何矩阵变换 */ }
             case "float"  -> shape_shifter_curse$applyFloatBobbing(matrices, tickDelta, player);
@@ -71,31 +71,31 @@ public class CameraBobbingMixin {
      * default — 复现原版晃动逻辑（用于不识别的 bobbingType 时兜底）。
      */
     @Unique
-    private void shape_shifter_curse$applyDefaultBobbing(MatrixStack matrices, float tickDelta, PlayerEntity player) {
-        float deltaH   = player.horizontalSpeed - player.prevHorizontalSpeed;
-        float phase    = -(player.horizontalSpeed + deltaH * tickDelta);
-        float amplitude = MathHelper.lerp(tickDelta, player.prevStrideDistance, player.strideDistance);
+    private void shape_shifter_curse$applyDefaultBobbing(PoseStack matrices, float tickDelta, Player player) {
+        float deltaH   = player.walkDist - player.walkDistO;
+        float phase    = -(player.walkDist + deltaH * tickDelta);
+        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
 
         matrices.translate(
-                (double)(MathHelper.sin(phase * MathHelper.PI) * amplitude * 0.5f),
-                (double)(-Math.abs(MathHelper.cos(phase * MathHelper.PI) * amplitude)),
+                (double)(Mth.sin(phase * Mth.PI) * amplitude * 0.5f),
+                (double)(-Math.abs(Mth.cos(phase * Mth.PI) * amplitude)),
                 0.0
         );
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                MathHelper.sin(phase * MathHelper.PI) * amplitude * 3.0f));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                Math.abs(MathHelper.cos(phase * MathHelper.PI - 0.2f) * amplitude) * 5.0f));
+        matrices.mulPose(Axis.ZP.rotationDegrees(
+                Mth.sin(phase * Mth.PI) * amplitude * 3.0f));
+        matrices.mulPose(Axis.XP.rotationDegrees(
+                Math.abs(Mth.cos(phase * Mth.PI - 0.2f) * amplitude) * 5.0f));
     }
 
     /**
      * float — 漂浮，慢速上下移动。
      */
     @Unique
-    private void shape_shifter_curse$applyFloatBobbing(MatrixStack matrices, float tickDelta, PlayerEntity player) {
-        float deltaH    = player.horizontalSpeed - player.prevHorizontalSpeed;
-        float phase     = -(player.horizontalSpeed + deltaH * tickDelta);
-        float amplitude = MathHelper.lerp(tickDelta, player.prevStrideDistance, player.strideDistance);
-        float sin       = MathHelper.sin(phase * MathHelper.PI * 0.6f);
+    private void shape_shifter_curse$applyFloatBobbing(PoseStack matrices, float tickDelta, Player player) {
+        float deltaH    = player.walkDist - player.walkDistO;
+        float phase     = -(player.walkDist + deltaH * tickDelta);
+        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
+        float sin       = Mth.sin(phase * Mth.PI * 0.6f);
 
         matrices.translate(
                 0.0,
@@ -108,40 +108,40 @@ public class CameraBobbingMixin {
      * feral
      */
     @Unique
-    private void shape_shifter_curse$applyFeralBobbing(MatrixStack matrices, float tickDelta, PlayerEntity player) {
-        float deltaH    = player.horizontalSpeed - player.prevHorizontalSpeed;
-        float phase     = -(player.horizontalSpeed + deltaH * tickDelta);
-        float amplitude = MathHelper.lerp(tickDelta, player.prevStrideDistance, player.strideDistance) * 0.55f;
+    private void shape_shifter_curse$applyFeralBobbing(PoseStack matrices, float tickDelta, Player player) {
+        float deltaH    = player.walkDist - player.walkDistO;
+        float phase     = -(player.walkDist + deltaH * tickDelta);
+        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob) * 0.55f;
 
         matrices.translate(
-                (double)(MathHelper.sin(phase * MathHelper.PI) * amplitude * 0.3f),
-                (double)(-Math.abs(MathHelper.cos(phase * MathHelper.PI * 1.1f) * amplitude) * 1.2f),
+                (double)(Mth.sin(phase * Mth.PI) * amplitude * 0.3f),
+                (double)(-Math.abs(Mth.cos(phase * Mth.PI * 1.1f) * amplitude) * 1.2f),
                 0.0
         );
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
-                MathHelper.sin(phase * MathHelper.PI) * amplitude * 2.0f));
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
-                Math.abs(MathHelper.cos(phase * MathHelper.PI - 0.2f) * amplitude) * 3.0f));
+        matrices.mulPose(Axis.ZP.rotationDegrees(
+                Mth.sin(phase * Mth.PI) * amplitude * 2.0f));
+        matrices.mulPose(Axis.XP.rotationDegrees(
+                Math.abs(Mth.cos(phase * Mth.PI - 0.2f) * amplitude) * 3.0f));
     }
 
     /**
      * bat
      */
     @Unique
-    private void shape_shifter_curse$applyBatBobbing(MatrixStack matrices, float tickDelta, PlayerEntity player) {
-        float deltaH    = player.horizontalSpeed - player.prevHorizontalSpeed;
-        float phase     = -(player.horizontalSpeed + deltaH * tickDelta);
-        float amplitude = MathHelper.lerp(tickDelta, player.prevStrideDistance, player.strideDistance);
-        float sin       = MathHelper.sin(phase * MathHelper.PI );
+    private void shape_shifter_curse$applyBatBobbing(PoseStack matrices, float tickDelta, Player player) {
+        float deltaH    = player.walkDist - player.walkDistO;
+        float phase     = -(player.walkDist + deltaH * tickDelta);
+        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
+        float sin       = Mth.sin(phase * Mth.PI );
 
         matrices.translate(
                 0.0,
                 (double)(-Math.abs(sin) * amplitude * 0.8f),
                 0.0
         );
-        matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(
+        matrices.mulPose(Axis.XP.rotationDegrees(
                 sin * amplitude * 2.0f));
-        matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(
+        matrices.mulPose(Axis.ZP.rotationDegrees(
                 sin * amplitude * 1.0f));
     }
 }

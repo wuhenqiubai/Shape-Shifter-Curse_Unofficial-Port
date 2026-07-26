@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.team;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.scoreboard.Team;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.PlayerTeam;
 import net.onixary.shapeShifterCurseFabric.additional_power.PillagerFriendlyPower;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
@@ -11,25 +11,25 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 
 public class PlayerTeamHandler {
     private static IForm currentForm;
-    public static void updatePlayerTeam(ServerPlayerEntity player) {
+    public static void updatePlayerTeam(ServerPlayer player) {
         currentForm = FormUtils.getPlayerForm(player);
         updateSorceryTeam(player);
     }
 
 
-    private static void updateSorceryTeam(ServerPlayerEntity player) {
+    private static void updateSorceryTeam(ServerPlayer player) {
         if(MobTeamManager.sorceryTeam == null) {
             // 确保队伍已注册
-            MobTeamManager.registerTeam(player.getServerWorld());
+            MobTeamManager.registerTeam(player.serverLevel());
         }
         if (PowerHolderComponent.hasPower(player, PillagerFriendlyPower.class)) {
             // 将玩家添加到队伍
-            MobTeamManager.sorceryTeam.getPlayerList().add(player.getNameForScoreboard());
+            MobTeamManager.sorceryTeam.getPlayers().add(player.getScoreboardName());
         } else {
             // 从队伍中移除（如果是成员）
-            Team team = player.getScoreboardTeam();
+            PlayerTeam team = player.getTeam();
             if (team != null && team.getName().equals(MobTeamManager.SORCERY_TEAM_NAME)) {
-                team.getPlayerList().remove(player.getNameForScoreboard());
+                team.getPlayers().remove(player.getScoreboardName());
             }
         }
     }

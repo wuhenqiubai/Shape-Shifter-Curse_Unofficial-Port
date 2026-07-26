@@ -4,9 +4,9 @@ import dev.emi.trinkets.api.TrinketComponent;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -25,8 +25,8 @@ public class DefaultAccessory {
             }
 
             @Override
-            public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
-                Map<Pair<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
+            public Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
+                Map<Tuple<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
                 Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(entity);
                 if (component.isEmpty()) {
                     return map;
@@ -36,11 +36,11 @@ public class DefaultAccessory {
                     for (String slotName : invMap.get(slotGroup).keySet()) {
                         List<ItemStack> stacks = new ArrayList<>();
                         TrinketInventory inventory = invMap.get(slotGroup).get(slotName);
-                        for (int i = 0; i < inventory.size(); i++) {
-                            ItemStack stack = inventory.getStack(i);
+                        for (int i = 0; i < inventory.getContainerSize(); i++) {
+                            ItemStack stack = inventory.getItem(i);
                             stacks.add(stack);
                         }
-                        map.put(new Pair<>(slotGroup, slotName), stacks);
+                        map.put(new Tuple<>(slotGroup, slotName), stacks);
                     }
                 }
                 return map;
@@ -59,8 +59,8 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = component.get().getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
-                    for (int i = 0; i < inventory.size(); i++) {
-                        ItemStack stack = inventory.getStack(i);
+                    for (int i = 0; i < inventory.getContainerSize(); i++) {
+                        ItemStack stack = inventory.getItem(i);
                         ItemList.add(stack);
                     }
                 }
@@ -79,8 +79,8 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = component.get().getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
-                    if (Index >= 0 && Index < inventory.size()) {
-                        return inventory.getStack(Index);
+                    if (Index >= 0 && Index < inventory.getContainerSize()) {
+                        return inventory.getItem(Index);
                     }
                 }
                 return null;
@@ -98,7 +98,7 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = component.get().getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
-                    inventory.setStack(Index, stack);
+                    inventory.setItem(Index, stack);
                 }
             }
         });
@@ -119,11 +119,11 @@ public class DefaultAccessory {
                 }
 
                 @Override
-                public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
-                    Map<Pair<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
+                public Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
+                    Map<Tuple<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
                     Map<String, List<ItemStack>> curiosData = CurioUtils.getEntitySlots(entity);
                     for (String slotName : curiosData.keySet()) {
-                        map.put(new Pair<>(null, slotName), curiosData.get(slotName));
+                        map.put(new Tuple<>(null, slotName), curiosData.get(slotName));
                     }
                     return map;
                 }

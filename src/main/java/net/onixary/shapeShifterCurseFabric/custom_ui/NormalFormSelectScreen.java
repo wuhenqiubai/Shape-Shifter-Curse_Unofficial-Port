@@ -1,12 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -22,31 +22,31 @@ public class NormalFormSelectScreen extends Screen {
     // 背景图片固定尺寸配置
     private static final int BG_WIDTH = 470;
     private static final int BG_HEIGHT = 247;
-    private static final Identifier BG_TEXTURE = Identifier.of(MOD_ID, "textures/gui/normal_form_select_menu.png");
+    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/normal_form_select_menu.png");
     private final String targetName;
     private final UUID targetUUID;
 
-    private List<Identifier> availableForms;
+    private List<ResourceLocation> availableForms;
     private int nowPage = 0;
     private static final int pageSize = 16;
-    private final List<Identifier> buttonForms = new ArrayList<>();
-    private final List<ButtonWidget> buttonWidgetList = new ArrayList<>();
+    private final List<ResourceLocation> buttonForms = new ArrayList<>();
+    private final List<Button> buttonWidgetList = new ArrayList<>();
 
-    public NormalFormSelectScreen(Text title, String targetName, UUID targetUUID) {
+    public NormalFormSelectScreen(Component title, String targetName, UUID targetUUID) {
         super(title);
         this.targetName = targetName;
         this.targetUUID = targetUUID;
     }
 
-    private List<Identifier> getAvailableForms() {
-        List<Identifier> availableForms = new ArrayList<>();
+    private List<ResourceLocation> getAvailableForms() {
+        List<ResourceLocation> availableForms = new ArrayList<>();
         RegPlayerForms.playerForms.forEach((formID, form) -> {
             availableForms.add(form.getFormID());
         });
         return availableForms;
     }
 
-    private void SendSetForm(Identifier formID) {
+    private void SendSetForm(ResourceLocation formID) {
         ModPacketsS2C.sendSetForm(formID, this.targetUUID, false);
     }
 
@@ -69,12 +69,12 @@ public class NormalFormSelectScreen extends Screen {
             return;
         }
         for (int i = 0; i < buttonForms.size(); i++) {
-            ButtonWidget buttonWidget = buttonWidgetList.get(i);
+            Button buttonWidget = buttonWidgetList.get(i);
             if (buttonForms.get(i) != null) {
                 try {
                     buttonWidget.setMessage(RegPlayerForms.getPlayerForm(buttonForms.get(i)).getContentText(CodexData.ContentType.NAME));
                 } catch (Exception e) {
-                    buttonWidget.setMessage(Text.of(buttonForms.get(i).toString()));
+                    buttonWidget.setMessage(Component.nullToEmpty(buttonForms.get(i).toString()));
                 }
                 buttonWidget.visible = true;
             }
@@ -97,35 +97,35 @@ public class NormalFormSelectScreen extends Screen {
         int InfoStartY = height / 2 + 4 * (ButtonHeight + 5) + 5;
         int totalButtonWidth = 2 * ButtonWidth + 20;
         int textX = width / 2 - totalButtonWidth / 2;
-        TextWidget TargetInfoText_NAME = new TextWidget(textX, InfoStartY - 9, totalButtonWidth, 20, Text.translatable("message.shape-shifter-curse.select_form_ui.target_name", targetName), MinecraftClient.getInstance().textRenderer);
+        StringWidget TargetInfoText_NAME = new StringWidget(textX, InfoStartY - 9, totalButtonWidth, 20, Component.translatable("message.shape-shifter-curse.select_form_ui.target_name", targetName), Minecraft.getInstance().font);
         TargetInfoText_NAME.alignCenter();
         // 暂时不需要UUID，太长了
         //TextWidget TargetInfoText_UUID = new TextWidget(ButtonStartX, InfoStartY, 420, 20, Text.translatable("message.shape-shifter-curse.select_form_ui.target_uuid", targetUUID.toString()), MinecraftClient.getInstance().textRenderer);
-        addDrawableChild(TargetInfoText_NAME);
+        addRenderableWidget(TargetInfoText_NAME);
         //addDrawableChild(TargetInfoText_UUID);
         for (int Col = 0; Col < 2; Col++) {
             for (int Row = 0; Row < 8; Row++) {
                 int ButtonX = ButtonStartX + Col * (ButtonWidth + 20);
                 int ButtonY = ButtonStartY + Row * (ButtonHeight + 5);
-                ButtonWidget button = ButtonWidget.builder(Text.of("<-------->"), (buttonWidget) -> {
+                Button button = Button.builder(Component.nullToEmpty("<-------->"), (buttonWidget) -> {
                     int ID = buttonWidgetList.indexOf(buttonWidget);
                     if (ID >= 0 && ID < buttonForms.size()) {
                         if (buttonForms.get(ID) != null) {
                             SendSetForm(buttonForms.get(ID));
                         }
                     }
-                    this.close();
-                }).size(ButtonWidth, ButtonHeight).position(ButtonX, ButtonY).build();
+                    this.onClose();
+                }).size(ButtonWidth, ButtonHeight).pos(ButtonX, ButtonY).build();
                 button.visible = false;
                 buttonWidgetList.add(button);
-                addDrawableChild(button);
+                addRenderableWidget(button);
             }
         }
         // 翻页
-        ButtonWidget PagePrevButton = ButtonWidget.builder(Text.of("<"), (buttonWidget) -> PrevPage()).size(20, 20).position(width / 2 - 100, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
-        this.addDrawableChild(PagePrevButton);
-        ButtonWidget PageNextButton = ButtonWidget.builder(Text.of(">"), (buttonWidget) -> NextPage()).size(20, 20).position(width / 2 + 80, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
-        this.addDrawableChild(PageNextButton);
+        Button PagePrevButton = Button.builder(Component.nullToEmpty("<"), (buttonWidget) -> PrevPage()).size(20, 20).pos(width / 2 - 100, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
+        this.addRenderableWidget(PagePrevButton);
+        Button PageNextButton = Button.builder(Component.nullToEmpty(">"), (buttonWidget) -> NextPage()).size(20, 20).pos(width / 2 + 80, height / 2 + 4 * (ButtonHeight + 5) - 5).build();
+        this.addRenderableWidget(PageNextButton);
         LoadPage();
         super.init();
     }
@@ -151,27 +151,27 @@ public class NormalFormSelectScreen extends Screen {
     }
 
     @Override
-    public void close() {
-        super.close();
+    public void onClose() {
+        super.onClose();
     }
 
-    public void renderBackgroundTexture(DrawContext context) {
+    public void renderBackgroundTexture(GuiGraphics context) {
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
         int bgY = (this.height - BG_HEIGHT) / 2;
-        context.drawTexture(BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+        context.blit(BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
     }
 
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderBackgroundTexture(context);
         //this.renderTexture(context);
         super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 }

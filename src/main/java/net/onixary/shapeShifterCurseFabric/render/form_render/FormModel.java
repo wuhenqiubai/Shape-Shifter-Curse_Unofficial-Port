@@ -4,11 +4,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -22,65 +22,65 @@ import java.util.*;
 @SuppressWarnings("removal")
 public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
-    public static HashMap<PlayerEntity, Boolean> SlimMap = new HashMap<>();
+    public static HashMap<Player, Boolean> SlimMap = new HashMap<>();
 
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing.geo.json";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
     public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/missing.animation.json";
 
-    public PlayerEntity entity;
+    public Player entity;
 
     public JsonObject modelJson;
 
     public String Name = "";  // 用于皮肤系统 先留一下API
-    public Identifier Layer = null;  // 用于皮肤系统 先留一下API
-    public Identifier Form = null;  // 用于皮肤系统 先留一下API
+    public ResourceLocation Layer = null;  // 用于皮肤系统 先留一下API
+    public ResourceLocation Form = null;  // 用于皮肤系统 先留一下API
 
     public static int modelIDIter = 0;
     public int modelID = -1;
 
     public boolean SlimOnly = false;
 
-    private final HashMap<String, Vec3d> prevBoneRotation = new HashMap<>();
+    private final HashMap<String, Vec3> prevBoneRotation = new HashMap<>();
     public boolean WideOnly = false;
     public boolean UseMultiplyMask = false;
     public boolean UseAzureAnim = false;
-    public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
-    public Identifier ModelResource_Slim = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
+    public ResourceLocation ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
+    public ResourceLocation ModelResource_Slim = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
 
-    public Identifier TextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier TextureMaskResource = null;
-    public Identifier TextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier TextureMaskResource_Slim = null;
+    public ResourceLocation TextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation TextureMaskResource = null;
+    public ResourceLocation TextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation TextureMaskResource_Slim = null;
 
-    public Identifier OverlayTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier OverlayTextureMaskResource = null;
-    public Identifier OverlayTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier OverlayTextureMaskResource_Slim = null;
+    public ResourceLocation OverlayTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation OverlayTextureMaskResource = null;
+    public ResourceLocation OverlayTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation OverlayTextureMaskResource_Slim = null;
 
-    public Identifier EmissiveTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier EmissiveTextureMaskResource = null;
-    public Identifier EmissiveTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier EmissiveTextureMaskResource_Slim = null;
+    public ResourceLocation EmissiveTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation EmissiveTextureMaskResource = null;
+    public ResourceLocation EmissiveTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation EmissiveTextureMaskResource_Slim = null;
 
-    public Identifier FullBrightTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier FullBrightTextureMaskResource = null;
-    public Identifier FullBrightTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
-    public Identifier FullBrightTextureMaskResource_Slim = null;
+    public ResourceLocation FullBrightTextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation FullBrightTextureMaskResource = null;
+    public ResourceLocation FullBrightTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
+    public ResourceLocation FullBrightTextureMaskResource_Slim = null;
 
-    public Identifier Animation = ShapeShifterCurseFabric.identifier("animations/missing.animation.json");
+    public ResourceLocation Animation = ShapeShifterCurseFabric.identifier("animations/missing.animation.json");
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_Textures = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_Textures_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_OverlayTexture = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_EmissiveTexture = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_FullBrightTexture = new HashMap<>();
+    public HashMap<FormTextureUtils.ColorSetting, ResourceLocation> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
 
     // Hidden Parts
     public boolean Hidden_Hat = false;
@@ -137,78 +137,78 @@ public class FormModel extends GeoModel<FormAnimatable> {
         this.ColorMask_Baked_FullBrightTexture.clear();
         this.ColorMask_Baked_FullBrightTexture_Slim.clear();
 
-        this.Name = JsonHelper.getString(this.modelJson, "name", "");
+        this.Name = GsonHelper.getAsString(this.modelJson, "name", "");
         if (this.modelJson.has("layer")) {
-            this.Layer = Identifier.tryParse(JsonHelper.getString(this.modelJson, "layer", ""));
+            this.Layer = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "layer", ""));
         } else {
             this.Layer = null;
         }
         if (this.modelJson.has("form")) {
-            this.Form = Identifier.tryParse(JsonHelper.getString(this.modelJson, "form", ""));
+            this.Form = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "form", ""));
         } else {
             this.Form = null;
         }
-        this.SlimOnly = JsonHelper.getBoolean(this.modelJson, "slim_only", false);
-        this.WideOnly = JsonHelper.getBoolean(this.modelJson, "wide_only", false);
-        this.UseMultiplyMask = JsonHelper.getBoolean(this.modelJson, "use_multiply_mask", false);
+        this.SlimOnly = GsonHelper.getAsBoolean(this.modelJson, "slim_only", false);
+        this.WideOnly = GsonHelper.getAsBoolean(this.modelJson, "wide_only", false);
+        this.UseMultiplyMask = GsonHelper.getAsBoolean(this.modelJson, "use_multiply_mask", false);
 
-        this.ModelResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "model", MissingGeoString));
-        this.ModelResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "model_slim", MissingGeoString));
+        this.ModelResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "model", MissingGeoString));
+        this.ModelResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "model_slim", MissingGeoString));
 
-        this.TextureResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "texture", MissingTextureString));
-        this.TextureResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "texture_slim", MissingTextureString));
+        this.TextureResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "texture", MissingTextureString));
+        this.TextureResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "texture_slim", MissingTextureString));
         if (this.modelJson.has("texture_mask")) {
-            this.TextureMaskResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "texture_mask", MissingTextureString));
+            this.TextureMaskResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "texture_mask", MissingTextureString));
         } else {
             this.TextureMaskResource = null;
         }
         if (this.modelJson.has("texture_mask_slim")) {
-            this.TextureMaskResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "texture_mask_slim", MissingTextureString));
+            this.TextureMaskResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "texture_mask_slim", MissingTextureString));
         } else {
             this.TextureMaskResource_Slim = null;
         }
 
-        this.OverlayTextureResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "overlay", MissingTextureString));
-        this.OverlayTextureResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "overlay_slim", MissingTextureString));
+        this.OverlayTextureResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "overlay", MissingTextureString));
+        this.OverlayTextureResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "overlay_slim", MissingTextureString));
         if (this.modelJson.has("overlay_mask")) {
-            this.OverlayTextureMaskResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "overlay_mask", MissingTextureString));
+            this.OverlayTextureMaskResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "overlay_mask", MissingTextureString));
         } else {
             this.OverlayTextureMaskResource = null;
         }
         if (this.modelJson.has("overlay_mask_slim")) {
-            this.OverlayTextureMaskResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "overlay_mask_slim", MissingTextureString));
+            this.OverlayTextureMaskResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "overlay_mask_slim", MissingTextureString));
         } else {
             this.OverlayTextureMaskResource_Slim = null;
         }
 
-        this.EmissiveTextureResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "emissive_overlay", MissingTextureString));
-        this.EmissiveTextureResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "emissive_overlay_slim", MissingTextureString));
+        this.EmissiveTextureResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "emissive_overlay", MissingTextureString));
+        this.EmissiveTextureResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "emissive_overlay_slim", MissingTextureString));
         if (this.modelJson.has("emissive_overlay_mask")) {
-            this.EmissiveTextureMaskResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "emissive_overlay_mask", MissingTextureString));
+            this.EmissiveTextureMaskResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "emissive_overlay_mask", MissingTextureString));
         } else {
             this.EmissiveTextureMaskResource = null;
         }
         if (this.modelJson.has("emissive_overlay_mask_slim")) {
-            this.EmissiveTextureMaskResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "emissive_overlay_mask_slim", MissingTextureString));
+            this.EmissiveTextureMaskResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "emissive_overlay_mask_slim", MissingTextureString));
         } else {
             this.EmissiveTextureMaskResource_Slim = null;
         }
 
-        this.FullBrightTextureResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "fullbright_texture", MissingTextureString));
+        this.FullBrightTextureResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "fullbright_texture", MissingTextureString));
         if (this.modelJson.has("fullbright_texture_mask")) {
-            this.FullBrightTextureMaskResource = Identifier.tryParse(JsonHelper.getString(this.modelJson, "fullbright_texture_mask", MissingTextureString));
+            this.FullBrightTextureMaskResource = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "fullbright_texture_mask", MissingTextureString));
         } else {
             this.FullBrightTextureMaskResource = null;
         }
-        this.FullBrightTextureResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "fullbright_texture_slim", MissingTextureString));
+        this.FullBrightTextureResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "fullbright_texture_slim", MissingTextureString));
         if (this.modelJson.has("fullbright_texture_mask_slim")) {
-            this.FullBrightTextureMaskResource_Slim = Identifier.tryParse(JsonHelper.getString(this.modelJson, "fullbright_texture_mask_slim", MissingTextureString));
+            this.FullBrightTextureMaskResource_Slim = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "fullbright_texture_mask_slim", MissingTextureString));
         } else {
             this.FullBrightTextureMaskResource_Slim = null;
         }
 
-        this.UseAzureAnim = JsonHelper.getBoolean(this.modelJson, "use_azurelib_anim", false);
-        this.Animation = Identifier.tryParse(JsonHelper.getString(this.modelJson, "animations", MissingAnimationString));
+        this.UseAzureAnim = GsonHelper.getAsBoolean(this.modelJson, "use_azurelib_anim", false);
+        this.Animation = ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "animations", MissingAnimationString));
 
         this.Hidden_Hat = false;
         this.Hidden_Head = false;
@@ -222,7 +222,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         this.Hidden_RightLeg = false;
         this.Hidden_LeftPants = false;
         this.Hidden_RightPants = false;
-        JsonArray hiddenArray = JsonHelper.getArray(this.modelJson, "hidden", null);
+        JsonArray hiddenArray = GsonHelper.getAsJsonArray(this.modelJson, "hidden", null);
         if (hiddenArray != null) {
             for (int i = 0; i < hiddenArray.size(); i++) {
                 String hidden = hiddenArray.get(i).getAsString();
@@ -244,7 +244,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         }
         this.AnimationSystem = null;
         if (this.modelJson.has("animation_system")) {
-            this.AnimationSystem = FormRenderUtils.get_MAS(Identifier.tryParse(JsonHelper.getString(this.modelJson, "animation_system", null)), this.modelJson.getAsJsonObject("animation_system_config"));
+            this.AnimationSystem = FormRenderUtils.get_MAS(ResourceLocation.tryParse(GsonHelper.getAsString(this.modelJson, "animation_system", null)), this.modelJson.getAsJsonObject("animation_system_config"));
         }
         if (AnimationSystem == null) {
             this.AnimationSystem = FormRenderUtils.get_MAS(FormRenderUtils.DEFAULT_MAS, null);
@@ -272,7 +272,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         // BCD 目前没参数了 之前的迁移至DefaultModelAnimationSystem里了 不过这套系统还留着 后续想加新参数可以在这里写
     }
 
-    public void setPlayer(PlayerEntity player, boolean slim) {
+    public void setPlayer(Player player, boolean slim) {
         this.entity = player;
         SlimMap.put(player, slim);
     }
@@ -287,12 +287,12 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return slim;
     }
 
-    public Identifier getModelResource(boolean slim) {
+    public ResourceLocation getModelResource(boolean slim) {
         return useSlim(slim) ? ModelResource_Slim : ModelResource;
     }
 
-    private Identifier readCacheOrBake(HashMap<FormTextureUtils.ColorSetting, Identifier> Cache, Identifier Resource, Identifier ResourceMask, FormTextureUtils.ColorSetting colorSetting) {
-        Identifier CachedTexture = Cache.get(colorSetting);
+    private ResourceLocation readCacheOrBake(HashMap<FormTextureUtils.ColorSetting, ResourceLocation> Cache, ResourceLocation Resource, ResourceLocation ResourceMask, FormTextureUtils.ColorSetting colorSetting) {
+        ResourceLocation CachedTexture = Cache.get(colorSetting);
         if (CachedTexture != null) {
             return CachedTexture;
         }
@@ -304,104 +304,104 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return CachedTexture;
     }
 
-    public Identifier getTextureResource(boolean slim) {
+    public ResourceLocation getTextureResource(boolean slim) {
         boolean uslim = useSlim(slim);
-        Identifier Resource = uslim ? this.TextureResource_Slim : this.TextureResource;
-        Identifier ResourceMask = uslim ? this.TextureMaskResource_Slim : this.TextureMaskResource;
+        ResourceLocation Resource = uslim ? this.TextureResource_Slim : this.TextureResource;
+        ResourceLocation ResourceMask = uslim ? this.TextureMaskResource_Slim : this.TextureMaskResource;
         if (this.entity != null) {
-            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUUID(), this.Form);
             if (formSkin != null) {
-                Identifier SkinResource = formSkin.getSkinTexture(uslim);
+                ResourceLocation SkinResource = formSkin.getSkinTexture(uslim);
                 if (SkinResource != null) {
                     return SkinResource;
                 }
             }
         }
         if (ResourceMask != null) {
-            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
+            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "texture_slim" : "texture", Resource, ResourceMask, UseMultiplyMask);
             }
             FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
+                HashMap<FormTextureUtils.ColorSetting, ResourceLocation> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
         return Resource;
     }
 
-    public Identifier getOverlayTextureResource(boolean slim) {
+    public ResourceLocation getOverlayTextureResource(boolean slim) {
         boolean uslim = useSlim(slim);
-        Identifier Resource = uslim ? this.OverlayTextureResource_Slim : this.OverlayTextureResource;
-        Identifier ResourceMask = uslim ? this.OverlayTextureMaskResource_Slim : this.OverlayTextureMaskResource;
+        ResourceLocation Resource = uslim ? this.OverlayTextureResource_Slim : this.OverlayTextureResource;
+        ResourceLocation ResourceMask = uslim ? this.OverlayTextureMaskResource_Slim : this.OverlayTextureMaskResource;
         if (this.entity != null) {
-            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUUID(), this.Form);
             if (formSkin != null) {
-                Identifier SkinResource = formSkin.getSkinOverlayTexture(uslim);
+                ResourceLocation SkinResource = formSkin.getSkinOverlayTexture(uslim);
                 if (SkinResource != null) {
                     return SkinResource;
                 }
             }
         }
         if (ResourceMask != null) {
-            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
+            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "overlay_texture_slim" : "overlay_texture", Resource, ResourceMask, UseMultiplyMask);
             }
             FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
+                HashMap<FormTextureUtils.ColorSetting, ResourceLocation> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
         return Resource;
     }
 
-    public Identifier getEmissiveTextureResource(boolean slim) {
+    public ResourceLocation getEmissiveTextureResource(boolean slim) {
         boolean uslim = useSlim(slim);
-        Identifier Resource = uslim ? this.EmissiveTextureResource_Slim : this.EmissiveTextureResource;
-        Identifier ResourceMask = uslim ? this.EmissiveTextureMaskResource_Slim : this.EmissiveTextureMaskResource;
+        ResourceLocation Resource = uslim ? this.EmissiveTextureResource_Slim : this.EmissiveTextureResource;
+        ResourceLocation ResourceMask = uslim ? this.EmissiveTextureMaskResource_Slim : this.EmissiveTextureMaskResource;
         if (this.entity != null) {
-            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUUID(), this.Form);
             if (formSkin != null) {
-                Identifier SkinResource = formSkin.getSkinEmissiveTexture(uslim);
+                ResourceLocation SkinResource = formSkin.getSkinEmissiveTexture(uslim);
                 if (SkinResource != null) {
                     return SkinResource;
                 }
             }
         }
         if (ResourceMask != null) {
-            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
+            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "emissive_texture_slim" : "emissive_texture", Resource, ResourceMask, UseMultiplyMask);
             }
             FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null && ResourceMask != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
+                HashMap<FormTextureUtils.ColorSetting, ResourceLocation> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
         return Resource;
     }
 
-    public Identifier getFullBrightTextureResource(boolean slim) {
+    public ResourceLocation getFullBrightTextureResource(boolean slim) {
         boolean uslim = useSlim(slim);
-        Identifier Resource = uslim ? this.FullBrightTextureResource_Slim : this.FullBrightTextureResource;
-        Identifier ResourceMask = uslim ? this.FullBrightTextureMaskResource_Slim : this.FullBrightTextureMaskResource;
+        ResourceLocation Resource = uslim ? this.FullBrightTextureResource_Slim : this.FullBrightTextureResource;
+        ResourceLocation ResourceMask = uslim ? this.FullBrightTextureMaskResource_Slim : this.FullBrightTextureMaskResource;
         if (this.entity != null) {
-            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUuid(), this.Form);
+            FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(this.entity.getUUID(), this.Form);
             if (formSkin != null) {
-                Identifier SkinResource = formSkin.getSkinFullBrightTexture(uslim);
+                ResourceLocation SkinResource = formSkin.getSkinFullBrightTexture(uslim);
                 if (SkinResource != null) {
                     return SkinResource;
                 }
             }
         }
         if (ResourceMask != null) {
-            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, MinecraftClient.getInstance().player)) {
+            if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "fullbright_texture_slim" : "fullbright_texture", Resource, ResourceMask, UseMultiplyMask);
             }
             FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
+                HashMap<FormTextureUtils.ColorSetting, ResourceLocation> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -424,16 +424,16 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
 
 
-    public final GeoBone translatePositionForBone(String bone_name, Vec3d pos) {
+    public final GeoBone translatePositionForBone(String bone_name, Vec3 pos) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
         }
-        var posOut = new Vec3d(pos.x + b.getPosX(), (float)pos.y + b.getPosY(),(float)pos.z + b.getPosZ());
+        var posOut = new Vec3(pos.x + b.getPosX(), (float)pos.y + b.getPosY(),(float)pos.z + b.getPosZ());
         return this.setPositionForBone(bone_name, posOut);
     }
 
-    public final GeoBone setPositionForBone(String bone_name, Vec3d pos) {
+    public final GeoBone setPositionForBone(String bone_name, Vec3 pos) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
@@ -444,7 +444,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return (GeoBone) b;
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3d rot) {
+    public final GeoBone setRotationForBone(String bone_name, Vec3 rot) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
@@ -456,10 +456,10 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final GeoBone setRotationForBone(String bone_name, Vec3f rot) {
-        return setRotationForBone(bone_name, new Vec3d(rot.x(), rot.y(), rot.z()));
+        return setRotationForBone(bone_name, new Vec3(rot.x(), rot.y(), rot.z()));
     }
 
-    public final GeoBone setModelPositionForBone(String bone_name, Vec3d pos) {
+    public final GeoBone setModelPositionForBone(String bone_name, Vec3 pos) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
@@ -469,10 +469,10 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
-        return setModelPositionForBone(bone_name, new Vec3d(pos.x(), pos.y(), pos.z()));
+        return setModelPositionForBone(bone_name, new Vec3(pos.x(), pos.y(), pos.z()));
     }
 
-    public final GeoBone setScaleForBone(String bone_name, Vec3d scale) {
+    public final GeoBone setScaleForBone(String bone_name, Vec3 scale) {
         var b = this.getCachedGeoBone(bone_name);
         if (b == null) {
             return null;
@@ -484,7 +484,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final GeoBone setScaleForBone(String bone_name, Vec3f scale) {
-        return setScaleForBone(bone_name, new Vec3d(scale.x(), scale.y(), scale.z()));
+        return setScaleForBone(bone_name, new Vec3(scale.x(), scale.y(), scale.z()));
     }
 
     public final GeoBone invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
@@ -498,15 +498,15 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final GeoBone resetBone(String bone_name) {
-        setPositionForBone(bone_name, new Vec3d(0,0,0));
-        setRotationForBone(bone_name, new Vec3d(0,0,0));
-        setModelPositionForBone(bone_name, Vec3d.ZERO);
-        return setScaleForBone(bone_name, new Vec3d(1,1,1));
+        setPositionForBone(bone_name, new Vec3(0,0,0));
+        setRotationForBone(bone_name, new Vec3(0,0,0));
+        setModelPositionForBone(bone_name, Vec3.ZERO);
+        return setScaleForBone(bone_name, new Vec3(1,1,1));
     }
 
     @Override
-    public Identifier getModelResource(FormAnimatable animatable) {
-        PlayerEntity player = animatable.e;
+    public ResourceLocation getModelResource(FormAnimatable animatable) {
+        Player player = animatable.e;
         // Skin Model System Not Implemented
         // if (player != null) {
         //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
@@ -521,19 +521,19 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     @Override
-    public Identifier getTextureResource(FormAnimatable animatable) {
-        PlayerEntity player = animatable.e;
+    public ResourceLocation getTextureResource(FormAnimatable animatable) {
+        Player player = animatable.e;
         return getTextureResource(SlimMap.getOrDefault(player, false));
     }
 
-    public Identifier getFullbrightTextureResource(FormAnimatable animatable) {
-        PlayerEntity player = animatable.e;
+    public ResourceLocation getFullbrightTextureResource(FormAnimatable animatable) {
+        Player player = animatable.e;
         return getFullBrightTextureResource(SlimMap.getOrDefault(player, false));
 
     }
 
     @Override
-    public Identifier getAnimationResource(FormAnimatable animatable) {
+    public ResourceLocation getAnimationResource(FormAnimatable animatable) {
         return this.Animation;
     }
 

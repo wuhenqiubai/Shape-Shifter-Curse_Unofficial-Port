@@ -3,13 +3,13 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 // FabricItemSettings removed in 1.21, use Item.Settings directly
 
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.T_AXOLOTL;
@@ -23,37 +23,37 @@ public class RegTransformativeEntitySpawnEgg {
     //);
 
     public static final Item T_BAT_SPAWN_EGG = register("custom_bat_spawn_egg", new SpawnEggItem(
-            T_BAT,  0x8B8B8B, 0x1F1F1F,new Item.Settings()
+            T_BAT,  0x8B8B8B, 0x1F1F1F,new Item.Properties()
     ));
 
     public static final Item T_AXOLOTL_SPAWN_EGG = register("custom_axolotl_spawn_egg", new SpawnEggItem(
-            T_AXOLOTL,  0x8B8B8B,0xe4a7ae, new Item.Settings()
+            T_AXOLOTL,  0x8B8B8B,0xe4a7ae, new Item.Properties()
     ));
 
     public static final Item T_OCELOT_SPAWN_EGG = register("custom_ocelot_spawn_egg", new SpawnEggItem(
-            ShapeShifterCurseFabric.T_OCELOT,  0x8B8B8B,0xfc801d, new Item.Settings()
+            ShapeShifterCurseFabric.T_OCELOT,  0x8B8B8B,0xfc801d, new Item.Properties()
     ));
 
     public static final Item T_WOLF_SPAWN_EGG = register("custom_wolf_spawn_egg", new SpawnEggItem(
-            ShapeShifterCurseFabric.T_WOLF,  0x8B8B8B,0xffd355, new Item.Settings()
+            ShapeShifterCurseFabric.T_WOLF,  0x8B8B8B,0xffd355, new Item.Properties()
     ));
 
     public static final Item T_SPIDER_SPAWN_EGG = register("custom_spider_spawn_egg", new SpawnEggItem(
-            ShapeShifterCurseFabric.T_SPIDER,  0x8B8B8B,0xff9060, new Item.Settings()
+            ShapeShifterCurseFabric.T_SPIDER,  0x8B8B8B,0xff9060, new Item.Properties()
     ));
 
     public static <T extends Item> T register(String path, T item) {
-        return Registry.register(Registries.ITEM, RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(ShapeShifterCurseFabric.MOD_ID, path)), item);
+        return Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), item);
     }
 
     public static void initialize() {
         //Registry.register(Registries.ITEM, RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(ShapeShifterCurseFabric.MOD_ID, "custom_bat_spawn_egg")), T_BAT_SPAWN_EGG);
-        ItemGroupEvents.modifyEntriesEvent(ItemGroups.SPAWN_EGGS).register(content -> {
-            content.add(T_BAT_SPAWN_EGG);
-            content.add(T_AXOLOTL_SPAWN_EGG);
-            content.add(T_OCELOT_SPAWN_EGG);
-            content.add(T_WOLF_SPAWN_EGG);
-            content.add(T_SPIDER_SPAWN_EGG);
+        ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(content -> {
+            content.accept(T_BAT_SPAWN_EGG);
+            content.accept(T_AXOLOTL_SPAWN_EGG);
+            content.accept(T_OCELOT_SPAWN_EGG);
+            content.accept(T_WOLF_SPAWN_EGG);
+            content.accept(T_SPIDER_SPAWN_EGG);
         });
     }
 }

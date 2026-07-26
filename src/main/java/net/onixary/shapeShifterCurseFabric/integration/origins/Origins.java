@@ -17,10 +17,10 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
@@ -88,11 +88,11 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			//OriginCommand.register(dispatcher);
 		});
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register((content) -> {
+		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((content) -> {
 			//content.add(ModItems.ORB_OF_ORIGIN);
 		});
 
-		net.minecraft.advancement.criterion.Criteria.register(ChoseOriginCriterion.ID.toString(), ChoseOriginCriterion.INSTANCE);
+		net.minecraft.advancements.CriteriaTriggers.register(ChoseOriginCriterion.ID.toString(), ChoseOriginCriterion.INSTANCE);
 	}
 
 	public static void serializeConfig() {
@@ -103,28 +103,28 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		}
 	}
 
-	public static Identifier identifier(String path) {
-		return Identifier.of(Origins.MODID, path);
+	public static ResourceLocation identifier(String path) {
+		return ResourceLocation.fromNamespaceAndPath(Origins.MODID, path);
 	}
 
 	@Override
 	public void registerResourceListeners(OrderedResourceListenerManager manager) {
-		Identifier powerData = Apoli.identifier("powers");
-		Identifier originData = Origins.identifier("origins");
+		ResourceLocation powerData = Apoli.identifier("powers");
+		ResourceLocation originData = Origins.identifier("origins");
 
 		// Ensure origins namespace tags are registered before power loading
 		OriginsTagLoader tagLoader = new OriginsTagLoader();
-		manager.register(ResourceType.SERVER_DATA, tagLoader).before(powerData).complete();
+		manager.register(PackType.SERVER_DATA, tagLoader).before(powerData).complete();
 		PowerTypes.DEPENDENCIES.add(tagLoader.getFabricId());
 
 		OriginManager originLoader = new OriginManager();
-		manager.register(ResourceType.SERVER_DATA, originLoader).after(powerData).complete();
-		manager.register(ResourceType.SERVER_DATA, new OriginLayers()).after(originData).complete();
+		manager.register(PackType.SERVER_DATA, originLoader).after(powerData).complete();
+		manager.register(PackType.SERVER_DATA, new OriginLayers()).after(originData).complete();
 
 		BadgeManager.init();
 
 		IdentifiableResourceReloadListener badgeLoader = BadgeManager.REGISTRY.getLoader();
-		manager.register(ResourceType.SERVER_DATA, badgeLoader).before(powerData).complete();
+		manager.register(PackType.SERVER_DATA, badgeLoader).before(powerData).complete();
 		PowerTypes.DEPENDENCIES.add(badgeLoader.getFabricId());
 	}
 
@@ -135,19 +135,19 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 		public JsonObject origins = new JsonObject();
 
-		public boolean isOriginDisabled(Identifier originId) {
+		public boolean isOriginDisabled(ResourceLocation originId) {
 			String idString = originId.toString();
 			if(!origins.has(idString)) {
 				return false;
 			}
 			JsonElement element = origins.get(idString);
 			if(element instanceof JsonObject jsonObject) {
-				return !JsonHelper.getBoolean(jsonObject, "enabled", true);
+				return !GsonHelper.getAsBoolean(jsonObject, "enabled", true);
 			}
 			return false;
 		}
 
-		public boolean isPowerDisabled(Identifier originId, Identifier powerId) {
+		public boolean isPowerDisabled(ResourceLocation originId, ResourceLocation powerId) {
 			String originIdString = originId.toString();
 			if(!origins.has(originIdString)) {
 				return false;
@@ -155,7 +155,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 			String powerIdString = powerId.toString();
 			JsonElement element = origins.get(originIdString);
 			if(element instanceof JsonObject jsonObject) {
-				return !JsonHelper.getBoolean(jsonObject, powerIdString, true);
+				return !GsonHelper.getAsBoolean(jsonObject, powerIdString, true);
 			}
 			return false;
 		}

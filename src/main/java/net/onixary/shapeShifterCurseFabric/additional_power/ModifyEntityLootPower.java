@@ -7,10 +7,10 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class ModifyEntityLootPower extends Power {
@@ -27,13 +27,13 @@ public class ModifyEntityLootPower extends Power {
         this.targetItemStack = data.get("target_item_stack");
     }
 
-    public ItemStack ApplyModifyDrop(ItemStack itemStack, Random randomSource) {
+    public ItemStack ApplyModifyDrop(ItemStack itemStack, RandomSource randomSource) {
         if (!FromItemCondition.test(itemStack)) {
             return itemStack;
         }
         if (randomSource.nextFloat() < this.chance) {
             if (targetItem != null) {
-                return itemStack.copyComponentsToNewStack(targetItem, itemStack.getCount());
+                return itemStack.transmuteCopy(targetItem, itemStack.getCount());
             } else if (targetItemStack != null) {
                 return targetItemStack.copy();
             }

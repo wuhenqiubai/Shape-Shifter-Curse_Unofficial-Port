@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.mana;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.ChargePower;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
@@ -15,18 +15,18 @@ public class WebResourceBar implements IManaRender {
     private ChargePower powerTemp_2;
     private int powerTempTimer = 0;
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-    private static final Identifier BarTexID = ShapeShifterCurseFabric.identifier("textures/gui/web_bar.png");
+    private static final Minecraft mc = Minecraft.getInstance();
+    private static final ResourceLocation BarTexID = ShapeShifterCurseFabric.identifier("textures/gui/web_bar.png");
 
     @Override
     public boolean OverrideInstinctBar() {
         return false;
     }
 
-    public void render(DrawContext context, float tickDelta) {
-        if (!mc.options.hudHidden) {
-            Pair<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
-            this.renderBar(context, tickDelta, pos.getLeft(), pos.getRight());
+    public void render(GuiGraphics context, float tickDelta) {
+        if (!mc.options.hideGui) {
+            Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
+            this.renderBar(context, tickDelta, pos.getA(), pos.getB());
         }
     }
 
@@ -56,7 +56,7 @@ public class WebResourceBar implements IManaRender {
         return RTier;
     }
 
-    private void renderBar(DrawContext context, float tickDelta, int x, int y) {
+    private void renderBar(GuiGraphics context, float tickDelta, int x, int y) {
         if (mc.player == null) {
             return;
         }
@@ -65,13 +65,13 @@ public class WebResourceBar implements IManaRender {
         double manaRegen = ManaUtils.getPlayerManaRegen(mc.player);
 
         int manaWidth = (int)Math.ceil((double)80.0F * ManaUtils.getManaPercent(mana, maxMana, 0.0F));
-        context.drawTexture(BarTexID, x, y, 0.0f, 0, 80, 5, 80, 18);
-        context.drawTexture(BarTexID, x, y, 0.0f, 5, manaWidth, 5, 80, 18);
+        context.blit(BarTexID, x, y, 0.0f, 0, 80, 5, 80, 18);
+        context.blit(BarTexID, x, y, 0.0f, 5, manaWidth, 5, 80, 18);
 
-        Text manaText = Text.literal((int) mana + "/" + (int) maxMana);
-        context.drawText(mc.textRenderer, manaText, x + 10, y - 8, manaRegen == 0 ? 0xFF7F7F7F : 0xFF00CFFF, false);
+        Component manaText = Component.literal((int) mana + "/" + (int) maxMana);
+        context.drawString(mc.font, manaText, x + 10, y - 8, manaRegen == 0 ? 0xFF7F7F7F : 0xFF00CFFF, false);
 
         int chargeLevel = this.getChargeLevel();
-        context.drawTexture(BarTexID, x, y - 8, chargeLevel * 8f, 10f, 8, 8, 80, 18);
+        context.blit(BarTexID, x, y - 8, chargeLevel * 8f, 10f, 8, 8, 80, 18);
     }
 }

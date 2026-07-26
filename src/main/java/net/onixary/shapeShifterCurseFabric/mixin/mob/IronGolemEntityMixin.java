@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.goal.ActiveTargetGoal;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.mob.Angerable;
-import net.minecraft.entity.passive.GolemEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.NeutralMob;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.AbstractGolem;
+import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,40 +17,40 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.UUID;
 
-@Mixin(IronGolemEntity.class)
-public class IronGolemEntityMixin extends GolemEntity implements Angerable {
-    protected IronGolemEntityMixin(EntityType<? extends GolemEntity> entityType, World world) {
+@Mixin(IronGolem.class)
+public class IronGolemEntityMixin extends AbstractGolem implements NeutralMob {
+    protected IronGolemEntityMixin(EntityType<? extends AbstractGolem> entityType, Level world) {
         super(entityType, world);
     }
 
-    @Inject(at = @At("TAIL"), method = "initGoals")
+    @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
-        Goal goal = new ActiveTargetGoal<PlayerEntity>(this, PlayerEntity.class, 10, true, false, AdditionalPowers.HOSTILE_IRON_GOLEM::isActive);;
-	    this.targetSelector.add(3, goal);
+        Goal goal = new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, AdditionalPowers.HOSTILE_IRON_GOLEM::isActive);;
+	    this.targetSelector.addGoal(3, goal);
     }
 
     @Override
-    public int getAngerTime() {
+    public int getRemainingPersistentAngerTime() {
         return 0;
     }
 
     @Override
-    public void setAngerTime(int angerTime) {
+    public void setRemainingPersistentAngerTime(int angerTime) {
 
     }
 
     @Override
-    public @Nullable UUID getAngryAt() {
+    public @Nullable UUID getPersistentAngerTarget() {
         return null;
     }
 
     @Override
-    public void setAngryAt(@Nullable UUID angryAt) {
+    public void setPersistentAngerTarget(@Nullable UUID angryAt) {
 
     }
 
     @Override
-    public void chooseRandomAngerTime() {
+    public void startPersistentAngerTimer() {
 
     }
 }

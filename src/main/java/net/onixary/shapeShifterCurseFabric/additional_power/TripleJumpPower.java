@@ -7,8 +7,8 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class TripleJumpPower extends Power {
@@ -40,7 +40,7 @@ public class TripleJumpPower extends Power {
     @Override
     public void tick() {
         boolean shouldReset = !entity.isSprinting();
-	    if (entity.isOnGround()) {
+	    if (entity.onGround()) {
             ticksOnGround++;
             if (ticksOnGround > resetTicksOnGround) {
                 shouldReset = true;
@@ -55,7 +55,7 @@ public class TripleJumpPower extends Power {
 
     // 在跳跃前被 Mixin 调用，用于更新状态
     public void onJump() {
-        if (!isActive() || !entity.isOnGround() || !entity.isSprinting()) {
+        if (!isActive() || !entity.onGround() || !entity.isSprinting()) {
             this.activeMultiplier = 1.0f;
             return;
         }

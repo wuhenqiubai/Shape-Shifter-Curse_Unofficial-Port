@@ -2,9 +2,9 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.power;
 
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -20,7 +20,7 @@ public class ModifyTypeTagPower extends Power {
      * ThreadLocal holding the entity currently executing an entity-type tag check.
      * Set by the InTagConditionMixin before calling EntityType#isIn.
      */
-    public static final ThreadLocal<net.minecraft.entity.Entity> CURRENT_ENTITY = new ThreadLocal<>();
+    public static final ThreadLocal<net.minecraft.world.entity.Entity> CURRENT_ENTITY = new ThreadLocal<>();
 
     private final TagKey<EntityType<?>> tagKey;
 

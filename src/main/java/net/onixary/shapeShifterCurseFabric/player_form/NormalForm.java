@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
@@ -17,15 +17,15 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class NormalForm implements IForm {
-    private final Identifier FORM_ID;
+    private final ResourceLocation FORM_ID;
     private IFormGroup formGroup = null;
     private int formTier = -2;
     private Set<String> formFlag = Set.of();
     private PlayerFormBodyType bodyType = PlayerFormBodyType.NORMAL;
-    private @Nullable Consumer<PlayerEntity> applyScaleFunc = null;
+    private @Nullable Consumer<Player> applyScaleFunc = null;
     private boolean powerAnimRegistered = false;
 
-    public static final BiFunction<Float, Float, Consumer<PlayerEntity>> NORMAL_SCALE_FUNC_BUILDER = (scale, eye_scale) -> (player) -> {
+    public static final BiFunction<Float, Float, Consumer<Player>> NORMAL_SCALE_FUNC_BUILDER = (scale, eye_scale) -> (player) -> {
         ScaleData scaleDataWidth = ScaleTypes.WIDTH.getScaleData(player);
         ScaleData scaleDataHeight = ScaleTypes.HEIGHT.getScaleData(player);
         scaleDataWidth.setScale(scale);
@@ -40,14 +40,14 @@ public class NormalForm implements IForm {
         scaleDataHitboxHeight.setPersistence(true);
     };
 
-    public static final Consumer<PlayerEntity> RESET_SCALE_FUNC = NORMAL_SCALE_FUNC_BUILDER.apply(1.0f, 1.0f);
+    public static final Consumer<Player> RESET_SCALE_FUNC = NORMAL_SCALE_FUNC_BUILDER.apply(1.0f, 1.0f);
 
-    public NormalForm(Identifier formID) {
+    public NormalForm(ResourceLocation formID) {
         this.FORM_ID = formID;
     }
 
     @Override
-    public @NotNull Identifier getFormID() {
+    public @NotNull ResourceLocation getFormID() {
         return this.FORM_ID;
     }
 
@@ -96,8 +96,8 @@ public class NormalForm implements IForm {
     }
 
     @Override
-    public @NotNull Pair<Identifier, Identifier> getFormLayer() {
-        return new Pair<>(Identifier.of("origins", "origin"), Identifier.of(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
+    public @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer() {
+        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
     }
 
     @Override
@@ -111,24 +111,24 @@ public class NormalForm implements IForm {
     }
 
     @Override
-    public @Nullable IForm getNextForm(PlayerEntity player, ITransformReason reason) {
+    public @Nullable IForm getNextForm(Player player, ITransformReason reason) {
         return null;
     }
 
     @Override
-    public @Nullable IForm getPrevForm(PlayerEntity player, ITransformReason reason) {
+    public @Nullable IForm getPrevForm(Player player, ITransformReason reason) {
         return null;
     }
 
     @Override
-    public void applyScale(PlayerEntity player) {
+    public void applyScale(Player player) {
         if (this.applyScaleFunc != null) {
             this.applyScaleFunc.accept(player);
             return;
         }
     }
 
-    public NormalForm applyScaleFunc(Consumer<PlayerEntity> func) {
+    public NormalForm applyScaleFunc(Consumer<Player> func) {
         this.applyScaleFunc = func;
         return this;
     }
@@ -143,18 +143,18 @@ public class NormalForm implements IForm {
     }
 
     @Override
-    public void registerPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+    public void registerPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
         powerAnimRegistered = true;
         return;
     }
 
     @Override
-    public boolean isPowerAnimRegistered(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+    public boolean isPowerAnimRegistered(Player player, AnimSystem.AnimSystemData animSystemData) {
         return powerAnimRegistered;
     }
 
     @Override
-    public void onTransform_Finish(PlayerEntity player) {
+    public void onTransform_Finish(Player player) {
         PlayerFormComponent pfc = PlayerFormComponent.COMPONENT.get(player);
         pfc.setFallbackForm(null);
     }

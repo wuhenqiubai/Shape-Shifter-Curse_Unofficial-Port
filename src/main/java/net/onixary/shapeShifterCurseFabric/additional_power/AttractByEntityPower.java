@@ -8,16 +8,16 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.entity.vehicle.MinecartEntity;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.Minecart;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.Comparator;
@@ -62,14 +62,14 @@ public class AttractByEntityPower extends Power{
 
     @Override
     public void tick() {
-        if (!(entity instanceof PlayerEntity player) || player.isSpectator()) {
+        if (!(entity instanceof Player player) || player.isSpectator()) {
             return;
         }
 
         if (tickCounter++ % 5 == 0) {
             // 1. 检测范围内的所有实体
-            Box searchBox = Box.from(player.getPos()).expand(attractionRadius);
-            List<Entity> entities = player.getWorld().getOtherEntities(
+            AABB searchBox = AABB.unitCubeFromLowerCorner(player.position()).inflate(attractionRadius);
+            List<Entity> entities = player.level().getEntities(
                     player,
                     searchBox,
                     e -> entityCondition.test(e)
@@ -78,25 +78,25 @@ public class AttractByEntityPower extends Power{
             // 2. 找到最近的符合条件的实体
             targetEntity = entities.stream()
                     .filter(entity -> entity.isAlive() && !entity.isSpectator())
-                    .min(Comparator.comparingDouble(e -> e.squaredDistanceTo(player)))
+                    .min(Comparator.comparingDouble(e -> e.distanceToSqr(player)))
                     .orElse(null);
 
             // 如果目标实体存在且距离小于停止半径，则不进行吸引
-            if (targetEntity != null && player.squaredDistanceTo(targetEntity) < stopRadius * stopRadius) {
+            if (targetEntity != null && player.distanceToSqr(targetEntity) < stopRadius * stopRadius) {
                 targetEntity = null; // 重置目标实体
             }
 
-            if (isPlayerInVehicle(player) || !player.isOnGround()) {
+            if (isPlayerInVehicle(player) || !player.onGround()) {
                 targetEntity = null; // 清除目标
                 return;
             }
 
             // 射线检测是否可以看到
             if (targetEntity != null) {
-                Vec3d actorEyePos = entity.getEyePos();
-                Vec3d targetEyePos = targetEntity.getEyePos();
-                RaycastContext context = new RaycastContext(actorEyePos, targetEyePos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity);
-                if(entity.getWorld().raycast(context).getType() == HitResult.Type.BLOCK){
+                Vec3 actorEyePos = entity.getEyePosition();
+                Vec3 targetEyePos = targetEntity.getEyePosition();
+                ClipContext context = new ClipContext(actorEyePos, targetEyePos, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entity);
+                if(entity.level().clip(context).getType() == HitResult.Type.BLOCK){
                     targetEntity = null;
                 }
             }
@@ -105,24 +105,24 @@ public class AttractByEntityPower extends Power{
 
         // 3. 应用吸引效果
         if (targetEntity != null) {
-            Vec3d attractDirection = targetEntity.getPos()
-                    .subtract(player.getPos())
+            Vec3 attractDirection = targetEntity.position()
+                    .subtract(player.position())
                     .multiply(1, 0, 1) // 忽略Y轴
                     .normalize();
 
             // 计算当前速度方向
-            Vec3d currentVelocity = player.getVelocity();
-            Vec3d horizontalVelocity = new Vec3d(currentVelocity.x, 0, currentVelocity.z);
+            Vec3 currentVelocity = player.getDeltaMovement();
+            Vec3 horizontalVelocity = new Vec3(currentVelocity.x, 0, currentVelocity.z);
             // 计算角色面朝向
-            Vec3d playerFacing = player.getRotationVector().multiply(1, 0, 1).normalize();
+            Vec3 playerFacing = player.getLookAngle().multiply(1, 0, 1).normalize();
 
             // 计算实际应用的吸引力
             float effectiveSpeed = calculateEffectiveSpeed(attractDirection, horizontalVelocity, playerFacing);
 
             // 应用速度
-            Vec3d finalVelocity = attractDirection.multiply(effectiveSpeed).add(0, currentVelocity.y, 0);
-            player.setVelocity(finalVelocity);
-            player.velocityModified = true;
+            Vec3 finalVelocity = attractDirection.scale(effectiveSpeed).add(0, currentVelocity.y, 0);
+            player.setDeltaMovement(finalVelocity);
+            player.hurtMarked = true;
 
             // 4. 执行实体动作（如果存在）
             if (entityAction != null) {
@@ -140,28 +140,28 @@ public class AttractByEntityPower extends Power{
     }
 
     // 检查玩家是否在载具上
-    private boolean isPlayerInVehicle(PlayerEntity player) {
+    private boolean isPlayerInVehicle(Player player) {
         Entity vehicle = player.getVehicle();
 
         // 检查所有已知载具类型
         return vehicle != null && (
-                vehicle instanceof BoatEntity ||
-                        vehicle instanceof MinecartEntity ||
+                vehicle instanceof Boat ||
+                        vehicle instanceof Minecart ||
                         // 支持其他模组载具
-                        vehicle.getType().getUntranslatedName().contains("vehicle") ||
-                        vehicle.getType().getUntranslatedName().contains("mount")
+                        vehicle.getType().toShortString().contains("vehicle") ||
+                        vehicle.getType().toShortString().contains("mount")
         );
     }
 
     // 计算实际应用的吸引力速度（考虑逃脱机制）
-    private float calculateEffectiveSpeed(Vec3d attractDirection, Vec3d playerVelocity, Vec3d playerFacing) {
+    private float calculateEffectiveSpeed(Vec3 attractDirection, Vec3 playerVelocity, Vec3 playerFacing) {
 
 
-        Vec3d faceDirection = playerFacing.normalize();
+        Vec3 faceDirection = playerFacing.normalize();
 
-        double dotProduct = faceDirection.dotProduct(attractDirection);
+        double dotProduct = faceDirection.dot(attractDirection);
 
-        double angle = Math.acos(MathHelper.clamp(dotProduct, -1.0, 1.0));
+        double angle = Math.acos(Mth.clamp(dotProduct, -1.0, 1.0));
 
         // 5. 判断是否在逃脱状态（夹角大于阈值）
         if (dotProduct < 0) {

@@ -1,9 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.entity.Entity;
-
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.world.entity.Entity;
 import java.lang.reflect.Method;
 
 /**

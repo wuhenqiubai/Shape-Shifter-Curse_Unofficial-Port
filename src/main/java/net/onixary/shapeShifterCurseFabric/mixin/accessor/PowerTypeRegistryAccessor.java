@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin.accessor;
 
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(PowerTypeRegistry.class)
 public interface  PowerTypeRegistryAccessor {
     @Invoker("update")
-    static PowerType Invoke_Update(Identifier id, PowerType powerType) {
+    static PowerType Invoke_Update(ResourceLocation id, PowerType powerType) {
 	    return null;
     }
 }

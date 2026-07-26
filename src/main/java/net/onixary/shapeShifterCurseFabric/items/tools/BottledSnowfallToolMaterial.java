@@ -1,43 +1,43 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
-import net.minecraft.block.Block;
-import net.minecraft.item.ItemConvertible;
-import net.minecraft.item.Items;
-import net.minecraft.item.ToolMaterial;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.registry.tag.BlockTags;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.level.ItemLike;
+import net.minecraft.world.level.block.Block;
 
-public class BottledSnowfallToolMaterial implements ToolMaterial {
+public class BottledSnowfallToolMaterial implements Tier {
     public static final BottledSnowfallToolMaterial INSTANCE = new BottledSnowfallToolMaterial();
 
     @Override
-    public int getDurability() {
+    public int getUses() {
         return 300;
     }
 
     @Override
-    public float getMiningSpeedMultiplier() {
+    public float getSpeed() {
         return 1;
     }
 
     @Override
-    public float getAttackDamage() {
+    public float getAttackDamageBonus() {
         return 0;
     }
 
     @Override
-    public TagKey<Block> getInverseTag() {
+    public TagKey<Block> getIncorrectBlocksForDrops() {
         return BlockTags.INCORRECT_FOR_WOODEN_TOOL;
     }
 
     @Override
-    public int getEnchantability() {
+    public int getEnchantmentValue() {
         return 0;
     }
 
     @Override
     public Ingredient getRepairIngredient() {
-        return Ingredient.ofItems(new ItemConvertible[]{Items.POWDER_SNOW_BUCKET});
+        return Ingredient.of(new ItemLike[]{Items.POWDER_SNOW_BUCKET});
     }
 }

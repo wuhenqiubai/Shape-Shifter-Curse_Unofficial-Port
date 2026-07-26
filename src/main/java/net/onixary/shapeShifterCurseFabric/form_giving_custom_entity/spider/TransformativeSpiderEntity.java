@@ -1,18 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider;
 
-import net.minecraft.entity.*;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.SpiderEntity;
-import net.minecraft.loot.LootTable;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.storage.loot.LootTable;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
@@ -23,19 +22,19 @@ import java.util.Optional;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_SPIDER_0_EFFECT;
 
-public class TransformativeSpiderEntity extends SpiderEntity implements ITMob {
-    public TransformativeSpiderEntity(EntityType<? extends SpiderEntity> entityType, World world) {
+public class TransformativeSpiderEntity extends Spider implements ITMob {
+    public TransformativeSpiderEntity(EntityType<? extends Spider> entityType, Level world) {
         super(entityType, world);
     }
 
-    public static DefaultAttributeContainer.Builder createAttributes() {
-        return MobEntity.createMobAttributes()
-                .add(EntityAttributes.GENERIC_MAX_HEALTH, 8.0f)
-                .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0.3f);
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 8.0f)
+                .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
+                .add(Attributes.MOVEMENT_SPEED, 0.3f);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeOcelotEntity> type, WorldAccess world, SpawnReason spawnReason, BlockPos pos, Random random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeOcelotEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
         float Chance = ShapeShifterCurseFabric.commonConfig.transformativeSpiderSpawnChance;
         if (Chance <= 0.0f) { return false; }
         if (Chance >= 1.0f) { return true; }
@@ -78,21 +77,21 @@ public class TransformativeSpiderEntity extends SpiderEntity implements ITMob {
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
+    public boolean doHurtTarget(Entity target) {
         Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
-        return attacked.orElseGet(() -> super.tryAttack(target));
+        return attacked.orElseGet(() -> super.doHurtTarget(target));
     }
 
     @Override
-    public EntityDimensions getBaseDimensions(EntityPose pose) {
+    public EntityDimensions getDefaultDimensions(Pose pose) {
         return EntityDimensions.fixed(0.7f, 0.45f);
     }
 
 
     @Override
-    protected RegistryKey<LootTable> getLootTableId() {
-        Identifier id = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
-        return RegistryKey.of(RegistryKeys.LOOT_TABLE, id);
+    protected ResourceKey<LootTable> getDefaultLootTable() {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
+        return ResourceKey.create(Registries.LOOT_TABLE, id);
     }
 
     

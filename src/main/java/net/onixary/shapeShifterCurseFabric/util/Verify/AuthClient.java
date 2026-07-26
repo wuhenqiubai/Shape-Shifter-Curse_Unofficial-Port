@@ -6,8 +6,8 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.FriendlyByteBuf;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
@@ -176,7 +176,7 @@ public final class AuthClient {
                 if (authFileBytes == null) {
                     return;
                 }
-                AuthFile authFile = AuthUtils.readAuthFile(new PacketByteBuf(Unpooled.wrappedBuffer(authFileBytes)));
+                AuthFile authFile = AuthUtils.readAuthFile(new FriendlyByteBuf(Unpooled.wrappedBuffer(authFileBytes)));
                 if (authFile == null) {
                     return;
                 }
@@ -185,7 +185,7 @@ public final class AuthClient {
                 }
                 SetLocalPatronAuthFile(targetUUID, authFile);
                 saveLocalPatronAuthFile(targetUUID);
-                if (MinecraftClient.getInstance().getServer() != null) {
+                if (Minecraft.getInstance().getSingleplayerServer() != null) {
                     ModPacketsS2C.sendPatronAuthFile(LOCAL_PATRON_AUTH_FILE);
                 }
             }).start();
@@ -198,7 +198,7 @@ public final class AuthClient {
             return;
         }
         try {
-            AuthFile loadedFile = AuthUtils.readAuthFile(new PacketByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(localPatronAuthFilePath))));
+            AuthFile loadedFile = AuthUtils.readAuthFile(new FriendlyByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(localPatronAuthFilePath))));
             if (loadedFile != null) {
                 AuthUtils.loadKey(loadedFile.getKeySegment());
             }
@@ -226,7 +226,7 @@ public final class AuthClient {
         }
     }
 
-    public static void loadServerKey(PacketByteBuf buf) {
+    public static void loadServerKey(FriendlyByteBuf buf) {
         KeySegment keySegment = AuthUtils.readKeySegment(buf);
         if (keySegment == null) {
             return;

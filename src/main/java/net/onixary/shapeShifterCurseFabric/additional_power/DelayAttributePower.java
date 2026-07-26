@@ -7,11 +7,11 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.AttributedEntityAttributeModifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeInstance;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.LinkedList;
@@ -43,7 +43,7 @@ public class DelayAttributePower extends Power {
     }
 
     public void tick() {
-        if (this.entity.age % this.tickRate == 0) {
+        if (this.entity.tickCount % this.tickRate == 0) {
             if (this.isActive()) {
                 if (!this.IsModActive) {
                     if (this.NowDelay >= this.TargetDelay) {
@@ -85,9 +85,9 @@ public class DelayAttributePower extends Power {
         float previousHealthPercent = this.entity.getHealth() / previousMaxHealth;
         this.modifiers.forEach((mod) -> {
             if (this.entity.getAttributes().hasAttribute(mod.getAttribute())) {
-                EntityAttributeInstance instance = this.entity.getAttributeInstance(mod.getAttribute());
+                AttributeInstance instance = this.entity.getAttribute(mod.getAttribute());
                 if (instance != null && !instance.hasModifier(mod.getModifier().id())) {
-                    instance.addTemporaryModifier(mod.getModifier());
+                    instance.addTransientModifier(mod.getModifier());
                 }
             }
 
@@ -104,7 +104,7 @@ public class DelayAttributePower extends Power {
         float previousHealthPercent = this.entity.getHealth() / previousMaxHealth;
         this.modifiers.forEach((mod) -> {
             if (this.entity.getAttributes().hasAttribute(mod.getAttribute())) {
-                EntityAttributeInstance instance = this.entity.getAttributeInstance(mod.getAttribute());
+                AttributeInstance instance = this.entity.getAttribute(mod.getAttribute());
                 if (instance != null && instance.hasModifier(mod.getModifier().id())) {
                     instance.removeModifier(mod.getModifier().id());
                 }
@@ -117,7 +117,7 @@ public class DelayAttributePower extends Power {
         }
     }
 
-    public DelayAttributePower addModifier(RegistryEntry<EntityAttribute> attribute, EntityAttributeModifier modifier) {
+    public DelayAttributePower addModifier(Holder<Attribute> attribute, AttributeModifier modifier) {
         AttributedEntityAttributeModifier mod = new AttributedEntityAttributeModifier(attribute, modifier);
         this.modifiers.add(mod);
         return this;

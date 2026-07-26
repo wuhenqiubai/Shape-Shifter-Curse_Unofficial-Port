@@ -1,20 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.recipes;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.recipe.SmithingRecipe;
-import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.recipe.input.SmithingRecipeInput;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
-
 import java.util.function.Function;
 import java.util.function.Predicate;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
+import net.minecraft.world.level.Level;
 
 public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX {
-    public final Identifier id;
+    public final ResourceLocation id;
     public final Predicate<ItemStack> template;
     public final Predicate<ItemStack> base;
     public final Predicate<ItemStack> addition;
@@ -24,7 +23,7 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
         return false;
     }
 
-    public UpgradeRecipe(Identifier id, Predicate<ItemStack> template, Predicate<ItemStack> base, Predicate<ItemStack> addition, Function<ItemStack, ItemStack> upgradeResult) {
+    public UpgradeRecipe(ResourceLocation id, Predicate<ItemStack> template, Predicate<ItemStack> base, Predicate<ItemStack> addition, Function<ItemStack, ItemStack> upgradeResult) {
         this.id = id;
         this.template = template;
         this.base = base;
@@ -33,27 +32,27 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
     }
 
     @Override
-    public boolean testTemplate(ItemStack stack) {
+    public boolean isTemplateIngredient(ItemStack stack) {
         return this.template.test(stack);
     }
 
     @Override
-    public boolean testBase(ItemStack stack) {
+    public boolean isBaseIngredient(ItemStack stack) {
         return this.base.test(stack);
     }
 
     @Override
-    public boolean testAddition(ItemStack stack) {
+    public boolean isAdditionIngredient(ItemStack stack) {
         return this.addition.test(stack);
     }
 
     @Override
-    public boolean matches(SmithingRecipeInput input, World world) {
+    public boolean matches(SmithingRecipeInput input, Level world) {
         return this.template.test(input.template()) && this.base.test(input.base()) && this.addition.test(input.addition());
     }
 
     @Override
-    public ItemStack craft(SmithingRecipeInput input, RegistryWrapper.WrapperLookup lookup) {
+    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider lookup) {
         ItemStack itemStack = input.base();
         if (this.base.test(itemStack)) {
             ItemStack outputStack = itemStack.copy();
@@ -66,12 +65,12 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
     }
 
     @Override
-    public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
+    public ItemStack getResultItem(HolderLookup.Provider registriesLookup) {
         ItemStack itemStack = new ItemStack(Items.IRON_CHESTPLATE);
         return this.upgradeResult.apply(itemStack.copy());
     }
 
-    public Identifier getId() {
+    public ResourceLocation getId() {
         return this.id;
     }
 
@@ -81,11 +80,11 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
     }
 
     @Override
-    public void onTakeOutput(SmithingScreenHandler screenHandler, PlayerEntity player, ItemStack stack) {
+    public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack) {
         if (this.isUpgradeAll()) {
-            screenHandler.decrementStack(0);
-            screenHandler.input.setStack(1, ItemStack.EMPTY);
-            screenHandler.decrementStack(2);
+            screenHandler.shrinkStackInSlot(0);
+            screenHandler.inputSlots.setItem(1, ItemStack.EMPTY);
+            screenHandler.shrinkStackInSlot(2);
         }
     }
 }

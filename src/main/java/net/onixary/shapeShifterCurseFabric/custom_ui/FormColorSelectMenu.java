@@ -1,22 +1,22 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import me.shedaniel.autoconfig.AutoConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.client.texture.TextureManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import net.onixary.shapeShifterCurseFabric.config.PlayerCustomConfig;
@@ -55,7 +55,7 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 // RGB 框 -> RGB 条 -> ...
 
 public class FormColorSelectMenu extends Screen implements FormTextureUtils.TempFormTextureProcessor, FormTextureUtils.TempCustomSkinConfigOverrider, FormTextureUtils.TempFormModelProcessor {
-    private static final Identifier texture = Identifier.of(MOD_ID,"textures/gui/v1_form_color_select_menu.png");
+    private static final ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/v1_form_color_select_menu.png");
     private static final int BG_WIDTH = 420;
     private static final int BG_HEIGHT = 227;
     private static final int BG_IMAGE_WIDTH = 420;
@@ -65,79 +65,79 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     public static FormColorSelectMenu instance = null;
 
-    static final Text EmptyText = Text.empty();
-    private static final Text BoolBTN_ON = Text.translatable("text.cloth-config.boolean.value.true");
-    private static final Text BoolBTN_OFF = Text.translatable("text.cloth-config.boolean.value.false");
+    static final Component EmptyText = Component.empty();
+    private static final Component BoolBTN_ON = Component.translatable("text.cloth-config.boolean.value.true");
+    private static final Component BoolBTN_OFF = Component.translatable("text.cloth-config.boolean.value.false");
 
     // Label
-    private static final Text FormSlotTitle = Text.translatable("gui.shape_shifter_curse_fabric.fcs.form_slot_title");
-    static final Text GlobalSlotTitle = Text.translatable("gui.shape_shifter_curse_fabric.fcs.global_slot_title");
-    private static final Text FormDefaultSlotTitle = Text.translatable("gui.shape_shifter_curse_fabric.fcs.form_default_slot_title");
-    private static final Text Title = Text.translatable("gui.shape_shifter_curse_fabric.fcs.title");
+    private static final Component FormSlotTitle = Component.translatable("gui.shape_shifter_curse_fabric.fcs.form_slot_title");
+    static final Component GlobalSlotTitle = Component.translatable("gui.shape_shifter_curse_fabric.fcs.global_slot_title");
+    private static final Component FormDefaultSlotTitle = Component.translatable("gui.shape_shifter_curse_fabric.fcs.form_default_slot_title");
+    private static final Component Title = Component.translatable("gui.shape_shifter_curse_fabric.fcs.title");
 
-    static final Text ColorChannel_R = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_r");
-    static final Text ColorChannel_G = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_g");
-    static final Text ColorChannel_B = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_b");
-    static final Text ColorChannel_H = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_h");
-    static final Text ColorChannel_S = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_s");
-    static final Text ColorChannel_V = Text.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_v");
+    static final Component ColorChannel_R = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_r");
+    static final Component ColorChannel_G = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_g");
+    static final Component ColorChannel_B = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_b");
+    static final Component ColorChannel_H = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_h");
+    static final Component ColorChannel_S = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_s");
+    static final Component ColorChannel_V = Component.translatable("gui.shape_shifter_curse_fabric.fcs.color_channel_v");
 
-    static final Text IsEnableLayerLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.is_enable_layer");
-    static final Text ExitSliderButtonLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.exit_slider_button");
-    static final MutableText NoneFromNameLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.none_from_name");
+    static final Component IsEnableLayerLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.is_enable_layer");
+    static final Component ExitSliderButtonLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.exit_slider_button");
+    static final MutableComponent NoneFromNameLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.none_from_name");
 
     // Button
-    private static final Text DownloadFromServer = Text.translatable("gui.shape_shifter_curse_fabric.fcs.from_server");
-    private static final Text UploadToServer = Text.translatable("gui.shape_shifter_curse_fabric.fcs.to_server");
-    private static final Text DownloadFromClient = Text.translatable("gui.shape_shifter_curse_fabric.fcs.from_client");
-    private static final Text UploadToClient = Text.translatable("gui.shape_shifter_curse_fabric.fcs.to_client");
-    static final Text DownloadFromClipboard = Text.translatable("gui.shape_shifter_curse_fabric.fcs.from_clipboard");
-    static final Text UploadToClipboard = Text.translatable("gui.shape_shifter_curse_fabric.fcs.to_clipboard");
+    private static final Component DownloadFromServer = Component.translatable("gui.shape_shifter_curse_fabric.fcs.from_server");
+    private static final Component UploadToServer = Component.translatable("gui.shape_shifter_curse_fabric.fcs.to_server");
+    private static final Component DownloadFromClient = Component.translatable("gui.shape_shifter_curse_fabric.fcs.from_client");
+    private static final Component UploadToClient = Component.translatable("gui.shape_shifter_curse_fabric.fcs.to_client");
+    static final Component DownloadFromClipboard = Component.translatable("gui.shape_shifter_curse_fabric.fcs.from_clipboard");
+    static final Component UploadToClipboard = Component.translatable("gui.shape_shifter_curse_fabric.fcs.to_clipboard");
 
     // Config Entry
-    static final Text PrimaryColorLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.primaryColor");
-    static final Text AccentColor1Label = Text.translatable("gui.shape_shifter_curse_fabric.fcs.accentColor1Color");
-    static final Text AccentColor2Label = Text.translatable("gui.shape_shifter_curse_fabric.fcs.accentColor2Color");
-    static final Text EyeColorALabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.eyeColorA");
-    static final Text EyeColorBLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.eyeColorB");
-    static final Text PrimaryGreyReverseLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.primaryGreyReverse");
-    static final Text Accent1GreyReverseLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.accent1GreyReverse");
-    static final Text Accent2GreyReverseLabel = Text.translatable("gui.shape_shifter_curse_fabric.fcs.accent2GreyReverse");
-    static final Text KeepOriginalSkinLabel = Text.translatable("text.autoconfig.shape-shifter-curse-custom.option.keep_original_skin");
-    static final Text IsEnableFormColorSystemLabel = Text.translatable("text.autoconfig.shape-shifter-curse-custom.option.enable_form_color");
+    static final Component PrimaryColorLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.primaryColor");
+    static final Component AccentColor1Label = Component.translatable("gui.shape_shifter_curse_fabric.fcs.accentColor1Color");
+    static final Component AccentColor2Label = Component.translatable("gui.shape_shifter_curse_fabric.fcs.accentColor2Color");
+    static final Component EyeColorALabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.eyeColorA");
+    static final Component EyeColorBLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.eyeColorB");
+    static final Component PrimaryGreyReverseLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.primaryGreyReverse");
+    static final Component Accent1GreyReverseLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.accent1GreyReverse");
+    static final Component Accent2GreyReverseLabel = Component.translatable("gui.shape_shifter_curse_fabric.fcs.accent2GreyReverse");
+    static final Component KeepOriginalSkinLabel = Component.translatable("text.autoconfig.shape-shifter-curse-custom.option.keep_original_skin");
+    static final Component IsEnableFormColorSystemLabel = Component.translatable("text.autoconfig.shape-shifter-curse-custom.option.enable_form_color");
 
     private boolean isScreenInit = false;
-    private TextFieldWidget primaryColorEditBox = null;
-    private TextFieldWidget accentColor1EditBox = null;
-    private TextFieldWidget accentColor2EditBox = null;
-    private TextFieldWidget eyeColorAEditBox = null;
-    private TextFieldWidget eyeColorBEditBox = null;
-    private ButtonWidget primaryGreyReverseButton = null;
-    private ButtonWidget accent1GreyReverseButton = null;
-    private ButtonWidget accent2GreyReverseButton = null;
-    private ButtonWidget keepOriginalSkinButton = null;
-    private ButtonWidget isEnableFormColorSystemButton = null;
+    private EditBox primaryColorEditBox = null;
+    private EditBox accentColor1EditBox = null;
+    private EditBox accentColor2EditBox = null;
+    private EditBox eyeColorAEditBox = null;
+    private EditBox eyeColorBEditBox = null;
+    private Button primaryGreyReverseButton = null;
+    private Button accent1GreyReverseButton = null;
+    private Button accent2GreyReverseButton = null;
+    private Button keepOriginalSkinButton = null;
+    private Button isEnableFormColorSystemButton = null;
 
     private SimpleIntSliderWidget sliderR = null;
     private SimpleIntSliderWidget sliderG = null;
     private SimpleIntSliderWidget sliderB = null;
-    private TextFieldWidget sliderREditBox = null;
-    private TextFieldWidget sliderGEditBox = null;
-    private TextFieldWidget sliderBEditBox = null;
+    private EditBox sliderREditBox = null;
+    private EditBox sliderGEditBox = null;
+    private EditBox sliderBEditBox = null;
     private SimpleIntSliderWidget sliderH = null;
     private SimpleIntSliderWidget sliderS = null;
     private SimpleIntSliderWidget sliderV = null;
-    private TextFieldWidget sliderHEditBox = null;
-    private TextFieldWidget sliderSEditBox = null;
-    private TextFieldWidget sliderVEditBox = null;
+    private EditBox sliderHEditBox = null;
+    private EditBox sliderSEditBox = null;
+    private EditBox sliderVEditBox = null;
 
-    private ButtonWidget formNameLabel = null;
+    private Button formNameLabel = null;
 
-    private ButtonWidget isEnableLayerButton = null;
+    private Button isEnableLayerButton = null;
 
-    private static final MinecraftClient minecraftClient = MinecraftClient.getInstance();
+    private static final Minecraft minecraftClient = Minecraft.getInstance();
 
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, ResourceLocation>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
     private int modelID = -1;
     private static final String IdentifierNameSpace = MOD_ID;
     private static final String IdentifierPrefix = "dynamic_fcs_v1_";
@@ -164,12 +164,12 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         if (ShapeShifterCurseFabric.clientConfig.disableUnlockCheckInFormColorSelectMenu) {
             isUnlocked = true;
         }
-        Text message = NoneFromNameLabel;
+        Component message = NoneFromNameLabel;
         if (!RegPlayerForms.ORIGINAL_BEFORE_ENABLE.equals(form)) {
             message = form.getContentText(CodexData.ContentType.NAME);
         }
         if (!isUnlocked) {
-            if (message instanceof MutableText text) {
+            if (message instanceof MutableComponent text) {
                 text.setStyle(message.getStyle().withColor(TextColor.fromRgb(0xFF0000)));
             } else {
                 message = message.copy().setStyle(message.getStyle().withColor(TextColor.fromRgb(0xFF0000)));
@@ -202,14 +202,14 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
 
-    private Identifier getNextDynamicFormID() {
-        return Identifier.of(IdentifierNameSpace, IdentifierPrefix + nowColorSettingIndex++);
+    private ResourceLocation getNextDynamicFormID() {
+        return ResourceLocation.fromNamespaceAndPath(IdentifierNameSpace, IdentifierPrefix + nowColorSettingIndex++);
     }
 
     private void CleanColorSettingCache() {
         TextureManager textureManager = minecraftClient.getTextureManager();
-        for (Identifier id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
-            textureManager.destroyTexture(id);
+        for (ResourceLocation id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
+            textureManager.release(id);
         }
         colorSettingCacheMap.clear();
     }
@@ -242,8 +242,8 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     private int tempSliderV = 0;
 
     private boolean isOpenSlider = false;
-    private List<ClickableWidget> config_panel_01 = new ArrayList<>();  // 保存config输入框 label之类的 用于切换
-    private List<ClickableWidget> config_panel_02 = new ArrayList<>();  // 保存 RGB条 一些按钮
+    private List<AbstractWidget> config_panel_01 = new ArrayList<>();  // 保存config输入框 label之类的 用于切换
+    private List<AbstractWidget> config_panel_02 = new ArrayList<>();  // 保存 RGB条 一些按钮
 
     // 修改 tempSliderX 后调用
     public void updateSlider() {
@@ -430,7 +430,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     private boolean isUsingCustomSkinConfigOverrider = true;
     private boolean isUsingTempModel = true;
 
-    public FormColorSelectMenu(Text title) {
+    public FormColorSelectMenu(Component title) {
         super(title);
         this.reloadFormIDIndex();
         loadData();
@@ -463,15 +463,15 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private Screen parsetScreen = null;
 
-    public FormColorSelectMenu(Text title, Screen parsetScreen) {
+    public FormColorSelectMenu(Component title, Screen parsetScreen) {
         this(title);
         this.parsetScreen = parsetScreen;
     }
 
-    public void renderTextureBackground(DrawContext context) {
+    public void renderTextureBackground(GuiGraphics context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
-        context.drawTexture(texture, BG_X, BG_Y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(texture, BG_X, BG_Y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
         if (!isOpenSlider) {
             // 133,20,184,181,0,0
             this.drawExtraPart(context, BG_X + 133, BG_Y + 20, 0, 0, 184, 181);
@@ -523,11 +523,11 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         if (!this.isScreenInit || isUpdateUI) {
             return;
         }
-        this.primaryColor = decodeColor(this.primaryColorEditBox.getText());
-        this.accentColor1Color = decodeColor(this.accentColor1EditBox.getText());
-        this.accentColor2Color = decodeColor(this.accentColor2EditBox.getText());
-        this.eyeColorA = decodeColor(this.eyeColorAEditBox.getText());
-        this.eyeColorB = decodeColor(this.eyeColorBEditBox.getText());
+        this.primaryColor = decodeColor(this.primaryColorEditBox.getValue());
+        this.accentColor1Color = decodeColor(this.accentColor1EditBox.getValue());
+        this.accentColor2Color = decodeColor(this.accentColor2EditBox.getValue());
+        this.eyeColorA = decodeColor(this.eyeColorAEditBox.getValue());
+        this.eyeColorB = decodeColor(this.eyeColorBEditBox.getValue());
         this.primaryGreyReverse = primaryGreyReverseButton.getMessage().equals(BoolBTN_ON);
         this.accent1GreyReverse = accent1GreyReverseButton.getMessage().equals(BoolBTN_ON);
         this.accent2GreyReverse = accent2GreyReverseButton.getMessage().equals(BoolBTN_ON);
@@ -541,11 +541,11 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
             return;
         }
         this.isUpdateUI = true;
-        this.primaryColorEditBox.setText(encodeColor(this.primaryColor));
-        this.accentColor1EditBox.setText(encodeColor(this.accentColor1Color));
-        this.accentColor2EditBox.setText(encodeColor(this.accentColor2Color));
-        this.eyeColorAEditBox.setText(encodeColor(this.eyeColorA));
-        this.eyeColorBEditBox.setText(encodeColor(this.eyeColorB));
+        this.primaryColorEditBox.setValue(encodeColor(this.primaryColor));
+        this.accentColor1EditBox.setValue(encodeColor(this.accentColor1Color));
+        this.accentColor2EditBox.setValue(encodeColor(this.accentColor2Color));
+        this.eyeColorAEditBox.setValue(encodeColor(this.eyeColorA));
+        this.eyeColorBEditBox.setValue(encodeColor(this.eyeColorB));
         this.primaryGreyReverseButton.setMessage(this.primaryGreyReverse ? BoolBTN_ON : BoolBTN_OFF);
         this.accent1GreyReverseButton.setMessage(this.accent1GreyReverse ? BoolBTN_ON : BoolBTN_OFF);
         this.accent2GreyReverseButton.setMessage(this.accent2GreyReverse ? BoolBTN_ON : BoolBTN_OFF);
@@ -588,141 +588,141 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         int BPosY = height / 2 - BG_HEIGHT / 2;  // 图片左上角 Y
         // Label
         // 20,146,80,9 - 形态3槽
-        this.addDrawableChild(new TextWidget(BPosX + 20, BPosY + 146, 80, 9, FormSlotTitle, textRenderer).setTextColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 20, BPosY + 146, 80, 9, FormSlotTitle, font).setColor(0xDDDDDD));
         // 135,5,180,9 - Title
-        this.addDrawableChild(new TextWidget(BPosX + 135, BPosY + 5, 180, 9, Title, textRenderer).setTextColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 135, BPosY + 5, 180, 9, Title, font).setColor(0xDDDDDD));
         // 320,5,80,9 - 全局9槽
-        this.addDrawableChild(new TextWidget(BPosX + 320, BPosY + 5, 80, 9, GlobalSlotTitle, textRenderer).setTextColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 5, 80, 9, GlobalSlotTitle, font).setColor(0xDDDDDD));
         // 320,182,80,9 - 形态默认槽
-        this.addDrawableChild(new TextWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, textRenderer).setTextColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, font).setColor(0xDDDDDD));
         // Normal Button
         // 85,5,45,15 - 获取服务器数据
-        this.addDrawableChild(ButtonWidget.builder(DownloadFromServer, button -> {
+        this.addRenderableWidget(Button.builder(DownloadFromServer, button -> {
             loadData(true);
-        }).position(BPosX + 85, BPosY + 5).size(45, 15).build()
+        }).pos(BPosX + 85, BPosY + 5).size(45, 15).build()
         );
         // 85,23,45,15 - 发送到服务器
-        this.addDrawableChild(ButtonWidget.builder(UploadToServer, button -> {
+        this.addRenderableWidget(Button.builder(UploadToServer, button -> {
             ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepOriginalSkin, this.enableFormColorSystem);
-        }).position(BPosX + 85, BPosY + 23).size(45, 15).build()
+        }).pos(BPosX + 85, BPosY + 23).size(45, 15).build()
         );
         // 85,41,45,15 - 获取客户端数据(配置)
-        this.addDrawableChild(ButtonWidget.builder(DownloadFromClient, button -> {
+        this.addRenderableWidget(Button.builder(DownloadFromClient, button -> {
             loadData(false);
-        }).position(BPosX + 85, BPosY + 41).size(45, 15).build()
+        }).pos(BPosX + 85, BPosY + 41).size(45, 15).build()
         );
         // 85,59,45,15 - 发送到客户端(配置)
-        this.addDrawableChild(ButtonWidget.builder(UploadToClient, button -> {
+        this.addRenderableWidget(Button.builder(UploadToClient, button -> {
             this.saveDataToClient(true, true);
-        }).position(BPosX + 85, BPosY + 59).size(45, 15).build()
+        }).pos(BPosX + 85, BPosY + 59).size(45, 15).build()
         );
         // 85,77,45,15 - 从剪切板获取
-        this.addDrawableChild(ButtonWidget.builder(DownloadFromClipboard, button -> {
-            String keyBoardData = minecraftClient.keyboard.getClipboard();
+        this.addRenderableWidget(Button.builder(DownloadFromClipboard, button -> {
+            String keyBoardData = minecraftClient.keyboardHandler.getClipboard();
             FormTextureUtils.ColorSetting cs = FormColorData.ColorSettingFormString(keyBoardData);
             if (cs != null) {
                 this.loadData(cs);
             }
-        }).position(BPosX + 85, BPosY + 77).size(45, 15).build()
+        }).pos(BPosX + 85, BPosY + 77).size(45, 15).build()
         );
         // 85,95,45,15 - 发送到剪切板
-        this.addDrawableChild(ButtonWidget.builder(UploadToClipboard, button -> {
+        this.addRenderableWidget(Button.builder(UploadToClipboard, button -> {
             String keyBoardData = FormColorData.ColorSettingtoString(this.getColorSetting(false), true);
             if (keyBoardData == null) {
                 return;
             }
-            minecraftClient.keyboard.setClipboard(keyBoardData);
-        }).position(BPosX + 85, BPosY + 95).size(45, 15).build()
+            minecraftClient.keyboardHandler.setClipboard(keyBoardData);
+        }).pos(BPosX + 85, BPosY + 95).size(45, 15).build()
         );
         // Player Form Model Switch
         // 35,128,80,15 Form Name Button
-        ButtonWidget formScrollButton = ButtonWidget.builder(NoneFromNameLabel, button -> {
+        Button formScrollButton = Button.builder(NoneFromNameLabel, button -> {
             this.reloadFormIDIndex();
             this.onFormChange(false, false);
-        }).position(BPosX + 35, BPosY + 128).size(80, 15).build();
-        this.addDrawableChild(formScrollButton);
+        }).pos(BPosX + 35, BPosY + 128).size(80, 15).build();
+        this.addRenderableWidget(formScrollButton);
         this.formNameLabel = formScrollButton;
         // 20,128,15,15 Form Scroll Left Button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal("<"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal("<"), button -> {
             this.scrollFormID(-1, true);
-        }).position(BPosX + 20, BPosY + 128).size(15, 15).build());
+        }).pos(BPosX + 20, BPosY + 128).size(15, 15).build());
         // 115,128,15,15 Form Scroll Right Button
-        this.addDrawableChild(ButtonWidget.builder(Text.literal(">"), button -> {
+        this.addRenderableWidget(Button.builder(Component.literal(">"), button -> {
             this.scrollFormID(1, true);
-        }).position(BPosX + 115, BPosY + 128).size(15, 15).build());
+        }).pos(BPosX + 115, BPosY + 128).size(15, 15).build());
         this.reloadFormIDName();
         // Config Pair
         // 139,27,75,11 - PrimaryColor Label
-        TextWidget primaryColorLabel = new TextWidget(BPosX + 139, BPosY + 27, 75, 11, PrimaryColorLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(primaryColorLabel);
+        StringWidget primaryColorLabel = new StringWidget(BPosX + 139, BPosY + 27, 75, 11, PrimaryColorLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(primaryColorLabel);
         this.config_panel_01.add(primaryColorLabel);
         // 241,27,70,11 - PrimaryColor Input
-        TextFieldWidget primaryColorInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 27, 70, 11, null, EmptyText);
+        EditBox primaryColorInput = new EditBox(this.font, BPosX + 241, BPosY + 27, 70, 11, null, EmptyText);
         primaryColorInput.setMaxLength(9);
-        primaryColorInput.setChangedListener((text) -> {
+        primaryColorInput.setResponder((text) -> {
             this.onConfigChanged();
         });
-        this.addDrawableChild(primaryColorInput);
+        this.addRenderableWidget(primaryColorInput);
         this.config_panel_01.add(primaryColorInput);
         this.primaryColorEditBox = primaryColorInput;
         // 139,41,75,11 - AccentColor1 Label
-        TextWidget accentColor1Label = new TextWidget(BPosX + 139, BPosY + 41, 75, 11, AccentColor1Label, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(accentColor1Label);
+        StringWidget accentColor1Label = new StringWidget(BPosX + 139, BPosY + 41, 75, 11, AccentColor1Label, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(accentColor1Label);
         this.config_panel_01.add(accentColor1Label);
         // 241,41,70,11 - AccentColor1 Input
-        TextFieldWidget accentColor1Input = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 41, 70, 11, null, EmptyText);
+        EditBox accentColor1Input = new EditBox(this.font, BPosX + 241, BPosY + 41, 70, 11, null, EmptyText);
         accentColor1Input.setMaxLength(9);
-        accentColor1Input.setChangedListener((text) -> {
+        accentColor1Input.setResponder((text) -> {
             this.onConfigChanged();
         });
-        this.addDrawableChild(accentColor1Input);
+        this.addRenderableWidget(accentColor1Input);
         this.config_panel_01.add(accentColor1Input);
         this.accentColor1EditBox = accentColor1Input;
         // 139,55,75,11 - AccentColor2 Label
-        TextWidget accentColor2Label = new TextWidget(BPosX + 139, BPosY + 55, 75, 11, AccentColor2Label, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(accentColor2Label);
+        StringWidget accentColor2Label = new StringWidget(BPosX + 139, BPosY + 55, 75, 11, AccentColor2Label, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(accentColor2Label);
         this.config_panel_01.add(accentColor2Label);
         // 241,55,70,11 - AccentColor2 Input
-        TextFieldWidget accentColor2Input = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 55, 70, 11, null, EmptyText);
+        EditBox accentColor2Input = new EditBox(this.font, BPosX + 241, BPosY + 55, 70, 11, null, EmptyText);
         accentColor2Input.setMaxLength(9);
-        accentColor2Input.setChangedListener((text) -> {
+        accentColor2Input.setResponder((text) -> {
             this.onConfigChanged();
         });
-        this.addDrawableChild(accentColor2Input);
+        this.addRenderableWidget(accentColor2Input);
         this.config_panel_01.add(accentColor2Input);
         this.accentColor2EditBox = accentColor2Input;
         // 139,69,75,11 - EyeColorA Label
-        TextWidget eyeColorALabel = new TextWidget(BPosX + 139, BPosY + 69, 75, 11, EyeColorALabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(eyeColorALabel);
+        StringWidget eyeColorALabel = new StringWidget(BPosX + 139, BPosY + 69, 75, 11, EyeColorALabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(eyeColorALabel);
         this.config_panel_01.add(eyeColorALabel);
         // 241,69,70,11 - EyeColorA Input
-        TextFieldWidget eyeColorAInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 69, 70, 11, null, EmptyText);
+        EditBox eyeColorAInput = new EditBox(this.font, BPosX + 241, BPosY + 69, 70, 11, null, EmptyText);
         eyeColorAInput.setMaxLength(9);
-        eyeColorAInput.setChangedListener((text) -> {
+        eyeColorAInput.setResponder((text) -> {
             this.onConfigChanged();
         });
-        this.addDrawableChild(eyeColorAInput);
+        this.addRenderableWidget(eyeColorAInput);
         this.config_panel_01.add(eyeColorAInput);
         this.eyeColorAEditBox = eyeColorAInput;
         // 139,83,75,11 - EyeColorB Label
-        TextWidget eyeColorBLabel = new TextWidget(BPosX + 139, BPosY + 83, 75, 11, EyeColorBLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(eyeColorBLabel);
+        StringWidget eyeColorBLabel = new StringWidget(BPosX + 139, BPosY + 83, 75, 11, EyeColorBLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(eyeColorBLabel);
         this.config_panel_01.add(eyeColorBLabel);
         // 241,83,70,11 - EyeColorB Input
-        TextFieldWidget eyeColorBInput = new TextFieldWidget(this.textRenderer, BPosX + 241, BPosY + 83, 70, 11, null, EmptyText);
+        EditBox eyeColorBInput = new EditBox(this.font, BPosX + 241, BPosY + 83, 70, 11, null, EmptyText);
         eyeColorBInput.setMaxLength(9);
-        eyeColorBInput.setChangedListener((text) -> {
+        eyeColorBInput.setResponder((text) -> {
             this.onConfigChanged();
         });
-        this.addDrawableChild(eyeColorBInput);
+        this.addRenderableWidget(eyeColorBInput);
         this.config_panel_01.add(eyeColorBInput);
         this.eyeColorBEditBox = eyeColorBInput;
         // 139,97,139,11 - PrimaryGreyReverse Label
-        TextWidget primaryGreyReverseLabel = new TextWidget(BPosX + 139, BPosY + 97, 139, 11, PrimaryGreyReverseLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(primaryGreyReverseLabel);
+        StringWidget primaryGreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 97, 139, 11, PrimaryGreyReverseLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(primaryGreyReverseLabel);
         this.config_panel_01.add(primaryGreyReverseLabel);
         // 281,97,30,11 - PrimaryGreyReverse Button
-        ButtonWidget primaryGreyReverseButton = ButtonWidget.builder(this.primaryGreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
+        Button primaryGreyReverseButton = Button.builder(this.primaryGreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
             this.primaryGreyReverse = !this.primaryGreyReverse;
             if (this.primaryGreyReverse) {
                 button.setMessage(BoolBTN_ON);
@@ -730,16 +730,16 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 button.setMessage(BoolBTN_OFF);
             }
             this.isColorSettingDirty = true;
-        }).position(BPosX + 281, BPosY + 97).size(30, 11).build();
-        this.addDrawableChild(primaryGreyReverseButton);
+        }).pos(BPosX + 281, BPosY + 97).size(30, 11).build();
+        this.addRenderableWidget(primaryGreyReverseButton);
         this.config_panel_01.add(primaryGreyReverseButton);
         this.primaryGreyReverseButton = primaryGreyReverseButton;
         // 139,111,139,11 - Accent1GreyReverse Label
-        TextWidget accent1GreyReverseLabel = new TextWidget(BPosX + 139, BPosY + 111, 139, 11, Accent1GreyReverseLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(accent1GreyReverseLabel);
+        StringWidget accent1GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 111, 139, 11, Accent1GreyReverseLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(accent1GreyReverseLabel);
         this.config_panel_01.add(accent1GreyReverseLabel);
         // 281,111,30,11 - Accent1GreyReverse Button
-        ButtonWidget accent1GreyReverseButton = ButtonWidget.builder(this.accent1GreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
+        Button accent1GreyReverseButton = Button.builder(this.accent1GreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
             this.accent1GreyReverse = !this.accent1GreyReverse;
             if (this.accent1GreyReverse) {
                 button.setMessage(BoolBTN_ON);
@@ -747,16 +747,16 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 button.setMessage(BoolBTN_OFF);
             }
             this.isColorSettingDirty = true;
-        }).position(BPosX + 281, BPosY + 111).size(30, 11).build();
-        this.addDrawableChild(accent1GreyReverseButton);
+        }).pos(BPosX + 281, BPosY + 111).size(30, 11).build();
+        this.addRenderableWidget(accent1GreyReverseButton);
         this.config_panel_01.add(accent1GreyReverseButton);
         this.accent1GreyReverseButton = accent1GreyReverseButton;
         // 139,125,139,11 - Accent2GreyReverse Label
-        TextWidget accent2GreyReverseLabel = new TextWidget(BPosX + 139, BPosY + 125, 139, 11, Accent2GreyReverseLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(accent2GreyReverseLabel);
+        StringWidget accent2GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 125, 139, 11, Accent2GreyReverseLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(accent2GreyReverseLabel);
         this.config_panel_01.add(accent2GreyReverseLabel);
         // 281,125,30,11 - Accent2GreyReverse Button
-        ButtonWidget accent2GreyReverseButton = ButtonWidget.builder(this.accent2GreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
+        Button accent2GreyReverseButton = Button.builder(this.accent2GreyReverse ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
             this.accent2GreyReverse = !this.accent2GreyReverse;
             if (this.accent2GreyReverse) {
                 button.setMessage(BoolBTN_ON);
@@ -764,58 +764,58 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 button.setMessage(BoolBTN_OFF);
             }
             this.isColorSettingDirty = true;
-        }).position(BPosX + 281, BPosY + 125).size(30, 11).build();
-        this.addDrawableChild(accent2GreyReverseButton);
+        }).pos(BPosX + 281, BPosY + 125).size(30, 11).build();
+        this.addRenderableWidget(accent2GreyReverseButton);
         this.config_panel_01.add(accent2GreyReverseButton);
         this.accent2GreyReverseButton = accent2GreyReverseButton;
         // 139,153,139,11 - Keep Original Skin Label
-        TextWidget keepOriginalSkinLabel = new TextWidget(BPosX + 139, BPosY + 153, 139, 11, KeepOriginalSkinLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(keepOriginalSkinLabel);
+        StringWidget keepOriginalSkinLabel = new StringWidget(BPosX + 139, BPosY + 153, 139, 11, KeepOriginalSkinLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(keepOriginalSkinLabel);
         this.config_panel_01.add(keepOriginalSkinLabel);
         // 281,153,30,11 - Keep Original Skin Button
-        ButtonWidget keepOriginalSkinButton = ButtonWidget.builder(this.keepOriginalSkin ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
+        Button keepOriginalSkinButton = Button.builder(this.keepOriginalSkin ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
             this.keepOriginalSkin = !this.keepOriginalSkin;
             if (this.keepOriginalSkin) {
                 button.setMessage(BoolBTN_ON);
             } else {
                 button.setMessage(BoolBTN_OFF);
             }
-        }).position(BPosX + 281, BPosY + 153).size(30, 11).build();
-        this.addDrawableChild(keepOriginalSkinButton);
+        }).pos(BPosX + 281, BPosY + 153).size(30, 11).build();
+        this.addRenderableWidget(keepOriginalSkinButton);
         this.config_panel_01.add(keepOriginalSkinButton);
         this.keepOriginalSkinButton = keepOriginalSkinButton;
         // 139,167,139,11 - Is Enable Form Color System Label
-        TextWidget isEnableFormColorSystemLabel = new TextWidget(BPosX + 139, BPosY + 167, 139, 11, IsEnableFormColorSystemLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(isEnableFormColorSystemLabel);
+        StringWidget isEnableFormColorSystemLabel = new StringWidget(BPosX + 139, BPosY + 167, 139, 11, IsEnableFormColorSystemLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(isEnableFormColorSystemLabel);
         this.config_panel_01.add(isEnableFormColorSystemLabel);
         // 281,167,30,11 - Is Enable Form Color System Button
-        ButtonWidget isEnableFormColorSystemButton = ButtonWidget.builder(this.enableFormColorSystem ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
+        Button isEnableFormColorSystemButton = Button.builder(this.enableFormColorSystem ? BoolBTN_ON :BoolBTN_OFF, (button) -> {
             this.enableFormColorSystem = !this.enableFormColorSystem;
             if (this.enableFormColorSystem) {
                 button.setMessage(BoolBTN_ON);
             } else {
                 button.setMessage(BoolBTN_OFF);
             }
-        }).position(BPosX + 281, BPosY + 167).size(30, 11).build();
-        this.addDrawableChild(isEnableFormColorSystemButton);
+        }).pos(BPosX + 281, BPosY + 167).size(30, 11).build();
+        this.addRenderableWidget(isEnableFormColorSystemButton);
         this.config_panel_01.add(isEnableFormColorSystemButton);
         this.isEnableFormColorSystemButton = isEnableFormColorSystemButton;
         // 139,27,25,11 - R Label
-        TextWidget rLabel = new TextWidget(BPosX + 139, BPosY + 27, 25, 11, ColorChannel_R, textRenderer);
-        this.addDrawableChild(rLabel);
+        StringWidget rLabel = new StringWidget(BPosX + 139, BPosY + 27, 25, 11, ColorChannel_R, font);
+        this.addRenderableWidget(rLabel);
         this.config_panel_02.add(rLabel);
         // 139,41,25,11 - G Label
-        TextWidget gLabel = new TextWidget(BPosX + 139, BPosY + 41, 25, 11, ColorChannel_G, textRenderer);
-        this.addDrawableChild(gLabel);
+        StringWidget gLabel = new StringWidget(BPosX + 139, BPosY + 41, 25, 11, ColorChannel_G, font);
+        this.addRenderableWidget(gLabel);
         this.config_panel_02.add(gLabel);
         // 139,55,25,11 - B Label
-        TextWidget bLabel = new TextWidget(BPosX + 139, BPosY + 55, 25, 11, ColorChannel_B, textRenderer);
-        this.addDrawableChild(bLabel);
+        StringWidget bLabel = new StringWidget(BPosX + 139, BPosY + 55, 25, 11, ColorChannel_B, font);
+        this.addRenderableWidget(bLabel);
         this.config_panel_02.add(bLabel);
         // 177,27,30,11 - R Input
-        TextFieldWidget sliderREditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 27, 30, 11, EmptyText);
+        EditBox sliderREditBox = new EditBox(font, BPosX + 177, BPosY + 27, 30, 11, EmptyText);
         sliderREditBox.setMaxLength(3);
-        sliderREditBox.setChangedListener((text) -> {
+        sliderREditBox.setResponder((text) -> {
             this.tempSliderR = this.colorChannel2Int(text);
             if (isUpdateSlider == 0) {
                 this.sliderR.setIntValue(this.tempSliderR);
@@ -826,13 +826,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderREditBox);
+        this.addRenderableWidget(sliderREditBox);
         this.config_panel_02.add(sliderREditBox);
         this.sliderREditBox = sliderREditBox;
         // 177,41,30,11 - G Input
-        TextFieldWidget sliderGEditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 41, 30, 11, EmptyText);
+        EditBox sliderGEditBox = new EditBox(font, BPosX + 177, BPosY + 41, 30, 11, EmptyText);
         sliderGEditBox.setMaxLength(3);
-        sliderGEditBox.setChangedListener((text) -> {
+        sliderGEditBox.setResponder((text) -> {
             this.tempSliderG = this.colorChannel2Int(text);
             if (isUpdateSlider == 0) {
                 this.sliderG.setIntValue(this.tempSliderG);
@@ -843,13 +843,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderGEditBox);
+        this.addRenderableWidget(sliderGEditBox);
         this.config_panel_02.add(sliderGEditBox);
         this.sliderGEditBox = sliderGEditBox;
         // 177,55,30,11 - B Input
-        TextFieldWidget sliderBEditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 55, 30, 11, EmptyText);
+        EditBox sliderBEditBox = new EditBox(font, BPosX + 177, BPosY + 55, 30, 11, EmptyText);
         sliderBEditBox.setMaxLength(3);
-        sliderBEditBox.setChangedListener((text) -> {
+        sliderBEditBox.setResponder((text) -> {
             this.tempSliderB = this.colorChannel2Int(text);
             if (isUpdateSlider == 0) {
                 this.sliderB.setIntValue(this.tempSliderB);
@@ -860,7 +860,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderBEditBox);
+        this.addRenderableWidget(sliderBEditBox);
         this.config_panel_02.add(sliderBEditBox);
         this.sliderBEditBox = sliderBEditBox;
         // Slider的改动直接改sliderXEditBox就行 不用updateSlider
@@ -868,48 +868,48 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         SimpleIntSliderWidget sliderR = new SimpleIntSliderWidget(BPosX + 211, BPosY + 27, 100, 11, EmptyText, 0d, 0, 255);
         sliderR.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderREditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderREditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderR);
+        this.addRenderableWidget(sliderR);
         this.config_panel_02.add(sliderR);
         this.sliderR = sliderR;
         // 211,41,100,11 - G Slider
         SimpleIntSliderWidget sliderG = new SimpleIntSliderWidget(BPosX + 211, BPosY + 41, 100, 11, EmptyText, 0d, 0, 255);
         sliderG.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderGEditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderGEditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderG);
+        this.addRenderableWidget(sliderG);
         this.config_panel_02.add(sliderG);
         this.sliderG = sliderG;
         // 211,55,100,11 - B Slider
         SimpleIntSliderWidget sliderB = new SimpleIntSliderWidget(BPosX + 211, BPosY + 55, 100, 11, EmptyText, 0d, 0, 255);
         sliderB.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderBEditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderBEditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderB);
+        this.addRenderableWidget(sliderB);
         this.config_panel_02.add(sliderB);
         this.sliderB = sliderB;
         // 139,69,25,11 - H label
-        TextWidget hLabel = new TextWidget(BPosX + 139, BPosY + 69, 25, 11, ColorChannel_H, textRenderer);
-        this.addDrawableChild(hLabel);
+        StringWidget hLabel = new StringWidget(BPosX + 139, BPosY + 69, 25, 11, ColorChannel_H, font);
+        this.addRenderableWidget(hLabel);
         this.config_panel_02.add(hLabel);
         // 139,83,25,11 - S label
-        TextWidget sLabel = new TextWidget(BPosX + 139, BPosY + 83, 25, 11, ColorChannel_S, textRenderer);
-        this.addDrawableChild(sLabel);
+        StringWidget sLabel = new StringWidget(BPosX + 139, BPosY + 83, 25, 11, ColorChannel_S, font);
+        this.addRenderableWidget(sLabel);
         this.config_panel_02.add(sLabel);
         // 139,97,25,11 - V label
-        TextWidget vLabel = new TextWidget(BPosX + 139, BPosY + 97, 25, 11, ColorChannel_V, textRenderer);
-        this.addDrawableChild(vLabel);
+        StringWidget vLabel = new StringWidget(BPosX + 139, BPosY + 97, 25, 11, ColorChannel_V, font);
+        this.addRenderableWidget(vLabel);
         this.config_panel_02.add(vLabel);
         // 177,69,30,11 - H Input
-        TextFieldWidget sliderHEditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 69, 30, 11, EmptyText);
+        EditBox sliderHEditBox = new EditBox(font, BPosX + 177, BPosY + 69, 30, 11, EmptyText);
         sliderHEditBox.setMaxLength(3);
-        sliderHEditBox.setChangedListener((text) -> {
+        sliderHEditBox.setResponder((text) -> {
             this.tempSliderH = this.colorChannel2Int(text, 0, 359);
             if (isUpdateSlider == 0) {
                 this.sliderH.setIntValue(this.tempSliderH);
@@ -919,13 +919,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderHEditBox);
+        this.addRenderableWidget(sliderHEditBox);
         this.config_panel_02.add(sliderHEditBox);
         this.sliderHEditBox = sliderHEditBox;
         // 177,83,30,11 - S Input
-        TextFieldWidget sliderSEditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 83, 30, 11, EmptyText);
+        EditBox sliderSEditBox = new EditBox(font, BPosX + 177, BPosY + 83, 30, 11, EmptyText);
         sliderSEditBox.setMaxLength(3);
-        sliderSEditBox.setChangedListener((text) -> {
+        sliderSEditBox.setResponder((text) -> {
             this.tempSliderS = this.colorChannel2Int(text, 0, 100);
             if (isUpdateSlider == 0) {
                 this.sliderS.setIntValue(this.tempSliderS);
@@ -935,13 +935,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderSEditBox);
+        this.addRenderableWidget(sliderSEditBox);
         this.config_panel_02.add(sliderSEditBox);
         this.sliderSEditBox = sliderSEditBox;
         // 177,97,30,11 - V Input
-        TextFieldWidget sliderVEditBox = new TextFieldWidget(textRenderer, BPosX + 177, BPosY + 97, 30, 11, EmptyText);
+        EditBox sliderVEditBox = new EditBox(font, BPosX + 177, BPosY + 97, 30, 11, EmptyText);
         sliderVEditBox.setMaxLength(3);
-        sliderVEditBox.setChangedListener((text) -> {
+        sliderVEditBox.setResponder((text) -> {
             this.tempSliderV = this.colorChannel2Int(text, 0, 100);
             if (isUpdateSlider == 0) {
                 this.sliderV.setIntValue(this.tempSliderV);
@@ -951,45 +951,45 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 }
             }
         });
-        this.addDrawableChild(sliderVEditBox);
+        this.addRenderableWidget(sliderVEditBox);
         this.config_panel_02.add(sliderVEditBox);
         this.sliderVEditBox = sliderVEditBox;
         // 211,69,100,11 - H Slider
         SimpleIntSliderWidget sliderH = new SimpleIntSliderWidget(BPosX + 211, BPosY + 69, 100, 11, EmptyText, 0d, 0, 359);
         sliderH.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderHEditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderHEditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderH);
+        this.addRenderableWidget(sliderH);
         this.config_panel_02.add(sliderH);
         this.sliderH = sliderH;
         // 211,83,100,11 - S Slider
         SimpleIntSliderWidget sliderS = new SimpleIntSliderWidget(BPosX + 211, BPosY + 83, 100, 11, EmptyText, 0d, 0, 100);
         sliderS.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderSEditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderSEditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderS);
+        this.addRenderableWidget(sliderS);
         this.config_panel_02.add(sliderS);
         this.sliderS = sliderS;
         // 211,97,100,11 - V Slider
         SimpleIntSliderWidget sliderV = new SimpleIntSliderWidget(BPosX + 211, BPosY + 97, 100, 11, EmptyText, 0d, 0, 100);
         sliderV.onChanged = (widget) -> {
             this.isUpdateSlider++;
-            this.sliderVEditBox.setText(String.valueOf(widget.getIntValue()));
+            this.sliderVEditBox.setValue(String.valueOf(widget.getIntValue()));
             this.isUpdateSlider--;
         };
-        this.addDrawableChild(sliderV);
+        this.addRenderableWidget(sliderV);
         this.config_panel_02.add(sliderV);
         this.sliderV = sliderV;
         // 139,111,75,11 - Is Enable Layer Label
-        TextWidget isEnableLayerLabel = new TextWidget(BPosX + 139, BPosY + 111, 75, 11, IsEnableLayerLabel, textRenderer).setTextColor(0xDDDDDD);
-        this.addDrawableChild(isEnableLayerLabel);
+        StringWidget isEnableLayerLabel = new StringWidget(BPosX + 139, BPosY + 111, 75, 11, IsEnableLayerLabel, font).setColor(0xDDDDDD);
+        this.addRenderableWidget(isEnableLayerLabel);
         this.config_panel_02.add(isEnableLayerLabel);
         // 228,111,36,11 - Is Enable Layer Button
-        ButtonWidget isEnableLayerButton = ButtonWidget.builder(this.tempSliderAlpha != 0 ? BoolBTN_ON : BoolBTN_OFF, (button) -> {
+        Button isEnableLayerButton = Button.builder(this.tempSliderAlpha != 0 ? BoolBTN_ON : BoolBTN_OFF, (button) -> {
             this.tempSliderAlpha = this.tempSliderAlpha == 0 ? 255 : 0;
             if (this.tempSliderAlpha != 0) {
                 button.setMessage(BoolBTN_ON);
@@ -998,17 +998,17 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                 button.setMessage(BoolBTN_OFF);
             }
             this.updateSlider();
-        }).position(BPosX + 228, BPosY + 111).size(36, 11).build();
-        this.addDrawableChild(isEnableLayerButton);
+        }).pos(BPosX + 228, BPosY + 111).size(36, 11).build();
+        this.addRenderableWidget(isEnableLayerButton);
         this.config_panel_02.add(isEnableLayerButton);
         this.isEnableLayerButton = isEnableLayerButton;
         // 281,111,30,11 - Exit Slider Button
-        ButtonWidget exitSliderButton = ButtonWidget.builder(ExitSliderButtonLabel, (button) -> {
+        Button exitSliderButton = Button.builder(ExitSliderButtonLabel, (button) -> {
             this.updateSlider();
             this.isOpenSlider = false;
             this.updatePanel();
-        }).position(BPosX + 281, BPosY + 111).size(30, 11).build();
-        this.addDrawableChild(exitSliderButton);
+        }).pos(BPosX + 281, BPosY + 111).size(30, 11).build();
+        this.addRenderableWidget(exitSliderButton);
         this.config_panel_02.add(exitSliderButton);
 
         this.formLocalSettingButtons.clear();
@@ -1051,43 +1051,43 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.updatePanel();
     }
 
-    private void RenderEntity(DrawContext context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
+    private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         float f = (float)Math.atan((double)(mouseX / 40.0F));
         float g = (float)Math.atan((double)(mouseY / 40.0F));
         Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
         Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
         quaternionf.mul(quaternionf2);
-        float h = entity.bodyYaw;
-        float i = entity.getYaw();
-        float j = entity.getPitch();
-        float k = entity.prevHeadYaw;
-        float l = entity.headYaw;
-        float m = entity.prevBodyYaw;
-        entity.bodyYaw = 180.0F + f * 20.0F;
-        entity.prevBodyYaw = entity.bodyYaw;
-        entity.setYaw(180.0F + f * 40.0F);
-        entity.setPitch(-g * 20.0F);
-        entity.headYaw = entity.getYaw();
-        entity.prevHeadYaw = entity.getYaw();
-        InventoryScreen.drawEntity(context, x, y, size, new org.joml.Vector3f(), quaternionf, quaternionf2, entity);
-        entity.bodyYaw = h;
-        entity.prevBodyYaw = m;
-        entity.setYaw(i);
-        entity.setPitch(j);
-        entity.prevHeadYaw = k;
-        entity.headYaw = l;
+        float h = entity.yBodyRot;
+        float i = entity.getYRot();
+        float j = entity.getXRot();
+        float k = entity.yHeadRotO;
+        float l = entity.yHeadRot;
+        float m = entity.yBodyRotO;
+        entity.yBodyRot = 180.0F + f * 20.0F;
+        entity.yBodyRotO = entity.yBodyRot;
+        entity.setYRot(180.0F + f * 40.0F);
+        entity.setXRot(-g * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+        InventoryScreen.renderEntityInInventory(context, x, y, size, new org.joml.Vector3f(), quaternionf, quaternionf2, entity);
+        entity.yBodyRot = h;
+        entity.yBodyRotO = m;
+        entity.setYRot(i);
+        entity.setXRot(j);
+        entity.yHeadRotO = k;
+        entity.yHeadRot = l;
     }
 
     private static int timer = 0;
 
-    private void drawExtraPart(DrawContext context, int x, int y, int PartX, int PartY, int Width, int Height) {
+    private void drawExtraPart(GuiGraphics context, int x, int y, int PartX, int PartY, int Width, int Height) {
         int realX = PartX + EXTRA_PART_START_X;
         int realY = PartY + EXTRA_PART_START_Y;
-        context.drawTexture(texture, x, y, realX, realY, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(texture, x, y, realX, realY, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
         this.renderBackground(context, mouseX, mouseY, 1.0f);
@@ -1126,7 +1126,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public Identifier getTexture(int modelID, String category, Identifier texture, Identifier mask, boolean OnlyMultiply) {
+    public ResourceLocation getTexture(int modelID, String category, ResourceLocation texture, ResourceLocation mask, boolean OnlyMultiply) {
         if (this.modelID != modelID) {
             this.modelID = modelID;
             CleanColorSettingCache();
@@ -1137,9 +1137,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         }
         return colorSettingCacheMap.computeIfAbsent(category, k -> new HashMap<>()).computeIfAbsent(this.getColorSetting(true), k -> {
             // 这种方法不会内存泄漏 但是得自己管理临时材质
-            NativeImageBackedTexture nativeImageBackedTexture = FormTextureUtils.BakeTextureNoMemLeak(texture, mask, this.getColorSetting(true), OnlyMultiply);
-            Identifier id = getNextDynamicFormID();
-            minecraftClient.getTextureManager().registerTexture(id, nativeImageBackedTexture);
+            DynamicTexture nativeImageBackedTexture = FormTextureUtils.BakeTextureNoMemLeak(texture, mask, this.getColorSetting(true), OnlyMultiply);
+            ResourceLocation id = getNextDynamicFormID();
+            minecraftClient.getTextureManager().register(id, nativeImageBackedTexture);
             return id;
         });
     }
@@ -1149,7 +1149,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public void close() {
+    public void onClose() {
         CleanColorSettingCache();
         if (isUsingTempTexture) {
             FormTextureUtils.useTempFormTexture = false;
@@ -1176,10 +1176,10 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
             this.saveDataToClient(true, true);
         }
         this.saveData();
-        if (this.parsetScreen != null && this.client != null) {
-            this.client.setScreen(this.parsetScreen);
+        if (this.parsetScreen != null && this.minecraft != null) {
+            this.minecraft.setScreen(this.parsetScreen);
         } else {
-            super.close();
+            super.onClose();
         }
     }
 
@@ -1228,7 +1228,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return result;
     }
 
-    private @Nullable Identifier getPlayerForm() {
+    private @Nullable ResourceLocation getPlayerForm() {
         IForm form = this.getForm();
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isEquals(form)) {
             return null;
@@ -1238,7 +1238,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private boolean isFormLocalSettingExists(int index) {
         String id = String.format("fcs_%s", index);
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).containsKey(id);
         }
@@ -1247,7 +1247,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private @Nullable FormTextureUtils.ColorSetting getFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).get(id);
         }
@@ -1256,7 +1256,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void setFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).put(id, colorSettingRGBA);
@@ -1266,7 +1266,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void removeFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).remove(id);
         }
@@ -1297,7 +1297,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private boolean isFormDefaultSettingExists() {
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.containsKey(formID);
         }
@@ -1305,7 +1305,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private @Nullable FormTextureUtils.ColorSetting getFormDefaultSetting() {
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.get(formID);
         }
@@ -1313,7 +1313,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void setFormDefaultSetting() {
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.put(formID, colorSettingRGBA);
@@ -1322,54 +1322,54 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void removeFormDefaultSetting() {
-        Identifier formID = this.getPlayerForm();
+        ResourceLocation formID = this.getPlayerForm();
         if (formID != null) {
             ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.remove(formID);
         }
         this.updateSavaButtonActive();
     }
 
-    private final List<Pair<FCS_ButtonWidget, FCS_ButtonWidget>> formLocalSettingButtons = new ArrayList<>();
-    private final List<TextFieldWidget> formLocalSettingTextFields = new ArrayList<>();
-    private Pair<FCS_ButtonWidget, FCS_ButtonWidget> formDefaultSettingButton = null;
-    private TextFieldWidget formDefaultSettingTextField = null;
-    private final List<Pair<FCS_ButtonWidget, FCS_ButtonWidget>> globalSettingButtons = new ArrayList<>();
-    private final List<TextFieldWidget> globalSettingTextFields = new ArrayList<>();
+    private final List<Tuple<FCS_ButtonWidget, FCS_ButtonWidget>> formLocalSettingButtons = new ArrayList<>();
+    private final List<EditBox> formLocalSettingTextFields = new ArrayList<>();
+    private Tuple<FCS_ButtonWidget, FCS_ButtonWidget> formDefaultSettingButton = null;
+    private EditBox formDefaultSettingTextField = null;
+    private final List<Tuple<FCS_ButtonWidget, FCS_ButtonWidget>> globalSettingButtons = new ArrayList<>();
+    private final List<EditBox> globalSettingTextFields = new ArrayList<>();
 
     private void updateSavaButtonActive() {
         if (this.isScreenInit) {
             if (minecraftClient.player == null) {
-                for (Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget : this.formLocalSettingButtons) {
-                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getRight();
+                for (Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget : this.formLocalSettingButtons) {
+                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
                     deleteButtonWidget.active = false;
-                    FCS_ButtonWidget updButtonWidget = buttonWidget.getLeft();
+                    FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
                     updButtonWidget.active = false;
                     updButtonWidget.TEXTURE_X = 0;
                 }
-                this.formDefaultSettingButton.getLeft().active = false;
-                this.formDefaultSettingButton.getRight().active = false;
-                this.formDefaultSettingButton.getLeft().TEXTURE_X = 0;
+                this.formDefaultSettingButton.getA().active = false;
+                this.formDefaultSettingButton.getB().active = false;
+                this.formDefaultSettingButton.getA().TEXTURE_X = 0;
             } else {
                 for (int index = 0; index < formLocalSettingButtons.size(); index++) {
                     boolean dataExist = this.isFormLocalSettingExists(index);
-                    Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = formLocalSettingButtons.get(index);
-                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getRight();
+                    Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = formLocalSettingButtons.get(index);
+                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
                     deleteButtonWidget.active = dataExist;
-                    FCS_ButtonWidget updButtonWidget = buttonWidget.getLeft();
+                    FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
                     updButtonWidget.active = true;
                     updButtonWidget.TEXTURE_X = dataExist ? 15 : 0;
                 }
                 boolean dataExist = this.isFormDefaultSettingExists();
-                this.formDefaultSettingButton.getLeft().active = true;
-                this.formDefaultSettingButton.getRight().active = dataExist;
-                this.formDefaultSettingButton.getLeft().TEXTURE_X = dataExist ? 15 : 0;
+                this.formDefaultSettingButton.getA().active = true;
+                this.formDefaultSettingButton.getB().active = dataExist;
+                this.formDefaultSettingButton.getA().TEXTURE_X = dataExist ? 15 : 0;
             }
             for (int index = 0; index < globalSettingButtons.size(); index++) {
                 boolean dataExist = this.isGlobalSettingExists(index);
-                Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSettingButtons.get(index);
-                FCS_ButtonWidget deleteButtonWidget = buttonWidget.getRight();
+                Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSettingButtons.get(index);
+                FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
                 deleteButtonWidget.active = dataExist;
-                FCS_ButtonWidget updButtonWidget = buttonWidget.getLeft();
+                FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
                 updButtonWidget.active = true;
                 updButtonWidget.TEXTURE_X = dataExist ? 15 : 0;
             }
@@ -1413,25 +1413,25 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void saveSlotName(int ButtonType, int Index) {
         if (ButtonType == 0) {
-            Identifier FormID = this.getPlayerForm();
+            ResourceLocation FormID = this.getPlayerForm();
             if (FormID == null) {
                 return;
             }
-            ShapeShifterCurseFabricClient.formColorData.setName_LocalFormSlot(FormID, Index, this.formLocalSettingTextFields.get(Index).getText());
+            ShapeShifterCurseFabricClient.formColorData.setName_LocalFormSlot(FormID, Index, this.formLocalSettingTextFields.get(Index).getValue());
         } else if (ButtonType == 1) {
-            ShapeShifterCurseFabricClient.formColorData.setName_GlobalSlot(Index, this.globalSettingTextFields.get(Index).getText());
+            ShapeShifterCurseFabricClient.formColorData.setName_GlobalSlot(Index, this.globalSettingTextFields.get(Index).getValue());
         } else if (ButtonType == 2) {
-            Identifier FormID = this.getPlayerForm();
+            ResourceLocation FormID = this.getPlayerForm();
             if (FormID == null) {
                 return;
             }
-            ShapeShifterCurseFabricClient.formColorData.setName_DefaultSlot(FormID, this.formDefaultSettingTextField.getText());
+            ShapeShifterCurseFabricClient.formColorData.setName_DefaultSlot(FormID, this.formDefaultSettingTextField.getValue());
         }
     }
 
     private String getSlotName(int ButtonType, int Index) {
         if (ButtonType == 0) {
-            Identifier FormID = this.getPlayerForm();
+            ResourceLocation FormID = this.getPlayerForm();
             if (FormID == null) {
                 return "";
             }
@@ -1439,7 +1439,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         } else if (ButtonType == 1) {
             return ShapeShifterCurseFabricClient.formColorData.getName_GlobalSlot(Index);
         } else if (ButtonType == 2) {
-            Identifier FormID = this.getPlayerForm();
+            ResourceLocation FormID = this.getPlayerForm();
             if (FormID == null)
                 return "";
 
@@ -1450,13 +1450,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void reloadAllSlotName() {
         for (int index = 0; index < globalSettingButtons.size(); index++) {
-            this.globalSettingTextFields.get(index).setText(this.getSlotName(1, index));
+            this.globalSettingTextFields.get(index).setValue(this.getSlotName(1, index));
         }
-        Identifier FormID = this.getPlayerForm();
+        ResourceLocation FormID = this.getPlayerForm();
         if (FormID != null) {
-            this.formDefaultSettingTextField.setText(this.getSlotName(2, 0));
+            this.formDefaultSettingTextField.setValue(this.getSlotName(2, 0));
             for (int index = 0; index < formLocalSettingButtons.size(); index++) {
-                this.formLocalSettingTextFields.get(index).setText(this.getSlotName(0, index));
+                this.formLocalSettingTextFields.get(index).setValue(this.getSlotName(0, index));
             }
         }
     }
@@ -1473,11 +1473,11 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                     this.saveCustomColorData(ButtonType, Index);
                 }
             }
-        }), (textSupplier) -> (MutableText)textSupplier.get(), 0);
+        }), (textSupplier) -> (MutableComponent)textSupplier.get(), 0);
 
         // X+15,Y+0,50,15 slot name input
-        TextFieldWidget textFieldWidget = new TextFieldWidget(this.textRenderer, X + 15, Y, 50, 15, EmptyText);
-        textFieldWidget.setChangedListener((text) -> {
+        EditBox textFieldWidget = new EditBox(this.font, X + 15, Y, 50, 15, EmptyText);
+        textFieldWidget.setResponder((text) -> {
             this.saveSlotName(ButtonType, Index);
         });
 
@@ -1488,24 +1488,24 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                     this.deleteSaveData(ButtonType, Index);
                 }
             }
-        }), (textSupplier) -> (MutableText)textSupplier.get(), 30);
+        }), (textSupplier) -> (MutableComponent)textSupplier.get(), 30);
         switch (ButtonType) {
             case 0:
-                formLocalSettingButtons.add(new Pair<>(updButtonWidget, deleteButtonWidget));
+                formLocalSettingButtons.add(new Tuple<>(updButtonWidget, deleteButtonWidget));
                 formLocalSettingTextFields.add(textFieldWidget);
                 break;
             case 1:
-                globalSettingButtons.add(new Pair<>(updButtonWidget, deleteButtonWidget));
+                globalSettingButtons.add(new Tuple<>(updButtonWidget, deleteButtonWidget));
                 globalSettingTextFields.add(textFieldWidget);
                 break;
             case 2:
-                formDefaultSettingButton = new Pair<>(updButtonWidget, deleteButtonWidget);
+                formDefaultSettingButton = new Tuple<>(updButtonWidget, deleteButtonWidget);
                 formDefaultSettingTextField = textFieldWidget;
                 break;
         }
-        this.addDrawableChild(updButtonWidget);
-        this.addDrawableChild(textFieldWidget);
-        this.addDrawableChild(deleteButtonWidget);
+        this.addRenderableWidget(updButtonWidget);
+        this.addRenderableWidget(textFieldWidget);
+        this.addRenderableWidget(deleteButtonWidget);
     }
 
     public IForm getFormNoCheckUnlock() {
@@ -1546,12 +1546,12 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public Identifier getLayerID() {
-        return this.getForm().getFormLayer().getRight();
+    public ResourceLocation getLayerID() {
+        return this.getForm().getFormLayer().getB();
     }
 
     @Override
-    public boolean shouldPause() {
+    public boolean isPauseScreen() {
         return false;
     }
 
@@ -1561,7 +1561,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
         // 自定义背景纹理完全遮挡，不需要暗色渐变
     }
 }

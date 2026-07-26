@@ -3,19 +3,19 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.component;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginRegistry;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.ChoseOriginCriterion;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -24,12 +24,12 @@ import java.util.Map;
 
 public class PlayerOriginComponent implements OriginComponent {
 
-    private PlayerEntity player;
+    private Player player;
     private HashMap<OriginLayer, Origin> origins = new HashMap<>();
 
     private boolean hadOriginBefore = false;
 
-    public PlayerOriginComponent(PlayerEntity player) {
+    public PlayerOriginComponent(Player player) {
         this.player = player;
     }
 
@@ -76,13 +76,13 @@ public class PlayerOriginComponent implements OriginComponent {
         if(this.hasAllOrigins()) {
             this.hadOriginBefore = true;
         }
-        if(player instanceof ServerPlayerEntity spe) {
+        if(player instanceof ServerPlayer spe) {
             ChoseOriginCriterion.INSTANCE.trigger(spe, origin);
         }
     }
 
     private void grantPowersFromOrigin(Origin origin, PowerHolderComponent powerComponent) {
-        Identifier source = origin.getIdentifier();
+        ResourceLocation source = origin.getIdentifier();
         for(PowerType<?> powerType : origin.getPowerTypes()) {
             if(!powerComponent.hasPower(powerType, source)) {
                 try {
@@ -96,13 +96,13 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     private void revokeRemovedPowers(Origin origin, PowerHolderComponent powerComponent) {
-        Identifier source = origin.getIdentifier();
+        ResourceLocation source = origin.getIdentifier();
         List<PowerType<?>> powersByOrigin = powerComponent.getPowersFromSource(source);
         powersByOrigin.stream().filter(p -> !origin.hasPowerType(p)).forEach(p -> powerComponent.removePower(p, source));
     }
 
     @Override
-    public void readFromNbt(@NotNull NbtCompound compoundTag, RegistryWrapper.@NotNull WrapperLookup registryLookup) {
+    public void readFromNbt(@NotNull CompoundTag compoundTag, HolderLookup.@NotNull Provider registryLookup) {
         if(player == null) {
             Origins.LOGGER.error("Player was null in `fromTag`! This is a bug!");
 	        return;
@@ -112,14 +112,14 @@ public class PlayerOriginComponent implements OriginComponent {
 
         if(compoundTag.contains("Origin")) {
             try {
-                OriginLayer defaultOriginLayer = OriginLayers.getLayer(Identifier.of(Origins.MODID, "origin"));
+                OriginLayer defaultOriginLayer = OriginLayers.getLayer(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origin"));
 	            if (defaultOriginLayer == null) {
 		            Origins.LOGGER.warn("Default origin layer not found");
 		            return;
 	            }
 
 	            String originString = compoundTag.getString("Origin");
-	            Identifier originId = Identifier.tryParse(originString);
+	            ResourceLocation originId = ResourceLocation.tryParse(originString);
 	            if (originId == null) {
 		            Origins.LOGGER.warn("Invalid origin ID: {}", originString);
 		            return;
@@ -136,15 +136,15 @@ public class PlayerOriginComponent implements OriginComponent {
 	            Origins.LOGGER.warn("Player {} had old origin which could not be migrated: {}", playerName, compoundTag.getString("Origin"));
             }
         } else {
-	        NbtElement originLayerElement = compoundTag.get("OriginLayers");
-	        if (!(originLayerElement instanceof NbtList originLayerList)) {
+	        Tag originLayerElement = compoundTag.get("OriginLayers");
+	        if (!(originLayerElement instanceof ListTag originLayerList)) {
 		        return;
 	        }
 
 	        for (int i = 0; i < originLayerList.size(); i++) {
-		        NbtCompound layerTag = originLayerList.getCompound(i);
+		        CompoundTag layerTag = originLayerList.getCompound(i);
 		        String layerString = layerTag.getString("Layer");
-		        Identifier layerId = Identifier.tryParse(layerString);
+		        ResourceLocation layerId = ResourceLocation.tryParse(layerString);
 
 		        if (layerId == null) {
 			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
@@ -162,7 +162,7 @@ public class PlayerOriginComponent implements OriginComponent {
 
 		        if (layer != null) {
 			        String originString = layerTag.getString("Origin");
-			        Identifier originId = Identifier.tryParse(originString);
+			        ResourceLocation originId = ResourceLocation.tryParse(originString);
 
 			        if (originId == null) {
 				        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
@@ -200,7 +200,7 @@ public class PlayerOriginComponent implements OriginComponent {
 
         this.hadOriginBefore = compoundTag.getBoolean("HadOriginBefore");
 
-        if(!player.getWorld().isClient) {
+        if(!player.level().isClientSide) {
             PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(player);
 	        if (powerComponent == null) {
 		        Origins.LOGGER.warn("PowerHolderComponent is null for player {}", player.getName().getString());
@@ -220,15 +220,15 @@ public class PlayerOriginComponent implements OriginComponent {
             // Loads power data from Origins tag, whereas new versions
             // store the data in the Apoli tag.
             if(compoundTag.contains("Powers")) {
-	            NbtElement powersElement = compoundTag.get("Powers");
-	            if (!(powersElement instanceof NbtList powerList)) {
+	            Tag powersElement = compoundTag.get("Powers");
+	            if (!(powersElement instanceof ListTag powerList)) {
 		            return;
 	            }
 
                 for(int i = 0; i < powerList.size(); i++) {
-                    NbtCompound powerTag = powerList.getCompound(i);
+                    CompoundTag powerTag = powerList.getCompound(i);
 	                String powerTypeString = powerTag.getString("Type");
-	                Identifier powerTypeId = Identifier.tryParse(powerTypeString);
+	                ResourceLocation powerTypeId = ResourceLocation.tryParse(powerTypeString);
 
 	                if (powerTypeId == null) {
 		                Origins.LOGGER.warn("Invalid power type ID: {}", powerTypeString);
@@ -238,7 +238,7 @@ public class PlayerOriginComponent implements OriginComponent {
                     try {
                         PowerType<?> type = PowerTypeRegistry.get(powerTypeId);
                         if(powerComponent.hasPower(type)) {
-                            NbtElement data = powerTag.get("Data");
+                            Tag data = powerTag.get("Data");
                             try {
                                 powerComponent.getPower(type).fromTag(data);
                             } catch(ClassCastException e) {
@@ -262,10 +262,10 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     @Override
-    public void writeToNbt(@NotNull NbtCompound compoundTag, RegistryWrapper.@NotNull WrapperLookup registryLookup) {
-        NbtList originLayerList = new NbtList();
+    public void writeToNbt(@NotNull CompoundTag compoundTag, HolderLookup.@NotNull Provider registryLookup) {
+        ListTag originLayerList = new ListTag();
         for(Map.Entry<OriginLayer, Origin> entry : origins.entrySet()) {
-            NbtCompound layerTag = new NbtCompound();
+            CompoundTag layerTag = new CompoundTag();
             layerTag.putString("Layer", entry.getKey().getIdentifier().toString());
             layerTag.putString("Origin", entry.getValue().getIdentifier().toString());
             originLayerList.add(layerTag);

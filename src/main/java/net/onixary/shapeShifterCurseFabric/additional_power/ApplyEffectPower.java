@@ -5,8 +5,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.ArrayList;
@@ -14,11 +14,11 @@ import java.util.List;
 
 public class ApplyEffectPower extends Power {
 
-    private final List<StatusEffectInstance> effects;
-    private final List<StatusEffectInstance> storeEffects;
+    private final List<MobEffectInstance> effects;
+    private final List<MobEffectInstance> storeEffects;
     private boolean isApplied = false;
 
-    public ApplyEffectPower(PowerType<?> type, LivingEntity entity, List<StatusEffectInstance> effects) {
+    public ApplyEffectPower(PowerType<?> type, LivingEntity entity, List<MobEffectInstance> effects) {
         super(type, entity);
         if (effects == null) {
             effects = new ArrayList<>();
@@ -37,35 +37,35 @@ public class ApplyEffectPower extends Power {
             this.RemoveEffects();
             this.isApplied = false;
         }
-        if (entity.age % 20 == 0 && this.isActive() && this.isApplied) {
+        if (entity.tickCount % 20 == 0 && this.isActive() && this.isApplied) {
             this.checkEffects();
         }
     }
 
     private void ApplyEffects() {
-        for (StatusEffectInstance effect : this.effects) {
-            if (this.entity.hasStatusEffect(effect.getEffectType())) {
-                this.storeEffects.add(this.entity.getStatusEffect(effect.getEffectType()));
-                this.entity.removeStatusEffect(effect.getEffectType());
+        for (MobEffectInstance effect : this.effects) {
+            if (this.entity.hasEffect(effect.getEffect())) {
+                this.storeEffects.add(this.entity.getEffect(effect.getEffect()));
+                this.entity.removeEffect(effect.getEffect());
             }
-            this.entity.addStatusEffect(new StatusEffectInstance(effect));
+            this.entity.addEffect(new MobEffectInstance(effect));
         }
     }
 
     private void checkEffects() {
-        for (StatusEffectInstance effect : this.effects) {
-            if (!this.entity.hasStatusEffect(effect.getEffectType())) {
-                this.entity.addStatusEffect(new StatusEffectInstance(effect));
+        for (MobEffectInstance effect : this.effects) {
+            if (!this.entity.hasEffect(effect.getEffect())) {
+                this.entity.addEffect(new MobEffectInstance(effect));
             }
         }
     }
 
     private void RemoveEffects() {
-        for (StatusEffectInstance effect : this.effects) {
-            this.entity.removeStatusEffect(effect.getEffectType());
+        for (MobEffectInstance effect : this.effects) {
+            this.entity.removeEffect(effect.getEffect());
         }
-        for (StatusEffectInstance effect : this.storeEffects) {
-            this.entity.addStatusEffect(effect);
+        for (MobEffectInstance effect : this.storeEffects) {
+            this.entity.addEffect(effect);
         }
         this.storeEffects.clear();
     }

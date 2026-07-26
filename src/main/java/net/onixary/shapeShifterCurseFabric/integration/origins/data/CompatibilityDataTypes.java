@@ -3,8 +3,8 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.data;
 import com.google.gson.JsonPrimitive;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
 public final class CompatibilityDataTypes {
 

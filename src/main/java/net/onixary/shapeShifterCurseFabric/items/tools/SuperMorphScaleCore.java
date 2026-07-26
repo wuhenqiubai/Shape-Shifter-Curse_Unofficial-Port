@@ -1,22 +1,22 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
-import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.util.UseAction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
@@ -26,18 +26,18 @@ public class SuperMorphScaleCore extends Item {
     public static float quickChargeCostMultiplier = 0.75f;
     public static float quickChargeCostMultiplierNoMending = 0.20f;
 
-    public SuperMorphScaleCore(Settings settings) {
+    public SuperMorphScaleCore(Properties settings) {
         super(settings);
     }
 
     public static int getMaxUseCount(ItemStack stack, int multiplier) {
-        int damage = (stack.getMaxDamage() - stack.getDamage());
+        int damage = (stack.getMaxDamage() - stack.getDamageValue());
         int damagePerCount = damagePerItem * multiplier;
         return damage / damagePerCount;
     }
 
     public static int getUpgradeDamageMultiplier(ItemStack stack) {
-        int upgradeItemStackCount = stack.getMaxCount();
+        int upgradeItemStackCount = stack.getMaxStackSize();
         if (upgradeItemStackCount == 0) {
             return 1;
         }
@@ -46,25 +46,25 @@ public class SuperMorphScaleCore extends Item {
 
     public static void damageItemAfterUpgrade(ItemStack stack, int multiplier) {
         int damagePerCount = damagePerItem * multiplier;
-        int damage = stack.getDamage();
+        int damage = stack.getDamageValue();
         int targetDamage = damage + damagePerCount;
-	    stack.setDamage(Math.min(targetDamage, stack.getMaxDamage()));
+	    stack.setDamageValue(Math.min(targetDamage, stack.getMaxDamage()));
     }
 
     @Override
-    public UseAction getUseAction(ItemStack stack) {
-        return UseAction.BOW;
+    public UseAnim getUseAnimation(ItemStack stack) {
+        return UseAnim.BOW;
     }
 
     @Override
-    public int getMaxUseTime(ItemStack stack, LivingEntity user) {
+    public int getUseDuration(ItemStack stack, LivingEntity user) {
         return 24;
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        user.setCurrentHand(hand);
-        return TypedActionResult.success(user.getStackInHand(hand));
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        user.startUsingItem(hand);
+        return InteractionResultHolder.success(user.getItemInHand(hand));
     }
 
     // 我最早的Mod中的代码(没发布) 最后一次更新还是2年前了
@@ -84,11 +84,11 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        if (user instanceof PlayerEntity player && !world.isClient) {
-            int damage = stack.getDamage();
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+        if (user instanceof Player player && !world.isClientSide) {
+            int damage = stack.getDamageValue();
             int need_repair = 0;
-            if (user.isSneaking()) {
+            if (user.isShiftKeyDown()) {
                 need_repair = stack.getMaxDamage();
             } else {
                 need_repair = damagePerItem;
@@ -96,30 +96,30 @@ public class SuperMorphScaleCore extends Item {
             int max_repair = damage;
             need_repair = Math.min(need_repair, max_repair);
             float exp_multiplier = mendingMultiplier;
-            if (EnchantmentHelper.getLevel((RegistryEntry<Enchantment>) Enchantments.MENDING, stack) > 0) {
+            if (EnchantmentHelper.getItemEnchantmentLevel((Holder<Enchantment>) Enchantments.MENDING, stack) > 0) {
                 exp_multiplier *= quickChargeCostMultiplier;
             } else {
                 exp_multiplier *= quickChargeCostMultiplierNoMending;
             }
-            int player_exp = getTotalExperience(player.experienceLevel, MathHelper.floor(player.experienceProgress * (float) player.getNextLevelExperience()));
-            max_repair = MathHelper.floor(player_exp * exp_multiplier);
+            int player_exp = getTotalExperience(player.experienceLevel, Mth.floor(player.experienceProgress * (float) player.getXpNeededForNextLevel()));
+            max_repair = Mth.floor(player_exp * exp_multiplier);
             need_repair = Math.min(need_repair, max_repair);
-            int exp_cost = MathHelper.ceil(need_repair / exp_multiplier);
+            int exp_cost = Mth.ceil(need_repair / exp_multiplier);
             if (need_repair > 0) {
                 int finalDamage = damage - need_repair;
                 if (finalDamage < 0) {
                     finalDamage = 0;
                 }
-                stack.setDamage(finalDamage);
-                player.addExperience(-exp_cost);
-                player.playSound(SoundEvents.BLOCK_ENCHANTMENT_TABLE_USE, 1.0f, 1.0f);
+                stack.setDamageValue(finalDamage);
+                player.giveExperiencePoints(-exp_cost);
+                player.playSound(SoundEvents.ENCHANTMENT_TABLE_USE, 1.0f, 1.0f);
             }
         }
         return stack;
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.translatable("item.shape-shifter-curse.super_morphscale_core.tooltip", getMaxUseCount(stack, 1)).formatted(Formatting.DARK_PURPLE));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.super_morphscale_core.tooltip", getMaxUseCount(stack, 1)).withStyle(ChatFormatting.DARK_PURPLE));
     }
 }

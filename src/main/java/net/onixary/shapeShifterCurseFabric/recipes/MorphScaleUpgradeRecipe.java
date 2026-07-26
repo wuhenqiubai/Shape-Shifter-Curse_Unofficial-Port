@@ -2,16 +2,16 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.component.type.NbtComponent;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.recipe.Ingredient;
-import net.minecraft.recipe.RecipeSerializer;
-import net.minecraft.screen.SmithingScreenHandler;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.SmithingMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
@@ -21,8 +21,8 @@ import static net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegist
 
 public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     @Override
-    public net.minecraft.recipe.RecipeType<?> getType() {
-        return net.minecraft.recipe.RecipeType.SMITHING;
+    public net.minecraft.world.item.crafting.RecipeType<?> getType() {
+        return net.minecraft.world.item.crafting.RecipeType.SMITHING;
     }
     public final Ingredient template;
     public final Ingredient addition;
@@ -31,22 +31,22 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         return ShapeShifterCurseFabric.commonConfig.enableFullStackUpgrade;
     }
 
-    public MorphScaleUpgradeRecipe(Identifier id, Ingredient template, Ingredient addition) {
+    public MorphScaleUpgradeRecipe(ResourceLocation id, Ingredient template, Ingredient addition) {
         super(id, template, (itemStack -> {
             if (itemStack.isEmpty()) {
                 return false;
             }
-	        var customData = itemStack.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+	        var customData = itemStack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 	        if (customData == null) {
                 return true;
             }
-	        NbtCompound nbtCompound = customData.copyNbt();
+	        CompoundTag nbtCompound = customData.copyTag();
             return !(nbtCompound.contains(IsMorphScaleItemCondition.IsMorphScaleArmorTagName) && nbtCompound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName));
         }), addition, itemStack -> {
 	        // 使用 Component 系统设置标记
-	        NbtCompound nbt = itemStack.getOrDefault(net.minecraft.component.DataComponentTypes.CUSTOM_DATA, NbtComponent.DEFAULT).copyNbt();
+	        CompoundTag nbt = itemStack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 	        nbt.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true);
-	        itemStack.set(net.minecraft.component.DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
+	        itemStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.of(nbt));
             return itemStack;
         });
         this.template = template;
@@ -54,9 +54,9 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public ItemStack craft(net.minecraft.recipe.input.SmithingRecipeInput input, net.minecraft.registry.RegistryWrapper.WrapperLookup lookup) {
+    public ItemStack assemble(net.minecraft.world.item.crafting.SmithingRecipeInput input, net.minecraft.core.HolderLookup.Provider lookup) {
 	    ItemStack coreStack = input.template();
-        if (coreStack.isOf(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
+        if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
 	        ItemStack itemStack = input.base();
             int multiplier = SuperMorphScaleCore.getUpgradeDamageMultiplier(itemStack);
             int canCraftCount = SuperMorphScaleCore.getMaxUseCount(coreStack, multiplier);
@@ -67,7 +67,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
             }
             return ItemStack.EMPTY;
         }
-	    return super.craft(input, lookup);
+	    return super.assemble(input, lookup);
     }
 
     @Override
@@ -81,37 +81,37 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public void onTakeOutput(SmithingScreenHandler screenHandler, PlayerEntity player, ItemStack stack) {
-        ItemStack coreStack = screenHandler.input.getStack(0);
-        if (coreStack.isOf(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
-            ItemStack baseStack = screenHandler.input.getStack(1);
+    public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack) {
+        ItemStack coreStack = screenHandler.inputSlots.getItem(0);
+        if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
+            ItemStack baseStack = screenHandler.inputSlots.getItem(1);
             int multiplier = SuperMorphScaleCore.getUpgradeDamageMultiplier(baseStack);
             SuperMorphScaleCore.damageItemAfterUpgrade(coreStack, multiplier);
-            screenHandler.decrementStack(1);
-            screenHandler.decrementStack(2);
+            screenHandler.shrinkStackInSlot(1);
+            screenHandler.shrinkStackInSlot(2);
         }
         else {
-            screenHandler.decrementStack(0);
+            screenHandler.shrinkStackInSlot(0);
             if (this.isUpgradeAll()) {
-                screenHandler.input.setStack(1, ItemStack.EMPTY);
+                screenHandler.inputSlots.setItem(1, ItemStack.EMPTY);
             } else {
-                screenHandler.decrementStack(1);
+                screenHandler.shrinkStackInSlot(1);
             }
-            screenHandler.decrementStack(2);
+            screenHandler.shrinkStackInSlot(2);
         }
     }
 
     public static class Serializer implements RecipeSerializer<MorphScaleUpgradeRecipe> {
 
         private static final MapCodec<MorphScaleUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Ingredient.DISALLOW_EMPTY_CODEC.fieldOf("template").forGetter(r -> r.template),
-            Ingredient.DISALLOW_EMPTY_CODEC.fieldOf("addition").forGetter(r -> r.addition)
-        ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.of("morph_scale_upgrade"), template, addition)));
+            Ingredient.CODEC_NONEMPTY.fieldOf("template").forGetter(r -> r.template),
+            Ingredient.CODEC_NONEMPTY.fieldOf("addition").forGetter(r -> r.addition)
+        ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(ResourceLocation.parse("morph_scale_upgrade"), template, addition)));
 
-        private static final PacketCodec<RegistryByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = PacketCodec.tuple(
-            Ingredient.PACKET_CODEC, r -> r.template,
-            Ingredient.PACKET_CODEC, r -> r.addition,
-            (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.of("morph_scale_upgrade"), template, addition)
+        private static final StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = StreamCodec.composite(
+            Ingredient.CONTENTS_STREAM_CODEC, r -> r.template,
+            Ingredient.CONTENTS_STREAM_CODEC, r -> r.addition,
+            (template, addition) -> new MorphScaleUpgradeRecipe(ResourceLocation.parse("morph_scale_upgrade"), template, addition)
         );
 
         @Override
@@ -120,7 +120,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         }
 
         @Override
-        public PacketCodec<RegistryByteBuf, MorphScaleUpgradeRecipe> packetCodec() {
+        public StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> streamCodec() {
             return PACKET_CODEC;
         }
     }

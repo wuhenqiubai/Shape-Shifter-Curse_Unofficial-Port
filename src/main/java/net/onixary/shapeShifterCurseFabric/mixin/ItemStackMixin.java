@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item.TooltipContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -33,11 +33,11 @@ public abstract class ItemStackMixin {
     private static final List<TransformativeStatusInstance> tsiList = new ArrayList<>();
 
     @Inject(
-            method = "finishUsing",
+            method = "finishUsingItem",
             at = @At("HEAD")
     )
-    private void shape_shifter_curse$onFinishUsing(World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClient && user instanceof ServerPlayerEntity player) {
+    private void shape_shifter_curse$onFinishUsing(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
+        if (!world.isClientSide && user instanceof ServerPlayer player) {
             ItemStack stack = (ItemStack) (Object) this;
             if(stack.getItem() == Items.GOLDEN_APPLE || stack.getItem() == Items.ENCHANTED_GOLDEN_APPLE){
                 IForm currentForm = FormUtils.getPlayerForm(player);
@@ -45,17 +45,17 @@ public abstract class ItemStackMixin {
                     ShapeShifterCurseFabric.ON_USE_GOLDEN_APPLE.trigger(player);
                 }
                 if (EffectManager.hasTransformativeEffect(player)) {
-                    player.sendMessage(Text.translatable("info.shape-shifter-curse.transformative_effect_cure").formatted(Formatting.YELLOW));
+                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformative_effect_cure").withStyle(ChatFormatting.YELLOW));
                     EffectManager.clearTransformativeEffect(player);
                 }
             }
             else if (stack.getItem() == Items.MILK_BUCKET) {
                 if (EffectManager.hasTransformativeEffect(player)) {
-                    player.sendMessage(Text.translatable("info.shape-shifter-curse.milk_cannot_remove_effect").formatted(Formatting.YELLOW));
+                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.milk_cannot_remove_effect").withStyle(ChatFormatting.YELLOW));
                     tsiList.clear();
-                    Iterator<StatusEffectInstance> iterator = player.getStatusEffects().iterator();
+                    Iterator<MobEffectInstance> iterator = player.getActiveEffects().iterator();
                     while (iterator.hasNext()) {
-                        StatusEffectInstance effectInstance = iterator.next();
+                        MobEffectInstance effectInstance = iterator.next();
                         if (effectInstance instanceof TransformativeStatusInstance tsi) {
                             tsiList.add(tsi);
                             iterator.remove();
@@ -66,28 +66,28 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @Inject(method = "finishUsing", at = @At("TAIL"))
-    private void shape_shifter_curse$onFinishUsingEnd(World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClient && user instanceof ServerPlayerEntity player) {
+    @Inject(method = "finishUsingItem", at = @At("TAIL"))
+    private void shape_shifter_curse$onFinishUsingEnd(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
+        if (!world.isClientSide && user instanceof ServerPlayer player) {
             if (!tsiList.isEmpty()) {
-                tsiList.forEach(tsi -> player.getActiveStatusEffects().put(tsi.getEffectType(), tsi));
+                tsiList.forEach(tsi -> player.getActiveEffectsMap().put(tsi.getEffect(), tsi));
                 tsiList.clear();
             }
         }
     }
 
-	@Inject(method = "getTooltip", at = @At("TAIL"))
-	private void shape_shifter_curse$getTooltip(TooltipContext context, PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir) {
+	@Inject(method = "getTooltipLines", at = @At("TAIL"))
+	private void shape_shifter_curse$getTooltip(TooltipContext context, Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir) {
 		ItemStack realThis = (ItemStack) (Object) this;
-		List<Text> tooltip = cir.getReturnValue();
-		var nbt = realThis.get(net.minecraft.component.DataComponentTypes.CUSTOM_DATA);
+		List<Component> tooltip = cir.getReturnValue();
+		var nbt = realThis.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 		if (nbt != null) {
-			var compound = nbt.copyNbt();
+			var compound = nbt.copyTag();
 			if (compound.contains("MorphScaleItem") && compound.getBoolean("MorphScaleItem")) {
-				tooltip.add(Text.translatable("tooltip.shape_shifter_curse.morphscale_item").formatted(Formatting.GRAY));
+				tooltip.add(Component.translatable("tooltip.shape_shifter_curse.morphscale_item").withStyle(ChatFormatting.GRAY));
 			}
 			if (compound.contains(IsMorphScaleItemCondition.IsMorphScaleFoodTagName) && compound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleFoodTagName)) {
-				tooltip.add(Text.translatable("tooltip.shape_shifter_curse.morphscale_food").formatted(Formatting.GRAY));
+				tooltip.add(Component.translatable("tooltip.shape_shifter_curse.morphscale_food").withStyle(ChatFormatting.GRAY));
 			}
 		}
 	}

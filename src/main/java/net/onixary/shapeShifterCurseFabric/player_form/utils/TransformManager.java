@@ -5,11 +5,11 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 
 public class TransformManager {
     public static class PlayerTransformData {
-        public @NotNull PlayerEntity player;
+        public @NotNull Player player;
         public int transformTimer = -1;
         public @Nullable IForm transformStartForm = null;
         public @Nullable IForm transformEndForm = null;
@@ -48,18 +48,18 @@ public class TransformManager {
         transformTimer = -1;
     }
 
-    private static PlayerTransformData getPlayerData(PlayerEntity player) {
-        PlayerTransformData data = playerData.get(player.getUuid());
+    private static PlayerTransformData getPlayerData(Player player) {
+        PlayerTransformData data = playerData.get(player.getUUID());
         if (data == null) {
             data = new PlayerTransformData();
             data.player = player;
-            playerData.put(player.getUuid(), data);
+            playerData.put(player.getUUID(), data);
         }
         return data;
     }
 
-    public static boolean startTransform(PlayerEntity player, IForm form, @Nullable Consumer<PlayerTransformData> onTransformComplete) {
-        if (form.isPlayerForm(player) || !(player instanceof ServerPlayerEntity serverPlayerEntity)) {
+    public static boolean startTransform(Player player, IForm form, @Nullable Consumer<PlayerTransformData> onTransformComplete) {
+        if (form.isPlayerForm(player) || !(player instanceof ServerPlayer serverPlayerEntity)) {
             return true;
         }
         if (!FormUtils.isFormCanUse(player, form)) {
@@ -84,7 +84,7 @@ public class TransformManager {
         return true;
     }
 
-    public static boolean forceTransform(PlayerEntity player, IForm form, boolean immediately) {
+    public static boolean forceTransform(Player player, IForm form, boolean immediately) {
         FormUtils.clearPlayerFormHistory(player);
         if (immediately) {
             return immediatelyTransform(player, form);
@@ -92,8 +92,8 @@ public class TransformManager {
         return startTransform(player, form, null);
     }
 
-    public static boolean immediatelyTransform(PlayerEntity player, IForm form) {
-        if (form.isPlayerForm(player) || !(player instanceof ServerPlayerEntity serverPlayerEntity)) {
+    public static boolean immediatelyTransform(Player player, IForm form) {
+        if (form.isPlayerForm(player) || !(player instanceof ServerPlayer serverPlayerEntity)) {
             return true;
         }
         if (!FormUtils.isFormCanUse(player, form)) {
@@ -111,7 +111,7 @@ public class TransformManager {
         return true;
     }
 
-    private static void setForm(PlayerEntity player) {
+    private static void setForm(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         component.transformTargetForm = null;
         PlayerTransformData data = getPlayerData(player);
@@ -127,32 +127,32 @@ public class TransformManager {
         sendClientFirstPersonReset(player);
     }
 
-    private static void startPlayerTransform(PlayerEntity player) {
-        if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+    private static void startPlayerTransform(Player player) {
+        if (player instanceof ServerPlayer serverPlayerEntity) {
             PlayerTransformData data = getPlayerData(player);
             IForm nowForm = data.transformStartForm;
             IForm targetForm = data.transformEndForm;
             ModPacketsS2CServer.sendTransformState(serverPlayerEntity, true, nowForm == null ? null : nowForm.getFormID(), targetForm == null ? null : targetForm.getFormID());
-            InstinctUtils.playerInstinctLock.put(player.getUuid(), true);
+            InstinctUtils.playerInstinctLock.put(player.getUUID(), true);
             PlayerTransformEffectManager.applyStartTransformEffect(serverPlayerEntity, StaticParams.TRANSFORM_FX_DURATION_IN);
         }
     }
 
-    private static void middlePlayerTransform(PlayerEntity player) {
+    private static void middlePlayerTransform(Player player) {
         // PlayerTransformData data = getPlayerData(player);
         setForm(player);
-        if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+        if (player instanceof ServerPlayer serverPlayerEntity) {
             PlayerTransformEffectManager.applyEndTransformEffect(serverPlayerEntity, StaticParams.TRANSFORM_FX_DURATION_OUT);
         }
     }
 
-    private static void endPlayerTransform(PlayerEntity player) {
-        if (player instanceof ServerPlayerEntity serverPlayerEntity) {
+    private static void endPlayerTransform(Player player) {
+        if (player instanceof ServerPlayer serverPlayerEntity) {
             PlayerTransformData data = getPlayerData(player);
             IForm nowForm = data.transformStartForm;
             IForm targetForm = data.transformEndForm;
             ModPacketsS2CServer.sendTransformState(serverPlayerEntity, false, nowForm == null ? null : nowForm.getFormID(), targetForm == null ? null : targetForm.getFormID());
-            InstinctUtils.playerInstinctLock.put(player.getUuid(), false);
+            InstinctUtils.playerInstinctLock.put(player.getUUID(), false);
             PlayerTransformEffectManager.applyFinaleTransformEffect(serverPlayerEntity, 5);
             if (data.onTransformComplete != null) {
                 data.onTransformComplete.accept(data);
@@ -184,7 +184,7 @@ public class TransformManager {
     }
 
     public static void serverTick(MinecraftServer server) {
-        for (PlayerEntity player : server.getPlayerManager().getPlayerList()) {
+        for (Player player : server.getPlayerList().getPlayers()) {
             IForm form = PlayerFormComponent.COMPONENT.get(player).transformTargetForm;
             PlayerTransformData data = getPlayerData(player);
             int timer = data.transformTimer;
@@ -234,11 +234,11 @@ public class TransformManager {
         }
     }
 
-    private static void sendClientFirstPersonReset(PlayerEntity player) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof ClientPlayerEntity) {
+    private static void sendClientFirstPersonReset(Player player) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof LocalPlayer) {
             executeClientFirstPersonReset();
-        } else if (player instanceof ServerPlayerEntity serverPlayerEntity) {
-            PacketByteBuf buf = PacketByteBufs.create();
+        } else if (player instanceof ServerPlayer serverPlayerEntity) {
+            FriendlyByteBuf buf = PacketByteBufs.create();
             ServerPlayNetworking.send(serverPlayerEntity, new BytePayload(BytePayload.id(ModPackets.RESET_FIRST_PERSON),  buf));
         }
     }

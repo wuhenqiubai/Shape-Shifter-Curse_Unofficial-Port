@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.player_form.skin;
 
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
+import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
-import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 
 import java.util.OptionalInt;
 
@@ -74,7 +74,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     }
 
     @Override
-    public void readFromNbt(NbtCompound tag, RegistryWrapper.@NotNull WrapperLookup registryLookup) {
+    public void readFromNbt(CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         // 直接往里面加了 反正在玩家进服务器后会同步 理论上连持久化都没必要
         try {
             this.keepOriginalSkin = tag.getBoolean("KeepOriginalSkin");
@@ -93,7 +93,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     }
 
     @Override
-    public void writeToNbt(NbtCompound tag, RegistryWrapper.@NotNull WrapperLookup registryLookup) {
+    public void writeToNbt(CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         tag.putBoolean("KeepOriginalSkin", this.keepOriginalSkin);
         tag.putBoolean("EnableFormColor", this.enableFormColor);
         tag.putInt("PrimaryColor", FormTextureUtils.ABGR2RGBA(this.formColor.getPrimaryColor()));

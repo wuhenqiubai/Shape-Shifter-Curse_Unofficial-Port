@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
@@ -32,15 +32,15 @@ public class RushJumpAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
-        if (Math.abs(player.getVelocity().z) > 0.15 || Math.abs(player.getVelocity().x) > 0.15) {
-            if (player.isSneaking()) {
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
+        if (Math.abs(player.getDeltaMovement().z) > 0.15 || Math.abs(player.getDeltaMovement().x) > 0.15) {
+            if (player.isShiftKeyDown()) {
                 return sneakRushJumpAnimationHolder;
             } else {
                 return rushJumpAnimationHolder;
             }
         } else {
-            if (player.isSneaking()) {
+            if (player.isShiftKeyDown()) {
                 return sneakAnimationHolder;
             } else {
                 return animationHolder;
@@ -49,7 +49,7 @@ public class RushJumpAnimController extends AbstractAnimStateControllerDP {
     }
 
     @Override
-    public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
         this.animationHolder = this.animationHolderData.build();
         this.sneakAnimationHolder = this.sneakAnimationHolderData.build();
         this.rushJumpAnimationHolder = this.rushJumpAnimationHolderData.build();

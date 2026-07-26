@@ -1,26 +1,26 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.component.type.FoodComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 
 import java.util.List;
 
 public class PowerfulCatalyst extends Item {
-    public PowerfulCatalyst(Settings settings) {
+    public PowerfulCatalyst(Properties settings) {
         super(settings
-                .maxCount(16)
+                .stacksTo(16)
                 .food(
-                        new FoodComponent.Builder()
+                        new FoodProperties.Builder()
                                 .nutrition(2)
                                 .saturationModifier(0.3f)
                                 .alwaysEdible()
@@ -29,20 +29,20 @@ public class PowerfulCatalyst extends Item {
     }
 
     @Override
-    public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
-        if (user.canConsume(true)) {
-            user.setCurrentHand(hand);
-            return TypedActionResult.consume(user.getStackInHand(hand));
+    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user.canEat(true)) {
+            user.startUsingItem(hand);
+            return InteractionResultHolder.consume(user.getItemInHand(hand));
         }
-        return TypedActionResult.fail(user.getStackInHand(hand));
+        return InteractionResultHolder.fail(user.getItemInHand(hand));
     }
 
     @Override
-    public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
+    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         // 实际效果在ItemStackMixin的注入中进行处理
-        super.finishUsing(stack, world, user);
-        if (user instanceof PlayerEntity playerEntity) {
-            if (playerEntity.getAbilities().creativeMode) {
+        super.finishUsingItem(stack, world, user);
+        if (user instanceof Player playerEntity) {
+            if (playerEntity.getAbilities().instabuild) {
                 return stack;
             }
         }
@@ -50,9 +50,9 @@ public class PowerfulCatalyst extends Item {
         if (stack.isEmpty()) {
             return new ItemStack(Items.BOWL);
         } else {
-            if (user instanceof PlayerEntity playerEntity) {
-                if (!playerEntity.getInventory().insertStack(new ItemStack(Items.BOWL))) {
-                    playerEntity.dropItem(new ItemStack(Items.BOWL), false);
+            if (user instanceof Player playerEntity) {
+                if (!playerEntity.getInventory().add(new ItemStack(Items.BOWL))) {
+                    playerEntity.drop(new ItemStack(Items.BOWL), false);
                 }
             }
             return stack;
@@ -60,7 +60,7 @@ public class PowerfulCatalyst extends Item {
     }
 
     @Override
-    public void appendTooltip(ItemStack stack, Item.TooltipContext context, List<Text> tooltip, TooltipType type) {
-        tooltip.add(Text.translatable("item.shape-shifter-curse.powerful_catalyst.tooltip").formatted(Formatting.LIGHT_PURPLE));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.powerful_catalyst.tooltip").withStyle(ChatFormatting.LIGHT_PURPLE));
     }
 }

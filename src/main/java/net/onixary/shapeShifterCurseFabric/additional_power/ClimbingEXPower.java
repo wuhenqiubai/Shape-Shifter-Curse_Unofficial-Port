@@ -6,8 +6,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Predicate;
@@ -34,7 +34,7 @@ public class ClimbingEXPower extends ClimbingPower {
             return false;
         }
         if (this.holdingCondition == null) {
-            return entity.isSneaking();
+            return entity.isShiftKeyDown();
         }
         return this.holdingCondition.test(this.entity);
     }

@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 
 public interface NeedCheckUsableForm {
-    default boolean IsPlayerCanUse(PlayerEntity player) {
+    default boolean IsPlayerCanUse(Player player) {
         return true;
     }
 }

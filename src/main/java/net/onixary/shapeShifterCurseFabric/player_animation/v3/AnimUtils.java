@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.easing.EasingType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.EmptyController;
@@ -15,23 +15,23 @@ import java.util.function.Function;
 
 public class AnimUtils {
     public static class AnimationHolderData {
-        public Identifier AnimID;
+        public ResourceLocation AnimID;
         public float Speed;
         public int Fade;
         public @Nullable EasingType Easing;
         public boolean skipFade;
         private @Nullable AnimationHolder animationHolder;
-        public AnimationHolderData(Identifier AnimID, float Speed, int Fade, @Nullable EasingType easing) {
+        public AnimationHolderData(ResourceLocation AnimID, float Speed, int Fade, @Nullable EasingType easing) {
             this.AnimID = AnimID;
             this.Speed = Speed;
             this.Fade = Fade;
             this.Easing = easing;
         }
-        public AnimationHolderData(Identifier AnimID, float Speed, int Fade) {
+        public AnimationHolderData(ResourceLocation AnimID, float Speed, int Fade) {
             this(AnimID, Speed, Fade, null);
         }
 
-        public AnimationHolderData setAnimID(Identifier AnimID) {
+        public AnimationHolderData setAnimID(ResourceLocation AnimID) {
             this.AnimID = AnimID;
             return this;
         }
@@ -55,11 +55,11 @@ public class AnimUtils {
             return new AnimationHolderData(AnimID, Speed, Fade);
         }
 
-        public AnimationHolderData(Identifier AnimID, float Speed) {
+        public AnimationHolderData(ResourceLocation AnimID, float Speed) {
             this(AnimID, Speed, 2);
         }
 
-        public AnimationHolderData(Identifier AnimID) {
+        public AnimationHolderData(ResourceLocation AnimID) {
             this(AnimID, 1.0f, 2);
         }
 
@@ -93,7 +93,7 @@ public class AnimUtils {
 
     public static @NotNull AnimationHolderData readAnim(JsonObject jsonData) {
         try {
-            Identifier AnimID = Identifier.tryParse(jsonData.get("animID").getAsString());
+            ResourceLocation AnimID = ResourceLocation.tryParse(jsonData.get("animID").getAsString());
             float Speed = 1.0f;
             int Fade = 2;
             if (jsonData.has("speed")) {
@@ -133,7 +133,7 @@ public class AnimUtils {
 
     public static @NotNull AbstractAnimStateController readController(JsonObject jsonData) {
         try {
-            Identifier ControllerType = Identifier.tryParse(jsonData.get(ANIM_CONTROLLER_TYPE_KEY).getAsString());
+            ResourceLocation ControllerType = ResourceLocation.tryParse(jsonData.get(ANIM_CONTROLLER_TYPE_KEY).getAsString());
             Function<JsonObject, AbstractAnimStateController> controllerFactory = AnimRegistry.getAnimStateControllerSupplier(ControllerType);
             if (controllerFactory != null) {
                 return controllerFactory.apply(jsonData);
@@ -148,23 +148,23 @@ public class AnimUtils {
     }
 
     public enum AnimationSendSideType {
-        ONLY_CLIENT((player -> player.getWorld().isClient)),
-        ONLY_SERVER((player -> !player.getWorld().isClient)),
+        ONLY_CLIENT((player -> player.level().isClientSide)),
+        ONLY_SERVER((player -> !player.level().isClientSide)),
         NONE((player -> false)),
         BOTH_SIDE((player -> true));
 
-        private final Function<PlayerEntity, Boolean> canPlayAnimCondition;
+        private final Function<Player, Boolean> canPlayAnimCondition;
 
-        public boolean canPlayAnim(PlayerEntity player) {
+        public boolean canPlayAnim(Player player) {
             return this.canPlayAnimCondition.apply(player);
         }
 
-        AnimationSendSideType(Function<PlayerEntity, Boolean> canPlayAnimCondition) {
+        AnimationSendSideType(Function<Player, Boolean> canPlayAnimCondition) {
             this.canPlayAnimCondition = canPlayAnimCondition;
         }
     }
 
-    public static boolean playPowerAnimWithTime(PlayerEntity playerEntity, Identifier powerAnimID, int animDuration, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimWithTime(Player playerEntity, ResourceLocation powerAnimID, int animDuration, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -176,7 +176,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean playPowerAnimWithCount(PlayerEntity playerEntity, Identifier powerAnimID, int animCount, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimWithCount(Player playerEntity, ResourceLocation powerAnimID, int animCount, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -188,7 +188,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean playPowerAnimLoop(PlayerEntity playerEntity, Identifier powerAnimID, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimLoop(Player playerEntity, ResourceLocation powerAnimID, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -200,7 +200,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean stopPowerAnim(PlayerEntity playerEntity, AnimationSendSideType sendSideType) {
+    public static boolean stopPowerAnim(Player playerEntity, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -212,17 +212,17 @@ public class AnimUtils {
         }
     }
 
-    public static boolean stopPowerAnimWithIDs(PlayerEntity playerEntity, AnimationSendSideType sendSideType, List<Identifier> powerAnimIDs) {
-        return stopPowerAnimWithIDs(playerEntity, sendSideType, powerAnimIDs.toArray(new Identifier[0]));
+    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, List<ResourceLocation> powerAnimIDs) {
+        return stopPowerAnimWithIDs(playerEntity, sendSideType, powerAnimIDs.toArray(new ResourceLocation[0]));
     }
 
-    public static boolean stopPowerAnimWithIDs(PlayerEntity playerEntity, AnimationSendSideType sendSideType, Identifier... powerAnimIDs) {
+    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, ResourceLocation... powerAnimIDs) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
         if (playerEntity instanceof IPlayerAnimController playerAnimController) {
-            @Nullable Identifier nowAnimID = playerAnimController.shape_shifter_curse$getPowerAnimationID();
-            for (Identifier powerAnimID : powerAnimIDs) {
+            @Nullable ResourceLocation nowAnimID = playerAnimController.shape_shifter_curse$getPowerAnimationID();
+            for (ResourceLocation powerAnimID : powerAnimIDs) {
                 if (powerAnimID.equals(nowAnimID)) {
                     stopPowerAnim(playerEntity, sendSideType);
                     return true;

@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.client.option.Perspective;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.entity.PlayerEntityRenderer;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.onixary.shapeShifterCurseFabric.additional_power.DisablePlayerRotationPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -16,32 +16,32 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
-@Mixin(value = PlayerEntityRenderer.class, priority = 100)
+@Mixin(value = PlayerRenderer.class, priority = 100)
 public class DisablePlayerRotationRendererMixin {
 
     @Inject(
-            method = "render(Lnet/minecraft/client/network/AbstractClientPlayerEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+            method = "render(Lnet/minecraft/client/player/AbstractClientPlayer;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
             at = @At("HEAD")
     )
     private void lockRotationToNorth(
-            AbstractClientPlayerEntity player,
+            AbstractClientPlayer player,
             float yaw,
             float tickDelta,
-            MatrixStack matrices,
-            VertexConsumerProvider vertexConsumers,
+            PoseStack matrices,
+            MultiBufferSource vertexConsumers,
             int light,
             CallbackInfo ci
     ) {
-        if (MinecraftClient.getInstance().options.getPerspective() == Perspective.FIRST_PERSON) {
+        if (Minecraft.getInstance().options.getCameraType() == CameraType.FIRST_PERSON) {
             return;
         }
 
         if (PowerHolderComponent.hasPower(player, DisablePlayerRotationPower.class)) {
             // Lock body and head facing north (yaw = 180 in Minecraft coordinate system)
-            player.prevBodyYaw = 180.0F;
-            player.bodyYaw = 180.0F;
-            player.prevHeadYaw = 180.0F;
-            player.headYaw = 180.0F;
+            player.yBodyRotO = 180.0F;
+            player.yBodyRot = 180.0F;
+            player.yHeadRotO = 180.0F;
+            player.yHeadRot = 180.0F;
         }
     }
 }

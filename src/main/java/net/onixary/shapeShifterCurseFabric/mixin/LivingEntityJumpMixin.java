@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.additional_power.TripleJumpPower;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,14 +16,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class LivingEntityJumpMixin implements IJumpController {
 
     // 注入到 jump() 方法的开头，用于更新 Power 的状态
-    @Inject(method = "jump", at = @At("HEAD"))
+    @Inject(method = "jumpFromGround", at = @At("HEAD"))
     private void onJump(CallbackInfo ci) {
         LivingEntity entity = (LivingEntity) (Object) this;
         // 在计算跳跃速度之前，先让 Power 更新它的内部状态（如跳跃次数）
         PowerHolderComponent.getPowers(entity, TripleJumpPower.class).forEach(TripleJumpPower::onJump);
     }
 
-    @ModifyReturnValue(method = "getJumpVelocity", at = @At("RETURN"))
+    @ModifyReturnValue(method = "getJumpPower", at = @At("RETURN"))
     private float modifyJumpVelocity(float originalVelocity) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
@@ -45,7 +45,7 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 .orElse(originalVelocity);
     }
 
-    @Inject(method = "getJumpVelocity", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getJumpPower", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
         if (this.noJumpTick > 0) {
             cir.setReturnValue(0.0F);

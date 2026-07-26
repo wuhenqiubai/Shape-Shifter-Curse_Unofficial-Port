@@ -1,27 +1,27 @@
 package net.onixary.shapeShifterCurseFabric.status_effects.other_effects;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 
-public class ImmobilityEffect extends StatusEffect {
+public class ImmobilityEffect extends MobEffect {
     public ImmobilityEffect() {
-        super(StatusEffectCategory.HARMFUL, 0x000000); // Color can be changed as needed
+        super(MobEffectCategory.HARMFUL, 0x000000); // Color can be changed as needed
     }
 
     @Override
-    public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
-        if (entity instanceof PlayerEntity){
-            double speedY = entity.getVelocity().y;
-            entity.setVelocity(0, speedY, 0);
-            entity.velocityModified = true;
+    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+        if (entity instanceof Player){
+            double speedY = entity.getDeltaMovement().y;
+            entity.setDeltaMovement(0, speedY, 0);
+            entity.hurtMarked = true;
         }
         return true;
     }
 
     @Override
-    public boolean canApplyUpdateEffect(int duration, int amplifier) {
+    public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
         return true; // Apply effect every tick
     }
 

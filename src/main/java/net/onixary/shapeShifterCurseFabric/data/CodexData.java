@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.data;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
@@ -20,40 +20,40 @@ public class CodexData {
     }
     // static texts
     // headers
-    public static final Text headerStatus = Text.translatable("codex.header.status");
-    public static final Text headerEquip = Text.translatable("codex.header.equip");
-    public static final Text headerAppearance = Text.translatable("codex.header.appearance");
-    public static final Text headerPros = Text.translatable("codex.header.pros");
-    public static final Text headerCons = Text.translatable("codex.header.cons");
-    public static final Text headerInstincts = Text.translatable("codex.header.instincts");
+    public static final Component headerStatus = Component.translatable("codex.header.status");
+    public static final Component headerEquip = Component.translatable("codex.header.equip");
+    public static final Component headerAppearance = Component.translatable("codex.header.appearance");
+    public static final Component headerPros = Component.translatable("codex.header.pros");
+    public static final Component headerCons = Component.translatable("codex.header.cons");
+    public static final Component headerInstincts = Component.translatable("codex.header.instincts");
     // status
-    private static final Text statusNormal = Text.translatable("codex.status.normal");
-    private static final Text statusInfected = Text.translatable("codex.status.infected");
-    private static final Text statusBeforeMoon = Text.translatable("codex.status.before_moon");
-    private static final Text statusUnderMoon = Text.translatable("codex.status.under_moon");
+    private static final Component statusNormal = Component.translatable("codex.status.normal");
+    private static final Component statusInfected = Component.translatable("codex.status.infected");
+    private static final Component statusBeforeMoon = Component.translatable("codex.status.before_moon");
+    private static final Component statusUnderMoon = Component.translatable("codex.status.under_moon");
     // description text before content
-    private static final Text descAppearance_normal = Text.translatable("codex.desc.appearance_normal");
-    private static final Text descPros_normal = Text.translatable("codex.desc.pros_normal");
-    private static final Text descCons_normal = Text.translatable("codex.desc.cons_normal");
-    private static final Text descInstincts_normal = Text.translatable("codex.desc.instincts_normal");
-    private static final Text descAppearance_0 = Text.translatable("codex.desc.appearance_0");
-    private static final Text descPros_0 = Text.translatable("codex.desc.pros_0");
-    private static final Text descCons_0 = Text.translatable("codex.desc.cons_0");
-    private static final Text descInstincts_0 = Text.translatable("codex.desc.instincts_0");
-    private static final Text descAppearance_1 = Text.translatable("codex.desc.appearance_1");
-    private static final Text descPros_1 = Text.translatable("codex.desc.pros_1");
-    private static final Text descCons_1 = Text.translatable("codex.desc.cons_1");
-    private static final Text descInstincts_1 = Text.translatable("codex.desc.instincts_1");
-    private static final Text descAppearance_2 = Text.translatable("codex.desc.appearance_2");
-    private static final Text descPros_2 = Text.translatable("codex.desc.pros_2");
-    private static final Text descCons_2 = Text.translatable("codex.desc.cons_2");
-    private static final Text descInstincts_2 = Text.translatable("codex.desc.instincts_2");
-    private static final Text descAppearance_3 = Text.translatable("codex.desc.appearance_3");
-    private static final Text descPros_3 = Text.translatable("codex.desc.pros_3");
-    private static final Text descCons_3 = Text.translatable("codex.desc.cons_3");
-    private static final Text descInstincts_3 = Text.translatable("codex.desc.instincts_3");
+    private static final Component descAppearance_normal = Component.translatable("codex.desc.appearance_normal");
+    private static final Component descPros_normal = Component.translatable("codex.desc.pros_normal");
+    private static final Component descCons_normal = Component.translatable("codex.desc.cons_normal");
+    private static final Component descInstincts_normal = Component.translatable("codex.desc.instincts_normal");
+    private static final Component descAppearance_0 = Component.translatable("codex.desc.appearance_0");
+    private static final Component descPros_0 = Component.translatable("codex.desc.pros_0");
+    private static final Component descCons_0 = Component.translatable("codex.desc.cons_0");
+    private static final Component descInstincts_0 = Component.translatable("codex.desc.instincts_0");
+    private static final Component descAppearance_1 = Component.translatable("codex.desc.appearance_1");
+    private static final Component descPros_1 = Component.translatable("codex.desc.pros_1");
+    private static final Component descCons_1 = Component.translatable("codex.desc.cons_1");
+    private static final Component descInstincts_1 = Component.translatable("codex.desc.instincts_1");
+    private static final Component descAppearance_2 = Component.translatable("codex.desc.appearance_2");
+    private static final Component descPros_2 = Component.translatable("codex.desc.pros_2");
+    private static final Component descCons_2 = Component.translatable("codex.desc.cons_2");
+    private static final Component descInstincts_2 = Component.translatable("codex.desc.instincts_2");
+    private static final Component descAppearance_3 = Component.translatable("codex.desc.appearance_3");
+    private static final Component descPros_3 = Component.translatable("codex.desc.pros_3");
+    private static final Component descCons_3 = Component.translatable("codex.desc.cons_3");
+    private static final Component descInstincts_3 = Component.translatable("codex.desc.instincts_3");
     
-    public static Text getPlayerStatusText(PlayerEntity player){
+    public static Component getPlayerStatusText(Player player){
         // 根据当前角色状态与环境返回对应的状态文本
         StringBuilder statusTextBuilder = new StringBuilder();
         boolean hasAnyStatus = false;
@@ -79,8 +79,8 @@ public class CodexData {
             hasAnyStatus = true;
         }
 
-        if(CursedMoon.isCursedMoonDay(player.getWorld())){
-            if(CursedMoon.isNight(player.getWorld())){
+        if(CursedMoon.isCursedMoonDay(player.level())){
+            if(CursedMoon.isNight(player.level())){
                 statusTextBuilder.append(statusUnderMoon.getString());
                 hasAnyStatus = true;
             }
@@ -94,10 +94,10 @@ public class CodexData {
             statusTextBuilder.append(statusNormal.getString());
         }
 
-        return Text.literal(statusTextBuilder.toString());
+        return Component.literal(statusTextBuilder.toString());
     }
 
-    public static Text getDescText(ContentType type, PlayerEntity player) {
+    public static Component getDescText(ContentType type, Player player) {
         int tier = FormUtils.getPlayerForm(player).getFormTier();
         // 什么时候也得把 本能Desc 改一下
         switch (type) {
@@ -108,14 +108,14 @@ public class CodexData {
                     case 2 -> descInstincts_1;
                     case 3 -> descInstincts_2;
                     case 4 -> descInstincts_3;
-                    default -> Text.empty();
+                    default -> Component.empty();
                 };
             }
         }
-        return Text.empty();
+        return Component.empty();
     }
 
-    public static Text getContentText(ContentType type, PlayerEntity player){
+    public static Component getContentText(ContentType type, Player player){
         return FormUtils.getPlayerForm(player).getContentText(type);
     }
 }

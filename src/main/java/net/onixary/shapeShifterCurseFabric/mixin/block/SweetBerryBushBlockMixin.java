@@ -3,13 +3,13 @@ package net.onixary.shapeShifterCurseFabric.mixin.block;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SweetBerryBushBlock;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.SweetBerryBushBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.additional_power.PreventBerryEffectPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,13 +20,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(value = SweetBerryBushBlock.class, priority = 1001)
 public abstract class SweetBerryBushBlockMixin {
     @Inject(
-            method = "onEntityCollision",
+            method = "entityInside",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"),
+                    target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
             cancellable = true
     )
-    private void preventBerryDamage(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci) {
-        if (entity instanceof PlayerEntity player) {
+    private void preventBerryDamage(BlockState state, Level world, BlockPos pos, Entity entity, CallbackInfo ci) {
+        if (entity instanceof Player player) {
             if (PowerHolderComponent.hasPower(player, PreventBerryEffectPower.class)) {
                 ci.cancel();
             }
@@ -34,16 +34,16 @@ public abstract class SweetBerryBushBlockMixin {
     }
 
     @WrapOperation(
-            method = "onEntityCollision",
+            method = "entityInside",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/entity/Entity;slowMovement(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Vec3d;)V"
+                    target = "Lnet/minecraft/world/entity/Entity;makeStuckInBlock(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/phys/Vec3;)V"
             )
     )
-    private void preventBerrySlowdown(Entity entity, BlockState state, Vec3d multiplier, Operation<Void> original) {
+    private void preventBerrySlowdown(Entity entity, BlockState state, Vec3 multiplier, Operation<Void> original) {
         // 如果是玩家则跳过减速
-        if ((entity instanceof PlayerEntity)) {
-            if (!PowerHolderComponent.hasPower((PlayerEntity)entity, PreventBerryEffectPower.class)) {
+        if ((entity instanceof Player)) {
+            if (!PowerHolderComponent.hasPower((Player)entity, PreventBerryEffectPower.class)) {
                 original.call(entity, state, multiplier);
             }
         }

@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
@@ -15,10 +15,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController {
     @Unique
-    private Identifier powerAnimationID = null;
+    private ResourceLocation powerAnimationID = null;
 
     @Unique
     private int powerAnimationCount = -1;  // 在客户端上处理 服务器上为初始值
@@ -36,7 +36,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     private final int updateAdditionalTime = 20;  // 用于无限时长的动画
 
     @Unique
-    private void setAnimation(@Nullable Identifier id, int count, int time, Boolean isAnimationLoop)  {
+    private void setAnimation(@Nullable ResourceLocation id, int count, int time, Boolean isAnimationLoop)  {
         this.powerAnimationID = id;
         this.powerAnimationCount = count;
         this.powerAnimationTime = time;
@@ -53,7 +53,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
         if (this.powerAnimationID == null) {
             return false;
         }
-        if (((PlayerEntity) (Object) this).age % updateRate == 0) {
+        if (((Player) (Object) this).tickCount % updateRate == 0) {
             return this.isAnimationLoop || this.powerAnimationTime > 0;
         }
         return false;
@@ -61,7 +61,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     @Unique
     private void syncToOtherPlayers() {
-        if ((Object)this instanceof ServerPlayerEntity serverPlayerEntity) {
+        if ((Object)this instanceof ServerPlayer serverPlayerEntity) {
             if (this.isAnimationLoop) {
                 ModPacketsS2CServer.sendPowerAnimationDataToNearPlayer(serverPlayerEntity, this.powerAnimationID, -1, updateRate + updateAdditionalTime);
             } else {
@@ -77,7 +77,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     // 为带同步的设置动画 其他和setAnimation一样
     @Unique
-    private void setAnimationOnServer(@Nullable Identifier id, int count, int time, Boolean isAnimationLoop) {
+    private void setAnimationOnServer(@Nullable ResourceLocation id, int count, int time, Boolean isAnimationLoop) {
         this.setAnimation(id, count, time, isAnimationLoop);
         this.syncToOtherPlayers();
     }
@@ -88,7 +88,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     }
 
     @Override
-    public @Nullable Identifier shape_shifter_curse$getPowerAnimationID() {
+    public @Nullable ResourceLocation shape_shifter_curse$getPowerAnimationID() {
         return this.powerAnimationID;
     }
 
@@ -104,9 +104,9 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     }
 
     @Override
-    public void shape_shifter_curse$playAnimationWithCount(@NotNull Identifier id, int PlayCount) {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
-        if (realThis.getWorld().isClient) {
+    public void shape_shifter_curse$playAnimationWithCount(@NotNull ResourceLocation id, int PlayCount) {
+        Player realThis = (Player) (Object) this;
+        if (realThis.level().isClientSide) {
             ModPacketsS2C.sendPowerAnimationDataToServer(id, PlayCount, -1);
             return;
         }
@@ -116,9 +116,9 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     }
 
     @Override
-    public void shape_shifter_curse$playAnimationWithTime(@NotNull Identifier id, int Time) {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
-        if (realThis.getWorld().isClient) {
+    public void shape_shifter_curse$playAnimationWithTime(@NotNull ResourceLocation id, int Time) {
+        Player realThis = (Player) (Object) this;
+        if (realThis.level().isClientSide) {
             ModPacketsS2C.sendPowerAnimationDataToServer(id, -1, Time);
             return;
         }
@@ -126,9 +126,9 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     }
 
     @Override
-    public void shape_shifter_curse$playAnimationLoop(@NotNull Identifier id) {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
-        if (realThis.getWorld().isClient) {
+    public void shape_shifter_curse$playAnimationLoop(@NotNull ResourceLocation id) {
+        Player realThis = (Player) (Object) this;
+        if (realThis.level().isClientSide) {
             ModPacketsS2C.sendPowerAnimationDataToServer(id, -1, -1);
             return;
         }
@@ -137,8 +137,8 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     @Override
     public void shape_shifter_curse$stopAnimation() {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
-        if (realThis.getWorld().isClient) {
+        Player realThis = (Player) (Object) this;
+        if (realThis.level().isClientSide) {
             ModPacketsS2C.sendPowerAnimationDataToServer(null, -1, -1);
             return;
         }
@@ -146,7 +146,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
     }
 
     @Override
-    public void shape_shifter_curse$animationDoneCallBack(@NotNull Identifier id) {
+    public void shape_shifter_curse$animationDoneCallBack(@NotNull ResourceLocation id) {
         if (this.powerAnimationID != null && this.powerAnimationID.equals(id)) {
             if (this.powerAnimationCount != 0) {
                 if (this.powerAnimationCount > 0) {
@@ -161,7 +161,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     // 仅在客户端调用 服务器不应该调用
     @Override
-    public void shape_shifter_curse$setAnimationData(@Nullable Identifier id, int count, int time) {
+    public void shape_shifter_curse$setAnimationData(@Nullable ResourceLocation id, int count, int time) {
         this.setAnimation(id, count, time, false);
     }
 
@@ -170,8 +170,8 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void init(CallbackInfo ci) {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
-        if (realThis.getWorld().isClient) {
+        Player realThis = (Player) (Object) this;
+        if (realThis.level().isClientSide) {
             this.isLoadedAnim = false;
         } else {
             this.isLoadedAnim = true;
@@ -180,7 +180,7 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void tick(CallbackInfo ci) {
-        PlayerEntity realThis = (PlayerEntity) (Object) this;
+        Player realThis = (Player) (Object) this;
         if (this.powerAnimationTime >= 0) {
             if (this.powerAnimationTime == 0) {
                 this.stopAnimation();
@@ -190,12 +190,12 @@ public abstract class PlayerAnimInterfaceMixin implements IPlayerAnimController 
         }
         // 为什么在这里加载而不是在init中加载呢? 在init加载会导致游戏崩溃 而且崩溃的信息也查不到这个Mixin
         if (!this.isLoadedAnim) {
-            if (realThis.getWorld().isClient) {
-                ModPacketsS2C.sendRequestPlayerAnimationData(realThis.getUuid());
+            if (realThis.level().isClientSide) {
+                ModPacketsS2C.sendRequestPlayerAnimationData(realThis.getUUID());
                 this.isLoadedAnim = true;
             }
         }
-        if (!realThis.getWorld().isClient) {
+        if (!realThis.level().isClientSide) {
             if (this.shouldAutoSyncToOtherPlayers()) {
                 this.syncToOtherPlayers();
             }

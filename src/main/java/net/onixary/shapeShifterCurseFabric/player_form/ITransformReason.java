@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.ExtraFunctionInterface;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 import org.jetbrains.annotations.Nullable;
@@ -25,26 +25,26 @@ public interface ITransformReason {
     }
 
 
-    public static ITransformReason create(Identifier reasonType, BiFunction<PlayerEntity, IForm, IForm> fNextForm, BiFunction<PlayerEntity, IForm, IForm> fPrevForm) {
+    public static ITransformReason create(ResourceLocation reasonType, BiFunction<Player, IForm, IForm> fNextForm, BiFunction<Player, IForm, IForm> fPrevForm) {
         return new ITransformReason() {
             @Override
-            public Identifier getReasonType() {
+            public ResourceLocation getReasonType() {
                 return reasonType;
             }
 
             @Override
-            public @Nullable IForm getFallBackNextForm(PlayerEntity player, IForm nowForm) {
+            public @Nullable IForm getFallBackNextForm(Player player, IForm nowForm) {
                 return fNextForm.apply(player, nowForm);
             }
 
             @Override
-            public @Nullable IForm getFallBackPrevForm(PlayerEntity player, IForm nowForm) {
+            public @Nullable IForm getFallBackPrevForm(Player player, IForm nowForm) {
                 return fPrevForm.apply(player, nowForm);
             }
         };
     }
 
-    public static <T> ITransformReasonWithArg<T> create(Identifier reasonType, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, PlayerEntity, IForm, IForm> fNextForm, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, PlayerEntity, IForm, IForm> fPrevForm, T arg) {
+    public static <T> ITransformReasonWithArg<T> create(ResourceLocation reasonType, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, Player, IForm, IForm> fNextForm, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, Player, IForm, IForm> fPrevForm, T arg) {
         return new ITransformReasonWithArg<T>() {
             private T storedArg = arg;
 
@@ -59,23 +59,23 @@ public interface ITransformReason {
             }
 
             @Override
-            public Identifier getReasonType() {
+            public ResourceLocation getReasonType() {
                 return reasonType;
             }
 
             @Override
-            public @Nullable IForm getFallBackNextForm(PlayerEntity player, IForm nowForm) {
+            public @Nullable IForm getFallBackNextForm(Player player, IForm nowForm) {
                 return fNextForm.apply(this, player, nowForm);
             }
 
             @Override
-            public @Nullable IForm getFallBackPrevForm(PlayerEntity player, IForm nowForm) {
+            public @Nullable IForm getFallBackPrevForm(Player player, IForm nowForm) {
                 return fPrevForm.apply(this, player, nowForm);
             }
         };
     }
 
-    public static final Identifier InstinctReasonID = ShapeShifterCurseFabric.identifier("instinct");
+    public static final ResourceLocation InstinctReasonID = ShapeShifterCurseFabric.identifier("instinct");
     public static final ITransformReason Instinct = create(InstinctReasonID,
             (player, nowForm) -> {
                 IFormGroup group = nowForm.getFormGroup();
@@ -107,7 +107,7 @@ public interface ITransformReason {
                 return result == null ? nowForm : result;
             }
     );
-    public static final Identifier CursedMoonReasonID = ShapeShifterCurseFabric.identifier("cursed_moon");
+    public static final ResourceLocation CursedMoonReasonID = ShapeShifterCurseFabric.identifier("cursed_moon");
     public static final ITransformReason CursedMoon = create(CursedMoonReasonID,
             (player, nowForm) -> {
                 if (FormUtils.NoCursedMoonEffect.hasFlag(nowForm)) {
@@ -145,7 +145,7 @@ public interface ITransformReason {
             }
     );
 
-    public static final Identifier ItemReasonID = ShapeShifterCurseFabric.identifier("item");
+    public static final ResourceLocation ItemReasonID = ShapeShifterCurseFabric.identifier("item");
     public static final Function<ItemStack, ITransformReasonWithArg<ItemStack>> ItemReasonBuilder = (itemStack) -> create(ItemReasonID,
             (reason, player, nowForm) -> {
                 Item item = itemStack.getItem();
@@ -185,7 +185,7 @@ public interface ITransformReason {
             itemStack
     );
 
-    public static final Identifier ForceReasonID = ShapeShifterCurseFabric.identifier("force");
+    public static final ResourceLocation ForceReasonID = ShapeShifterCurseFabric.identifier("force");
     public static final Function<IForm, ITransformReasonWithArg<IForm>> ForceReasonBuilder = (form) -> create(ForceReasonID,
             (reason, player, nowForm) -> {
                 return reason.getArg() == null ? nowForm : reason.getArg();
@@ -197,13 +197,13 @@ public interface ITransformReason {
     );
 
 
-    public Identifier getReasonType();
+    public ResourceLocation getReasonType();
 
-    default @Nullable IForm getFallBackNextForm(PlayerEntity player, IForm nowForm) {
+    default @Nullable IForm getFallBackNextForm(Player player, IForm nowForm) {
         return null;
     }
 
-    default @Nullable IForm getFallBackPrevForm(PlayerEntity player, IForm nowForm) {
+    default @Nullable IForm getFallBackPrevForm(Player player, IForm nowForm) {
         return null;
     }
 }

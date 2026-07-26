@@ -4,13 +4,13 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Consumer;
@@ -19,20 +19,20 @@ public class FireArrowAction {
     public static void spawnFireArrow(LivingEntity owner, float Damage, float Speed, float Spread, int FireTime, boolean NoGravity, boolean Critical, boolean hasOwner, Consumer<Entity> projectileAction) {
         ArrowItem arrowItem = (ArrowItem)(Items.ARROW);
         ItemStack itemStack = new ItemStack(arrowItem);
-        PersistentProjectileEntity persistentProjectileEntity = arrowItem.createArrow(owner.getWorld(), itemStack, owner, ItemStack.EMPTY);
+        AbstractArrow persistentProjectileEntity = arrowItem.createArrow(owner.level(), itemStack, owner, ItemStack.EMPTY);
         if (FireTime > 0) {
-            persistentProjectileEntity.setOnFireFor(FireTime);
+            persistentProjectileEntity.igniteForSeconds(FireTime);
         }
         if (NoGravity) {
             persistentProjectileEntity.setNoGravity(true);  // 危险设计 容易制作卡服机 见烈焰弹卡服务器方法
         }
-        persistentProjectileEntity.setVelocity(owner, owner.getPitch(), owner.getYaw(), 0.0F, Speed, Spread);
-        persistentProjectileEntity.setDamage(Damage);
+        persistentProjectileEntity.shootFromRotation(owner, owner.getXRot(), owner.getYRot(), 0.0F, Speed, Spread);
+        persistentProjectileEntity.setBaseDamage(Damage);
         if (Critical) {
-            persistentProjectileEntity.setCritical(true);
+            persistentProjectileEntity.setCritArrow(true);
         }
-        persistentProjectileEntity.pickupType = PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY;
-        boolean success = owner.getWorld().spawnEntity(persistentProjectileEntity);
+        persistentProjectileEntity.pickup = AbstractArrow.Pickup.CREATIVE_ONLY;
+        boolean success = owner.level().addFreshEntity(persistentProjectileEntity);
         if (success) {
             if (projectileAction != null) {
                 projectileAction.accept(persistentProjectileEntity);
@@ -40,7 +40,7 @@ public class FireArrowAction {
         }
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<Entity>(
 			    ShapeShifterCurseFabric.identifier("fire_arrow"),
 			    new SerializableData()

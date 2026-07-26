@@ -1,17 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.*;
-import net.minecraft.potion.Potion;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Rarity;
+import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.*;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.material.Fluids;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.armors.MorphScaleArmor;
 import net.onixary.shapeShifterCurseFabric.items.armors.NetheriteMorphScaleArmor;
@@ -28,18 +27,18 @@ import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
 public class RegCustomItem {
     private RegCustomItem(){}
 
-    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", new StartBook(new StartBook.Settings()));
-    public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", new BookOfShapeShifter(new BookOfShapeShifter.Settings()));
-    public static final Item UNTREATED_MOONDUST = register("untreated_moondust", new UntreatedMoonDust(new Item.Settings()));
-    public static final Item INHIBITOR = register("inhibitor", new Inhibitor(new Item.Settings()));
-    public static final Item POWERFUL_INHIBITOR = register("powerful_inhibitor", new PowerfulInhibitor(new Item.Settings()));
-    public static final Item CREATIVE_INHIBITOR = register("creative_inhibitor", new CreativeInhibitor(new Item.Settings()));
-    public static final Item CATALYST = register("catalyst", new Catalyst(new Item.Settings()));
-    public static final Item POWERFUL_CATALYST = register("powerful_catalyst", new PowerfulCatalyst(new Item.Settings()));
-    public static final Item MOONDUST_MATRIX = register("moondust_matrix", new MoonDustMatrix(new Item.Settings()));
+    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", new StartBook(new Item.Properties()));
+    public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", new BookOfShapeShifter(new Item.Properties()));
+    public static final Item UNTREATED_MOONDUST = register("untreated_moondust", new UntreatedMoonDust(new Item.Properties()));
+    public static final Item INHIBITOR = register("inhibitor", new Inhibitor(new Item.Properties()));
+    public static final Item POWERFUL_INHIBITOR = register("powerful_inhibitor", new PowerfulInhibitor(new Item.Properties()));
+    public static final Item CREATIVE_INHIBITOR = register("creative_inhibitor", new CreativeInhibitor(new Item.Properties()));
+    public static final Item CATALYST = register("catalyst", new Catalyst(new Item.Properties()));
+    public static final Item POWERFUL_CATALYST = register("powerful_catalyst", new PowerfulCatalyst(new Item.Properties()));
+    public static final Item MOONDUST_MATRIX = register("moondust_matrix", new MoonDustMatrix(new Item.Properties()));
     // morphscale armor
-    public static final Item MORPHSCALE_CORE = register("morphscale_core", new Item(new Item.Settings()));
-    public static final Item SUPER_MORPHSCALE_CORE = register("super_morphscale_core", new SuperMorphScaleCore(new Item.Settings().maxDamage(64 * SuperMorphScaleCore.damagePerItem).rarity(Rarity.EPIC)));
+    public static final Item MORPHSCALE_CORE = register("morphscale_core", new Item(new Item.Properties()));
+    public static final Item SUPER_MORPHSCALE_CORE = register("super_morphscale_core", new SuperMorphScaleCore(new Item.Properties().durability(64 * SuperMorphScaleCore.damagePerItem).rarity(Rarity.EPIC)));
     public static final Item MORPHSCALE_HEADRING = register("morphscale_headring", new MorphScaleArmor(ArmorItem.Type.HELMET));
     public static final Item MORPHSCALE_VEST = register("morphscale_vest", new MorphScaleArmor(ArmorItem.Type.CHESTPLATE));
     public static final Item MORPHSCALE_CUISH = register("morphscale_cuish", new MorphScaleArmor(ArmorItem.Type.LEGGINGS));
@@ -50,96 +49,96 @@ public class RegCustomItem {
     public static final Item NETHERITE_MORPHSCALE_CUISH = register("netherite_morphscale_cuish", new NetheriteMorphScaleArmor(ArmorItem.Type.LEGGINGS));
     public static final Item NETHERITE_MORPHSCALE_ANKLET = register("netherite_morphscale_anklet", new NetheriteMorphScaleArmor(ArmorItem.Type.BOOTS));
     // 模组自定义物品
-    public static final Item MOONDUST_CRYSTAL_SHARD = register("moondust_crystal_shard", new MoonDustCrystalShard(new MoonDustCrystalShard.Settings()));
-    public static final Item ECTOPLASM_RAG = register("ectoplasm_rag", new Item(new Item.Settings()));
-    public static final ToolItem BOTTLED_SNOWFALL = register("bottled_snowfall", new BottledSnowfall(BottledSnowfallToolMaterial.INSTANCE, 1, 1, new Item.Settings()));
-    public static final ToolItem DIAMOND_MINING_CLAW = register("diamond_mining_claw", new DiamondMiningClaw(DiamondMiningClawToolMaterial.INSTANCE, 1, -2.4f, new Item.Settings()));
-    public static final Item FIRE_CHARM_PAPER = register("fire_charm_paper", new Item(new Item.Settings()));
-    public static final Item AUXILIARY_SWORD = register("auxiliary_sword", new AuxiliarySword(AuxiliarySwordToolMaterial.INSTANCE, 1, -2.4f, new Item.Settings()));
-    public static final ToolItem AUXILIARY_PICKAXE = register("auxiliary_pickaxe", new AuxiliaryPickaxe(AuxiliaryPickaxeToolMaterial.INSTANCE, 1, -2.8f, new Item.Settings()));
-    public static final ToolItem AUXILIARY_AXE = register("auxiliary_axe", new AuxiliaryAxe(AuxiliaryAxeToolMaterial.INSTANCE, 1, -3.1f, new Item.Settings()));
+    public static final Item MOONDUST_CRYSTAL_SHARD = register("moondust_crystal_shard", new MoonDustCrystalShard(new Item.Properties()));
+    public static final Item ECTOPLASM_RAG = register("ectoplasm_rag", new Item(new Item.Properties()));
+    public static final TieredItem BOTTLED_SNOWFALL = register("bottled_snowfall", new BottledSnowfall(BottledSnowfallToolMaterial.INSTANCE, 1, 1, new Item.Properties()));
+    public static final TieredItem DIAMOND_MINING_CLAW = register("diamond_mining_claw", new DiamondMiningClaw(DiamondMiningClawToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
+    public static final Item FIRE_CHARM_PAPER = register("fire_charm_paper", new Item(new Item.Properties()));
+    public static final Item AUXILIARY_SWORD = register("auxiliary_sword", new AuxiliarySword(AuxiliarySwordToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
+    public static final TieredItem AUXILIARY_PICKAXE = register("auxiliary_pickaxe", new AuxiliaryPickaxe(AuxiliaryPickaxeToolMaterial.INSTANCE, 1, -2.8f, new Item.Properties()));
+    public static final TieredItem AUXILIARY_AXE = register("auxiliary_axe", new AuxiliaryAxe(AuxiliaryAxeToolMaterial.INSTANCE, 1, -3.1f, new Item.Properties()));
     // 模组自定义Trinkets
-    public static final Item AMULET_BRACELET = register("amulet_bracelet", new AmuletBraceletTrinket(new AmuletBraceletTrinket.Settings()));
-    public static final Item ATTACH_HOOK = register("attach_hook", new AttachHookTrinket(new AttachHookTrinket.Settings()));
-    public static final Item CHARM_OF_HOLLOW_FANG = register("charm_of_hollow_fang", new CharmOfHollowFangTrinket(new CharmOfHollowFangTrinket.Settings()));
-    public static final Item CHARM_OF_NIGHT_CRYSTAL = register("charm_of_night_crystal", new CharmOfNightCrystalTrinket(new CharmOfNightCrystalTrinket.Settings()));
-    public static final Item CHARM_OF_REVERSE_THERMOMETER = register("charm_of_reverse_thermometer", new CharmOfReverseThermometerTrinket(new CharmOfReverseThermometerTrinket.Settings()));
-    public static final Item COLLAR_OF_TENSION = register("collar_of_tension", new CollarOfTensionTrinket(new CollarOfTensionTrinket.Settings()));
-    public static final Item COLLAR_OF_WHISKERS = register("collar_of_whiskers", new CollarOfWhiskersTrinket(new CollarOfWhiskersTrinket.Settings()));
-    public static final Item DIGESTION_FIBER_BALL = register("digestion_fiber_ball", new DigestionFiberBallTrinket(new DigestionFiberBallTrinket.Settings()));
-    public static final Item FROST_PAWGLOVE = register("frost_pawglove", new FrostPawgloveTrinket(new FrostPawgloveTrinket.Settings()));
-    public static final Item WITHERED_BANDAGE = register("withered_bandage", new WitheredBandageTrinket(new WitheredBandageTrinket.Settings()));
-    public static final Item FOUNTAIN_BELT = register("fountain_belt", new FountainBeltTrinket(new FountainBeltTrinket.Settings()));
-    public static final Item RESONANT_CORE = register("resonant_core", new ResonantCoreTrinket(new ResonantCoreTrinket.Settings()));
-    public static final Item VENOM_SPINDLE = register("venom_spindle", new VenomSpindle(new VenomSpindle.Settings()));
+    public static final Item AMULET_BRACELET = register("amulet_bracelet", new AmuletBraceletTrinket(new Item.Properties()));
+    public static final Item ATTACH_HOOK = register("attach_hook", new AttachHookTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_HOLLOW_FANG = register("charm_of_hollow_fang", new CharmOfHollowFangTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_NIGHT_CRYSTAL = register("charm_of_night_crystal", new CharmOfNightCrystalTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_REVERSE_THERMOMETER = register("charm_of_reverse_thermometer", new CharmOfReverseThermometerTrinket(new Item.Properties()));
+    public static final Item COLLAR_OF_TENSION = register("collar_of_tension", new CollarOfTensionTrinket(new Item.Properties()));
+    public static final Item COLLAR_OF_WHISKERS = register("collar_of_whiskers", new CollarOfWhiskersTrinket(new Item.Properties()));
+    public static final Item DIGESTION_FIBER_BALL = register("digestion_fiber_ball", new DigestionFiberBallTrinket(new Item.Properties()));
+    public static final Item FROST_PAWGLOVE = register("frost_pawglove", new FrostPawgloveTrinket(new Item.Properties()));
+    public static final Item WITHERED_BANDAGE = register("withered_bandage", new WitheredBandageTrinket(new Item.Properties()));
+    public static final Item FOUNTAIN_BELT = register("fountain_belt", new FountainBeltTrinket(new Item.Properties()));
+    public static final Item RESONANT_CORE = register("resonant_core", new ResonantCoreTrinket(new Item.Properties()));
+    public static final Item VENOM_SPINDLE = register("venom_spindle", new VenomSpindle(new Item.Properties()));
 
-    public static final Item TRANSFORMATIVE_AXOLOTL_BUCKET = register("transformative_axolotl_bucket", new EntityBucketItem(ShapeShifterCurseFabric.T_AXOLOTL, Fluids.WATER, SoundEvents.ITEM_BUCKET_EMPTY_AXOLOTL, (new Item.Settings()).maxCount(1)));
+    public static final Item TRANSFORMATIVE_AXOLOTL_BUCKET = register("transformative_axolotl_bucket", new MobBucketItem(ShapeShifterCurseFabric.T_AXOLOTL, Fluids.WATER, SoundEvents.BUCKET_EMPTY_AXOLOTL, (new Item.Properties()).stacksTo(1)));
     // 减少非蜘蛛玩家食用的中毒量，做到实在没东西吃的时候也能硬着头皮吃的感觉
-    public static final Item SPIDER_FLUID_COCOON = register("spider_fluid_cocoon", new SpiderFluidCocoon(new SpiderFluidCocoon.Settings()));
+    public static final Item SPIDER_FLUID_COCOON = register("spider_fluid_cocoon", new SpiderFluidCocoon(new Item.Properties()));
 
-    public static final Item PATRON_FORM_ITEM = register("patron_form_item", new PatronFormItem(new Item.Settings()));
-    public static final Item SELECT_FORM_ITEM = register("select_form_item", new SelectFormItem(new Item.Settings()));
+    public static final Item PATRON_FORM_ITEM = register("patron_form_item", new PatronFormItem(new Item.Properties()));
+    public static final Item SELECT_FORM_ITEM = register("select_form_item", new SelectFormItem(new Item.Properties()));
 
-    public static final Item CUSTOM_TRINKET = register("custom_trinket", new CustomTrinket(new CustomTrinket.Settings()));
+    public static final Item CUSTOM_TRINKET = register("custom_trinket", new CustomTrinket(new Item.Properties()));
     // 用于成就图标的占位物品
-    public static final Item ICON_CURSED_MOON = register("icon_cursed_moon", new Item(new Item.Settings()));
+    public static final Item ICON_CURSED_MOON = register("icon_cursed_moon", new Item(new Item.Properties()));
     // 蛛丝弹占位物品
-    public static final Item WEB_PROJECTILE = register("web_projectile", new Item(new Item.Settings()));
-    public static final Item SILK_DEW = register("silk_dew", new SilkDew(new Item.Settings()));
+    public static final Item WEB_PROJECTILE = register("web_projectile", new Item(new Item.Properties()));
+    public static final Item SILK_DEW = register("silk_dew", new SilkDew(new Item.Properties()));
 
-    public static final ItemGroup SSC_GROUP = new ItemGroup.Builder(ItemGroup.Row.TOP, 0)
+    public static final CreativeModeTab SSC_GROUP = new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
             .icon(() -> new ItemStack(ICON_CURSED_MOON))
-            .displayName(Text.translatable("itemGroup.shape_shifter_curse.sscitems"))
-            .entries((context, entries) -> {
-                entries.add(BOOK_OF_SHAPE_SHIFTER);
-                entries.add(UNTREATED_MOONDUST);
-                entries.add(MOONDUST_MATRIX);
-                entries.add(MORPHSCALE_CORE);
-                entries.add(SUPER_MORPHSCALE_CORE);
-                entries.add(INHIBITOR);
-                entries.add(POWERFUL_INHIBITOR);
-                entries.add(CREATIVE_INHIBITOR);
-                entries.add(CATALYST);
-                entries.add(POWERFUL_CATALYST);
-                entries.add(MORPHSCALE_HEADRING);
-                entries.add(MORPHSCALE_VEST);
-                entries.add(MORPHSCALE_CUISH);
-                entries.add(MORPHSCALE_ANKLET);
-                entries.add(NETHERITE_MORPHSCALE_HEADRING);
-                entries.add(NETHERITE_MORPHSCALE_VEST);
-                entries.add(NETHERITE_MORPHSCALE_CUISH);
-                entries.add(NETHERITE_MORPHSCALE_ANKLET);
-                entries.add(DIAMOND_MINING_CLAW);
-                entries.add(MOONDUST_CRYSTAL_SHARD);
-                entries.add(ECTOPLASM_RAG);
-                entries.add(AMULET_BRACELET);
-                entries.add(ATTACH_HOOK);
-                entries.add(BOTTLED_SNOWFALL);
-                entries.add(CHARM_OF_HOLLOW_FANG);
-                entries.add(CHARM_OF_NIGHT_CRYSTAL);
-                entries.add(CHARM_OF_REVERSE_THERMOMETER);
-                entries.add(COLLAR_OF_TENSION);
-                entries.add(COLLAR_OF_WHISKERS);
-                entries.add(DIGESTION_FIBER_BALL);
-                entries.add(FROST_PAWGLOVE);
-                entries.add(WITHERED_BANDAGE);
-                entries.add(FOUNTAIN_BELT);
-                entries.add(RESONANT_CORE);
-                entries.add(VENOM_SPINDLE);
-                entries.add(CUSTOM_TRINKET);
-                entries.add(FIRE_CHARM_PAPER);
-                entries.add(TRANSFORMATIVE_AXOLOTL_BUCKET);
-                entries.add(SPIDER_FLUID_COCOON);
-                entries.add(AUXILIARY_SWORD);
-                entries.add(AUXILIARY_PICKAXE);
-                entries.add(AUXILIARY_AXE);
-                entries.add(SELECT_FORM_ITEM);
-                entries.add(SILK_DEW);
+            .title(Component.translatable("itemGroup.shape_shifter_curse.sscitems"))
+            .displayItems((context, entries) -> {
+                entries.accept(BOOK_OF_SHAPE_SHIFTER);
+                entries.accept(UNTREATED_MOONDUST);
+                entries.accept(MOONDUST_MATRIX);
+                entries.accept(MORPHSCALE_CORE);
+                entries.accept(SUPER_MORPHSCALE_CORE);
+                entries.accept(INHIBITOR);
+                entries.accept(POWERFUL_INHIBITOR);
+                entries.accept(CREATIVE_INHIBITOR);
+                entries.accept(CATALYST);
+                entries.accept(POWERFUL_CATALYST);
+                entries.accept(MORPHSCALE_HEADRING);
+                entries.accept(MORPHSCALE_VEST);
+                entries.accept(MORPHSCALE_CUISH);
+                entries.accept(MORPHSCALE_ANKLET);
+                entries.accept(NETHERITE_MORPHSCALE_HEADRING);
+                entries.accept(NETHERITE_MORPHSCALE_VEST);
+                entries.accept(NETHERITE_MORPHSCALE_CUISH);
+                entries.accept(NETHERITE_MORPHSCALE_ANKLET);
+                entries.accept(DIAMOND_MINING_CLAW);
+                entries.accept(MOONDUST_CRYSTAL_SHARD);
+                entries.accept(ECTOPLASM_RAG);
+                entries.accept(AMULET_BRACELET);
+                entries.accept(ATTACH_HOOK);
+                entries.accept(BOTTLED_SNOWFALL);
+                entries.accept(CHARM_OF_HOLLOW_FANG);
+                entries.accept(CHARM_OF_NIGHT_CRYSTAL);
+                entries.accept(CHARM_OF_REVERSE_THERMOMETER);
+                entries.accept(COLLAR_OF_TENSION);
+                entries.accept(COLLAR_OF_WHISKERS);
+                entries.accept(DIGESTION_FIBER_BALL);
+                entries.accept(FROST_PAWGLOVE);
+                entries.accept(WITHERED_BANDAGE);
+                entries.accept(FOUNTAIN_BELT);
+                entries.accept(RESONANT_CORE);
+                entries.accept(VENOM_SPINDLE);
+                entries.accept(CUSTOM_TRINKET);
+                entries.accept(FIRE_CHARM_PAPER);
+                entries.accept(TRANSFORMATIVE_AXOLOTL_BUCKET);
+                entries.accept(SPIDER_FLUID_COCOON);
+                entries.accept(AUXILIARY_SWORD);
+                entries.accept(AUXILIARY_PICKAXE);
+                entries.accept(AUXILIARY_AXE);
+                entries.accept(SELECT_FORM_ITEM);
+                entries.accept(SILK_DEW);
                 // 方块物品注册
-                entries.add(MOONDUST_CRYSTAL_GRIT);
-	            entries.add(WEB_COMPOSTER);
-                entries.add(DEW_COVERED_COBWEB);
-                entries.addAll(buildAllPotions(
+                entries.accept(MOONDUST_CRYSTAL_GRIT);
+	            entries.accept(WEB_COMPOSTER);
+                entries.accept(DEW_COVERED_COBWEB);
+                entries.acceptAll(buildAllPotions(
                         RegCustomPotions.MOONDUST_POTION,
                         RegCustomPotions.BAT_FORM_POTION,
                         RegCustomPotions.AXOLOTL_FORM_POTION,
@@ -154,7 +153,7 @@ public class RegCustomItem {
                         RegCustomPotions.FEED_POTION
                 ));
                 if (PatronUtils.EnablePatronFeature) {
-                    entries.add(PATRON_FORM_ITEM);
+                    entries.accept(PATRON_FORM_ITEM);
                 }
             })
             .build();
@@ -178,16 +177,16 @@ public class RegCustomItem {
 
     public static ItemStack buildPotion(Item PotionItem, Potion potion) {
         ItemStack potionStack = new ItemStack(PotionItem);
-        potionStack.set(DataComponentTypes.POTION_CONTENTS, new PotionContentsComponent(Registries.POTION.getEntry(potion)));
+        potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
         return potionStack;
     }
 
     public static <T extends Item> T register(String path, T item) {
-        return Registry.register(Registries.ITEM, RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(ShapeShifterCurseFabric.MOD_ID, path)), item);
+        return Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), item);
     }
 
     public static void initialize() {
-        Registry.register(Registries.ITEM_GROUP, ShapeShifterCurseFabric.identifier("ssc_item"), SSC_GROUP);
+        Registry.register(BuiltInRegistries.CREATIVE_MODE_TAB, ShapeShifterCurseFabric.identifier("ssc_item"), SSC_GROUP);
         /*
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
             entries.add(BOOK_OF_SHAPE_SHIFTER);

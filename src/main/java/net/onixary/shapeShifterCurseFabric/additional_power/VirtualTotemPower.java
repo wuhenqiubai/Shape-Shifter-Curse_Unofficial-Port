@@ -7,20 +7,20 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import org.jetbrains.annotations.NotNull;
@@ -33,36 +33,36 @@ import java.util.function.Consumer;
 
 // 由于网络同步问题 仅支持玩家实体 非玩家实体不会触发客户端效果
 public class VirtualTotemPower extends CooldownPower {
-    public static final HashMap<Identifier, BiConsumer<PlayerEntity, ItemStack>> virtualTotemTypeMap = new HashMap<>();
+    public static final HashMap<ResourceLocation, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
 
     static {
-        virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("default"), (PlayerEntity playerEntity, ItemStack totemStack) -> {
-            MinecraftClient client = MinecraftClient.getInstance();
+        virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("default"), (Player playerEntity, ItemStack totemStack) -> {
+            Minecraft client = Minecraft.getInstance();
             if (totemStack == null) {
                 totemStack = new ItemStack(Items.TOTEM_OF_UNDYING, 1);
             }
-            if (client.world != null) {
-                client.particleManager.addEmitter(playerEntity, ParticleTypes.TOTEM_OF_UNDYING, 30);
-                client.world.playSound(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ITEM_TOTEM_USE, playerEntity.getSoundCategory(), 1.0f, 1.0f, false);
+            if (client.level != null) {
+                client.particleEngine.createTrackingEmitter(playerEntity, ParticleTypes.TOTEM_OF_UNDYING, 30);
+                client.level.playLocalSound(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.TOTEM_USE, playerEntity.getSoundSource(), 1.0f, 1.0f, false);
                 if (playerEntity != client.player) return;
-                client.gameRenderer.showFloatingItem(totemStack);
+                client.gameRenderer.displayItemActivation(totemStack);
             }
         });
-        virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("form_anubis_wolf_3_undying"), (PlayerEntity playerEntity, ItemStack totemStack) -> {
-            MinecraftClient client = MinecraftClient.getInstance();
-            if (client.world != null) {
-                client.particleManager.addEmitter(playerEntity, ParticleTypes.SMOKE, 30);
-                client.particleManager.addEmitter(playerEntity, ParticleTypes.TOTEM_OF_UNDYING, 30);
-                client.world.playSound(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.ENTITY_WITHER_DEATH, playerEntity.getSoundCategory(), 0.75f, 0.8f, false);
+        virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("form_anubis_wolf_3_undying"), (Player playerEntity, ItemStack totemStack) -> {
+            Minecraft client = Minecraft.getInstance();
+            if (client.level != null) {
+                client.particleEngine.createTrackingEmitter(playerEntity, ParticleTypes.SMOKE, 30);
+                client.particleEngine.createTrackingEmitter(playerEntity, ParticleTypes.TOTEM_OF_UNDYING, 30);
+                client.level.playLocalSound(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.WITHER_DEATH, playerEntity.getSoundSource(), 0.75f, 0.8f, false);
             }
         });
     }
 
-    public Identifier virtualTotemType;  // 用于播放动画
+    public ResourceLocation virtualTotemType;  // 用于播放动画
     public ItemStack totemStack;  // 当VirtualTotemPowerID == 0时 模拟原版不死图腾
     private final List<Consumer<Entity>> entityAction;
     private final int totemHealth;
-    private final List<StatusEffectInstance> totemStatusEffects;
+    private final List<MobEffectInstance> totemStatusEffects;
 
     public VirtualTotemPower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
         super(type, entity, data.get("cooldown"), data.get("hud_render"));
@@ -74,11 +74,11 @@ public class VirtualTotemPower extends CooldownPower {
     }
 
     // 应该不用同步配置 Apoli应该会把SerializableData.Instance同步到客户端
-    public NbtElement toTag() {
+    public Tag toTag() {
         return super.toTag();
     }
 
-    public void fromTag(NbtElement tag) {
+    public void fromTag(Tag tag) {
         super.fromTag(tag);
     }
 
@@ -89,8 +89,8 @@ public class VirtualTotemPower extends CooldownPower {
         }
         this.entity.setHealth(this.totemHealth);
         if (this.totemStatusEffects != null) {
-            for (StatusEffectInstance statusEffectInstance : this.totemStatusEffects) {
-                this.entity.addStatusEffect(new StatusEffectInstance(statusEffectInstance));
+            for (MobEffectInstance statusEffectInstance : this.totemStatusEffects) {
+                this.entity.addEffect(new MobEffectInstance(statusEffectInstance));
             }
         }
         if (this.entityAction != null) {
@@ -98,28 +98,28 @@ public class VirtualTotemPower extends CooldownPower {
                 consumer.accept(this.entity);
             }
         }
-        if (!this.entity.getWorld().isClient && this.entity instanceof ServerPlayerEntity serverPlayerEntity) {
+        if (!this.entity.level().isClientSide && this.entity instanceof ServerPlayer serverPlayerEntity) {
             ModPacketsS2CServer.sendActiveVirtualTotem(serverPlayerEntity, this);
         }
         super.use();
     }
 
-    public @Nullable PacketByteBuf create_packet_byte_buf() {
-        if (this.entity instanceof ServerPlayerEntity serverPlayerEntity) {
-            RegistryByteBuf buf = new RegistryByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.getServer().getRegistryManager());
-            buf.writeUuid(serverPlayerEntity.getUuid());
-            buf.writeIdentifier(this.virtualTotemType);
+    public @Nullable FriendlyByteBuf create_packet_byte_buf() {
+        if (this.entity instanceof ServerPlayer serverPlayerEntity) {
+            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.getServer().registryAccess());
+            buf.writeUUID(serverPlayerEntity.getUUID());
+            buf.writeResourceLocation(this.virtualTotemType);
             buf.writeBoolean(this.totemStack != null && !this.totemStack.isEmpty());
             if (this.totemStack != null && !this.totemStack.isEmpty()) {
-                ItemStack.PACKET_CODEC.encode(buf, this.totemStack);
+                ItemStack.STREAM_CODEC.encode(buf, this.totemStack);
             }
             return buf;
         }
         return null;
     }
 
-    public static void process_virtual_totem_type(@NotNull PlayerEntity entity, Identifier virtualTotemType, @Nullable ItemStack totemStack) {
-        MinecraftClient client = MinecraftClient.getInstance();
+    public static void process_virtual_totem_type(@NotNull Player entity, ResourceLocation virtualTotemType, @Nullable ItemStack totemStack) {
+        Minecraft client = Minecraft.getInstance();
         if (virtualTotemTypeMap.containsKey(virtualTotemType)) {
             virtualTotemTypeMap.get(virtualTotemType).accept(entity, totemStack);
         } else {

@@ -8,9 +8,9 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
@@ -40,7 +40,7 @@ public class AdditionalEntityConditions {
                 ShapeShifterCurseFabric.identifier("enable_random_sound"),
                 new SerializableData(),
                 (data, e) -> {
-                    if (e instanceof PlayerEntity player) {
+                    if (e instanceof Player player) {
                         PlayerSkinComponent skinComponent = RegPlayerSkinComponent.SKIN_SETTINGS.get(e);
                         return skinComponent.isEnableFormRandomSound();
                     }
@@ -53,9 +53,9 @@ public class AdditionalEntityConditions {
                         .add("comparison", ApoliDataTypes.COMPARISON)
                         .add("compare_to", SerializableDataTypes.INT, 0),
                 (data, e) -> {
-                    if (e instanceof PlayerEntity player) {
-                        long lastAttackTime = AttackEntityDataTracker.lastAttackWitchTimeMap.getOrDefault(player.getUuid(), Long.MIN_VALUE / 16);
-                        long trueLastAttackTime = player.getWorld().getTime() - lastAttackTime;
+                    if (e instanceof Player player) {
+                        long lastAttackTime = AttackEntityDataTracker.lastAttackWitchTimeMap.getOrDefault(player.getUUID(), Long.MIN_VALUE / 16);
+                        long trueLastAttackTime = player.level().getGameTime() - lastAttackTime;
                         Comparison comparison = (Comparison)data.get("comparison");
                         if (comparison == null) {
                             return false;
@@ -71,9 +71,9 @@ public class AdditionalEntityConditions {
                         .add("comparison", ApoliDataTypes.COMPARISON)
                         .add("compare_to", SerializableDataTypes.INT, 0),
                 (data, e) -> {
-                    if (e instanceof PlayerEntity player) {
-                        long lastAttackTime = AttackEntityDataTracker.lastAttackPillagerTimeMap.getOrDefault(player.getUuid(), Long.MIN_VALUE / 16);
-                        long trueLastAttackTime = player.getWorld().getTime() - lastAttackTime;
+                    if (e instanceof Player player) {
+                        long lastAttackTime = AttackEntityDataTracker.lastAttackPillagerTimeMap.getOrDefault(player.getUUID(), Long.MIN_VALUE / 16);
+                        long trueLastAttackTime = player.level().getGameTime() - lastAttackTime;
                         Comparison comparison = (Comparison)data.get("comparison");
                         if (comparison == null) {
                             return false;
@@ -87,7 +87,7 @@ public class AdditionalEntityConditions {
                 ShapeShifterCurseFabric.identifier("is_sleep"),
                 new SerializableData(),
                 (data, e) -> {
-                    if (e instanceof PlayerEntity player) {
+                    if (e instanceof Player player) {
                         return player.isSleeping();
                     }
                     return false;

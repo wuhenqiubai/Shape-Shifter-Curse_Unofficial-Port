@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
 import io.github.apace100.apoli.power.factory.condition.entity.InTagCondition;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.ModifyTypeTagPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

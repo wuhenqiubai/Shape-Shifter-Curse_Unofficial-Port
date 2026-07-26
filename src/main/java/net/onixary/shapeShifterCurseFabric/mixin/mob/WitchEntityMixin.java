@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.WitchEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.component.type.PotionContentsComponent;
-import net.minecraft.entity.projectile.thrown.PotionEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.WitchFriendlyPower;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -20,48 +20,48 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(WitchEntity.class)
+@Mixin(Witch.class)
 public abstract class WitchEntityMixin {
 
 	@Unique
     private static final float POTION_REPLACE_CHANCE = 0.6f;
 
-	@Inject(method = "shootAt", at = @At("HEAD"), cancellable = true)
+	@Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
     private void injectCustomPotionAttack(LivingEntity target, float pullProgress, CallbackInfo ci) {
-        WitchEntity witch = (WitchEntity) (Object) this;
-        World world = witch.getWorld();
+        Witch witch = (Witch) (Object) this;
+        Level world = witch.level();
 
-        if(target instanceof PlayerEntity player){
+        if(target instanceof Player player){
             if (PowerHolderComponent.hasPower(player, WitchFriendlyPower.class)) {
                 ci.cancel();
             }
             if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player) || (ShapeShifterCurseFabric.commonConfig.witchPotionForPreBook && RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player))){
                 double randomChance = Math.random();
                 if(randomChance < POTION_REPLACE_CHANCE){
-                    Vec3d vec3d = target.getVelocity();
+                    Vec3 vec3d = target.getDeltaMovement();
                     double d = target.getX() + vec3d.x - witch.getX();
                     double e = target.getEyeY() - (double)1.1F - witch.getY();
                     double f = target.getZ() + vec3d.z - witch.getZ();
                     double g = Math.sqrt(d * d + f * f);
 
                     // 创建自定义溅射式药水
-                    PotionEntity customPotion = new PotionEntity(world, witch);
-                    net.minecraft.registry.entry.RegistryEntry<net.minecraft.potion.Potion> familiarFoxPotion =
-                            net.minecraft.registry.Registries.POTION.getEntry(
-                                    net.minecraft.registry.RegistryKey.of(net.minecraft.registry.RegistryKeys.POTION,
-                                            net.minecraft.util.Identifier.of("shape-shifter-curse", "to_familiar_fox_0_potion")))
+                    ThrownPotion customPotion = new ThrownPotion(world, witch);
+                    net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion> familiarFoxPotion =
+                            net.minecraft.core.registries.BuiltInRegistries.POTION.getHolder(
+                                    net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.POTION,
+                                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
                                     .orElseThrow();
-                    ItemStack potionStack = PotionContentsComponent.createStack(Items.SPLASH_POTION, familiarFoxPotion);
+                    ItemStack potionStack = PotionContents.createItemStack(Items.SPLASH_POTION, familiarFoxPotion);
                     customPotion.setItem(potionStack);
 
-                    customPotion.setPitch(customPotion.getPitch() - -20.0F);
-                    customPotion.setVelocity(d, e + g * 0.2, f, 0.75F, 8.0F);
+                    customPotion.setXRot(customPotion.getXRot() - -20.0F);
+                    customPotion.shoot(d, e + g * 0.2, f, 0.75F, 8.0F);
 
                     if (!witch.isSilent()) {
-                        witch.getWorld().playSound(null, witch.getX(), witch.getY(), witch.getZ(), SoundEvents.ENTITY_WITCH_THROW, witch.getSoundCategory(), 1.0F, 0.8F);
+                        witch.level().playSound(null, witch.getX(), witch.getY(), witch.getZ(), SoundEvents.WITCH_THROW, witch.getSoundSource(), 1.0F, 0.8F);
                     }
                     // 发射自定义药水
-                    world.spawnEntity(customPotion);
+                    world.addFreshEntity(customPotion);
 
                     // 取消原始攻击逻辑
                     ci.cancel();

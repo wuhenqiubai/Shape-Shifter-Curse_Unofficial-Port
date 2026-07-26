@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.google.gson.JsonObject;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import software.bernie.geckolib.renderer.GeoObjectRenderer;
 
 public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
@@ -15,7 +15,7 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable> {
         this.animatable = this.realAnimatable;
     }
 
-    public void setPlayer(PlayerEntity player, boolean slim) {
+    public void setPlayer(Player player, boolean slim) {
         this.realAnimatable.setPlayer(player);
         this.realModel.setPlayer(player, slim);
     }

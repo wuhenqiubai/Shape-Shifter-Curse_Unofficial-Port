@@ -7,14 +7,14 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.Vec3ArgumentType;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 import net.onixary.shapeShifterCurseFabric.entity.projectile.WebBullet;
@@ -36,59 +36,59 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class ShapeShifterCurseCommand {
-    public static void register(CommandDispatcher<ServerCommandSource> dispatcher){
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
         dispatcher.register(
                 literal("shape_shifter_curse")
-                        .then(literal("set_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("set_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Text.translatable("command.shape_shifter_curse.no_permission_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("transform_to_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Text.translatable("command.shape_shifter_curse.no_permission_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_form")))
                                         )
                                 )
                         )
-                        .then(literal("set_dynamic_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("set_dynamic_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_DYNAMIC_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Text.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_dynamic_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("transform_to_dynamic_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_DYNAMIC_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Text.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
                                         )
                                 )
                         )
-                        .then(literal("set_sub_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("set_sub_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_SUB_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Text.translatable("command.shape_shifter_curse.no_permission_sub_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_sub_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_sub_form").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("target", EntityArgumentType.player())
+                        .then(literal("transform_to_sub_form").requires(cs -> cs.hasPermission(2))
+                                .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_SUB_FORM_ARG))
-                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Text.translatable("command.shape_shifter_curse.no_permission_sub_form")))
+                                                .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_sub_form")))
                                         )
                                 )
                         )
-                        .then(literal("jump_to_next_cursed_moon").requires(cs -> cs.hasPermissionLevel(2))
+                        .then(literal("jump_to_next_cursed_moon").requires(cs -> cs.hasPermission(2))
                                 .executes(ShapeShifterCurseCommand::jumpToNextCursedMoon)
                         )
-                        .then(literal("world_time").requires(cs -> cs.hasPermissionLevel(2))
+                        .then(literal("world_time").requires(cs -> cs.hasPermission(2))
                                 .then(literal("set").then(argument("time", IntegerArgumentType.integer())
                                         .executes(ShapeShifterCurseCommand::setWorldTime))
                                 )
@@ -96,21 +96,21 @@ public class ShapeShifterCurseCommand {
                                         .executes(ShapeShifterCurseCommand::addWorldTime))
                                 )
                         )
-                        .then(literal("adjust_feral_item_loc").requires(cs -> cs.hasPermissionLevel(2))
-                                .then(argument("rot_center", Vec3ArgumentType.vec3())
-                                        .then(argument("pos_offset", Vec3ArgumentType.vec3())
+                        .then(literal("adjust_feral_item_loc").requires(cs -> cs.hasPermission(2))
+                                .then(argument("rot_center", Vec3Argument.vec3())
+                                        .then(argument("pos_offset", Vec3Argument.vec3())
                                                 .then(argument("euler_x", FloatArgumentType.floatArg())
                                                         .executes(ShapeShifterCurseCommand::adjustFeralItemLoc)
                                                 )
                                         )
                                 )
                         )
-                        .then(literal("keep_original_skin").requires(cs -> cs.hasPermissionLevel(0))
+                        .then(literal("keep_original_skin").requires(cs -> cs.hasPermission(0))
                                 .then(argument("value", BoolArgumentType.bool())
                                         .executes(ShapeShifterCurseCommand::setPlayerSkin)
                                 )
                         )
-                        .then(literal("set_form_color").requires(cs -> cs.hasPermissionLevel(0))
+                        .then(literal("set_form_color").requires(cs -> cs.hasPermission(0))
                                 .executes(ShapeShifterCurseCommand::logFormColorSetting)
                                 .then(argument("enable", BoolArgumentType.bool())
                                         .executes(ShapeShifterCurseCommand::setFormColorEnable)
@@ -131,33 +131,33 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        .then(literal("debug").requires(cs -> cs.hasPermissionLevel(0))
+                        .then(literal("debug").requires(cs -> cs.hasPermission(0))
                                 .then(literal("dev_command").executes(ShapeShifterCurseCommand::devCommand))
                                 .then(literal("clear_player_form_data")
-                                        .then(argument("target", EntityArgumentType.player())
+                                        .then(argument("target", EntityArgument.player())
                                                 .executes(ShapeShifterCurseCommand::clearPlayerFormData)
                                         )
                                 )
                                 .then(literal("clear_player_skin_data")
-                                        .then(argument("target", EntityArgumentType.player())
+                                        .then(argument("target", EntityArgument.player())
                                                 .executes(ShapeShifterCurseCommand::clearPlayerSkinData)
                                         )
                                 )
                                 .then(literal("clear_player_minion_data")
-                                        .then(argument("target", EntityArgumentType.player())
+                                        .then(argument("target", EntityArgument.player())
                                                 .executes(ShapeShifterCurseCommand::clearPlayerMinionData)
                                         )
                                 )
                                 .then(literal("clear_player_mana_data")
-                                        .then(argument("target", EntityArgumentType.player())
+                                        .then(argument("target", EntityArgument.player())
                                                 .executes(ShapeShifterCurseCommand::clearPlayerManaData)
                                         )
                                 )
                         )
-                        .then(literal("patron_info").requires(cs -> cs.hasPermissionLevel(0))
+                        .then(literal("patron_info").requires(cs -> cs.hasPermission(0))
                                 .executes(ShapeShifterCurseCommand::logPatronInfo)
                         )
-                        .then(literal("form_color").requires(cs -> cs.hasPermissionLevel(0))
+                        .then(literal("form_color").requires(cs -> cs.hasPermission(0))
                                 .then(literal("menu").executes(ShapeShifterCurseCommand::FC_Menu))
                                 .then(literal("save")
                                         .then(argument("type", new MiscArgumentType.Enum_ArgumentType("form", "global", "form_default"))
@@ -220,19 +220,19 @@ public class ShapeShifterCurseCommand {
         );
     }
 
-    private static int setForm(CommandContext<ServerCommandSource> commandContext, Text failText) throws CommandSyntaxException {
+    private static int setForm(CommandContext<CommandSourceStack> commandContext, Component failText) throws CommandSyntaxException {
         // set form without transform effect
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         IForm form = FormArgumentType.getForm(commandContext, "form");
-        ServerCommandSource serverCommandSource = commandContext.getSource();
+        CommandSourceStack serverCommandSource = commandContext.getSource();
         if (form == null) {
-            commandContext.getSource().sendError(Text.literal("Invalid Form Id!"));
+            commandContext.getSource().sendFailure(Component.literal("Invalid Form Id!"));
             return 0;
         }
         try {
             boolean success = TransformManager.forceTransform(target, form, true);
             if (!success) {
-                commandContext.getSource().sendError(failText);
+                commandContext.getSource().sendFailure(failText);
             }
         }
         catch (Exception e){
@@ -245,19 +245,19 @@ public class ShapeShifterCurseCommand {
 
     }
 
-    private static int transformToForm(CommandContext<ServerCommandSource> commandContext, Text failText) throws CommandSyntaxException {
+    private static int transformToForm(CommandContext<CommandSourceStack> commandContext, Component failText) throws CommandSyntaxException {
         // this with transform effect
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         IForm form = FormArgumentType.getForm(commandContext, "form");
-        ServerCommandSource serverCommandSource = commandContext.getSource();
+        CommandSourceStack serverCommandSource = commandContext.getSource();
         if (form == null) {
-            commandContext.getSource().sendError(Text.literal("Invalid Form Id!"));
+            commandContext.getSource().sendFailure(Component.literal("Invalid Form Id!"));
             return 0;
         }
         try {
             boolean success = TransformManager.forceTransform(target, form, false);
             if (!success) {
-                commandContext.getSource().sendError(failText);
+                commandContext.getSource().sendFailure(failText);
             }
         }
         catch (Exception e){
@@ -268,41 +268,41 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int jumpToNextCursedMoon(CommandContext<ServerCommandSource> commandContext) {
-        ServerWorld world = commandContext.getSource().getWorld();
+    private static int jumpToNextCursedMoon(CommandContext<CommandSourceStack> commandContext) {
+        ServerLevel world = commandContext.getSource().getLevel();
         CursedMoon.forceTriggerCursedMoon(world);
-        ServerCommandSource serverCommandSource = commandContext.getSource();
-        serverCommandSource.sendFeedback(() -> Text.literal("Set cursed moon to next night!"), true);
+        CommandSourceStack serverCommandSource = commandContext.getSource();
+        serverCommandSource.sendSuccess(() -> Component.literal("Set cursed moon to next night!"), true);
         return 1;
     }
 
-    private static int adjustFeralItemLoc(CommandContext<ServerCommandSource> commandContext) {
-        Vec3d rotCenter = Vec3ArgumentType.getVec3(commandContext, "rot_center");
-        Vec3d posOffset = Vec3ArgumentType.getVec3(commandContext, "pos_offset");
+    private static int adjustFeralItemLoc(CommandContext<CommandSourceStack> commandContext) {
+        Vec3 rotCenter = Vec3Argument.getVec3(commandContext, "rot_center");
+        Vec3 posOffset = Vec3Argument.getVec3(commandContext, "pos_offset");
         float eulerX = FloatArgumentType.getFloat(commandContext, "euler_x");
         ShapeShifterCurseFabric.feralItemCenter = rotCenter;
         ShapeShifterCurseFabric.feralItemPosOffset = posOffset;
         ShapeShifterCurseFabric.feralItemEulerX = eulerX;
-        ServerCommandSource serverCommandSource = commandContext.getSource();
-        serverCommandSource.sendFeedback(() -> Text.literal("Location adjusted! Center : " + rotCenter + " Offset: " + posOffset + " RotationX : " + eulerX), true);
+        CommandSourceStack serverCommandSource = commandContext.getSource();
+        serverCommandSource.sendSuccess(() -> Component.literal("Location adjusted! Center : " + rotCenter + " Offset: " + posOffset + " RotationX : " + eulerX), true);
         return 1;
     }
 
-    private static int setPlayerSkin(CommandContext<ServerCommandSource> commandContext) {
+    private static int setPlayerSkin(CommandContext<CommandSourceStack> commandContext) {
         try {
-            ServerPlayerEntity player = commandContext.getSource().getPlayer();
+            ServerPlayer player = commandContext.getSource().getPlayer();
             boolean newSetting = BoolArgumentType.getBool(commandContext, "value");
             RegPlayerSkinComponent.SKIN_SETTINGS.get(player).setKeepOriginalSkin(newSetting);
             RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
             String message = newSetting
                     ? "Successfully set to use your original skin!"
                     : "Successfully set to use built-in skin!";
-            player.sendMessage(Text.literal(message), false);
+            player.displayClientMessage(Component.literal(message), false);
 
             return 1;
         } catch (Exception e) {
             // 处理其他可能的错误
-            commandContext.getSource().sendError(Text.literal("Error when change player skin: " + e.getMessage()));
+            commandContext.getSource().sendFailure(Component.literal("Error when change player skin: " + e.getMessage()));
             ShapeShifterCurseFabric.LOGGER.error("Error when change player skin: ", e);
             return 0;
         }
@@ -317,11 +317,11 @@ public class ShapeShifterCurseCommand {
         return String;
     }
 
-    private static int logFormColorSetting(CommandContext<ServerCommandSource> commandContext) {
+    private static int logFormColorSetting(CommandContext<CommandSourceStack> commandContext) {
         try {
-            ServerPlayerEntity player = commandContext.getSource().getPlayer();
+            ServerPlayer player = commandContext.getSource().getPlayer();
             if (player == null) {
-                commandContext.getSource().sendError(Text.literal("Must be a player!"));
+                commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
                 return 0;
             }
             String message = "Form color setting: \n";
@@ -334,22 +334,22 @@ public class ShapeShifterCurseCommand {
             message += "Primary Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getPrimaryGreyReverse() + "\n";
             message += "Accent 1 Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getAccent1GreyReverse() + "\n";
             message += "Accent 2 Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getAccent2GreyReverse() + "\n";
-            player.sendMessage(Text.literal(message), false);
+            player.displayClientMessage(Component.literal(message), false);
             return 1;
         }
         catch (Exception e) {
             // 处理其他可能的错误
-            commandContext.getSource().sendError(Text.literal("Error when log player form color: " + e.getMessage()));
+            commandContext.getSource().sendFailure(Component.literal("Error when log player form color: " + e.getMessage()));
             ShapeShifterCurseFabric.LOGGER.error("Error when log player form color: ", e);
             return 0;
         }
     }
 
-    private static int setFormColorEnable(CommandContext<ServerCommandSource> commandContext) {
+    private static int setFormColorEnable(CommandContext<CommandSourceStack> commandContext) {
         try {
-            ServerPlayerEntity player = commandContext.getSource().getPlayer();
+            ServerPlayer player = commandContext.getSource().getPlayer();
             if (player == null) {
-                commandContext.getSource().sendError(Text.literal("Must be a player!"));
+                commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
                 return 0;
             }
             boolean enable = BoolArgumentType.getBool(commandContext, "enable");
@@ -358,17 +358,17 @@ public class ShapeShifterCurseCommand {
             return 1;
         } catch (Exception e) {
             // 处理其他可能的错误
-            commandContext.getSource().sendError(Text.literal("Error when change player form color: " + e.getMessage()));
+            commandContext.getSource().sendFailure(Component.literal("Error when change player form color: " + e.getMessage()));
             ShapeShifterCurseFabric.LOGGER.error("Error when change player form color: ", e);
             return 0;
         }
     }
 
-    private static int setFormColor(CommandContext<ServerCommandSource> commandContext) {
+    private static int setFormColor(CommandContext<CommandSourceStack> commandContext) {
         try {
-            ServerPlayerEntity player = commandContext.getSource().getPlayer();
+            ServerPlayer player = commandContext.getSource().getPlayer();
             if (player == null) {
-                commandContext.getSource().sendError(Text.literal("Must be a player!"));
+                commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
                 return 0;
             }
             boolean enable = BoolArgumentType.getBool(commandContext, "enable");
@@ -378,7 +378,7 @@ public class ShapeShifterCurseCommand {
             String eyeColorA = StringArgumentType.getString(commandContext, "eyeColorA");
             String eyeColorB = StringArgumentType.getString(commandContext, "eyeColorB");
             if (!RegPlayerSkinComponent.SKIN_SETTINGS.get(player).setFormColor(primaryColorRGBA, accentColor1RGBA, accentColor2RGBA, eyeColorA, eyeColorB, BoolArgumentType.getBool(commandContext, "primaryGreyReverse"), BoolArgumentType.getBool(commandContext, "accent1GreyReverse"), BoolArgumentType.getBool(commandContext, "accent2GreyReverse"))) {
-                commandContext.getSource().sendError(Text.literal("Invalid color format!"));
+                commandContext.getSource().sendFailure(Component.literal("Invalid color format!"));
                 return 0;
             }
             RegPlayerSkinComponent.SKIN_SETTINGS.get(player).setEnableFormColor(enable);
@@ -386,22 +386,22 @@ public class ShapeShifterCurseCommand {
             return 1;
         } catch (Exception e) {
             // 处理其他可能的错误
-            commandContext.getSource().sendError(Text.literal("Error when change player form color: " + e.getMessage()));
+            commandContext.getSource().sendFailure(Component.literal("Error when change player form color: " + e.getMessage()));
             ShapeShifterCurseFabric.LOGGER.error("Error when change player form color: ", e);
             return 0;
         }
     }
 
-    private static int logPatronInfo(CommandContext<ServerCommandSource> commandContext) {
+    private static int logPatronInfo(CommandContext<CommandSourceStack> commandContext) {
         try {
-            ServerPlayerEntity player = commandContext.getSource().getPlayer();
+            ServerPlayer player = commandContext.getSource().getPlayer();
             if (player == null) {
-                commandContext.getSource().sendError(Text.literal("Must be a player!"));
+                commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
                 return 0;
             }
             PatronDataSegment patronDataSegment = PatronDataSegment.getPatronDataSegment(player);
             StringBuilder message = new StringBuilder("Patron Info:\n");
-            message.append("UUID: ").append(player.getUuid()).append("\n");
+            message.append("UUID: ").append(player.getUUID()).append("\n");
             message.append("Patron Level: ").append(patronDataSegment != null ? patronDataSegment.getLevel() : 0).append("\n");
             if (patronDataSegment != null) {
                 DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -409,10 +409,10 @@ public class ShapeShifterCurseCommand {
                 message.append("Expire Time: ").append(LocalDateTime.ofInstant(Instant.ofEpochSecond(expireTime), ZoneId.systemDefault()).format(formatter)).append("\n");
             }
             // message.append("\n");
-            player.sendMessage(Text.literal(message.toString()), false);
+            player.displayClientMessage(Component.literal(message.toString()), false);
         } catch (Exception e) {
             // 处理其他可能的错误
-            commandContext.getSource().sendError(Text.literal("Error when log player patron info: " + e.getMessage()));
+            commandContext.getSource().sendFailure(Component.literal("Error when log player patron info: " + e.getMessage()));
             ShapeShifterCurseFabric.LOGGER.error("Error when log player patron info: ", e);
         }
         return 1;
@@ -462,43 +462,43 @@ public class ShapeShifterCurseCommand {
     //     return availableForms;
     // }
 
-    private static int setWorldTime(CommandContext<ServerCommandSource> commandContext) {
-        ServerWorld world = commandContext.getSource().getWorld();
-        world.setTimeOfDay(IntegerArgumentType.getInteger(commandContext, "time"));
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("World time set to " + commandContext.getSource().getWorld().getTimeOfDay());}, false);
+    private static int setWorldTime(CommandContext<CommandSourceStack> commandContext) {
+        ServerLevel world = commandContext.getSource().getLevel();
+        world.setDayTime(IntegerArgumentType.getInteger(commandContext, "time"));
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("World time set to " + commandContext.getSource().getLevel().getDayTime());}, false);
         return 1;
     }
 
-    private static int addWorldTime(CommandContext<ServerCommandSource> commandContext) {
-        ServerWorld world = commandContext.getSource().getWorld();
-        long TargetTime = world.getTimeOfDay() + IntegerArgumentType.getInteger(commandContext, "time");
-        world.setTimeOfDay(TargetTime);
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("World time set to " + TargetTime);}, false);
+    private static int addWorldTime(CommandContext<CommandSourceStack> commandContext) {
+        ServerLevel world = commandContext.getSource().getLevel();
+        long TargetTime = world.getDayTime() + IntegerArgumentType.getInteger(commandContext, "time");
+        world.setDayTime(TargetTime);
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("World time set to " + TargetTime);}, false);
         return 1;
     }
 
-    private static boolean CheckDebugEnvironment(CommandContext<ServerCommandSource> commandContext) {
+    private static boolean CheckDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
         // 只有权限等级>=2 或者在配置中开启才可以使用调试命令
-        if (commandContext.getSource().hasPermissionLevel(2)) {
+        if (commandContext.getSource().hasPermission(2)) {
             return true;
         }
         return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
     }
 
-    private static int devCommand(CommandContext<ServerCommandSource> commandContext) {
+    private static int devCommand(CommandContext<CommandSourceStack> commandContext) {
         if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
-        ServerWorld world = commandContext.getSource().getWorld();
+        ServerPlayer player = commandContext.getSource().getPlayer();
+        ServerLevel world = commandContext.getSource().getLevel();
         if (player == null) {
             return 0;
         }
         try {
             WebBullet webBullet = new WebBullet(player, 1);
-            webBullet.setVelocity(player, player.getPitch(), player.getYaw(), 0.0f, 2.25f, 0.5f);
-            player.getWorld().spawnEntity(webBullet);
+            webBullet.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 2.25f, 0.5f);
+            player.level().addFreshEntity(webBullet);
         } catch (Exception e) {
             ShapeShifterCurseFabric.LOGGER.error("Error Dev Command", e);
             return 0;
@@ -507,56 +507,56 @@ public class ShapeShifterCurseCommand {
     }
 
 
-    private static int clearPlayerFormData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+    private static int clearPlayerFormData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         PlayerFormComponent.COMPONENT.get(target).clear();
         PlayerFormComponent.COMPONENT.sync(target);
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("Form Data Cleared!");}, false);
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("Form Data Cleared!");}, false);
         return 1;
     }
 
-    private static int clearPlayerSkinData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+    private static int clearPlayerSkinData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         RegPlayerSkinComponent.SKIN_SETTINGS.get(target).clear();
         RegPlayerSkinComponent.SKIN_SETTINGS.sync(target);
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("Skin Data Cleared!");}, false);
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("Skin Data Cleared!");}, false);
         return 1;
     }
 
-    private static int clearPlayerMinionData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+    private static int clearPlayerMinionData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         RegPlayerMinionComponent.PLAYER_MINION_DATA.get(target).clear();
         RegPlayerMinionComponent.PLAYER_MINION_DATA.sync(target);
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("Minion Data Cleared!");}, false);
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("Minion Data Cleared!");}, false);
         return 1;
     }
 
-    private static int clearPlayerManaData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+    private static int clearPlayerManaData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         RegManaComponent.MANA.get(target).clear();
         RegManaComponent.MANA.sync(target);
-        commandContext.getSource().sendFeedback(() -> {return Text.literal("Mana Data Cleared!");}, false);
+        commandContext.getSource().sendSuccess(() -> {return Component.literal("Mana Data Cleared!");}, false);
         return 1;
     }
 
-    private static int FC_Menu(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_Menu(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
@@ -564,14 +564,14 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int FC_Save(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_Save(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
-        Identifier formID = null;
+        ResourceLocation formID = null;
         try {
-            formID = commandContext.getArgument("form", Identifier.class);
+            formID = commandContext.getArgument("form", ResourceLocation.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -581,14 +581,14 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int FC_Load(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_Load(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
-        Identifier formID = null;
+        ResourceLocation formID = null;
         try {
-            formID = commandContext.getArgument("form", Identifier.class);
+            formID = commandContext.getArgument("form", ResourceLocation.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -598,14 +598,14 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int FC_Delete(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_Delete(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
-        Identifier formID = null;
+        ResourceLocation formID = null;
         try {
-            formID = commandContext.getArgument("form", Identifier.class);
+            formID = commandContext.getArgument("form", ResourceLocation.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -615,10 +615,10 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static final Identifier NO_ID = ShapeShifterCurseFabric.identifier("empty");
+    private static final ResourceLocation NO_ID = ShapeShifterCurseFabric.identifier("empty");
 
-    private static int FC_Config(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_Config(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
@@ -627,14 +627,14 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int FC_List(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_List(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
-        Identifier formID = null;
+        ResourceLocation formID = null;
         try {
-            formID = commandContext.getArgument("form", Identifier.class);
+            formID = commandContext.getArgument("form", ResourceLocation.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -643,8 +643,8 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int FC_ToChat(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_ToChat(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
@@ -668,21 +668,21 @@ public class ShapeShifterCurseCommand {
                 Data = "/shape_shifter_curse form_color set_color_from_string \"" + Data + "\"";
             }
         }
-        Text text = Text.translatable("message.shape-shifter-curse.form_color_data", player.getName());
+        Component text = Component.translatable("message.shape-shifter-curse.form_color_data", player.getName());
         text = FormColorData.appendCopyableText(text, Data);
         switch (type) {
             case "local" -> {
-                player.sendMessage(text, false);
+                player.displayClientMessage(text, false);
             }
             case "server" -> {
-                Objects.requireNonNull(player.getServer()).getPlayerManager().broadcast(text, false);
+                Objects.requireNonNull(player.getServer()).getPlayerList().broadcastSystemMessage(text, false);
             }
         }
         return 1;
     }
 
-    private static int FC_SetColorFromString(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+    private static int FC_SetColorFromString(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
@@ -695,7 +695,7 @@ public class ShapeShifterCurseCommand {
                 return 1;
             }
         } catch (Exception e) {
-            player.getCommandSource().sendError(Text.literal("Error to apply color setting from string"));
+            player.createCommandSourceStack().sendFailure(Component.literal("Error to apply color setting from string"));
             return 0;
         }
         return 0;

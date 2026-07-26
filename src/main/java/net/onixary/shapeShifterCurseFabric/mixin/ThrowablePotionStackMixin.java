@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ThrowablePotionItem;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ThrowablePotionItem;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -14,9 +14,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ThrowablePotionItem.class)
 public abstract  class ThrowablePotionStackMixin {
     @Inject(method = "use", at = @At("RETURN"))
-    private void addCooldown(World world, PlayerEntity player, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
-        if (!world.isClient) {
-            player.getItemCooldownManager().set((ThrowablePotionItem) (Object) this, 20); // 20 ticks = 1 second
+    private void addCooldown(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+        if (!world.isClientSide) {
+            player.getCooldowns().addCooldown((ThrowablePotionItem) (Object) this, 20); // 20 ticks = 1 second
         }
     }
 }

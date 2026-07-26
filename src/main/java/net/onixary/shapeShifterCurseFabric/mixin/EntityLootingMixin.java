@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.additional_power.ModifyEntityLootPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,18 +19,18 @@ public abstract class EntityLootingMixin {
     @Unique
     private ItemEntity DropLootStack(ItemStack stack) {
         LivingEntity RealThis = (LivingEntity)(Object)this;
-        LivingEntity Attacker = RealThis.getAttacker();
-        if (Attacker instanceof PlayerEntity player) {
+        LivingEntity Attacker = RealThis.getLastHurtByMob();
+        if (Attacker instanceof Player player) {
             AtomicReference<ItemStack> FinalStack = new AtomicReference<>(stack);
             PowerHolderComponent.getPowers(player, ModifyEntityLootPower.class).forEach(
                     power -> FinalStack.set(power.ApplyModifyDrop(FinalStack.get(), RealThis.getRandom()))
             );
-            return RealThis.dropStack(FinalStack.get());
+            return RealThis.spawnAtLocation(FinalStack.get());
         }
-        return RealThis.dropStack(stack);
+        return RealThis.spawnAtLocation(stack);
     }
 
-    @ModifyArg(method = "dropLoot", at = @At(value = "INVOKE", target = "Lnet/minecraft/loot/LootTable;generateLoot(Lnet/minecraft/loot/context/LootContextParameterSet;JLjava/util/function/Consumer;)V"), index = 2)
+    @ModifyArg(method = "dropFromLootTable", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"), index = 2)
     private Consumer<ItemStack> modifyLootTableArgs(Consumer<ItemStack> lootConsumer) {
         return this::DropLootStack;
     }

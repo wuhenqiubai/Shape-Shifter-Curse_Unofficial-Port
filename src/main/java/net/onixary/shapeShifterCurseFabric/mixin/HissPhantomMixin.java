@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.PhantomEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Phantom;
 import net.onixary.shapeShifterCurseFabric.additional_power.HissPhantomPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -11,17 +11,17 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(targets = "net.minecraft.entity.mob.PhantomEntity$SwoopMovementGoal")
+@Mixin(targets = "net.minecraft.world.entity.monster.Phantom$PhantomSweepAttackGoal")
 public class HissPhantomMixin {
     @Unique
-    private PhantomEntity phantomEntity;
+    private Phantom phantomEntity;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void setPhantomEntity(PhantomEntity phantomEntity, CallbackInfo ci) {
+    private void setPhantomEntity(Phantom phantomEntity, CallbackInfo ci) {
         this.phantomEntity = phantomEntity;
     }
 
-    @Inject(method = "shouldContinue", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "canContinueToUse", at = @At("RETURN"), cancellable = true)
     private void shouldContinue(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = phantomEntity.getTarget();
         if (cir.getReturnValueZ()) {

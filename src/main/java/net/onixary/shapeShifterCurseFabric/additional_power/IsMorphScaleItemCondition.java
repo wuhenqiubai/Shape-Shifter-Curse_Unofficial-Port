@@ -2,9 +2,9 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.ModTags;
 
@@ -13,11 +13,11 @@ public class IsMorphScaleItemCondition {
     public static final String IsMorphScaleFoodTagName = "MorphScaleFood";  // TODO 得改一下名称 我想不出名字了
 
     public static boolean MSI_condition(SerializableData.Instance data, ItemStack itemStack) {
-        if (itemStack.isIn(ModTags.MorphScaleItem_Tag)) {
+        if (itemStack.is(ModTags.MorphScaleItem_Tag)) {
             return true;
         }
-        var customData = itemStack.get(DataComponentTypes.CUSTOM_DATA);
-        if (customData != null && customData.copyNbt().getBoolean(IsMorphScaleArmorTagName)) {
+        var customData = itemStack.get(DataComponents.CUSTOM_DATA);
+        if (customData != null && customData.copyTag().getBoolean(IsMorphScaleArmorTagName)) {
             return true;
         }
         return false;
@@ -27,12 +27,12 @@ public class IsMorphScaleItemCondition {
         if (!ShapeShifterCurseFabric.commonConfig.enableFoodHabitSystem) {
             return true;
         }
-        if (itemStack.isIn(ModTags.MorphScaleItem_Tag)) {
+        if (itemStack.is(ModTags.MorphScaleItem_Tag)) {
             return true;
         }
-        var customData = itemStack.get(DataComponentTypes.CUSTOM_DATA);
+        var customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
-            NbtCompound itemNBT = customData.copyNbt();
+            CompoundTag itemNBT = customData.copyTag();
             if (itemNBT.getBoolean(IsMorphScaleFoodTagName)) {
                 return true;
             }

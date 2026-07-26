@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimFSM;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.jetbrains.annotations.NotNull;
@@ -9,18 +7,21 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimRegistries.*;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+
 public class UseItemFSM extends AbstractAnimFSM {
     @Override
-    public @Nullable Identifier getNextFSM(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
-        if (!(player.isUsingItem() || player.handSwinging)) {
+    public @Nullable ResourceLocation getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData) {
+        if (!(player.isUsingItem() || player.swinging)) {
             return FSM_ON_GROUND;
         }
         return null;
     }
 
     @Override
-    public @NotNull Identifier getStateID(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
-        @Nullable Identifier UniversalStateResult = FSMUtils.ProcessUniversalAnim(player, animSystemData);
+    public @NotNull ResourceLocation getStateID(Player player, AnimSystem.AnimSystemData animSystemData) {
+        @Nullable ResourceLocation UniversalStateResult = FSMUtils.ProcessUniversalAnim(player, animSystemData);
         if (UniversalStateResult != null) {
             return UniversalStateResult;
         }

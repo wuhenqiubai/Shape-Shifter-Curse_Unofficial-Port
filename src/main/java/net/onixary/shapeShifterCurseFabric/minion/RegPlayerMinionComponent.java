@@ -1,17 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
+import net.minecraft.resources.ResourceLocation;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer;
 import org.ladysnake.cca.api.v3.entity.RespawnCopyStrategy;
-import net.minecraft.util.Identifier;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 // 或许应该把这几个Component合并到同一个RegClass
 public class RegPlayerMinionComponent implements EntityComponentInitializer {
-    public static final ComponentKey<PlayerMinionComponent> PLAYER_MINION_DATA = ComponentRegistry.getOrCreate(Identifier.of(MOD_ID, "player_minion_data"), PlayerMinionComponent.class);
+    public static final ComponentKey<PlayerMinionComponent> PLAYER_MINION_DATA = ComponentRegistry.getOrCreate(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_minion_data"), PlayerMinionComponent.class);
 
     @Override
     public void registerEntityComponentFactories(EntityComponentFactoryRegistry entityComponentFactoryRegistry) {
