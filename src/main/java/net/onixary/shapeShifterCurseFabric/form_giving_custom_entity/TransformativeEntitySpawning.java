@@ -22,6 +22,7 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.Tra
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.StructureAccessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -112,7 +113,7 @@ public class TransformativeEntitySpawning {
         });
     }
 
-    // Structure.settings 是 protected final → AW 中已设置 accessible + mutable，可直接赋值
+    // Structure.settings 是 protected final，用 Mixin @Accessor（兼容 Fabric + NeoForge/Connector）
     private static void addStructureSpawn(Structure structure, MobCategory category, StructureSpawnOverride override) {
         if (structure == null) return;
         Map<MobCategory, StructureSpawnOverride> spawns = new HashMap<>(structure.spawnOverrides());
@@ -122,6 +123,6 @@ public class TransformativeEntitySpawning {
             .generationStep(structure.step())
             .terrainAdapation(structure.terrainAdaptation())
             .build();
-        structure.settings = newSettings;
+        ((StructureAccessor) structure).ssc_setSettings(newSettings);
     }
 }

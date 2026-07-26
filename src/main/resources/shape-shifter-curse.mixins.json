@@ -57,6 +57,7 @@
         "VirtualTotemMixin",
         "accessor.MobEntityAccessor",
         "accessor.PowerTypeRegistryAccessor",
+        "accessor.StructureAccessor",
         "accessory.TrinketImpl",
         "accessory.TrinketItemMixin",
         "accessory.TrinketSlotMixin",

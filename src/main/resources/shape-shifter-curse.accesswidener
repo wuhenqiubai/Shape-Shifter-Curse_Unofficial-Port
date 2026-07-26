@@ -9,7 +9,6 @@ accessible field net/minecraft/client/gui/Font filterFishyGlyphs Z
 accessible method net/minecraft/client/gui/Font adjustColor (I)I
 accessible method net/minecraft/client/gui/Font renderText (Ljava/lang/String;FFIZLorg/joml/Matrix4f;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/client/gui/Font$DisplayMode;II)F
 accessible field net/minecraft/world/level/levelgen/structure/Structure settings Lnet/minecraft/world/level/levelgen/structure/Structure$StructureSettings;
-mutable field net/minecraft/world/level/levelgen/structure/Structure settings Lnet/minecraft/world/level/levelgen/structure/Structure$StructureSettings;
 accessible field net/minecraft/world/entity/AgeableMob$AgeableMobGroupData shouldSpawnBaby Z
 accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetConditions Lnet/minecraft/world/entity/ai/targeting/TargetingConditions;
 accessible field net/minecraft/client/model/PlayerModel slim Z
