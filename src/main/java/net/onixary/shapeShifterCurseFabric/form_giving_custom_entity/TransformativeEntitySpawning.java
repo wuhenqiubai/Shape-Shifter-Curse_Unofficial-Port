@@ -23,8 +23,9 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.Transfo
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
 
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class TransformativeEntitySpawning {
     public static void addEntitySpawns() {
@@ -91,22 +92,52 @@ public class TransformativeEntitySpawning {
         );
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            Structure structure = server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE).get(ResourceLocation.fromNamespaceAndPath("minecraft", "desert_pyramid"));
-            if (structure != null) {
-                Map<MobCategory, StructureSpawnOverride> oldSpawns = structure.spawnOverrides();
-                Map<MobCategory, StructureSpawnOverride> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                spawns.put(MobCategory.CREATURE, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3, 5))));
-                structure.settings.spawnOverrides = spawns;
-            }
-            for (Holder<Structure> structureEntry : server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE).getTagOrEmpty(TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("minecraft", "mineshaft")))) {
-                structure = structureEntry.value();
-                if (structure != null) {
-                    Map<MobCategory, StructureSpawnOverride> oldSpawns = structure.spawnOverrides();
-                    Map<MobCategory, StructureSpawnOverride> spawns = oldSpawns.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-                    spawns.put(MobCategory.MONSTER, new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE, WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1, 2))));
-                    structure.settings.spawnOverrides = spawns;
-                }
+            // 1. 在沙漠神殿添加狼生成
+            addStructureSpawn(
+                server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE)
+                    .get(ResourceLocation.fromNamespaceAndPath("minecraft", "desert_pyramid")),
+                MobCategory.CREATURE,
+                new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
+                    WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3, 5)))
+            );
+            // 2. 在废弃矿井添加蜘蛛生成
+            for (Holder<Structure> structureEntry : server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE)
+                .getTagOrEmpty(TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("minecraft", "mineshaft")))) {
+                addStructureSpawn(
+                    structureEntry.value(),
+                    MobCategory.MONSTER,
+                    new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
+                        WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1, 2)))
+                );
             }
         });
+    }
+
+    // Structure.settings 是 protected final，StructureSettings 是 record→ 用 Builder + 反射写入
+    private static final Field STRUCTURE_SETTINGS_FIELD;
+
+    static {
+        try {
+            STRUCTURE_SETTINGS_FIELD = Structure.class.getDeclaredField("settings");
+            STRUCTURE_SETTINGS_FIELD.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Failed to access Structure.settings field", e);
+        }
+    }
+
+    private static void addStructureSpawn(Structure structure, MobCategory category, StructureSpawnOverride override) {
+        if (structure == null) return;
+        try {
+            Map<MobCategory, StructureSpawnOverride> spawns = new HashMap<>(structure.spawnOverrides());
+            spawns.put(category, override);
+            Structure.StructureSettings newSettings = new Structure.StructureSettings.Builder(structure.biomes())
+                .spawnOverrides(Map.copyOf(spawns))
+                .generationStep(structure.step())
+                .terrainAdapation(structure.terrainAdaptation())
+                .build();
+            STRUCTURE_SETTINGS_FIELD.set(structure, newSettings);
+        } catch (IllegalAccessException e) {
+            ShapeShifterCurseFabric.LOGGER.error("Failed to set structure spawn overrides for {}", structure, e);
+        }
     }
 }

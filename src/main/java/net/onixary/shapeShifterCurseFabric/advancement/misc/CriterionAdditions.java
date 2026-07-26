@@ -51,7 +51,7 @@ public final class CriterionAdditions {
         public ResourceLocation getId() { return ID; }
         public @NotNull Codec<Cnd> codec() { return Cnd.CODEC; }
         public void trigger(ServerPlayer player, ResourceLocation id) { trigger(player, c -> c.matches(id)); }
-        public record Cnd(Optional<ContextAwarePredicate> player, List<String> entity) implements Conditions, SimpleInstance {
+        public record Cnd(Optional<ContextAwarePredicate> player, List<String> entity) implements SimpleInstance {
             public static final Codec<Cnd> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
                 Codec.STRING.listOf().fieldOf("entity").forGetter(Cnd::entity)

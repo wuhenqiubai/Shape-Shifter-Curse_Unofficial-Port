@@ -27,8 +27,8 @@ import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
 public class RegCustomItem {
     private RegCustomItem(){}
 
-    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", new StartBook(new StartBook.Settings()));
-    public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", new BookOfShapeShifter(new BookOfShapeShifter.Settings()));
+    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", new StartBook(new Item.Properties()));
+    public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", new BookOfShapeShifter(new Item.Properties()));
     public static final Item UNTREATED_MOONDUST = register("untreated_moondust", new UntreatedMoonDust(new Item.Properties()));
     public static final Item INHIBITOR = register("inhibitor", new Inhibitor(new Item.Properties()));
     public static final Item POWERFUL_INHIBITOR = register("powerful_inhibitor", new PowerfulInhibitor(new Item.Properties()));
@@ -49,7 +49,7 @@ public class RegCustomItem {
     public static final Item NETHERITE_MORPHSCALE_CUISH = register("netherite_morphscale_cuish", new NetheriteMorphScaleArmor(ArmorItem.Type.LEGGINGS));
     public static final Item NETHERITE_MORPHSCALE_ANKLET = register("netherite_morphscale_anklet", new NetheriteMorphScaleArmor(ArmorItem.Type.BOOTS));
     // 模组自定义物品
-    public static final Item MOONDUST_CRYSTAL_SHARD = register("moondust_crystal_shard", new MoonDustCrystalShard(new MoonDustCrystalShard.Settings()));
+    public static final Item MOONDUST_CRYSTAL_SHARD = register("moondust_crystal_shard", new MoonDustCrystalShard(new Item.Properties()));
     public static final Item ECTOPLASM_RAG = register("ectoplasm_rag", new Item(new Item.Properties()));
     public static final TieredItem BOTTLED_SNOWFALL = register("bottled_snowfall", new BottledSnowfall(BottledSnowfallToolMaterial.INSTANCE, 1, 1, new Item.Properties()));
     public static final TieredItem DIAMOND_MINING_CLAW = register("diamond_mining_claw", new DiamondMiningClaw(DiamondMiningClawToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
@@ -58,28 +58,28 @@ public class RegCustomItem {
     public static final TieredItem AUXILIARY_PICKAXE = register("auxiliary_pickaxe", new AuxiliaryPickaxe(AuxiliaryPickaxeToolMaterial.INSTANCE, 1, -2.8f, new Item.Properties()));
     public static final TieredItem AUXILIARY_AXE = register("auxiliary_axe", new AuxiliaryAxe(AuxiliaryAxeToolMaterial.INSTANCE, 1, -3.1f, new Item.Properties()));
     // 模组自定义Trinkets
-    public static final Item AMULET_BRACELET = register("amulet_bracelet", new AmuletBraceletTrinket(new AmuletBraceletTrinket.Settings()));
-    public static final Item ATTACH_HOOK = register("attach_hook", new AttachHookTrinket(new AttachHookTrinket.Settings()));
-    public static final Item CHARM_OF_HOLLOW_FANG = register("charm_of_hollow_fang", new CharmOfHollowFangTrinket(new CharmOfHollowFangTrinket.Settings()));
-    public static final Item CHARM_OF_NIGHT_CRYSTAL = register("charm_of_night_crystal", new CharmOfNightCrystalTrinket(new CharmOfNightCrystalTrinket.Settings()));
-    public static final Item CHARM_OF_REVERSE_THERMOMETER = register("charm_of_reverse_thermometer", new CharmOfReverseThermometerTrinket(new CharmOfReverseThermometerTrinket.Settings()));
-    public static final Item COLLAR_OF_TENSION = register("collar_of_tension", new CollarOfTensionTrinket(new CollarOfTensionTrinket.Settings()));
-    public static final Item COLLAR_OF_WHISKERS = register("collar_of_whiskers", new CollarOfWhiskersTrinket(new CollarOfWhiskersTrinket.Settings()));
-    public static final Item DIGESTION_FIBER_BALL = register("digestion_fiber_ball", new DigestionFiberBallTrinket(new DigestionFiberBallTrinket.Settings()));
-    public static final Item FROST_PAWGLOVE = register("frost_pawglove", new FrostPawgloveTrinket(new FrostPawgloveTrinket.Settings()));
-    public static final Item WITHERED_BANDAGE = register("withered_bandage", new WitheredBandageTrinket(new WitheredBandageTrinket.Settings()));
-    public static final Item FOUNTAIN_BELT = register("fountain_belt", new FountainBeltTrinket(new FountainBeltTrinket.Settings()));
-    public static final Item RESONANT_CORE = register("resonant_core", new ResonantCoreTrinket(new ResonantCoreTrinket.Settings()));
-    public static final Item VENOM_SPINDLE = register("venom_spindle", new VenomSpindle(new VenomSpindle.Settings()));
+    public static final Item AMULET_BRACELET = register("amulet_bracelet", new AmuletBraceletTrinket(new Item.Properties()));
+    public static final Item ATTACH_HOOK = register("attach_hook", new AttachHookTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_HOLLOW_FANG = register("charm_of_hollow_fang", new CharmOfHollowFangTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_NIGHT_CRYSTAL = register("charm_of_night_crystal", new CharmOfNightCrystalTrinket(new Item.Properties()));
+    public static final Item CHARM_OF_REVERSE_THERMOMETER = register("charm_of_reverse_thermometer", new CharmOfReverseThermometerTrinket(new Item.Properties()));
+    public static final Item COLLAR_OF_TENSION = register("collar_of_tension", new CollarOfTensionTrinket(new Item.Properties()));
+    public static final Item COLLAR_OF_WHISKERS = register("collar_of_whiskers", new CollarOfWhiskersTrinket(new Item.Properties()));
+    public static final Item DIGESTION_FIBER_BALL = register("digestion_fiber_ball", new DigestionFiberBallTrinket(new Item.Properties()));
+    public static final Item FROST_PAWGLOVE = register("frost_pawglove", new FrostPawgloveTrinket(new Item.Properties()));
+    public static final Item WITHERED_BANDAGE = register("withered_bandage", new WitheredBandageTrinket(new Item.Properties()));
+    public static final Item FOUNTAIN_BELT = register("fountain_belt", new FountainBeltTrinket(new Item.Properties()));
+    public static final Item RESONANT_CORE = register("resonant_core", new ResonantCoreTrinket(new Item.Properties()));
+    public static final Item VENOM_SPINDLE = register("venom_spindle", new VenomSpindle(new Item.Properties()));
 
     public static final Item TRANSFORMATIVE_AXOLOTL_BUCKET = register("transformative_axolotl_bucket", new MobBucketItem(ShapeShifterCurseFabric.T_AXOLOTL, Fluids.WATER, SoundEvents.BUCKET_EMPTY_AXOLOTL, (new Item.Properties()).stacksTo(1)));
     // 减少非蜘蛛玩家食用的中毒量，做到实在没东西吃的时候也能硬着头皮吃的感觉
-    public static final Item SPIDER_FLUID_COCOON = register("spider_fluid_cocoon", new SpiderFluidCocoon(new SpiderFluidCocoon.Settings()));
+    public static final Item SPIDER_FLUID_COCOON = register("spider_fluid_cocoon", new SpiderFluidCocoon(new Item.Properties()));
 
     public static final Item PATRON_FORM_ITEM = register("patron_form_item", new PatronFormItem(new Item.Properties()));
     public static final Item SELECT_FORM_ITEM = register("select_form_item", new SelectFormItem(new Item.Properties()));
 
-    public static final Item CUSTOM_TRINKET = register("custom_trinket", new CustomTrinket(new CustomTrinket.Settings()));
+    public static final Item CUSTOM_TRINKET = register("custom_trinket", new CustomTrinket(new Item.Properties()));
     // 用于成就图标的占位物品
     public static final Item ICON_CURSED_MOON = register("icon_cursed_moon", new Item(new Item.Properties()));
     // 蛛丝弹占位物品

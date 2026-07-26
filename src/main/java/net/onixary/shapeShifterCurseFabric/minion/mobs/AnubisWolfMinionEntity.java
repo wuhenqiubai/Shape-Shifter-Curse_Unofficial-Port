@@ -43,15 +43,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData) {
-        AgeableMobGroupData data;
-        if (entityData instanceof AgeableMobGroupData passiveData) {
-            passiveData.shouldSpawnBaby = false;
-            data = passiveData;
-        }
-        else {
-            data = new AgeableMobGroupData(false);
-        }
-        return super.finalizeSpawn(world, difficulty, spawnReason, data);
+        // AgeableMobGroupData.shouldSpawnBaby is final in MojMap 1.21.1, cannot reuse passed data
+        return super.finalizeSpawn(world, difficulty, spawnReason, new AgeableMobGroupData(false));
     }
 
     public int MinionLevel = 1;
