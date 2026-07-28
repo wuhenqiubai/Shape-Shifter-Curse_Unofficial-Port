@@ -106,7 +106,7 @@ public class CapeFeatureRendererMixin {
             return new Vec3(0.0f, -0.2f, 0.3f);
         }
         else {
-            return new Vec3(0.0, 0.0, 0.125);
+            return new Vec3(0.0, 0.2f, 0.125);
         }
     }
 
@@ -117,8 +117,7 @@ public class CapeFeatureRendererMixin {
         if (curForm instanceof ModifyCapeRender mcr) {
             return mcr.getCapeBaseRotateAngle(player);
         }
-        // 与重构前行为保持一致: FERAL 形态上仰 90°, 其他普通形态不做额外旋转
-        return curForm.getBodyType() == PlayerFormBodyType.FERAL ? 90.0f : 100.0f;
+        return 0.0f;
     }
 
     @Unique

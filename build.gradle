@@ -6,14 +6,13 @@ plugins {
 
 group = project.maven_group
 
-// 统一版本号格式: mod_version-channel.build_number+mc.minecraft_version
-// CI 通过环境变量 channel / build_version 覆盖，本地使用 gradle.properties 默认值
-def channel = System.getenv('channel') ?: build_type
+// 版本号: mod_version.build_number（mc 版本信息在 jar 文件名中）
+// CI 通过环境变量 build_version 覆盖，本地使用 gradle.properties 默认值
 def build_version = System.getenv('build_version') ?: build_number
-version = "${project.mod_version}-${channel}.${build_version}+mc.${minecraft_version}"
+version = "${project.mod_version}-${build_type}+build.${build_version}+mc${minecraft_version}"
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = "${project.archives_base_name}"
 }
 
 loom {
@@ -223,6 +222,8 @@ tasks.withType(JavaCompile).configureEach {
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         it.options.release.set(targetJavaVersion)
     }
+    options.deprecation = false
+    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal"]
 }
 
 java {
