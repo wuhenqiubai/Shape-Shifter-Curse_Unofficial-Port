@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.WithSneakAnimController;
@@ -19,17 +19,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements IPatronForm {
-    public Form_SnowFox3_Sub_MarbledPolecat(Identifier formID) {
+    public Form_SnowFox3_Sub_MarbledPolecat(ResourceLocation formID) {
         super(formID, RegPlayerForms.SNOW_FOX_3);
     }
 
     @Override
-    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
-        return new Pair<>(Identifier.of("origins", "origin"), Identifier.of(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
+        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
-    public boolean checkCanUse(@Nullable PlayerEntity player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
+    public boolean checkCanUse(@Nullable Player player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
         if (patronData == null || player == null) {
             return false;
         }
@@ -42,7 +42,7 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements I
 
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {

@@ -679,7 +679,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         // 物品栏等GUI窗口中的额外模型渲染会干扰脖颈IK的角度缓存数据，导致脖颈抖动，此时关闭脖颈IK
         Vec2 neckAngles;
         if (ClientUtils.isOpenInventoryScreen) {
-            neckAngles = new Vec2f(headYaw, headPitch);
+            neckAngles = new Vec2(headYaw, headPitch);
         } else {
             neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
             this.setRotationForNeckBones(player, model, neckAngles.x, neckAngles.y);
