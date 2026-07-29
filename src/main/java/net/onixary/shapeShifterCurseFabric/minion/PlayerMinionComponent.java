@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
@@ -16,8 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class PlayerMinionComponent implements Component, AutoSyncedComponent {
-    public ConcurrentHashMap<ResourceLocation, ArrayList<UUID>> minions = new ConcurrentHashMap<>();
-    public ConcurrentHashMap<ResourceLocation, Long> minionsCooldown = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Identifier, ArrayList<UUID>> minions = new ConcurrentHashMap<>();
+    public ConcurrentHashMap<Identifier, Long> minionsCooldown = new ConcurrentHashMap<>();
 
     @Override
     public void readFromNbt(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider registryLookup) {
@@ -29,11 +29,11 @@ public class PlayerMinionComponent implements Component, AutoSyncedComponent {
                 for (net.minecraft.nbt.Tag nbtElement : uuidList) {
                     uuids.add(NbtUtils.loadUUID(nbtElement));
                 }
-                this.minions.put(ResourceLocation.parse(key), uuids);
+                this.minions.put(Identifier.parse(key), uuids);
             }
             CompoundTag minionsCooldownNbt = nbtCompound.getCompound("minionsCooldown");
             for (String key : minionsCooldownNbt.getAllKeys()) {
-                this.minionsCooldown.put(ResourceLocation.parse(key), minionsCooldownNbt.getLong(key));
+                this.minionsCooldown.put(Identifier.parse(key), minionsCooldownNbt.getLong(key));
             }
         } catch (IllegalArgumentException e) {
             this.minions = new ConcurrentHashMap<>();
@@ -52,7 +52,7 @@ public class PlayerMinionComponent implements Component, AutoSyncedComponent {
     @Override
     public void writeToNbt(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider registryLookup) {
         CompoundTag minionsNbt = new CompoundTag();
-        for (ResourceLocation key : this.minions.keySet()) {
+        for (Identifier key : this.minions.keySet()) {
             ListTag uuidList = new ListTag();
             for (UUID uuid : this.minions.get(key)) {
                 IntArrayTag uuidNBT = NbtUtils.createUUID(uuid);
@@ -62,7 +62,7 @@ public class PlayerMinionComponent implements Component, AutoSyncedComponent {
         }
         nbtCompound.put("minions", minionsNbt);
         CompoundTag minionsCooldownNbt = new CompoundTag();
-        for (ResourceLocation key : this.minionsCooldown.keySet()) {
+        for (Identifier key : this.minionsCooldown.keySet()) {
             minionsCooldownNbt.putLong(key.toString(), this.minionsCooldown.get(key));
         }
         nbtCompound.put("minionsCooldown", minionsCooldownNbt);

@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public enum AnimStateEnum {
     ANIM_STATE_IDLE,
     ANIM_STATE_CRAWL;
 
-    public static final HashMap <ResourceLocation, AnimStateEnum> stateMap = new HashMap<>();
+    public static final HashMap <Identifier, AnimStateEnum> stateMap = new HashMap<>();
 
     static {
         stateMap.put(AnimRegistries.ANIM_STATE_SLEEP, ANIM_STATE_SLEEP);
@@ -43,7 +43,7 @@ public enum AnimStateEnum {
         stateMap.put(AnimRegistries.ANIM_STATE_CRAWL, ANIM_STATE_CRAWL);
     }
 
-    public static @Nullable AnimStateEnum getStateEnum(ResourceLocation stateID) {
+    public static @Nullable AnimStateEnum getStateEnum(Identifier stateID) {
         return stateMap.get(stateID);
     }
 }

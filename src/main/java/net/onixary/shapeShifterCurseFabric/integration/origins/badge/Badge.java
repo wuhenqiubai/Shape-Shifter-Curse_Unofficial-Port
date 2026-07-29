@@ -10,12 +10,12 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import java.util.List;
 
 public interface Badge extends DataObject<Badge> {
 
-    ResourceLocation spriteId();
+    Identifier spriteId();
 
     boolean hasTooltip();
 
@@ -33,7 +33,7 @@ public interface Badge extends DataObject<Badge> {
 
     default void writeBuf(FriendlyByteBuf buf) {
         DataObjectFactory<Badge> factory = this.getFactory();
-        buf.writeResourceLocation(this.getBadgeFactory().id());
+        buf.writeIdentifier(this.getBadgeFactory().id());
         factory.getData().write((RegistryFriendlyByteBuf) buf, factory.toData(this));
     }
 

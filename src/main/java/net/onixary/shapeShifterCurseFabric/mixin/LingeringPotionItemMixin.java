@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.LingeringPotionItem;
@@ -31,7 +31,7 @@ public class LingeringPotionItemMixin {
 
 	    var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
-        ResourceLocation CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
+        Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
         if (CTPFormID != null) {
             Component formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
             tooltip.add(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));

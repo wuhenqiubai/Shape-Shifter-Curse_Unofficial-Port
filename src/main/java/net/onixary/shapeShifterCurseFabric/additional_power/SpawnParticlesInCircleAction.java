@@ -59,22 +59,17 @@ public class SpawnParticlesInCircleAction {
             // 计算最终粒子生成位置（Y轴保持不变，在XZ平面上形成环）
             Vec3 particlePos = basePos.add(xOffset, 0, zOffset);
 
-            // 为每个符合条件的玩家生成粒子
+            // Build the particle packet once
+            var packet = new net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket(
+                    particleEffect, force, false,
+                    particlePos.x(), particlePos.y(), particlePos.z(),
+                    (float) delta.x(), (float) delta.y(), (float) delta.z(),
+                    speed, count
+            );
+            // Send to each matching player individually
             for (ServerPlayer player : serverWorld.players()) {
                 if (biEntityCondition == null || biEntityCondition.test(new Tuple<>(entity, player))) {
-                    serverWorld.sendParticles(
-                            player,
-                            particleEffect,
-                            force,
-                            particlePos.x(),
-                            particlePos.y(),
-                            particlePos.z(),
-                            count,
-                            delta.x(),
-                            delta.y(),
-                            delta.z(),
-                            speed
-                    );
+                    serverWorld.sendParticles(player, force, particlePos.x(), particlePos.y(), particlePos.z(), packet);
                 }
             }
         }

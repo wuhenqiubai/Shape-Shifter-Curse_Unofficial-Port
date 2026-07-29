@@ -3,12 +3,13 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.onixary.shapeShifterCurseFabric.features.ExtraItemFeatureRenderer;
 import net.onixary.shapeShifterCurseFabric.features.MouthItemFeature;
 import net.onixary.shapeShifterCurseFabric.render.tech.ThirdPersonExtraHandItemRender;
@@ -21,11 +22,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 @Mixin(
-        value = PlayerRenderer.class,
+        value = AvatarRenderer.class,
         priority = 1000
 )
-public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    public AdjustItemHoldPlayerRendererMixin(EntityRendererProvider.Context ctx, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
+public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
+    public AdjustItemHoldPlayerRendererMixin(EntityRendererProvider.Context ctx, PlayerModel model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 

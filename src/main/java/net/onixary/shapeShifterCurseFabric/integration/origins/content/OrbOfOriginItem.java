@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.content;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.fabricmc.fabric.api.util.NbtType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -10,10 +9,10 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -41,9 +40,9 @@ public class OrbOfOriginItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
         ItemStack stack = user.getItemInHand(hand);
-        if(!world.isClientSide) {
+        if(!world.isClientSide()) {
             OriginComponent component = ModComponents.ORIGIN.get(user);
             Map<OriginLayer, Origin> targets = getTargets(stack);
             if(targets.size() > 0) {
@@ -91,7 +90,7 @@ public class OrbOfOriginItem extends Item {
             return targets;
         }
         CompoundTag nbt = customData.copyTag();
-        if(!nbt.contains("Targets", Tag.TAG_LIST)) {
+        if(!nbt.contains("Targets")) {
             return targets;
         }
 
@@ -102,9 +101,9 @@ public class OrbOfOriginItem extends Item {
 
         for (Tag nbtElement : targetList) {
             if(nbtElement instanceof CompoundTag targetNbt) {
-                if(targetNbt.contains("Layer", NbtType.STRING)) {
+                if(targetNbt.contains("Layer")) {
                     try {
-                        ResourceLocation id = ResourceLocation.tryParse(targetNbt.getString("Layer"));
+                        Identifier id = Identifier.tryParse(String.valueOf(targetNbt.getString("Layer")));
 	                    if (id == null) {
 		                    continue;
 	                    }
@@ -115,8 +114,8 @@ public class OrbOfOriginItem extends Item {
 	                    }
 
                         Origin origin = Origin.EMPTY;
-                        if(targetNbt.contains("Origin", NbtType.STRING)) {
-                            ResourceLocation originId = ResourceLocation.parse(targetNbt.getString("Origin"));
+                        if(targetNbt.contains("Origin")) {
+                            Identifier originId = Identifier.parse(String.valueOf(targetNbt.getString("Origin")));
                             origin = OriginRegistry.get(originId);
                         }
                         if(layer.isEnabled() && (layer.contains(origin) || origin.isSpecial())) {

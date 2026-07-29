@@ -4,7 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
@@ -26,7 +26,7 @@ import java.util.Objects;
 public class FormTextureUtils {
     public interface TempFormTextureProcessor {
         // 需要自行实现缓存 Model的缓存带内存泄漏
-        ResourceLocation getTexture(int modelID, String category, ResourceLocation texture, ResourceLocation mask, boolean OnlyMultiply);
+        Identifier getTexture(int modelID, String category, Identifier texture, Identifier mask, boolean OnlyMultiply);
     }
 
     public interface TempCustomSkinConfigOverrider {
@@ -36,7 +36,7 @@ public class FormTextureUtils {
     public interface TempFormModelProcessor {
         IForm getForm();
 
-        ResourceLocation getLayerID();
+        Identifier getLayerID();
     }
 
     public static boolean useTempFormTexture = false;
@@ -85,7 +85,7 @@ public class FormTextureUtils {
         }
     }
 
-    public static NativeImage toNativeImage(ResourceLocation texture) {
+    public static NativeImage toNativeImage(Identifier texture) {
         NativeImage nativeImage = null;
         ResourceManager RM = Minecraft.getInstance().getResourceManager();
         Resource resource = null;
@@ -291,13 +291,13 @@ public class FormTextureUtils {
         return Color;
     }
 
-    public static ResourceLocation BakeTexture(ResourceLocation texture, ResourceLocation mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
+    public static Identifier BakeTexture(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
         TextureManager TM = Minecraft.getInstance().getTextureManager();
         // 客户端会在每次重载资源包时数据溢出 溢出量不高 等以后再优化吧
         return TM.register("masked_texture", BakeTextureNoMemLeak(texture, mask, colorSetting, OnlyMultiply));
     }
 
-    public static DynamicTexture BakeTextureNoMemLeak(ResourceLocation texture, ResourceLocation mask, ColorSetting colorSetting, boolean OnlyMultiply) {
+    public static DynamicTexture BakeTextureNoMemLeak(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply) {
         if (texture == null || mask == null) return null;
         NativeImage textureImage = toNativeImage(texture);
         NativeImage maskImage = toNativeImage(mask);

@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP;
 
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -10,9 +10,9 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.jetbrains.annotations.Nullable;
 
 public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
-    public @Nullable ResourceLocation otherStateId;
+    public @Nullable Identifier otherStateId;
 
-    public UseOtherStateAnimController(@Nullable ResourceLocation otherStateId) {
+    public UseOtherStateAnimController(@Nullable Identifier otherStateId) {
         super();
         this.otherStateId = otherStateId;
     }
@@ -64,7 +64,7 @@ public class UseOtherStateAnimController extends AbstractAnimStateControllerDP {
     @Override
     public AbstractAnimStateController loadFormJson(JsonObject jsonData) {
         if (jsonData != null && jsonData.has("StateControllerId") && jsonData.get("StateControllerId").isJsonPrimitive())  {
-            this.otherStateId = ResourceLocation.tryParse(jsonData.get("StateControllerId").getAsString());
+            this.otherStateId = Identifier.tryParse(jsonData.get("StateControllerId").getAsString());
         } else {
             this.otherStateId = null;
         }

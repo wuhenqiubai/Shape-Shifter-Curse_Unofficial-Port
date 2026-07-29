@@ -7,7 +7,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
@@ -82,7 +82,7 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     private void grantPowersFromOrigin(Origin origin, PowerHolderComponent powerComponent) {
-        ResourceLocation source = origin.getIdentifier();
+        Identifier source = origin.getIdentifier();
         for(PowerType<?> powerType : origin.getPowerTypes()) {
             if(!powerComponent.hasPower(powerType, source)) {
                 try {
@@ -96,7 +96,7 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     private void revokeRemovedPowers(Origin origin, PowerHolderComponent powerComponent) {
-        ResourceLocation source = origin.getIdentifier();
+        Identifier source = origin.getIdentifier();
         List<PowerType<?>> powersByOrigin = powerComponent.getPowersFromSource(source);
         powersByOrigin.stream().filter(p -> !origin.hasPowerType(p)).forEach(p -> powerComponent.removePower(p, source));
     }
@@ -112,14 +112,14 @@ public class PlayerOriginComponent implements OriginComponent {
 
         if(compoundTag.contains("Origin")) {
             try {
-                OriginLayer defaultOriginLayer = OriginLayers.getLayer(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origin"));
+                OriginLayer defaultOriginLayer = OriginLayers.getLayer(Identifier.fromNamespaceAndPath(Origins.MODID, "origin"));
 	            if (defaultOriginLayer == null) {
 		            Origins.LOGGER.warn("Default origin layer not found");
 		            return;
 	            }
 
 	            String originString = compoundTag.getString("Origin");
-	            ResourceLocation originId = ResourceLocation.tryParse(originString);
+	            Identifier originId = Identifier.tryParse(originString);
 	            if (originId == null) {
 		            Origins.LOGGER.warn("Invalid origin ID: {}", originString);
 		            return;
@@ -144,7 +144,7 @@ public class PlayerOriginComponent implements OriginComponent {
 	        for (int i = 0; i < originLayerList.size(); i++) {
 		        CompoundTag layerTag = originLayerList.getCompound(i);
 		        String layerString = layerTag.getString("Layer");
-		        ResourceLocation layerId = ResourceLocation.tryParse(layerString);
+		        Identifier layerId = Identifier.tryParse(layerString);
 
 		        if (layerId == null) {
 			        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
@@ -162,7 +162,7 @@ public class PlayerOriginComponent implements OriginComponent {
 
 		        if (layer != null) {
 			        String originString = layerTag.getString("Origin");
-			        ResourceLocation originId = ResourceLocation.tryParse(originString);
+			        Identifier originId = Identifier.tryParse(originString);
 
 			        if (originId == null) {
 				        String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
@@ -200,7 +200,7 @@ public class PlayerOriginComponent implements OriginComponent {
 
         this.hadOriginBefore = compoundTag.getBoolean("HadOriginBefore");
 
-        if(!player.level().isClientSide) {
+        if(!player.level().isClientSide()) {
             PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(player);
 	        if (powerComponent == null) {
 		        Origins.LOGGER.warn("PowerHolderComponent is null for player {}", player.getName().getString());
@@ -228,7 +228,7 @@ public class PlayerOriginComponent implements OriginComponent {
                 for(int i = 0; i < powerList.size(); i++) {
                     CompoundTag powerTag = powerList.getCompound(i);
 	                String powerTypeString = powerTag.getString("Type");
-	                ResourceLocation powerTypeId = ResourceLocation.tryParse(powerTypeString);
+	                Identifier powerTypeId = Identifier.tryParse(powerTypeString);
 
 	                if (powerTypeId == null) {
 		                Origins.LOGGER.warn("Invalid power type ID: {}", powerTypeString);

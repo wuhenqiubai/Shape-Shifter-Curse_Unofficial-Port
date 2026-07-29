@@ -4,7 +4,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.CraftingRecipeBadge;
@@ -15,7 +15,7 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
     private final int recipeWidth;
     private final NonNullList<ItemStack> inputs;
     private final ItemStack output;
-    private static final ResourceLocation TEXTURE = Origins.identifier("textures/gui/tooltip/recipe_tooltip.png");
+    private static final Identifier TEXTURE = Origins.identifier("textures/gui/tooltip/recipe_tooltip.png");
 
     public CraftingRecipeTooltipComponent(int recipeWidth, NonNullList<ItemStack> inputs, ItemStack output) {
         this.recipeWidth = recipeWidth;

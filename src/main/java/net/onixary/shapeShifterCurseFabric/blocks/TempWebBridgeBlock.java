@@ -15,8 +15,8 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -24,7 +24,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
     public static final int MAX_AGE = 3;
     public static final IntegerProperty AGE = BlockStateProperties.AGE_3;
-    public static final DirectionProperty HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
+    public static final Property<Direction> HORIZONTAL_FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     private static final VoxelShape voxelShape = Block.box(0.0F, 14.0F, 0.0F, 16.0F, 16.0F, 16.0F);
     private static final VoxelShape voxelShape2 = Block.box(0.0F, 0.0F, 0.0F, 2.0F, 16.0F, 2.0F);
@@ -139,7 +139,7 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    public boolean propagatesSkylightDown(BlockState state, BlockGetter world, BlockPos pos) {
+    public boolean propagatesSkylightDown(BlockState state) {
         return true;
     }
 }

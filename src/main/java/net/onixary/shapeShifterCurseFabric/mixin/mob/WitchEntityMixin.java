@@ -5,7 +5,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownSplashPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -45,15 +45,13 @@ public abstract class WitchEntityMixin {
                     double g = Math.sqrt(d * d + f * f);
 
                     // 创建自定义溅射式药水
-                    ThrownPotion customPotion = new ThrownPotion(world, witch);
+                    ThrownSplashPotion customPotion = new ThrownSplashPotion(world, witch, potionStack);
                     net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion> familiarFoxPotion =
                             net.minecraft.core.registries.BuiltInRegistries.POTION.getHolder(
                                     net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.POTION,
-                                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
+                                            net.minecraft.resources.Identifier.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
                                     .orElseThrow();
                     ItemStack potionStack = PotionContents.createItemStack(Items.SPLASH_POTION, familiarFoxPotion);
-                    customPotion.setItem(potionStack);
-
                     customPotion.setXRot(customPotion.getXRot() - -20.0F);
                     customPotion.shoot(d, e + g * 0.2, f, 0.75F, 8.0F);
 

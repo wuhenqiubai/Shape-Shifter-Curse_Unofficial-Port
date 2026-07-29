@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimFSM;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
@@ -11,7 +11,7 @@ import static net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimRegist
 
 public class OnGroundFSM extends AbstractAnimFSM {
     @Override
-    public @Nullable ResourceLocation getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData) {
+    public @Nullable Identifier getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData) {
         if (!animSystemData.IsOnGround) {
             return FSM_IN_AIR;
         } else if (player.isUsingItem() || player.swinging) {
@@ -21,8 +21,8 @@ public class OnGroundFSM extends AbstractAnimFSM {
     }
 
     @Override
-    public @NotNull ResourceLocation getStateID(Player player, AnimSystem.AnimSystemData animSystemData) {
-        @Nullable ResourceLocation UniversalStateResult = FSMUtils.ProcessUniversalAnim(player, animSystemData);
+    public @NotNull Identifier getStateID(Player player, AnimSystem.AnimSystemData animSystemData) {
+        @Nullable Identifier UniversalStateResult = FSMUtils.ProcessUniversalAnim(player, animSystemData);
         if (UniversalStateResult != null) {
             return UniversalStateResult;
         }

@@ -82,7 +82,7 @@ public class SneakingJumpClashPower extends Power {
     private boolean checkForCollision(Player player) {
         // 获取玩家面向方向
         Direction facing = player.getDirection();
-        Vec3 facingVec = Vec3.atLowerCornerOf(facing.getNormal());
+        Vec3 facingVec = Vec3.atLowerCornerOf(new net.minecraft.core.Vec3i(facing.getStepX(), facing.getStepY(), facing.getStepZ()));
         
         // 扩展玩家碰撞箱向前方
         AABB expandedBox = player.getBoundingBox().expandTowards(facingVec.scale(expansionDistance)).inflate(0.5);

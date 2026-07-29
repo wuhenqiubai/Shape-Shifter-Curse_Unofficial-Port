@@ -14,7 +14,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -55,7 +55,7 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 // RGB 框 -> RGB 条 -> ...
 
 public class FormColorSelectMenu extends Screen implements FormTextureUtils.TempFormTextureProcessor, FormTextureUtils.TempCustomSkinConfigOverrider, FormTextureUtils.TempFormModelProcessor {
-    private static final ResourceLocation texture = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/v1_form_color_select_menu.png");
+    private static final Identifier texture = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/v1_form_color_select_menu.png");
     private static final int BG_WIDTH = 420;
     private static final int BG_HEIGHT = 227;
     private static final int BG_IMAGE_WIDTH = 420;
@@ -137,7 +137,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private static final Minecraft minecraftClient = Minecraft.getInstance();
 
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, ResourceLocation>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
     private int modelID = -1;
     private static final String IdentifierNameSpace = MOD_ID;
     private static final String IdentifierPrefix = "dynamic_fcs_v1_";
@@ -202,13 +202,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
 
-    private ResourceLocation getNextDynamicFormID() {
-        return ResourceLocation.fromNamespaceAndPath(IdentifierNameSpace, IdentifierPrefix + nowColorSettingIndex++);
+    private Identifier getNextDynamicFormID() {
+        return Identifier.fromNamespaceAndPath(IdentifierNameSpace, IdentifierPrefix + nowColorSettingIndex++);
     }
 
     private void CleanColorSettingCache() {
         TextureManager textureManager = minecraftClient.getTextureManager();
-        for (ResourceLocation id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
+        for (Identifier id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
             textureManager.release(id);
         }
         colorSettingCacheMap.clear();
@@ -1126,7 +1126,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public ResourceLocation getTexture(int modelID, String category, ResourceLocation texture, ResourceLocation mask, boolean OnlyMultiply) {
+    public Identifier getTexture(int modelID, String category, Identifier texture, Identifier mask, boolean OnlyMultiply) {
         if (this.modelID != modelID) {
             this.modelID = modelID;
             CleanColorSettingCache();
@@ -1138,7 +1138,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return colorSettingCacheMap.computeIfAbsent(category, k -> new HashMap<>()).computeIfAbsent(this.getColorSetting(true), k -> {
             // 这种方法不会内存泄漏 但是得自己管理临时材质
             DynamicTexture nativeImageBackedTexture = FormTextureUtils.BakeTextureNoMemLeak(texture, mask, this.getColorSetting(true), OnlyMultiply);
-            ResourceLocation id = getNextDynamicFormID();
+            Identifier id = getNextDynamicFormID();
             minecraftClient.getTextureManager().register(id, nativeImageBackedTexture);
             return id;
         });
@@ -1228,7 +1228,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return result;
     }
 
-    private @Nullable ResourceLocation getPlayerForm() {
+    private @Nullable Identifier getPlayerForm() {
         IForm form = this.getForm();
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isEquals(form)) {
             return null;
@@ -1238,7 +1238,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private boolean isFormLocalSettingExists(int index) {
         String id = String.format("fcs_%s", index);
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).containsKey(id);
         }
@@ -1247,7 +1247,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private @Nullable FormTextureUtils.ColorSetting getFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).get(id);
         }
@@ -1256,7 +1256,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void setFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).put(id, colorSettingRGBA);
@@ -1266,7 +1266,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void removeFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).remove(id);
         }
@@ -1297,7 +1297,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private boolean isFormDefaultSettingExists() {
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.containsKey(formID);
         }
@@ -1305,7 +1305,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private @Nullable FormTextureUtils.ColorSetting getFormDefaultSetting() {
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.get(formID);
         }
@@ -1313,7 +1313,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void setFormDefaultSetting() {
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.put(formID, colorSettingRGBA);
@@ -1322,7 +1322,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void removeFormDefaultSetting() {
-        ResourceLocation formID = this.getPlayerForm();
+        Identifier formID = this.getPlayerForm();
         if (formID != null) {
             ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.remove(formID);
         }
@@ -1413,7 +1413,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void saveSlotName(int ButtonType, int Index) {
         if (ButtonType == 0) {
-            ResourceLocation FormID = this.getPlayerForm();
+            Identifier FormID = this.getPlayerForm();
             if (FormID == null) {
                 return;
             }
@@ -1421,7 +1421,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         } else if (ButtonType == 1) {
             ShapeShifterCurseFabricClient.formColorData.setName_GlobalSlot(Index, this.globalSettingTextFields.get(Index).getValue());
         } else if (ButtonType == 2) {
-            ResourceLocation FormID = this.getPlayerForm();
+            Identifier FormID = this.getPlayerForm();
             if (FormID == null) {
                 return;
             }
@@ -1431,7 +1431,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private String getSlotName(int ButtonType, int Index) {
         if (ButtonType == 0) {
-            ResourceLocation FormID = this.getPlayerForm();
+            Identifier FormID = this.getPlayerForm();
             if (FormID == null) {
                 return "";
             }
@@ -1439,7 +1439,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         } else if (ButtonType == 1) {
             return ShapeShifterCurseFabricClient.formColorData.getName_GlobalSlot(Index);
         } else if (ButtonType == 2) {
-            ResourceLocation FormID = this.getPlayerForm();
+            Identifier FormID = this.getPlayerForm();
             if (FormID == null)
                 return "";
 
@@ -1452,7 +1452,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         for (int index = 0; index < globalSettingButtons.size(); index++) {
             this.globalSettingTextFields.get(index).setValue(this.getSlotName(1, index));
         }
-        ResourceLocation FormID = this.getPlayerForm();
+        Identifier FormID = this.getPlayerForm();
         if (FormID != null) {
             this.formDefaultSettingTextField.setValue(this.getSlotName(2, 0));
             for (int index = 0; index < formLocalSettingButtons.size(); index++) {
@@ -1546,7 +1546,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public ResourceLocation getLayerID() {
+    public Identifier getLayerID() {
         return this.getForm().getFormLayer().getB();
     }
 

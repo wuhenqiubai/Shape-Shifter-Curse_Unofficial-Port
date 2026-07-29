@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -13,10 +13,10 @@ import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class ManaTypePower extends Power {
-    private @Nullable ResourceLocation manaType = null;
-    private @Nullable ResourceLocation manaSource = null;
+    private @Nullable Identifier manaType = null;
+    private @Nullable Identifier manaSource = null;
 
-    public ManaTypePower(PowerType<?> type, LivingEntity entity, @Nullable ResourceLocation manaType, @Nullable ResourceLocation manaSource) {
+    public ManaTypePower(PowerType<?> type, LivingEntity entity, @Nullable Identifier manaType, @Nullable Identifier manaSource) {
         super(type, entity);
         this.manaType = manaType;
         if (manaSource == null) {

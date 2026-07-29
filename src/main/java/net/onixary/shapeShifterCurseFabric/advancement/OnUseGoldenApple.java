@@ -2,18 +2,18 @@ package net.onixary.shapeShifterCurseFabric.advancement;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.Optional;
 
 public class OnUseGoldenApple extends SimpleCriterionTrigger<OnUseGoldenApple.Condition> {
-    public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "on_use_golden_apple");
+    public static final Identifier ID = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "on_use_golden_apple");
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return ID;
     }
 

@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.util;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -19,16 +19,16 @@ import java.util.Optional;
 public class OriginLootCondition implements LootItemCondition {
 
     public static final MapCodec<OriginLootCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        ResourceLocation.CODEC.fieldOf("origin").forGetter(OriginLootCondition::getOrigin),
-        ResourceLocation.CODEC.optionalFieldOf("layer").forGetter(OriginLootCondition::getLayer)
+        Identifier.CODEC.fieldOf("origin").forGetter(OriginLootCondition::getOrigin),
+        Identifier.CODEC.optionalFieldOf("layer").forGetter(OriginLootCondition::getLayer)
     ).apply(instance, OriginLootCondition::new));
 
     public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
 
-    private final ResourceLocation origin;
-    private final Optional<ResourceLocation> layer;
+    private final Identifier origin;
+    private final Optional<Identifier> layer;
 
-    private OriginLootCondition(ResourceLocation origin, Optional<ResourceLocation> layer) {
+    private OriginLootCondition(Identifier origin, Optional<Identifier> layer) {
         this.origin = origin;
         this.layer = layer;
     }
@@ -46,8 +46,8 @@ public class OriginLootCondition implements LootItemCondition {
             return false;
         }
         for (Map.Entry<OriginLayer, Origin> entry : component.getOrigins().entrySet()) {
-            ResourceLocation layerId = entry.getKey().getIdentifier();
-            ResourceLocation originId = entry.getValue().getIdentifier();
+            Identifier layerId = entry.getKey().getIdentifier();
+            Identifier originId = entry.getValue().getIdentifier();
             if (layer.map(layerId::equals).orElse(true) && originId.equals(origin)) {
                 return true;
             }
@@ -55,11 +55,11 @@ public class OriginLootCondition implements LootItemCondition {
         return false;
     }
 
-    public ResourceLocation getOrigin() {
+    public Identifier getOrigin() {
         return origin;
     }
 
-    public Optional<ResourceLocation> getLayer() {
+    public Optional<Identifier> getLayer() {
         return layer;
     }
 

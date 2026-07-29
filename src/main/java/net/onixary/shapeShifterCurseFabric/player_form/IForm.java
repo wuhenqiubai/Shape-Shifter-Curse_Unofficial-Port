@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -18,7 +18,7 @@ import java.util.Set;
 // 新形态变形引擎代码
 
 public interface IForm {
-    public @NotNull ResourceLocation getFormID();
+    public @NotNull Identifier getFormID();
 
     // HasSlowFall 整合进 flag 系统
     public @NotNull Set<String> getFormFlag();
@@ -30,9 +30,9 @@ public interface IForm {
     public void setFormGroup(IFormGroup group, int formTier);
 
     // 临时能力系统 等Origins移除后再写
-    public @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer();
+    public @NotNull Tuple<Identifier, Identifier> getFormLayer();
 
-    public default @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
+    public default @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
         return null;
     }
 
@@ -110,7 +110,7 @@ public interface IForm {
     }
 
     // 动画系统
-    public default @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public default @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         return null;
     }
 
@@ -120,7 +120,7 @@ public interface IForm {
         return true;
     }
 
-    public default @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
+    public default @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         return new Tuple<>(false, null);
     }
 

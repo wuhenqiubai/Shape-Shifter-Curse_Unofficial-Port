@@ -6,7 +6,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class TrinketsConditionAction {
-    public static boolean isEquipped(Entity entity, String AccessoryMod, ResourceLocation trinketID) {
+    public static boolean isEquipped(Entity entity, String AccessoryMod, Identifier trinketID) {
         if (trinketID == null) {
             return false;
         }

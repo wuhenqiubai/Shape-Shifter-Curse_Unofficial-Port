@@ -4,7 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class MorphScaleTagLoader implements SimpleSynchronousResourceReloadListe
     }
 
     @Override
-    public ResourceLocation getFabricId() {
+    public Identifier getFabricId() {
         return ShapeShifterCurseFabric.identifier("morph_scale_tag_loader");
     }
 

@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -18,19 +18,19 @@ import java.util.Map;
 @Mixin(AreaEffectCloud.class)
 public class AreaEffectCloudEntityMixin implements CTPUtils.CTPFormIDHolder {
     @Unique
-    private ResourceLocation ctpFormID = null;
+    private Identifier ctpFormID = null;
 
     @Final
     @Shadow
     private Map<Entity, Integer> victims;
 
     @Override
-    public ResourceLocation getCTPFormID() {
+    public Identifier getCTPFormID() {
         return this.ctpFormID;
     }
 
     @Override
-    public void setCTPFormID(ResourceLocation formID) {
+    public void setCTPFormID(Identifier formID) {
         this.ctpFormID = formID;
     }
 

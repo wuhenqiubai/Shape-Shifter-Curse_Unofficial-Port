@@ -80,7 +80,7 @@ public class BatBlockAttachPower extends Power {
             if (isAttached && attachedPos != null && attachedSide != null) {
                 Vec3 targetPos;
                 if (power.attachType == AttachType.SIDE) {
-                    targetPos = Vec3.atCenterOf(attachedPos).add(Vec3.atLowerCornerOf(attachedSide.getNormal()).scale(0.75d)).add(0, -0.5, 0);
+                    targetPos = Vec3.atCenterOf(attachedPos).add(Vec3.atLowerCornerOf(new net.minecraft.core.Vec3i(attachedSide.getStepX(), attachedSide.getStepY(), attachedSide.getStepZ())).scale(0.75d)).add(0, -0.5, 0);
                 } else {
                     targetPos = Vec3.atCenterOf(attachedPos).add(0, -1.5, 0);
                 }
@@ -193,11 +193,11 @@ public class BatBlockAttachPower extends Power {
         attachedSide = side;
 
         // 立即在服务端设置位置
-        Vec3 attachPos = Vec3.atCenterOf(blockPos).add(Vec3.atLowerCornerOf(side.getNormal()).scale(0.75d)).add(0, -0.5, 0);
+        Vec3 attachPos = Vec3.atCenterOf(blockPos).add(Vec3.atLowerCornerOf(new net.minecraft.core.Vec3i(side.getStepX(), side.getStepY(), side.getStepZ())).scale(0.75d)).add(0, -0.5, 0);
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        player.hasImpulse = true;
+        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
@@ -216,7 +216,7 @@ public class BatBlockAttachPower extends Power {
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        player.hasImpulse = true;
+        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
@@ -262,7 +262,7 @@ public class BatBlockAttachPower extends Power {
             // 同时添加向上的速度
             player.push(dirX * jumpSpeed, 0.4f, dirZ * jumpSpeed);
         }
-        player.hasImpulse = true;
+        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 同步到客户端
@@ -284,7 +284,7 @@ public class BatBlockAttachPower extends Power {
 
         Vec3 targetPos;
         if (attachType == AttachType.SIDE) {
-            targetPos = Vec3.atCenterOf(attachedBlockPos).add(Vec3.atLowerCornerOf(attachedSide.getNormal()));
+            targetPos = Vec3.atCenterOf(attachedBlockPos).add(Vec3.atLowerCornerOf(new net.minecraft.core.Vec3i(attachedSide.getStepX(), attachedSide.getStepY(), attachedSide.getStepZ())));
         } else {
             targetPos = Vec3.atCenterOf(attachedBlockPos).add(0, -1.5f, 0);
         }
@@ -306,7 +306,7 @@ public class BatBlockAttachPower extends Power {
         player.fallDistance = 0;
 
         // 直接操作移动相关字段，类似原版的处理方式
-        player.walkDist = 0;
+        // walkDist removed in 1.21.11
         player.moveDist = 0;
         player.flyDist = 0;
 
@@ -316,7 +316,7 @@ public class BatBlockAttachPower extends Power {
         player.zza = 0;
 
         // 标记速度已变更
-        player.hasImpulse = true;
+        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
     }

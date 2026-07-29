@@ -1,9 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.recipes;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
@@ -12,8 +10,11 @@ import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 
+import java.util.function.Function;
+import java.util.function.Predicate;
+
 public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX {
-    public final ResourceLocation id;
+    public final Identifier id;
     public final Predicate<ItemStack> template;
     public final Predicate<ItemStack> base;
     public final Predicate<ItemStack> addition;
@@ -23,7 +24,7 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
         return false;
     }
 
-    public UpgradeRecipe(ResourceLocation id, Predicate<ItemStack> template, Predicate<ItemStack> base, Predicate<ItemStack> addition, Function<ItemStack, ItemStack> upgradeResult) {
+    public UpgradeRecipe(Identifier id, Predicate<ItemStack> template, Predicate<ItemStack> base, Predicate<ItemStack> addition, Function<ItemStack, ItemStack> upgradeResult) {
         this.id = id;
         this.template = template;
         this.base = base;
@@ -70,7 +71,7 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
         return this.upgradeResult.apply(itemStack.copy());
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return this.id;
     }
 

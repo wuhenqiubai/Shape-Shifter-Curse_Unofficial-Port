@@ -11,9 +11,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
@@ -43,52 +45,52 @@ public class ShapeShifterCurseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
         dispatcher.register(
                 literal("shape_shifter_curse")
-                        .then(literal("set_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("set_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("transform_to_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_form")))
                                         )
                                 )
                         )
-                        .then(literal("set_dynamic_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("set_dynamic_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_DYNAMIC_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_dynamic_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("transform_to_dynamic_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_DYNAMIC_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_dynamic_form")))
                                         )
                                 )
                         )
-                        .then(literal("set_sub_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("set_sub_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_SUB_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.setForm(context, Component.translatable("command.shape_shifter_curse.no_permission_sub_form")))
                                         )
                                 )
                         )
-                        .then(literal("transform_to_sub_form").requires(cs -> cs.hasPermission(2))
+                        .then(literal("transform_to_sub_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_SUB_FORM_ARG))
                                                 .executes(context -> ShapeShifterCurseCommand.transformToForm(context, Component.translatable("command.shape_shifter_curse.no_permission_sub_form")))
                                         )
                                 )
                         )
-                        .then(literal("jump_to_next_cursed_moon").requires(cs -> cs.hasPermission(2))
+                        .then(literal("jump_to_next_cursed_moon").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .executes(ShapeShifterCurseCommand::jumpToNextCursedMoon)
                         )
-                        .then(literal("world_time").requires(cs -> cs.hasPermission(2))
+                        .then(literal("world_time").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(literal("set").then(argument("time", IntegerArgumentType.integer())
                                         .executes(ShapeShifterCurseCommand::setWorldTime))
                                 )
@@ -96,7 +98,7 @@ public class ShapeShifterCurseCommand {
                                         .executes(ShapeShifterCurseCommand::addWorldTime))
                                 )
                         )
-                        .then(literal("adjust_feral_item_loc").requires(cs -> cs.hasPermission(2))
+                        .then(literal("adjust_feral_item_loc").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("rot_center", Vec3Argument.vec3())
                                         .then(argument("pos_offset", Vec3Argument.vec3())
                                                 .then(argument("euler_x", FloatArgumentType.floatArg())
@@ -105,12 +107,12 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        .then(literal("keep_original_skin").requires(cs -> cs.hasPermission(0))
+                        .then(literal("keep_original_skin").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(0))))
                                 .then(argument("value", BoolArgumentType.bool())
                                         .executes(ShapeShifterCurseCommand::setPlayerSkin)
                                 )
                         )
-                        .then(literal("set_form_color").requires(cs -> cs.hasPermission(0))
+                        .then(literal("set_form_color").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(0))))
                                 .executes(ShapeShifterCurseCommand::logFormColorSetting)
                                 .then(argument("enable", BoolArgumentType.bool())
                                         .executes(ShapeShifterCurseCommand::setFormColorEnable)
@@ -131,7 +133,7 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        .then(literal("debug").requires(cs -> cs.hasPermission(0))
+                        .then(literal("debug").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(0))))
                                 .then(literal("dev_command").executes(ShapeShifterCurseCommand::devCommand))
                                 .then(literal("clear_player_form_data")
                                         .then(argument("target", EntityArgument.player())
@@ -154,10 +156,10 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        .then(literal("patron_info").requires(cs -> cs.hasPermission(0))
+                        .then(literal("patron_info").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(0))))
                                 .executes(ShapeShifterCurseCommand::logPatronInfo)
                         )
-                        .then(literal("form_color").requires(cs -> cs.hasPermission(0))
+                        .then(literal("form_color").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(0))))
                                 .then(literal("menu").executes(ShapeShifterCurseCommand::FC_Menu))
                                 .then(literal("save")
                                         .then(argument("type", new MiscArgumentType.Enum_ArgumentType("form", "global", "form_default"))
@@ -479,7 +481,7 @@ public class ShapeShifterCurseCommand {
 
     private static boolean CheckDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
         // 只有权限等级>=2 或者在配置中开启才可以使用调试命令
-        if (commandContext.getSource().hasPermission(2)) {
+        if (commandContext.getSource().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             return true;
         }
         return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
@@ -569,9 +571,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -586,9 +588,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -603,9 +605,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -615,7 +617,7 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static final ResourceLocation NO_ID = ShapeShifterCurseFabric.identifier("empty");
+    private static final Identifier NO_ID = ShapeShifterCurseFabric.identifier("empty");
 
     private static int FC_Config(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
@@ -632,9 +634,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -675,7 +677,7 @@ public class ShapeShifterCurseCommand {
                 player.displayClientMessage(text, false);
             }
             case "server" -> {
-                Objects.requireNonNull(player.getServer()).getPlayerList().broadcastSystemMessage(text, false);
+                Objects.requireNonNull(player.level().getServer()).getPlayerList().broadcastSystemMessage(text, false);
             }
         }
         return 1;

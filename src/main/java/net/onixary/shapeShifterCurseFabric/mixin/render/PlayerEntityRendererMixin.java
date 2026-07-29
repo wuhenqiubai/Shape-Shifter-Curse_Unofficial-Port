@@ -2,17 +2,17 @@ package net.onixary.shapeShifterCurseFabric.mixin.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.client.resources.PlayerSkin;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.PlayerSkin;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.NoRenderArmPower;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -27,24 +27,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(PlayerRenderer.class)
-public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
-    public PlayerEntityRendererMixin(EntityRendererProvider.Context ctx, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
+@Mixin(AvatarRenderer.class)
+public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
+    public PlayerEntityRendererMixin(EntityRendererProvider.Context ctx, PlayerModel model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 
     // 挂载Feature
     @Inject(method = "<init>", at = @At(value = "TAIL"))
     public void onInit(EntityRendererProvider.Context ctx, boolean slim, CallbackInfo ci) {
-        this.addLayer(new FormRenderFeature<>((PlayerRenderer) (Object) this));
+        this.addLayer(new FormRenderFeature<>((AvatarRenderer) (Object) this));
     }
 
     // 第一人称 渲染
     @Unique
-    private static final ResourceLocation CUSTOM_SKIN = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
+    private static final Identifier CUSTOM_SKIN = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "textures/entity/base_player/ssc_base_skin.png");
 
     @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
-    private void shape_shifter_curse$RenderArm_HEAD(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
+    private void shape_shifter_curse$RenderArm_HEAD(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.ignoreNoRenderArmPower && PowerHolderComponent.hasPower(player, NoRenderArmPower.class)) {  // 不渲染手臂情况
             ci.cancel();
@@ -52,20 +52,20 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     }
 
     @Inject(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/player/PlayerRenderer;setModelProperties(Lnet/minecraft/client/player/AbstractClientPlayer;)V", shift = At.Shift.AFTER))
-    private void shape_shifter_curse$RenderArm_setModelPose_AFTER(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
+    private void shape_shifter_curse$RenderArm_setModelPose_AFTER(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         // 渲染变身模型-根据模型设置修改手臂组件渲染
         if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}  // 仅当启用自定义第一人称渲染时才进行修改
-        PlayerRenderer realThis = (PlayerRenderer) (Object) this;
+        AvatarRenderer realThis = (AvatarRenderer) (Object) this;
         FormRenderFeature.rFPM_PartA(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
     }
 
     @Inject(method = "renderHand", at = @At("RETURN"))
-    private void shape_shifter_curse$RenderArm_RETURN(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
+    private void shape_shifter_curse$RenderArm_RETURN(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         // 渲染变身模型
         if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
         if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}  // 仅当启用自定义第一人称渲染时才进行修改
-        PlayerRenderer realThis = (PlayerRenderer) (Object) this;
+        AvatarRenderer realThis = (AvatarRenderer) (Object) this;
         FormRenderFeature.rFPM_PartB(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
     }
 
@@ -81,8 +81,8 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
 
 
     // 第三人称皮肤
-    @Inject(method = "getTextureLocation(Lnet/minecraft/world/entity/Entity;)Lnet/minecraft/resources/ResourceLocation;", at = @At("HEAD"), cancellable = true)
-    private void shape_shifter_curse$onGetTexture(Entity entity, CallbackInfoReturnable<ResourceLocation> cir) {
+    @Inject(method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/resources/Identifier;", at = @At("HEAD"), cancellable = true)
+    private void shape_shifter_curse$onGetTexture(AvatarRenderState avatarRenderState, CallbackInfoReturnable<Identifier> cir) {
         if(entity instanceof Player player) {
             if (!RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {
                 boolean keepOriginalSkin = RegPlayerSkinComponent.SKIN_SETTINGS.get(player).shouldKeepOriginalSkin();

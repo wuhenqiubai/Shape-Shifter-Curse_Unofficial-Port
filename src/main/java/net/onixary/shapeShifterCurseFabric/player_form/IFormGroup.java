@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +12,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public interface IFormGroup {
-    @NotNull ResourceLocation getGroupID();
+    @NotNull Identifier getGroupID();
 
     @NotNull Map<Integer, List<Tuple<Integer, IForm>>> getGroupData();
 

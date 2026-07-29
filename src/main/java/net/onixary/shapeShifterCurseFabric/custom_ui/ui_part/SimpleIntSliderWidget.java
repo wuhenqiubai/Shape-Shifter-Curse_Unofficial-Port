@@ -5,13 +5,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 
 import java.util.function.Consumer;
 
 public class SimpleIntSliderWidget extends AbstractSliderButton {
-    private static final ResourceLocation TEXTURE = ResourceLocation.parse("textures/gui/slider.png");
+    private static final Identifier TEXTURE = Identifier.parse("textures/gui/slider.png");
 	public final int minValue;
     public final int maxValue;
 

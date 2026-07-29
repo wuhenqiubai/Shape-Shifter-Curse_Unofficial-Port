@@ -3,33 +3,29 @@ package net.onixary.shapeShifterCurseFabric.minion.mobs;
 import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.model.ColorableAgeableListModel;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
+import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.Wolf;
 
 @Environment(EnvType.CLIENT)
-public class AnubisWolfMinionEntityModel<T extends Wolf> extends ColorableAgeableListModel<T> {
+public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
     private static final String REAL_HEAD = "real_head";
     private static final String UPPER_BODY = "upper_body";
     private static final String REAL_TAIL = "real_tail";
     private final ModelPart head;
-    //private final ModelPart realHead;
     private final ModelPart torso;
     private final ModelPart rightHindLeg;
     private final ModelPart leftHindLeg;
     private final ModelPart rightFrontLeg;
     private final ModelPart leftFrontLeg;
     private final ModelPart tail;
-    //private final ModelPart realTail;
     private final ModelPart neck;
-    private static final int field_32580 = 8;
 
     public AnubisWolfMinionEntityModel(ModelPart root) {
         this.head = root.getChild("head");
-        //this.realHead = this.head.getChild("real_head");
         this.torso = root.getChild("body");
         this.neck = root.getChild("upperBody");
         this.rightHindLeg = root.getChild("leg0");
@@ -37,7 +33,6 @@ public class AnubisWolfMinionEntityModel<T extends Wolf> extends ColorableAgeabl
         this.rightFrontLeg = root.getChild("leg2");
         this.leftFrontLeg = root.getChild("leg3");
         this.tail = root.getChild("tail");
-        //this.realTail = this.tail.getChild("real_tail");
     }
 
     public static LayerDefinition getTexturedModelData() {
@@ -80,14 +75,14 @@ public class AnubisWolfMinionEntityModel<T extends Wolf> extends ColorableAgeabl
         return ImmutableList.of(this.torso, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.neck);
     }
 
-    public void prepareMobModel(T wolfEntity, float f, float g, float h) {
-        if (wolfEntity.isAngry()) {
+    public void prepareMobModel(WolfRenderState state, float f, float g) {
+        if (state.isAngry) {
             this.tail.yRot = 0.0F;
         } else {
             this.tail.yRot = Mth.cos(f * 0.6662F) * 1.4F * g;
         }
 
-        if (wolfEntity.isInSittingPose()) {
+        if (state.isSitting) {
             this.neck.setPos(-1.0F, 16.0F, -3.0F);
             this.neck.xRot = 1.2566371F;
             this.neck.yRot = 0.0F;
@@ -118,13 +113,11 @@ public class AnubisWolfMinionEntityModel<T extends Wolf> extends ColorableAgeabl
             this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
         }
 
-        //this.realHead.roll = wolfEntity.getBegAnimationProgress(h) + wolfEntity.getShakeAnimationProgress(h, 0.0F);
-        this.neck.zRot = wolfEntity.getBodyRollAngle(h, -0.08F);
-        this.torso.zRot = wolfEntity.getBodyRollAngle(h, -0.16F);
-        //this.realTail.roll = wolfEntity.getShakeAnimationProgress(h, -0.2F);
+        this.neck.zRot = Mth.cos(f * 0.6662F) * 0.08F;
+        this.torso.zRot = Mth.cos(f * 0.6662F) * 0.16F;
     }
 
-    public void setupAnim(T wolfEntity, float f, float g, float h, float i, float j) {
+    public void setupAnim(WolfRenderState state, float f, float g, float h, float i, float j) {
         this.head.xRot = j * ((float)Math.PI / 180F);
         this.head.yRot = i * ((float)Math.PI / 180F);
         this.tail.xRot = h;

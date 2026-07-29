@@ -6,13 +6,13 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -52,8 +52,8 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public UseAnim getUseAnimation(ItemStack stack) {
-        return UseAnim.BOW;
+    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+        return ItemUseAnimation.BOW;
     }
 
     @Override
@@ -62,9 +62,9 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-        user.startUsingItem(hand);
-        return InteractionResultHolder.success(user.getItemInHand(hand));
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        player.startUsingItem(hand);
+        return InteractionResult.SUCCESS;
     }
 
     // 我最早的Mod中的代码(没发布) 最后一次更新还是2年前了
@@ -85,7 +85,7 @@ public class SuperMorphScaleCore extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
-        if (user instanceof Player player && !world.isClientSide) {
+        if (user instanceof Player player && !world.isClientSide()) {
             int damage = stack.getDamageValue();
             int need_repair = 0;
             if (user.isShiftKeyDown()) {

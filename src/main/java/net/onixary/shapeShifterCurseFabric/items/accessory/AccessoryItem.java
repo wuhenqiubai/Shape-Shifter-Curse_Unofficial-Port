@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.items.accessory;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -24,7 +24,7 @@ public abstract class AccessoryItem extends Item {
 	 * @param slot  槽位 ID（如 {@code trinkets:head}）
 	 * @param index 槽位内的索引
 	 */
-	public record SlotData(ResourceLocation slot, int index) { }
+	public record SlotData(Identifier slot, int index) { }
 
 	/**
 	 * 饰品掉落规则。

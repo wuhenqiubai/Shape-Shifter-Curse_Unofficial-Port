@@ -8,11 +8,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.portal.DimensionTransition;
 import net.minecraft.world.phys.HitResult;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
 
@@ -22,12 +21,12 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
    }
 
    public EnderianPearlEntity(Level world, LivingEntity owner) {
-      super(ModEntities.ENDERIAN_PEARL, owner, world);
+      super(ModEntities.ENDERIAN_PEARL, world);
    }
 
    @Environment(EnvType.CLIENT)
    public EnderianPearlEntity(Level world, double x, double y, double z) {
-      super(ModEntities.ENDERIAN_PEARL, x, y, z, world);
+      super(ModEntities.ENDERIAN_PEARL, world);
    }
 
    protected Item getDefaultItem() {
@@ -42,7 +41,7 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
          this.level().addParticle(ParticleTypes.PORTAL, this.getX(), this.getY() + this.random.nextDouble() * 2.0D, this.getZ(), this.random.nextGaussian(), 0.0D, this.random.nextGaussian());
       }
 
-      if (!this.level().isClientSide && !this.isRemoved()) {
+      if (!this.level().isClientSide() && !this.isRemoved()) {
          if (entity instanceof ServerPlayer) {
             ServerPlayer serverPlayerEntity = (ServerPlayer)entity;
 		      if (serverPlayerEntity.connection.isAcceptingMessages() && serverPlayerEntity.level() == this.level() && !serverPlayerEntity.isSleeping()) {

@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -18,7 +18,7 @@ public class Form_FeralBase extends NormalForm {
     // 用模版的需要自行修改canSneakRush 不用模版的直接改AnimStateController
     public boolean canSneakRush = false;
 
-    public Form_FeralBase(ResourceLocation formID) {
+    public Form_FeralBase(Identifier formID) {
         super(formID);
         this.bodyType(PlayerFormBodyType.FERAL);
     }
@@ -65,7 +65,7 @@ public class Form_FeralBase extends NormalForm {
     public static final AbstractAnimStateController USE_ITEM_CONTROLLER = new UseItemAnimControllerPro(ANIM_IDLE, ANIM_IDLE, ANIM_SNEAK_IDLE, ANIM_SNEAK_WALK);
     public static final AbstractAnimStateController RIDE_CONTROLLER = new OneAnimController(ANIM_SNEAK_IDLE);
 
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {

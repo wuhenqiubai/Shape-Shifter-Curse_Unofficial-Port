@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.origin;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,13 +8,13 @@ import java.util.stream.Stream;
 
 public class OriginRegistry {
 
-    private static final HashMap<ResourceLocation, Origin> idToOrigin = new HashMap<>();
+    private static final HashMap<Identifier, Origin> idToOrigin = new HashMap<>();
 
     public static Origin register(Origin origin) {
         return register(origin.getIdentifier(), origin);
     }
 
-    public static Origin register(ResourceLocation id, Origin origin) {
+    public static Origin register(Identifier id, Origin origin) {
         if(idToOrigin.containsKey(id)) {
             throw new IllegalArgumentException("Duplicate origin id tried to register: '" + id.toString() + "'");
         }
@@ -22,7 +22,7 @@ public class OriginRegistry {
         return origin;
     }
 
-    protected static Origin update(ResourceLocation id, Origin origin) {
+    protected static Origin update(Identifier id, Origin origin) {
         if(idToOrigin.containsKey(id)) {
             Origin old = idToOrigin.get(id);
             idToOrigin.remove(id);
@@ -34,11 +34,11 @@ public class OriginRegistry {
         return idToOrigin.size();
     }
 
-    public static Stream<ResourceLocation> identifiers() {
+    public static Stream<Identifier> identifiers() {
         return idToOrigin.keySet().stream();
     }
 
-    public static Iterable<Map.Entry<ResourceLocation, Origin>> entries() {
+    public static Iterable<Map.Entry<Identifier, Origin>> entries() {
         return idToOrigin.entrySet();
     }
 
@@ -46,7 +46,7 @@ public class OriginRegistry {
         return idToOrigin.values();
     }
 
-    public static Origin get(ResourceLocation id) {
+    public static Origin get(Identifier id) {
         if(!idToOrigin.containsKey(id)) {
             throw new IllegalArgumentException("Could not get origin from id '" + id.toString() + "', as it was not registered!");
         }
@@ -54,7 +54,7 @@ public class OriginRegistry {
         return origin;
     }
 
-    public static boolean contains(ResourceLocation id) {
+    public static boolean contains(Identifier id) {
         return idToOrigin.containsKey(id);
     }
 
@@ -71,7 +71,7 @@ public class OriginRegistry {
         register(Origin.EMPTY);
     }
 
-    public static void remove(ResourceLocation id) {
+    public static void remove(Identifier id) {
         idToOrigin.remove(id);
     }
 }

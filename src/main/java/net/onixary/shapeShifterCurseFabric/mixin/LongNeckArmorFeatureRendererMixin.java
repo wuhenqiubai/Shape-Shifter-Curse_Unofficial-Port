@@ -6,7 +6,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
@@ -37,7 +36,7 @@ public class LongNeckArmorFeatureRendererMixin<T extends LivingEntity, M extends
         if (!(entity instanceof AbstractClientPlayer player)) {
             return;
         }
-        PlayerRenderer playerEntityRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+        AvatarRenderer playerEntityRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         FormRenderer renderer = FormRenderUtils.searchFirstRenderer(player, formRenderer -> {
             FormModel formModel = formRenderer.realModel;
             if (formModel == null) {

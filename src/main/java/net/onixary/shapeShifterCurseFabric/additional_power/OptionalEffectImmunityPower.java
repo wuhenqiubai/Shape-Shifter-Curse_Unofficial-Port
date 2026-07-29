@@ -4,9 +4,8 @@ import io.github.apace100.apoli.power.EffectImmunityPower;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffect;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
@@ -16,7 +15,7 @@ import java.util.Optional;
 
 public class OptionalEffectImmunityPower {
 
-    public static @Nullable MobEffect getStatusEffect(ResourceLocation effectID) {
+    public static @Nullable MobEffect getStatusEffect(Identifier effectID) {
         Optional<MobEffect> result = BuiltInRegistries.MOB_EFFECT.getOptional(effectID);
         return result.orElse(null);
     }
@@ -33,15 +32,15 @@ public class OptionalEffectImmunityPower {
                     if (data.isPresent("effect")) {
                         MobEffect effect = getStatusEffect(data.get("effect"));
                         if (effect != null) {
-                            power.addEffect((Holder<MobEffect>) effect);
+                            power.addEffect(effect);
                         }
                     }
                     if (data.isPresent("effects")) {
-                        List<ResourceLocation> effectIDs = data.get("effects");
-                        for (ResourceLocation effectID : effectIDs) {
+                        List<Identifier> effectIDs = data.get("effects");
+                        for (Identifier effectID : effectIDs) {
                             MobEffect effect = getStatusEffect(effectID);
                             if (effect != null) {
-                                power.addEffect((Holder<MobEffect>) effect);
+                                power.addEffect(effect);
                             }
                         }
                     }

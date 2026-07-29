@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 // 类熔炉配方 多输入物品 单种燃料 多输出物品
 public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
     public static final RecipeType<AlterRecipe> ALTER_RECIPE = RecipeUtils.registerRecipeType(ShapeShifterCurseFabric.identifier("alter"));
-    public static final ResourceLocation EmptyRecipeId = ShapeShifterCurseFabric.identifier("empty_alter_recipe");
+    public static final Identifier EmptyRecipeId = ShapeShifterCurseFabric.identifier("empty_alter_recipe");
 
     public static final AlterRecipe EmptyRecipe = new AlterRecipe(EmptyRecipeId, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, (inventory) -> new ArrayList<>(), 0);
 
@@ -45,9 +45,9 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
 
     public ItemStack VirtualOutput;
 
-    public final ResourceLocation id;
+    public final Identifier id;
 
-    public AlterRecipe(ResourceLocation id, Ingredient input1, Ingredient input2, Ingredient input3, Ingredient input4, Ingredient input5, Ingredient input6, Ingredient input7, Function<@Nullable Container, List<ItemStack>> output, int recipeTime) {
+    public AlterRecipe(Identifier id, Ingredient input1, Ingredient input2, Ingredient input3, Ingredient input4, Ingredient input5, Ingredient input6, Ingredient input7, Function<@Nullable Container, List<ItemStack>> output, int recipeTime) {
         this.id = id;
         this.input1 = input1;
         this.input2 = input2;
@@ -131,7 +131,7 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
 		}
 	}
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return this.id;
     }
 
@@ -158,7 +158,7 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
 			    ItemStack.CODEC.listOf().fieldOf("output").forGetter(r -> r.output.apply(null)),
 			    com.mojang.serialization.Codec.INT.optionalFieldOf("recipeTime", 200).forGetter(r -> r.recipeTime)
 	    ).apply(instance, (i1, i2, i3, i4, i5, i6, i7, outputList, time) ->
-			    new AlterRecipe(ResourceLocation.parse("alter"), i1, i2, i3, i4, i5, i6, i7, inv -> outputList, time)
+			    new AlterRecipe(Identifier.parse("alter"), i1, i2, i3, i4, i5, i6, i7, inv -> outputList, time)
 	    ));
 
 	    private static final StreamCodec<RegistryFriendlyByteBuf, AlterRecipe> PACKET_CODEC = new StreamCodec<>() {
@@ -177,7 +177,7 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
 				    outputs.add(ItemStack.OPTIONAL_STREAM_CODEC.decode(buf));
                 }
 			    int time = buf.readVarInt();
-			    return new AlterRecipe(ResourceLocation.parse("alter"), i1, i2, i3, i4, i5, i6, i7, inv -> outputs, time);
+			    return new AlterRecipe(Identifier.parse("alter"), i1, i2, i3, i4, i5, i6, i7, inv -> outputs, time);
 		    }
 
 		    @Override

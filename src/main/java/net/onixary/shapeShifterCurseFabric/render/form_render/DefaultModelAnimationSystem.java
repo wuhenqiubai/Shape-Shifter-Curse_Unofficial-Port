@@ -7,11 +7,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
@@ -34,8 +34,8 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.cache.model.BakedGeoModel;
+import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -162,7 +162,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             }
             if (json.has("condition")) {
                 String conditionName = json.get("condition").getAsString();
-                ResourceLocation conditionID = ResourceLocation.tryParse(conditionName);
+                Identifier conditionID = Identifier.tryParse(conditionName);
                 if (FormRenderUtils.conditionRegistry.containsKey(conditionID)) {
                     this.condition = FormRenderUtils.conditionRegistry.get(conditionID);
                 } else {
@@ -642,7 +642,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void beforeRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void beforeRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         float targetDrag = Mth.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
         td.currentTailDragAmount = Mth.lerp(0.04f, td.currentTailDragAmount, targetDrag);
@@ -652,7 +652,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
 
     @Override
-    public void processAnimation(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void processAnimation(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         model.resetBone(RM_HeadGeoBoneID);
         model.resetBone(RM_BodyGeoBoneID);
@@ -663,7 +663,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         for (Tuple<String, String> pair : extraPartsMap) {
             ProcessExtraBone(model, player, pair.getA(), pair.getB());
         }
-        PlayerModel<?> playerModel = renderer.getModel();
+        PlayerModel playerModel = (PlayerModel) renderer.getModel();
         model.setRotationForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartRotation(playerModel.head));
         model.translatePositionForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartPosition(playerModel.head));
         model.translatePositionForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartPosition(playerModel.body));
@@ -717,7 +717,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void afterRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void afterRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         if (neckConfig != null) {
             GeoBone neckRoot = neckConfig.getRoot(model);
             if (neckRoot != null) {
@@ -727,7 +727,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void finishRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void finishRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         td.tailDragAmountO = td.tailDragAmount;
         td.tailDragAmount *= 0.75F;
@@ -742,7 +742,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public @Nullable GeoBone beforeRenderFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
+    public @Nullable GeoBone beforeRenderFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         Optional<GeoBone> OptionalGeoBone = model.getBone(GeoBoneName);
@@ -760,7 +760,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public @Nullable GeoBone processAnimationFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
+    public @Nullable GeoBone processAnimationFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         model.resetBone(GeoBoneName);

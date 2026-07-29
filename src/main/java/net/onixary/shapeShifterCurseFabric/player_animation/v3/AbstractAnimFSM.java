@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -41,8 +41,8 @@ public abstract class AbstractAnimFSM {
 	 * @param animSystemData 动画系统数据
 	 * @return left = 下一个 FSM ID（null=不切换），right = 动画状态 ID
 	 */
-    public Tuple<@Nullable ResourceLocation, @NotNull ResourceLocation> update(Player player, AnimSystem.AnimSystemData animSystemData) {
-        ResourceLocation NextFSMID = getNextFSM(player, animSystemData);
+    public Tuple<@Nullable Identifier, @NotNull Identifier> update(Player player, AnimSystem.AnimSystemData animSystemData) {
+        Identifier NextFSMID = getNextFSM(player, animSystemData);
         if (NextFSMID == null) {
             return new Tuple<>(null, getStateID(player, animSystemData));
         } else {
@@ -51,7 +51,7 @@ public abstract class AbstractAnimFSM {
                 ShapeShifterCurseFabric.LOGGER.error("找不到动画控制状态机: {}", NextFSMID);
                 return new Tuple<>(null, getStateID(player, animSystemData));
             }
-            Tuple<@Nullable ResourceLocation, @NotNull ResourceLocation> NextFSMResult = NextFSM.update(player, animSystemData);
+            Tuple<@Nullable Identifier, @NotNull Identifier> NextFSMResult = NextFSM.update(player, animSystemData);
             if (NextFSMResult.getA() != null) {  // 多次跳转
                 return NextFSMResult;
             }
@@ -70,7 +70,7 @@ public abstract class AbstractAnimFSM {
 	 * @param animSystemData 动画系统数据
 	 * @return 下一个 FSM 的 ID，返回 null 表示不切换（留在当前 FSM）
 	 */
-	public abstract @Nullable ResourceLocation getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData);
+	public abstract @Nullable Identifier getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData);
 
 	/**
 	 * 获取当前 FSM 应使用的动画状态 ID。
@@ -82,5 +82,5 @@ public abstract class AbstractAnimFSM {
 	 * @param animSystemData 动画系统数据
 	 * @return 动画状态 ID
 	 */
-    public abstract @NotNull ResourceLocation getStateID(Player player, AnimSystem.AnimSystemData animSystemData);
+    public abstract @NotNull Identifier getStateID(Player player, AnimSystem.AnimSystemData animSystemData);
 }

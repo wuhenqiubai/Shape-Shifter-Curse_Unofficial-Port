@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
@@ -17,7 +17,7 @@ public class ModComponents implements EntityComponentInitializer {
     public static final ComponentKey<OriginComponent> ORIGIN;
 
     static {
-        ORIGIN = ComponentRegistry.getOrCreate(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origin"), OriginComponent.class);
+        ORIGIN = ComponentRegistry.getOrCreate(Identifier.fromNamespaceAndPath(Origins.MODID, "origin"), OriginComponent.class);
     }
 
     @Override

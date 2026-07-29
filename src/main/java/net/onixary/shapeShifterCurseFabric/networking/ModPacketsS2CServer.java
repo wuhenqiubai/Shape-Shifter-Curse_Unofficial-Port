@@ -6,7 +6,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -37,9 +37,9 @@ public class ModPacketsS2CServer {
     }
 
     // 发送形态变化同步包
-    public static void sendFormChange(ServerPlayer player, ResourceLocation newFormID) {
+    public static void sendFormChange(ServerPlayer player, Identifier newFormID) {
         FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeResourceLocation(newFormID);
+        buf.writeIdentifier(newFormID);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), buf));
     }
 
@@ -53,7 +53,7 @@ public class ModPacketsS2CServer {
      */
 
     // 发送变身状态同步包
-    public static void sendTransformState(ServerPlayer player, boolean isTransforming, ResourceLocation fromForm, ResourceLocation toForm) {
+    public static void sendTransformState(ServerPlayer player, boolean isTransforming, Identifier fromForm, Identifier toForm) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUUID(player.getUUID());
         buf.writeBoolean(isTransforming);
@@ -139,7 +139,7 @@ public class ModPacketsS2CServer {
     private static void sendRemoveDynamicFormExcept(ServerPlayer player) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(RegPlayerForms.dynamicPlayerForms.size());
-        for (ResourceLocation formId : RegPlayerForms.dynamicPlayerForms) {
+        for (Identifier formId : RegPlayerForms.dynamicPlayerForms) {
             buf.writeUtf(formId.toString());
         }
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT), buf));
@@ -159,12 +159,12 @@ public class ModPacketsS2CServer {
     // 现在理论 单包32K Form数量无限
     public static void updateDynamicForm(ServerPlayer player) {
         int MaxFormPerPacket = 63;  // 2M / 32K - 1
-        HashMap<ResourceLocation, DynamicForm> forms = RegPlayerForms.DumpDynamicPlayerForms();
+        HashMap<Identifier, DynamicForm> forms = RegPlayerForms.DumpDynamicPlayerForms();
         sendRemoveDynamicFormExcept(player);
         for (int i = 0; i < forms.size(); i += MaxFormPerPacket) {
             JsonObject jsonForms = new JsonObject();
             for (int j = 0; j < MaxFormPerPacket && i + j < forms.size(); j++) {
-                ResourceLocation formId = RegPlayerForms.dynamicPlayerForms.get(i + j);
+                Identifier formId = RegPlayerForms.dynamicPlayerForms.get(i + j);
                 jsonForms.add(formId.toString(), forms.get(formId).toJson());
             }
             sendUpdateDynamicForm(player, jsonForms);
@@ -178,10 +178,10 @@ public class ModPacketsS2CServer {
     }
 
     // 仅在获取到 Patron 数据后调用 玩家登录由 updateDynamicForm 负责
-    public static void updatePatronForms(ServerPlayer player, List<ResourceLocation> patronForms) {
+    public static void updatePatronForms(ServerPlayer player, List<Identifier> patronForms) {
         int MaxFormPerPacket = 63;
-        HashMap<ResourceLocation, DynamicForm> forms = new HashMap<>();
-        for (ResourceLocation formId : patronForms) {
+        HashMap<Identifier, DynamicForm> forms = new HashMap<>();
+        for (Identifier formId : patronForms) {
             IForm form = RegPlayerForms.getPlayerForm(formId);
             if (form instanceof DynamicForm pfd) {
                 forms.put(formId, pfd);
@@ -190,7 +190,7 @@ public class ModPacketsS2CServer {
         int NowPacket = 0;
         int RemainPacket = forms.size();
         JsonObject jsonForms = new JsonObject();
-        for (ResourceLocation formId : forms.keySet()) {
+        for (Identifier formId : forms.keySet()) {
             jsonForms.add(formId.toString(), forms.get(formId).toJson());
             NowPacket ++;
             RemainPacket --;
@@ -241,12 +241,12 @@ public class ModPacketsS2CServer {
         );
     }
 
-    public static void sendPowerAnimationDataToClient(ServerPlayer player, UUID PlayerUUID, @Nullable ResourceLocation animationId, int animationCount, int animationLength) {
+    public static void sendPowerAnimationDataToClient(ServerPlayer player, UUID PlayerUUID, @Nullable Identifier animationId, int animationCount, int animationLength) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUUID(PlayerUUID);
         if (animationId != null) {
             buf.writeBoolean(true);
-            buf.writeResourceLocation(animationId);
+            buf.writeIdentifier(animationId);
         } else {
             buf.writeBoolean(false);
         }
@@ -255,7 +255,7 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_CLIENT), buf));
     }
 
-    public static void sendPowerAnimationDataToNearPlayer(ServerPlayer player, @Nullable ResourceLocation animationId, int animationCount, int animationLength) {
+    public static void sendPowerAnimationDataToNearPlayer(ServerPlayer player, @Nullable Identifier animationId, int animationCount, int animationLength) {
         player.serverLevel().getPlayers(near_player -> near_player.distanceToSqr(player) <= 128 * 128).forEach(
                 nearPlayer -> {
                     sendPowerAnimationDataToClient(nearPlayer, player.getUUID(), animationId, animationCount, animationLength);
@@ -275,7 +275,7 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), buf));
     }
 
-    public static void sendModifyFCDData(ServerPlayer player, String commandType, ResourceLocation formID, String arg1, String arg2, String arg3, String arg4) {
+    public static void sendModifyFCDData(ServerPlayer player, String commandType, Identifier formID, String arg1, String arg2, String arg3, String arg4) {
         // commandType ->
         // save ->
         //     formID
@@ -304,7 +304,7 @@ public class ModPacketsS2CServer {
 
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUtf(commandType);
-        buf.writeResourceLocation(formID);
+        buf.writeIdentifier(formID);
         buf.writeUtf(arg1);
         buf.writeUtf(arg2);
         buf.writeUtf(arg3);

@@ -5,10 +5,10 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.random.WeightedRandomList;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.SpawnPlacementTypes;
 import net.minecraft.world.entity.SpawnPlacements;
@@ -93,20 +93,20 @@ public class TransformativeEntitySpawning {
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 1. 在沙漠神殿添加狼生成
             addStructureSpawn(
-                server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE)
-                    .get(ResourceLocation.fromNamespaceAndPath("minecraft", "desert_pyramid")),
+                server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
+                    .get(Identifier.fromNamespaceAndPath("minecraft", "desert_pyramid")).map(Holder::value).orElse(null),
                 MobCategory.CREATURE,
                 new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
-                    WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3, 5)))
+                    WeightedList.of(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3)))
             );
             // 2. 在废弃矿井添加蜘蛛生成
-            for (Holder<Structure> structureEntry : server.overworld().registryAccess().registryOrThrow(Registries.STRUCTURE)
-                .getTagOrEmpty(TagKey.create(Registries.STRUCTURE, ResourceLocation.fromNamespaceAndPath("minecraft", "mineshaft")))) {
+            for (Holder<Structure> structureEntry : server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
+                .getTagOrEmpty(TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath("minecraft", "mineshaft")))) {
                 addStructureSpawn(
                     structureEntry.value(),
                     MobCategory.MONSTER,
                     new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
-                        WeightedRandomList.create(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1, 2)))
+                        WeightedList.of(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1)))
                 );
             }
         });

@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
@@ -17,7 +17,7 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public class NormalForm implements IForm {
-    private final ResourceLocation FORM_ID;
+    private final Identifier FORM_ID;
     private IFormGroup formGroup = null;
     private int formTier = -2;
     private Set<String> formFlag = Set.of();
@@ -42,12 +42,12 @@ public class NormalForm implements IForm {
 
     public static final Consumer<Player> RESET_SCALE_FUNC = NORMAL_SCALE_FUNC_BUILDER.apply(1.0f, 1.0f);
 
-    public NormalForm(ResourceLocation formID) {
+    public NormalForm(Identifier formID) {
         this.FORM_ID = formID;
     }
 
     @Override
-    public @NotNull ResourceLocation getFormID() {
+    public @NotNull Identifier getFormID() {
         return this.FORM_ID;
     }
 
@@ -96,8 +96,8 @@ public class NormalForm implements IForm {
     }
 
     @Override
-    public @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer() {
-        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
+    public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
+        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
     }
 
     @Override

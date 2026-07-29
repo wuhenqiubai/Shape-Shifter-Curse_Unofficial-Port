@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -13,7 +13,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
 
 public class AddSustainedInstinctPower extends Power {
 
-    private final ResourceLocation instinctEffectID;
+    private final Identifier instinctEffectID;
     private final float value;
     private final int duration;
 

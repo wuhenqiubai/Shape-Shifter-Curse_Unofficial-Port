@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.mixin;
 
-import io.github.apace100.apoli.power.factory.condition.entity.InTagCondition;
 import io.github.apace100.calio.data.SerializableData;
 import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.ModifyTypeTagPower;

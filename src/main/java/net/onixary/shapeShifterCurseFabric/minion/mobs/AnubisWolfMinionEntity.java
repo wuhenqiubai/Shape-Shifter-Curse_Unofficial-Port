@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.minion.mobs;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.DifficultyInstance;
@@ -19,8 +19,8 @@ import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
-import net.minecraft.world.entity.animal.Wolf;
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.animal.wolf.Wolf;
+import net.minecraft.world.entity.monster.skeleton.AbstractSkeleton;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
@@ -29,11 +29,12 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.minion.IMinion;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
 public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMinionEntity> {
-    public static final ResourceLocation MinionID = ShapeShifterCurseFabric.identifier("anubis_wolf_minion");
+    public static final Identifier MinionID = ShapeShifterCurseFabric.identifier("anubis_wolf_minion");
 
     public AnubisWolfMinionEntity(EntityType<? extends AnubisWolfMinionEntity> entityType, Level world) {
         super(entityType, world);
@@ -42,9 +43,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     }
 
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData) {
-        // AgeableMobGroupData.shouldSpawnBaby is final in MojMap 1.21.1, cannot reuse passed data
-        return super.finalizeSpawn(world, difficulty, spawnReason, new AgeableMobGroupData(false));
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
+        return super.finalizeSpawn(world, difficulty, spawnReason, new AgeableMob.AgeableMobGroupData(false));
     }
 
     public int MinionLevel = 1;
@@ -82,12 +82,13 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public UUID getMinionOwnerUUID() {
-        return super.getOwnerUUID();
+        LivingEntity owner = this.getOwner();
+        return owner != null ? owner.getUUID() : null;
     }
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        this.setOwnerUUID(uuid);
+        // Owner UUID is now managed via getOwner/setOwner entity reference system
     }
 
     @Override
@@ -95,7 +96,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
             super.getOwner();
     }
 
-    public ResourceLocation getMinionTypeID() {
+    public Identifier getMinionTypeID() {
         return MinionID;
     }
 
@@ -154,8 +155,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        boolean IsSuccess = super.doHurtTarget(target);
+    public boolean doHurtTarget(ServerLevel serverLevel,  Entity target) {
+        boolean IsSuccess = super.doHurtTarget((ServerLevel) this.level(), target);
         LivingEntity Owner = this.getOwner();
         if (Owner == null) {
             return IsSuccess;
@@ -177,7 +178,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void tick() {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             if (!this.shouldExist()) {
                 this.setHealth(0.0f);  // 自动死亡
             }
@@ -203,18 +204,18 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-        nbt.putInt("MinionLevel", this.MinionLevel);
-        nbt.putFloat("MinionHealth", this.getHealth());  // 原版Bug不知道什么时候修
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putInt("MinionLevel", this.MinionLevel);
+        output.putFloat("MinionHealth", this.getHealth());
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        this.MinionLevel = nbt.getInt("MinionLevel");
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
+        this.MinionLevel = input.getIntOr("MinionLevel", 1);
         this.ApplyMinionLevel(false);
-        this.setHealth(nbt.getFloat("MinionHealth"));
+        this.setHealth(input.getFloatOr("MinionHealth", this.getHealth()));
     }
 
     public double getMinionDisappearRange() {
@@ -222,7 +223,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     }
 
     public boolean shouldExist() {
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             return true;
         }
         if (this.getMinionOwnerUUID() == null) {
@@ -255,12 +256,12 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
             iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
         // 清除死亡Message
-        this.setOwnerUUID(null);
+        this.setOwner(null);
         super.die(source);
     }
 
     @Override
-    public Level level() {
+    public @NonNull Level level() {
         return super.level();
     }
 

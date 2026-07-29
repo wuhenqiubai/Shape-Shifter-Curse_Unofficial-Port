@@ -1,9 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
@@ -24,9 +23,9 @@ public class ModBlocks {
     }
 
     private static void register(String blockName, Block block, boolean withBlockItem) {
-        Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(Origins.MODID, blockName), block);
+        Registry.register(BuiltInRegistries.BLOCK, Identifier.fromNamespaceAndPath(Origins.MODID, blockName), block);
         if(withBlockItem) {
-            Registry.register(BuiltInRegistries.ITEM, ResourceLocation.fromNamespaceAndPath(Origins.MODID, blockName), new BlockItem(block, new Item.Properties()));
+            Registry.register(BuiltInRegistries.ITEM, Identifier.fromNamespaceAndPath(Origins.MODID, blockName), new BlockItem(block, new Item.Properties()));
         }
     }
 }

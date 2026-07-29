@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.util;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -11,8 +11,8 @@ import java.io.IOException;
 
 public class TrinketDataPackReloadListener implements SimpleSynchronousResourceReloadListener {
     @Override
-    public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "accessory_power");
+    public Identifier getFabricId() {
+        return Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "accessory_power");
     }
 
     @Override

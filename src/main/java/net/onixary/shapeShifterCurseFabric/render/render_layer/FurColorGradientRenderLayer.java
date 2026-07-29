@@ -2,9 +2,8 @@ package net.onixary.shapeShifterCurseFabric.render.render_layer;
 
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import org.joml.Vector4f;
 
@@ -20,7 +19,7 @@ public abstract class FurColorGradientRenderLayer extends RenderType {
     }
 
 
-    public static RenderType getFurLayer(ResourceLocation texture, Vector4f startColor, Vector4f endColor) {
+    public static RenderType getFurLayer(Identifier texture, Vector4f startColor, Vector4f endColor) {
         // 使用所有可变参数生成唯一的缓存键
         String cacheKey = "fur_layer_" + texture + startColor + endColor;
 

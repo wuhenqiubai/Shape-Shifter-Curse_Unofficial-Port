@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 public class TransformAction {
     public static void TransformToFormAction(SerializableData.Instance data, Entity entity) {
         if (entity instanceof Player pe) {
-            ResourceLocation formId = data.get("form_id");
+            Identifier formId = data.get("form_id");
             boolean instant = data.get("instant");
             boolean force = data.get("force");
             if (formId == null) {
@@ -45,10 +45,10 @@ public class TransformAction {
 
     public static void GiveCustomTransformEffect(SerializableData.Instance data, Entity entity) {
         if (entity instanceof Player player) {
-            ResourceLocation formId = data.get("form_id");
+            Identifier formId = data.get("form_id");
             if (formId != null) {
                 CTPUtils.setTransformativePotionForm(player, formId);
-                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantenousEffect(player, player, player, 0, 1.0d);
+                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantenousEffect((net.minecraft.server.level.ServerLevel) player.level(), player, player, player, 0, 1.0d);
             }
         }
     }

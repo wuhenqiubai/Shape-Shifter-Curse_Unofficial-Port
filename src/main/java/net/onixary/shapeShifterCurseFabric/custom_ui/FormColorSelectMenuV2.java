@@ -15,7 +15,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -150,7 +150,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     // 私有变量 用于部分逻辑
     private boolean isScreenInit = false;
     private static final Minecraft minecraftClient = Minecraft.getInstance();
-    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/v2_form_color_select_menu.png");
+    private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/v2_form_color_select_menu.png");
     private static final int BG_WIDTH = 420;
     private static final int BG_HEIGHT = 227;
     private static final int BG_IMAGE_WIDTH = 420;
@@ -162,7 +162,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     private boolean isLockTempModelSystem = false;  // 用于还原
     private boolean isLockTempConfigSystem = false;  // 用于还原
     private @Nullable Screen parsetScreen = null;
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, ResourceLocation>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
     private int modelID = -1;
     private static final String identifierNameSpace = MOD_ID;
     private static final String identifierPrefix = "dynamic_fcs_v2_";
@@ -297,7 +297,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     }
 
     @Override
-    public ResourceLocation getLayerID() {
+    public Identifier getLayerID() {
         return this.getForm().getFormLayer().getB();
     }
 
@@ -1225,20 +1225,20 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     }
 
     // 实时形态颜色显示系统
-    private ResourceLocation getNextDynamicFormID() {
-        return ResourceLocation.fromNamespaceAndPath(identifierNameSpace, identifierPrefix + nowColorSettingIndex++);
+    private Identifier getNextDynamicFormID() {
+        return Identifier.fromNamespaceAndPath(identifierNameSpace, identifierPrefix + nowColorSettingIndex++);
     }
 
     private void CleanColorSettingCache() {
         TextureManager textureManager = minecraftClient.getTextureManager();
-        for (ResourceLocation id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
+        for (Identifier id : colorSettingCacheMap.values().stream().flatMap(map -> map.values().stream()).toList()) {
             textureManager.release(id);
         }
         colorSettingCacheMap.clear();
     }
 
     @Override
-    public ResourceLocation getTexture(int modelID, String category, ResourceLocation texture, ResourceLocation mask, boolean OnlyMultiply) {
+    public Identifier getTexture(int modelID, String category, Identifier texture, Identifier mask, boolean OnlyMultiply) {
         if (this.modelID != modelID) {
             this.modelID = modelID;
             CleanColorSettingCache();
@@ -1250,7 +1250,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         return colorSettingCacheMap.computeIfAbsent(category, k -> new HashMap<>()).computeIfAbsent(this.getColorSetting(true), k -> {
             // 这种方法不会内存泄漏 但是得自己管理临时材质
             DynamicTexture nativeImageBackedTexture = FormTextureUtils.BakeTextureNoMemLeak(texture, mask, this.getColorSetting(true), OnlyMultiply);
-            ResourceLocation id = getNextDynamicFormID();
+            Identifier id = getNextDynamicFormID();
             minecraftClient.getTextureManager().register(id, nativeImageBackedTexture);
             return id;
         });

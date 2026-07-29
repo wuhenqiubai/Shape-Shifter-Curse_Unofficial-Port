@@ -5,17 +5,19 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import org.objectweb.asm.Type;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
-import software.bernie.geckolib.animation.AnimatableManager;
+import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
 import java.util.List;
+import java.util.Properties;
 import java.util.function.Consumer;
 
 public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
@@ -26,7 +28,7 @@ public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
         tooltip.add(Component.translatable("item.shape-shifter-curse.morphscale_armor.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 
@@ -39,7 +41,7 @@ public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
             private GeoArmorRenderer<NetheriteMorphScaleArmor> renderer;
 
             @Override
-            public <T extends LivingEntity> HumanoidModel<?> getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<T> original) {
+            public <T extends LivingEntity> GeoArmorRenderer getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<T> original) {
                 if (this.renderer == null) {
                     this.renderer = new NetheriteMorphscaleArmorRenderer();
                 }

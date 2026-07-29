@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController;
 
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -11,9 +13,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
-
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
 
 public class TransformingController extends AbstractAnimStateController {
     private static AnimationHolder anim_on_transform_default = AnimationHolder.EMPTY;
@@ -58,9 +57,9 @@ public class TransformingController extends AbstractAnimStateController {
 
     @Override
     public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
-        anim_on_transform_default = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform"), true);
-        anim_on_transform_normal_to_feral = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_normal_to_feral"), true);
-        anim_on_transform_feral_to_normal = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_feral_to_normal"), true);
+        anim_on_transform_default = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform"), true);
+        anim_on_transform_normal_to_feral = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform_normal_to_feral"), true);
+        anim_on_transform_feral_to_normal = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform_feral_to_normal"), true);
         super.registerAnim(player, data);
     }
 

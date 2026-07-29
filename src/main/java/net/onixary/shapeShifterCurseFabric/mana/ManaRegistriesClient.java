@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mana;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,17 +11,17 @@ import java.util.HashMap;
 @Environment(EnvType.CLIENT)
 public class ManaRegistriesClient {
 
-    private static final HashMap<ResourceLocation, IManaRender> manaRenderRegistry = new HashMap<>();
+    private static final HashMap<Identifier, IManaRender> manaRenderRegistry = new HashMap<>();
 
-    public static void registerManaTypeRender(ResourceLocation identifier, @NotNull IManaRender render) {
+    public static void registerManaTypeRender(Identifier identifier, @NotNull IManaRender render) {
         manaRenderRegistry.put(identifier, render);
     }
 
-    public static boolean hasManaRender(@Nullable ResourceLocation identifier) {
+    public static boolean hasManaRender(@Nullable Identifier identifier) {
         return manaRenderRegistry.containsKey(identifier);
     }
 
-    public static @Nullable IManaRender getManaRender(@Nullable ResourceLocation identifier) {
+    public static @Nullable IManaRender getManaRender(@Nullable Identifier identifier) {
         return manaRenderRegistry.get(identifier);
     }
 

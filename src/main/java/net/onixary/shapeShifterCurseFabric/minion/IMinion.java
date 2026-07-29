@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -15,7 +15,7 @@ public interface IMinion<T extends LivingEntity> {
 
     void setMinionOwnerUUID(UUID uuid);
 
-    ResourceLocation getMinionTypeID();
+    Identifier getMinionTypeID();
 
     T getSelf();
 }

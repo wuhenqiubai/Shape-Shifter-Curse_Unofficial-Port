@@ -4,7 +4,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -32,7 +32,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
 
     public boolean enableScrollableIconRender = false;
     public int IconSize = 8;
-    public ResourceLocation IconTexID = ShapeShifterCurseFabric.identifier("textures/gui/scrollable_icon.png");
+    public Identifier IconTexID = ShapeShifterCurseFabric.identifier("textures/gui/scrollable_icon.png");
 
     public int textsLineCount = 0;
     public int scroll = 0;

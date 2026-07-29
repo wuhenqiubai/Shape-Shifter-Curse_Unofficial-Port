@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
@@ -10,12 +9,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.WorldlyContainer;
-import net.minecraft.world.WorldlyContainerHolder;
+import net.minecraft.util.Util;
+import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -118,10 +113,10 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int i = state.getValue(LEVEL);
         if (i < MAX_LEVEL + 1 && canIncrease(stack)) {
-            if (i < MAX_LEVEL && !world.isClientSide) {
+            if (i < MAX_LEVEL && !world.isClientSide()) {
                 BlockState blockState = addToComposter(player, state, world, pos, stack);
                 world.levelEvent(1500, pos, state != blockState ? 1 : 0);
                 player.awardStat(Stats.ITEM_USED.get(stack.getItem()));
@@ -129,7 +124,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
                     stack.shrink(1);
                 }
             }
-            return ItemInteractionResult.sidedSuccess(world.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return super.useItemOn(stack, state, world, pos, player, hand, hit);
     }
@@ -138,10 +133,10 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         int i = state.getValue(LEVEL);
         if (i == MAX_LEVEL + 1) {
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 emptyFullComposter(player, state, world, pos);
             }
-            return InteractionResult.sidedSuccess(world.isClientSide);
+            return InteractionResult.SUCCESS;
         }
         return InteractionResult.PASS;
     }
@@ -158,7 +153,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     }
 
     public static void emptyFullComposter(Entity user, BlockState state, Level world, BlockPos pos) {
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             Vec3 vec3d = Vec3.atLowerCornerWithOffset(pos, 0.5F, 1.01, 0.5F).offsetRandom(world.random, 0.7F);
 	        ItemEntity itemEntity = new ItemEntity(world, vec3d.x(), vec3d.y(), vec3d.z(), new ItemStack(ResultItem, state.getValue(COCOON_COUNT)));
             itemEntity.setDefaultPickUpDelay();

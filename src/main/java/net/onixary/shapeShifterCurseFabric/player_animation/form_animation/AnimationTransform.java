@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.form_animation;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -45,8 +45,8 @@ public class AnimationTransform {
     }
 
     public static void registerAnims() {
-        anim_on_transform_default = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform"), true);
-        anim_on_transform_normal_to_feral = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_normal_to_feral"), true);
-        anim_on_transform_feral_to_normal = new AnimationHolder(ResourceLocation.fromNamespaceAndPath(MOD_ID, "player_on_transform_feral_to_normal"), true);
+        anim_on_transform_default = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform"), true);
+        anim_on_transform_normal_to_feral = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform_normal_to_feral"), true);
+        anim_on_transform_feral_to_normal = new AnimationHolder(Identifier.fromNamespaceAndPath(MOD_ID, "player_on_transform_feral_to_normal"), true);
     }
 }

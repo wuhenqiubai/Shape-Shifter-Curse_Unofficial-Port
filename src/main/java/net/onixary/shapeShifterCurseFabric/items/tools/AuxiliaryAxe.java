@@ -9,8 +9,8 @@ import java.util.List;
 
 public class AuxiliaryAxe extends AxeItem {
 
-    public AuxiliaryAxe(Tier material, int attackDamage, float attackSpeed, Properties settings) {
-        super(material, settings);
+    public AuxiliaryAxe(ToolMaterial material, float attackDamage, float attackSpeed, Properties settings) {
+        super(material, attackDamage, attackSpeed, settings);
     }
 
     @Override

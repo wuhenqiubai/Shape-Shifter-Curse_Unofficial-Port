@@ -5,7 +5,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -22,17 +21,17 @@ public class SelectFormItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-        if (!world.isClientSide) {
-            ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) user, user);
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (!level.isClientSide()) {
+            ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) player, player);
         }
-        return super.use(world, user, hand);
+        return super.use(level, player, hand);
     }
 
     @Override
     public InteractionResult interactLivingEntity(ItemStack stack, Player user, LivingEntity entity, InteractionHand hand) {
         if (entity instanceof Player player) {
-            if (!user.level().isClientSide) {
+            if (!user.level().isClientSide()) {
                 ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) user, player);
             }
             return InteractionResult.SUCCESS;

@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.event;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +29,7 @@ public class SSCEvent {
     // 改函数参数比较麻烦 我得重新编译一下外部挂载Mixin(Curios兼容补丁) 暂时先这么写吧 等有需求再加个Slot和ItemStack参数
     @FunctionalInterface
     public static interface AccessoryModifyEvent {
-        void onEvent(@NotNull Player player, @NotNull ResourceLocation itemID, @NotNull String pluginID);
+        void onEvent(@NotNull Player player, @NotNull Identifier itemID, @NotNull String pluginID);
     }
 
     @FunctionalInterface

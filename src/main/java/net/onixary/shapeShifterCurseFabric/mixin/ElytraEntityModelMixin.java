@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.client.model.ElytraModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.object.equipment.ElytraModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;

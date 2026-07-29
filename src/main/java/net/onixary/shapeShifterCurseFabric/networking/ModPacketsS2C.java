@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -122,7 +122,7 @@ public class ModPacketsS2C {
      * 接收形态变化同步包
      */
     public static void receiveFormChange(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        ResourceLocation newFormID = payload.data().readResourceLocation();
+        Identifier newFormID = payload.data().readIdentifier();
 
         ctx.client().execute(() -> {
             if (ctx.client().player != null) {
@@ -251,11 +251,11 @@ public class ModPacketsS2C {
 
     private static void handleRemoveDynamicExcept(BytePayload payload, ClientPlayNetworking.Context ctx) {
         // 读取String -> JsonObject
-        List<ResourceLocation> except = new ArrayList<>();
+        List<Identifier> except = new ArrayList<>();
         int formCount = payload.data().readInt();
         for (int i = 0; i < formCount; i++) {
             String formName = payload.data().readUtf();
-            except.add(ResourceLocation.tryParse(formName));
+            except.add(Identifier.tryParse(formName));
         }
         ctx.client().execute(() -> {
             RegPlayerForms.removeDynamicPlayerFormsExcept(except);
@@ -352,7 +352,7 @@ public class ModPacketsS2C {
             ShapeShifterCurseFabric.LOGGER.warn("Can't find player entity when receiving active virtual totem packet");
             return;
         }
-        ResourceLocation virtualTotemType = payload.data().readResourceLocation();
+        Identifier virtualTotemType = payload.data().readIdentifier();
         RegistryFriendlyByteBuf regBuf = new RegistryFriendlyByteBuf(payload.data(), ctx.client().level.registryAccess());
         ItemStack totemStack = ItemStack.OPTIONAL_STREAM_CODEC.decode(regBuf);
         // ConcurrentModificationException 需要把这个操作放到Client线程而非Network线程
@@ -361,9 +361,9 @@ public class ModPacketsS2C {
 
     public static void receivePowerAnimationData(BytePayload payload, ClientPlayNetworking.Context ctx) {
         UUID playerUuid = payload.data().readUUID();
-        @Nullable ResourceLocation animationId;
+        @Nullable Identifier animationId;
         if (payload.data().readBoolean()) {
-            animationId = payload.data().readResourceLocation();
+            animationId = payload.data().readIdentifier();
         }
         else {
             animationId = null;
@@ -385,11 +385,11 @@ public class ModPacketsS2C {
         });
     }
 
-    public static void sendPowerAnimationDataToServer(@Nullable ResourceLocation animationId, int animationCount, int animationLength) {
+    public static void sendPowerAnimationDataToServer(@Nullable Identifier animationId, int animationCount, int animationLength) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         if (animationId != null) {
             buf.writeBoolean(true);
-            buf.writeResourceLocation(animationId);
+            buf.writeIdentifier(animationId);
         }
         else {
             buf.writeBoolean(false);
@@ -434,16 +434,16 @@ public class ModPacketsS2C {
         });
     }
 
-    public static void sendSetPatronForm(ResourceLocation formID) {
+    public static void sendSetPatronForm(Identifier formID) {
         FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeResourceLocation(formID);
+        buf.writeIdentifier(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM),  buf));
     }
 
-    public static void sendSetForm(ResourceLocation formID, UUID target, boolean immediate) {
+    public static void sendSetForm(Identifier formID, UUID target, boolean immediate) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUUID(target);
-        buf.writeResourceLocation(formID);
+        buf.writeIdentifier(formID);
         buf.writeBoolean(immediate);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_FORM),  buf));
     }
@@ -475,7 +475,7 @@ public class ModPacketsS2C {
 
     public static void receiveModifyFCDData(BytePayload payload, ClientPlayNetworking.Context ctx) {
         String commandType = payload.data().readUtf();
-        ResourceLocation formID = payload.data().readResourceLocation();
+        Identifier formID = payload.data().readIdentifier();
         String arg1 = payload.data().readUtf();
         String arg2 = payload.data().readUtf();
         String arg3 = payload.data().readUtf();

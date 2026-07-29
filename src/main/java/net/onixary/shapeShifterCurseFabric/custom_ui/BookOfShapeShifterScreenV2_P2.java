@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleMultilineTextWidget;
@@ -22,7 +22,7 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUtils.IWidgetEX {
-    private static final ResourceLocation page_texID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/codex_page_2.png");
+    private static final Identifier page_texID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/codex_page_2.png");
     public Player currentPlayer;
     public static final int BookSizeX = 350;
     public static final int BookSizeY = 220;

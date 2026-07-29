@@ -32,14 +32,16 @@ public interface ITMob {
 
 			double distance = TMob.distanceToSqr(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                TMob.doHurtTarget(player);
+                if (TMob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                    TMob.doHurtTarget(serverLevel, player);
+                }
                 applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
                 this.ApplyCooldown();
             }
         }
 
         // 生成粒子效果
-        if (TMob.level().isClientSide) {
+        if (TMob.level().isClientSide()) {
             for (int i = 0; i < 1; i++) {
                 TMob.level().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
                         TMob.getX() + (TMob.getRandom().nextDouble() - 0.5) * 0.5,
@@ -54,11 +56,9 @@ public interface ITMob {
         if(target instanceof Player player) {
             IForm currentForm = FormUtils.getPlayerForm(player);
             if (currentForm.isEquals(RegPlayerForms.ORIGINAL_SHIFTER)) {
-                boolean attacked = target.hurt(TMob.damageSources().mobAttack(TMob), (float)TMob.getAttributeValue(Attributes.ATTACK_DAMAGE));
-                if (attacked) {
-                    TMob.setLastHurtMob(TMob);
-                }
-                return Optional.of(attacked);
+                target.hurt(TMob.damageSources().mobAttack(TMob), (float)TMob.getAttributeValue(Attributes.ATTACK_DAMAGE));
+                TMob.setLastHurtMob(target);
+                return Optional.of(true);
             }
             return Optional.of(false);
         }

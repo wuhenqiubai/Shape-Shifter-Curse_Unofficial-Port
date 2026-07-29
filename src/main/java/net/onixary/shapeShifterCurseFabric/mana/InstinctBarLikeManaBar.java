@@ -5,7 +5,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
@@ -15,8 +15,8 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 @Environment(EnvType.CLIENT)
 public class InstinctBarLikeManaBar implements IManaRender{
     private static final Minecraft mc = Minecraft.getInstance();
-    private static final ResourceLocation BarTexFullID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/instinct_bar_full.png");
-    private static final ResourceLocation BarTexEmptyID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/instinct_bar_empty.png");
+    private static final Identifier BarTexFullID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/instinct_bar_full.png");
+    private static final Identifier BarTexEmptyID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/instinct_bar_empty.png");
 
     @Override
     public boolean OverrideInstinctBar() {

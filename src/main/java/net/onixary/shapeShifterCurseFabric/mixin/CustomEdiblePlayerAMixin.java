@@ -5,7 +5,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,14 +41,14 @@ public class CustomEdiblePlayerAMixin {
         return original;
     }
 
-    @ModifyExpressionValue(method = "triggerItemUseEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/UseAnim;"))
-    private UseAnim spawnConsumptionEffects$getUseAction(UseAnim original, ItemStack stack, int particleCount) {
+    @ModifyExpressionValue(method = "triggerItemUseEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))
+    private ItemUseAnimation spawnConsumptionEffects$getUseAction(ItemUseAnimation original, ItemStack stack, int particleCount) {
         if ((Object)this instanceof Player playerEntity) {
             FoodProperties fc = getPowerFoodComponent(playerEntity, useItem);
             if (fc == null) {
                 return original;
             }
-            return UseAnim.EAT;
+            return ItemUseAnimation.EAT;
         }
         return original;
     }

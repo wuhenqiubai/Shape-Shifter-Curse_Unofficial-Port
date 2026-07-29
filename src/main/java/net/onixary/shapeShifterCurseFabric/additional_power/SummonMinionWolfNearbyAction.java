@@ -73,8 +73,14 @@ public class SummonMinionWolfNearbyAction {
                 if (!(player.level() instanceof ServerLevel serverWorld)) {
                     return;
                 }
-                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_GROWL, player.getSoundSource(), 1.0f, 1.5f);
-                serverWorld.sendParticles(player, ParticleTypes.SOUL_FIRE_FLAME, true, player.blockPosition().getX() + 0.5f, player.blockPosition().getY() + 0.5f, player.blockPosition().getZ() + 0.5f, 8, 0, 0, 0, 0);
+                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_STEP, player.getSoundSource(), 1.0f, 1.5f);
+                var packet = new net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket(
+                        ParticleTypes.SOUL_FIRE_FLAME, true, false,
+                        player.blockPosition().getX() + 0.5, player.blockPosition().getY() + 0.5, player.blockPosition().getZ() + 0.5,
+                        0, 0, 0, 0, 8);
+                for (ServerPlayer p : serverWorld.players()) {
+                    serverWorld.sendParticles(p, true, player.blockPosition().getX() + 0.5, player.blockPosition().getY() + 0.5, player.blockPosition().getZ() + 0.5, packet);
+                }
             }
         }
     }

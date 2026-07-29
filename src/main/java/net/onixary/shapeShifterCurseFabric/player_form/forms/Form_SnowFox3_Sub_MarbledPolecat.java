@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -19,13 +19,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements IPatronForm {
-    public Form_SnowFox3_Sub_MarbledPolecat(ResourceLocation formID) {
+    public Form_SnowFox3_Sub_MarbledPolecat(Identifier formID) {
         super(formID, RegPlayerForms.SNOW_FOX_3);
     }
 
     @Override
-    public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
-        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
+        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements I
 
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {

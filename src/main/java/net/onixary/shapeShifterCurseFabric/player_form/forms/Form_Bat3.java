@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 
 public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
-    public Form_Bat3(ResourceLocation formID) {
+    public Form_Bat3(Identifier formID) {
         super(formID);
     }
 
@@ -61,7 +61,7 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     public static final AbstractAnimStateController CLIMB_CONTROLLER = new ClimbAnimController(ANIM_CLIMB_IDLE, ANIM_CLIMB);
     public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
 
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {
@@ -111,7 +111,7 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
+    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
             return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
         } else if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_BOTTOM)) {

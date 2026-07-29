@@ -2,11 +2,12 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -18,15 +19,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // 这一mixin与ViveCraft mod冲突，当其存在时禁用此mixin
 // This mixin conflicts with the ViveCraft mod, disable this mixin when it exists
-@Mixin(PlayerRenderer.class)
-public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRenderer<AbstractClientPlayer, PlayerModel<AbstractClientPlayer>> {
+@Mixin(AvatarRenderer.class)
+public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRenderer<AbstractClientPlayer, AvatarRenderState, PlayerModel> {
 
-    public PlayerEntityRendererFallFlyingMixin(EntityRendererProvider.Context ctx, PlayerModel<AbstractClientPlayer> model, float shadowRadius) {
+    public PlayerEntityRendererFallFlyingMixin(EntityRendererProvider.Context ctx, PlayerModel model, float shadowRadius) {
         super(ctx, model, shadowRadius);
     }
 
 
-    @Inject(method = "setupRotations(Lnet/minecraft/client/player/AbstractClientPlayer;Lcom/mojang/blaze3d/vertex/PoseStack;FFFF)V",
+    @Inject(method = "setupRotations(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V",
             at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V"),
             slice = {
                 @Slice(
@@ -36,7 +37,7 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             },
             cancellable = true
     )
-    public void setupTransformsInject(AbstractClientPlayer abstractClientPlayerEntity, PoseStack matrixStack, float f, float g, float h, float scale, CallbackInfo ci) {
+    public void setupTransformsInject(AvatarRenderState avatarRenderState, PoseStack poseStack, float f, float g, CallbackInfo ci) {
         // 如果 vivecraft 对此Inject仍不兼容 把下面代码解除注释
         /*
         if (FabricLoader.getInstance().isModLoaded("vivecraft")) {
@@ -126,4 +127,3 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
     }
     */
 }
-

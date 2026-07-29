@@ -6,7 +6,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -22,14 +22,14 @@ public class NormalFormSelectScreen extends Screen {
     // 背景图片固定尺寸配置
     private static final int BG_WIDTH = 470;
     private static final int BG_HEIGHT = 247;
-    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/normal_form_select_menu.png");
+    private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/normal_form_select_menu.png");
     private final String targetName;
     private final UUID targetUUID;
 
-    private List<ResourceLocation> availableForms;
+    private List<Identifier> availableForms;
     private int nowPage = 0;
     private static final int pageSize = 16;
-    private final List<ResourceLocation> buttonForms = new ArrayList<>();
+    private final List<Identifier> buttonForms = new ArrayList<>();
     private final List<Button> buttonWidgetList = new ArrayList<>();
 
     public NormalFormSelectScreen(Component title, String targetName, UUID targetUUID) {
@@ -38,15 +38,15 @@ public class NormalFormSelectScreen extends Screen {
         this.targetUUID = targetUUID;
     }
 
-    private List<ResourceLocation> getAvailableForms() {
-        List<ResourceLocation> availableForms = new ArrayList<>();
+    private List<Identifier> getAvailableForms() {
+        List<Identifier> availableForms = new ArrayList<>();
         RegPlayerForms.playerForms.forEach((formID, form) -> {
             availableForms.add(form.getFormID());
         });
         return availableForms;
     }
 
-    private void SendSetForm(ResourceLocation formID) {
+    private void SendSetForm(Identifier formID) {
         ModPacketsS2C.sendSetForm(formID, this.targetUUID, false);
     }
 

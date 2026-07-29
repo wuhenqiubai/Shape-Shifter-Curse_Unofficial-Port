@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(PotionBrewing.class)
 public class BrewingRecipeRegistryMixin {
 	@Unique
-    private static void setTargetForm(ItemStack stack, net.minecraft.resources.ResourceLocation formID) {
+    private static void setTargetForm(ItemStack stack, net.minecraft.resources.Identifier formID) {
         CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         CTPUtils.setCTPFormIDToNBT(nbt, formID);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));

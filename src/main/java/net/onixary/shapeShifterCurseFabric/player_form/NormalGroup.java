@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import org.jetbrains.annotations.NotNull;
 
@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 public class NormalGroup implements IFormGroup {
-    public final ResourceLocation id;
+    public final Identifier id;
     public Map<Integer, List<Tuple<Integer, IForm>>> groupData = new HashMap<>();
 
-    public NormalGroup(ResourceLocation id) {
+    public NormalGroup(Identifier id) {
         this.id = id;
     }
 
     @Override
-    public @NotNull ResourceLocation getGroupID() {
+    public @NotNull Identifier getGroupID() {
         return this.id;
     }
 

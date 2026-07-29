@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.items;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -28,12 +28,12 @@ public class PowerfulInhibitor extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-        if (user.canEat(true)) {
-            user.startUsingItem(hand);
-            return InteractionResultHolder.consume(user.getItemInHand(hand));
+    public InteractionResult use(Level level, Player player, InteractionHand hand) {
+        if (player.canEat(true)) {
+            player.startUsingItem(hand);
+            return InteractionResult.CONSUME;
         }
-        return InteractionResultHolder.fail(user.getItemInHand(hand));
+        return InteractionResult.FAIL;
     }
 
     @Override

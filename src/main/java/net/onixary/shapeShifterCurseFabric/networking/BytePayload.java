@@ -4,7 +4,7 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -14,11 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements CustomPacketPayload {
 
-    private static final ConcurrentHashMap<ResourceLocation, Type<BytePayload>> IDS = new ConcurrentHashMap<>();
-    private static final java.util.HashSet<ResourceLocation> REGISTERED_S2C = new java.util.HashSet<>();
-    private static final java.util.HashSet<ResourceLocation> REGISTERED_C2S = new java.util.HashSet<>();
+    private static final ConcurrentHashMap<Identifier, Type<BytePayload>> IDS = new ConcurrentHashMap<>();
+    private static final java.util.HashSet<Identifier> REGISTERED_S2C = new java.util.HashSet<>();
+    private static final java.util.HashSet<Identifier> REGISTERED_C2S = new java.util.HashSet<>();
 
-    public static Type<BytePayload> id(ResourceLocation identifier) {
+    public static Type<BytePayload> id(Identifier identifier) {
 	    return IDS.computeIfAbsent(identifier, Type::new);
     }
 
@@ -31,14 +31,14 @@ public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements
     }
 
     /** Shorthand: register S2C (idempotent) */
-    public static void registerS2C(ResourceLocation identifier) {
+    public static void registerS2C(Identifier identifier) {
         if (REGISTERED_S2C.add(identifier)) {
             PayloadTypeRegistry.playS2C().register(id(identifier), codecFor(id(identifier)));
         }
     }
 
     /** Shorthand: register C2S (idempotent) */
-    public static void registerC2S(ResourceLocation identifier) {
+    public static void registerC2S(Identifier identifier) {
         if (REGISTERED_C2S.add(identifier)) {
             PayloadTypeRegistry.playC2S().register(id(identifier), codecFor(id(identifier)));
         }

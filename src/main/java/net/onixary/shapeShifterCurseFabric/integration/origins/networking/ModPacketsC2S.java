@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.networking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
@@ -49,7 +49,7 @@ public class ModPacketsC2S {
                 return;
             }
 
-            ResourceLocation layerIdentifier = ResourceLocation.tryParse(layerId);
+            Identifier layerIdentifier = Identifier.tryParse(layerId);
             if (layerIdentifier == null) {
                 Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
                 return;
@@ -62,7 +62,7 @@ public class ModPacketsC2S {
             }
 
             if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
-                ResourceLocation id = ResourceLocation.tryParse(originId);
+                Identifier id = Identifier.tryParse(originId);
                 if (id == null) {
                     Origins.LOGGER.warn("Invalid origin ID: {}", originId);
                     return;
@@ -113,7 +113,7 @@ public class ModPacketsC2S {
                 return;
             }
 
-            ResourceLocation layerIdentifier = ResourceLocation.tryParse(layerId);
+            Identifier layerIdentifier = Identifier.tryParse(layerId);
             if (layerIdentifier == null) {
                 Origins.LOGGER.warn("Invalid layer ID: {}", layerId);
                 return;
@@ -126,9 +126,9 @@ public class ModPacketsC2S {
             }
 
             if (!component.hasAllOrigins() && !component.hasOrigin(layer)) {
-                List<ResourceLocation> randomOrigins = layer.getRandomOrigins(player);
+                List<Identifier> randomOrigins = layer.getRandomOrigins(player);
                 if (layer.isRandomAllowed() && randomOrigins != null && !randomOrigins.isEmpty()) {
-                    ResourceLocation randomOrigin = randomOrigins.get(new Random().nextInt(randomOrigins.size()));
+                    Identifier randomOrigin = randomOrigins.get(new Random().nextInt(randomOrigins.size()));
                     Origin origin = OriginRegistry.get(randomOrigin);
                     if (origin == null) {
                         Origins.LOGGER.warn("Random origin not found: {}", randomOrigin);
@@ -163,8 +163,8 @@ public class ModPacketsC2S {
         }
 
         FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeResourceLocation(layer.getIdentifier());
-        buf.writeResourceLocation(origin.getIdentifier());
+        buf.writeIdentifier(layer.getIdentifier());
+        buf.writeIdentifier(origin.getIdentifier());
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));
     }
 }

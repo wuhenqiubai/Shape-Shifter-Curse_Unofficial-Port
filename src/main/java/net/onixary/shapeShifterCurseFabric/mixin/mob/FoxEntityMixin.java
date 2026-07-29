@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.world.entity.animal.Fox;
+import net.minecraft.world.entity.animal.fox.Fox;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.FoxFriendlyPower;
 import org.spongepowered.asm.mixin.Mixin;

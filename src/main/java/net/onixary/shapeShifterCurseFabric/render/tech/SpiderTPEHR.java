@@ -8,7 +8,6 @@ import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -27,7 +26,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
 
 	    EntityRenderDispatcher ed = Minecraft.getInstance().getEntityRenderDispatcher();
 	    if (ed == null) return;
-	    PlayerRenderer eR = (PlayerRenderer) ed.getRenderer(player);
+	    AvatarRenderer eR = (AvatarRenderer) ed.getRenderer(player);
 	    if (eR == null) return;
         ModelPart body = eR.getModel().body;
         body.translateAndRotate(matrices);

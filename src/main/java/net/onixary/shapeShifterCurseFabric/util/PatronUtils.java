@@ -5,7 +5,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -275,7 +275,7 @@ public class PatronUtils {
     // **** 此DataPack非标准数据包 为单层 <id>.json 的ssc_form文件 ****
     private static void UpdateDataPack(MinecraftServer server) {
         List<JsonObject> jsonObjects = ReadDataPackZip(getNewestDataPack());
-        List<ResourceLocation> patronForms = new ArrayList<>();
+        List<Identifier> patronForms = new ArrayList<>();
         if (jsonObjects != null) {
             for (JsonObject jsonObject : jsonObjects) {
                 DynamicForm pfd = null;
@@ -290,7 +290,7 @@ public class PatronUtils {
                     ShapeShifterCurseFabric.LOGGER.warn("DataPack contains non-patron PlayerFormDynamic: {}", pfd.getFormID());
                     continue;
                 }
-                ResourceLocation formID = RegPlayerForms.registerDynamicPlayerForm(pfd).getFormID();
+                Identifier formID = RegPlayerForms.registerDynamicPlayerForm(pfd).getFormID();
                 if (!patronForms.contains(formID)) {
                     patronForms.add(formID);
                 }

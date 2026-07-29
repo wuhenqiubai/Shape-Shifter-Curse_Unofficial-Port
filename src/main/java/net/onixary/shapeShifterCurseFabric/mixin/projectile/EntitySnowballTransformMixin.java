@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Snowball;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,7 +46,7 @@ public abstract class EntitySnowballTransformMixin {
 	    Level world = snowball.level();
 
         // 避免重复转换
-        if (hasTransformedFluid || world.isClientSide) {
+        if (hasTransformedFluid || world.isClientSide()) {
             return;
         }
 
@@ -74,7 +74,7 @@ public abstract class EntitySnowballTransformMixin {
             hasTransformedFluid = true;
 
             // 销毁雪球（模拟碰撞效果）
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 snowball.level().broadcastEntityEvent(snowball, (byte) 3); // 粒子效果
                 snowball.discard();
             }
@@ -92,7 +92,7 @@ public abstract class EntitySnowballTransformMixin {
         Snowball snowball = (Snowball) (Object) this;
 	    Level world = snowball.level();
 
-        if (hasTransformedFluid || world.isClientSide) {
+        if (hasTransformedFluid || world.isClientSide()) {
             return;
         }
 

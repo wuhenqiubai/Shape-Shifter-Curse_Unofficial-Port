@@ -13,14 +13,13 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.render.tech.ItemStorePowerRender;
@@ -30,12 +29,12 @@ import java.util.function.Consumer;
 
 public class ItemStorePower extends Power implements ItemStorePowerRender.itemStorePowerRenderInterface {
     public ItemStack storedItem = ItemStack.EMPTY;
-    public final @Nullable ResourceLocation powerID;
+    public final @Nullable Identifier powerID;
     public int bobbingAnimationTime = 0;
     public final int Slot;
     public final int VanillaSlotStart = 2800;
 
-    public ItemStorePower(PowerType<?> type, LivingEntity entity, @Nullable ResourceLocation powerID, int Slot) {
+    public ItemStorePower(PowerType<?> type, LivingEntity entity, @Nullable Identifier powerID, int Slot) {
         super(type, entity);
         this.powerID = powerID;
         this.Slot = Slot;
@@ -53,11 +52,11 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
         if (this.bobbingAnimationTime > 0) {
             this.bobbingAnimationTime -= 1;
         }
-        this.storedItem.inventoryTick(this.entity.level(), this.entity, VanillaSlotStart + this.Slot, false);
+        this.storedItem.inventoryTick(this.entity.level(), this.entity, null);
     }
 
     public void SetItem(ItemStack stack) {
-        if (this.entity.level().isClientSide) {
+        if (this.entity.level().isClientSide()) {
             return;
         }
         this.storedItem = stack.copy();
@@ -66,7 +65,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     }
 
     public void GainItem(ItemStack stack) {
-        if (this.entity.level().isClientSide) {
+        if (this.entity.level().isClientSide()) {
             return;
         }
         if (!this.storedItem.isEmpty()) {
@@ -76,7 +75,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     }
 
     public void DropItem() {
-        if (this.entity.level().isClientSide) {
+        if (this.entity.level().isClientSide()) {
             return;
         }
         if (!storedItem.isEmpty()) {
@@ -94,7 +93,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     }
 
     public void SwapItem(EquipmentSlot slot) {
-        if (this.entity.level().isClientSide) {
+        if (this.entity.level().isClientSide()) {
             return;
         }
         ItemStack item = this.entity.getItemBySlot(slot);
@@ -104,7 +103,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     }
 
     public void InvokeItemAction(ActionFactory<Tuple<Level, ItemStack>>.Instance action) {
-        if (this.entity.level().isClientSide) {
+        if (this.entity.level().isClientSide()) {
             return;
         }
         if (action != null) {
@@ -141,7 +140,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
                         .result()
                         .ifPresent(stack -> this.storedItem = stack);
             }
-            this.bobbingAnimationTime = compound.getInt("bobbing_animation_time");
+            this.bobbingAnimationTime = compound.getInt("bobbing_animation_time").orElse(0);
         }
     }
 
@@ -155,7 +154,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
         ).allowCondition();
     }
 
-    public static @Nullable ItemStorePower findPower(Entity entity, @Nullable ResourceLocation powerID) {
+    public static @Nullable ItemStorePower findPower(Entity entity, @Nullable Identifier powerID) {
         if (powerID == null) return null;
         if (entity instanceof LivingEntity livingEntity) {
             return PowerHolderComponent.getPowers(livingEntity, ItemStorePower.class).stream()
@@ -195,7 +194,9 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
                         itemStorePower.GainItem(data.get("item"));
                     }
                     else if (data.getBoolean("if_no_power_drop")) {
-                        entity.spawnAtLocation((ItemLike) data.get("item"));
+                        if (entity.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                            entity.spawnAtLocation(serverLevel, (net.minecraft.world.level.ItemLike) data.get("item"));
+                        }
                     }
                 }
         ));

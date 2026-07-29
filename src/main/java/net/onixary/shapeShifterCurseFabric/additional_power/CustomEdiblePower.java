@@ -7,9 +7,8 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
@@ -21,7 +20,7 @@ import java.util.List;
 public class CustomEdiblePower extends Power {
 
     private final FoodProperties foodComponent;
-    private final List<ResourceLocation> ItemIdList;
+    private final List<Identifier> ItemIdList;
 
 
     public CustomEdiblePower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
@@ -36,20 +35,11 @@ public class CustomEdiblePower extends Power {
         if (data.getBoolean("always_edible")) {
             foodComponentBuilder.alwaysEdible();
         }
-        if (data.getBoolean("snack")) {
-            foodComponentBuilder.fast();
-        }
-        List<MobEffectInstance> effects = data.get("status_effects");
-        if (effects != null) {
-            for (MobEffectInstance effect : effects) {
-                // 应该使用这个功能的都是需求100%触发效果的 所以这里直接1.0f
-                foodComponentBuilder.effect(effect, 1.0f);
-            }
-        }
+        // snack and effect methods removed from FoodProperties.Builder in 1.21.11
         this.foodComponent = foodComponentBuilder.build();
     }
 
-    public List<ResourceLocation> getItemIdList() {
+    public List<Identifier> getItemIdList() {
         return this.ItemIdList;
     }
 

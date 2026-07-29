@@ -4,7 +4,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ModifyPlayerSpawnPower;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
@@ -81,7 +81,7 @@ public interface OriginComponent extends AutoSyncedComponent {
 				} else if (layer.getOriginOptionCount(player) == 1 && layer.shouldAutoChoose()) {
 					List<Origin> origins = layer.getOrigins(player).stream().map(OriginRegistry::get).filter(Origin::isChoosable).collect(Collectors.toList());
 					if (origins.size() == 0) {
-						List<ResourceLocation> randomOrigins = layer.getRandomOrigins(player);
+						List<Identifier> randomOrigins = layer.getRandomOrigins(player);
 						setOrigin(layer, OriginRegistry.get(randomOrigins.get(player.getRandom().nextInt(randomOrigins.size()))));
 					} else {
 						setOrigin(layer, origins.get(0));

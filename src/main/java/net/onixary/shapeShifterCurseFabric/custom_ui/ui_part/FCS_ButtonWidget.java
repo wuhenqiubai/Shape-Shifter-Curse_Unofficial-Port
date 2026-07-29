@@ -5,12 +5,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class FCS_ButtonWidget extends Button {
-    public final ResourceLocation WIDGETS_TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/form_color_select_menu_part.png");
+    public final Identifier WIDGETS_TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/form_color_select_menu_part.png");
     public int TEXTURE_X = 0;
 
 

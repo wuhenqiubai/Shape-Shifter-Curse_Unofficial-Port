@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -16,7 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class Form_Ocelot2 extends NormalForm {
-    public Form_Ocelot2(ResourceLocation formID) {
+    public Form_Ocelot2(Identifier formID) {
         super(formID);
     }
 
@@ -29,7 +29,7 @@ public class Form_Ocelot2 extends NormalForm {
     public static final AbstractAnimStateController FALL_CONTROLLER = new WithSneakAnimController(null, SNEAK_RUSH_JUMP_ANIM);
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {

@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -13,12 +13,12 @@ import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import org.jetbrains.annotations.Nullable;
 
 public class ManaAttributePower extends Power {
-    private final @Nullable ResourceLocation modifierID;
+    private final @Nullable Identifier modifierID;
     private final @Nullable ManaUtils.Modifier maxManaModifier;
     private final @Nullable ManaUtils.Modifier regenManaModifier;
     private final boolean playerSide;
 
-    public ManaAttributePower(PowerType<?> type, LivingEntity entity, @Nullable ResourceLocation modifierID, @Nullable ManaUtils.Modifier maxManaModifier, @Nullable ManaUtils.Modifier manaRegenModifier, boolean playerSide)  {
+    public ManaAttributePower(PowerType<?> type, LivingEntity entity, @Nullable Identifier modifierID, @Nullable ManaUtils.Modifier maxManaModifier, @Nullable ManaUtils.Modifier manaRegenModifier, boolean playerSide)  {
         super(type, entity);
         this.modifierID = modifierID;
         this.maxManaModifier = maxManaModifier;

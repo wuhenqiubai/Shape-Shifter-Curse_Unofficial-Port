@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item.TooltipContext;
@@ -30,7 +30,7 @@ public class PotionItemMixin {
         if (user instanceof Player player) {
             var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
-        ResourceLocation CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
+        Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
             if (CTPFormID != null) {
                 CTPUtils.setTransformativePotionForm(player, CTPFormID);
             }
@@ -46,11 +46,10 @@ public class PotionItemMixin {
         }
         var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
-        ResourceLocation CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
+        Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
         if (CTPFormID != null) {
             Component formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
             tooltip.add(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
         }
     }
 }
-

@@ -2,14 +2,15 @@ package net.onixary.shapeShifterCurseFabric.mixin.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.PlayerModel;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
@@ -23,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(value = LivingEntityRenderer.class, priority = 10000)
-public abstract class OverlayRenderMixin<T extends LivingEntity, M extends EntityModel<T>> {
+public abstract class OverlayRenderMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> {
 
     @Shadow
     protected M model;
@@ -35,9 +36,9 @@ public abstract class OverlayRenderMixin<T extends LivingEntity, M extends Entit
     private void renderFormOverlay(T livingEntity, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, CallbackInfo ci) {
         if (!(livingEntity instanceof AbstractClientPlayer player)) return;
         if (player.isInvisible() || player.isSpectator()) return;
-        if (!(((Object) this) instanceof PlayerRenderer playerEntityRenderer)) return;
+        if (!(((Object) this) instanceof AvatarRenderer playerEntityRenderer)) return;
 
-	    PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
+        PlayerModel playerEntityModel = playerEntityRenderer.getModel();
 
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
         for (FormRenderer formRenderer : formRendererList) {
@@ -50,14 +51,14 @@ public abstract class OverlayRenderMixin<T extends LivingEntity, M extends Entit
                     OverlayTexture.u(hurtTime),
                     OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
 
-            ResourceLocation overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
+            Identifier overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
             if (overlayTexture != null) {
                 RenderType renderLayer = RenderType.entityTranslucent(overlayTexture);
                 playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),
                         light, overlay, 0xFFFFFFFF);
             }
 
-            ResourceLocation emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
+            Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
             if (emissiveTexture != null) {
                 RenderType renderLayer = RenderType.entityTranslucentEmissive(emissiveTexture);
                 playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(renderLayer),

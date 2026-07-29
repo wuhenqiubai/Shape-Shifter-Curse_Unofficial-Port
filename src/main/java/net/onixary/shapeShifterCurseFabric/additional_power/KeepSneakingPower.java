@@ -21,7 +21,7 @@ public class KeepSneakingPower extends Power {
 
     public boolean shouldForceSneak(Player player) {
         // 在水中时不强制潜行
-        if (player.isUnderWater() || player.isInWaterOrBubble()) {
+        if (player.isUnderWater() || player.isInWater()) {
             return false;
         }
 

@@ -5,7 +5,7 @@ import dev.emi.trinkets.api.SlotType;
 import dev.emi.trinkets.api.TrinketInventory;
 import dev.emi.trinkets.api.TrinketsApi;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -61,7 +61,7 @@ public class TrinketItemMixin {
 
     @Unique
     public void onEquip(ItemStack stack, SlotReference slot, Player player) {
-        ResourceLocation ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerEquip(player, ItemID, pluginID);
         }
@@ -69,7 +69,7 @@ public class TrinketItemMixin {
 
     @Unique
     public void onUnequip(ItemStack stack, SlotReference slot, Player player) {
-        ResourceLocation ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        Identifier ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerUnEquip(player, ItemID, pluginID);
         }

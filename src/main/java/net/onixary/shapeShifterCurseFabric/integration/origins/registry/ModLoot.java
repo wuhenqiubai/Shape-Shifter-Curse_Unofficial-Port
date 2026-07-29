@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 // Enchantment loot tables can be added via JSON data files:
 //   data/origins/loot_table/...
 
 public class ModLoot {
 
-    private static final ResourceLocation DUNGEON_LOOT = ResourceLocation.fromNamespaceAndPath("minecraft", "chests/simple_dungeon");
-    private static final ResourceLocation STRONGHOLD_LIBRARY = ResourceLocation.fromNamespaceAndPath("minecraft", "chests/stronghold_library");
-    private static final ResourceLocation MINESHAFT = ResourceLocation.fromNamespaceAndPath("minecraft", "chests/abandoned_mineshaft");
-    private static final ResourceLocation WATER_RUIN = ResourceLocation.fromNamespaceAndPath("minecraft", "chests/underwater_ruin_small");
+    private static final Identifier DUNGEON_LOOT = Identifier.fromNamespaceAndPath("minecraft", "chests/simple_dungeon");
+    private static final Identifier STRONGHOLD_LIBRARY = Identifier.fromNamespaceAndPath("minecraft", "chests/stronghold_library");
+    private static final Identifier MINESHAFT = Identifier.fromNamespaceAndPath("minecraft", "chests/abandoned_mineshaft");
+    private static final Identifier WATER_RUIN = Identifier.fromNamespaceAndPath("minecraft", "chests/underwater_ruin_small");
 
 // TODO:上游没有用到，但我后面还是重新写一下吧
 //    public static final LootConditionType ORIGIN_LOOT_CONDITION = registerLootCondition("origin", new OriginLootCondition.Serializer());

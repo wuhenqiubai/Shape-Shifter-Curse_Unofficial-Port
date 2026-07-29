@@ -4,8 +4,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
@@ -39,24 +39,24 @@ public class RegCustomItem {
     // morphscale armor
     public static final Item MORPHSCALE_CORE = register("morphscale_core", new Item(new Item.Properties()));
     public static final Item SUPER_MORPHSCALE_CORE = register("super_morphscale_core", new SuperMorphScaleCore(new Item.Properties().durability(64 * SuperMorphScaleCore.damagePerItem).rarity(Rarity.EPIC)));
-    public static final Item MORPHSCALE_HEADRING = register("morphscale_headring", new MorphScaleArmor(ArmorItem.Type.HELMET));
-    public static final Item MORPHSCALE_VEST = register("morphscale_vest", new MorphScaleArmor(ArmorItem.Type.CHESTPLATE));
-    public static final Item MORPHSCALE_CUISH = register("morphscale_cuish", new MorphScaleArmor(ArmorItem.Type.LEGGINGS));
-    public static final Item MORPHSCALE_ANKLET = register("morphscale_anklet", new MorphScaleArmor(ArmorItem.Type.BOOTS));
+    public static final Item MORPHSCALE_HEADRING = register("morphscale_headring", new MorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.HELMET));
+    public static final Item MORPHSCALE_VEST = register("morphscale_vest", new MorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
+    public static final Item MORPHSCALE_CUISH = register("morphscale_cuish", new MorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.LEGGINGS));
+    public static final Item MORPHSCALE_ANKLET = register("morphscale_anklet", new MorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.BOOTS));
     // netherite morphscale armor
-    public static final Item NETHERITE_MORPHSCALE_HEADRING = register("netherite_morphscale_headring", new NetheriteMorphScaleArmor(ArmorItem.Type.HELMET));
-    public static final Item NETHERITE_MORPHSCALE_VEST = register("netherite_morphscale_vest", new NetheriteMorphScaleArmor(ArmorItem.Type.CHESTPLATE));
-    public static final Item NETHERITE_MORPHSCALE_CUISH = register("netherite_morphscale_cuish", new NetheriteMorphScaleArmor(ArmorItem.Type.LEGGINGS));
-    public static final Item NETHERITE_MORPHSCALE_ANKLET = register("netherite_morphscale_anklet", new NetheriteMorphScaleArmor(ArmorItem.Type.BOOTS));
+    public static final Item NETHERITE_MORPHSCALE_HEADRING = register("netherite_morphscale_headring", new NetheriteMorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.HELMET));
+    public static final Item NETHERITE_MORPHSCALE_VEST = register("netherite_morphscale_vest", new NetheriteMorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.CHESTPLATE));
+    public static final Item NETHERITE_MORPHSCALE_CUISH = register("netherite_morphscale_cuish", new NetheriteMorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.LEGGINGS));
+    public static final Item NETHERITE_MORPHSCALE_ANKLET = register("netherite_morphscale_anklet", new NetheriteMorphScaleArmor(net.minecraft.world.item.equipment.ArmorType.BOOTS));
     // 模组自定义物品
     public static final Item MOONDUST_CRYSTAL_SHARD = register("moondust_crystal_shard", new MoonDustCrystalShard(new Item.Properties()));
     public static final Item ECTOPLASM_RAG = register("ectoplasm_rag", new Item(new Item.Properties()));
-    public static final TieredItem BOTTLED_SNOWFALL = register("bottled_snowfall", new BottledSnowfall(BottledSnowfallToolMaterial.INSTANCE, 1, 1, new Item.Properties()));
-    public static final TieredItem DIAMOND_MINING_CLAW = register("diamond_mining_claw", new DiamondMiningClaw(DiamondMiningClawToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
+    public static final Item BOTTLED_SNOWFALL = register("bottled_snowfall", new BottledSnowfall(BottledSnowfallToolMaterial.INSTANCE, 1, 1, new Item.Properties()));
+    public static final Item DIAMOND_MINING_CLAW = register("diamond_mining_claw", new DiamondMiningClaw(DiamondMiningClawToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
     public static final Item FIRE_CHARM_PAPER = register("fire_charm_paper", new Item(new Item.Properties()));
     public static final Item AUXILIARY_SWORD = register("auxiliary_sword", new AuxiliarySword(AuxiliarySwordToolMaterial.INSTANCE, 1, -2.4f, new Item.Properties()));
-    public static final TieredItem AUXILIARY_PICKAXE = register("auxiliary_pickaxe", new AuxiliaryPickaxe(AuxiliaryPickaxeToolMaterial.INSTANCE, 1, -2.8f, new Item.Properties()));
-    public static final TieredItem AUXILIARY_AXE = register("auxiliary_axe", new AuxiliaryAxe(AuxiliaryAxeToolMaterial.INSTANCE, 1, -3.1f, new Item.Properties()));
+    public static final Item AUXILIARY_PICKAXE = register("auxiliary_pickaxe", new AuxiliaryPickaxe(AuxiliaryPickaxeToolMaterial.INSTANCE, 1, -2.8f, new Item.Properties()));
+    public static final Item AUXILIARY_AXE = register("auxiliary_axe", new AuxiliaryAxe(AuxiliaryAxeToolMaterial.INSTANCE, 1, -3.1f, new Item.Properties()));
     // 模组自定义Trinkets
     public static final Item AMULET_BRACELET = register("amulet_bracelet", new AmuletBraceletTrinket(new Item.Properties()));
     public static final Item ATTACH_HOOK = register("attach_hook", new AttachHookTrinket(new Item.Properties()));
@@ -182,7 +182,7 @@ public class RegCustomItem {
     }
 
     public static <T extends Item> T register(String path, T item) {
-        return Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), item);
+        return Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(BuiltInRegistries.ITEM.key(), Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), item);
     }
 
     public static void initialize() {

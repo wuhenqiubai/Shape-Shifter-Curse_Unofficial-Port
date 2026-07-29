@@ -17,7 +17,7 @@ public class FoodUtilsCondition {
     public static boolean FC_isVegan(ItemStack itemStack, boolean Default) {
         var customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
-            return customData.copyTag().getByte(VeganDelightTag) == 1;
+            return customData.copyTag().getByte(VeganDelightTag).orElse((byte)0) == 1;
         }
         return Default;
     }

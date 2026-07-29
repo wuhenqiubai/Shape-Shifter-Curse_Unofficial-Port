@@ -20,9 +20,9 @@ public class CursedMoonClient {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
                 if (player.level().dimension() != Level.OVERWORLD) {
-                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    player.displayClientMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE), false);
                 } else {
-                    player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
+                    player.displayClientMessage(Component.translatable("info.shape-shifter-curse.before_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE), false);
                 }
             }
             middayMessageSent = true;

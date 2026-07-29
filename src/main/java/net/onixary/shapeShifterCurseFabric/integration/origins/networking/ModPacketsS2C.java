@@ -10,7 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.OriginsClient;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.Badge;
@@ -52,8 +52,8 @@ public class ModPacketsS2C {
 	@Environment(EnvType.CLIENT)
 	private static void receiveOriginConfirmation(BytePayload payload, ClientPlayNetworking.Context ctx) {
 		FriendlyByteBuf buf = payload.data();
-		OriginLayer layer = OriginLayers.getLayer(buf.readResourceLocation());
-		Origin origin = OriginRegistry.get(buf.readResourceLocation());
+		OriginLayer layer = OriginLayers.getLayer(buf.readIdentifier());
+		Origin origin = OriginRegistry.get(buf.readIdentifier());
 
 		if (layer == null) {
 			Origins.LOGGER.warn("Received origin confirmation with null layer");
@@ -118,7 +118,7 @@ public class ModPacketsS2C {
 		FriendlyByteBuf packetByteBuf = payload.data();
 		try {
 			Minecraft minecraftClient = ctx.client();
-			ResourceLocation[] ids = new ResourceLocation[packetByteBuf.readInt()];
+			Identifier[] ids = new Identifier[packetByteBuf.readInt()];
 			SerializableData.Instance[] origins = new SerializableData.Instance[ids.length];
 			RegistryFriendlyByteBuf originRegBuf = null;
 			if (minecraftClient.level != null) {
@@ -126,7 +126,7 @@ public class ModPacketsS2C {
 			}
 			for (int i = 0; i < origins.length; i++) {
 				if (originRegBuf != null) {
-					ids[i] = ResourceLocation.tryParse(originRegBuf.readUtf());
+					ids[i] = Identifier.tryParse(originRegBuf.readUtf());
 				}
 				origins[i] = Origin.DATA.read(originRegBuf);
 			}
@@ -175,10 +175,10 @@ public class ModPacketsS2C {
         FriendlyByteBuf packetByteBuf = payload.data();
         try {
             Minecraft minecraftClient = ctx.client();
-            HashMap<ResourceLocation, List<Badge>> badges = new HashMap<>();
+            HashMap<Identifier, List<Badge>> badges = new HashMap<>();
             int count = packetByteBuf.readInt();
             for (int i = 0; i < count; i++) {
-                ResourceLocation powerId = packetByteBuf.readResourceLocation();
+                Identifier powerId = packetByteBuf.readIdentifier();
                 List<Badge> badgeList = new LinkedList<>();
                 int badgeCount = packetByteBuf.readInt();
                 RegistryFriendlyByteBuf badgeRegBuf = new RegistryFriendlyByteBuf(packetByteBuf, minecraftClient.level.registryAccess());
@@ -190,7 +190,7 @@ public class ModPacketsS2C {
             }
             minecraftClient.execute(() -> {
                 BadgeManager.clear();
-                for (Map.Entry<ResourceLocation, List<Badge>> badgeEntry : badges.entrySet()) {
+                for (Map.Entry<Identifier, List<Badge>> badgeEntry : badges.entrySet()) {
                     for (Badge badge : badgeEntry.getValue()) {
                         BadgeManager.putPowerBadge(badgeEntry.getKey(), badge);
                     }

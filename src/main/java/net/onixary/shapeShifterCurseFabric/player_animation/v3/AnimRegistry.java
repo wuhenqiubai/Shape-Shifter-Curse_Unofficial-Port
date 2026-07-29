@@ -4,8 +4,8 @@ import com.google.gson.JsonObject;
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -70,33 +70,33 @@ public class AnimRegistry {
     public static ResourceKey<Registry<PowerDefaultAnim>> powerAnimIDRegistryKey = ResourceKey.createRegistryKey(ShapeShifterCurseFabric.identifier("power_anim_id"));
     public static Registry<PowerDefaultAnim> powerAnimIDRegistry = new MappedRegistry<>(powerAnimIDRegistryKey, Lifecycle.stable());
 
-    public static ResourceLocation registerAnimState(ResourceLocation identifier, AnimState animState) {
+    public static Identifier registerAnimState(Identifier identifier, AnimState animState) {
         Registry.register(animStateRegistry, identifier, animState);
         return identifier;
     }
 
     // 用于数据包
-    public static ResourceLocation registerAnimStateController(ResourceLocation identifier, Function<JsonObject, AbstractAnimStateController> animStateController) {
+    public static Identifier registerAnimStateController(Identifier identifier, Function<JsonObject, AbstractAnimStateController> animStateController) {
         Registry.register(animStateControllerRegistry, identifier, animStateController);
         return identifier;
     }
 
-    public static ResourceLocation registerAnimFSM(ResourceLocation identifier, AbstractAnimFSM animFSM) {
+    public static Identifier registerAnimFSM(Identifier identifier, AbstractAnimFSM animFSM) {
         Registry.register(animFSMRegistry, identifier, animFSM);
         return identifier;
     }
 
-    public static ResourceLocation registerPowerDefaultAnim(ResourceLocation identifier, PowerDefaultAnim powerDefaultAnim) {
+    public static Identifier registerPowerDefaultAnim(Identifier identifier, PowerDefaultAnim powerDefaultAnim) {
         Registry.register(powerAnimIDRegistry, identifier, powerDefaultAnim);
         return identifier;
     }
 
-    public static @Nullable AnimState getAnimState(ResourceLocation identifier) {
+    public static @Nullable AnimState getAnimState(Identifier identifier) {
         return animStateRegistry.get(identifier);
     }
 
     // 每个Form里都有一个预设了不同参数的AnimStateController
-    public static @Nullable AbstractAnimStateController getAnimStateController(ResourceLocation identifier, JsonObject jsonData) {
+    public static @Nullable AbstractAnimStateController getAnimStateController(Identifier identifier, JsonObject jsonData) {
         Function<JsonObject, AbstractAnimStateController> animStateController = animStateControllerRegistry.get(identifier);
         if (animStateController != null) {
             return animStateController.apply(jsonData);
@@ -104,15 +104,15 @@ public class AnimRegistry {
         return null;
     }
 
-    public static @Nullable Function<JsonObject, AbstractAnimStateController> getAnimStateControllerSupplier(ResourceLocation identifier) {
+    public static @Nullable Function<JsonObject, AbstractAnimStateController> getAnimStateControllerSupplier(Identifier identifier) {
         return animStateControllerRegistry.get(identifier);
     }
 
-    public static @Nullable AbstractAnimFSM getAnimFSM(ResourceLocation identifier) {
+    public static @Nullable AbstractAnimFSM getAnimFSM(Identifier identifier) {
         return animFSMRegistry.get(identifier);
     }
 
-    public static @Nullable PowerDefaultAnim getPowerDefaultAnim(ResourceLocation identifier) {
+    public static @Nullable PowerDefaultAnim getPowerDefaultAnim(Identifier identifier) {
         return powerAnimIDRegistry.get(identifier);
     }
 

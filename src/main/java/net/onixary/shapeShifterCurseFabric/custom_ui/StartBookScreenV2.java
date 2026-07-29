@@ -8,7 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
@@ -22,7 +22,7 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX {
-    private static final ResourceLocation StartBook_TexID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/start_book.png");
+    private static final Identifier StartBook_TexID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/start_book.png");
     public Player currentPlayer;
 
     public static final int BookSizeX = 360;

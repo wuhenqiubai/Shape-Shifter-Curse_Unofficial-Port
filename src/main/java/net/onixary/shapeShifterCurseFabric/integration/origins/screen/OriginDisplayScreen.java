@@ -12,7 +12,7 @@ import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
@@ -28,7 +28,7 @@ import java.util.List;
 
 public class OriginDisplayScreen extends Screen {
 
-    private static final ResourceLocation WINDOW = ResourceLocation.fromNamespaceAndPath(Origins.MODID, "textures/gui/choose_origin.png");
+    private static final Identifier WINDOW = Identifier.fromNamespaceAndPath(Origins.MODID, "textures/gui/choose_origin.png");
     private Origin origin;
     private OriginLayer layer;
     private boolean isOriginRandom;

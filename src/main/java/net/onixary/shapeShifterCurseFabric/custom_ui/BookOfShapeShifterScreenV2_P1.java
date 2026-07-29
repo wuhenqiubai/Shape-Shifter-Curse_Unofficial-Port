@@ -7,7 +7,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -24,8 +24,8 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUtils.IWidgetEX {
-    private static final ResourceLocation page_texID = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/codex_page_1.png");
-    private static final ResourceLocation cursed_moon_icon_texID = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/book_cursed_moon_icon.png");
+    private static final Identifier page_texID = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/codex_page_1.png");
+    private static final Identifier cursed_moon_icon_texID = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/book_cursed_moon_icon.png");
     public Player currentPlayer;
     public static final int BookSizeX = 350;
     public static final int BookSizeY = 220;

@@ -11,7 +11,7 @@ import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -42,7 +42,7 @@ public class VirtualShieldPower extends Power {
                 if (this.takenDamageAction != null) {
                     this.takenDamageAction.accept(this.entity);
                 }
-                if (attacker instanceof LivingEntity livingEntity && livingEntity.canDisableShield()) {
+                if (attacker instanceof LivingEntity livingEntity && livingEntity.getMainHandItem().has(net.minecraft.core.component.DataComponents.WEAPON)) {
                     if (this.shieldBreakAction != null) {
                         this.shieldBreakAction.accept(this.entity);
                     }

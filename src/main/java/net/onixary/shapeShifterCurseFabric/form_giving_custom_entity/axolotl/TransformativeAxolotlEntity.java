@@ -1,13 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -41,7 +42,7 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
                 .add(Attributes.MOVEMENT_SPEED, 1.0);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeAxolotlEntity> type, ServerLevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeAxolotlEntity> type, ServerLevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         // ~100% 刷新成功率
         float Chance = ShapeShifterCurseFabric.commonConfig.transformativeAxolotlSpawnChance;
         if (Chance <= 0.0f) { return false; }
@@ -93,7 +94,7 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
         super.tick();
         // Axolotl uses Brain AI in 1.21, traditional goals don't work.
         // Manually find nearby players and apply effect.
-        if (!this.level().isClientSide && !this.IsInCooldown()) {
+        if (!this.level().isClientSide() && !this.IsInCooldown()) {
             var players = this.level().getEntitiesOfClass(
                 Player.class,
                 this.getBoundingBox().inflate(StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE),
@@ -108,7 +109,7 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
         }
         this.TickCooldown();
         // Particles
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             for (int i = 0; i < 1; i++) {
                 this.level().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
                     this.getX() + (this.random.nextDouble() - 0.5) * 0.5,
@@ -120,9 +121,9 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
         Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
-        return attacked.orElseGet(() -> super.doHurtTarget(target));
+        return attacked.orElseGet(() -> super.doHurtTarget(serverLevel, target));
     }
 
     @Override

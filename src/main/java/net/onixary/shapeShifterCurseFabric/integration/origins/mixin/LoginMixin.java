@@ -5,7 +5,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.CommonListenerCookie;
 import net.minecraft.server.players.PlayerList;
@@ -42,7 +42,7 @@ public abstract class LoginMixin {
         originListData.writeInt(OriginRegistry.size() - 1);
         OriginRegistry.entries().forEach((entry) -> {
             if(entry.getValue() != Origin.EMPTY) {
-                originListData.writeResourceLocation(entry.getKey());
+                originListData.writeIdentifier(entry.getKey());
                 entry.getValue().write(originListData);
             }
         });
@@ -81,7 +81,7 @@ public abstract class LoginMixin {
     }
 
 	@Unique
-    private static void sendToPlayer(ServerPlayer player, ResourceLocation id, FriendlyByteBuf buf) {
+    private static void sendToPlayer(ServerPlayer player, Identifier id, FriendlyByteBuf buf) {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(id),  buf));
     }
 }

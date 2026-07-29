@@ -4,13 +4,13 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,17 +27,17 @@ public abstract class CustomEdibleItemMixin {
     private static final ThreadLocal<Player> ssc$currentPlayer = new ThreadLocal<>();
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void onUse(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+    private void onUse(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack stack = user.getItemInHand(hand);
         FoodProperties fc = getPowerFoodComponent(user, stack);
         if (fc != null) {
             if (user.canEat(fc.canAlwaysEat())) {
                 ssc$currentPlayer.set(user);
                 user.startUsingItem(hand);
-                cir.setReturnValue(InteractionResultHolder.consume(stack));
+                cir.setReturnValue(InteractionResult.CONSUME);
             } else {
                 ssc$currentPlayer.remove();
-                cir.setReturnValue(InteractionResultHolder.fail(stack));
+                cir.setReturnValue(InteractionResult.FAIL);
             }
         }
     }
@@ -53,13 +53,13 @@ public abstract class CustomEdibleItemMixin {
     }
 
     @ModifyReturnValue(method = "getUseAnimation", at = @At("RETURN"))
-    private UseAnim replaceUseAction(UseAnim original, ItemStack stack) {
-        if (original == UseAnim.EAT) {
+    private ItemUseAnimation replaceUseAction(ItemUseAnimation original, ItemStack stack) {
+        if (original == ItemUseAnimation.EAT) {
             return original;
         }
         Player player = ssc$currentPlayer.get();
         if (player != null && getPowerFoodComponent(player, stack) != null) {
-            return UseAnim.EAT;
+            return ItemUseAnimation.EAT;
         }
         return original;
     }

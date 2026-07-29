@@ -5,7 +5,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
@@ -31,7 +31,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         return ShapeShifterCurseFabric.commonConfig.enableFullStackUpgrade;
     }
 
-    public MorphScaleUpgradeRecipe(ResourceLocation id, Ingredient template, Ingredient addition) {
+    public MorphScaleUpgradeRecipe(Identifier id, Ingredient template, Ingredient addition) {
         super(id, template, (itemStack -> {
             if (itemStack.isEmpty()) {
                 return false;
@@ -106,12 +106,12 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         private static final MapCodec<MorphScaleUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Ingredient.CODEC_NONEMPTY.fieldOf("template").forGetter(r -> r.template),
             Ingredient.CODEC_NONEMPTY.fieldOf("addition").forGetter(r -> r.addition)
-        ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(ResourceLocation.parse("morph_scale_upgrade"), template, addition)));
+        ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.parse("morph_scale_upgrade"), template, addition)));
 
         private static final StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = StreamCodec.composite(
             Ingredient.CONTENTS_STREAM_CODEC, r -> r.template,
             Ingredient.CONTENTS_STREAM_CODEC, r -> r.addition,
-            (template, addition) -> new MorphScaleUpgradeRecipe(ResourceLocation.parse("morph_scale_upgrade"), template, addition)
+            (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.parse("morph_scale_upgrade"), template, addition)
         );
 
         @Override

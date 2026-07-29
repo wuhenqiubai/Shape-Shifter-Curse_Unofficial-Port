@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -16,10 +16,10 @@ import java.util.UUID;
 
 public class InstinctUtils {
     public static class InstinctEffect {
-        private final ResourceLocation id;
+        private final Identifier id;
         private final float value;
         private int duration;
-        public InstinctEffect(ResourceLocation id, float value, int duration) {
+        public InstinctEffect(Identifier id, float value, int duration) {
             this.id = id;
             this.value = value;
             this.duration = duration;
@@ -33,7 +33,7 @@ public class InstinctUtils {
             }
         }
 
-        public ResourceLocation getId() {
+        public Identifier getId() {
             return id;
         }
 
@@ -49,7 +49,7 @@ public class InstinctUtils {
         }
 
         public static InstinctEffect fromNBT(CompoundTag nbt) {
-            return new InstinctEffect(ResourceLocation.parse(nbt.getString("id")), nbt.getFloat("value"), nbt.getInt("duration"));
+            return new InstinctEffect(Identifier.parse(nbt.getString("id")), nbt.getFloat("value"), nbt.getInt("duration"));
         }
     }
     // ServerSide Data
@@ -97,7 +97,7 @@ public class InstinctUtils {
     }
 
     // Both Side
-    public static float calcRate(HashMap<ResourceLocation, InstinctEffect> effects, boolean checkExist) {
+    public static float calcRate(HashMap<Identifier, InstinctEffect> effects, boolean checkExist) {
         if (checkExist) {
             effects.entrySet().removeIf(entry -> !entry.getValue().IsEffectExist());
         }
@@ -167,7 +167,7 @@ public class InstinctUtils {
         component.sync();
     }
 
-    public static void addInstinctEffect(Player player, ResourceLocation id, float value, int duration, boolean isImmediate) {
+    public static void addInstinctEffect(Player player, Identifier id, float value, int duration, boolean isImmediate) {
         addInstinctEffect(player, new InstinctEffect(id, value, duration), isImmediate);
     }
 }

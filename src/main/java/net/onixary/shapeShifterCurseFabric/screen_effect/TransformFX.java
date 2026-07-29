@@ -3,18 +3,19 @@ package net.onixary.shapeShifterCurseFabric.screen_effect;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.Minecraft;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import org.jetbrains.annotations.Nullable;
-import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
-import org.ladysnake.satin.api.managed.ManagedShaderEffect;
-import org.ladysnake.satin.api.managed.ShaderEffectManager;
-import org.ladysnake.satin.api.managed.uniform.Uniform1f;
+//Satin没有1.21.11版本，故移除
+//import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
+//import org.ladysnake.satin.api.managed.ManagedShaderEffect;
+//import org.ladysnake.satin.api.managed.ShaderEffectManager;
+//import org.ladysnake.satin.api.managed.uniform.Uniform1f;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public final class TransformFX implements ShaderEffectRenderCallback, ClientTickEvents.EndTick {
-    public static final ResourceLocation TRANSFORM_EFFECT_SHADER_ID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "shaders/post/transform_effect.json");
+    public static final Identifier TRANSFORM_EFFECT_SHADER_ID = Identifier.fromNamespaceAndPath(MOD_ID, "shaders/post/transform_effect.json");
 
     public static final TransformFX INSTANCE = new TransformFX();
     private final Minecraft mc = Minecraft.getInstance();

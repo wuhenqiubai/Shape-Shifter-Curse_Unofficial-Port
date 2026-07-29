@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.ability;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -11,10 +11,10 @@ import java.util.List;
 public class PlayerLayerData {
     public Player player;
 
-    public HashMap<ResourceLocation, ResourceLocation> layers = new HashMap<>();
+    public HashMap<Identifier, Identifier> layers = new HashMap<>();
 
     // 无需存储为NBT 修改形态时先修改targetLayers 之后调用函数来应用
-    public HashMap<ResourceLocation, ResourceLocation> targetLayers = new HashMap<>();
+    public HashMap<Identifier, Identifier> targetLayers = new HashMap<>();
 
     public PlayerLayerData(Player player) {
         this.player = player;
@@ -29,7 +29,7 @@ public class PlayerLayerData {
     }
 
     public void setLayerGroup(List<IFormLayerGroup> layerGroups) {
-        List<ResourceLocation> layerGroupsID = new ArrayList<>();
+        List<Identifier> layerGroupsID = new ArrayList<>();
         for (IFormLayerGroup layerGroup : layerGroups) {
             layerGroupsID.add(layerGroup.getGroupID());
         }
@@ -45,12 +45,12 @@ public class PlayerLayerData {
         }
     }
 
-    public void setLayer(ResourceLocation groupID, ResourceLocation layerID) {
+    public void setLayer(Identifier groupID, Identifier layerID) {
         IFormLayerGroup layerGroup = RegFormLayer.getLayerGroup(groupID);
         if (layerGroup == null) {
             throw new RuntimeException("Layer group not found");
         }
-        ResourceLocation newLayerID = layerGroup.transformLayerID(this.player, layerID);
+        Identifier newLayerID = layerGroup.transformLayerID(this.player, layerID);
         IFormLayer layer = RegFormLayer.getLayer(newLayerID);
         if (layer == null) {
             throw new RuntimeException("Layer not found");
@@ -58,7 +58,7 @@ public class PlayerLayerData {
         targetLayers.put(groupID, newLayerID);
     }
 
-    public void __setLayer(ResourceLocation groupID, ResourceLocation layerID) {
+    public void __setLayer(Identifier groupID, Identifier layerID) {
         IFormLayerGroup layerGroup = RegFormLayer.getLayerGroup(groupID);
         if (layerGroup == null) {
             throw new RuntimeException("Layer group not found");
@@ -70,9 +70,9 @@ public class PlayerLayerData {
         targetLayers.put(groupID, layerID);
     }
 
-    private List<ResourceLocation> getMissingGroup() {
-        List<ResourceLocation> result = new ArrayList<>();
-        for (ResourceLocation group : layers.keySet()) {
+    private List<Identifier> getMissingGroup() {
+        List<Identifier> result = new ArrayList<>();
+        for (Identifier group : layers.keySet()) {
             if (!targetLayers.containsKey(group)) {
                 result.add(group);
             }
@@ -80,9 +80,9 @@ public class PlayerLayerData {
         return result;
     }
 
-    private List<ResourceLocation> getExtraGroup() {
-        List<ResourceLocation> result = new ArrayList<>();
-        for (ResourceLocation group : targetLayers.keySet()) {
+    private List<Identifier> getExtraGroup() {
+        List<Identifier> result = new ArrayList<>();
+        for (Identifier group : targetLayers.keySet()) {
             if (!layers.containsKey(group)) {
                 result.add(group);
             }
@@ -91,12 +91,12 @@ public class PlayerLayerData {
     }
 
     private void checkTargetGroupDataValid() {
-        for (ResourceLocation groupID : targetLayers.keySet()) {
+        for (Identifier groupID : targetLayers.keySet()) {
             IFormLayerGroup group = RegFormLayer.getLayerGroup(groupID);
             if (group == null) {
                 throw new RuntimeException("Layer group not found");
             }
-            ResourceLocation layerID = targetLayers.get(groupID);
+            Identifier layerID = targetLayers.get(groupID);
             if (!group.getLayers().contains(layerID)) {
                 targetLayers.put(groupID, group.transformLayerID(player, layerID));
             }
@@ -105,14 +105,14 @@ public class PlayerLayerData {
 
     public void apply() {
         checkTargetGroupDataValid();
-        List<ResourceLocation> missingGroup = getMissingGroup();
+        List<Identifier> missingGroup = getMissingGroup();
         missingGroup.forEach(group -> {
             IFormLayerGroup layerGroup = RegFormLayer.getLayerGroup(group);
             if (layerGroup != null) {
                 layerGroup.onRemoveGroup(player, layers.get(group));
             }
         });
-        List<ResourceLocation> extraGroup = getExtraGroup();
+        List<Identifier> extraGroup = getExtraGroup();
         extraGroup.forEach(group -> {
             IFormLayerGroup layerGroup = RegFormLayer.getLayerGroup(group);
             // 新增部分如果还没有就肯定有问题了

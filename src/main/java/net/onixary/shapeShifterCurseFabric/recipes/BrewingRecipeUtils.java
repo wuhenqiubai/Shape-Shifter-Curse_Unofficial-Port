@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -21,9 +21,9 @@ public class BrewingRecipeUtils {
 		public final T input;
 		public final Ingredient ingredient;
 		public final T output;
-		public @Nullable ResourceLocation targetForm;
+		public @Nullable Identifier targetForm;
 
-		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable ResourceLocation targetForm) {
+		public DynamicRecipe(T input, Ingredient ingredient, T output, @Nullable Identifier targetForm) {
 			this.input = input;
 			this.ingredient = ingredient;
 			this.output = output;
@@ -73,12 +73,12 @@ public class BrewingRecipeUtils {
             ShapeShifterCurseFabric.LOGGER.error("recipe json has no input or ingredient or output");
             return;
         }
-        ResourceLocation input = ResourceLocation.tryParse(recipeJson.get("input").getAsString());
-        ResourceLocation ingredient = ResourceLocation.tryParse(recipeJson.get("ingredient").getAsString());
-        ResourceLocation output = ResourceLocation.tryParse(recipeJson.get("output").getAsString());
-        ResourceLocation targetForm = null;
+        Identifier input = Identifier.tryParse(recipeJson.get("input").getAsString());
+        Identifier ingredient = Identifier.tryParse(recipeJson.get("ingredient").getAsString());
+        Identifier output = Identifier.tryParse(recipeJson.get("output").getAsString());
+        Identifier targetForm = null;
         if (recipeJson.has("target_form")) {
-            targetForm = ResourceLocation.tryParse(recipeJson.get("target_form").getAsString());
+            targetForm = Identifier.tryParse(recipeJson.get("target_form").getAsString());
         }
         if (input == null || ingredient == null || output == null) {
             ShapeShifterCurseFabric.LOGGER.error("recipe json has invalid input or ingredient or output");

@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.screen_effect;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
@@ -10,7 +9,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import org.joml.Matrix4f;
 
@@ -18,8 +17,8 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 
 public final class TransformOverlay {
     public static final TransformOverlay INSTANCE = new TransformOverlay();
-    private final ResourceLocation nausea_texture = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/overlay/nausea_black.png");
-    private final ResourceLocation black_texture = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/overlay/black.png");
+    private final Identifier nausea_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/nausea_black.png");
+    private final Identifier black_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/black.png");
 
     private boolean enableOverlay = false;
     private float strength_nausea = 0.0f;

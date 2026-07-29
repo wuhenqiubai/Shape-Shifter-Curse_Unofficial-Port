@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class OriginLayers extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
 
-    private static final HashMap<ResourceLocation, OriginLayer> layers = new HashMap<>();
+    private static final HashMap<Identifier, OriginLayer> layers = new HashMap<>();
     private static int minLayerPriority = Integer.MIN_VALUE;
 
     private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
@@ -28,9 +28,9 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
     }
 
     @Override
-    protected void apply(Map<ResourceLocation, List<JsonElement>> loader, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, List<JsonElement>> loader, ResourceManager manager, ProfilerFiller profiler) {
         clear();
-        HashMap<ResourceLocation, HashMap<Integer, List<JsonObject>>> layers = new HashMap<>();
+        HashMap<Identifier, HashMap<Integer, List<JsonObject>>> layers = new HashMap<>();
         // Load phase
         loader.forEach((id, jel) -> {
             minLayerPriority = Integer.MIN_VALUE;
@@ -55,8 +55,8 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
             });
         });
         // Merge phase
-        for (Map.Entry<ResourceLocation, HashMap<Integer, List<JsonObject>>> layerToLoad : layers.entrySet()) {
-            ResourceLocation layerId = layerToLoad.getKey();
+        for (Map.Entry<Identifier, HashMap<Integer, List<JsonObject>>> layerToLoad : layers.entrySet()) {
+            Identifier layerId = layerToLoad.getKey();
             List<Integer> keys = layerToLoad.getValue().keySet().stream().sorted().collect(Collectors.toList());
             OriginLayer layer = null;
             for(Integer key : keys) {
@@ -74,7 +74,7 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
         OriginDataLoadedCallback.EVENT.invoker().onDataLoaded(false);
     }
 
-    public static OriginLayer getLayer(ResourceLocation id) {
+    public static OriginLayer getLayer(Identifier id) {
         if (!layers.containsKey(id)) throw new IllegalArgumentException("Could not get layer from id '" + id.toString() + "', as it doesn't exist!");
         else return layers.get(id);
     }
@@ -96,12 +96,12 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
     }
 
     @Override
-    public ResourceLocation getFabricId() {
-        return ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origin_layers");
+    public Identifier getFabricId() {
+        return Identifier.fromNamespaceAndPath(Origins.MODID, "origin_layers");
     }
 
     @Override
-    public Collection<ResourceLocation> getFabricDependencies() {
+    public Collection<Identifier> getFabricDependencies() {
         return Set.of(Origins.identifier("origins"));
     }
 }

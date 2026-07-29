@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mana;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -34,32 +34,32 @@ public class ManaRegistries {
             .setImmutable();
 
     // 给我自己拓展留的访问权限 修改时需要使用特殊方式 如果用错误修改方式修改可能会出现特殊Bug 优先使用提供的2个函数修改 manaHandler没有提供函数 因为有可能拓展使用相同的handler
-    public static final HashMap<ResourceLocation, Function<Player, Boolean>> manaConditionTypeRegistry = new HashMap<>();
-    public static final HashMap<ResourceLocation, ManaUtils.ModifierList> maxManaModifierRegistry = new HashMap<>();
-    public static final HashMap<ResourceLocation, ManaUtils.ModifierList> manaReginModifierRegistry = new HashMap<>();
-    public static final HashMap<ResourceLocation, ManaHandler> manaHandlerRegistry = new HashMap<>();
+    public static final HashMap<Identifier, Function<Player, Boolean>> manaConditionTypeRegistry = new HashMap<>();
+    public static final HashMap<Identifier, ManaUtils.ModifierList> maxManaModifierRegistry = new HashMap<>();
+    public static final HashMap<Identifier, ManaUtils.ModifierList> manaReginModifierRegistry = new HashMap<>();
+    public static final HashMap<Identifier, ManaHandler> manaHandlerRegistry = new HashMap<>();
 
     public static final ManaUtils.ModifierList EMPTY_MAX_MANA_MODIFIER = new ManaUtils.ModifierList();
     public static final ManaUtils.ModifierList EMPTY_MANA_REGEN_MODIFIER = new ManaUtils.ModifierList();
 
-    public static final ResourceLocation MC_AlwaysTrue = registerManaConditionType(ShapeShifterCurseFabric.identifier("always_true"), player -> true);
-    public static final ResourceLocation MC_AlwaysFalse = registerManaConditionType(ShapeShifterCurseFabric.identifier("always_false"), player -> false);
-    public static final ResourceLocation MC_IsCursedMoon = registerManaConditionType(ShapeShifterCurseFabric.identifier("is_cursed_moon"), player -> CursedMoon.isInCursedMoon(player.level()));
+    public static final Identifier MC_AlwaysTrue = registerManaConditionType(ShapeShifterCurseFabric.identifier("always_true"), player -> true);
+    public static final Identifier MC_AlwaysFalse = registerManaConditionType(ShapeShifterCurseFabric.identifier("always_false"), player -> false);
+    public static final Identifier MC_IsCursedMoon = registerManaConditionType(ShapeShifterCurseFabric.identifier("is_cursed_moon"), player -> CursedMoon.isInCursedMoon(player.level()));
 
-    public static final ResourceLocation FAMILIAR_FOX_MANA = registerManaType(ShapeShifterCurseFabric.identifier("familiar_fox_mana"),
+    public static final Identifier FAMILIAR_FOX_MANA = registerManaType(ShapeShifterCurseFabric.identifier("familiar_fox_mana"),
             new ManaUtils.ModifierList(
-                    new Tuple<ResourceLocation, Tuple<ResourceLocation, ManaUtils.Modifier>>(
+                    new Tuple<Identifier, Tuple<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("base_value"),
-                            new Tuple<ResourceLocation, ManaUtils.Modifier>(
+                            new Tuple<Identifier, ManaUtils.Modifier>(
 						            MC_AlwaysTrue,
 						            new ManaUtils.Modifier(100d, 1.0d, 0d)
 				            )
 		            )
             ),
             new ManaUtils.ModifierList(
-                    new Tuple<ResourceLocation, Tuple<ResourceLocation, ManaUtils.Modifier>>(
+                    new Tuple<Identifier, Tuple<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("cursed_moon"),
-                            new Tuple<ResourceLocation, ManaUtils.Modifier>(
+                            new Tuple<Identifier, ManaUtils.Modifier>(
 						            MC_IsCursedMoon,
 						            new ManaUtils.Modifier(0.02d, 1.0d, 0d)
 				            )
@@ -68,11 +68,11 @@ public class ManaRegistries {
             EMPTY_MANA_HANDLER
     );
 
-    public static final ResourceLocation WEB_RESOURCE = registerManaType(ShapeShifterCurseFabric.identifier("web_resource"),
+    public static final Identifier WEB_RESOURCE = registerManaType(ShapeShifterCurseFabric.identifier("web_resource"),
             new ManaUtils.ModifierList(
-                    new Tuple<ResourceLocation, Tuple<ResourceLocation, ManaUtils.Modifier>>(
+                    new Tuple<Identifier, Tuple<Identifier, ManaUtils.Modifier>>(
 				            ShapeShifterCurseFabric.identifier("base_value"),
-                            new Tuple<ResourceLocation, ManaUtils.Modifier>(
+                            new Tuple<Identifier, ManaUtils.Modifier>(
 						            MC_AlwaysTrue,
 						            new ManaUtils.Modifier(100d, 1.0d, 0d)
 				            )
@@ -83,9 +83,9 @@ public class ManaRegistries {
     );
 
     // 给数据包提供一个空 Modifier 资源条吧
-    public static final ResourceLocation DP_MANA = registerManaType(ShapeShifterCurseFabric.identifier("dp_mana"), EMPTY_MAX_MANA_MODIFIER, EMPTY_MANA_REGEN_MODIFIER, EMPTY_MANA_HANDLER);
+    public static final Identifier DP_MANA = registerManaType(ShapeShifterCurseFabric.identifier("dp_mana"), EMPTY_MAX_MANA_MODIFIER, EMPTY_MANA_REGEN_MODIFIER, EMPTY_MANA_HANDLER);
 
-    public static ResourceLocation registerManaType(ResourceLocation identifier, ManaUtils.ModifierList defaultMaxManaModifier, ManaUtils.ModifierList defaultManaRegenModifier, @Nullable ManaHandler handler) {
+    public static Identifier registerManaType(Identifier identifier, ManaUtils.ModifierList defaultMaxManaModifier, ManaUtils.ModifierList defaultManaRegenModifier, @Nullable ManaHandler handler) {
         if (defaultManaRegenModifier == null) {
             defaultManaRegenModifier = EMPTY_MANA_REGEN_MODIFIER;
         }
@@ -101,18 +101,18 @@ public class ManaRegistries {
     }
 
 
-    public static ResourceLocation registerManaConditionType(ResourceLocation identifier, Function<Player, Boolean> condition) {
+    public static Identifier registerManaConditionType(Identifier identifier, Function<Player, Boolean> condition) {
         manaConditionTypeRegistry.put(identifier, condition);
         return identifier;
     }
 
     public static void register() {}
 
-    public static @NotNull ManaUtils.ModifierList getMaxManaModifier(@Nullable ResourceLocation identifier) {
+    public static @NotNull ManaUtils.ModifierList getMaxManaModifier(@Nullable Identifier identifier) {
         return maxManaModifierRegistry.getOrDefault(identifier, EMPTY_MAX_MANA_MODIFIER).copy();
     }
 
-    public static boolean modifyMaxManaModifier(@Nullable ResourceLocation identifier, @NotNull Consumer<ManaUtils.ModifierList> modify) {
+    public static boolean modifyMaxManaModifier(@Nullable Identifier identifier, @NotNull Consumer<ManaUtils.ModifierList> modify) {
         if (!maxManaModifierRegistry.containsKey(identifier)) {
             return false;
         }
@@ -128,11 +128,11 @@ public class ManaRegistries {
         return true;
     }
 
-    public static @NotNull ManaUtils.ModifierList getManaRegenModifier(@Nullable ResourceLocation identifier) {
+    public static @NotNull ManaUtils.ModifierList getManaRegenModifier(@Nullable Identifier identifier) {
         return manaReginModifierRegistry.getOrDefault(identifier, EMPTY_MANA_REGEN_MODIFIER).copy();
     }
 
-    public static boolean modifyManaRegenModifier(@Nullable ResourceLocation identifier, @NotNull Consumer<ManaUtils.ModifierList> modify) {
+    public static boolean modifyManaRegenModifier(@Nullable Identifier identifier, @NotNull Consumer<ManaUtils.ModifierList> modify) {
         if (!manaReginModifierRegistry.containsKey(identifier)) {
             return false;
         }
@@ -148,21 +148,21 @@ public class ManaRegistries {
         return true;
     }
 
-    public static @Nullable ManaHandler getManaHandler(@Nullable ResourceLocation identifier) {
+    public static @Nullable ManaHandler getManaHandler(@Nullable Identifier identifier) {
         return manaHandlerRegistry.get(identifier);
     }
 
     // Mana Handler 就不留API了 直接改注册表吧 修改起来非常麻烦
 
-    public static @NotNull ManaHandler getManaHandlerOrDefault(@Nullable ResourceLocation identifier) {
+    public static @NotNull ManaHandler getManaHandlerOrDefault(@Nullable Identifier identifier) {
         return getManaHandlerOrDefault(identifier, EMPTY_MANA_HANDLER);
     }
 
-    public static @NotNull ManaHandler getManaHandlerOrDefault(@Nullable ResourceLocation identifier, @NotNull ManaHandler defaultHandler) {
+    public static @NotNull ManaHandler getManaHandlerOrDefault(@Nullable Identifier identifier, @NotNull ManaHandler defaultHandler) {
         return manaHandlerRegistry.getOrDefault(identifier, defaultHandler);
     }
 
-    public static boolean ManaConditionCheck(@Nullable ResourceLocation identifier, Player player) {
+    public static boolean ManaConditionCheck(@Nullable Identifier identifier, Player player) {
         return manaConditionTypeRegistry.getOrDefault(identifier, (p) -> false).apply(player);
     }
 }

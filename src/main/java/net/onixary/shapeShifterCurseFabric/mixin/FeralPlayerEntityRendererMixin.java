@@ -4,7 +4,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // 取消feral的潜行下压
 @Environment(EnvType.CLIENT) // 仅客户端渲染逻辑
-@Mixin(PlayerRenderer.class)
+@Mixin(AvatarRenderer.class)
 public abstract class FeralPlayerEntityRendererMixin {
 
     /**

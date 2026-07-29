@@ -7,7 +7,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -45,7 +45,7 @@ public class ModPacketsC2S {
                 player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_enable_mod").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         });
-        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting")), (payload, ctx) -> {
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting")), (payload, ctx) -> {
             FriendlyByteBuf buf = payload.data();
             boolean keepOriginalSkin = buf.readBoolean();
             ServerPlayer player = ctx.player();
@@ -131,7 +131,7 @@ public class ModPacketsC2S {
     private static void onUpdatePowerAnimationData(BytePayload payload, ServerPlayNetworking.Context ctx) {
         FriendlyByteBuf buf = payload.data();
         ServerPlayer player = ctx.player();
-        ResourceLocation animationId = buf.readBoolean() ? buf.readResourceLocation() : null;
+        Identifier animationId = buf.readBoolean() ? buf.readIdentifier() : null;
         int animationCount = buf.readInt();
         int animationLength = buf.readInt();
         if (player instanceof IPlayerAnimController animPlayer) {
@@ -160,7 +160,7 @@ public class ModPacketsC2S {
         FriendlyByteBuf buf = payload.data();
         ServerPlayer player = ctx.player();
         UUID target = buf.readUUID();
-        ResourceLocation formID = ResourceLocation.tryParse(buf.readUtf());
+        Identifier formID = Identifier.tryParse(buf.readUtf());
         if (target.equals(player.getUUID()) || player.hasPermissions(2)) {
             ServerPlayer targetPlayer = player.getServer().getPlayerList().getPlayer(target);
             if (targetPlayer != null) {
@@ -175,7 +175,7 @@ public class ModPacketsC2S {
     private static void receiveSetPatronForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
         FriendlyByteBuf buf = payload.data();
         ServerPlayer player = ctx.player();
-        IForm form = RegPlayerForms.getPlayerForm(ResourceLocation.tryParse(buf.readUtf()));
+        IForm form = RegPlayerForms.getPlayerForm(Identifier.tryParse(buf.readUtf()));
         if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUUID())) {
             TransformManager.startTransform(player, form, null);
         }
@@ -194,7 +194,7 @@ public class ModPacketsC2S {
     /** Called from client initializer: registers C2S payload codecs so the client can send. */
     public static void registerClient() {
         BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
-        BytePayload.registerC2S(ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
+        BytePayload.registerC2S(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
         BytePayload.registerC2S(JUMP_DETACH_REQUEST_ID);
         BytePayload.registerC2S(JUMP_EVENT_ID);
         BytePayload.registerC2S(SPRINTING_TO_SNEAKING_EVENT_ID);

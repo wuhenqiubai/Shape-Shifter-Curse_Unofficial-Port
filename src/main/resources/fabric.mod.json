@@ -139,12 +139,11 @@
   "depends": {
     "java": ">=21",
     "fabricloader": ">=${loader_version}",
-    "fabric": ">=0.114.0",
+    "fabric": ">=0.141.0",
     "minecraft": "${minecraft_version}",
     "pehkui": ">=3.8.3",
-    "satin": ">=2.0.0",
-    "player_animation_library": ">=1.0.11",
-    "geckolib": ">=4.7.0"
+    "player_animation_library": ">=1.1.9",
+    "geckolib": ">=5.4.0"
   },
   "breaks": {
     "origins": ">0.0.0",
@@ -154,6 +153,6 @@
   },
   "recommends": {
     "firstperson": "*",
-    "trinkets": ">=3.10.0"
+    "trinkets": ">=3.11.0"
   }
 }

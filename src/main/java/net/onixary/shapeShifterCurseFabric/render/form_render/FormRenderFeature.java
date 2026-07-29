@@ -5,23 +5,24 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-import software.bernie.geckolib.cache.object.BakedGeoModel;
-import software.bernie.geckolib.cache.object.GeoBone;
+import software.bernie.geckolib.cache.model.BakedGeoModel;
+import software.bernie.geckolib.cache.model.GeoBone;
+import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 import java.util.List;
 
@@ -52,8 +53,8 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
                 if (formRenderer == null) {
                     continue;
                 }
-                PlayerRenderer playerEntityRenderer = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(abstractClientPlayerEntity);
-                PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
+                AvatarRenderer playerEntityRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(abstractClientPlayerEntity);
+                PlayerModel playerEntityModel = (PlayerModel) playerEntityRenderer.getModel();
                 FormModel formModel = (FormModel) formRenderer.getGeoModel();
                 FormAnimatable formAnimatable = formRenderer.realAnimatable;
                 formRenderer.setPlayer(abstractClientPlayerEntity, playerEntityModel.slim);
@@ -83,9 +84,9 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
     }
 
     // 处理 BonePart 隐藏
-    public static void rM_PartA(PlayerRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
+    public static void rM_PartA(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
         if (player.isSpectator()) {
-            PlayerModel<?> model = (PlayerModel<?>) playerEntityRenderer.getModel();
+            PlayerModel model = (PlayerModel) playerEntityRenderer.getModel();
             model.hat.skipDraw = false;
             model.head.skipDraw = false;
             model.body.skipDraw = false;
@@ -101,7 +102,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
             return;
         }
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
+        PlayerModel playerEntityModel = (PlayerModel) playerEntityRenderer.getModel();
         boolean hatHidden = !player.isModelPartShown(PlayerModelPart.HAT);
         boolean headHidden = false;
         boolean bodyHidden = false;
@@ -164,7 +165,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         playerEntityModel.rightPants.visible = !rightPantsHidden;
     }
 
-    public static void rM_PartB(PlayerRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
+    public static void rM_PartB(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
         int p = OverlayTexture.pack(OverlayTexture.u(playerEntityRenderer.getWhiteOverlayProgress(player, g)), OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
         if (player.isSpectator()) {
             return;
@@ -173,8 +174,8 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         for (FormRenderer formRenderer : formRendererList) {
             PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            ResourceLocation overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
-            ResourceLocation emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
+            Identifier overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
+            Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
             boolean bl = playerEntityRenderer.isBodyVisible(player);
             boolean bl2 = !bl && !player.isInvisibleTo(Minecraft.getInstance().player);
             if (overlayTexture != null) {
@@ -219,7 +220,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
 
     private static void renderGeoBone(FormRenderer formRenderer, GeoBone geoBone, PoseStack matrixStack, FormAnimatable formAnimatable, MultiBufferSource vertexConsumerProvider, RenderType renderLayer, VertexConsumer vertexConsumer, int packedLight, float R, float G, float B, float A) {
         FormModel formModel = (FormModel) formRenderer.getGeoModel();
-        BakedGeoModel bakedGeoModel = formModel.getBakedModel(formModel.getModelResource(formAnimatable));
+        BakedGeoModel bakedGeoModel = formModel.getBakedModel(formModel.getModelResource((GeoRenderState) formAnimatable));
         float TickDelta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
         int packedOverlay = formRenderer.getPackedOverlay(formAnimatable, 0.0F, TickDelta);
         matrixStack.translate(-0.5, -0.51, -0.5); // 在 GeoObjectRenderer.preRender 中会 poseStack.translate(0.5, 0.51, 0.5) 因此需要手动调整
@@ -237,7 +238,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         }
     }
 
-    public static void rFPM_PartA(PlayerRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
+    public static void rFPM_PartA(AvatarRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
         boolean IsRenderRight = arm.equals(playerEntityRenderer.getModel().rightArm);
         boolean ArmHidden = false;
@@ -257,7 +258,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         sleeve.visible = !SleeveHidden;
     }
 
-    public static void rFPM_PartB(PlayerRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
+    public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(playerEntityRenderer.getModel().rightArm);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
         for (FormRenderer formRenderer : formRendererList) {
@@ -285,7 +286,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
 
             // Render Overlay 藏得够深的 要不是发现悦灵手臂无法显示我都不会发现
             // 从 PlayerEntityRendererMixin.renderOverlayTexture 提取的代码并进行修改
-            ResourceLocation OverlayTextureID = formModel.getOverlayTextureResource(playerEntityModel.slim);
+            Identifier OverlayTextureID = formModel.getOverlayTextureResource(playerEntityModel.slim);
             if (OverlayTextureID != null) {
                 // 玩家看自己绝对是非隐身
                 // boolean bl = this.isVisible(player);

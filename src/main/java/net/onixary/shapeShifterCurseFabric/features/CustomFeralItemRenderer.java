@@ -12,13 +12,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -30,8 +30,8 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class CustomFeralItemRenderer {
-	private static final RenderType MAP_BACKGROUND = RenderType.text(ResourceLocation.parse("textures/map/map_background.png"));
-	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(ResourceLocation.parse("textures/map/map_background_checkerboard.png"));
+	private static final RenderType MAP_BACKGROUND = RenderType.text(Identifier.parse("textures/map/map_background.png"));
+	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(Identifier.parse("textures/map/map_background_checkerboard.png"));
 	private static final float field_32735 = -0.4F;
 	private static final float field_32736 = 0.2F;
 	private static final float field_32737 = -0.2F;
@@ -155,7 +155,7 @@ public class CustomFeralItemRenderer {
 			return;
 		}
 		RenderSystem.setShaderTexture(0, this.client.player.getSkin().texture());
-		PlayerRenderer playerEntityRenderer = (PlayerRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(this.client.player);
+		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(this.client.player);
 		matrices.pushPose();
 		float f = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		matrices.mulPose(Axis.YP.rotationDegrees(92.0F));
@@ -281,7 +281,7 @@ public class CustomFeralItemRenderer {
 		matrices.mulPose(Axis.XP.rotationDegrees(200.0F));
 		matrices.mulPose(Axis.YP.rotationDegrees(f * -135.0F));
 		matrices.translate(f * 5.6F, 0.0F, 0.0F);
-		PlayerRenderer playerEntityRenderer = (PlayerRenderer)this.entityRenderDispatcher
+		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher
 			.<AbstractClientPlayer>getRenderer(abstractClientPlayerEntity);
 		if (bl) {
 			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light, abstractClientPlayerEntity);

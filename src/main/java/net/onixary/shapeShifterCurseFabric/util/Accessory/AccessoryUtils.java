@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util.Accessory;
 
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +36,7 @@ public class AccessoryUtils {
         public void setEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName, int Index, ItemStack stack);
     }
 
-    public static void onPlayerEquip(Player player, ResourceLocation itemID, String pluginID) {
+    public static void onPlayerEquip(Player player, Identifier itemID, String pluginID) {
         if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
@@ -44,7 +44,7 @@ public class AccessoryUtils {
         SSCEvent.ACCESSORY_EQUIP.invoker().onEvent(player, itemID, pluginID);
     }
 
-    public static void onPlayerUnEquip(Player player, ResourceLocation itemID, String pluginID) {
+    public static void onPlayerUnEquip(Player player, Identifier itemID, String pluginID) {
         if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
@@ -52,7 +52,7 @@ public class AccessoryUtils {
         SSCEvent.ACCESSORY_UNEQUIP.invoker().onEvent(player, itemID, pluginID);
     }
 
-    public static boolean CanAutoExecute(ResourceLocation itemID, String pluginID) {
+    public static boolean CanAutoExecute(Identifier itemID, String pluginID) {
         return TrinketUtils.getAccessoryMixinAuto(itemID);
     }
 

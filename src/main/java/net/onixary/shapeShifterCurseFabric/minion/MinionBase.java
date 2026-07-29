@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
@@ -30,10 +30,10 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
         }
     }
 
-    public ResourceLocation minionTypeID;
+    public Identifier minionTypeID;
 
     @Override
-    public ResourceLocation getMinionTypeID() {
+    public Identifier getMinionTypeID() {
         return this.minionTypeID;
     }
 
@@ -62,7 +62,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
     }
 
     public boolean shouldExist() {
-        if (this.level().isClientSide) {
+        if (this.level().isClientSide()) {
             return true;
         }
         if (this.getMinionOwnerUUID() == null) {

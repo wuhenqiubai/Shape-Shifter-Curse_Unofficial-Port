@@ -1,17 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.entity.projectile;
 
-import net.onixary.shapeShifterCurseFabric.additional_power.TrinketsConditionAction;
-import net.onixary.shapeShifterCurseFabric.additional_power.WebBridgeAction;
-import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
-import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
-import net.onixary.shapeShifterCurseFabric.status_effects.EntangledEffectUtils;
-import org.jetbrains.annotations.Nullable;
-
-import static net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity.WEB_BULLET;
-
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -21,11 +11,19 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
+import net.onixary.shapeShifterCurseFabric.additional_power.TrinketsConditionAction;
+import net.onixary.shapeShifterCurseFabric.additional_power.WebBridgeAction;
+import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
+import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
+import net.onixary.shapeShifterCurseFabric.status_effects.EntangledEffectUtils;
+import org.jetbrains.annotations.Nullable;
+
+import static net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity.WEB_BULLET;
 
 public class WebBullet extends ThrowableItemProjectile {
     public @Nullable LivingEntity owner = null;
@@ -42,7 +40,7 @@ public class WebBullet extends ThrowableItemProjectile {
     public static final int Tier2BuffTime = 400;
     public static final int Tier3BuffTime = 600;
 
-    public WebBullet(EntityType<? extends ThrowableItemProjectile> entityType, Level world) {
+    public WebBullet(EntityType<? extends WebBullet> entityType, Level world) {
         super(entityType, world);
         this.Tier = 1;
         this.EnableEntangledEffect = true;
@@ -50,14 +48,14 @@ public class WebBullet extends ThrowableItemProjectile {
     }
 
     public WebBullet(double d, double e, double f, Level world, int Tier) {
-        super(WEB_BULLET, d, e, f, world);
+        super(WEB_BULLET, world);
         this.Tier = Tier;
         this.EnableEntangledEffect = true;
         this.EnableTopBlockBuild = true;
     }
 
     public WebBullet(@org.jetbrains.annotations.Nullable LivingEntity livingEntity, int Tier) {
-        super(WEB_BULLET, livingEntity, livingEntity != null ? livingEntity.level() : null);
+        super(WEB_BULLET, livingEntity != null ? livingEntity.level() : null);
         this.Tier = Tier;
         this.owner = livingEntity;
         this.EnableEntangledEffect = true;
@@ -65,7 +63,7 @@ public class WebBullet extends ThrowableItemProjectile {
     }
 
     public WebBullet(@org.jetbrains.annotations.Nullable LivingEntity livingEntity, int Tier, boolean EnableEntangledEffect, boolean EnableTopBlockBuild) {
-        super(WEB_BULLET, livingEntity, livingEntity != null ? livingEntity.level() : null);
+        super(WEB_BULLET, livingEntity != null ? livingEntity.level() : null);
         this.Tier = Tier;
         this.owner = livingEntity;
         this.EnableEntangledEffect = EnableEntangledEffect;
@@ -150,14 +148,14 @@ public class WebBullet extends ThrowableItemProjectile {
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
-        super.addAdditionalSaveData(nbt);
-        nbt.putBoolean("web_projectile", true);
+    public void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putBoolean("web_projectile", true);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
+    public void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {
+        super.readAdditionalSaveData(input);
     }
 
     @Override
@@ -210,7 +208,7 @@ public class WebBullet extends ThrowableItemProjectile {
                 // 原版蛛网弹效果
                 switch (Tier) {
                     case 1 -> {
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 80, 1));
+                        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 80, 1));
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 1));
                         if(EnableEntangledEffect){
                             EntangledEffectUtils.applyEntangledEffect(this.getOwner(), target, Tier1BuffTime);
@@ -218,14 +216,14 @@ public class WebBullet extends ThrowableItemProjectile {
 
                     }
                     case 2 -> {
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 120, 2));
+                        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 120, 2));
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 2));
                         if(EnableEntangledEffect){
                             EntangledEffectUtils.applyEntangledEffect(this.getOwner(), target, Tier2BuffTime);
                         }
                     }
                     case 3 -> {
-                        target.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, 160, 3));
+                        target.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 160, 3));
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 160, 3));
                         if(EnableEntangledEffect){
                             EntangledEffectUtils.applyEntangledEffect(this.getOwner(), target, Tier3BuffTime);

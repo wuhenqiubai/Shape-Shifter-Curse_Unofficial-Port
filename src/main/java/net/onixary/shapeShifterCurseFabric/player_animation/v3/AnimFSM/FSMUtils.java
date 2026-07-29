@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import static net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimRegistries.*;
 
 public class FSMUtils {
-    public static @Nullable ResourceLocation ProcessUniversalAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
+    public static @Nullable Identifier ProcessUniversalAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
         if (player.isSleeping()) {
             return ANIM_STATE_SLEEP;
         }

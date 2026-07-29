@@ -2,11 +2,11 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.badge;
 
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.registry.DataObjectFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.Function;
 
-public record BadgeFactory(ResourceLocation id, SerializableData data, Function<SerializableData.Instance, Badge> factory) implements DataObjectFactory<Badge> {
+public record BadgeFactory(Identifier id, SerializableData data, Function<SerializableData.Instance, Badge> factory) implements DataObjectFactory<Badge> {
 
     @Override
     public SerializableData getData() {

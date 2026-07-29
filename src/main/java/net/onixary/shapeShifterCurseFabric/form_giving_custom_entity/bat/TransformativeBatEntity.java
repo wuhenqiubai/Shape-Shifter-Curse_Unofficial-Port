@@ -1,11 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -34,7 +35,7 @@ public class TransformativeBatEntity extends Bat implements ITMob {
                 .add(Attributes.MOVEMENT_SPEED, 1.0);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeBatEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeBatEntity> type, LevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         if (pos.getY() >= world.getSeaLevel()) {
             return false;
         } else {
@@ -86,9 +87,9 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
         Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
-        return attacked.orElseGet(() -> super.doHurtTarget(target));
+        return attacked.orElseGet(() -> super.doHurtTarget(serverLevel, target));
     }
 
     @Override

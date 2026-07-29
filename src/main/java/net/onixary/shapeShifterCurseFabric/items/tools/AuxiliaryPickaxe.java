@@ -2,15 +2,18 @@ package net.onixary.shapeShifterCurseFabric.items.tools;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ToolMaterial;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.List;
 
 
-public class AuxiliaryPickaxe extends PickaxeItem {
+public class AuxiliaryPickaxe extends Item {
 
-    public AuxiliaryPickaxe(Tier material, int attackDamage, float attackSpeed, Properties settings) {
-        super(material, settings);
+    public AuxiliaryPickaxe(ToolMaterial material, int attackDamage, float attackSpeed, Properties settings) {
+        super(settings.pickaxe(material, attackDamage, attackSpeed));
     }
 
     @Override

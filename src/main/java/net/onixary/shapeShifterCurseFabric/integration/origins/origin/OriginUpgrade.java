@@ -4,13 +4,13 @@ import com.google.gson.JsonElement;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.OriginsDataTypes;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 @Deprecated
-public record OriginUpgrade(ResourceLocation advancementCondition, ResourceLocation upgradeToOrigin, @Nullable String announcement) {
+public record OriginUpgrade(Identifier advancementCondition, Identifier upgradeToOrigin, @Nullable String announcement) {
 
     public static final SerializableData DATA = new SerializableData()
         .add("condition", SerializableDataTypes.IDENTIFIER)
@@ -18,12 +18,12 @@ public record OriginUpgrade(ResourceLocation advancementCondition, ResourceLocat
         .add("announcement", SerializableDataTypes.STRING, null);
 
     @Deprecated
-    public ResourceLocation getAdvancementCondition() {
+    public Identifier getAdvancementCondition() {
         return advancementCondition;
     }
 
     @Deprecated
-    public ResourceLocation getUpgradeToOrigin() {
+    public Identifier getUpgradeToOrigin() {
         return upgradeToOrigin;
     }
 

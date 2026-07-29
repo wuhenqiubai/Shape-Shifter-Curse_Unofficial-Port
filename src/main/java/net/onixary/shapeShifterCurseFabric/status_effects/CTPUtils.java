@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.status_effects;
 
 import com.google.common.base.Objects;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -13,8 +13,8 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.RegPlayerFormCompon
 // Custom Transformative Potion Utils (CTP)
 public class CTPUtils {
     public interface CTPFormIDHolder {
-        ResourceLocation getCTPFormID();
-        void setCTPFormID(ResourceLocation formID);
+        Identifier getCTPFormID();
+        void setCTPFormID(Identifier formID);
     }
 
     public static IForm getTransformativePotionForm(Player player) {
@@ -30,7 +30,7 @@ public class CTPUtils {
         return RegPlayerForms.getPlayerFormOrDefault(playerFormComponent.customPotionFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
     }
 
-    public static void setTransformativePotionForm(Player player, ResourceLocation formID) {
+    public static void setTransformativePotionForm(Player player, Identifier formID) {
         if (player == null) {
             ShapeShifterCurseFabric.LOGGER.error("CustomTransformativeStatue PlayerEntity is null");
             return;
@@ -50,17 +50,17 @@ public class CTPUtils {
         setTransformativePotionForm(player, RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID());
     }
 
-    public static ResourceLocation getCTPFormIDFromNBT(CompoundTag nbtCompound) {
+    public static Identifier getCTPFormIDFromNBT(CompoundTag nbtCompound) {
         if (nbtCompound == null) {
             return null;
         }
         if (nbtCompound.contains("targetForm")) {
-            return ResourceLocation.tryParse(nbtCompound.getString("targetForm"));
+            return Identifier.tryParse(nbtCompound.getString("targetForm"));
         }
         return null;
     }
 
-    public static void setCTPFormIDToNBT(CompoundTag nbtCompound, ResourceLocation formID) {
+    public static void setCTPFormIDToNBT(CompoundTag nbtCompound, Identifier formID) {
         if (nbtCompound == null) {
             return;
         }

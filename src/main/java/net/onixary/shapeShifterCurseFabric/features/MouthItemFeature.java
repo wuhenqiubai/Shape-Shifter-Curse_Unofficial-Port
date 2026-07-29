@@ -12,14 +12,13 @@ import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.client.renderer.entity.player.PlayerRenderer;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ShieldItem;
-import net.minecraft.world.item.UseAnim;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
@@ -106,7 +105,7 @@ public class MouthItemFeature<T extends LivingEntity, M extends EntityModel<T> &
         //     return;
         // }
         matrixStack.pushPose();
-        var eR = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
+        var eR = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
         FormRenderer renderer = FormRenderUtils.searchFirstRenderer(player, formRenderer -> {
             FormModel model = formRenderer.realModel;
             if (model == null) {
@@ -137,7 +136,7 @@ public class MouthItemFeature<T extends LivingEntity, M extends EntityModel<T> &
 
     private void renderShieldOnBack(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T livingEntity, ItemStack itemStack, boolean isLeftHand) {
         matrixStack.pushPose();
-        var eR = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
+        var eR = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
         var body = eR.getModel().body;
         body.translateAndRotate(matrixStack);
         // --- 格挡时盾牌的调整 ---
@@ -153,7 +152,7 @@ public class MouthItemFeature<T extends LivingEntity, M extends EntityModel<T> &
 
     private void renderDefaultItemOnBack(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T livingEntity, ItemStack itemStack) {
         matrixStack.pushPose();
-        var eR = (PlayerRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
+        var eR = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(livingEntity);
         var body = eR.getModel().body;
         body.translateAndRotate(matrixStack);
         matrixStack.translate(0.0F, 0.5F, 0.25F);

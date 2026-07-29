@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
 import com.google.gson.JsonObject;
 import com.zigythebird.playeranimcore.easing.EasingType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -15,23 +15,23 @@ import java.util.function.Function;
 
 public class AnimUtils {
     public static class AnimationHolderData {
-        public ResourceLocation AnimID;
+        public Identifier AnimID;
         public float Speed;
         public int Fade;
         public @Nullable EasingType Easing;
         public boolean skipFade;
         private @Nullable AnimationHolder animationHolder;
-        public AnimationHolderData(ResourceLocation AnimID, float Speed, int Fade, @Nullable EasingType easing) {
+        public AnimationHolderData(Identifier AnimID, float Speed, int Fade, @Nullable EasingType easing) {
             this.AnimID = AnimID;
             this.Speed = Speed;
             this.Fade = Fade;
             this.Easing = easing;
         }
-        public AnimationHolderData(ResourceLocation AnimID, float Speed, int Fade) {
+        public AnimationHolderData(Identifier AnimID, float Speed, int Fade) {
             this(AnimID, Speed, Fade, null);
         }
 
-        public AnimationHolderData setAnimID(ResourceLocation AnimID) {
+        public AnimationHolderData setAnimID(Identifier AnimID) {
             this.AnimID = AnimID;
             return this;
         }
@@ -55,11 +55,11 @@ public class AnimUtils {
             return new AnimationHolderData(AnimID, Speed, Fade);
         }
 
-        public AnimationHolderData(ResourceLocation AnimID, float Speed) {
+        public AnimationHolderData(Identifier AnimID, float Speed) {
             this(AnimID, Speed, 2);
         }
 
-        public AnimationHolderData(ResourceLocation AnimID) {
+        public AnimationHolderData(Identifier AnimID) {
             this(AnimID, 1.0f, 2);
         }
 
@@ -93,7 +93,7 @@ public class AnimUtils {
 
     public static @NotNull AnimationHolderData readAnim(JsonObject jsonData) {
         try {
-            ResourceLocation AnimID = ResourceLocation.tryParse(jsonData.get("animID").getAsString());
+            Identifier AnimID = Identifier.tryParse(jsonData.get("animID").getAsString());
             float Speed = 1.0f;
             int Fade = 2;
             if (jsonData.has("speed")) {
@@ -133,7 +133,7 @@ public class AnimUtils {
 
     public static @NotNull AbstractAnimStateController readController(JsonObject jsonData) {
         try {
-            ResourceLocation ControllerType = ResourceLocation.tryParse(jsonData.get(ANIM_CONTROLLER_TYPE_KEY).getAsString());
+            Identifier ControllerType = Identifier.tryParse(jsonData.get(ANIM_CONTROLLER_TYPE_KEY).getAsString());
             Function<JsonObject, AbstractAnimStateController> controllerFactory = AnimRegistry.getAnimStateControllerSupplier(ControllerType);
             if (controllerFactory != null) {
                 return controllerFactory.apply(jsonData);
@@ -148,8 +148,8 @@ public class AnimUtils {
     }
 
     public enum AnimationSendSideType {
-        ONLY_CLIENT((player -> player.level().isClientSide)),
-        ONLY_SERVER((player -> !player.level().isClientSide)),
+        ONLY_CLIENT((player -> player.level().isClientSide())),
+        ONLY_SERVER((player -> !player.level().isClientSide())),
         NONE((player -> false)),
         BOTH_SIDE((player -> true));
 
@@ -164,7 +164,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean playPowerAnimWithTime(Player playerEntity, ResourceLocation powerAnimID, int animDuration, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimWithTime(Player playerEntity, Identifier powerAnimID, int animDuration, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -176,7 +176,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean playPowerAnimWithCount(Player playerEntity, ResourceLocation powerAnimID, int animCount, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimWithCount(Player playerEntity, Identifier powerAnimID, int animCount, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -188,7 +188,7 @@ public class AnimUtils {
         }
     }
 
-    public static boolean playPowerAnimLoop(Player playerEntity, ResourceLocation powerAnimID, AnimationSendSideType sendSideType) {
+    public static boolean playPowerAnimLoop(Player playerEntity, Identifier powerAnimID, AnimationSendSideType sendSideType) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
@@ -212,17 +212,17 @@ public class AnimUtils {
         }
     }
 
-    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, List<ResourceLocation> powerAnimIDs) {
-        return stopPowerAnimWithIDs(playerEntity, sendSideType, powerAnimIDs.toArray(new ResourceLocation[0]));
+    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, List<Identifier> powerAnimIDs) {
+        return stopPowerAnimWithIDs(playerEntity, sendSideType, powerAnimIDs.toArray(new Identifier[0]));
     }
 
-    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, ResourceLocation... powerAnimIDs) {
+    public static boolean stopPowerAnimWithIDs(Player playerEntity, AnimationSendSideType sendSideType, Identifier... powerAnimIDs) {
         if (!sendSideType.canPlayAnim(playerEntity)) {
             return false;
         }
         if (playerEntity instanceof IPlayerAnimController playerAnimController) {
-            @Nullable ResourceLocation nowAnimID = playerAnimController.shape_shifter_curse$getPowerAnimationID();
-            for (ResourceLocation powerAnimID : powerAnimIDs) {
+            @Nullable Identifier nowAnimID = playerAnimController.shape_shifter_curse$getPowerAnimationID();
+            for (Identifier powerAnimID : powerAnimIDs) {
                 if (powerAnimID.equals(nowAnimID)) {
                     stopPowerAnim(playerEntity, sendSideType);
                     return true;

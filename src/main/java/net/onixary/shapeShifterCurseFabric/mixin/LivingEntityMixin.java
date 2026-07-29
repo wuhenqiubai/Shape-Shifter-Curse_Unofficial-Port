@@ -15,10 +15,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.monster.Evoker;
 import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.entity.monster.illager.Evoker;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
@@ -69,7 +69,7 @@ public abstract class LivingEntityMixin {
         Level world = entity.level();
 
         // 仅在服务端执行，避免客户端重复触发
-        if (world.isClientSide) return;
+        if (world.isClientSide()) return;
 
         Entity attacker = source.getEntity();
         // 拥有 ENTANGLED_FULL_EFFECT 的生物死亡时在其位置生成蜘蛛网。当攻击者为蜘蛛形态时，概率掉落流食囊
@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin {
                     net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion> familiarFoxPotion =
                             net.minecraft.core.registries.BuiltInRegistries.POTION.getHolder(
                                     net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.POTION,
-                                            net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
+                                            net.minecraft.resources.Identifier.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
                                     .orElseThrow();
                     ItemStack customPotion = PotionContents.createItemStack(Items.SPLASH_POTION, familiarFoxPotion);
                     entity.level().addFreshEntity(
@@ -210,7 +210,7 @@ public abstract class LivingEntityMixin {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof Player player) {
             // 检查是否是溅射药水或滞留药水造成的效果
-            if ((source instanceof ThrownPotion || source instanceof AreaEffectCloud)) {
+            if ((source instanceof AbstractThrownPotion || source instanceof AreaEffectCloud)) {
                 PowerHolderComponent.getPowers(player, ActionOnSplashPotionTakeEffect.class)
                         .forEach(ActionOnSplashPotionTakeEffect::executeAction);
             }

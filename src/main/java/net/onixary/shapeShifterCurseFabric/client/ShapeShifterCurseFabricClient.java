@@ -1,20 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import io.github.apace100.apoli.ApoliClient;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
@@ -37,7 +34,6 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
-import net.onixary.shapeShifterCurseFabric.render.render_layer.FurGradientRenderLayer;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
@@ -61,7 +57,10 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static Minecraft getClient() {
 		return Minecraft.getInstance();
 	}
-	private static ShaderInstance furGradientShader;
+	private static final KeyMapping.Category SSC_CATEGORY = KeyMapping.Category.register(
+			Identifier.fromNamespaceAndPath(MOD_ID, "keys"));
+	// TODO: 1.21.11 Satin已移除，需要新方案注册着色器
+	// private static ShaderInstance furGradientShader;
 
 	public static KeyMapping makeSound;
 	public static KeyMapping useActiveSkill1PowerKeybind;
@@ -155,16 +154,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		}
 	}
 
-	// 添加动画刷新方法
-	public static void refreshPlayerAnimations() {
-		Minecraft client = Minecraft.getInstance();
-		if (client.player != null) {
-			ShapeShifterCurseFabric.LOGGER.info("Refreshing player animations on client");
-			// 强制重新初始化动画系统
-			// 这里可以触发动画重新注册或刷新
-		}
-	}
-
 	// 原先的仅考虑到当前玩家变身动作 其他玩家变身动作不会更新
 	public static class TransformingStage {
 		public boolean IsTransforming = false;
@@ -205,6 +194,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		return getClientTransformState(playerUuid).TransformToForm;
 	}
 
+	/* TODO: 1.21.11 已移除Satin
 	private void registerShaderResource()
 	{
 		CoreShaderRegistrationCallback.EVENT.register(context -> {
@@ -219,6 +209,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			});
 		});
 	}
+	 */
 
 	@Override
 	public void onInitializeClient() {
@@ -226,8 +217,9 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		ModPacketsS2C.register();
         ModPacketsC2S.registerClient();
 
-		registerShaderResource();
-		FurGradientRenderLayer.onInitializeClient();
+		// TODO: 1.21.11 Satin已移除，需新方案注册着色器
+		// registerShaderResource();
+		// FurGradientRenderLayer.onInitializeClient();
 
 		ManaRegistriesClient.register();
 		RegCustomEntityRenderer.init();
@@ -254,7 +246,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			CustomEdiblePower.OnClientTick(clientPlayer);
 		});
 
-		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, "category." + MOD_ID);
+		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);
 		KeyBindingHelper.registerKeyBinding(makeSound);
 
@@ -265,14 +257,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// 打开菜单 5->6
 		// 切换能力 6->5
 		// 这2个分配给常用技能 一般推荐绑鼠标侧键上
-		useActiveSkill1PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill2PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill1PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill2PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个介于常用和非常用之间 尽量别放类似火球这种能力 如果鼠标侧键多也可以绑侧键上
-		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
-		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
-		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, "category." + ShapeShifterCurseFabric.MOD_ID);
+		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_1", useActiveSkill1PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_2", useActiveSkill2PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_3", useActiveSkill3PowerKeybind);
@@ -308,8 +300,9 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		AuthClient.init();
 	}
 
-	public static ShaderInstance getFurGradientShader() {
-		return furGradientShader;
-	}
+	// TODO: 1.21.11 Satin已移除，需新方案注册着色器
+	// public static ShaderInstance getFurGradientShader() {
+	// 	return furGradientShader;
+	// }
 
 }

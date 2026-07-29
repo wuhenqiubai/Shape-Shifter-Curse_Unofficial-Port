@@ -12,7 +12,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -33,7 +33,7 @@ import java.util.function.Consumer;
 
 // 由于网络同步问题 仅支持玩家实体 非玩家实体不会触发客户端效果
 public class VirtualTotemPower extends CooldownPower {
-    public static final HashMap<ResourceLocation, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
+    public static final HashMap<Identifier, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
 
     static {
         virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("default"), (Player playerEntity, ItemStack totemStack) -> {
@@ -58,7 +58,7 @@ public class VirtualTotemPower extends CooldownPower {
         });
     }
 
-    public ResourceLocation virtualTotemType;  // 用于播放动画
+    public Identifier virtualTotemType;  // 用于播放动画
     public ItemStack totemStack;  // 当VirtualTotemPowerID == 0时 模拟原版不死图腾
     private final List<Consumer<Entity>> entityAction;
     private final int totemHealth;
@@ -98,7 +98,7 @@ public class VirtualTotemPower extends CooldownPower {
                 consumer.accept(this.entity);
             }
         }
-        if (!this.entity.level().isClientSide && this.entity instanceof ServerPlayer serverPlayerEntity) {
+        if (!this.entity.level().isClientSide() && this.entity instanceof ServerPlayer serverPlayerEntity) {
             ModPacketsS2CServer.sendActiveVirtualTotem(serverPlayerEntity, this);
         }
         super.use();
@@ -106,9 +106,9 @@ public class VirtualTotemPower extends CooldownPower {
 
     public @Nullable FriendlyByteBuf create_packet_byte_buf() {
         if (this.entity instanceof ServerPlayer serverPlayerEntity) {
-            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.getServer().registryAccess());
+            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.level().getServer().registryAccess());
             buf.writeUUID(serverPlayerEntity.getUUID());
-            buf.writeResourceLocation(this.virtualTotemType);
+            buf.writeIdentifier(this.virtualTotemType);
             buf.writeBoolean(this.totemStack != null && !this.totemStack.isEmpty());
             if (this.totemStack != null && !this.totemStack.isEmpty()) {
                 ItemStack.STREAM_CODEC.encode(buf, this.totemStack);
@@ -118,7 +118,7 @@ public class VirtualTotemPower extends CooldownPower {
         return null;
     }
 
-    public static void process_virtual_totem_type(@NotNull Player entity, ResourceLocation virtualTotemType, @Nullable ItemStack totemStack) {
+    public static void process_virtual_totem_type(@NotNull Player entity, Identifier virtualTotemType, @Nullable ItemStack totemStack) {
         Minecraft client = Minecraft.getInstance();
         if (virtualTotemTypeMap.containsKey(virtualTotemType)) {
             virtualTotemTypeMap.get(virtualTotemType).accept(entity, totemStack);

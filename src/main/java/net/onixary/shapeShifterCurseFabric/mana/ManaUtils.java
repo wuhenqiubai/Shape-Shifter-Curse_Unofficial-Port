@@ -7,7 +7,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class ManaUtils {
     public record Modifier(double add, double multiply, double add_total) {
@@ -36,7 +37,7 @@ public class ManaUtils {
         }
 
         public static Modifier readFromNbt(CompoundTag nbtCompound) {
-            return of(nbtCompound.getDouble("add"), nbtCompound.getDouble("multiply"), nbtCompound.getDouble("add_total"));
+            return of(nbtCompound.getDouble("add").orElse(null), nbtCompound.getDouble("multiply").orElse(null), nbtCompound.getDouble("add_total").orElse(null));
         }
 
         public void writeToNbt(CompoundTag nbtCompound) {
@@ -52,13 +53,22 @@ public class ManaUtils {
                     .add("add", SerializableDataTypes.DOUBLE, 0.0d)
                     .add("multiply", SerializableDataTypes.DOUBLE, 1.0d)
                     .add("add_total", SerializableDataTypes.DOUBLE, 0.0d),
-            (serializableData) -> Modifier.of(serializableData.get("add"), serializableData.get("multiply"), serializableData.get("add_total")),
+            (serializableData) -> {
+                Optional<?> add = serializableData.get("add");
+                Optional<?> multiply = serializableData.get("multiply");
+                Optional<?> addTotal = serializableData.get("add_total");
+                return Modifier.of(
+                        (Double) add.orElse(null),
+                        (Double) multiply.orElse(null),
+                        (Double) addTotal.orElse(null)
+                );
+            },
             (serializableData, modifier) -> {
                 JsonObject jsonData = new JsonObject();
                 jsonData.addProperty("add", modifier.add);
                 jsonData.addProperty("multiply", modifier.multiply);
                 jsonData.addProperty("add_total", modifier.add_total);
-                return serializableData.read(jsonData);
+                return serializableData.read(jsonData, null);
             }
     );
 
@@ -67,13 +77,13 @@ public class ManaUtils {
     public static class ModifierList {
         public double lastValue = 0.0d;
         public boolean needSync = false;
-        private final LinkedHashMap<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifiers;
+        private final LinkedHashMap<Identifier, Tuple<Identifier, Modifier>> modifiers;
 
         @SafeVarargs
-        public ModifierList(Tuple<ResourceLocation, Tuple<ResourceLocation, Modifier>>... modifier) {
+        public ModifierList(Tuple<Identifier, Tuple<Identifier, Modifier>>... modifier) {
             modifiers = new LinkedHashMap<>();
             if (modifier != null) {
-                for (Tuple<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifierEntry : modifier) {
+                for (Tuple<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifier) {
                     modifiers.put(modifierEntry.getA(), modifierEntry.getB());
                 }
             }
@@ -83,7 +93,7 @@ public class ManaUtils {
             modifiers = new LinkedHashMap<>(other.getModifiers());
         }
 
-        public LinkedHashMap<ResourceLocation, Tuple<ResourceLocation, Modifier>> getModifiers() {
+        public LinkedHashMap<Identifier, Tuple<Identifier, Modifier>> getModifiers() {
             return modifiers;
         }
 
@@ -91,17 +101,17 @@ public class ManaUtils {
             return new ModifierList(this);
         }
 
-        public void add(ResourceLocation identifier, ResourceLocation conditionID, Modifier modifier) {
+        public void add(Identifier identifier, Identifier conditionID, Modifier modifier) {
             modifiers.put(identifier, new Tuple<>(conditionID, modifier));
         }
 
-        public void remove(ResourceLocation identifier) {
+        public void remove(Identifier identifier) {
             modifiers.remove(identifier);
         }
 
         private double applyAdd(Player player, double value) {
-            for(Map.Entry<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifierEntry : modifiers.entrySet()) {
-                ResourceLocation conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getA();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
                     value = modifierEntry.getValue().getB().applyAdd(value);
                 }
@@ -110,8 +120,8 @@ public class ManaUtils {
         }
 
         private double applyMultiply(Player player, double value) {
-            for(Map.Entry<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifierEntry : modifiers.entrySet()) {
-                ResourceLocation conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getA();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
                     value = modifierEntry.getValue().getB().applyMultiply(value);
                 }
@@ -120,8 +130,8 @@ public class ManaUtils {
         }
 
         private double applyAddTotal(Player player, double value) {
-            for(Map.Entry<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifierEntry : modifiers.entrySet()) {
-                ResourceLocation conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getA();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
                     value = modifierEntry.getValue().getB().applyAddTotal(value);
                 }
@@ -158,12 +168,12 @@ public class ManaUtils {
         public void readFromNbt(CompoundTag nbtCompound) {
             modifiers.clear();
             if (nbtCompound.contains("modifiers")) {
-                ListTag nbtList = nbtCompound.getList("modifiers", Tag.TAG_COMPOUND);
+                ListTag nbtList = nbtCompound.getList("modifiers").orElse(new ListTag());
                 for (Tag nbtElement : nbtList) {
                     CompoundTag modifierEntryNbt = (CompoundTag) nbtElement;
-                    ResourceLocation identifier = ResourceLocation.parse(modifierEntryNbt.getString("identifier"));
-                    ResourceLocation conditionID = ResourceLocation.parse(modifierEntryNbt.getString("conditionID"));
-                    Modifier modifier = Modifier.readFromNbt(modifierEntryNbt.getCompound("modifier"));
+                    Identifier identifier = Identifier.parse(modifierEntryNbt.getStringOr("identifier", ""));
+                    Identifier conditionID = Identifier.parse(modifierEntryNbt.getStringOr("conditionID", ""));
+                    Modifier modifier = Modifier.readFromNbt(modifierEntryNbt.getCompound("modifier").orElse(new CompoundTag()));
                     modifiers.put(identifier, new Tuple<>(conditionID, modifier));
                 }
             }
@@ -171,7 +181,7 @@ public class ManaUtils {
 
         public void writeToNbt(CompoundTag nbtCompound) {
             ListTag nbtList = new ListTag();
-            for (Map.Entry<ResourceLocation, Tuple<ResourceLocation, Modifier>> modifierEntry : modifiers.entrySet()) {
+            for (Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
                 CompoundTag modifierEntryNbt = new CompoundTag();
                 modifierEntryNbt.putString("identifier", modifierEntry.getKey().toString());
                 modifierEntryNbt.putString("conditionID", modifierEntry.getValue().getA().toString());
@@ -188,7 +198,7 @@ public class ManaUtils {
         return RegManaComponent.MANA.get(player);
     }
 
-    public static void addMaxManaModifier(Player player, ResourceLocation identifier, ResourceLocation conditionID, Modifier modifier, boolean playerSide) {
+    public static void addMaxManaModifier(Player player, Identifier identifier, Identifier conditionID, Modifier modifier, boolean playerSide) {
         if (playerSide) {
             getManaComponent(player).MaxManaModifierPlayerSide.add(identifier, conditionID, modifier);
         } else {
@@ -196,11 +206,11 @@ public class ManaUtils {
         }
     }
 
-    public static void addMaxManaModifier(Player player, ResourceLocation identifier, Modifier modifier, boolean playerSide) {
+    public static void addMaxManaModifier(Player player, Identifier identifier, Modifier modifier, boolean playerSide) {
         addMaxManaModifier(player, identifier, ManaRegistries.MC_AlwaysTrue, modifier, playerSide);
     }
 
-    public static void removeMaxManaModifier(Player player, ResourceLocation identifier, boolean playerSide) {
+    public static void removeMaxManaModifier(Player player, Identifier identifier, boolean playerSide) {
         if (playerSide) {
             getManaComponent(player).MaxManaModifierPlayerSide.remove(identifier);
         } else {
@@ -208,7 +218,7 @@ public class ManaUtils {
         }
     }
 
-    public static void addRegenManaModifier(Player player, ResourceLocation identifier, ResourceLocation conditionID, Modifier modifier, boolean playerSide) {
+    public static void addRegenManaModifier(Player player, Identifier identifier, Identifier conditionID, Modifier modifier, boolean playerSide) {
         if (playerSide) {
             getManaComponent(player).ManaRegenModifierPlayerSide.add(identifier, conditionID, modifier);
         } else {
@@ -216,11 +226,11 @@ public class ManaUtils {
         }
     }
 
-    public static void addRegenManaModifier(Player player, ResourceLocation identifier, Modifier modifier, boolean playerSide) {
+    public static void addRegenManaModifier(Player player, Identifier identifier, Modifier modifier, boolean playerSide) {
         addRegenManaModifier(player, identifier, ManaRegistries.MC_AlwaysTrue, modifier, playerSide);
     }
 
-    public static void removeRegenManaModifier(Player player, ResourceLocation identifier, boolean playerSide) {
+    public static void removeRegenManaModifier(Player player, Identifier identifier, boolean playerSide) {
         if (playerSide) {
             getManaComponent(player).ManaRegenModifierPlayerSide.remove(identifier);
         } else {
@@ -252,7 +262,7 @@ public class ManaUtils {
         return getManaPercent(manaComponent.getMana(), manaComponent.getMaxMana(), if0Result);
     }
 
-    public static ResourceLocation getPlayerManaTypeID(Player player) {
+    public static Identifier getPlayerManaTypeID(Player player) {
         return getManaComponent(player).getManaTypeID();
     }
 
@@ -281,27 +291,27 @@ public class ManaUtils {
     }
 
     // 用于Power系统
-    public static void gainManaTypeID(Player player, ResourceLocation manaTypeID, ResourceLocation sourceID) {
+    public static void gainManaTypeID(Player player, Identifier manaTypeID, Identifier sourceID) {
         getManaComponent(player).gainManaTypeID(manaTypeID, sourceID);
     }
 
-    public static void loseManaTypeID(Player player, ResourceLocation manaTypeID, ResourceLocation sourceID) {
+    public static void loseManaTypeID(Player player, Identifier manaTypeID, Identifier sourceID) {
         getManaComponent(player).loseManaTypeID(manaTypeID, sourceID);
     }
 
-    public static boolean isManaTypeExists(Player player, @NotNull ResourceLocation manaTypeID, @Nullable ResourceLocation sourceID) {
+    public static boolean isManaTypeExists(Player player, @NotNull Identifier manaTypeID, @Nullable Identifier sourceID) {
         return getManaComponent(player).isManaTypeExists(manaTypeID, sourceID);
     }
 
     // 用于其他非Power系统
-    public static void setManaTypeID(Player player, ResourceLocation manaTypeID) {
+    public static void setManaTypeID(Player player, Identifier manaTypeID) {
         getManaComponent(player).setManaTypeID(manaTypeID);
     }
 
     public static void manaTick(Player player) {
         ManaComponent manaComponent = getManaComponent(player);
         manaComponent.tick();
-        if (!player.level().isClientSide && manaComponent.isNeedSync()) {
+        if (!player.level().isClientSide() && manaComponent.isNeedSync()) {
             RegManaComponent.MANA.sync(player);
         }
     }

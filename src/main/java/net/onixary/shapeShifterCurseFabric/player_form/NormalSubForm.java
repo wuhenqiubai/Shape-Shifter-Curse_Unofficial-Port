@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
@@ -15,11 +15,11 @@ import java.util.function.Consumer;
 
 public class NormalSubForm extends NormalForm implements ISubForm {
     public final @NotNull IForm masterForm;
-    public final @NotNull List<ResourceLocation> power_ADD = new ArrayList<>();
-    public final @NotNull List<ResourceLocation> power_REMOVE = new ArrayList<>();
+    public final @NotNull List<Identifier> power_ADD = new ArrayList<>();
+    public final @NotNull List<Identifier> power_REMOVE = new ArrayList<>();
     private @Nullable Consumer<Player> applyScaleFunc = null;
 
-    public NormalSubForm(ResourceLocation formID, @NotNull IForm masterForm) {
+    public NormalSubForm(Identifier formID, @NotNull IForm masterForm) {
         super(formID);
         this.masterForm = masterForm;
         this.loadAllDataFormMasterForm();
@@ -31,20 +31,20 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @Nullable Tuple<List<ResourceLocation>, List<ResourceLocation>> getLayerModifier() {
+    public @Nullable Tuple<List<Identifier>, List<Identifier>> getLayerModifier() {
         return new Tuple<>(power_ADD, power_REMOVE);
     }
 
-    public void addPower(ResourceLocation... powerIDs) {
-        for (ResourceLocation powerID : powerIDs) {
+    public void addPower(Identifier... powerIDs) {
+        for (Identifier powerID : powerIDs) {
             if (!power_ADD.contains(powerID)) {
                 power_ADD.add(powerID);
             }
         }
     }
 
-    public void removePower(ResourceLocation... powerIDs) {
-        for (ResourceLocation powerID : powerIDs) {
+    public void removePower(Identifier... powerIDs) {
+        for (Identifier powerID : powerIDs) {
             if (!power_REMOVE.contains(powerID)) {
                 power_REMOVE.add(powerID);
             }
@@ -72,7 +72,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         return this.getMasterForm().getAnimStateController(player, animSystemData, animStateID);
     }
 
@@ -88,7 +88,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
+    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         return this.getMasterForm().getPowerAnim(player, animSystemData, powerAnimID);
     }
 
@@ -140,7 +140,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer() {
+    public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
         return ISubForm.super.getFormLayer();
     }
 }

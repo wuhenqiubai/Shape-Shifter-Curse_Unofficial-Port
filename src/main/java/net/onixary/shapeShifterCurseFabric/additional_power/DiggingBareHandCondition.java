@@ -8,7 +8,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.TieredItem;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class DiggingBareHandCondition {
@@ -33,13 +33,13 @@ public class DiggingBareHandCondition {
             return false;
         }
 
-	    // getMiningLevel removed in 1.21; any tool in hand means not barehand
-	    if(playerEntity.getInventory().getSelected().isEmpty()){
+        // getMiningLevel removed in 1.21; check tool component instead of TieredItem
+        if (playerEntity.getInventory().isEmpty()) {
             return true;  // bare hand
+        } else {
+            ItemStack held = playerEntity.getInventory().getSelectedItem();
+            return !held.has(net.minecraft.core.component.DataComponents.TOOL);
         }
-        else
-		    return !(playerEntity.getInventory().getSelected().getItem() instanceof TieredItem);// non-tool item in hand, counts as bare hand
-
     }
 
     public static ConditionFactory<Entity> getFactory() {
@@ -49,5 +49,4 @@ public class DiggingBareHandCondition {
                 DiggingBareHandCondition::condition
         );
     }
-
 }

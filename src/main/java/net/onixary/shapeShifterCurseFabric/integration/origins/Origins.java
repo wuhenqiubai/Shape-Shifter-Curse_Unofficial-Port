@@ -17,7 +17,7 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -103,14 +103,14 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		}
 	}
 
-	public static ResourceLocation identifier(String path) {
-		return ResourceLocation.fromNamespaceAndPath(Origins.MODID, path);
+	public static Identifier identifier(String path) {
+		return Identifier.fromNamespaceAndPath(Origins.MODID, path);
 	}
 
 	@Override
 	public void registerResourceListeners(OrderedResourceListenerManager manager) {
-		ResourceLocation powerData = Apoli.identifier("powers");
-		ResourceLocation originData = Origins.identifier("origins");
+		Identifier powerData = Apoli.identifier("powers");
+		Identifier originData = Origins.identifier("origins");
 
 		// Ensure origins namespace tags are registered before power loading
 		OriginsTagLoader tagLoader = new OriginsTagLoader();
@@ -135,7 +135,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 		public JsonObject origins = new JsonObject();
 
-		public boolean isOriginDisabled(ResourceLocation originId) {
+		public boolean isOriginDisabled(Identifier originId) {
 			String idString = originId.toString();
 			if(!origins.has(idString)) {
 				return false;
@@ -147,7 +147,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 			return false;
 		}
 
-		public boolean isPowerDisabled(ResourceLocation originId, ResourceLocation powerId) {
+		public boolean isPowerDisabled(Identifier originId, Identifier powerId) {
 			String originIdString = originId.toString();
 			if(!origins.has(originIdString)) {
 				return false;

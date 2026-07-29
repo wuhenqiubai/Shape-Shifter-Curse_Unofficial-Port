@@ -5,7 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
@@ -28,8 +28,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     // form的2个值禁止使用非setForm函数修改 除非你知道你在干什么 读取可以直接读 但是修改请使用setForm
     public @NotNull IForm nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-    public @Nullable ResourceLocation nowFormID = nowForm.getFormID();
-    public @NotNull ResourceLocation fallbackFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
+    public @Nullable Identifier nowFormID = nowForm.getFormID();
+    public @NotNull Identifier fallbackFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
     public final List<IForm> formHistory = new ArrayList<>();
     // 诅咒之月逻辑
     public boolean isCursedMoonApplied = false;
@@ -39,11 +39,11 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     // 变形系统
     public @Nullable IForm transformTargetForm = null;
     // CTP系统
-    public ResourceLocation customPotionFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
+    public Identifier customPotionFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
     // 本能系统
     public float instinctValue = 0.0f;
     public float instinctRate = 0.0f;
-    public HashMap<ResourceLocation, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
+    public HashMap<Identifier, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
 
     // 临时变量
     public Player player = null;
@@ -63,7 +63,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         return form;
     }
 
-    public void setFallbackForm(@Nullable ResourceLocation formID) {
+    public void setFallbackForm(@Nullable Identifier formID) {
         IForm form = RegPlayerForms.getPlayerForm(formID);
         if (form == null) {
             ShapeShifterCurseFabric.LOGGER.warn("Fallback form not found");
@@ -85,7 +85,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
         } else {
             if (tag.contains("nowFormID")) {
-                nowFormID = ResourceLocation.tryParse(tag.getString("nowFormID"));
+                nowFormID = Identifier.tryParse(tag.getString("nowFormID"));
                 nowForm = FormUtils.parseForm(nowFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
             } else {
                 nowFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
@@ -93,12 +93,12 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             }
         }
         if (tag.contains("fallbackFormID")) {
-            ResourceLocation fallbackFormIDNullable = ResourceLocation.tryParse(tag.getString("fallbackFormID"));
+            Identifier fallbackFormIDNullable = Identifier.tryParse(tag.getString("fallbackFormID"));
             fallbackFormID = fallbackFormIDNullable == null ? RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID() : fallbackFormIDNullable;
         }
         // 旧版兼容补丁 只迁移形态数据 其他全Drop了
         if (tag.contains("currentForm")) {
-            nowFormID = ResourceLocation.tryParse(tag.getString("currentForm"));
+            nowFormID = Identifier.tryParse(tag.getString("currentForm"));
             nowForm = FormUtils.parseForm(nowFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
         }
         if (tag.contains("formHistory")) {
@@ -106,7 +106,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             ListTag history = tag.getList("formHistory", Tag.TAG_STRING);
             formHistory.clear();
             for (Tag element : history) {
-                IForm form = FormUtils.parseForm(ResourceLocation.tryParse(element.getAsString()), null);
+                IForm form = FormUtils.parseForm(Identifier.tryParse(element.getAsString()), null);
                 if (form != null) {
                     formHistory.add(form);
                 }
@@ -123,22 +123,22 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             lastTransformByCure = false;
         }
         if (tag.contains("BeforeCursedMoonAppliedForm")) {
-            BeforeCursedMoonAppliedForm = FormUtils.parseForm(ResourceLocation.tryParse(tag.getString("BeforeCursedMoonAppliedForm")), null);
+            BeforeCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("BeforeCursedMoonAppliedForm")), null);
         } else {
             BeforeCursedMoonAppliedForm = null;
         }
         if (tag.contains("AfterCursedMoonAppliedForm")) {
-            AfterCursedMoonAppliedForm = FormUtils.parseForm(ResourceLocation.tryParse(tag.getString("AfterCursedMoonAppliedForm")), null);
+            AfterCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("AfterCursedMoonAppliedForm")), null);
         } else {
             AfterCursedMoonAppliedForm = null;
         }
         if (tag.contains("transformTargetForm")) {
-            transformTargetForm = FormUtils.parseForm(ResourceLocation.tryParse(tag.getString("transformTargetForm")), null);
+            transformTargetForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("transformTargetForm")), null);
         } else {
             transformTargetForm = null;
         }
         if (tag.contains("customPotionFormID")) {
-            customPotionFormID = ResourceLocation.tryParse(tag.getString("customPotionFormID"));
+            customPotionFormID = Identifier.tryParse(tag.getString("customPotionFormID"));
         } else {
             customPotionFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
         }
@@ -156,10 +156,10 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             instinctEffects.clear();
             CompoundTag effects = tag.getCompound("instinctEffects");
             for (String key : effects.getAllKeys()) {
-                instinctEffects.put(ResourceLocation.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompound(key)));
+                instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompound(key)));
             }
         }
-        if (player.level().isClientSide) {
+        if (player.level().isClientSide()) {
             InstinctUtils.fromInstinctUpdate(instinctValue, instinctRate);
         }
     }
@@ -194,7 +194,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         tag.putFloat("instinctValue", instinctValue);
         tag.putFloat("instinctRate", instinctRate);
         CompoundTag effects = new CompoundTag();
-        for (Map.Entry<ResourceLocation, InstinctUtils.InstinctEffect> entry : instinctEffects.entrySet()) {
+        for (Map.Entry<Identifier, InstinctUtils.InstinctEffect> entry : instinctEffects.entrySet()) {
             CompoundTag effect = new CompoundTag();
             entry.getValue().toNBT(effect);
             effects.put(entry.getKey().toString(), effect);
@@ -226,7 +226,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         nowFormID = form.getFormID();
     }
 
-    public void setForm(ResourceLocation formID) {
+    public void setForm(Identifier formID) {
         nowForm = FormUtils.parseForm(formID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
         nowFormID = formID;
     }

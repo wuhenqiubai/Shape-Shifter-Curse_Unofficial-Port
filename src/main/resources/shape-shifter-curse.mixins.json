@@ -46,6 +46,7 @@
         "ServerAdvancementMixin",
         "ServerPlayerEntityForceInputMixin",
         "ServerPlayerEntityMixin",
+        "ServerPlayerSleepMixin",
         "ShearsItemMixin",
         "SmithingScreenHandlerMixin",
         "SneakEdgeCheckMixin",

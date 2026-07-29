@@ -11,7 +11,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -112,7 +112,7 @@ public class ChargePower extends Power implements Active {
 
     public static final int TierCount = 10;
 
-    public @Nullable ResourceLocation chargePowerID = null;
+    public @Nullable Identifier chargePowerID = null;
     public int nowTier = 0;
     public int renderTier = 0;
     public Key ActiveKey;
@@ -202,7 +202,7 @@ public class ChargePower extends Power implements Active {
     }
 
     public void fromTag(Tag tag) {
-        this.renderTier = ((CompoundTag) tag).getInt("renderTier");
+        this.renderTier = ((CompoundTag) tag).getInt("renderTier").orElse(0);
     }
 
     public static PowerFactory<?> createFactory() {

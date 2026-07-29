@@ -5,7 +5,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -19,13 +19,13 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class PatronFormSelectScreen extends Screen {
-    private static final ResourceLocation page_texID = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/patron_form_select_menu.png");
+    private static final Identifier page_texID = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/patron_form_select_menu.png");
     private final LocalPlayer player;
 
-    private List<ResourceLocation> availableForms;
+    private List<Identifier> availableForms;
     private int nowPage = 0;
     private static final int pageSize = 16;
-    private final List<ResourceLocation> buttonForms = new ArrayList<>();
+    private final List<Identifier> buttonForms = new ArrayList<>();
     private final List<Button> buttonWidgetList = new ArrayList<>();
 
     public PatronFormSelectScreen(Component title, LocalPlayer player) {
@@ -33,9 +33,9 @@ public class PatronFormSelectScreen extends Screen {
         this.player = player;
     }
 
-    private List<ResourceLocation> getAvailableForms() {
-        List<ResourceLocation> availableForms = new ArrayList<>();
-        for (ResourceLocation formID : RegPlayerForms.dynamicPlayerForms) {
+    private List<Identifier> getAvailableForms() {
+        List<Identifier> availableForms = new ArrayList<>();
+        for (Identifier formID : RegPlayerForms.dynamicPlayerForms) {
             IForm form = RegPlayerForms.getPlayerForm(formID);
             if (form instanceof DynamicForm pfd) {
                 if (pfd.IsPatronForm && pfd.IsPlayerCanUse(player)) {
@@ -54,7 +54,7 @@ public class PatronFormSelectScreen extends Screen {
         return availableForms;
     }
 
-    private void SendSetPatronForm(ResourceLocation formID) {
+    private void SendSetPatronForm(Identifier formID) {
         ModPacketsS2C.sendSetPatronForm(formID);
     }
 

@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Form_Spider2 extends NormalForm {
     
-    public Form_Spider2(ResourceLocation formID) {
+    public Form_Spider2(Identifier formID) {
         super(formID);
     }
 
@@ -44,7 +44,7 @@ public class Form_Spider2 extends NormalForm {
     public @Nullable AbstractAnimStateController getAnimStateController(
             Player player, 
             AnimSystem.AnimSystemData animSystemData, 
-            @NotNull ResourceLocation animStateID) {
+            @NotNull Identifier animStateID) {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {

@@ -5,7 +5,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.ThrownPotion;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.AbstractThrownPotion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.phys.AABB;
 import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnSplashPotionTakeEffect;
@@ -16,12 +16,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
-@Mixin(ThrownPotion.class)
+@Mixin(AbstractThrownPotion.class)
 public class PotionEntityMixin {
 
     @Inject(method = "applyWater", at = @At("HEAD"))
     private void onApplyWater(CallbackInfo ci) {
-        ThrownPotion self = (ThrownPotion) (Object) this;
+        AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
         AABB box = self.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
         List<LivingEntity> entities = self.level().getEntitiesOfClass(LivingEntity.class, box);
@@ -41,7 +41,7 @@ public class PotionEntityMixin {
 
     @Inject(method = "applySplash", at = @At("HEAD"))
     private void onApplySplashPotion(Iterable<MobEffectInstance> effects, Entity entity, CallbackInfo ci) {
-        ThrownPotion self = (ThrownPotion) (Object) this;
+        AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
         AABB box = self.getBoundingBox().inflate(4.0, 2.0, 4.0);
         List<LivingEntity> entities = self.level().getEntitiesOfClass(LivingEntity.class, box);
 
@@ -60,7 +60,7 @@ public class PotionEntityMixin {
     private void onApplyLingeringPotion(PotionContents contents, CallbackInfo ci) {
         List<MobEffectInstance> effects = contents.customEffects();
         if (effects.isEmpty()) {
-            ThrownPotion self = (ThrownPotion) (Object) this;
+            AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
             AABB box = self.getBoundingBox().inflate(3.0, 2.0, 3.0);
 
             List<LivingEntity> entities = self.level().getEntitiesOfClass(LivingEntity.class, box);

@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -23,7 +23,7 @@ public class AddInstinctAction{
             return;
         }
 
-        ResourceLocation EffectID = data.getId("instinct_effect_id");
+        Identifier EffectID = data.getId("instinct_effect_id");
         float EffectValue = data.getFloat("value");
         int EffectDuration = data.getInt("duration");
 

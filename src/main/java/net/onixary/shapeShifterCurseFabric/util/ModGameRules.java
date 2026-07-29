@@ -1,10 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
 import net.fabricmc.fabric.api.gamerule.v1.CustomGameRuleCategory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class ModGameRules {

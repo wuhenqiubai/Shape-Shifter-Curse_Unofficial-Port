@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
@@ -19,7 +19,7 @@ public interface ISubForm extends IForm {
 
     // 默认使用主形态的能力
     @Override
-    default @NotNull Tuple<ResourceLocation, ResourceLocation> getFormLayer() {
+    default @NotNull Tuple<Identifier, Identifier> getFormLayer() {
         IForm masterForm = this.getMasterForm();
         if (masterForm != null) {
             return masterForm.getFormLayer();
@@ -27,19 +27,19 @@ public interface ISubForm extends IForm {
         throw new RuntimeException("Master form is null");
     }
 
-    @Nullable Tuple<List<ResourceLocation>, List<ResourceLocation>> getLayerModifier();
+    @Nullable Tuple<List<Identifier>, List<Identifier>> getLayerModifier();
 
     @Override
     default void afterApplyLayer(Player player) {
-        Tuple<List<ResourceLocation>, List<ResourceLocation>> modifier = getLayerModifier();
+        Tuple<List<Identifier>, List<Identifier>> modifier = getLayerModifier();
         if (modifier != null) {
-            ResourceLocation powerSource = getFormLayer().getB();
-            List<ResourceLocation> addPowerList = modifier.getA();
-            List<ResourceLocation> removePowerList = modifier.getB();
-            for (ResourceLocation powerID : addPowerList) {
+            Identifier powerSource = getFormLayer().getB();
+            List<Identifier> addPowerList = modifier.getA();
+            List<Identifier> removePowerList = modifier.getB();
+            for (Identifier powerID : addPowerList) {
                 FormUtils.applyPower(player, powerID, powerSource);
             }
-            for (ResourceLocation powerID : removePowerList) {
+            for (Identifier powerID : removePowerList) {
                 FormUtils.removePower(player, powerID, powerSource);
             }
         }

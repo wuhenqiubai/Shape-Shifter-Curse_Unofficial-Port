@@ -4,7 +4,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.ChargePower;
@@ -16,7 +16,7 @@ public class WebResourceBar implements IManaRender {
     private int powerTempTimer = 0;
 
     private static final Minecraft mc = Minecraft.getInstance();
-    private static final ResourceLocation BarTexID = ShapeShifterCurseFabric.identifier("textures/gui/web_bar.png");
+    private static final Identifier BarTexID = ShapeShifterCurseFabric.identifier("textures/gui/web_bar.png");
 
     @Override
     public boolean OverrideInstinctBar() {

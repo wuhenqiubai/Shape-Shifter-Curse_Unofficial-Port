@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.player_animation;
 import com.zigythebird.playeranim.animation.PlayerAnimResources;
 import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.easing.EasingType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,15 +28,15 @@ public class AnimationHolder {
     @Nullable private EasingType easingType;
     private boolean skipFade;
 
-    public AnimationHolder(ResourceLocation animation_id, boolean isEnabled, float speed) {
+    public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, 5);
     }
 
-    public AnimationHolder(ResourceLocation animation_id, boolean isEnabled) {
+    public AnimationHolder(Identifier animation_id, boolean isEnabled) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, 1.0f, 2);
     }
 
-    public AnimationHolder(ResourceLocation animation_id, boolean isEnabled, float speed, int fade) {
+    public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed, int fade) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, fade);
     }
 

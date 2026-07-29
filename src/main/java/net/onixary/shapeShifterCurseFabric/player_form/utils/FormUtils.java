@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.player_form.utils;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
@@ -62,17 +62,17 @@ public class FormUtils {
     // 在此解释一下为什么要先变TechnicalFormOrigin后变目标Origin 因为形态能力还原依赖于不同Origin切换时的清除旧Power+添加新Power 如果Origin一样 就会导致饰品/子形态/额外能力挂载系统添加/删除的能力无法还原
     public static Origin TechnicalFormOrigin = null;
 
-    public static record ExtraPower(@NotNull ResourceLocation LayerID, @NotNull ResourceLocation FormID, @NotNull List<ResourceLocation> PowerIDs) {
-        public @NotNull ResourceLocation getLayerID() { return LayerID; }
-        public @NotNull ResourceLocation getFormID() { return FormID; }
-        public @NotNull List<ResourceLocation> getPowerIDs() { return PowerIDs; }
+    public static record ExtraPower(@NotNull Identifier LayerID, @NotNull Identifier FormID, @NotNull List<Identifier> PowerIDs) {
+        public @NotNull Identifier getLayerID() { return LayerID; }
+        public @NotNull Identifier getFormID() { return FormID; }
+        public @NotNull List<Identifier> getPowerIDs() { return PowerIDs; }
 
-        public boolean canApply(ResourceLocation layerID, ResourceLocation formID) {
+        public boolean canApply(Identifier layerID, Identifier formID) {
             return getLayerID().equals(layerID) && getFormID().equals(formID);
         }
     }
 
-    public static void applyPower(Player player, ResourceLocation powerId, ResourceLocation powerSource) {
+    public static void applyPower(Player player, Identifier powerId, Identifier powerSource) {
         if (PowerTypeRegistry.contains(powerId)) {
             PowerType<?> powerType = PowerTypeRegistry.get(powerId);
             if (powerType != null) {
@@ -108,7 +108,7 @@ public class FormUtils {
         }
     }
 
-    public static void removePower(Player player, ResourceLocation powerId, ResourceLocation powerSource) {
+    public static void removePower(Player player, Identifier powerId, Identifier powerSource) {
         PowerType<?> powerType = PowerTypeRegistry.get(powerId);
         if (powerType != null) {
             PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(player);
@@ -116,12 +116,12 @@ public class FormUtils {
         }
     }
 
-    public static final HashMap<ResourceLocation, ExtraPower> extraPowerRegistry = new HashMap<>();
-    public static void registerExtraPower(ResourceLocation identifier, ExtraPower extraPower) {
+    public static final HashMap<Identifier, ExtraPower> extraPowerRegistry = new HashMap<>();
+    public static void registerExtraPower(Identifier identifier, ExtraPower extraPower) {
         extraPowerRegistry.put(identifier, extraPower);
     }
 
-    public static void applyExtraPower(Player player, Tuple<ResourceLocation, ResourceLocation> layerData) {
+    public static void applyExtraPower(Player player, Tuple<Identifier, Identifier> layerData) {
         extraPowerRegistry.forEach((id, extraPower) -> {
             if (extraPower.canApply(layerData.getA(), layerData.getB())) {
                 extraPower.getPowerIDs().forEach(powerId -> applyPower(player, powerId, layerData.getB()));
@@ -129,7 +129,7 @@ public class FormUtils {
         });
     }
 
-    public static void applyLayer(Player player, Tuple<ResourceLocation, ResourceLocation> layerData) {
+    public static void applyLayer(Player player, Tuple<Identifier, Identifier> layerData) {
         // 临时 等移除Origins后再重新这部分
         OriginComponent component = ModComponents.ORIGIN.get(player);
         OriginLayer layer = OriginLayers.getLayer(layerData.getA());
@@ -155,11 +155,11 @@ public class FormUtils {
         return Set.copyOf(flagSet);
     }
 
-    public static @Nullable IForm getForm(@NotNull ResourceLocation formID) {
+    public static @Nullable IForm getForm(@NotNull Identifier formID) {
         return RegPlayerForms.getPlayerForm(formID);
     }
 
-    public static @NotNull IForm parseForm(@Nullable ResourceLocation formID, IForm defaultForm) {
+    public static @NotNull IForm parseForm(@Nullable Identifier formID, IForm defaultForm) {
         if (formID == null) return defaultForm;
         IForm form = getForm(formID);
         return form != null ? form : defaultForm;
@@ -216,7 +216,7 @@ public class FormUtils {
         // 应用Scale
         form.applyScale(player);
         // 应用Power Origin -> OriginExtraPower -> AccessoryPower
-        Tuple<ResourceLocation, ResourceLocation> layerPair = form.getFormLayer();
+        Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
         applyLayer(player, layerPair);
         form.afterApplyLayer(player);
         TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);

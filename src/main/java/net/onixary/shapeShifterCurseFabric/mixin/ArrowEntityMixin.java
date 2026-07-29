@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.projectile.Arrow;
+import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
@@ -20,13 +20,13 @@ public class ArrowEntityMixin {
     private boolean IsCTPArrow = false;
 
     @Unique
-    private ResourceLocation CTPFormID = null;
+    private Identifier CTPFormID = null;
 
     @Inject(method = "setPickupItemStack", at = @At("HEAD"))
     public void setStack(ItemStack stack, CallbackInfo ci) {
         var customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (customData == null) return;
-        ResourceLocation CTPFormID = CTPUtils.getCTPFormIDFromNBT(customData.copyTag());
+        Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(customData.copyTag());
         if (CTPFormID != null) {
             IsCTPArrow = true;
             this.CTPFormID = CTPFormID;

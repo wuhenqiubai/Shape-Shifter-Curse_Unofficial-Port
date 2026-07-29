@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.items;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,11 +20,11 @@ public class PatronFormItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
         if (!PatronUtils.EnablePatronFeature) {
             return super.use(world, user, hand);
         }
-        if (!world.isClientSide) {
+        if (!world.isClientSide()) {
             ModPacketsS2CServer.OpenPatronFormSelectMenu(((ServerPlayer) user));
         }
         return super.use(world, user, hand);

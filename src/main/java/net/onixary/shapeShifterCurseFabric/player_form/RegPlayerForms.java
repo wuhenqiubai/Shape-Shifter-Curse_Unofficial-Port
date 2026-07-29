@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_form;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.forms.*;
 import org.jetbrains.annotations.Nullable;
@@ -13,12 +13,12 @@ import static net.onixary.shapeShifterCurseFabric.player_form.NormalForm.NORMAL_
 import static net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils.*;
 
 public class RegPlayerForms {
-    public static List<ResourceLocation> dynamicPlayerForms = new ArrayList<>();
-    public static List<ResourceLocation> dynamicPlayerFormGroups = new ArrayList<>();
-    public static LinkedHashMap<ResourceLocation, IForm> playerForms = new LinkedHashMap<>();
-    public static LinkedHashMap<ResourceLocation, IFormGroup> playerFormGroups = new LinkedHashMap<>();
+    public static List<Identifier> dynamicPlayerForms = new ArrayList<>();
+    public static List<Identifier> dynamicPlayerFormGroups = new ArrayList<>();
+    public static LinkedHashMap<Identifier, IForm> playerForms = new LinkedHashMap<>();
+    public static LinkedHashMap<Identifier, IFormGroup> playerFormGroups = new LinkedHashMap<>();
 
-    public static HashMap<ResourceLocation, List<ResourceLocation>> subFormMap = new HashMap<>();
+    public static HashMap<Identifier, List<Identifier>> subFormMap = new HashMap<>();
 
     public static String PatronNameSpace = "ssc-patron";  // 在更新数据包时保留
 
@@ -93,7 +93,7 @@ public class RegPlayerForms {
     }
 
     public static void registerSubForm(IForm masterForm, ISubForm subForm) {
-        List<ResourceLocation> subFormList = subFormMap.computeIfAbsent(masterForm.getFormID(), k -> new ArrayList<>());
+        List<Identifier> subFormList = subFormMap.computeIfAbsent(masterForm.getFormID(), k -> new ArrayList<>());
         if (!subFormList.contains(subForm.getFormID())) {
             subFormList.add(subForm.getFormID());
         }
@@ -101,9 +101,9 @@ public class RegPlayerForms {
 
     public static List<IForm> getSubForms(IForm masterForm) {
         List<IForm> result = new ArrayList<>();
-        List<ResourceLocation> subFormList = subFormMap.get(masterForm.getFormID());
+        List<Identifier> subFormList = subFormMap.get(masterForm.getFormID());
         if (subFormList != null) {
-            for (ResourceLocation id : subFormList) {
+            for (Identifier id : subFormList) {
                 IForm form = playerForms.get(id);
                 if (form != null) {
                     result.add(form);
@@ -113,15 +113,15 @@ public class RegPlayerForms {
         return result;
     }
 
-    public static DynamicForm buildDynamicPlayerForm(ResourceLocation id, JsonObject dynamicPlayerForm) {
+    public static DynamicForm buildDynamicPlayerForm(Identifier id, JsonObject dynamicPlayerForm) {
         return DynamicForm.fromJson(id, dynamicPlayerForm);
     }
 
     // 实现更大的数据包后移除 目前怕包顺序错误
-    public static void removeDynamicPlayerFormsExcept(List<ResourceLocation> except) {
-        List<ResourceLocation> NeedRemove = new ArrayList<>();
-        for (ResourceLocation id : dynamicPlayerForms) {
-            for (ResourceLocation exceptID : except) {
+    public static void removeDynamicPlayerFormsExcept(List<Identifier> except) {
+        List<Identifier> NeedRemove = new ArrayList<>();
+        for (Identifier id : dynamicPlayerForms) {
+            for (Identifier exceptID : except) {
                 if (id.equals(exceptID)) {
                     continue;
                 }
@@ -131,14 +131,14 @@ public class RegPlayerForms {
                 NeedRemove.add(id);
             }
         }
-        for (ResourceLocation id : NeedRemove) {
+        for (Identifier id : NeedRemove) {
             removeDynamicPlayerForm(id, true);
         }
     }
 
     public static void ApplyDynamicPlayerForms(JsonObject dynamicPlayerFormList) {
         for (Map.Entry<String, JsonElement> entry : dynamicPlayerFormList.entrySet()) {
-            ResourceLocation ID = ResourceLocation.tryParse(entry.getKey());
+            Identifier ID = Identifier.tryParse(entry.getKey());
             if (ID == null) {
                 ShapeShifterCurseFabric.LOGGER.warn("Invalid dynamic player form ID: " + entry.getKey());
                 continue;
@@ -149,9 +149,9 @@ public class RegPlayerForms {
     }
 
     // 每次Reload调用
-    public static HashMap<ResourceLocation, DynamicForm> DumpDynamicPlayerForms() {
-        HashMap<ResourceLocation, DynamicForm> dynamicPlayerFormMap = new HashMap<ResourceLocation, DynamicForm>();
-        for (ResourceLocation id : dynamicPlayerForms) {
+    public static HashMap<Identifier, DynamicForm> DumpDynamicPlayerForms() {
+        HashMap<Identifier, DynamicForm> dynamicPlayerFormMap = new HashMap<Identifier, DynamicForm>();
+        for (Identifier id : dynamicPlayerForms) {
             if (playerForms.get(id) instanceof DynamicForm playerFormDynamic) {
                 dynamicPlayerFormMap.put(id, playerFormDynamic);
             }
@@ -174,7 +174,7 @@ public class RegPlayerForms {
         return registerPlayerFormGroup(formGroup);
     }
 
-    public static boolean removeDynamicPlayerForm(ResourceLocation id, boolean RemoveDynamicRegistry) {
+    public static boolean removeDynamicPlayerForm(Identifier id, boolean RemoveDynamicRegistry) {
         if (!dynamicPlayerForms.contains(id)) {
             ShapeShifterCurseFabric.LOGGER.warn("Attempted to remove non-dynamic player form: " + id);
             return false;
@@ -190,7 +190,7 @@ public class RegPlayerForms {
         return true;
     }
 
-    public static boolean removeDynamicPlayerFormGroup(ResourceLocation id, boolean RemoveDynamicRegistry) {
+    public static boolean removeDynamicPlayerFormGroup(Identifier id, boolean RemoveDynamicRegistry) {
         if (!dynamicPlayerFormGroups.contains(id)) {
             ShapeShifterCurseFabric.LOGGER.warn("Attempted to remove non-dynamic player form group: " + id);
             return false;
@@ -207,13 +207,13 @@ public class RegPlayerForms {
     }
 
     public static void ClearAllDynamicPlayerForms() {
-        for (ResourceLocation id : dynamicPlayerForms) {
+        for (Identifier id : dynamicPlayerForms) {
             if (!id.getNamespace().equals(PatronNameSpace)) {
                 removeDynamicPlayerForm(id, false);
             }
         }
         dynamicPlayerForms.clear();
-        for (ResourceLocation id : dynamicPlayerFormGroups) {
+        for (Identifier id : dynamicPlayerFormGroups) {
             if (!id.getNamespace().equals(PatronNameSpace)) {
                 removeDynamicPlayerFormGroup(id, false);
             }
@@ -221,7 +221,7 @@ public class RegPlayerForms {
         dynamicPlayerFormGroups.clear();
     }
 
-    public static IForm getPlayerForm(@Nullable ResourceLocation id) {
+    public static IForm getPlayerForm(@Nullable Identifier id) {
         if (id == null) {
             return null;
         }
@@ -229,10 +229,10 @@ public class RegPlayerForms {
     }
 
     public static IForm getPlayerForm(String id) {
-        return playerForms.get(ResourceLocation.tryParse(id));
+        return playerForms.get(Identifier.tryParse(id));
     }
 
-    public static IForm getPlayerFormOrThrow(ResourceLocation id) {
+    public static IForm getPlayerFormOrThrow(Identifier id) {
         IForm form = getPlayerForm(id);
         if (form == null) {
             throw new IllegalArgumentException("Unknown player form: " + id);
@@ -241,10 +241,10 @@ public class RegPlayerForms {
     }
 
     public static IForm getPlayerFormOrThrow(String id) {
-        return getPlayerFormOrThrow(ResourceLocation.tryParse(id));
+        return getPlayerFormOrThrow(Identifier.tryParse(id));
     }
 
-    public static IForm getPlayerFormOrDefault(ResourceLocation id, IForm defaultForm) {
+    public static IForm getPlayerFormOrDefault(Identifier id, IForm defaultForm) {
         IForm form = getPlayerForm(id);
         if (form == null) {
             return defaultForm;
@@ -254,7 +254,7 @@ public class RegPlayerForms {
     }
 
     public static IForm getPlayerFormOrDefault(String id, IForm defaultForm) {
-        return getPlayerFormOrDefault(ResourceLocation.tryParse(id), defaultForm);
+        return getPlayerFormOrDefault(Identifier.tryParse(id), defaultForm);
     }
 
     public static Boolean IsPlayerFormEqual(@Nullable IForm form1, @Nullable IForm form2) {
@@ -264,7 +264,7 @@ public class RegPlayerForms {
         return form1.isEquals(form2);
     }
 
-    public static IFormGroup getPlayerFormGroup(@Nullable ResourceLocation id) {
+    public static IFormGroup getPlayerFormGroup(@Nullable Identifier id) {
         if (id == null) {
             return null;
         }
@@ -272,6 +272,6 @@ public class RegPlayerForms {
     }
 
     public static IFormGroup getPlayerFormGroup(String id) {
-        return playerFormGroups.get(ResourceLocation.tryParse(id));
+        return playerFormGroups.get(Identifier.tryParse(id));
     }
 }

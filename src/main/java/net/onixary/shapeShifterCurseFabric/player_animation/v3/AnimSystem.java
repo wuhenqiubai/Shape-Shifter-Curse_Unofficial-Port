@@ -1,14 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
-import com.zigythebird.playeranim.accessors.IAnimatedPlayer;
-import com.zigythebird.playeranim.animation.PlayerAnimManager;
 import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -45,13 +43,13 @@ public class AnimSystem {
 
     public AnimSystemData data;
 
-	public static final ResourceLocation defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
+	public static final Identifier defaultAnimFSMID = AnimRegistries.FSM_ON_GROUND;
 
-	public ResourceLocation nowAnimFSMID = defaultAnimFSMID;
+	public Identifier nowAnimFSMID = defaultAnimFSMID;
 
     public final List<AbstractAnimStateController> PreProcessControllers;
 
-    public @Nullable ResourceLocation nowPlayingPowerAnimationID = null;
+    public @Nullable Identifier nowPlayingPowerAnimationID = null;
 	public @Nullable Animation nowPlayingPowerAnimation = null;
     public int NPPA_Length = -1;
 	public int NPPA_NowTick = 0;
@@ -129,7 +127,7 @@ public class AnimSystem {
         }
     }
 
-    private void NPPA_SetAnimation(@NotNull ResourceLocation animID, @Nullable AnimationHolder anim) {
+    private void NPPA_SetAnimation(@NotNull Identifier animID, @Nullable AnimationHolder anim) {
         if (animID.equals(this.nowPlayingPowerAnimationID)) {
             return;
         }
@@ -152,7 +150,7 @@ public class AnimSystem {
         }
     }
 
-    private @Nullable ResourceLocation getPowerAnimID() {
+    private @Nullable Identifier getPowerAnimID() {
         if (this.player instanceof IPlayerAnimController iPlayerAnimController) {
             return iPlayerAnimController.shape_shifter_curse$getPowerAnimationID();
         } else {
@@ -165,7 +163,7 @@ public class AnimSystem {
         this.PreProcessAnimSystemData();
         @Nullable AnimationHolder anim = this.getPreProcessAnimation();
         if (anim == null) {
-            @Nullable ResourceLocation powerAnimID = this.getPowerAnimID();
+            @Nullable Identifier powerAnimID = this.getPowerAnimID();
             if (powerAnimID != null) {
                 if (!this.data.playerForm.isPowerAnimRegistered(this.player, this.data)) {
                     this.data.playerForm.registerPowerAnim(this.player, this.data);
@@ -181,11 +179,11 @@ public class AnimSystem {
                 anim = resultPowerDefaultAnim.ANIM_SYSTEM_GET_CURRENT_ANIM(this.player, this.data);
                 this.NPPA_SetAnimation(powerAnimID, anim);
             } else {
-                Tuple<@Nullable ResourceLocation, @NotNull ResourceLocation> result = this.getAnimFSM().update(this.player, this.data);
+                Tuple<@Nullable Identifier, @NotNull Identifier> result = this.getAnimFSM().update(this.player, this.data);
                 if (result.getA() != null) {
                     this.nowAnimFSMID = result.getA();
                 }
-                ResourceLocation animStateControllerID = result.getB();
+                Identifier animStateControllerID = result.getB();
                 AbstractAnimStateController animStateController = this.data.playerForm.getAnimStateController(this.player, this.data, animStateControllerID);
                 if (animStateController == null) {
                     AnimRegistry.AnimState resultAnimState = Objects.requireNonNull(AnimRegistry.getAnimState(animStateControllerID));

@@ -43,7 +43,7 @@ repositories {
         url 'https://maven.aliyun.com/nexus/content/groups/public'
     }
     mavenCentral()
-    //}
+    mavenLocal()
 
     exclusiveContent {
 
@@ -123,8 +123,6 @@ repositories {
             includeGroup("software.bernie.geckolib")
         }
     }
-
-    mavenLocal()
 }
 
 dependencies {
@@ -149,17 +147,15 @@ dependencies {
     //GeckoLib
     modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
 
-    // satin shader
-    modImplementation "org.ladysnake:satin:${satin_version}"
+    // satin shader 1.21.11没有
+//    modImplementation "org.ladysnake:satin:${satin_version}"
 
-    // Apoli + Calio by Apace100
-    // 1.21.1 alpha versions are on Ladysnake snapshots maven
-    modImplementation "io.github.apace100:apoli:${project.apoli_version}"
-    include "io.github.apace100:apoli:${project.apoli_version}"
-    modImplementation "io.github.apace100:calio:${project.calio_version}"
-    include "io.github.apace100:calio:${project.calio_version}"
+    modImplementation "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
+    include "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
+    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
+    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
-    modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
+    modApi("maven.modrinth:pehkui-continuation:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
     })
 
@@ -179,7 +175,7 @@ dependencies {
     modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
 
     // Trinkets
-    modCompileOnly "dev.emi:trinkets:${project.trinkets_version}"
+    modCompileOnly "maven.modrinth:trinkets-updated:${project.trinkets_version}"
 
     modCompileOnly "maven.modrinth:iris:zsoi0dso"
     modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
@@ -236,63 +232,6 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 }
-
-
-// Patch embedded Apoli/Calio fabric.mod.json from "1.21" to "1.21.1"
-// Needed because Apoli hasn't released a 1.21.1 build yet
-tasks.register('fixEmbeddedModVersions') {
-    group = 'fabric'
-    dependsOn remapJar
-    doLast {
-        def sscJar = remapJar.archiveFile.get().asFile
-        def tmpDir = layout.buildDirectory.dir('tmp/embedded-patch').get().asFile
-        tmpDir.deleteDir()
-        tmpDir.mkdirs()
-        copy {
-            from zipTree(sscJar)
-            into tmpDir
-            include 'META-INF/jars/*.jar'
-        }
-        def jarsDir = new File(tmpDir, 'META-INF/jars')
-        jarsDir.listFiles()?.each { embedded ->
-            if (embedded.name.contains('apoli') || embedded.name.contains('calio')) {
-                def extractDir = new File(tmpDir, embedded.name + '-tmp')
-                extractDir.mkdir()
-                copy { from zipTree(embedded); into extractDir }
-                def modJson = new File(extractDir, 'fabric.mod.json')
-                if (modJson.exists()) {
-                    def txt = modJson.text
-                    txt = txt.replace('"minecraft": "1.21"', '"minecraft": "1.21.1"')
-                    txt = txt.replace('"minecraft": "1.21.x"', '"minecraft": "1.21.1"')
-                    modJson.text = txt
-                }
-//                if (embedded.name.contains('apoli')) {
-//                    // Delete EquipmentMixin - restrict_armor condition context mismatch in 1.21
-//                    project.delete fileTree(extractDir) { include '**/EquipmentMixin*.class' }
-//                    def cfg = new File(extractDir, 'apoli.mixins.json')
-//                    if (cfg.exists()) {
-//                        def json = new groovy.json.JsonSlurper().parse(cfg) as Map
-//                        json.mixins = json.mixins.findAll { !it.contains('EquipmentMixin') }
-//                        json.client = (json.client ?: []).findAll { !it.contains('EquipmentMixin') }
-//                        json.server = (json.server ?: []).findAll { !it.contains('EquipmentMixin') }
-//                        cfg.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
-//                    }
-//                }
-                embedded.delete()
-                ant.jar(destfile: embedded, basedir: extractDir)
-                extractDir.deleteDir()
-            }
-        }
-        // Use jar update instead of full repack to preserve data pack structure
-        ant.jar(update: true, destfile: sscJar) {
-            fileset(dir: tmpDir) {
-                include(name: 'META-INF/**')
-            }
-        }
-        tmpDir.deleteDir()
-    }
-}
-build.dependsOn fixEmbeddedModVersions
 
 jar {
     from("LICENSE") {

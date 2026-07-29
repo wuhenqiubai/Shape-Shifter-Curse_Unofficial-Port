@@ -4,6 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -22,7 +23,7 @@ public class TemporaryCobwebBlock extends WebBlock {
 
 	@Override
 	public void tick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
-		if(!world.isClientSide) {
+		if(!world.isClientSide()) {
 			world.setBlockAndUpdate(pos, Blocks.AIR.defaultBlockState());
 		}
 	}
@@ -44,7 +45,7 @@ public class TemporaryCobwebBlock extends WebBlock {
 	}
 
 	@Override
-	public void entityInside(BlockState state, Level worldIn, BlockPos pos, Entity entityIn) {
+	public void entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier insideBlockEffectApplier, boolean bl) {
 		//if (PowerTypes.WEBBING.isActive(entityIn)) {
 		//	return;
 		//}

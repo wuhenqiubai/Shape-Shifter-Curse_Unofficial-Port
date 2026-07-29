@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.status_effects;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -23,7 +23,7 @@ public class EntangledEffectUtils {
                 BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.ENTANGLED_EFFECT);
         Holder<net.minecraft.world.effect.MobEffect> entangledFullType =
                 BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.ENTANGLED_FULL_EFFECT);
-        if (target.level().isClientSide) {
+        if (target.level().isClientSide()) {
             return;
         }
         if (target.getEffect(entangledFullType) != null) {
@@ -43,7 +43,7 @@ public class EntangledEffectUtils {
             int NowDuration = entangledEffect.getDuration();
             if (NowDuration >= ENTANGLED_DURATION_PER_LEVEL * (ENTANGLED_MAX_LEVEL + 1)) {
                 target.removeEffect(entangledEffectType);
-                ResourceLocation targetID = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
+                Identifier targetID = BuiltInRegistries.ENTITY_TYPE.getKey(target.getType());
                 if (owner instanceof ServerPlayer player) {
                     ShapeShifterCurseFabric.ON_WEB_ENTITY.trigger(player, targetID);
                 }

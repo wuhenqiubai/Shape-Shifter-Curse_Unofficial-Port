@@ -5,7 +5,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ItemStorePowerRender {
-    private static final ResourceLocation WIDGETS_TEXTURE = ResourceLocation.parse("textures/gui/sprites/hud/hotbar_offhand_left.png");
+    private static final Identifier WIDGETS_TEXTURE = Identifier.parse("textures/gui/sprites/hud/hotbar_offhand_left.png");
 
     public static interface itemStorePowerRenderInterface {
         public int getSlot();

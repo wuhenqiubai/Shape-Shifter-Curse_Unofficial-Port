@@ -4,11 +4,11 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
@@ -18,9 +18,9 @@ import java.util.function.Consumer;
 
 public class AdvancementUtils {
     // === Upstream-compatible API ===
-    public static final HashMap<ResourceLocation, List<Consumer<Advancement>>> advancementAddedCallbacks = new HashMap<>();
+    public static final HashMap<Identifier, List<Consumer<Advancement>>> advancementAddedCallbacks = new HashMap<>();
 
-    public static void registerAdvancementAddedCallback(ResourceLocation id, Consumer<Advancement> callback) {
+    public static void registerAdvancementAddedCallback(Identifier id, Consumer<Advancement> callback) {
         if (advancementAddedCallbacks.containsKey(id)) {
             advancementAddedCallbacks.get(id).add(callback);
         } else {
@@ -35,7 +35,7 @@ public class AdvancementUtils {
      */
     public static AdvancementHolder onAdvancementAdded(AdvancementHolder entry) {
         Advancement advancement = entry.value();
-        ResourceLocation id = entry.id();
+        Identifier id = entry.id();
 
         // Run registered callbacks (for side effects: they register into pendingPatches)
         List<Consumer<Advancement>> callbacks = advancementAddedCallbacks.get(id);
@@ -48,9 +48,9 @@ public class AdvancementUtils {
     }
 
     // === 1.21.1 patch infrastructure (immutable Advancement, RegistryEntryList) ===
-    private static final Map<ResourceLocation, List<ItemPatch>> pendingPatches = new HashMap<>();
+    private static final Map<Identifier, List<ItemPatch>> pendingPatches = new HashMap<>();
 
-    private static void addItemPatch(ResourceLocation id, Item original, Item custom) {
+    private static void addItemPatch(Identifier id, Item original, Item custom) {
         pendingPatches.computeIfAbsent(id, k -> new ArrayList<>()).add(new ItemPatch(original, custom));
     }
 
@@ -65,7 +65,7 @@ public class AdvancementUtils {
         for (Map.Entry<String, Criterion<?>> criterionEntry : criteria.entrySet()) {
             Criterion<?> criterion = criterionEntry.getValue();
             if (criterion.triggerInstance() instanceof InventoryChangeTrigger.TriggerInstance(
-                    Optional<net.minecraft.advancements.critereon.ContextAwarePredicate> player,
+                    Optional<net.minecraft.advancements.criterion.ContextAwarePredicate> player,
                     InventoryChangeTrigger.TriggerInstance.Slots slots,
                     List<ItemPredicate> items
             )) {
@@ -130,14 +130,14 @@ public class AdvancementUtils {
 
     // === Patches — follows upstream structure adapted for 1.21.1 ===
     static {
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_HELMET, RegCustomItem.NETHERITE_MORPHSCALE_HEADRING);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_CHESTPLATE, RegCustomItem.NETHERITE_MORPHSCALE_VEST);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_LEGGINGS, RegCustomItem.NETHERITE_MORPHSCALE_CUISH);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_BOOTS, RegCustomItem.NETHERITE_MORPHSCALE_ANKLET);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_HELMET, RegCustomItem.MORPHSCALE_HEADRING);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_CHESTPLATE, RegCustomItem.MORPHSCALE_VEST);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_LEGGINGS, RegCustomItem.MORPHSCALE_CUISH);
-        addItemPatch(ResourceLocation.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_BOOTS, RegCustomItem.MORPHSCALE_ANKLET);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_HELMET, RegCustomItem.NETHERITE_MORPHSCALE_HEADRING);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_CHESTPLATE, RegCustomItem.NETHERITE_MORPHSCALE_VEST);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_LEGGINGS, RegCustomItem.NETHERITE_MORPHSCALE_CUISH);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "nether/netherite_armor"), Items.NETHERITE_BOOTS, RegCustomItem.NETHERITE_MORPHSCALE_ANKLET);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_HELMET, RegCustomItem.MORPHSCALE_HEADRING);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_CHESTPLATE, RegCustomItem.MORPHSCALE_VEST);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_LEGGINGS, RegCustomItem.MORPHSCALE_CUISH);
+        addItemPatch(Identifier.fromNamespaceAndPath("minecraft", "story/shiny_gear"), Items.DIAMOND_BOOTS, RegCustomItem.MORPHSCALE_ANKLET);
     }
 
     private record ItemPatch(Item originalItem, Item customItem) {

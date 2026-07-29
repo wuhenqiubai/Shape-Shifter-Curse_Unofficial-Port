@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
@@ -15,8 +15,8 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 public class FamiliarFoxManaBar implements IManaRender{
     private static final Minecraft mc = Minecraft.getInstance();
 
-    private static final ResourceLocation BarTexFullID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/familiar_fox_mana_bar_full.png");
-    private static final ResourceLocation BarTexEmptyID = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/familiar_fox_mana_bar_empty.png");
+    private static final Identifier BarTexFullID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/familiar_fox_mana_bar_full.png");
+    private static final Identifier BarTexEmptyID = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/familiar_fox_mana_bar_empty.png");
 
     @Override
     public boolean OverrideInstinctBar() {

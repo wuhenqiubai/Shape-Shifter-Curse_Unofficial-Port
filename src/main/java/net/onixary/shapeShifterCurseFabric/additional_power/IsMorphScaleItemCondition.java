@@ -17,7 +17,7 @@ public class IsMorphScaleItemCondition {
             return true;
         }
         var customData = itemStack.get(DataComponents.CUSTOM_DATA);
-        if (customData != null && customData.copyTag().getBoolean(IsMorphScaleArmorTagName)) {
+        if (customData != null && customData.copyTag().getBoolean(IsMorphScaleArmorTagName).orElse(false)) {
             return true;
         }
         return false;
@@ -33,10 +33,10 @@ public class IsMorphScaleItemCondition {
         var customData = itemStack.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
             CompoundTag itemNBT = customData.copyTag();
-            if (itemNBT.getBoolean(IsMorphScaleFoodTagName)) {
+            if (itemNBT.getBoolean(IsMorphScaleFoodTagName).orElse(false)) {
                 return true;
             }
-            if (itemNBT.getBoolean(IsMorphScaleArmorTagName)) {
+            if (itemNBT.getBoolean(IsMorphScaleArmorTagName).orElse(false)) {
                 return true;
             }
         }

@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.MultiplePowerType;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -14,14 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public interface IFormLayer {
-    @NotNull ResourceLocation getID();
+    @NotNull Identifier getID();
 
-    void __setID(@NotNull ResourceLocation id);  // 禁止外部调用
+    void __setID(@NotNull Identifier id);  // 禁止外部调用
 
     // 可以实现一些特殊玩法 比如我拓展中的 使魔(主角) 形态 需要这套系统来实现动态Power 而不用加一堆LayerGroup
-    @NotNull List<ResourceLocation> getPowerID(@Nullable Player player);
+    @NotNull List<Identifier> getPowerID(@Nullable Player player);
 
-    void __setPowerID(@NotNull List<ResourceLocation> powerIDList);  // 禁止外部调用
+    void __setPowerID(@NotNull List<Identifier> powerIDList);  // 禁止外部调用
 
     default void beforeApply(@NotNull Player player) {};
 
@@ -29,23 +29,23 @@ public interface IFormLayer {
 
     // 给后续留的拓展接口 说不定未来客户端需要知道部分数据 反正目前不需要
     default void write(@NotNull FriendlyByteBuf packetByteBuf) {
-        packetByteBuf.writeResourceLocation(getID());
-        packetByteBuf.writeCollection(getPowerID(null), FriendlyByteBuf::writeResourceLocation);
+        packetByteBuf.writeIdentifier(getID());
+        packetByteBuf.writeCollection(getPowerID(null), FriendlyByteBuf::writeIdentifier);
     }
 
     default void read(@NotNull FriendlyByteBuf packetByteBuf) {
-        __setID(packetByteBuf.readResourceLocation());
-        __setPowerID(packetByteBuf.readCollection(ArrayList::new, FriendlyByteBuf::readResourceLocation));
+        __setID(packetByteBuf.readIdentifier());
+        __setPowerID(packetByteBuf.readCollection(ArrayList::new, FriendlyByteBuf::readIdentifier));
     }
 
-    static boolean hasPowerType(List<ResourceLocation> powerIDs, PowerType<?> powerType) {
+    static boolean hasPowerType(List<Identifier> powerIDs, PowerType<?> powerType) {
         if(powerType.getIdentifier() == null) {
             return false;
         }
         if(powerIDs.contains(powerType.getIdentifier())) {
             return true;
         }
-        for (ResourceLocation powerID : powerIDs) {
+        for (Identifier powerID : powerIDs) {
             PowerType<?> power = PowerTypeRegistry.get(powerID);
             if (power instanceof MultiplePowerType<?> mpt) {
                 if(mpt.getSubPowers().contains(powerType.getIdentifier())) {
@@ -60,8 +60,8 @@ public interface IFormLayer {
         beforeApply(player);
         PowerHolderComponent phc = PowerHolderComponent.KEY.get(player);
         phc.removeAllPowersFromSource(getID());
-        List<ResourceLocation> powerIDs = getPowerID(player);
-        for (ResourceLocation powerID : powerIDs) {
+        List<Identifier> powerIDs = getPowerID(player);
+        for (Identifier powerID : powerIDs) {
             PowerType<?> powerType = PowerTypeRegistry.get(powerID);
             if (powerType != null && !phc.hasPower(powerType, getID())) {
                 phc.addPower(powerType, getID());

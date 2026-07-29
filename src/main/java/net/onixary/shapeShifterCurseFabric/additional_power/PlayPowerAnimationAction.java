@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -65,7 +65,7 @@ public class PlayPowerAnimationAction {
 
     public static void playPowerAnimationWithTime(SerializableData.Instance data, Entity entity) {
         int animationTime = data.getInt("animation_time");
-        ResourceLocation powerAnimationId = data.getId("power_animation_id");
+        Identifier powerAnimationId = data.getId("power_animation_id");
         if (animationTime <= 0 || powerAnimationId == null) {
             return;
         }
@@ -76,7 +76,7 @@ public class PlayPowerAnimationAction {
 
     public static void playPowerAnimationWithCount(SerializableData.Instance data, Entity entity) {
         int animationCount = data.getInt("animation_count");
-        ResourceLocation powerAnimationId = data.getId("power_animation_id");
+        Identifier powerAnimationId = data.getId("power_animation_id");
         if (animationCount <= 0 || powerAnimationId == null) {
             return;
         }
@@ -86,7 +86,7 @@ public class PlayPowerAnimationAction {
     }
 
     public static void playPowerAnimationLoop(SerializableData.Instance data, Entity entity) {
-        ResourceLocation powerAnimationId = data.getId("power_animation_id");
+        Identifier powerAnimationId = data.getId("power_animation_id");
         if (powerAnimationId == null) {
             return;
         }
@@ -96,7 +96,7 @@ public class PlayPowerAnimationAction {
     }
 
     public static void stopPowerAnimation(SerializableData.Instance data, Entity entity) {
-        List<ResourceLocation> animIdList = data.get("anim_id_list");
+        List<Identifier> animIdList = data.get("anim_id_list");
         if (entity instanceof Player player) {
             if (animIdList == null || animIdList.isEmpty()) {
                 AnimUtils.stopPowerAnim(player, getAnimationSendSideType(data));
