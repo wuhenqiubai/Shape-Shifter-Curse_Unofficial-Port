@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.features;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -11,12 +10,14 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.MapRenderState;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -30,8 +31,8 @@ import org.joml.Matrix4f;
 
 @Environment(EnvType.CLIENT)
 public class CustomFeralItemRenderer {
-	private static final RenderType MAP_BACKGROUND = RenderType.text(Identifier.parse("textures/map/map_background.png"));
-	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderType.text(Identifier.parse("textures/map/map_background_checkerboard.png"));
+	private static final RenderType MAP_BACKGROUND = RenderTypes.text(Identifier.parse("textures/map/map_background.png"));
+	private static final RenderType MAP_BACKGROUND_CHECKERBOARD = RenderTypes.text(Identifier.parse("textures/map/map_background_checkerboard.png"));
 	private static final float field_32735 = -0.4F;
 	private static final float field_32736 = 0.2F;
 	private static final float field_32737 = -0.2F;
@@ -110,9 +111,9 @@ public class CustomFeralItemRenderer {
 	private float equipProgressOffHand;
 	private float prevEquipProgressOffHand;
 	private final EntityRenderDispatcher entityRenderDispatcher;
-	private final ItemRenderer itemRenderer;
+	private final ItemInHandRenderer itemRenderer;
 
-	public CustomFeralItemRenderer(Minecraft client, EntityRenderDispatcher entityRenderDispatcher, ItemRenderer itemRenderer) {
+	public CustomFeralItemRenderer(Minecraft client, EntityRenderDispatcher entityRenderDispatcher, ItemInHandRenderer itemRenderer) {
 		this.client = client;
 		this.entityRenderDispatcher = entityRenderDispatcher;
 		this.itemRenderer = itemRenderer;
@@ -122,25 +123,14 @@ public class CustomFeralItemRenderer {
 		LivingEntity entity,
 		ItemStack stack,
 		ItemDisplayContext renderMode,
-		boolean leftHanded,
 		PoseStack matrices,
-		MultiBufferSource vertexConsumers,
+		SubmitNodeCollector vertexConsumers,
 		int light
 	) {
 		if (!stack.isEmpty()) {
-			this.itemRenderer
-				.renderStatic(
-					entity,
-					stack,
-					renderMode,
-					leftHanded,
-					matrices,
-					vertexConsumers,
-					entity.level(),
-					light,
-					OverlayTexture.NO_OVERLAY,
-					entity.getId() + renderMode.ordinal()
-				);
+			this.itemRenderer.renderItem(
+				entity, stack, renderMode, matrices, vertexConsumers, light
+			);
 		}
 	}
 
@@ -154,7 +144,6 @@ public class CustomFeralItemRenderer {
 		if (this.client.player == null) {
 			return;
 		}
-		RenderSystem.setShaderTexture(0, this.client.player.getSkin().texture());
 		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(this.client.player);
 		matrices.pushPose();
 		float f = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
@@ -163,9 +152,11 @@ public class CustomFeralItemRenderer {
 		matrices.mulPose(Axis.ZP.rotationDegrees(f * -41.0F));
 		matrices.translate(f * 0.3F, -1.1F, 0.45F);
 		if (arm == HumanoidArm.RIGHT) {
-			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light, this.client.player);
+			playerEntityRenderer.renderRightHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+					this.client.player.getSkin().body().texturePath(), false);
 		} else {
-			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light, this.client.player);
+			playerEntityRenderer.renderLeftHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+					this.client.player.getSkin().body().texturePath(), false);
 		}
 
 		matrices.popPose();
@@ -251,7 +242,9 @@ public class CustomFeralItemRenderer {
 		vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(swingProgress);
 		vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(swingProgress);
 		if (mapState != null) {
-			this.client.gameRenderer.getMapRenderer().render(matrices, vertexConsumers, mapId, mapState, false, swingProgress);
+			MapRenderState mapRenderState = new MapRenderState();
+			this.client.getMapRenderer().extractRenderState(mapId, mapState, mapRenderState);
+			this.client.getMapRenderer().render(mapRenderState, matrices, (SubmitNodeCollector)vertexConsumers, false, swingProgress);
 		}
 	}
 
@@ -275,7 +268,6 @@ public class CustomFeralItemRenderer {
 		matrices.mulPose(Axis.YP.rotationDegrees(f * l * 70.0F));
 		matrices.mulPose(Axis.ZP.rotationDegrees(f * k * -20.0F));
 		AbstractClientPlayer abstractClientPlayerEntity = this.client.player;
-		RenderSystem.setShaderTexture(0, abstractClientPlayerEntity.getSkin().texture());
 		matrices.translate(f * -1.0F, 3.6F, 3.5F);
 		matrices.mulPose(Axis.ZP.rotationDegrees(f * 120.0F));
 		matrices.mulPose(Axis.XP.rotationDegrees(200.0F));
@@ -284,9 +276,11 @@ public class CustomFeralItemRenderer {
 		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher
 			.<AbstractClientPlayer>getRenderer(abstractClientPlayerEntity);
 		if (bl) {
-			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light, abstractClientPlayerEntity);
+			playerEntityRenderer.renderRightHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+					abstractClientPlayerEntity.getSkin().body().texturePath(), false);
 		} else {
-			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light, abstractClientPlayerEntity);
+			playerEntityRenderer.renderLeftHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+					abstractClientPlayerEntity.getSkin().body().texturePath(), false);
 		}
 	}
 
@@ -502,9 +496,8 @@ public class CustomFeralItemRenderer {
 					player,
 					item,
 					bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
-					!bl3,
 					matrices,
-					vertexConsumers,
+					(SubmitNodeCollector)vertexConsumers,
 					light
 				);
 			} else {
@@ -599,9 +592,8 @@ public class CustomFeralItemRenderer {
 					player,
 					item,
 					bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
-					!bl2,
 					matrices,
-					vertexConsumers,
+					(SubmitNodeCollector)vertexConsumers,
 					light
 				);
 			}

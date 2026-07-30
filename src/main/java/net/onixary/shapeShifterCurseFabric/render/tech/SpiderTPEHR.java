@@ -4,10 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -28,7 +31,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
 	    if (ed == null) return;
 	    AvatarRenderer eR = (AvatarRenderer) ed.getRenderer(player);
 	    if (eR == null) return;
-        ModelPart body = eR.getModel().body;
+        ModelPart body = ((PlayerModel)eR.getModel()).body;
         body.translateAndRotate(matrices);
         if(stack.getItem() == Items.SHIELD){
             // 适用于spider_2、spider_3额外手臂盾牌的transform，需要将其转向正面
@@ -49,7 +52,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
             matrices.mulPose(Axis.YP.rotationDegrees(15.0F));
             matrices.translate(1.0 / 16.0F, -2.0 / 16.0F, 1.0 / 16.0F);
         }
-        heldItemRenderer.renderItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false, matrices, vertexConsumers, light);
+        heldItemRenderer.renderItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, matrices, (SubmitNodeCollector)vertexConsumers, light);
 
     }
 }
