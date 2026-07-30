@@ -25,13 +25,13 @@ public class RegPlayerForms {
     // Builtin PlayerForms
     // Original
     public static IForm ORIGINAL_BEFORE_ENABLE = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("original_before_enable")).formFlag(NoInstinct, InhibitorImmune, NoCursedMoonEffect, NoCursedMoonTFTarget).applyScaleFunc(NormalForm.RESET_SCALE_FUNC));
-    public static IForm ORIGINAL_SHIFTER = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("original_shifter")).formFlag(NoInstinct, InhibitorImmune, NoCursedMoonTFTarget).applyScaleFunc(NormalForm.RESET_SCALE_FUNC));
+    public static IForm ORIGINAL_SHIFTER = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("original_shifter")).formFlag(CanHaveTransformEffect, TransformEffectCanApply, NoInstinct, InhibitorImmune, NoCursedMoonTFTarget).applyScaleFunc(NormalForm.RESET_SCALE_FUNC));
     public static IFormGroup BASE_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("base_form")).registerForm(-1, 1, ORIGINAL_BEFORE_ENABLE).registerForm(0, 1, ORIGINAL_SHIFTER));
     // Bat
     public static IForm BAT_0 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("bat_0")).formFlag(StarterForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.9f, 1.0f)));
     public static IForm BAT_1 = registerPlayerForm(new Form_Bat1(ShapeShifterCurseFabric.identifier("bat_1")).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.75f, 1.0f)));
-    public static IForm BAT_2 = registerPlayerForm(new Form_Bat2(ShapeShifterCurseFabric.identifier("bat_2")).formFlag(HasSlowFall, InhibitorResist, LockInstinct, CursedMoonFinalForm, CatalystResist, CanTFToFinalForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.5f, 1.0f)));
-    public static IForm BAT_3 = registerPlayerForm(new Form_Bat3(ShapeShifterCurseFabric.identifier("bat_3")).formFlag(HasSlowFall, FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.5f, 0.6f)));
+    public static IForm BAT_2 = registerPlayerForm(new Form_Bat2(ShapeShifterCurseFabric.identifier("bat_2")).formFlag(HasSlowFall, InhibitorResist, LockInstinct, CursedMoonFinalForm, CatalystResist, CanTFToFinalForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.6f, 1.0f)));
+    public static IForm BAT_3 = registerPlayerForm(new Form_Bat3(ShapeShifterCurseFabric.identifier("bat_3")).formFlag(HasSlowFall, FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.6f, 0.7f)));
     public static IFormGroup BAT_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("bat_form")).registerForm(1, 1, BAT_0).registerForm(2, 1, BAT_1).registerForm(3, 1, BAT_2).registerForm(4, 1, BAT_3));
     // Axolotl
     public static IForm AXOLOTL_0 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("axolotl_0")).formFlag(StarterForm).applyScaleFunc(NormalForm.RESET_SCALE_FUNC));
@@ -49,13 +49,13 @@ public class RegPlayerForms {
     public static IForm FAMILIAR_FOX_0 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("familiar_fox_0")).formFlag(StarterForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.8f, 1.0f)));
     public static IForm FAMILIAR_FOX_1 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("familiar_fox_1")).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.65f, 1.0f)));
     public static IForm FAMILIAR_FOX_2 = registerPlayerForm(new Form_FamiliarFox2(ShapeShifterCurseFabric.identifier("familiar_fox_2")).formFlag(InhibitorResist, LockInstinct, CursedMoonFinalForm, CatalystResist, CanTFToFinalForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f, 1.0f)));
-    public static IForm FAMILIAR_FOX_3 = registerPlayerForm(new Form_FamiliarFox3(ShapeShifterCurseFabric.identifier("familiar_fox_3")).formFlag(FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.45f,0.6f)));
+    public static IForm FAMILIAR_FOX_3 = registerPlayerForm(new Form_FamiliarFox3(ShapeShifterCurseFabric.identifier("familiar_fox_3")).formFlag(FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f,0.6f)));
     public static IFormGroup FAMILIAR_FOX_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("familiar_fox_form")).registerForm(1, 1, FAMILIAR_FOX_0).registerForm(2, 1, FAMILIAR_FOX_1).registerForm(3, 1, FAMILIAR_FOX_2).registerForm(4, 1, FAMILIAR_FOX_3));
     // Snow Fox
     public static IForm SNOW_FOX_0 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("snow_fox_0")).formFlag(StarterForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.8f, 1.0f)));
     public static IForm SNOW_FOX_1 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("snow_fox_1")).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.65f, 1.0f)));
     public static IForm SNOW_FOX_2 = registerPlayerForm(new Form_SnowFox2(ShapeShifterCurseFabric.identifier("snow_fox_2")).formFlag(InhibitorResist, LockInstinct, CursedMoonFinalForm, CatalystResist, CanTFToFinalForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f, 1.0f)));
-    public static IForm SNOW_FOX_3 = registerPlayerForm(new Form_SnowFox3(ShapeShifterCurseFabric.identifier("snow_fox_3")).formFlag(FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.45f,0.6f)));
+    public static IForm SNOW_FOX_3 = registerPlayerForm(new Form_SnowFox3(ShapeShifterCurseFabric.identifier("snow_fox_3")).formFlag(FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f,0.6f)));
     public static IFormGroup SNOW_FOX_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("snow_fox_form")).registerForm(1, 1, SNOW_FOX_0).registerForm(2, 1, SNOW_FOX_1).registerForm(3, 1, SNOW_FOX_2).registerForm(4, 1, SNOW_FOX_3));
     // Anubis Wolf
     public static IForm ANUBIS_WOLF_0 = registerPlayerForm(new NormalForm(ShapeShifterCurseFabric.identifier("anubis_wolf_0")).formFlag(StarterForm).applyScaleFunc(NormalForm.RESET_SCALE_FUNC));
@@ -70,7 +70,7 @@ public class RegPlayerForms {
     public static IForm SPIDER_3 = registerPlayerForm(new Form_Spider3(ShapeShifterCurseFabric.identifier("spider_3")).formFlag(FinalForm, InhibitorImmune, NoInstinct, NoCursedMoonEffect).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.9f,1.0f)));
     public static IFormGroup SPIDER_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("spider_form")).registerForm(1, 1, SPIDER_0).registerForm(2, 1, SPIDER_1).registerForm(3, 1, SPIDER_2).registerForm(4, 1, SPIDER_3));
     // ALLAY_SP
-    public static IForm ALLAY_SP = registerPlayerForm(new Form_Allay(ShapeShifterCurseFabric.identifier("allay_sp")).formFlag(NoInstinct, NoCursedMoonEffect, SpecialForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.35f,1.0f)));
+    public static IForm ALLAY_SP = registerPlayerForm(new Form_Allay(ShapeShifterCurseFabric.identifier("allay_sp")).formFlag(NoInstinct, NoCursedMoonEffect, SpecialForm).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f,1.0f)));
     public static IFormGroup ALLAY_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("allay_form")).registerForm(1, 1, ALLAY_SP));
     // FERAL_CAT_SP
     public static IForm FERAL_CAT_SP = registerPlayerForm(new Form_FeralCatSP(ShapeShifterCurseFabric.identifier("feral_cat_sp")).formFlag(NoInstinct, NoCursedMoonEffect, SpecialForm).bodyType(PlayerFormBodyType.FERAL).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.55f,0.6f)));
