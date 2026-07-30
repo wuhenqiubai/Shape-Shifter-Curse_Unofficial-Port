@@ -335,6 +335,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
     private static final ICachedDataMap<UUID, Player, tailData> tailDataMap = new CachedDataMap<>(player -> new tailData(), Entity::getUUID);
     private static final ICachedDataMap<UUID, Player, neckData> neckDataMap = new CachedDataMap<>(neckData::new, Entity::getUUID);
+    // 物品栏或其他需要额外渲染玩家用的数据缓存 应该就只需要一个吧
+    private static final ICachedDataMap<UUID, Player, neckData> neckDataMapV = new CachedDataMap<>(neckData::new, Entity::getUUID);
 
     private static class tailData {
         private float tailDragAmount = 0.0F;
@@ -590,12 +592,18 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
+    // 如果拓展需要修改这个逻辑 可以使用Mixin 我认为挂一个事件有点臃肿 推荐使用Inject Return False
+    // 当然也有其他方法 比如写一个判断函数变量 不过我认为修改应该没这么勤
+    private boolean shouldUseVirtualData(Player player) {
+        return ClientUtils.isOpenInventoryScreen;
+    }
+
     // Yaw, Pitch
     private Vec2 getLongNeckAngles(Player player, float tickDelta, float fallbackHeadYaw, float fallbackHeadPitch) {
         if (neckConfig == null) {
             return new Vec2(fallbackHeadYaw, fallbackHeadPitch);
         }
-        neckData data = neckDataMap.get(player);
+	    neckData data = (shouldUseVirtualData(player) ? neckDataMapV : neckDataMap).get(player);
         float viewYaw = player.getViewYRot(tickDelta);
         float targetHeadPitch = player.getViewXRot(tickDelta);
         float bodyYaw = LongNeckRenderUtils.lerpAngle(tickDelta, player.yBodyRotO, player.yBodyRot);
@@ -676,14 +684,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.translatePositionForBone(RM_LeftLegGeoBoneID, new Vec3(2, 12, 0));
         model.translatePositionForBone(RM_RightLegGeoBoneID, new Vec3(-2, 12, 0));
         model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
-        // 物品栏等GUI窗口中的额外模型渲染会干扰脖颈IK的角度缓存数据，导致脖颈抖动，此时关闭脖颈IK
-        Vec2 neckAngles;
-        if (ClientUtils.isOpenInventoryScreen) {
-            neckAngles = new Vec2(headYaw, headPitch);
-        } else {
-            neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
-            this.setRotationForNeckBones(player, model, neckAngles.x, neckAngles.y);
-        }
+        Vec2 neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
+        this.setRotationForNeckBones(player, model, neckAngles.x, neckAngles.y);
         this.setRotationForTailBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
         this.setRotationForHeadTailBones(player, model, neckAngles.x, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
         this.setRotationForWingBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmountVertical);
