@@ -333,10 +333,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    private static final ICachedDataMap<UUID, PlayerEntity, tailData> tailDataMap = new CachedDataMap<>(player -> new tailData(), Entity::getUuid);
-    private static final ICachedDataMap<UUID, PlayerEntity, neckData> neckDataMap = new CachedDataMap<>(neckData::new, Entity::getUuid);
+    private static final ICachedDataMap<UUID, Player, tailData> tailDataMap = new CachedDataMap<>(player -> new tailData(), Entity::getUUID);
+    private static final ICachedDataMap<UUID, Player, neckData> neckDataMap = new CachedDataMap<>(neckData::new, Entity::getUUID);
     // 物品栏或其他需要额外渲染玩家用的数据缓存 应该就只需要一个吧
-    private static final ICachedDataMap<UUID, PlayerEntity, neckData> neckDataMapV = new CachedDataMap<>(neckData::new, Entity::getUuid);
+    private static final ICachedDataMap<UUID, Player, neckData> neckDataMapV = new CachedDataMap<>(neckData::new, Entity::getUUID);
 
     private static class tailData {
         private float tailDragAmount = 0.0F;
@@ -594,7 +594,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
     // 如果拓展需要修改这个逻辑 可以使用Mixin 我认为挂一个事件有点臃肿 推荐使用Inject Return False
     // 当然也有其他方法 比如写一个判断函数变量 不过我认为修改应该没这么勤
-    private boolean shouldUseVirtualData(PlayerEntity player) {
+    private boolean shouldUseVirtualData(Player player) {
         return ClientUtils.isOpenInventoryScreen;
     }
 

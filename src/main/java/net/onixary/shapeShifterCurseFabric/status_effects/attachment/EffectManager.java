@@ -339,7 +339,7 @@ public class EffectManager {
         }
     }
 
-    public static boolean playerCanHaveTransformativeEffect(PlayerEntity player) {
+    public static boolean playerCanHaveTransformativeEffect(Player player) {
         return CanHaveTransformativeEffect(player, getPlayerForm(player));
     }
 
