@@ -96,7 +96,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         // 仅限开启FirstPersonModel时渲染额外物品
                         matrices.pushPose();
                         //var eR = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(player);
-                        //var head = eR.getModel().head;
+                        //var head = ((PlayerModel)eR.getModel()).head;
                         // FirstPerson Mod会直接将head.pivot移动到某个非常远的位置来“隐藏”头部，所以需要直接定义好一个固定位置
                         // Vec3d posOffset = new Vec3d(0.0F, 0.0F, 0.0F);
                         // Vec3d rotCenter = ShapeShifterCurseFabric.feralItemCenter;

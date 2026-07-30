@@ -21,6 +21,11 @@ public class TOcelotEntityRenderer extends MobRenderer<Ocelot, FelineRenderState
 		super(context, new OcelotModel(context.bakeLayer(ModelLayers.OCELOT)), 0.4F);
 	}
 
+	@Override
+	public @NonNull FelineRenderState createRenderState() {
+		return new FelineRenderState();
+	}
+
 	public @NonNull Identifier getTextureLocation(@NonNull FelineRenderState state) {
 		return TEXTURE;
 	}

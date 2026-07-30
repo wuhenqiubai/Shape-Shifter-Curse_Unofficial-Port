@@ -20,6 +20,11 @@ public class BatEntityRenderer extends MobRenderer<Bat, BatRenderState, BatModel
         super(context, new BatModel(context.bakeLayer(ModelLayers.BAT)), 0.25F);
     }
 
+    @Override
+    public @NonNull BatRenderState createRenderState() {
+        return new BatRenderState();
+    }
+
     public @NonNull Identifier getTextureLocation(@NonNull BatRenderState state) {
         return TEXTURE;
     }

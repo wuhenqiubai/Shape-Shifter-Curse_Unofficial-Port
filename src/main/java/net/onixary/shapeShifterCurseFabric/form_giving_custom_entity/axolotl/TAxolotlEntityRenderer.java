@@ -16,7 +16,10 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 @Environment(EnvType.CLIENT)
 public class TAxolotlEntityRenderer extends MobRenderer<Axolotl, AxolotlRenderState, AxolotlModel> {
 
-	// 1. 删除了整个 TEXTURES 静态映射的定义
+	@Override
+	public @NonNull AxolotlRenderState createRenderState() {
+		return new AxolotlRenderState();
+	}
 
 	private static final Identifier TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/entity/mob/t_axolotl.png");
 
