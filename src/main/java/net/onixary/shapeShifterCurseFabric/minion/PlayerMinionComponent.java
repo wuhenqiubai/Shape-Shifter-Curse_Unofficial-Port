@@ -1,11 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.minecraft.core.HolderLookup;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
@@ -20,20 +21,31 @@ public class PlayerMinionComponent implements Component, AutoSyncedComponent {
     public ConcurrentHashMap<Identifier, Long> minionsCooldown = new ConcurrentHashMap<>();
 
     @Override
-    public void readFromNbt(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider registryLookup) {
+    public void readData(ValueInput input) {
+        input.read("data", CompoundTag.CODEC).ifPresent(this::readFromNbt);
+    }
+
+    @Override
+    public void writeData(ValueOutput output) {
+        CompoundTag tag = new CompoundTag();
+        this.writeToNbt(tag);
+        output.store("data", CompoundTag.CODEC, tag);
+    }
+
+    public void readFromNbt(@NotNull CompoundTag nbtCompound) {
         try {
-            CompoundTag minionsNbt = nbtCompound.getCompound("minions");
-            for (String key : minionsNbt.getAllKeys()) {
-                ListTag uuidList = minionsNbt.getList(key, 11);
+            CompoundTag minionsNbt = nbtCompound.getCompoundOrEmpty("minions");
+            for (String key : minionsNbt.keySet()) {
+                ListTag uuidList = minionsNbt.getListOrEmpty(key);
                 ArrayList<UUID> uuids = new ArrayList<>();
                 for (net.minecraft.nbt.Tag nbtElement : uuidList) {
-                    uuids.add(NbtUtils.loadUUID(nbtElement));
+                    uuids.add(UUIDUtil.uuidFromIntArray(((IntArrayTag)nbtElement).getAsIntArray()));
                 }
                 this.minions.put(Identifier.parse(key), uuids);
             }
-            CompoundTag minionsCooldownNbt = nbtCompound.getCompound("minionsCooldown");
-            for (String key : minionsCooldownNbt.getAllKeys()) {
-                this.minionsCooldown.put(Identifier.parse(key), minionsCooldownNbt.getLong(key));
+            CompoundTag minionsCooldownNbt = nbtCompound.getCompoundOrEmpty("minionsCooldown");
+            for (String key : minionsCooldownNbt.keySet()) {
+                this.minionsCooldown.put(Identifier.parse(key), minionsCooldownNbt.getLongOr(key, 0L));
             }
         } catch (IllegalArgumentException e) {
             this.minions = new ConcurrentHashMap<>();
@@ -49,14 +61,12 @@ public class PlayerMinionComponent implements Component, AutoSyncedComponent {
         this.minionsCooldown.clear();
     }
 
-    @Override
-    public void writeToNbt(@NotNull CompoundTag nbtCompound, HolderLookup.@NotNull Provider registryLookup) {
+    public void writeToNbt(@NotNull CompoundTag nbtCompound) {
         CompoundTag minionsNbt = new CompoundTag();
         for (Identifier key : this.minions.keySet()) {
             ListTag uuidList = new ListTag();
             for (UUID uuid : this.minions.get(key)) {
-                IntArrayTag uuidNBT = NbtUtils.createUUID(uuid);
-                uuidList.add(uuidNBT);
+                uuidList.add(new IntArrayTag(UUIDUtil.uuidToIntArray(uuid)));
             }
             minionsNbt.put(key.toString(), uuidList);
         }

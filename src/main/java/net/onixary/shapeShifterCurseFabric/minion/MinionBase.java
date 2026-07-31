@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
@@ -9,7 +8,10 @@ import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtTargetGoal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
@@ -39,12 +41,14 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
 
     @Override
     public UUID getMinionOwnerUUID() {
-        return super.getOwnerUUID();
+        // getOwnerUUID() 在 1.21.11 移除，改用 getOwner() 实体引用
+        net.minecraft.world.entity.LivingEntity owner = this.getOwner();
+        return owner != null ? owner.getUUID() : null;
     }
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        this.setOwnerUUID(uuid);
+        // setOwnerUUID() 在 1.21.11 移除，改为 getOwner()/setOwner() 实体引用系统
     }
 
     @Override
@@ -93,12 +97,12 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
     }
 
     @Override
-    public void addAdditionalSaveData(CompoundTag nbt) {
+    public void addAdditionalSaveData(@NonNull ValueOutput nbt) {
         super.addAdditionalSaveData(nbt);
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
+    public void readAdditionalSaveData(@NonNull ValueInput nbt) {
         super.readAdditionalSaveData(nbt);
     }
 

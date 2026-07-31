@@ -2,16 +2,13 @@ package net.onixary.shapeShifterCurseFabric.items;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class SpiderFluidCocoon extends Item {
     public SpiderFluidCocoon(Properties settings) {
@@ -21,18 +18,12 @@ public class SpiderFluidCocoon extends Item {
                         new FoodProperties.Builder()
                                 .nutrition(6)
                                 .saturationModifier(0.8f)
-                                .effect(new MobEffectInstance(MobEffects.POISON, 150, 0), 1.0f)
                                 .build()
                 ));
     }
 
     @Override
-    public SoundEvent getEatingSound(){
-        return SoundEvents.GENERIC_DRINK;
-    }
-
-    @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

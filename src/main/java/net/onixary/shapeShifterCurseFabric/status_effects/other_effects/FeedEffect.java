@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.status_effects.other_effects;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.Entity;
@@ -20,7 +21,7 @@ public class FeedEffect extends MobEffect {
     }
 
     @Override
-    public void applyInstantenousEffect(@Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
+    public void applyInstantenousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
         // 检查目标是否为玩家
         if (target instanceof Player player) {
             // 基础数值
@@ -51,7 +52,7 @@ public class FeedEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity entity, int amplifier) {
         if (entity instanceof Player player) {
             player.getFoodData().eat(8, 0.6f);
             if (ManaRegistries.FAMILIAR_FOX_MANA.equals(ManaUtils.getPlayerManaTypeID(player))) {

@@ -6,8 +6,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ToolMaterial;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 // 形态专属工具只应用耐久度逻辑，其他逻辑由形态Power+手持道具condition实现
 public class DiamondMiningClaw extends Item {
@@ -17,7 +18,7 @@ public class DiamondMiningClaw extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.diamond_mining_claw.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.diamond_mining_claw.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

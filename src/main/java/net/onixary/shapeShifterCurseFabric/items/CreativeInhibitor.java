@@ -11,10 +11,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class CreativeInhibitor extends Item {
     public CreativeInhibitor(Properties settings) {
@@ -32,9 +33,9 @@ public class CreativeInhibitor extends Item {
     public InteractionResult use(Level world, Player user, InteractionHand hand) {
         if (user.canEat(true)) {
             user.startUsingItem(hand);
-            return InteractionResult.consume(user.getItemInHand(hand));
+            return InteractionResult.CONSUME;
         }
-        return InteractionResult.fail(user.getItemInHand(hand));
+        return InteractionResult.FAIL;
     }
 
     @Override
@@ -63,7 +64,7 @@ public class CreativeInhibitor extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.creative_inhibitor.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.creative_inhibitor.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

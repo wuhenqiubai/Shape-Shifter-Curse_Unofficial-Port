@@ -59,7 +59,7 @@ public class FormColorData {
     }
 
     public FormTextureUtils.ColorSetting loadColorSetting(CompoundTag nbt) {
-        return new FormTextureUtils.ColorSetting(nbt.getInt("primaryColor"), nbt.getInt("accentColor1"), nbt.getInt("accentColor2"), nbt.getInt("eyeColorA"), nbt.getInt("eyeColorB"), nbt.getBoolean("primaryGreyReverse"), nbt.getBoolean("accent1GreyReverse"), nbt.getBoolean("accent2GreyReverse"));
+        return new FormTextureUtils.ColorSetting(nbt.getIntOr("primaryColor", 0), nbt.getIntOr("accentColor1", 0), nbt.getIntOr("accentColor2", 0), nbt.getIntOr("eyeColorA", 0), nbt.getIntOr("eyeColorB", 0), nbt.getBooleanOr("primaryGreyReverse", false), nbt.getBooleanOr("accent1GreyReverse", false), nbt.getBooleanOr("accent2GreyReverse", false));
     }
 
     public CompoundTag saveCompound() {
@@ -124,36 +124,36 @@ public class FormColorData {
         FormColorSelectMenu_Global_Names.clear();
         unlockedForms.clear();
         if (compound.contains("enableDefaultFormColor")) {
-            enableDefaultFormColor = compound.getBoolean("enableDefaultFormColor");
+            enableDefaultFormColor = compound.getBooleanOr("enableDefaultFormColor", false);
         }
         if (compound.contains("formDefaultSetting")) {
-            CompoundTag formDefaultSettingNbt = compound.getCompound("formDefaultSetting");
-            for (String form : formDefaultSettingNbt.getAllKeys()) {
+            CompoundTag formDefaultSettingNbt = compound.getCompoundOrEmpty("formDefaultSetting");
+            for (String form : formDefaultSettingNbt.keySet()) {
                 try {
-                    formDefaultSetting.put(Identifier.tryParse(form), loadColorSetting(formDefaultSettingNbt.getCompound(form)));
+                    formDefaultSetting.put(Identifier.tryParse(form), loadColorSetting(formDefaultSettingNbt.getCompoundOrEmpty(form)));
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.warn("Failed to load form default color setting for " + form + ": " + e.getMessage());
                 }
             }
         }
         if (compound.contains("customSetting")) {
-            CompoundTag customSettingNbt = compound.getCompound("customSetting");
-            for (String name : customSettingNbt.getAllKeys()) {
+            CompoundTag customSettingNbt = compound.getCompoundOrEmpty("customSetting");
+            for (String name : customSettingNbt.keySet()) {
                 try {
-                    customSetting.put(name, loadColorSetting(customSettingNbt.getCompound(name)));
+                    customSetting.put(name, loadColorSetting(customSettingNbt.getCompoundOrEmpty(name)));
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.warn("Failed to load custom color setting for " + name + ": " + e.getMessage());
                 }
             }
         }
         if (compound.contains("customSettingByForm")) {
-            CompoundTag customSettingByFormNbt = compound.getCompound("customSettingByForm");
-            for (String form : customSettingByFormNbt.getAllKeys()) {
+            CompoundTag customSettingByFormNbt = compound.getCompoundOrEmpty("customSettingByForm");
+            for (String form : customSettingByFormNbt.keySet()) {
                 Identifier formId = Identifier.tryParse(form);
-                CompoundTag formNbt = customSettingByFormNbt.getCompound(form);
-                for (String name : formNbt.getAllKeys()) {
+                CompoundTag formNbt = customSettingByFormNbt.getCompoundOrEmpty(form);
+                for (String name : formNbt.keySet()) {
                     try {
-                        customSettingByForm.computeIfAbsent(formId, k -> new HashMap<>()).put(name, loadColorSetting(formNbt.getCompound(name)));
+                        customSettingByForm.computeIfAbsent(formId, k -> new HashMap<>()).put(name, loadColorSetting(formNbt.getCompoundOrEmpty(name)));
                     } catch (Exception e) {
                         ShapeShifterCurseFabric.LOGGER.warn("Failed to load custom color setting for " + name + " on form " + form + ": " + e.getMessage());
                     }
@@ -161,39 +161,39 @@ public class FormColorData {
             }
         }
         if (compound.contains("FCS_form_local_setting_names")) {
-            CompoundTag nbtList = compound.getCompound("FCS_form_local_setting_names");
-            for (String form : nbtList.getAllKeys()) {
+            CompoundTag nbtList = compound.getCompoundOrEmpty("FCS_form_local_setting_names");
+            for (String form : nbtList.keySet()) {
                 Identifier formId = Identifier.tryParse(form);
                 List<String> formSlotNames = FormColorSelectMenu_Form_Local_Names.computeIfAbsent(formId, k -> new ArrayList<>());
-                ListTag nbtList2 = nbtList.getList(form, Tag.TAG_STRING);
+                ListTag nbtList2 = nbtList.getListOrEmpty(form);
                 for (int i = 0; i < nbtList2.size(); i++) {
-                    formSlotNames.add(nbtList2.getString(i));
+                    formSlotNames.add(nbtList2.getStringOr(i, ""));
                 }
             }
         }
         if (compound.contains("FCS_global_setting_names")) {
-            ListTag nbtList = compound.getList("FCS_global_setting_names", Tag.TAG_STRING);
+            ListTag nbtList = compound.getListOrEmpty("FCS_global_setting_names");
             for (int i = 0; i < nbtList.size(); i++) {
-                FormColorSelectMenu_Global_Names.add(nbtList.getString(i));
+                FormColorSelectMenu_Global_Names.add(nbtList.getStringOr(i, ""));
             }
         }
         if (compound.contains("FCS_form_default_setting_names")) {
-            CompoundTag nbtList = compound.getCompound("FCS_form_default_setting_names");
-            for (String form : nbtList.getAllKeys()) {
+            CompoundTag nbtList = compound.getCompoundOrEmpty("FCS_form_default_setting_names");
+            for (String form : nbtList.keySet()) {
                 Identifier formId = Identifier.tryParse(form);
-                FormColorSelectMenu_Form_Default_Names.put(formId, nbtList.getString(form));
+                FormColorSelectMenu_Form_Default_Names.put(formId, nbtList.getStringOr(form, ""));
             }
         }
         if (compound.contains("V2_FCS_global_setting_names")) {
-            ListTag nbtList = compound.getList("V2_FCS_global_setting_names", Tag.TAG_STRING);
+            ListTag nbtList = compound.getListOrEmpty("V2_FCS_global_setting_names");
             for (int i = 0; i < nbtList.size(); i++) {
-                V2_FormColorSelectMenu_Global_Names.add(nbtList.getString(i));
+                V2_FormColorSelectMenu_Global_Names.add(nbtList.getStringOr(i, ""));
             }
         }
         if (compound.contains("unlockedForms")) {
-            ListTag nbtList = compound.getList("unlockedForms", Tag.TAG_STRING);
+            ListTag nbtList = compound.getListOrEmpty("unlockedForms");
             for (int i = 0; i < nbtList.size(); i++) {
-                unlockedForms.add(Identifier.tryParse(nbtList.getString(i)));
+                unlockedForms.add(Identifier.tryParse(nbtList.getStringOr(i, "")));
             }
         }
     }
@@ -491,12 +491,12 @@ public class FormColorData {
     }
 
     public static Component toCopyableText(String text, String copyText) {
-        return Component.literal(text).withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText)));
+        return Component.literal(text).withStyle(style -> style.withClickEvent(new ClickEvent.CopyToClipboard(copyText)));
     }
 
     public static Component appendCopyableText(Component text, String copyText) {
         return text.copy().withStyle(style -> style.withClickEvent(
-                new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, copyText)
+                new ClickEvent.CopyToClipboard(copyText)
         ));
     }
 }

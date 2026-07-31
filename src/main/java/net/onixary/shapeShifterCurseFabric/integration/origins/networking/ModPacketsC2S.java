@@ -75,7 +75,7 @@ public class ModPacketsC2S {
                 }
 
                 if (origin.isChoosable() && layer.contains(origin, player)) {
-                    boolean hadOriginBefore = component.hadOriginBefore();
+                    boolean hadOriginBefore = component.hadOriginBefore().orElse(false);
                     boolean hadAllOrigins = component.hasAllOrigins();
                     component.setOrigin(layer, origin);
                     component.checkAutoChoosingLayers(player, false);
@@ -135,7 +135,7 @@ public class ModPacketsC2S {
                         return;
                     }
 
-                    boolean hadOriginBefore = component.hadOriginBefore();
+                    boolean hadOriginBefore = component.hadOriginBefore().orElse(false);
                     boolean hadAllOrigins = component.hasAllOrigins();
                     component.setOrigin(layer, origin);
                     component.checkAutoChoosingLayers(player, false);

@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.mixin.EntityAccessor;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.tags.FluidTags;
@@ -72,7 +71,7 @@ public final class CustomWaterBreathingMixin {
                 if(!this.isEyeInFluid(FluidTags.WATER)
                         && !this.hasEffect(MobEffects.WATER_BREATHING)
                         && !this.hasEffect(MobEffects.CONDUIT_POWER)) {
-                    if(!((EntityAccessor) this).callIsBeingRainedOn()) {
+                    if(!this.isInRain()) {
                         int landWaterBreathLevel = PowerHolderComponent.getPowers(this, CustomWaterBreathingPower.class)
                                 .stream()
                                 .mapToInt(CustomWaterBreathingPower::getLandWaterBreathLevel).sum();

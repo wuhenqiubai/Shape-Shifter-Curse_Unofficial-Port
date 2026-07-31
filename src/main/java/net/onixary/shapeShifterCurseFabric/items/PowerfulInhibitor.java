@@ -11,9 +11,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class PowerfulInhibitor extends Item {
     public PowerfulInhibitor(Properties settings) {
@@ -59,7 +60,7 @@ public class PowerfulInhibitor extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.powerful_inhibitor.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.powerful_inhibitor.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

@@ -37,7 +37,7 @@ public abstract class ItemStackMixin {
             at = @At("HEAD")
     )
     private void shape_shifter_curse$onFinishUsing(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClientSide && user instanceof ServerPlayer player) {
+        if (!world.isClientSide() && user instanceof ServerPlayer player) {
             ItemStack stack = (ItemStack) (Object) this;
             if(stack.getItem() == Items.GOLDEN_APPLE || stack.getItem() == Items.ENCHANTED_GOLDEN_APPLE){
                 IForm currentForm = FormUtils.getPlayerForm(player);
@@ -68,7 +68,7 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "finishUsingItem", at = @At("TAIL"))
     private void shape_shifter_curse$onFinishUsingEnd(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClientSide && user instanceof ServerPlayer player) {
+        if (!world.isClientSide() && user instanceof ServerPlayer player) {
             if (!tsiList.isEmpty()) {
                 tsiList.forEach(tsi -> player.getActiveEffectsMap().put(tsi.getEffect(), tsi));
                 tsiList.clear();
@@ -83,10 +83,10 @@ public abstract class ItemStackMixin {
 		var nbt = realThis.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
 		if (nbt != null) {
 			var compound = nbt.copyTag();
-			if (compound.contains("MorphScaleItem") && compound.getBoolean("MorphScaleItem")) {
+			if (compound.contains("MorphScaleItem") && compound.getBooleanOr("MorphScaleItem", false)) {
 				tooltip.add(Component.translatable("tooltip.shape_shifter_curse.morphscale_item").withStyle(ChatFormatting.GRAY));
 			}
-			if (compound.contains(IsMorphScaleItemCondition.IsMorphScaleFoodTagName) && compound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleFoodTagName)) {
+			if (compound.contains(IsMorphScaleItemCondition.IsMorphScaleFoodTagName) && compound.getBooleanOr(IsMorphScaleItemCondition.IsMorphScaleFoodTagName, false)) {
 				tooltip.add(Component.translatable("tooltip.shape_shifter_curse.morphscale_food").withStyle(ChatFormatting.GRAY));
 			}
 		}

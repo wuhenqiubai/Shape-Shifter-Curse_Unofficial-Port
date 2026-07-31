@@ -1,14 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.items.armors;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import org.objectweb.asm.Type;
+import net.minecraft.world.item.component.TooltipDisplay;
+import net.minecraft.world.item.equipment.ArmorType;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.animatable.client.GeoRenderProvider;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
@@ -16,20 +15,17 @@ import software.bernie.geckolib.animatable.manager.AnimatableManager;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import software.bernie.geckolib.util.GeckoLibUtil;
 
-import java.util.List;
-import java.util.Properties;
 import java.util.function.Consumer;
 
-public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
-    public NetheriteMorphScaleArmor(Type type) {
-        super(NetheriteMorphscaleArmorMaterial.ENTRY, type, new Properties().stacksTo(1).fireResistant()
-                .durability(type.getDurability(37)));
+public class NetheriteMorphScaleArmor extends Item implements GeoItem {
+    public NetheriteMorphScaleArmor(ArmorType type) {
+        super(new Item.Properties().humanoidArmor(NetheriteMorphscaleArmorMaterial.INSTANCE, type).stacksTo(1).fireResistant());
         GeoItem.registerSyncedAnimatable(this);
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.morphscale_armor.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.morphscale_armor.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 
 
@@ -38,14 +34,13 @@ public class NetheriteMorphScaleArmor extends ArmorItem implements GeoItem {
     @Override
     public void createGeoRenderer(Consumer<GeoRenderProvider> consumer) {
         consumer.accept(new GeoRenderProvider() {
-            private GeoArmorRenderer<NetheriteMorphScaleArmor> renderer;
+            private GeoArmorRenderer<NetheriteMorphScaleArmor, MorphscaleArmorRenderState> renderer;
 
             @Override
-            public <T extends LivingEntity> GeoArmorRenderer getGeoArmorRenderer(T livingEntity, ItemStack itemStack, EquipmentSlot equipmentSlot, HumanoidModel<T> original) {
+            public @org.jetbrains.annotations.Nullable GeoArmorRenderer<?, ?> getGeoArmorRenderer(ItemStack itemStack, EquipmentSlot equipmentSlot) {
                 if (this.renderer == null) {
                     this.renderer = new NetheriteMorphscaleArmorRenderer();
                 }
-                this.renderer.prepForRender(livingEntity, itemStack, equipmentSlot, original);
                 return this.renderer;
             }
         });

@@ -55,7 +55,7 @@ public class CTPUtils {
             return null;
         }
         if (nbtCompound.contains("targetForm")) {
-            return Identifier.tryParse(nbtCompound.getString("targetForm"));
+            return Identifier.tryParse(nbtCompound.getStringOr("targetForm", ""));
         }
         return null;
     }

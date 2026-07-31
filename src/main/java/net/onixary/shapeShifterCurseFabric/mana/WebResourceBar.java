@@ -65,13 +65,13 @@ public class WebResourceBar implements IManaRender {
         double manaRegen = ManaUtils.getPlayerManaRegen(mc.player);
 
         int manaWidth = (int)Math.ceil((double)80.0F * ManaUtils.getManaPercent(mana, maxMana, 0.0F));
-        context.blit(BarTexID, x, y, 0.0f, 0, 80, 5, 80, 18);
-        context.blit(BarTexID, x, y, 0.0f, 5, manaWidth, 5, 80, 18);
+        context.blit(BarTexID, x, y, 0, 0, 80, 5, 80, 18);
+        context.blit(BarTexID, x, y, 0, 5, manaWidth, 5, 80, 18);
 
         Component manaText = Component.literal((int) mana + "/" + (int) maxMana);
         context.drawString(mc.font, manaText, x + 10, y - 8, manaRegen == 0 ? 0xFF7F7F7F : 0xFF00CFFF, false);
 
         int chargeLevel = this.getChargeLevel();
-        context.blit(BarTexID, x, y - 8, chargeLevel * 8f, 10f, 8, 8, 80, 18);
+        context.blit(BarTexID, x, y - 8, chargeLevel * 8, 10, 8, 8, 80, 18);
     }
 }

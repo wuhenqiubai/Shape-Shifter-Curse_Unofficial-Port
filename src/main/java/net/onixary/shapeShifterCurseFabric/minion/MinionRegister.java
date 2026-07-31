@@ -1,14 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -22,10 +23,9 @@ public class MinionRegister {
     public static final EntityType<AnubisWolfMinionEntity> ANUBIS_WOLF_MINION = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             AnubisWolfMinionEntity.MinionID,
-            FabricEntityTypeBuilder
-                    .create(MobCategory.MISC, AnubisWolfMinionEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
-                    .build()
+            EntityType.Builder.of(AnubisWolfMinionEntity::new, MobCategory.MISC)
+                    .sized(0.5F, 0.5F)
+                    .build(ResourceKey.create(Registries.ENTITY_TYPE, AnubisWolfMinionEntity.MinionID))
     );
 
     public static void register() {
@@ -40,7 +40,7 @@ public class MinionRegister {
     }
 
     public static @Nullable <T extends LivingEntity> T SpawnMinion(EntityType<T> minion, ServerLevel world, BlockPos pos, ServerPlayer player) {
-        T entity = minion.spawn(world, pos, MobSpawnType.NATURAL);
+        T entity = minion.spawn(world, pos, EntitySpawnReason.NATURAL);
         if (entity instanceof IMinion<?> minionEntity) {
             minionEntity.InitMinion(player);
             return entity;

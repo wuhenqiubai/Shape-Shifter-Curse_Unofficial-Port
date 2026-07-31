@@ -47,6 +47,6 @@ public abstract class ArmorSlotMixin {
         if (stack.is(ModTags.MorphScaleItem_Tag)) return true;
         if (MorphScaleTagLoader.getMorphScaleItems().contains(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString())) return true;
         var c = stack.get(DataComponents.CUSTOM_DATA);
-        return c != null && c.copyTag().getBoolean(MSI_TAG);
+        return c != null && c.copyTag().getBooleanOr(MSI_TAG, false);
     }
 }

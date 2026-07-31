@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.status_effects.other_effects;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
@@ -11,7 +12,7 @@ public class ImmobilityEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity entity, int amplifier) {
         if (entity instanceof Player){
             double speedY = entity.getDeltaMovement().y;
             entity.setDeltaMovement(0, speedY, 0);

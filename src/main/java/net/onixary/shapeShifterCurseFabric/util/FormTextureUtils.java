@@ -210,17 +210,17 @@ public class FormTextureUtils {
         int RC = 0, GC = 0, BC = 0;
         for (int x = 0; x < textureWidth; x++) {
             for (int y = 0; y < textureHeight; y++) {
-                int Mask = maskImage.getPixelRGBA(x, y);
+                int Mask = maskImage.getPixel(x, y);
                 if ((Mask & 0x00FF0000) > 0) {
-                    B += getGreyScale(image.getPixelRGBA(x, y));
+                    B += getGreyScale(image.getPixel(x, y));
                     BC ++;
                 }
                 else if ((Mask & 0x0000FF00) > 0) {
-                    G += getGreyScale(image.getPixelRGBA(x, y));
+                    G += getGreyScale(image.getPixel(x, y));
                     GC ++;
                 }
                 else if ((Mask & 0x000000FF) > 0) {
-                    R += getGreyScale(image.getPixelRGBA(x, y));
+                    R += getGreyScale(image.getPixel(x, y));
                     RC ++;
                 }
             }
@@ -291,10 +291,14 @@ public class FormTextureUtils {
         return Color;
     }
 
+    private static int maskedTextureCounter = 0;
+
     public static Identifier BakeTexture(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
         TextureManager TM = Minecraft.getInstance().getTextureManager();
         // 客户端会在每次重载资源包时数据溢出 溢出量不高 等以后再优化吧
-        return TM.register("masked_texture", BakeTextureNoMemLeak(texture, mask, colorSetting, OnlyMultiply));
+        Identifier id = Identifier.fromNamespaceAndPath("shape-shifter-curse", "masked_texture_" + maskedTextureCounter++);
+        TM.register(id, BakeTextureNoMemLeak(texture, mask, colorSetting, OnlyMultiply));
+        return id;
     }
 
     public static DynamicTexture BakeTextureNoMemLeak(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply) {
@@ -306,10 +310,10 @@ public class FormTextureUtils {
         Triple<Integer, Integer, Integer> MaskLayerAverageGreyScale = getAverageGreyScale(textureImage, maskImage);
         for (int x = 0; x < textureWidth; x++) {
             for (int y = 0; y < textureHeight; y++) {
-                textureImage.setPixelRGBA(x, y, ProcessPixel(textureImage.getPixelRGBA(x, y), maskImage.getPixelRGBA(x, y), colorSetting, MaskLayerAverageGreyScale, OnlyMultiply));
+                textureImage.setPixel(x, y, ProcessPixel(textureImage.getPixel(x, y), maskImage.getPixel(x, y), colorSetting, MaskLayerAverageGreyScale, OnlyMultiply));
             }
         }
-        return new DynamicTexture(textureImage);
+        return new DynamicTexture(() -> "masked_texture", textureImage);
     }
 
     // 仅渲染使用 会处理isEnableFormColor

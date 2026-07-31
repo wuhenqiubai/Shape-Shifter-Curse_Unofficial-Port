@@ -57,14 +57,14 @@ public class CursedMoon {
         boolean isOverworld = player.level().dimension() == Level.OVERWORLD;
         if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
             if (isOverworld) {
-                ((ServerPlayer)player).sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_before_enable").withStyle(ChatFormatting.LIGHT_PURPLE));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_before_enable").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         } else {
             if(isOverworld){
-                ((ServerPlayer)player).sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
             else{
-                ((ServerPlayer)player).sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_cursed_moon_nether").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
             ShapeShifterCurseFabric.ON_TRIGGER_CURSED_MOON.trigger(serverPlayer);
         }

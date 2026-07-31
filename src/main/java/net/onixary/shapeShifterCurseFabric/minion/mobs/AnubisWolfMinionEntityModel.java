@@ -25,6 +25,7 @@ public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
     private final ModelPart neck;
 
     public AnubisWolfMinionEntityModel(ModelPart root) {
+        super(root);
         this.head = root.getChild("head");
         this.torso = root.getChild("body");
         this.neck = root.getChild("upperBody");

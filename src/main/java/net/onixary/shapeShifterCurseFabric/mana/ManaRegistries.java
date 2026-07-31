@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.mana;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
@@ -17,21 +15,6 @@ import java.util.function.Function;
 public class ManaRegistries {
     // 不可变 防止某些天才操作同时把其他的ManaHandler给修改了 导致程序异常 当然Immutable为可选项 无论是否Immutable都支持注册 推荐为公共ManaHandler加上setImmutable
     public static final ManaHandler EMPTY_MANA_HANDLER = new ManaHandler().setImmutable();
-    public static final ManaHandler DEBUG_MANA_HANDLER = new ManaHandler()
-            // 所有Hook执行时间不保证在同一Tick
-            .setOnClientManaFull((component, player) -> {
-                player.sendSystemMessage(Component.literal("[Client] 魔力值已满!").withStyle(ChatFormatting.GREEN));
-            })
-            .setOnClientManaEmpty((component, player) -> {
-                player.sendSystemMessage(Component.literal("[Client] 魔力值已空!").withStyle(ChatFormatting.RED));
-            })
-            .setOnServerManaFull((component, player) -> {
-                player.sendSystemMessage(Component.literal("[Server] 魔力值已满!").withStyle(ChatFormatting.GREEN));
-            })
-            .setOnServerManaEmpty((component, player) -> {
-                player.sendSystemMessage(Component.literal("[Server] 魔力值已空!").withStyle(ChatFormatting.RED));
-            })
-            .setImmutable();
 
     // 给我自己拓展留的访问权限 修改时需要使用特殊方式 如果用错误修改方式修改可能会出现特殊Bug 优先使用提供的2个函数修改 manaHandler没有提供函数 因为有可能拓展使用相同的handler
     public static final HashMap<Identifier, Function<Player, Boolean>> manaConditionTypeRegistry = new HashMap<>();

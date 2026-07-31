@@ -72,9 +72,8 @@ public class CameraBobbingMixin {
      */
     @Unique
     private void shape_shifter_curse$applyDefaultBobbing(PoseStack matrices, float tickDelta, Player player) {
-        float deltaH   = player.walkDist - player.walkDistO;
-        float phase    = -(player.walkDist + deltaH * tickDelta);
-        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
+        float phase = -((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getBackwardsInterpolatedWalkDistance(tickDelta);
+        float amplitude = ((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getInterpolatedBob(tickDelta);
 
         matrices.translate(
                 (double)(Mth.sin(phase * Mth.PI) * amplitude * 0.5f),
@@ -92,9 +91,8 @@ public class CameraBobbingMixin {
      */
     @Unique
     private void shape_shifter_curse$applyFloatBobbing(PoseStack matrices, float tickDelta, Player player) {
-        float deltaH    = player.walkDist - player.walkDistO;
-        float phase     = -(player.walkDist + deltaH * tickDelta);
-        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
+        float phase = -((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getBackwardsInterpolatedWalkDistance(tickDelta);
+        float amplitude = ((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getInterpolatedBob(tickDelta);
         float sin       = Mth.sin(phase * Mth.PI * 0.6f);
 
         matrices.translate(
@@ -109,9 +107,8 @@ public class CameraBobbingMixin {
      */
     @Unique
     private void shape_shifter_curse$applyFeralBobbing(PoseStack matrices, float tickDelta, Player player) {
-        float deltaH    = player.walkDist - player.walkDistO;
-        float phase     = -(player.walkDist + deltaH * tickDelta);
-        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob) * 0.55f;
+        float phase = -((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getBackwardsInterpolatedWalkDistance(tickDelta);
+        float amplitude = ((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getInterpolatedBob(tickDelta) * 0.55f;
 
         matrices.translate(
                 (double)(Mth.sin(phase * Mth.PI) * amplitude * 0.3f),
@@ -129,9 +126,8 @@ public class CameraBobbingMixin {
      */
     @Unique
     private void shape_shifter_curse$applyBatBobbing(PoseStack matrices, float tickDelta, Player player) {
-        float deltaH    = player.walkDist - player.walkDistO;
-        float phase     = -(player.walkDist + deltaH * tickDelta);
-        float amplitude = Mth.lerp(tickDelta, player.oBob, player.bob);
+        float phase = -((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getBackwardsInterpolatedWalkDistance(tickDelta);
+        float amplitude = ((net.minecraft.client.player.AbstractClientPlayer)player).avatarState().getInterpolatedBob(tickDelta);
         float sin       = Mth.sin(phase * Mth.PI );
 
         matrices.translate(

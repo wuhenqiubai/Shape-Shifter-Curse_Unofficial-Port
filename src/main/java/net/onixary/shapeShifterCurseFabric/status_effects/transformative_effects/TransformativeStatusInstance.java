@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.status_effects.transformative_effect
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -18,11 +19,11 @@ public class TransformativeStatusInstance extends MobEffectInstance {
     }
 
     @Override
-    public boolean tick(LivingEntity entity, Runnable overwriteCallback) {
+    public boolean tickServer(ServerLevel serverLevel, LivingEntity entity, Runnable overwriteCallback) {
         if (entity instanceof ServerPlayer player && this.getDuration() <= 1) {
             ShapeShifterCurseFabric.ON_TRANSFORM_EFFECT_FADE.trigger(player);
         }
-        return super.tick(entity, overwriteCallback);
+        return super.tickServer(serverLevel, entity, overwriteCallback);
     }
 
     public void ActiveEffect(ServerPlayer player) {

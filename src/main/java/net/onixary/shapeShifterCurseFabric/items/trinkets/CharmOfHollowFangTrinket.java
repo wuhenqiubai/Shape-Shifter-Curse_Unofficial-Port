@@ -5,9 +5,10 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.onixary.shapeShifterCurseFabric.items.accessory.AccessoryItem;
 
-import java.util.List;
+import java.util.function.Consumer;
 
 public class CharmOfHollowFangTrinket extends AccessoryItem {
     public CharmOfHollowFangTrinket(Properties settings) {
@@ -15,7 +16,7 @@ public class CharmOfHollowFangTrinket extends AccessoryItem {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
-        tooltip.add(Component.translatable("item.shape-shifter-curse.charm_of_hollow_fang.tooltip").withStyle(ChatFormatting.YELLOW));
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
+        consumer.accept(Component.translatable("item.shape-shifter-curse.charm_of_hollow_fang.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

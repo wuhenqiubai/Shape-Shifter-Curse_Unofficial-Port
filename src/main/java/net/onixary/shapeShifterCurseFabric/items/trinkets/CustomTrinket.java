@@ -29,7 +29,7 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
         }
         CompoundTag nbt = customData.copyTag();
         if (nbt.contains("custom_accessory_id")) {
-            Identifier identifier = Identifier.tryParse(nbt.getString("custom_accessory_id"));
+            Identifier identifier = Identifier.tryParse(nbt.getStringOr("custom_accessory_id", ""));
             if (identifier != null) {
                 return identifier;
             }
@@ -45,7 +45,7 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
         }
         CompoundTag nbt = customData.copyTag();
         if (nbt.contains("custom_accessory_slots")) {
-            ListTag slots = nbt.getList("custom_accessory_slots", 8);
+            ListTag slots = nbt.getListOrEmpty("custom_accessory_slots");
             Identifier slotFinalName = slot.slot();
             for (int i = 0; i < slots.size(); i++) {
                 if (slots.getString(i).equals(slotFinalName.toString())) {
