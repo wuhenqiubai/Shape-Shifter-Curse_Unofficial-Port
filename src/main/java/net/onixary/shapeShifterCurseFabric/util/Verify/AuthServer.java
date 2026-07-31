@@ -47,7 +47,7 @@ public final class AuthServer {
             return;
         }
         if (AuthUtils.loadKey(keySegment)) {
-            MinecraftServer server = player.getServer();
+            MinecraftServer server = player.level().getServer();
             if (server != null) {
                 for (ServerPlayer serverPlayerEntity : server.getPlayerList().getPlayers()) {
                     ModPacketsS2CServer.sendNewSubKey(serverPlayerEntity, keySegment);

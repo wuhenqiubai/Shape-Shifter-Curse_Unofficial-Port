@@ -37,12 +37,12 @@ public class ModPacketsC2S {
         String originId = buf.readUtf(32767);
         String layerId = buf.readUtf(32767);
 
-        if (player.getServer() == null) {
+        if (player.level().getServer() == null) {
             Origins.LOGGER.warn("Player server is null");
             return;
         }
 
-        player.getServer().execute(() -> {
+        player.level().getServer().execute(() -> {
             OriginComponent component = ModComponents.ORIGIN.get(player);
             if (component == null) {
                 Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());
@@ -101,12 +101,12 @@ public class ModPacketsC2S {
         FriendlyByteBuf buf = payload.data();
         String layerId = buf.readUtf(32767);
 
-        if (player.getServer() == null) {
+        if (player.level().getServer() == null) {
             Origins.LOGGER.warn("Player server is null");
             return;
         }
 
-        player.getServer().execute(() -> {
+        player.level().getServer().execute(() -> {
             OriginComponent component = ModComponents.ORIGIN.get(player);
             if (component == null) {
                 Origins.LOGGER.warn("OriginComponent is null for player: {}", player.getName().getString());

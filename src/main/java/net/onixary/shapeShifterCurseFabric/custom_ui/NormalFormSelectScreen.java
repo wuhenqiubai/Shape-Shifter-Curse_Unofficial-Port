@@ -98,7 +98,7 @@ public class NormalFormSelectScreen extends Screen {
         int totalButtonWidth = 2 * ButtonWidth + 20;
         int textX = width / 2 - totalButtonWidth / 2;
         StringWidget TargetInfoText_NAME = new StringWidget(textX, InfoStartY - 9, totalButtonWidth, 20, Component.translatable("message.shape-shifter-curse.select_form_ui.target_name", targetName), Minecraft.getInstance().font);
-        TargetInfoText_NAME.alignCenter();
+        // alignCenter() 在 1.21.11 移除
         // 暂时不需要UUID，太长了
         //TextWidget TargetInfoText_UUID = new TextWidget(ButtonStartX, InfoStartY, 420, 20, Text.translatable("message.shape-shifter-curse.select_form_ui.target_uuid", targetUUID.toString()), MinecraftClient.getInstance().textRenderer);
         addRenderableWidget(TargetInfoText_NAME);
@@ -159,7 +159,7 @@ public class NormalFormSelectScreen extends Screen {
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
         int bgY = (this.height - BG_HEIGHT) / 2;
-        context.blit(BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+        context.blit(BG_TEXTURE, bgX, bgY, BG_WIDTH, BG_HEIGHT, 0, 0, BG_WIDTH, BG_HEIGHT);
     }
 
 

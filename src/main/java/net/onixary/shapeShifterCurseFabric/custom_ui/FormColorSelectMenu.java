@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -33,7 +34,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -471,7 +472,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     public void renderTextureBackground(GuiGraphics context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
-        context.blit(texture, BG_X, BG_Y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(texture, BG_X, BG_Y, BG_WIDTH, BG_HEIGHT, 0, 0, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
         if (!isOpenSlider) {
             // 133,20,184,181,0,0
             this.drawExtraPart(context, BG_X + 133, BG_Y + 20, 0, 0, 184, 181);
@@ -588,13 +589,13 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         int BPosY = height / 2 - BG_HEIGHT / 2;  // 图片左上角 Y
         // Label
         // 20,146,80,9 - 形态3槽
-        this.addRenderableWidget(new StringWidget(BPosX + 20, BPosY + 146, 80, 9, FormSlotTitle, font).setColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 20, BPosY + 146, 80, 9, FormSlotTitle, font));
         // 135,5,180,9 - Title
-        this.addRenderableWidget(new StringWidget(BPosX + 135, BPosY + 5, 180, 9, Title, font).setColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 135, BPosY + 5, 180, 9, Title, font));
         // 320,5,80,9 - 全局9槽
-        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 5, 80, 9, GlobalSlotTitle, font).setColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 5, 80, 9, GlobalSlotTitle, font));
         // 320,182,80,9 - 形态默认槽
-        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, font).setColor(0xDDDDDD));
+        this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, font));
         // Normal Button
         // 85,5,45,15 - 获取服务器数据
         this.addRenderableWidget(Button.builder(DownloadFromServer, button -> {
@@ -653,7 +654,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.reloadFormIDName();
         // Config Pair
         // 139,27,75,11 - PrimaryColor Label
-        StringWidget primaryColorLabel = new StringWidget(BPosX + 139, BPosY + 27, 75, 11, PrimaryColorLabel, font).setColor(0xDDDDDD);
+        StringWidget primaryColorLabel = new StringWidget(BPosX + 139, BPosY + 27, 75, 11, PrimaryColorLabel, font);
         this.addRenderableWidget(primaryColorLabel);
         this.config_panel_01.add(primaryColorLabel);
         // 241,27,70,11 - PrimaryColor Input
@@ -666,7 +667,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(primaryColorInput);
         this.primaryColorEditBox = primaryColorInput;
         // 139,41,75,11 - AccentColor1 Label
-        StringWidget accentColor1Label = new StringWidget(BPosX + 139, BPosY + 41, 75, 11, AccentColor1Label, font).setColor(0xDDDDDD);
+        StringWidget accentColor1Label = new StringWidget(BPosX + 139, BPosY + 41, 75, 11, AccentColor1Label, font);
         this.addRenderableWidget(accentColor1Label);
         this.config_panel_01.add(accentColor1Label);
         // 241,41,70,11 - AccentColor1 Input
@@ -679,7 +680,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(accentColor1Input);
         this.accentColor1EditBox = accentColor1Input;
         // 139,55,75,11 - AccentColor2 Label
-        StringWidget accentColor2Label = new StringWidget(BPosX + 139, BPosY + 55, 75, 11, AccentColor2Label, font).setColor(0xDDDDDD);
+        StringWidget accentColor2Label = new StringWidget(BPosX + 139, BPosY + 55, 75, 11, AccentColor2Label, font);
         this.addRenderableWidget(accentColor2Label);
         this.config_panel_01.add(accentColor2Label);
         // 241,55,70,11 - AccentColor2 Input
@@ -692,7 +693,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(accentColor2Input);
         this.accentColor2EditBox = accentColor2Input;
         // 139,69,75,11 - EyeColorA Label
-        StringWidget eyeColorALabel = new StringWidget(BPosX + 139, BPosY + 69, 75, 11, EyeColorALabel, font).setColor(0xDDDDDD);
+        StringWidget eyeColorALabel = new StringWidget(BPosX + 139, BPosY + 69, 75, 11, EyeColorALabel, font);
         this.addRenderableWidget(eyeColorALabel);
         this.config_panel_01.add(eyeColorALabel);
         // 241,69,70,11 - EyeColorA Input
@@ -705,7 +706,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(eyeColorAInput);
         this.eyeColorAEditBox = eyeColorAInput;
         // 139,83,75,11 - EyeColorB Label
-        StringWidget eyeColorBLabel = new StringWidget(BPosX + 139, BPosY + 83, 75, 11, EyeColorBLabel, font).setColor(0xDDDDDD);
+        StringWidget eyeColorBLabel = new StringWidget(BPosX + 139, BPosY + 83, 75, 11, EyeColorBLabel, font);
         this.addRenderableWidget(eyeColorBLabel);
         this.config_panel_01.add(eyeColorBLabel);
         // 241,83,70,11 - EyeColorB Input
@@ -718,7 +719,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(eyeColorBInput);
         this.eyeColorBEditBox = eyeColorBInput;
         // 139,97,139,11 - PrimaryGreyReverse Label
-        StringWidget primaryGreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 97, 139, 11, PrimaryGreyReverseLabel, font).setColor(0xDDDDDD);
+        StringWidget primaryGreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 97, 139, 11, PrimaryGreyReverseLabel, font);
         this.addRenderableWidget(primaryGreyReverseLabel);
         this.config_panel_01.add(primaryGreyReverseLabel);
         // 281,97,30,11 - PrimaryGreyReverse Button
@@ -735,7 +736,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(primaryGreyReverseButton);
         this.primaryGreyReverseButton = primaryGreyReverseButton;
         // 139,111,139,11 - Accent1GreyReverse Label
-        StringWidget accent1GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 111, 139, 11, Accent1GreyReverseLabel, font).setColor(0xDDDDDD);
+        StringWidget accent1GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 111, 139, 11, Accent1GreyReverseLabel, font);
         this.addRenderableWidget(accent1GreyReverseLabel);
         this.config_panel_01.add(accent1GreyReverseLabel);
         // 281,111,30,11 - Accent1GreyReverse Button
@@ -752,7 +753,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(accent1GreyReverseButton);
         this.accent1GreyReverseButton = accent1GreyReverseButton;
         // 139,125,139,11 - Accent2GreyReverse Label
-        StringWidget accent2GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 125, 139, 11, Accent2GreyReverseLabel, font).setColor(0xDDDDDD);
+        StringWidget accent2GreyReverseLabel = new StringWidget(BPosX + 139, BPosY + 125, 139, 11, Accent2GreyReverseLabel, font);
         this.addRenderableWidget(accent2GreyReverseLabel);
         this.config_panel_01.add(accent2GreyReverseLabel);
         // 281,125,30,11 - Accent2GreyReverse Button
@@ -769,7 +770,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(accent2GreyReverseButton);
         this.accent2GreyReverseButton = accent2GreyReverseButton;
         // 139,153,139,11 - Keep Original Skin Label
-        StringWidget keepOriginalSkinLabel = new StringWidget(BPosX + 139, BPosY + 153, 139, 11, KeepOriginalSkinLabel, font).setColor(0xDDDDDD);
+        StringWidget keepOriginalSkinLabel = new StringWidget(BPosX + 139, BPosY + 153, 139, 11, KeepOriginalSkinLabel, font);
         this.addRenderableWidget(keepOriginalSkinLabel);
         this.config_panel_01.add(keepOriginalSkinLabel);
         // 281,153,30,11 - Keep Original Skin Button
@@ -785,7 +786,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_01.add(keepOriginalSkinButton);
         this.keepOriginalSkinButton = keepOriginalSkinButton;
         // 139,167,139,11 - Is Enable Form Color System Label
-        StringWidget isEnableFormColorSystemLabel = new StringWidget(BPosX + 139, BPosY + 167, 139, 11, IsEnableFormColorSystemLabel, font).setColor(0xDDDDDD);
+        StringWidget isEnableFormColorSystemLabel = new StringWidget(BPosX + 139, BPosY + 167, 139, 11, IsEnableFormColorSystemLabel, font);
         this.addRenderableWidget(isEnableFormColorSystemLabel);
         this.config_panel_01.add(isEnableFormColorSystemLabel);
         // 281,167,30,11 - Is Enable Form Color System Button
@@ -985,7 +986,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.config_panel_02.add(sliderV);
         this.sliderV = sliderV;
         // 139,111,75,11 - Is Enable Layer Label
-        StringWidget isEnableLayerLabel = new StringWidget(BPosX + 139, BPosY + 111, 75, 11, IsEnableLayerLabel, font).setColor(0xDDDDDD);
+        StringWidget isEnableLayerLabel = new StringWidget(BPosX + 139, BPosY + 111, 75, 11, IsEnableLayerLabel, font);
         this.addRenderableWidget(isEnableLayerLabel);
         this.config_panel_02.add(isEnableLayerLabel);
         // 228,111,36,11 - Is Enable Layer Button
@@ -1052,30 +1053,8 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        float f = (float)Math.atan((double)(mouseX / 40.0F));
-        float g = (float)Math.atan((double)(mouseY / 40.0F));
-        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
-        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
-        quaternionf.mul(quaternionf2);
-        float h = entity.yBodyRot;
-        float i = entity.getYRot();
-        float j = entity.getXRot();
-        float k = entity.yHeadRotO;
-        float l = entity.yHeadRot;
-        float m = entity.yBodyRotO;
-        entity.yBodyRot = 180.0F + f * 20.0F;
-        entity.yBodyRotO = entity.yBodyRot;
-        entity.setYRot(180.0F + f * 40.0F);
-        entity.setXRot(-g * 20.0F);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
-        InventoryScreen.renderEntityInInventory(context, x, y, size, new org.joml.Vector3f(), quaternionf, quaternionf2, entity);
-        entity.yBodyRot = h;
-        entity.yBodyRotO = m;
-        entity.setYRot(i);
-        entity.setXRot(j);
-        entity.yHeadRotO = k;
-        entity.yHeadRot = l;
+        // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
     }
 
     private static int timer = 0;
@@ -1083,7 +1062,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     private void drawExtraPart(GuiGraphics context, int x, int y, int PartX, int PartY, int Width, int Height) {
         int realX = PartX + EXTRA_PART_START_X;
         int realY = PartY + EXTRA_PART_START_Y;
-        context.blit(texture, x, y, realX, realY, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(texture, x, y, Width, Height, realX, realY, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
     }
 
     @Override
@@ -1184,8 +1163,10 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean result = super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean bl) {
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
+        boolean result = super.mouseClicked(mouseButtonEvent, bl);
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
         if (!this.isOpenSlider && this.isScreenInit) {

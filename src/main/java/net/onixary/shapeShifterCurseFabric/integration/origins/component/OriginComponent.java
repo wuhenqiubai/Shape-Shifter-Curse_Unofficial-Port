@@ -34,9 +34,6 @@ public interface OriginComponent extends AutoSyncedComponent {
 
 	void sync();
 
-	//@Deprecated(forRemoval = true)
-	void onPowersRead();
-
 	static void sync(Player player) {
 		ModComponents.ORIGIN.sync(player);
 		PowerHolderComponent.KEY.sync(player);

@@ -256,12 +256,7 @@ public class PlayerOriginComponent implements OriginComponent {
         }
     }
 
-    @Override
-    public void onPowersRead() {
-        // NO-OP
-    }
-
-    @Override
+	@Override
     public void writeToNbt(@NotNull CompoundTag compoundTag, HolderLookup.@NotNull Provider registryLookup) {
         ListTag originLayerList = new ListTag();
         for(Map.Entry<OriginLayer, Origin> entry : origins.entrySet()) {

@@ -6,7 +6,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
@@ -14,14 +13,11 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
+import org.jspecify.annotations.NonNull;
 
 public class EnderianPearlEntity extends ThrowableItemProjectile {
    public EnderianPearlEntity(EntityType<? extends EnderianPearlEntity> entityType, Level world) {
       super(entityType, world);
-   }
-
-   public EnderianPearlEntity(Level world, LivingEntity owner) {
-      super(ModEntities.ENDERIAN_PEARL, world);
    }
 
    @Environment(EnvType.CLIENT)
@@ -29,11 +25,11 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
       super(ModEntities.ENDERIAN_PEARL, world);
    }
 
-   protected Item getDefaultItem() {
+   protected @NonNull Item getDefaultItem() {
       return Items.ENDER_PEARL;
    }
 
-   protected void onHit(HitResult hitResult) {
+   protected void onHit(@NonNull HitResult hitResult) {
       super.onHit(hitResult);
       Entity entity = this.getOwner();
 
@@ -71,13 +67,5 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
          super.tick();
       }
 
-   }
-
-   public Entity changeDimension(DimensionTransition target) {
-      Entity entity = this.getOwner();
-      if (entity != null && entity.level().dimension() != target.newLevel().dimension()) {
-         this.setOwner(null);
-      }
-      return super.changeDimension(target);
    }
 }

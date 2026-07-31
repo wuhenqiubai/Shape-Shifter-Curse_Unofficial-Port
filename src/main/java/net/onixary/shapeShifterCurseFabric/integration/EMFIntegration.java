@@ -39,14 +39,6 @@ public class EMFIntegration {
         } catch (Exception ignored) {}
     }
 
-    public static void pauseAnimationsForParts(Entity entity, ModelPart... parts) {
-        if (!EMF_LOADED || parts == null || parts.length == 0) return;
-        try {
-            Object emfEntity = emfEntityOf.invoke(null, entity);
-            pauseParts.invoke(null, emfEntity, (Object) parts);
-        } catch (Exception ignored) {}
-    }
-
     public static void resumeAnimations(Entity entity) {
         if (!EMF_LOADED) return;
         try {

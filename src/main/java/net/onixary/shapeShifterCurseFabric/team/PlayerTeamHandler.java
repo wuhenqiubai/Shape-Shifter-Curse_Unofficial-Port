@@ -20,7 +20,7 @@ public class PlayerTeamHandler {
     private static void updateSorceryTeam(ServerPlayer player) {
         if(MobTeamManager.sorceryTeam == null) {
             // 确保队伍已注册
-            MobTeamManager.registerTeam(player.serverLevel());
+            MobTeamManager.registerTeam(player.level());
         }
         if (PowerHolderComponent.hasPower(player, PillagerFriendlyPower.class)) {
             // 将玩家添加到队伍

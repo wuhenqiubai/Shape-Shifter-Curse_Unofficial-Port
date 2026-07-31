@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.tags.TagKey;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,12 +28,12 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
     private static final Logger LOGGER = LoggerFactory.getLogger(OriginsTagLoader.class);
 
     @Override
-    public Identifier getFabricId() {
+    public @NonNull Identifier getFabricId() {
         return Origins.identifier("origins_tags");
     }
 
     @Override
-    public void onResourceManagerReload(ResourceManager manager) {
+    public void onResourceManagerReload(@NonNull ResourceManager manager) {
         Map<TagKey<?>, Collection<Holder<?>>> registryTags = Calio.REGISTRY_TAGS.get();
         if (registryTags == null) {
             registryTags = new HashMap<>();

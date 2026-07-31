@@ -7,6 +7,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Objects;
 public class ScaleScrollTextWidget extends MultiLineTextWidget implements WidgetEXUtils.IWidgetEX {
     private final float Scale;
     private boolean shadow;
+    private int textColor = 0xFFFFFFFF;
 
 
     private int realWidth;
@@ -124,6 +126,15 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
         return this;
     }
 
+    public ScaleScrollTextWidget setColor(int color) {
+        this.textColor = color;
+        return this;
+    }
+
+    public int getColor() {
+        return this.textColor;
+    }
+
     public ScaleScrollTextWidget setEnableScrollableIconRender(boolean enableScrollableIconRender) {
         if (this.enableScrollableIconRender != enableScrollableIconRender) {
             if (enableScrollableIconRender) {
@@ -170,7 +181,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public MultiLineTextWidget setMaxWidth(int maxWidth) {
+    public @NonNull MultiLineTextWidget setMaxWidth(int maxWidth) {
         this.realWidth = maxWidth;
         this.MaxWidth = Math.round(maxWidth * (1 / this.Scale));
         super.setMaxWidth(this.MaxWidth + this.modMaxWidth);
@@ -178,7 +189,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public MultiLineTextWidget setMaxRows(int maxRows) {
+    public @NonNull MultiLineTextWidget setMaxRows(int maxRows) {
         this.realHeight = maxRows * 9;
         this.MaxRows = Math.round(maxRows * (1 / this.Scale));
         super.setMaxRows(this.MaxRows);
@@ -229,7 +240,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!this.textDone) {
             this.calculateText();
         }
@@ -237,10 +248,10 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
         int j = this.getY();
         if (this.enableScrollableIconRender) {
             if (this.scroll > 0) {
-                context.blit(IconTexID, i + realWidth - IconSize, j, 0, 0, IconSize, IconSize, IconSize, IconSize * 2);
+                context.blit(IconTexID, i + realWidth - IconSize, j, IconSize, IconSize, 0, 0, IconSize, IconSize * 2);
             }
             if (this.scroll < this.texts.size() - this.MaxRows) {
-                context.blit(IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize * 2);
+                context.blit(IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, IconSize, IconSize, 0, IconSize, IconSize, IconSize * 2);
             }
         }
         Objects.requireNonNull(this.getFont());

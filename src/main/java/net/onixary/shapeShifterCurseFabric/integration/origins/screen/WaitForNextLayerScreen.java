@@ -8,6 +8,8 @@ import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModComponents;
+import org.jspecify.annotations.NonNull;
+
 import java.util.ArrayList;
 
 public class WaitForNextLayerScreen extends Screen {
@@ -45,7 +47,7 @@ public class WaitForNextLayerScreen extends Screen {
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         if(maxSelection == 0) {
             openSelection();
             return;

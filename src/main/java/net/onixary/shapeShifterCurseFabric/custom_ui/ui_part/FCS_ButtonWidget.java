@@ -1,12 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class FCS_ButtonWidget extends Button {
@@ -30,14 +29,12 @@ public class FCS_ButtonWidget extends Button {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        Minecraft minecraftClient = Minecraft.getInstance();
-        context.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.enableDepthTest();
-        context.blit(WIDGETS_TEXTURE, this.getX(), this.getY(), TEXTURE_X, this.getTextureY(), 15, 15, 45, 45);
-        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = this.active ? 16777215 : 10526880;
-        this.renderString(context, minecraftClient.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
+    protected void renderContents(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // renderWidget 在 1.21.11 为 final，改重写 renderContents
+        // RenderSystem.enableBlend()/enableDepthTest() 已移除，RenderPipeline 自带渲染状态
+        int color = ARGB.white(this.alpha);
+        context.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.getX(), this.getY(),
+                TEXTURE_X, this.getTextureY(), 15, 15, 0, 0, 45, 45, color);
+        this.renderDefaultLabel(context.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
     }
 }

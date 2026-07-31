@@ -9,6 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
@@ -19,7 +20,7 @@ public class ChoseOriginCriterion extends SimpleCriterionTrigger<ChoseOriginCrit
     public static final Identifier ID = Identifier.fromNamespaceAndPath(Origins.MODID, "chose_origin");
 
     @Override
-    public Codec<Conditions> codec() {
+    public @NonNull Codec<Conditions> codec() {
         return Conditions.CODEC;
     }
 

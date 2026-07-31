@@ -36,10 +36,6 @@ public class ModifyTypeTagPower extends Power {
         this.tagKey = tagKey;
     }
 
-    public TagKey<EntityType<?>> getTagKey() {
-        return tagKey;
-    }
-
     @Override
     public void onAdded() {
         super.onAdded();

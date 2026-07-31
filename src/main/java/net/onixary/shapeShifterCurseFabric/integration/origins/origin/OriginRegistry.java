@@ -4,7 +4,6 @@ import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Stream;
 
 public class OriginRegistry {
 
@@ -32,10 +31,6 @@ public class OriginRegistry {
 
     public static int size() {
         return idToOrigin.size();
-    }
-
-    public static Stream<Identifier> identifiers() {
-        return idToOrigin.keySet().stream();
     }
 
     public static Iterable<Map.Entry<Identifier, Origin>> entries() {

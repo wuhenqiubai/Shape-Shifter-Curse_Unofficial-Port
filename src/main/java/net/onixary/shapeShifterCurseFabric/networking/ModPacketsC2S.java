@@ -147,7 +147,7 @@ public class ModPacketsC2S {
         FriendlyByteBuf buf = payload.data();
         ServerPlayer player = ctx.player();
         UUID targetPlayerUuid = buf.readUUID();
-        Player targetPlayer = player.getServer().getPlayerList().getPlayer(targetPlayerUuid);
+        Player targetPlayer = player.level().getServer().getPlayerList().getPlayer(targetPlayerUuid);
         if (targetPlayer instanceof IPlayerAnimController animPlayer) {
             ModPacketsS2CServer.sendPowerAnimationDataToClient(player, targetPlayerUuid,
                     animPlayer.shape_shifter_curse$getPowerAnimationID(),
@@ -162,7 +162,7 @@ public class ModPacketsC2S {
         UUID target = buf.readUUID();
         Identifier formID = Identifier.tryParse(buf.readUtf());
         if (target.equals(player.getUUID()) || player.hasPermissions(2)) {
-            ServerPlayer targetPlayer = player.getServer().getPlayerList().getPlayer(target);
+            ServerPlayer targetPlayer = player.level().getServer().getPlayerList().getPlayer(target);
             if (targetPlayer != null) {
                 IForm form = RegPlayerForms.getPlayerForm(formID);
                 if (form != null) {

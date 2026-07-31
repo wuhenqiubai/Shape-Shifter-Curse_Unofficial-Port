@@ -6,6 +6,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,6 +19,7 @@ import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleTextRenderer;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import org.joml.Quaternionf;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +65,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // D -> (9, 9), (116, 143)
         // Size -> (107, 56) Pos -> (17, 153)
         this.addRenderableWidget(BuildDetailScreenButton(116, 143, 9, 9, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer)));
-        this.addRenderableWidget(new StringWidget(BookPosX + 17 * BookScale, BookPosY + 143 * BookScale, 107 * BookScale, 6 * BookScale, CodexData.headerEquip, font).setColor(HeaderTextColor));
+        this.addRenderableWidget(new StringWidget(BookPosX + 17 * BookScale, BookPosY + 143 * BookScale, 107 * BookScale, 6 * BookScale, CodexData.headerEquip, font));
         ScaleScrollTextWidget StatusLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 153 * BookScale, 107 * BookScale, 6 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         StatusLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) StatusLabel);
@@ -90,7 +93,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // D -> (9, 9), (311, 13)
         // Size -> (176, 184) Pos -> (142, 23)
         this.addRenderableWidget(BuildDetailScreenButton(311, 13, 9, 9, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer)));
-        this.addRenderableWidget(new StringWidget(BookPosX + 142 * BookScale, BookPosY + 11 * BookScale, 176 * BookScale, 8 * BookScale, CodexData.headerAppearance, font).setColor(HeaderTextColor));
+        this.addRenderableWidget(new StringWidget(BookPosX + 142 * BookScale, BookPosY + 11 * BookScale, 176 * BookScale, 8 * BookScale, CodexData.headerAppearance, font));
         ScaleScrollTextWidget AppearanceLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 142 * BookScale, BookPosY + 26 * BookScale, 176 * BookScale, 20 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         AppearanceLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) AppearanceLabel);
@@ -147,7 +150,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
-        context.blit(page_texID, BookPosX, BookPosY, 0, 0, FinalBookSizeX, FinalBookSizeY, FinalBookSizeX, FinalBookSizeY);
+        context.blit(page_texID, BookPosX, BookPosY, FinalBookSizeX, FinalBookSizeY, 0, 0, FinalBookSizeX, FinalBookSizeY);
     }
 
     private void NextPage() {
@@ -196,7 +199,8 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         this.RenderEntity(context, PlayerX, PlayerY, 30 * BookScale, PlayerX - mouseX, PlayerY - 37 * BookScale - mouseY, currentPlayer);
         // Cursed Moon Icon
         // Size -> (8, 8), Pos -> (115, 92)
-        context.blit(cursed_moon_icon_texID, BookPosX + 115 * BookScale, BookPosY + 92 * BookScale, 8 * BookScale, 8 * BookScale, CursedMoonClient.isCursedMoon ? 8 : 0, 0, 8, 8, 16, 8);
+        context.blit(RenderPipelines.GUI_TEXTURED, cursed_moon_icon_texID, BookPosX + 115 * BookScale, BookPosY + 92 * BookScale,
+                CursedMoonClient.isCursedMoon ? 8 : 0, 0, 8 * BookScale, 8 * BookScale, 8, 8, 16, 8, -1);
         super.render(context, mouseX, mouseY, delta);
     }
 
@@ -218,21 +222,21 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        this.onClickWidget(mouseX, mouseY, button);
-        return super.mouseClicked(mouseX, mouseY, button);
+    public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean bl) {
+        this.onClickWidget(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button());
+        return super.mouseClicked(mouseButtonEvent, bl);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        this.onReleaseWidget(mouseX, mouseY, button);
-        return super.mouseReleased(mouseX, mouseY, button);
+    public boolean mouseReleased(@NonNull MouseButtonEvent mouseButtonEvent) {
+        this.onReleaseWidget(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button());
+        return super.mouseReleased(mouseButtonEvent);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
-        this.onDragWidget(mouseX, mouseY, button, deltaX, deltaY);
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    public boolean mouseDragged(@NonNull MouseButtonEvent mouseButtonEvent, double d, double e) {
+        this.onDragWidget(mouseButtonEvent.x(), mouseButtonEvent.y(), mouseButtonEvent.button(), d, e);
+        return super.mouseDragged(mouseButtonEvent, d, e);
     }
 
     @Override

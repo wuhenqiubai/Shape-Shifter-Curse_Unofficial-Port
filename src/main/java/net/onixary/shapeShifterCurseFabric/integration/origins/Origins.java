@@ -85,9 +85,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		ModLoot.registerLootTables();
 		Origin.init();
 
-		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-			//OriginCommand.register(dispatcher);
-		});
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {});
 		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((content) -> {
 			//content.add(ModItems.ORB_OF_ORIGIN);
 		});
@@ -130,8 +128,6 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 	@Config(name = Origins.MODID + "_server")
 	public static class ServerConfig implements ConfigData {
-
-		public boolean performVersionCheck = true;
 
 		public JsonObject origins = new JsonObject();
 

@@ -12,6 +12,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.integration.OriginDataLoadedCallback;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,7 +29,7 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
     }
 
     @Override
-    protected void apply(Map<Identifier, List<JsonElement>> loader, ResourceManager manager, ProfilerFiller profiler) {
+    protected void apply(Map<Identifier, List<JsonElement>> loader, @NonNull ResourceManager manager, @NonNull ProfilerFiller profiler) {
         clear();
         HashMap<Identifier, HashMap<Integer, List<JsonObject>>> layers = new HashMap<>();
         // Load phase
@@ -96,12 +97,12 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
     }
 
     @Override
-    public Identifier getFabricId() {
+    public @NonNull Identifier getFabricId() {
         return Identifier.fromNamespaceAndPath(Origins.MODID, "origin_layers");
     }
 
     @Override
-    public Collection<Identifier> getFabricDependencies() {
+    public @NonNull Collection<Identifier> getFabricDependencies() {
         return Set.of(Origins.identifier("origins"));
     }
 }

@@ -59,7 +59,7 @@ public class ModPacketsS2CServer {
         buf.writeBoolean(isTransforming);
         buf.writeUtf(fromForm == null ? "" : fromForm.toString());
         buf.writeUtf(toForm== null ? "" : toForm.toString());
-        for (ServerPlayer p : player.serverLevel().players()) {
+        for (ServerPlayer p : player.level().players()) {
             FriendlyByteBuf copy = PacketByteBufs.copy(buf);
             ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), copy));
         }
@@ -93,7 +93,7 @@ public class ModPacketsS2CServer {
     public static void broadcastBatAttachState(ServerPlayer targetPlayer, boolean isAttached,
                                                int attachType, BlockPos attachedPos, Direction attachedSide) {
         // 获取附近的所有玩家（64格范围内）
-        targetPlayer.serverLevel().getPlayers(player ->
+        targetPlayer.level().getPlayers(player ->
                 player != targetPlayer &&
                         player.distanceToSqr(targetPlayer) <= 64 * 64
         ).forEach(nearbyPlayer -> {
@@ -231,7 +231,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendActiveVirtualTotem(ServerPlayer player, VirtualTotemPower virtualTotemPower) {
-        player.serverLevel().getPlayers(near_player -> near_player.distanceToSqr(player) <= 64 * 64).forEach(
+        player.level().getPlayers(near_player -> near_player.distanceToSqr(player) <= 64 * 64).forEach(
                 nearPlayer -> {
                     FriendlyByteBuf buf = virtualTotemPower.create_packet_byte_buf();
                     if (buf != null) {
@@ -256,7 +256,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendPowerAnimationDataToNearPlayer(ServerPlayer player, @Nullable Identifier animationId, int animationCount, int animationLength) {
-        player.serverLevel().getPlayers(near_player -> near_player.distanceToSqr(player) <= 128 * 128).forEach(
+        player.level().getPlayers(near_player -> near_player.distanceToSqr(player) <= 128 * 128).forEach(
                 nearPlayer -> {
                     sendPowerAnimationDataToClient(nearPlayer, player.getUUID(), animationId, animationCount, animationLength);
                 }

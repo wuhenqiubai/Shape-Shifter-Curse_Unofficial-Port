@@ -1,12 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Mth;
+import net.minecraft.util.ARGB;
 
 import java.util.function.Consumer;
 
@@ -43,21 +42,20 @@ public class SimpleIntSliderWidget extends AbstractSliderButton {
 
     @Override
     public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        Minecraft minecraftClient = Minecraft.getInstance();
-        context.setColor(1.0F, 1.0F, 1.0F, this.alpha);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.enableDepthTest();
-
+        // RenderSystem.enableBlend()/defaultBlendFunc()/enableDepthTest() 已移除，RenderPipeline 自带渲染状态
         int textureY = this.active ? (this.isHovered() ? 1 : 0) : 2;
-        context.blit(TEXTURE, this.getX(), this.getY(), 0, textureY * 20, this.getWidth(), this.getHeight(), 200, 60);
+        int color = ARGB.white(this.alpha);
+
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 0, textureY * 20,
+                this.getWidth(), this.getHeight(), 0, 0, 200, 60, color);
 
         int sliderX = this.getX() + (int) (this.value * (double) (this.getWidth() - 8));
-        context.blit(TEXTURE, sliderX, this.getY(), 0, textureY * 20 + 40, 8, this.getHeight(), 200, 60);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, sliderX, this.getY(), 0, textureY * 20 + 40,
+                8, this.getHeight(), 0, 0, 200, 60, color);
 
-        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        int i = this.active ? 16777215 : 10526880;
-        this.renderScrollingString(context, minecraftClient.font, 2, i | Mth.ceil(this.alpha * 255.0F) << 24);
+        this.renderScrollingStringOverContents(
+                context.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE),
+                this.getMessage(), 2);
     }
 
     public void setIntValue(int value) {

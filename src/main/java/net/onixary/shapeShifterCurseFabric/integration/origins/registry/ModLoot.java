@@ -12,12 +12,6 @@ public class ModLoot {
     private static final Identifier MINESHAFT = Identifier.fromNamespaceAndPath("minecraft", "chests/abandoned_mineshaft");
     private static final Identifier WATER_RUIN = Identifier.fromNamespaceAndPath("minecraft", "chests/underwater_ruin_small");
 
-// TODO:上游没有用到，但我后面还是重新写一下吧
-//    public static final LootConditionType ORIGIN_LOOT_CONDITION = registerLootCondition("origin", new OriginLootCondition.Serializer());
-//    private static LootConditionType registerLootCondition(String path, JsonSerializer<? extends LootCondition> serializer) {
-//        return Registry.register(Registries.LOOT_CONDITION_TYPE, Origins.identifier(path), new LootConditionType(serializer));
-//    }
-
     public static void registerLootTables() {
         /*NbtCompound waterProtectionLevel1 = createEnchantmentTag(ModEnchantments.WATER_PROTECTION, 1);
         NbtCompound waterProtectionLevel2 = createEnchantmentTag(ModEnchantments.WATER_PROTECTION, 2);

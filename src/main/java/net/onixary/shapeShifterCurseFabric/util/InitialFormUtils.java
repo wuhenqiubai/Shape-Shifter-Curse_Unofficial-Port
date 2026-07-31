@@ -27,7 +27,7 @@ public class InitialFormUtils {
         if (!ShapeShifterCurseFabric.commonConfig.enableInitialForm) {
             return RegPlayerForms.ORIGINAL_BEFORE_ENABLE;  // 默认形态
         }
-        if (player.getServer() != null && !player.getServer().getGameRules().getBoolean(ModGameRules.USE_INITIAL_FORM)) {
+        if (player.level().getServer() != null && !player.level().getServer().getGameRules().getBoolean(ModGameRules.USE_INITIAL_FORM)) {
             return RegPlayerForms.ORIGINAL_BEFORE_ENABLE;  // 默认形态
         }
         try {

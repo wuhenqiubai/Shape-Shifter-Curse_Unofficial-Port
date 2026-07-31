@@ -1,8 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import org.jspecify.annotations.NonNull;
 
 import java.util.function.BiPredicate;
 
@@ -21,10 +24,16 @@ public class ButtonWidgetOKey extends Button {
     }
 
     @Override
-    protected boolean isValidClickButton(int button) {
+    protected boolean isValidClickButton(@NonNull MouseButtonInfo mouseButtonInfo) {
         if (canClick != null) {
-            return canClick.test(this, button);
+            return canClick.test(this, mouseButtonInfo.button());
         }
-        return super.isValidClickButton(button);
+        return super.isValidClickButton(mouseButtonInfo);
+    }
+
+    @Override
+    protected void renderContents(@NonNull GuiGraphics guiGraphics, int i, int j, float f) {
+        this.renderDefaultSprite(guiGraphics);
+        this.renderDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
     }
 }

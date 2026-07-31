@@ -32,8 +32,6 @@ public final class OriginsDataTypes {
         (serializableData, conditionedOrigin) -> conditionedOrigin.toData()
     );
 
-    public static final SerializableDataType<List<OriginLayer.ConditionedOrigin>> CONDITIONED_ORIGINS = SerializableDataType.list(CONDITIONED_ORIGIN);
-
     public static final SerializableDataType<OriginLayer.ConditionedOrigin> ORIGIN_OR_CONDITIONED_ORIGIN = new SerializableDataType<>(
         OriginLayer.ConditionedOrigin.class,
         CONDITIONED_ORIGIN::send,
@@ -47,8 +45,7 @@ public final class OriginsDataTypes {
             }
             Identifier originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive);
             return new OriginLayer.ConditionedOrigin(null, Lists.newArrayList(originId));
-        },
-        CONDITIONED_ORIGIN::write
+        }
     );
 
     public static final SerializableDataType<List<OriginLayer.ConditionedOrigin>> ORIGINS_OR_CONDITIONED_ORIGINS = SerializableDataType.list(ORIGIN_OR_CONDITIONED_ORIGIN);

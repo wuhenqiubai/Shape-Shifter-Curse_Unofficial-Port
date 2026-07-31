@@ -69,7 +69,7 @@ public final class BadgeManager {
 
     public static void sync(ServerPlayer player) {
         REGISTRY.sync(player);
-        FriendlyByteBuf badgeData = new RegistryFriendlyByteBuf(new FriendlyByteBuf(Unpooled.buffer()), player.getServer().registryAccess());
+        FriendlyByteBuf badgeData = new RegistryFriendlyByteBuf(new FriendlyByteBuf(Unpooled.buffer()), player.level().getServer().registryAccess());
         badgeData.writeInt(BADGES.size());
         BADGES.forEach((id, list) -> {
             badgeData.writeIdentifier(id);

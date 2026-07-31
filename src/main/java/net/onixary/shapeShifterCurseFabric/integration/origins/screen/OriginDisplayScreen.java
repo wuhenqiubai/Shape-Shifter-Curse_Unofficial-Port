@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -22,6 +23,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.mixin.DrawContext
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
+import org.jspecify.annotations.NonNull;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -81,7 +83,7 @@ public class OriginDisplayScreen extends Screen {
     // renderBackground override removed — method became non-overrideable in 1.21
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderedBadges.clear();
         this.time += delta;
         this.renderBackground(context, mouseX, mouseY, delta);
@@ -122,19 +124,19 @@ public class OriginDisplayScreen extends Screen {
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(@NonNull MouseButtonEvent mouseButtonEvent) {
         scrolling = false;
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(mouseButtonEvent);
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean bl) {
         if(canScroll()) {
             scrolling = false;
             int scrollbarY = 36;
             int maxScrollbarOffset = 141;
             float part = scrollPos / (float)currentMaxScroll;
-            scrollbarY += (maxScrollbarOffset - scrollbarY) * part;
+            scrollbarY += (int) ((maxScrollbarOffset - scrollbarY) * part);
             if(mouseX >= guiLeft + 156 && mouseX < guiLeft + 156 + 6) {
                 if(mouseY >= guiTop + scrollbarY && mouseY < guiTop + scrollbarY + 27) {
                     scrolling = true;
@@ -144,18 +146,18 @@ public class OriginDisplayScreen extends Screen {
                 }
             }
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseButtonEvent, bl);
     }
 
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseDragged(@NonNull MouseButtonEvent mouseButtonEvent, double d, double e) {
         if(this.scrolling) {
             int delta = (int)(mouseY - mouseDragStart);
             int newScrollPos = (int)Math.max(36, Math.min(141, scrollDragStart + delta));
             float part = (newScrollPos - 36) / (float)(141 - 36);
             scrollPos = (int)(part * currentMaxScroll);
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(mouseButtonEvent, d, e);
     }
 
     private void renderBadgeTooltip(GuiGraphics context, int mouseX, int mouseY) {
