@@ -1,6 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -15,8 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.UUID;
-
 @Mixin(IronGolem.class)
 public class IronGolemEntityMixin extends AbstractGolem implements NeutralMob {
     protected IronGolemEntityMixin(EntityType<? extends AbstractGolem> entityType, Level world) {
@@ -25,32 +25,29 @@ public class IronGolemEntityMixin extends AbstractGolem implements NeutralMob {
 
     @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
-        Goal goal = new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, AdditionalPowers.HOSTILE_IRON_GOLEM::isActive);;
-	    this.targetSelector.addGoal(3, goal);
+        Goal goal = new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, (entity, level) -> AdditionalPowers.HOSTILE_IRON_GOLEM.isActive(entity));
+        this.targetSelector.addGoal(3, goal);
     }
 
     @Override
-    public int getRemainingPersistentAngerTime() {
+    public long getPersistentAngerEndTime() {
         return 0;
     }
 
     @Override
-    public void setRemainingPersistentAngerTime(int angerTime) {
-
+    public void setPersistentAngerEndTime(long angerEndTime) {
     }
 
     @Override
-    public @Nullable UUID getPersistentAngerTarget() {
+    public @Nullable EntityReference<LivingEntity> getPersistentAngerTarget() {
         return null;
     }
 
     @Override
-    public void setPersistentAngerTarget(@Nullable UUID angryAt) {
-
+    public void setPersistentAngerTarget(@Nullable EntityReference<LivingEntity> angryAt) {
     }
 
     @Override
     public void startPersistentAngerTimer() {
-
     }
 }

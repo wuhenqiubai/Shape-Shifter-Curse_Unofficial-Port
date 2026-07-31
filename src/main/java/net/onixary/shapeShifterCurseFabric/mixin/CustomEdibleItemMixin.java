@@ -1,8 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -47,7 +45,9 @@ public abstract class CustomEdibleItemMixin {
         if (user instanceof Player player) {
             FoodProperties fc = getPowerFoodComponent(player, stack);
             if (fc != null) {
-                cir.setReturnValue(player.eat(world, stack, fc));
+                // 1.21.11 Player.eat(Level, ItemStack, FoodProperties) 移除，改用 FoodData.eat(FoodProperties)
+                player.getFoodData().eat(fc);
+                cir.setReturnValue(stack);
             }
         }
     }
@@ -64,17 +64,12 @@ public abstract class CustomEdibleItemMixin {
         return original;
     }
 
-    @ModifyReturnValue(method = "getEatingSound", at = @At("RETURN"))
-    private SoundEvent replaceEatSound(SoundEvent original) {
-        return ssc$currentPlayer.get() != null ? SoundEvents.GENERIC_EAT : original;
-    }
-
     @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
     private void onGetMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
         if (user instanceof Player player) {
             FoodProperties fc = getPowerFoodComponent(player, stack);
             if (fc != null) {
-                cir.setReturnValue(fc.eatSeconds() < 1.0f ? 16 : 32);
+                cir.setReturnValue(32);
             }
         }
     }

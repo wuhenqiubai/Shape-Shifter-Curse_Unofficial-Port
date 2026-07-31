@@ -71,7 +71,7 @@ public final class CustomWaterBreathingMixin {
                 if(!this.isEyeInFluid(FluidTags.WATER)
                         && !this.hasEffect(MobEffects.WATER_BREATHING)
                         && !this.hasEffect(MobEffects.CONDUIT_POWER)) {
-                    if(!this.isInRain()) {
+                    if(!this.level().isRainingAt(this.blockPosition())) {
                         int landWaterBreathLevel = PowerHolderComponent.getPowers(this, CustomWaterBreathingPower.class)
                                 .stream()
                                 .mapToInt(CustomWaterBreathingPower::getLandWaterBreathLevel).sum();

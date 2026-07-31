@@ -1,30 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.render.render_layer;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.resources.Identifier;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-//import org.ladysnake.satin.api.event.EntitiesPreRenderCallback;
-//import org.ladysnake.satin.api.managed.ManagedCoreShader;
-//import org.ladysnake.satin.api.managed.ShaderEffectManager;
-//import org.ladysnake.satin.api.managed.uniform.Uniform1f;
 
 public abstract class FurGradientRenderLayer {
 
-    public static final ManagedCoreShader furGradientRemap = ShaderEffectManager.getInstance().manageCoreShader(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap"));
-    private static final Uniform1f uniformSTime = furGradientRemap.findUniform1f("STime");
+    // TODO: Satin 无 1.21.11 版，fur_gradient_remap core shader 需改用原版 RenderPipeline 注册。
+    // 复刻方向：在 RenderPipelines 类似的静态注册里创建自定义 RenderPipeline（引用 shaders/core/fur_gradient_remap），
+    // 然后通过 RenderSystem/GPU 设备 pipeline cache 注册。原 Satin 的
+    // ShaderEffectManager/ManagedCoreShader/Uniform1f/EntitiesPreRenderCallback 已移除。
     private static int ticks;
 
     public static void onInitializeClient() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> ticks++);
-        EntitiesPreRenderCallback.EVENT.register((camera, frustum, tickDelta) -> uniformSTime.set((ticks + tickDelta) * 0.05f));
-//        ShaderEffectRenderCallback.EVENT.register(tickDelta -> {
-//                    MinecraftClient client = MinecraftClient.getInstance();
-//                    client.getFramebuffer().beginWrite(true);
-//                    RenderSystem.enableBlend();
-//                    RenderSystem.blendFuncSeparate(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SrcFactor.ZERO, GlStateManager.DstFactor.ONE);
-//                    client.getFramebuffer().beginWrite(true);
-//                    RenderSystem.disableBlend();
-//                }
-//        );
     }
 }

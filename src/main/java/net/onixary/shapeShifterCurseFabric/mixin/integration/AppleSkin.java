@@ -71,8 +71,8 @@ public class AppleSkin {
                 : (float) ModifierUtil.applyModifiers(player, saturationModifiers, itemFood.saturation());
 
         if (hunger != itemFood.nutrition() || saturation != itemFood.saturation()) {
-            cir.setReturnValue(new FoodProperties(hunger, saturation, itemFood.canAlwaysEat(),
-                    itemFood.eatSeconds(), itemFood.usingConvertsTo(), itemFood.effects()));
+            // 1.21.11 FoodProperties 构造器只剩 (nutrition, saturation, canAlwaysEat)
+            cir.setReturnValue(new FoodProperties(hunger, saturation, itemFood.canAlwaysEat()));
         }
     }
 }

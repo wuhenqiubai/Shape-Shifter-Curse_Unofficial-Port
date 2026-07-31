@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
 import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -17,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 @Mixin(Creeper.class)
 public abstract class ScareCreeperMixin {
@@ -31,13 +29,9 @@ public abstract class ScareCreeperMixin {
         Set<WrappedGoal> goals = targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
             if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && atg.targetType == Player.class) {
-                Predicate<LivingEntity> targetPredicate = atg.targetConditions.selector;
-                if (targetPredicate == null) {
-                    targetPredicate = e -> !AdditionalPowers.SCARE_CREEPERS.isActive(e);
-                } else {
-                    targetPredicate = targetPredicate.and(e -> !AdditionalPowers.SCARE_CREEPERS.isActive(e));
-                }
-                atg.targetConditions.selector(targetPredicate);
+                // 1.21.11 selector 是 private 且改为双参 Selector(LivingEntity, ServerLevel)
+                atg.targetConditions.selector((entity, level) ->
+                        EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity) && !AdditionalPowers.SCARE_CREEPERS.isActive(entity));
             }
         }
     }

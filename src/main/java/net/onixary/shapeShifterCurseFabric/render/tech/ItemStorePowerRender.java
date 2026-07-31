@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.client.Minecraft;
@@ -68,10 +67,10 @@ public class ItemStorePowerRender {
         int SlotY = power.getSlot() / SlotPerRow;
         int SlotXFinal = SlotBegin.getA() + SlotX;
         int SlotYFinal = SlotBegin.getB() + SlotY;
-        context.pose().pushPose();
-        context.pose().translate(0.0f, 0.0f, -90.0f);
-        context.blit(WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 29, 24);
-        context.pose().popPose();
+        // 2D 变换栈不支持 z 平移，去除 translate(0,0,-90)
+        context.pose().pushMatrix();
+        context.blit(WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 22, 22, 0, 1, 29, 24);
+        context.pose().popMatrix();
         ItemStack stack = power.getStack();
         if (stack.isEmpty()) {
             return;
@@ -79,14 +78,14 @@ public class ItemStorePowerRender {
         float g = power.getBobbingAnimationTime() - tickDelta;
         if (g > 0.0f) {
             float h = 1.0f + g / 5.0f;
-            context.pose().pushPose();
-            context.pose().translate(SlotXFinal + 8, SlotYFinal + 12, 0.0f);
-            context.pose().scale(1.0f / h, (h + 1.0f) / 2.0f, 1.0f);
-            context.pose().translate(-(SlotXFinal + 8), -(SlotYFinal + 12), 0.0f);
+            context.pose().pushMatrix();
+            context.pose().translate(SlotXFinal + 8, SlotYFinal + 12);
+            context.pose().scale(1.0f / h, (h + 1.0f) / 2.0f);
+            context.pose().translate(-(SlotXFinal + 8), -(SlotYFinal + 12));
         }
         context.renderItem(mc.player, stack, SlotXFinal, SlotYFinal, power.getSlot());
         if (g > 0.0f) {
-            context.pose().popPose();
+            context.pose().popMatrix();
         }
         context.renderItemDecorations(mc.font, stack, SlotXFinal, SlotYFinal);
     }
@@ -94,13 +93,12 @@ public class ItemStorePowerRender {
     public static void render(GuiGraphics context, float tickDelta) {
         timerTick();
         if (!mc.options.hideGui) {
-            RenderSystem.enableBlend();
+            // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
             for (itemStorePowerRenderInterface power : tempPower) {
                 if (power != null) {
                     renderSlot(context, tickDelta, power);
                 }
             }
-            RenderSystem.disableBlend();
         }
     }
 }

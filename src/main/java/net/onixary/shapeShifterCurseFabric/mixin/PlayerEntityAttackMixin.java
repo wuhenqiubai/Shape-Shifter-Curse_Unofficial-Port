@@ -61,7 +61,7 @@ public abstract class PlayerEntityAttackMixin {
             } else if (player.fallDistance >= maxFall) {
                 fallMultiplier = maxMultiplier;
             } else {
-                float progress = (player.fallDistance - minFall) / (maxFall - minFall);
+                float progress = (float)((player.fallDistance - minFall) / (maxFall - minFall));
                 fallMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * progress;
             }
             finalMultiplier *= fallMultiplier;

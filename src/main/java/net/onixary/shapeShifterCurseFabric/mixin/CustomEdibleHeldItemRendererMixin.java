@@ -7,7 +7,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.food.FoodProperties;
@@ -35,6 +34,6 @@ public class CustomEdibleHeldItemRendererMixin {
         if (fc == null) {
             return original;
         }
-        return Mth.ceil(fc.eatSeconds() * 20.0F);
+        return 32;
     }
 }

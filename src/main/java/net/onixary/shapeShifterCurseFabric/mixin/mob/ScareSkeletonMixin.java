@@ -26,13 +26,13 @@ public abstract class ScareSkeletonMixin extends Monster implements RangedAttack
 
     @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
-        Goal goal = new AvoidEntityGoal<>(this, Player.class, AdditionalPowers.SCARE_SKELETON::isActive, 3.0F, 1.0D, 1.2D, EntitySelector.NO_CREATIVE_OR_SPECTATOR::test);
+        Goal goal = new AvoidEntityGoal<>(this, Player.class, AdditionalPowers.SCARE_SKELETON::isActive, 3.0F, 1.0D, 1.2D, EntitySelector.NO_CREATIVE_OR_SPECTATOR);
         this.goalSelector.addGoal(3, goal);
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V", ordinal = 7), method = "registerGoals")
     private void redirectTargetGoal(GoalSelector goalSelector, int priority, Goal goal) {
-	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, e -> !AdditionalPowers.SCARE_SKELETON.isActive(e));
+	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (e, level) -> !AdditionalPowers.SCARE_SKELETON.isActive(e));
         goalSelector.addGoal(priority, newGoal);
     }
 }

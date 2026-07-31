@@ -24,7 +24,7 @@ public class CustomEdiblePlayerAMixin {
             if (fc == null) {
                 return original;
             }
-            return fc.eatSeconds() < 1.0f ? 16 : 32;
+            return 32;
         }
         return original;
     }
@@ -36,7 +36,7 @@ public class CustomEdiblePlayerAMixin {
             if (fc == null) {
                 return original;
             }
-            return fc.eatSeconds() < 1.0f ? 16 : 32;
+            return 32;
         }
         return original;
     }

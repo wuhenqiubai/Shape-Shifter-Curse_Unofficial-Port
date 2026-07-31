@@ -25,9 +25,14 @@ public abstract class EntityLootingMixin {
             PowerHolderComponent.getPowers(player, ModifyEntityLootPower.class).forEach(
                     power -> FinalStack.set(power.ApplyModifyDrop(FinalStack.get(), RealThis.getRandom()))
             );
-            return RealThis.spawnAtLocation(FinalStack.get());
+            if (RealThis.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+                return RealThis.spawnAtLocation(serverLevel, FinalStack.get());
+            }
         }
-        return RealThis.spawnAtLocation(stack);
+        if (RealThis.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
+            return RealThis.spawnAtLocation(serverLevel, stack);
+        }
+        return null;
     }
 
     @ModifyArg(method = "dropFromLootTable", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"), index = 2)

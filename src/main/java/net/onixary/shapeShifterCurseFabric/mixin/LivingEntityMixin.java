@@ -90,7 +90,7 @@ public abstract class LivingEntityMixin {
             if(entity instanceof Witch || entity instanceof Evoker) {
                 if (Math.random() < StaticParams.FAMILIAR_CURSE_POTION_DROP_PROBABILITY){
                     net.minecraft.core.Holder<net.minecraft.world.item.alchemy.Potion> familiarFoxPotion =
-                            net.minecraft.core.registries.BuiltInRegistries.POTION.getHolder(
+                            net.minecraft.core.registries.BuiltInRegistries.POTION.get(
                                     net.minecraft.resources.ResourceKey.create(net.minecraft.core.registries.Registries.POTION,
                                             net.minecraft.resources.Identifier.fromNamespaceAndPath("shape-shifter-curse", "to_familiar_fox_0_potion")))
                                     .orElseThrow();

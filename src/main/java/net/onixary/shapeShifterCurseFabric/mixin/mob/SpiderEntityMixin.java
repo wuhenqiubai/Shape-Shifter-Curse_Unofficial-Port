@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin.mob;
 
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
@@ -15,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Set;
-import java.util.function.Predicate;
 
 @Mixin(Spider.class)
 public class SpiderEntityMixin extends Monster {
@@ -28,13 +26,8 @@ public class SpiderEntityMixin extends Monster {
         Set<WrappedGoal> goals = this.targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
             if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 2 && atg.targetType == Player.class) {
-                Predicate<LivingEntity> targetPredicate = atg.targetConditions.selector;
-                if (targetPredicate == null) {
-                    targetPredicate = e -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(e);
-                } else {
-                    targetPredicate = targetPredicate.and(e -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(e));
-                }
-                atg.targetConditions.selector(targetPredicate);
+                // 1.21.11 selector 是 private 且改为双参 Selector(LivingEntity, ServerLevel)
+                atg.targetConditions.selector((entity, level) -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(entity));
             }
         }
     }
