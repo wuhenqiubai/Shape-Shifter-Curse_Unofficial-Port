@@ -25,7 +25,7 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
     }
 
     @Override
-    public int getHeight() {
+    public int getHeight(@NonNull Font textRenderer) {
         return 68;
     }
 
@@ -35,7 +35,7 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(Font textRenderer, int x, int y, GuiGraphics context) {
+    public void renderImage(@NonNull Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
         this.drawBackground(context, x, y);
         for(int column = 0; column < 3; ++column) {
             for(int row = 0; row < 3; ++row) {
@@ -52,8 +52,8 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
     }
 
     public void drawBackground(GuiGraphics context, int x, int y) {
-        context.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-        context.blit(TEXTURE, x, y, 0, 0, 130, 86, 256, 256);
+        // setColor 在 1.21.11 移除，blit 参数顺序调整为 (x, y, w, h, u, v, texW, texH)
+        context.blit(TEXTURE, x, y, 130, 86, 0, 0, 256, 256);
     }
 
 }

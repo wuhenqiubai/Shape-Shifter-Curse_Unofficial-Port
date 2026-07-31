@@ -3,13 +3,14 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.component;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class PlayerOriginComponent implements OriginComponent {
 
@@ -57,8 +59,8 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     @Override
-    public boolean hadOriginBefore() {
-        return hadOriginBefore;
+    public Optional<Boolean> hadOriginBefore() {
+        return Optional.of(hadOriginBefore);
     }
 
     @Override
@@ -102,7 +104,18 @@ public class PlayerOriginComponent implements OriginComponent {
     }
 
     @Override
-    public void readFromNbt(@NotNull CompoundTag compoundTag, HolderLookup.@NotNull Provider registryLookup) {
+    public void readData(ValueInput input) {
+        input.read("data", CompoundTag.CODEC).ifPresent(this::readFromNbt);
+    }
+
+    @Override
+    public void writeData(ValueOutput output) {
+        CompoundTag tag = new CompoundTag();
+        this.writeToNbt(tag);
+        output.store("data", CompoundTag.CODEC, tag);
+    }
+
+    public void readFromNbt(@NotNull CompoundTag compoundTag) {
         if(player == null) {
             Origins.LOGGER.error("Player was null in `fromTag`! This is a bug!");
 	        return;
@@ -118,7 +131,7 @@ public class PlayerOriginComponent implements OriginComponent {
 		            return;
 	            }
 
-	            String originString = compoundTag.getString("Origin");
+	            String originString = compoundTag.getStringOr("Origin", "");
 	            Identifier originId = Identifier.tryParse(originString);
 	            if (originId == null) {
 		            Origins.LOGGER.warn("Invalid origin ID: {}", originString);
@@ -133,7 +146,7 @@ public class PlayerOriginComponent implements OriginComponent {
 	            }
             } catch(IllegalArgumentException e) {
 	            String playerName = player.getDisplayName() != null ? player.getDisplayName().getString() : player.getName().getString();
-	            Origins.LOGGER.warn("Player {} had old origin which could not be migrated: {}", playerName, compoundTag.getString("Origin"));
+	            Origins.LOGGER.warn("Player {} had old origin which could not be migrated: {}", playerName, compoundTag.getStringOr("Origin", ""));
             }
         } else {
 	        Tag originLayerElement = compoundTag.get("OriginLayers");
@@ -142,8 +155,8 @@ public class PlayerOriginComponent implements OriginComponent {
 	        }
 
 	        for (int i = 0; i < originLayerList.size(); i++) {
-		        CompoundTag layerTag = originLayerList.getCompound(i);
-		        String layerString = layerTag.getString("Layer");
+		        CompoundTag layerTag = originLayerList.getCompoundOrEmpty(i);
+		        String layerString = layerTag.getStringOr("Layer", "");
 		        Identifier layerId = Identifier.tryParse(layerString);
 
 		        if (layerId == null) {
@@ -161,7 +174,7 @@ public class PlayerOriginComponent implements OriginComponent {
 		        }
 
 		        if (layer != null) {
-			        String originString = layerTag.getString("Origin");
+			        String originString = layerTag.getStringOr("Origin", "");
 			        Identifier originId = Identifier.tryParse(originString);
 
 			        if (originId == null) {
@@ -197,8 +210,7 @@ public class PlayerOriginComponent implements OriginComponent {
 		        }
 	        }
         }
-
-        this.hadOriginBefore = compoundTag.getBoolean("HadOriginBefore");
+        this.hadOriginBefore = compoundTag.getBooleanOr("HadOriginBefore", false);
 
         if(!player.level().isClientSide()) {
             PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(player);
@@ -226,8 +238,8 @@ public class PlayerOriginComponent implements OriginComponent {
 	            }
 
                 for(int i = 0; i < powerList.size(); i++) {
-                    CompoundTag powerTag = powerList.getCompound(i);
-	                String powerTypeString = powerTag.getString("Type");
+                    CompoundTag powerTag = powerList.getCompoundOrEmpty(i);
+	                String powerTypeString = powerTag.getStringOr("Type", "");
 	                Identifier powerTypeId = Identifier.tryParse(powerTypeString);
 
 	                if (powerTypeId == null) {
@@ -256,8 +268,7 @@ public class PlayerOriginComponent implements OriginComponent {
         }
     }
 
-	@Override
-    public void writeToNbt(@NotNull CompoundTag compoundTag, HolderLookup.@NotNull Provider registryLookup) {
+    public void writeToNbt(@NotNull CompoundTag compoundTag) {
         ListTag originLayerList = new ListTag();
         for(Map.Entry<OriginLayer, Origin> entry : origins.entrySet()) {
             CompoundTag layerTag = new CompoundTag();

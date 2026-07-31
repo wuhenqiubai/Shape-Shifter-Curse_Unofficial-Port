@@ -1,10 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.registry;
 
-import io.github.apace100.calio.Calio;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -16,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -34,21 +31,8 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
 
     @Override
     public void onResourceManagerReload(@NonNull ResourceManager manager) {
-        Map<TagKey<?>, Collection<Holder<?>>> registryTags = Calio.REGISTRY_TAGS.get();
-        if (registryTags == null) {
-            registryTags = new HashMap<>();
-            Calio.REGISTRY_TAGS.set(registryTags);
-        }
-
-        int count = 0;
-
-        // Scan ALL namespaces for tag files to ensure they're available at parse time
-        count += registerTags(registryTags, Registries.ITEM, manager, "items");
-        count += registerTags(registryTags, Registries.BLOCK, manager, "blocks");
-        count += registerTags(registryTags, Registries.ENTITY_TYPE, manager, "entity_type");
-        count += registerTags(registryTags, Registries.DAMAGE_TYPE, manager, "damage_type");
-
-        LOGGER.info("Registered {} missing tags across all namespaces", count);
+        // Calio 1.11.2 移除了 REGISTRY_TAGS 缓存机制，改用原版 tag 系统。
+        // 该 listener 仅保留 resource listener 注册顺序（在 power 加载前），无需再手动预注册 tag。
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

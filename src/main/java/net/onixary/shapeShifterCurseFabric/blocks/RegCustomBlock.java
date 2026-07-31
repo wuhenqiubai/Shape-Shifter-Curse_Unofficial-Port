@@ -1,6 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
+import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -15,9 +17,6 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
-// TODO: 1.21.11 RenderType变了，需新方案注册渲染层
-// import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
-// import net.minecraft.client.renderer.RenderType;
 
 public final class RegCustomBlock {
     public static final Block MOONDUST_CRYSTAL_GRIT = register("moondust_crystal_grit", new Block(BlockBehaviour.Properties.ofFullCopy(Blocks.GRAVEL).mapColor(MapColor.COLOR_PURPLE).strength(0.6f, 0.6f).sound(SoundType.GRAVEL)));
@@ -28,11 +27,9 @@ public final class RegCustomBlock {
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", new DewCoveredCobwebBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollision().noOcclusion()));
 
     public static void ClientInit() {
-        // transparent透明模式不写Z，会出现自排序问题遮挡自己，只需要镂空的模型应该使用getCutout
-        // TODO: 1.21.11 RenderType重构，需新方案，RenderTypes.entityCutout需要传Identifier
-//         BlockRenderLayerMap.putBlock(TEMP_WEB_BRIDGE, RenderTypes.entityCutout());
-//         BlockRenderLayerMap.putBlock(WEB_COMPOSTER, RenderTypes.entityCutout());
-//         BlockRenderLayerMap.putBlock(DEW_COVERED_COBWEB, RenderTypes.entityCutout());
+         BlockRenderLayerMap.putBlock(TEMP_WEB_BRIDGE, ChunkSectionLayer.CUTOUT);
+         BlockRenderLayerMap.putBlock(WEB_COMPOSTER, ChunkSectionLayer.CUTOUT);
+         BlockRenderLayerMap.putBlock(DEW_COVERED_COBWEB, ChunkSectionLayer.CUTOUT);
     }
 
     private static <T extends Block> T registerWithOutItem(String path, T block) {

@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 
-import com.mojang.authlib.properties.PropertyMap;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
@@ -51,7 +50,9 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 				ItemStack displayItem = origin.getDisplayItem();
 				if(displayItem.getItem() == Items.PLAYER_HEAD) {
 					if(displayItem.get(DataComponents.PROFILE) == null) {
-						displayItem.set(DataComponents.PROFILE, new ResolvableProfile(java.util.Optional.of(player.getDisplayName().getString()), java.util.Optional.empty(), new PropertyMap()));
+						if (player != null) {
+							displayItem.set(DataComponents.PROFILE, ResolvableProfile.createUnresolved(player.getDisplayName().getString()));
+						}
 					}
 				}
 				this.originSelection.add(origin);

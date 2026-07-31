@@ -15,8 +15,4 @@ public class ModEnchantments {
         // No Java registration needed.
     }
 
-//    private static Enchantment register(String path, Enchantment enchantment) {
-//        Registry.register(Registries.ENCHANTMENT, new Identifier(Origins.MODID, path), enchantment);
-//        return enchantment;
-//    }
 }

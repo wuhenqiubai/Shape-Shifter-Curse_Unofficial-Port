@@ -54,7 +54,7 @@ public record OriginUpgrade(Identifier advancementCondition, Identifier upgradeT
     }
 
     public static OriginUpgrade fromJson(JsonElement jsonElement) {
-        return OriginsDataTypes.UPGRADE.read(jsonElement);
+        return OriginsDataTypes.UPGRADE.read(jsonElement, null);
     }
 
 }

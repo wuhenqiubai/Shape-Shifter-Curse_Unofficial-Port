@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.gson.*;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
+import io.github.apace100.apoli.power.factory.condition.ConditionTypes;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
@@ -13,7 +14,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
-import net.onixary.shapeShifterCurseFabric.integration.origins.data.OriginsDataTypes;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -363,12 +363,26 @@ public class OriginLayer implements Comparable<OriginLayer> {
             return new ConditionedOrigin(data.get("condition"), data.get("origins"));
         }
 
-        public void write(RegistryFriendlyByteBuf buf) {
-            OriginsDataTypes.CONDITIONED_ORIGIN.send(buf, this);
+        public void write(RegistryFriendlyByteBuf buffer) {
+            buffer.writeBoolean(condition != null);
+            if(condition != null)
+                condition.write(buffer);
+            buffer.writeInt(origins.size());
+            origins.forEach(buffer::writeIdentifier);
         }
 
-        public static ConditionedOrigin read(RegistryFriendlyByteBuf buf) {
-            return OriginsDataTypes.ORIGIN_OR_CONDITIONED_ORIGIN.receive(buf);
+        @Environment(EnvType.CLIENT)
+        public static ConditionedOrigin read(RegistryFriendlyByteBuf buffer) {
+            ConditionFactory<Entity>.Instance condition = null;
+            if(buffer.readBoolean()) {
+                condition = ConditionTypes.ENTITY.read(buffer);
+            }
+            int originCount = buffer.readInt();
+            List<Identifier> originList = new ArrayList<>(originCount);
+            for(int i = 0; i < originCount; i++) {
+                originList.add(buffer.readIdentifier());
+            }
+            return new ConditionedOrigin(condition, originList);
         }
 
         public static ConditionedOrigin read(JsonElement element) {
@@ -379,8 +393,8 @@ public class OriginLayer implements Comparable<OriginLayer> {
                 }
                 throw new JsonParseException("Expected origin in layer to be either a string or an object.");
             } else if(element.isJsonObject()) {
-                SerializableData.Instance data = conditionedOriginObjectData.read(element.getAsJsonObject());
-                return new ConditionedOrigin((ConditionFactory<Entity>.Instance)data.get("condition"), (List<Identifier>)data.get("origins"));
+                SerializableData.Instance data = conditionedOriginObjectData.read(element.getAsJsonObject(), null);
+                return new ConditionedOrigin(data.get("condition"), data.get("origins"));
             }
             throw new JsonParseException("Expected origin in layer to be either a string or an object.");
         }

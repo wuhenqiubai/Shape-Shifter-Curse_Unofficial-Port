@@ -2,8 +2,6 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.component;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ModifyPlayerSpawnPower;
-import io.github.apace100.apoli.power.Power;
-import io.github.apace100.apoli.power.PowerType;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
@@ -14,10 +12,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.power.OriginsCall
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModComponents;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface OriginComponent extends AutoSyncedComponent {
@@ -28,7 +23,7 @@ public interface OriginComponent extends AutoSyncedComponent {
 	HashMap<OriginLayer, Origin> getOrigins();
 	Origin getOrigin(OriginLayer layer);
 
-	boolean hadOriginBefore();
+	Optional<Boolean> hadOriginBefore();
 
 	void setOrigin(OriginLayer layer, Origin origin);
 
@@ -44,19 +39,6 @@ public interface OriginComponent extends AutoSyncedComponent {
 			PowerHolderComponent.getPowers(player, ModifyPlayerSpawnPower.class).forEach(ModifyPlayerSpawnPower::teleportToModifiedSpawn);
 		}
 		PowerHolderComponent.getPowers(player, OriginsCallbackPower.class).forEach(p -> p.onChosen(hadOriginBefore));
-	}
-
-	static void partialOnChosen(Player player, boolean hadOriginBefore, Origin origin) {
-		PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(player);
-		for(PowerType<?> powerType : powerHolder.getPowersFromSource(origin.getIdentifier())) {
-			Power p = powerHolder.getPower(powerType);
-			if(p instanceof ModifyPlayerSpawnPower && !hadOriginBefore) {
-				((ModifyPlayerSpawnPower)p).teleportToModifiedSpawn();
-			} else
-			if(p instanceof OriginsCallbackPower) {
-				((OriginsCallbackPower)p).onChosen(hadOriginBefore);
-			}
-		}
 	}
 
 	default boolean checkAutoChoosingLayers(Player player, boolean includeDefaults) {

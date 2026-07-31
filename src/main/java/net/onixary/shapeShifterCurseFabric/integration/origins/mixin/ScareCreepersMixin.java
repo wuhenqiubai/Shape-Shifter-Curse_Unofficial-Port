@@ -32,7 +32,7 @@ public abstract class ScareCreepersMixin extends Monster {
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V", ordinal = 8), method = "registerGoals")
     private void redirectTargetGoal(GoalSelector goalSelector, int priority, Goal goal) {
-	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, e -> !OriginsPowerTypes.SCARE_CREEPERS.isActive(e));
+	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (e, level) -> !OriginsPowerTypes.SCARE_CREEPERS.isActive(e));
         goalSelector.addGoal(priority, newGoal);
     }
 }

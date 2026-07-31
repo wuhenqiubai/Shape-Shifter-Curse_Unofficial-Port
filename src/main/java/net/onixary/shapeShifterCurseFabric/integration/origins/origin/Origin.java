@@ -262,7 +262,7 @@ public class Origin {
     }
 
     public static Origin fromJson(Identifier id, JsonObject json) {
-        return createFromData(id, DATA.read(json));
+        return createFromData(id, DATA.read(json, null));
     }
 
     @Override

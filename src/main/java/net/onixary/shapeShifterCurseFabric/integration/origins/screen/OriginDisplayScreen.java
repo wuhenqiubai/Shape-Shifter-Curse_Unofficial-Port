@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.apace100.apoli.power.PowerType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
@@ -19,7 +18,6 @@ import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.Badge;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
-import net.onixary.shapeShifterCurseFabric.integration.origins.mixin.DrawContextAccessor;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
@@ -99,7 +97,7 @@ public class OriginDisplayScreen extends Screen {
         if(!canScroll()) {
             return;
         }
-        context.blit(WINDOW, guiLeft + 155, guiTop + 35, 188, 24, 8, 134);
+        context.blit(WINDOW, guiLeft + 155, guiTop + 35, 8, 134, 188, 24, 256, 256);
         int scrollbarY = 36;
         int maxScrollbarOffset = 141;
         int u = 176;
@@ -112,7 +110,7 @@ public class OriginDisplayScreen extends Screen {
                 u += 6;
             }
         }
-        context.blit(WINDOW, guiLeft + 156, guiTop + scrollbarY, u, 24, 6, 27);
+        context.blit(WINDOW, guiLeft + 156, guiTop + scrollbarY, 6, 27, u, 24, 256, 256);
     }
 
     private boolean scrolling = false;
@@ -131,6 +129,8 @@ public class OriginDisplayScreen extends Screen {
 
     @Override
     public boolean mouseClicked(@NonNull MouseButtonEvent mouseButtonEvent, boolean bl) {
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
         if(canScroll()) {
             scrolling = false;
             int scrollbarY = 36;
@@ -152,6 +152,7 @@ public class OriginDisplayScreen extends Screen {
     @Override
     public boolean mouseDragged(@NonNull MouseButtonEvent mouseButtonEvent, double d, double e) {
         if(this.scrolling) {
+            double mouseY = mouseButtonEvent.y();
             int delta = (int)(mouseY - mouseDragStart);
             int newScrollPos = (int)Math.max(36, Math.min(141, scrollDragStart + delta));
             float part = (newScrollPos - 36) / (float)(141 - 36);
@@ -168,7 +169,7 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                ((DrawContextAccessor)context).invokeRenderTooltipInternal(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+                context.renderTooltip(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
             }
         }
     }
@@ -178,25 +179,19 @@ public class OriginDisplayScreen extends Screen {
     }
 
     private void renderOriginWindow(GuiGraphics context, int mouseX, int mouseY) {
-        RenderSystem.enableBlend();
+        // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
         renderWindowBackground(context, 16, 0);
         if(origin != null) {
-            //context.enableScissor(guiLeft, guiTop, guiLeft + windowWidth, guiTop + windowHeight);
             this.renderOriginContent(context, mouseX, mouseY);
-            //context.disableScissor();
         }
-        context.blit(WINDOW, guiLeft, guiTop, 1, 0, 0, windowWidth, windowHeight, 256, 256);
+        context.blit(WINDOW, guiLeft, guiTop, windowWidth, windowHeight, 0, 0, 256, 256);
         if(origin != null) {
-            context.pose().pushPose();
-            context.pose().translate(0, 0, 5);
+            // 2D 变换栈不支持 z 平移，删除原 pose().pushPose()/translate(0,0,5)/popPose()
             renderOriginName(context);
-            RenderSystem.setShaderTexture(0, WINDOW);
             this.renderOriginImpact(context, mouseX, mouseY);
-            context.pose().popPose();
             Component title = getTitleText();
             context.drawCenteredString(this.font, title.getString(), width / 2, guiTop - 15, 0xFFFFFF);
         }
-        RenderSystem.disableBlend();
     }
 
     private void renderOriginImpact(GuiGraphics context, int mouseX, int mouseY) {
@@ -205,15 +200,15 @@ public class OriginDisplayScreen extends Screen {
         int wOffset = impactValue * 8;
         for(int i = 0; i < 3; i++) {
             if(i < impactValue) {
-                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth + wOffset, 16, 8, 8);
+                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, 8, 8, windowWidth + wOffset, 16, 256, 256);
             } else {
-                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth, 16, 8, 8);
+                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, 8, 8, windowWidth, 16, 256, 256);
             }
         }
         if(mouseX >= guiLeft + 128 && mouseX <= guiLeft + 158
             && mouseY >= guiTop + 19 && mouseY <= guiTop + 27) {
             MutableComponent ttc = Component.translatable(Origins.MODID + ".gui.impact.impact").append(": ").append(impact.getTextComponent());
-            context.renderTooltip(this.font, ttc, mouseX, mouseY);
+            context.renderTooltip(this.font, List.of(new net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip(ttc.getVisualOrderText())), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
         }
     }
 
@@ -230,7 +225,7 @@ public class OriginDisplayScreen extends Screen {
         int endY = guiTop + windowHeight - border;
         for(int x = guiLeft; x < endX; x += 16) {
             for(int y = guiTop + offsetYStart; y < endY + offsetYEnd; y += 16) {
-                context.blit(WINDOW, x, y, windowWidth, 0, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y));
+                context.blit(WINDOW, x, y, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y), windowWidth, 0, 256, 256);
             }
         }
     }
@@ -290,7 +285,7 @@ public class OriginDisplayScreen extends Screen {
                     for(Badge badge : badges) {
                         RenderedBadge renderedBadge = new RenderedBadge(p, badge,xStart + 10 * bi, y - 1);
                         renderedBadges.add(renderedBadge);
-                        context.blit(badge.spriteId(), xStart + 10 * bi, y - 1, 0, 0, 9, 9, 9, 9);
+                        context.blit(badge.spriteId(), xStart + 10 * bi, y - 1, 9, 9, 0, 0, 9, 9);
                         bi++;
                     }
                 }

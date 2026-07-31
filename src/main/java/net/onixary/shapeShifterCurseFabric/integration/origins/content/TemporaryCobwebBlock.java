@@ -50,6 +50,6 @@ public class TemporaryCobwebBlock extends WebBlock {
 		//if (PowerTypes.WEBBING.isActive(entityIn)) {
 		//	return;
 		//}
-		super.entityInside(state, worldIn, pos, entityIn);
+		super.entityInside(state, level, pos, entity, insideBlockEffectApplier, bl);
 	}
 }

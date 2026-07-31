@@ -6,19 +6,15 @@
   "mixins": [
     "ArgumentTypesMixin",
     "ConduitOnLandMixin",
-    "InTagConditionMixin",
     "LikeWaterMixin",
     "LoginMixin",
     "ModifyTypeTagMixin",
     "NoCobwebSlowdownMixin",
     "OriginUpgradeMixin",
     "ScareCreepersMixin",
-    "SelectionInvulnerabilityMixin",
-    "WaterBreathingMixin$CanBreatheInWater",
-    "WaterBreathingMixin$UpdateAir"
+    "SelectionInvulnerabilityMixin"
   ],
   "client": [
-    "DrawContextAccessor",
     "ServerCheckMixin",
     "WaterVisibilityMixin"
   ],
