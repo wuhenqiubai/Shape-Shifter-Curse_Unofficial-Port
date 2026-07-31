@@ -4,9 +4,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
@@ -23,77 +26,56 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(CapeLayer.class)
 public class CapeFeatureRendererMixin {
 
-    private AbstractClientPlayer currentPlayer;
+    @Unique
+    private AbstractClientPlayer ssc$capePlayer;
 
-    @Inject(method = "render*", at = @At("HEAD"))
-    private void capturePlayer(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider,
-                               int i, AbstractClientPlayer player, float f, float g, float h,
-                               float j, float k, float l, CallbackInfo ci) {
-        this.currentPlayer = player;
+    // 1.21.11 CapeLayer 改为 submit(AvatarRenderState) 模式，从 avatarRenderState.id 恢复实体
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At("HEAD"))
+    private void capturePlayer(PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
+                               int i, AvatarRenderState avatarRenderState, float f, float g, CallbackInfo ci) {
+        Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
+        this.ssc$capePlayer = entity instanceof AbstractClientPlayer player ? player : null;
     }
 
-    @ModifyArg(method = "render*",
+    @ModifyArg(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
             at = @At(value = "INVOKE",
                     target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"),
             index = 1)
     private float modifyTranslateY(float y) {
-        if (currentPlayer != null) {
-            Vec3 idlePos = getCapeIdleLoc(currentPlayer);
+        if (ssc$capePlayer != null) {
+            Vec3 idlePos = getCapeIdleLoc(ssc$capePlayer);
             return (float) idlePos.y;
         }
         return y;
     }
 
-    @ModifyArg(method = "render*",
+    @ModifyArg(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
             at = @At(value = "INVOKE",
                     target = "Lcom/mojang/blaze3d/vertex/PoseStack;translate(FFF)V"),
             index = 2)
     private float modifyTranslateZ(float z) {
-        if (currentPlayer != null) {
-            Vec3 idlePos = getCapeIdleLoc(currentPlayer);
+        if (ssc$capePlayer != null) {
+            Vec3 idlePos = getCapeIdleLoc(ssc$capePlayer);
             return (float) idlePos.z;
         }
         return z;
     }
 
-    @Inject(method = "render*",
+    // 1.21.11 CapeLayer.submit 中无 mulPose 调用，改为在提交披风模型前施加向上旋转
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
             at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V",
-                    ordinal = 0))
-    private void addCapeUpwardRotation(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider,
-                                       int i, AbstractClientPlayer player, float f, float g, float h,
-                                       float j, float k, float l, CallbackInfo ci) {
-        float baseRotation = getCapeBaseRotateAngle(player);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(baseRotation));
-    }
-
-    @ModifyArg(method = "render",
-            at = @At(value = "INVOKE",
-                    target = "Lcom/mojang/math/Axis;rotationDegrees(F)Lorg/joml/Quaternionf;",
-                    ordinal = 0),
-            index = 0)
-    private float modifyXRotationAngle(float angle) {
-        if (currentPlayer != null) {
-            if (this.NeedModifyXRotationAngle(currentPlayer)) {
-                // 从角度中提取 q 的部分并钳制
-                // angle = 6.0F + r / 2.0F + q
-                // 我们需要重新计算角度以限制 q 的部分
-                float baseAngle = 6.0F; // 基础角度
-                float qPortion = angle - baseAngle; // 提取包含 q 的部分
-
-                // 钳制 q 相关的部分（这里需要根据实际情况调整）
-                float maxQ = 35.0f;
-                float minQ = -10.0f;
-
-                if (qPortion > maxQ) {
-                    return baseAngle + maxQ;
-                } else if (qPortion < minQ) {
-                    return baseAngle + minQ;
-                }
-            }
+                    target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
+                    shift = At.Shift.BEFORE))
+    private void addCapeUpwardRotation(PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
+                                       int i, AvatarRenderState avatarRenderState, float f, float g, CallbackInfo ci) {
+        if (ssc$capePlayer != null) {
+            float baseRotation = getCapeBaseRotateAngle(ssc$capePlayer);
+            poseStack.mulPose(Axis.XP.rotationDegrees(baseRotation));
         }
-        return angle;
     }
+
+    // TODO: 1.21.11 CapeLayer.submit 中无 Axis.rotationDegrees 调用，
+    // modifyXRotationAngle（钳制披风 X 旋转角度）逻辑暂不可用，待迁移到 PlayerCapeModel.setupAnim
 
     // helper func
     @Unique
@@ -118,15 +100,5 @@ public class CapeFeatureRendererMixin {
             return mcr.getCapeBaseRotateAngle(player);
         }
         return 0.0f;
-    }
-
-    @Unique
-    private boolean NeedModifyXRotationAngle(AbstractClientPlayer player) {
-        IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
-        if (curForm instanceof ModifyCapeRender mcr) {
-            return mcr.NeedModifyXRotationAngle();
-        } else {
-            return curForm.getBodyType() == PlayerFormBodyType.FERAL;
-        }
     }
 }

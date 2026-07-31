@@ -35,7 +35,8 @@ public abstract class EntityLootingMixin {
         return null;
     }
 
-    @ModifyArg(method = "dropFromLootTable", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"), index = 2)
+    // 1.21.11: dropFromLootTable 有多个重载，需用完整描述符限定到带 Consumer 参数的那个
+    @ModifyArg(method = "dropFromLootTable(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;ZLnet/minecraft/resources/ResourceKey;Ljava/util/function/Consumer;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/loot/LootTable;getRandomItems(Lnet/minecraft/world/level/storage/loot/LootParams;JLjava/util/function/Consumer;)V"), index = 2)
     private Consumer<ItemStack> modifyLootTableArgs(Consumer<ItemStack> lootConsumer) {
         return this::DropLootStack;
     }

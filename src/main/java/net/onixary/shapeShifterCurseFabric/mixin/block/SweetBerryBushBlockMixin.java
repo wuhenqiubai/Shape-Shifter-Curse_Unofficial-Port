@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.SweetBerryBushBlock;
@@ -19,13 +20,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // 修改甜浆果丛方块行为
 @Mixin(value = SweetBerryBushBlock.class, priority = 1001)
 public abstract class SweetBerryBushBlockMixin {
+    // 1.21.11: entityInside 增加 InsideBlockEffectApplier/boolean 参数；伤害调用从 hurt 改为 hurtServer
     @Inject(
             method = "entityInside",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
+                    target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
             cancellable = true
     )
-    private void preventBerryDamage(BlockState state, Level world, BlockPos pos, Entity entity, CallbackInfo ci) {
+    private void preventBerryDamage(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier applier, boolean bl, CallbackInfo ci) {
         if (entity instanceof Player player) {
             if (PowerHolderComponent.hasPower(player, PreventBerryEffectPower.class)) {
                 ci.cancel();

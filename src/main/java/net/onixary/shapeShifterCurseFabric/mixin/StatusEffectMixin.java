@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -83,7 +84,7 @@ public class StatusEffectMixin {
     }
 
     @Inject(method = "applyEffectTick", at = @At("HEAD"), cancellable = true)
-    private void applyUpdateEffect(LivingEntity entity, int amplifier, CallbackInfoReturnable<Boolean> cir) {
+    private void applyUpdateEffect(ServerLevel serverLevel, LivingEntity entity, int amplifier, CallbackInfoReturnable<Boolean> cir) {
         MobEffect realThis = (MobEffect)(Object)this;
         if (applyEffect(realThis, entity, null, null, amplifier, 0.0, false)) {
             cir.cancel();
@@ -91,7 +92,7 @@ public class StatusEffectMixin {
     }
 
     @Inject(method = "applyInstantenousEffect", at = @At("HEAD"), cancellable = true)
-    private void applyInstantEffect(Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, CallbackInfo ci) {
+    private void applyInstantEffect(ServerLevel serverLevel, Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, CallbackInfo ci) {
         MobEffect realThis = (MobEffect)(Object)this;
         if (applyEffect(realThis, target, source, attacker, amplifier, proximity, true)) {
             ci.cancel();

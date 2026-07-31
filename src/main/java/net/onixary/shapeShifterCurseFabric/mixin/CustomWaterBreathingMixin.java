@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.core.particles.ParticleTypes;
@@ -118,12 +117,15 @@ public final class CustomWaterBreathingMixin {
             }
         }
 
-        @ModifyExpressionValue(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"), method = "turtleHelmetTick")
-        public boolean isSubmergedInProxy(boolean submerged) {
+        // 1.21.11: turtleHelmetTick 内不再调用 isEyeInFluid（该检查已上移到 Player.tick() 的调用处），
+        // 原 @ModifyExpressionValue 无法再映射到该调用，改为在 turtleHelmetTick 入口直接取消：
+        // 因为 turtleHelmetTick 仅当 !isEyeInFluid(WATER) && 戴着海龟壳 时才会被调用，
+        // 拥有 CustomWaterBreathingPower 时取消它等价于"陆地上不再给予水下呼吸"，保持鱼鳃陆地缺氧机制
+        @Inject(method = "turtleHelmetTick", at = @At("HEAD"), cancellable = true)
+        public void preventTurtleHelmetWaterBreathing(CallbackInfo ci) {
             if(PowerHolderComponent.getPowers(this, CustomWaterBreathingPower.class).stream().anyMatch(Power::isActive)) {
-                return !submerged;
+                ci.cancel();
             }
-            return submerged;
         }
     }
 }

@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
@@ -15,8 +16,11 @@ import java.util.List;
 @Mixin(LivingEntity.class)
 public class LivingEntityBurnDamageMixin {
 
-    @ModifyArg(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V"), index = 1)
-    private float modifyBurnDamage(DamageSource source, float amount) {
+    // 1.21.11: 伤害入口重构为 hurtServer(ServerLevel, DamageSource, float)，
+    // 实际伤害经 actuallyHurt(ServerLevel, DamageSource, float) 结算。这里在 hurtServer 内的
+    // actuallyHurt 调用点修改伤害参数（默认匹配 hurtServer 内全部 actuallyHurt 调用）。
+    @ModifyArg(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"), index = 2)
+    private float modifyBurnDamage(ServerLevel serverLevel, DamageSource source, float amount) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
         if (entity.isOnFire() && (source.is(DamageTypeTags.IS_FIRE)

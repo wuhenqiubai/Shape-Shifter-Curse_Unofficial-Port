@@ -17,7 +17,8 @@ public abstract class LikeWaterMixin extends Entity {
         super(type, world);
     }
 
-    @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getFluidFallingAdjustedMovement(DZLnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
+    // 1.21.11 travel 拆分为 travelInWater/travelInAir，getFluidFallingAdjustedMovement 在 travelInWater 内调用
+    @Redirect(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getFluidFallingAdjustedMovement(DZLnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
     public Vec3 method_26317Proxy(LivingEntity entity, double d, boolean bl, Vec3 vec3d) {
         Vec3 oldReturn = entity.getFluidFallingAdjustedMovement(d, bl, vec3d);
         if(OriginsPowerTypes.LIKE_WATER.isActive(this)) {

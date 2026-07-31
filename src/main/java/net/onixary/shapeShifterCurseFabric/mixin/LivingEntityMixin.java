@@ -1,13 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
@@ -55,8 +54,9 @@ public abstract class LivingEntityMixin {
 
     @Shadow protected abstract void checkFallDamage(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition);
 
+    // 1.21.11: blockUsingShield 已更名为 blockUsingItem(ServerLevel, LivingEntity)
     @Shadow
-    protected abstract void blockUsingShield(LivingEntity attacker);
+    protected abstract void blockUsingItem(ServerLevel serverLevel, LivingEntity attacker);
 
     @Inject(
             method = "die",
@@ -181,12 +181,13 @@ public abstract class LivingEntityMixin {
      * used in form's falling protection powers.
      */
     @ModifyVariable(
-            method = "calculateFallDamage(FF)I",
+            method = "calculateFallDamage(DF)I",
             at = @At("HEAD"),
             argsOnly = true,
             ordinal = 0
     )
-    private float modifyFallDistanceForDamageCalc(float fallDistance) {
+    // 1.21.11: calculateFallDamage 首参由 float 改为 double（int calculateFallDamage(double, float)）
+    private double modifyFallDistanceForDamageCalc(double fallDistance) {
         LivingEntity self = (LivingEntity) (Object) this;
 
         List<FallingProtectionPower> powers = PowerHolderComponent.getPowers(self, FallingProtectionPower.class);
@@ -201,7 +202,7 @@ public abstract class LivingEntityMixin {
             }
         }
 
-        return Math.max(0f, fallDistance - maxProtection);
+        return Math.max(0.0D, fallDistance - maxProtection);
     }
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z",
@@ -218,7 +219,9 @@ public abstract class LivingEntityMixin {
     }
 
     // Origins的LikeWaterPower
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V", ordinal = 1))
+    // 1.21.11: travel 重构拆分为 travelInAir / travelInFluid / travelFallFlying，
+    // 原 travel 内的 setDeltaMovement(流体下落调整) 调用现在位于 travelInWater
+    @ModifyArg(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"))
     public Vec3 likeWaterMixin(Vec3 movementInput, @Local(ordinal = 0) double d) {
         LivingEntity self = (LivingEntity) (Object) this;
         if(AdditionalPowers.LIKE_WATER.isActive((LivingEntity) (Object) this)) {
@@ -246,7 +249,7 @@ public abstract class LivingEntityMixin {
         return this.getMovementSpeed() * 0.2f;  // g * (this.getMovementSpeed() / 0.1f) 或者 0.10000000149011612f g = 0.02f
     }*/
 
-    @ModifyArg(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"), index = 0)
+    @ModifyArg(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"), index = 0)
     private float ModifyInWaterSpeed(float g) {
         if ((LivingEntity)(Object)this instanceof Player player) {
             // g -> 水中速度
@@ -276,7 +279,7 @@ public abstract class LivingEntityMixin {
         return g;
     }
 
-    @ModifyArgs(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;", ordinal = 0))
+    @ModifyArgs(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;", ordinal = 0))
     private void modifyInWaterFlexibility(Args args) {
         if ((LivingEntity)(Object)this instanceof Player player) {
             double targetSpeedX = args.get(0);
@@ -316,9 +319,10 @@ public abstract class LivingEntityMixin {
     }
 
     @ModifyVariable(method = "causeFallDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private float handleFallDamageA(float fallDistance) {
-        float finalV = applyModifier(ModifyFallDamagePower.class, fallDistance, ModifyFallDamagePower::getModifiers_FallDistance);
-        return Math.max(0f, finalV);
+    // 1.21.11: causeFallDamage(double fallDistance, float multiplier, DamageSource) 首参改为 double
+    private double handleFallDamageA(double fallDistance) {
+        float finalV = applyModifier(ModifyFallDamagePower.class, (float) fallDistance, ModifyFallDamagePower::getModifiers_FallDistance);
+        return Math.max(0.0D, finalV);
     }
 
     @ModifyVariable(method = "causeFallDamage", at = @At("HEAD"), ordinal = 1, argsOnly = true)
@@ -345,26 +349,18 @@ public abstract class LivingEntityMixin {
     //     return finalDamage;
     // }
 
-    // 新方案 修改原版盾牌检查函数 对于伤害防护兼容性强 但是使用了Redirect(需要防止玩家当前使用的盾牌不会受损) 可能兼容性不太高
-    @Unique
-    private boolean bypassNextShieldDamage = false;
-
-    @Inject(method = "isDamageSourceBlocked", at = @At("HEAD"), cancellable = true)
-    private void blockedByShield(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+    // 1.21.11: 伤害入口重构为 hurtServer(ServerLevel, DamageSource, float)，
+    // isDamageSourceBlocked 与 hurtCurrentlyUsedShield 均已移除，盾牌格挡逻辑并入 applyItemBlocking(ServerLevel, DamageSource, float)。
+    // 虚拟护盾改为在 applyItemBlocking 头部直接返回全额伤害（视为被完全格挡）：
+    // 既不会真正扣血，也不会走真实盾牌的耐久损耗（原 bypassNextShieldDamage 的目的）。
+    @Inject(method = "applyItemBlocking", at = @At("HEAD"), cancellable = true)
+    private void blockedByShield(ServerLevel serverLevel, DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
         LivingEntity realThis = (LivingEntity) (Object) this;
         for (VirtualShieldPower power : PowerHolderComponent.getPowers(realThis, VirtualShieldPower.class)) {
             if (power.blockDamage(source)) {
-                this.bypassNextShieldDamage = true;
-                cir.setReturnValue(true);
+                cir.setReturnValue(amount);
+                return;
             }
         }
-    }
-
-    @WrapOperation(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hurtCurrentlyUsedShield(F)V"))
-    private void damageShield(LivingEntity instance, float amount, Operation<Void> original) {
-        if (!this.bypassNextShieldDamage) {
-            original.call(instance, amount);
-        }
-        this.bypassNextShieldDamage = false;
     }
 }

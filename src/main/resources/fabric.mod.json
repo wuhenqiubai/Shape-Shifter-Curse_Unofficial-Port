@@ -141,7 +141,7 @@
     "fabricloader": ">=${loader_version}",
     "fabric": ">=0.141.0",
     "minecraft": "${minecraft_version}",
-    "pehkui": ">=3.8.3",
+    "pehkui": ">=3.8.3+1.14.4-1.21.11",
     "player_animation_library": ">=1.1.9",
     "geckolib": ">=5.4.0"
   },

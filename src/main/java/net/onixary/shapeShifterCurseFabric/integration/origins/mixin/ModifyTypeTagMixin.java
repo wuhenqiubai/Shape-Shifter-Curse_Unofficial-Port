@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Intercepts {@link EntityType#is(TagKey)} to also check
  * {@link ModifyTypeTagPower}. The entity context is provided via
  * {@link ModifyTypeTagPower#CURRENT_ENTITY} ThreadLocal, which is
- * set by {@link InTagConditionMixin} before the tag check.
+ * set by the calio InTagConditionMixin before the tag check.
  */
 @Mixin(EntityType.class)
 public abstract class ModifyTypeTagMixin {
