@@ -1,108 +1,172 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.PlayerModelPart;
+import net.minecraft.world.entity.player.PlayerModelType;
+import net.onixary.shapeShifterCurseFabric.integration.EMFIntegration;
+import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
+import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import software.bernie.geckolib.cache.model.BakedGeoModel;
 import software.bernie.geckolib.cache.model.GeoBone;
+import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
+import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import static net.onixary.shapeShifterCurseFabric.util.ClientUtils.isOpenInventoryScreen;
-
-public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A extends HumanoidModel<T>> extends RenderLayer<T, M> {
-    public FormRenderFeature(RenderLayerParent<T, M> context) {
+/**
+ * 1.21.11 渲染管线（submit）适配版 FormRenderFeature。
+ * 主渲染通过 GL5 GeoObjectRenderer.performRenderPass 走 SubmitNodeCollector，
+ * 骨骼操作在 GL5 的 adjustModelBonesForRender（BoneUpdater）钩子中执行。
+ */
+public class FormRenderFeature<S extends EntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
+    public FormRenderFeature(RenderLayerParent<S, M> context) {
         super(context);
     }
 
     private static final boolean IS_FIRST_PERSON_MOD_LOADED = FabricLoader.getInstance().isModLoaded("firstperson");
-    private static final boolean BetterCombatInstalled = FabricLoader.getInstance().isModLoaded("bettercombat");
     private static final boolean IRISInstalled = FabricLoader.getInstance().isModLoaded("iris");
     private static final boolean ImmediatelyFastInstalled = FabricLoader.getInstance().isModLoaded("immediatelyfast");
 
-    @Override
-    public void render(PoseStack matrices, MultiBufferSource vertexConsumers, int light, T entity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        if (entity instanceof AbstractClientPlayer abstractClientPlayerEntity) {
-            boolean hasOutline = Minecraft.getInstance().shouldEntityAppearGlowing(abstractClientPlayerEntity);
-            if (Minecraft.getInstance().options.getCameraType().isFirstPerson() && IS_FIRST_PERSON_MOD_LOADED) {
-                if (abstractClientPlayerEntity == Minecraft.getInstance().player) {
-                    hasOutline = false;
-                }
-            }
-            if (abstractClientPlayerEntity.isInvisible() || abstractClientPlayerEntity.isSpectator()) { return; }
-            List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(abstractClientPlayerEntity);
-            for (FormRenderer formRenderer : formRendererList) {
-                if (formRenderer == null) {
-                    continue;
-                }
-                AvatarRenderer playerEntityRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(abstractClientPlayerEntity);
-                PlayerModel playerEntityModel = (PlayerModel) playerEntityRenderer.getModel();
-                FormModel formModel = (FormModel) formRenderer.getGeoModel();
-                FormAnimatable formAnimatable = formRenderer.realAnimatable;
-                formRenderer.setPlayer(abstractClientPlayerEntity, playerEntityModel.slim);
-                matrices.pushPose();
-                matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
-                matrices.translate(0, -1.51f, 0);
-                matrices.translate(-0.5, -0.5, -0.5);
-                formModel.AnimationSystem.beforeRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, matrices, vertexConsumers, light, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                formModel.AnimationSystem.processAnimation(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                // 渲染部分
-                formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderType.entityTranslucent(formModel.getTextureResource(formAnimatable)), null, light, tickDelta);
-                if (formModel.getFullbrightTextureResource(formAnimatable) != null) {
-                    // GeckoLib 的 handleAnimations 在第一次 render 时会覆盖 processAnimation 设的骨骼
-                    // 第二次 render 虽然跳过了 handleAnimations（重渲染保护），但骨骼已经不对了
-                    // 所以在两次 render 之间重新 processAnimation 恢复正确骨骼
-                    formModel.AnimationSystem.processAnimation(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                    formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderType.entityTranslucentEmissive(formModel.getFullbrightTextureResource(formAnimatable)), null, Integer.MAX_VALUE - 1, tickDelta);
-                }
-                if (hasOutline) {
-                    formRenderer.render(matrices, formAnimatable, vertexConsumers, RenderType.outline(formModel.getTextureResource(formAnimatable)), vertexConsumers.getBuffer(RenderType.outline(formModel.getTextureResource(formAnimatable))), light, tickDelta);
-                }
-                formModel.AnimationSystem.afterRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, matrices, vertexConsumers, light, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-                matrices.popPose();
-                formModel.AnimationSystem.finishRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, matrices, vertexConsumers, light, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
-            }
-        }
+    private static boolean isSlim(AbstractClientPlayer player) {
+        return player.getSkin().model() == PlayerModelType.SLIM;
     }
 
-    // 处理 BonePart 隐藏
-    public static void rM_PartA(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
+    @Override
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, S entityRenderState, float f, float g) {
+        if (!(entityRenderState instanceof AvatarRenderState avatarRenderState)) return;
+        Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
+        if (!(entity instanceof AbstractClientPlayer player)) return;
+        if (player.isInvisible() || player.isSpectator()) return;
+        if (!(getParentModel() instanceof PlayerModel playerModel)) return;
+        AvatarRenderer avatarRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+        boolean slim = isSlim(player);
+
+        // EMF 暂停（feral 形态/第一人称时暂停 EMF 动画）
+        boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;
+        if (!pause && IS_FIRST_PERSON_MOD_LOADED
+                && Minecraft.getInstance().options.getCameraType().isFirstPerson()
+                && player == Minecraft.getInstance().player) {
+            pause = true;
+        }
+        if (pause) EMFIntegration.pauseAllAnimations(player);
+
+        // 隐藏 vanilla 部件（form 模型覆盖时）
+        rM_PartA(avatarRenderer, player, playerModel, poseStack, i);
+
+        boolean hasOutline = Minecraft.getInstance().shouldEntityAppearGlowing(player);
+        List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getLevelRenderState().cameraRenderState;
+        float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        float limbAngle = avatarRenderState.walkAnimationPos;
+        float limbDistance = avatarRenderState.walkAnimationSpeed;
+
+        // beforeRender（tailDrag 插值等）
+        for (FormRenderer formRenderer : formRendererList) {
+            if (formRenderer == null) continue;
+            formRenderer.realModel.AnimationSystem.beforeRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+        }
+
+        for (FormRenderer formRenderer : formRendererList) {
+            if (formRenderer == null) {
+                continue;
+            }
+            FormModel formModel = formRenderer.realModel;
+            FormAnimatable formAnimatable = formRenderer.realAnimatable;
+            formRenderer.setPlayer(player, slim);
+
+            poseStack.pushPose();
+            poseStack.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
+            poseStack.translate(0, -1.51f, 0);
+            poseStack.translate(-0.5, -0.5, -0.5);
+
+            // 主通道
+            submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, i, partialTick,
+                    FormRenderer.CHANNEL_NORMAL, player, limbAngle, limbDistance, f, g);
+            // fullbright 通道
+            if (formModel.getFullBrightTextureResource(slim) != null) {
+                submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, Integer.MAX_VALUE - 1, partialTick,
+                        FormRenderer.CHANNEL_FULLBRIGHT, player, limbAngle, limbDistance, f, g);
+            }
+            // outline 通道
+            if (hasOutline) {
+                submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, i, partialTick,
+                        FormRenderer.CHANNEL_OUTLINE, player, limbAngle, limbDistance, f, g);
+            }
+
+            poseStack.popPose();
+        }
+
+        // afterRender + finishRender
+        for (FormRenderer formRenderer : formRendererList) {
+            if (formRenderer == null) continue;
+            formRenderer.realModel.AnimationSystem.afterRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+            formRenderer.realModel.AnimationSystem.finishRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+        }
+
+        // overlay/emissive 纹理（vanilla PlayerModel 额外通道）
+        rM_PartB(avatarRenderer, player, playerModel, avatarRenderState, poseStack, submitNodeCollector, i);
+
+        if (pause) EMFIntegration.resumeAnimations(player);
+    }
+
+    private void submitPass(FormRenderer formRenderer, FormAnimatable formAnimatable, PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
+                            CameraRenderState cameraState, int light, float partialTick, int channel, Player player,
+                            float limbAngle, float limbDistance, float headYaw, float headPitch) {
+        GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
+        formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
+        rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
+        rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
+        rs.addGeckolibData(FormRenderer.TICKET_LIMB_ANGLE, limbAngle);
+        rs.addGeckolibData(FormRenderer.TICKET_LIMB_DISTANCE, limbDistance);
+        rs.addGeckolibData(FormRenderer.TICKET_HEAD_YAW, headYaw);
+        rs.addGeckolibData(FormRenderer.TICKET_HEAD_PITCH, headPitch);
+        formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, null);
+    }
+
+    // 处理 BonePart 隐藏（vanilla PlayerModel 部件）
+    public static void rM_PartA(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, PlayerModel playerEntityModel, PoseStack matrixStack, int i) {
         if (player.isSpectator()) {
-            PlayerModel model = (PlayerModel) playerEntityRenderer.getModel();
-            model.hat.skipDraw = false;
-            model.head.skipDraw = false;
-            model.body.skipDraw = false;
-            model.jacket.skipDraw = false;
-            model.leftArm.skipDraw = false;
-            model.leftSleeve.skipDraw = false;
-            model.rightArm.skipDraw = false;
-            model.rightSleeve.skipDraw = false;
-            model.leftLeg.skipDraw = false;
-            model.leftPants.skipDraw = false;
-            model.rightLeg.skipDraw = false;
-            model.rightPants.skipDraw = false;
+            playerEntityModel.hat.skipDraw = false;
+            playerEntityModel.head.skipDraw = false;
+            playerEntityModel.body.skipDraw = false;
+            playerEntityModel.jacket.skipDraw = false;
+            playerEntityModel.leftArm.skipDraw = false;
+            playerEntityModel.leftSleeve.skipDraw = false;
+            playerEntityModel.rightArm.skipDraw = false;
+            playerEntityModel.rightSleeve.skipDraw = false;
+            playerEntityModel.leftLeg.skipDraw = false;
+            playerEntityModel.leftPants.skipDraw = false;
+            playerEntityModel.rightLeg.skipDraw = false;
+            playerEntityModel.rightPants.skipDraw = false;
             return;
         }
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        PlayerModel playerEntityModel = (PlayerModel) playerEntityRenderer.getModel();
         boolean hatHidden = !player.isModelPartShown(PlayerModelPart.HAT);
         boolean headHidden = false;
         boolean bodyHidden = false;
@@ -115,27 +179,6 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         boolean leftPantsHidden = !player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
         boolean rightLegHidden = false;
         boolean rightPantsHidden = !player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
-        // Better Combat 修复
-//        if (FirstPersonMode.isFirstPersonPass() && ClientConfig.enableBetterCombatFix && player == MinecraftClient.getInstance().getCameraEntity()) {
-//            AnimationApplier animationApplier = ((IAnimatedPlayer) player).playerAnimator_getAnimation();
-//            FirstPersonConfiguration config = animationApplier.getFirstPersonConfiguration();
-//            hatHidden = true;
-//            headHidden = true;
-//            bodyHidden = true;
-//            jacketHidden = true;
-//            if (!config.isShowLeftArm()) {
-//                leftArmHidden = true;
-//                leftSleeveHidden = true;
-//            }
-//            if (!config.isShowRightArm()) {
-//                rightArmHidden = true;
-//                rightSleeveHidden = true;
-//            }
-//            leftLegHidden = true;
-//            leftPantsHidden = true;
-//            rightLegHidden = true;
-//            rightPantsHidden = true;
-//        }
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             hatHidden |= formModel.Hidden_Hat;
@@ -165,39 +208,30 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         playerEntityModel.rightPants.visible = !rightPantsHidden;
     }
 
-    public static void rM_PartB(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, float f, float g, PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i) {
-        int p = OverlayTexture.pack(OverlayTexture.u(playerEntityRenderer.getWhiteOverlayProgress(player, g)), OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
+    // 渲染 vanilla PlayerModel 的额外纹理（form overlay/emissive），1.21.11 submit 模式
+    public static void rM_PartB(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, PlayerModel playerEntityModel,
+                                AvatarRenderState avatarRenderState, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, int i) {
+        int p = LivingEntityRenderer.getOverlayCoords(avatarRenderState, 0.0F);
         if (player.isSpectator()) {
             return;
         }
+        boolean bl2 = avatarRenderState.isInvisibleToPlayer;
+        int color = bl2 ? 0x26FFFFFF : 0xFFFFFFFF;
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
+        boolean slim = isSlim(player);
         for (FormRenderer formRenderer : formRendererList) {
-            PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            Identifier overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
-            Identifier emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
-            boolean bl = playerEntityRenderer.isBodyVisible(player);
-            boolean bl2 = !bl && !player.isInvisibleTo(Minecraft.getInstance().player);
+            Identifier overlayTexture = formModel.getOverlayTextureResource(slim);
+            Identifier emissiveTexture = formModel.getEmissiveTextureResource(slim);
             if (overlayTexture != null) {
-                RenderType l = null;
-                if ((FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled) {
-                    l = RenderType.entityCutoutNoCullZOffset(overlayTexture);
-                } else {
-                    l = RenderType.entityCutout(overlayTexture);
-                }
-                if (ImmediatelyFastInstalled && isOpenInventoryScreen) {
-                    matrixStack.pushPose();
-                    matrixStack.scale(1.02f, 1.02f, 1.02f);
-                    playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0x26FFFFFF : 0xFFFFFFFF);
-                    matrixStack.popPose();
-                } else {
-                    playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0x26FFFFFF : 0xFFFFFFFF);
-                }
+                RenderType l = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
+                        ? RenderTypes.entityCutoutNoCullZOffset(overlayTexture)
+                        : RenderTypes.entityCutout(overlayTexture);
+                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor, null);
             }
             if (emissiveTexture != null) {
-                RenderType l = RenderType.entityTranslucentEmissive(emissiveTexture);
-                playerEntityModel.renderToBuffer(matrixStack, vertexConsumerProvider.getBuffer(l), i, p, bl2 ? 0x26FFFFFF : 0xFFFFFFFF);
-
+                RenderType l = RenderTypes.entityTranslucentEmissive(emissiveTexture);
+                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor, null);
             }
             playerEntityModel.hat.skipDraw = false;
             playerEntityModel.head.skipDraw = false;
@@ -214,38 +248,14 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         }
     }
 
-    private static void renderGeoBone(FormRenderer formRenderer, GeoBone geoBone, PoseStack matrixStack, FormAnimatable formAnimatable, MultiBufferSource vertexConsumerProvider, RenderType renderLayer, VertexConsumer vertexConsumer, int packedLight) {
-        renderGeoBone(formRenderer, geoBone, matrixStack, formAnimatable, vertexConsumerProvider, renderLayer, vertexConsumer, packedLight, 1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
-    private static void renderGeoBone(FormRenderer formRenderer, GeoBone geoBone, PoseStack matrixStack, FormAnimatable formAnimatable, MultiBufferSource vertexConsumerProvider, RenderType renderLayer, VertexConsumer vertexConsumer, int packedLight, float R, float G, float B, float A) {
-        FormModel formModel = (FormModel) formRenderer.getGeoModel();
-        BakedGeoModel bakedGeoModel = formModel.getBakedModel(formModel.getModelResource((GeoRenderState) formAnimatable));
-        float TickDelta = Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
-        int packedOverlay = formRenderer.getPackedOverlay(formAnimatable, 0.0F, TickDelta);
-        matrixStack.translate(-0.5, -0.51, -0.5); // 在 GeoObjectRenderer.preRender 中会 poseStack.translate(0.5, 0.51, 0.5) 因此需要手动调整
-        int colour = ((int) (A * 255.0f) << 24) | ((int) (R * 255.0f) << 16) | ((int) (G * 255.0f) << 8) | ((int) (B * 255.0f));
-        formRenderer.preRender(matrixStack, formAnimatable, bakedGeoModel, vertexConsumerProvider, vertexConsumer, false, TickDelta, packedLight, packedOverlay, colour);
-        if (formRenderer.firePreRenderEvent(matrixStack, bakedGeoModel, vertexConsumerProvider, TickDelta, packedLight)) {
-            formRenderer.preApplyRenderLayers(matrixStack, formAnimatable, bakedGeoModel, renderLayer, vertexConsumerProvider, vertexConsumer, (float)packedLight, packedLight, packedOverlay);
-            matrixStack.pushPose();
-            formRenderer.updateAnimatedTextureFrame(formAnimatable);
-            formRenderer.renderRecursively(matrixStack, formAnimatable, geoBone, renderLayer, vertexConsumerProvider, vertexConsumer, false, TickDelta, packedLight, packedOverlay, colour);
-            matrixStack.popPose();
-            formRenderer.applyRenderLayers(matrixStack, formAnimatable, bakedGeoModel, renderLayer, vertexConsumerProvider, vertexConsumer, TickDelta, packedLight, packedOverlay);
-            formRenderer.postRender(matrixStack, formAnimatable, bakedGeoModel, vertexConsumerProvider, vertexConsumer, false, TickDelta, packedLight, packedOverlay, colour);
-            formRenderer.firePostRenderEvent(matrixStack, bakedGeoModel, vertexConsumerProvider, TickDelta, packedLight);
-        }
-    }
-
-    public static void rFPM_PartA(AvatarRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
+    public static void rFPM_PartA(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        boolean IsRenderRight = arm.equals(playerEntityRenderer.getModel().rightArm);
+        PlayerModel playerEntityModel = (PlayerModel) playerEntityRenderer.getModel();
+        boolean IsRenderRight = arm.equals(playerEntityModel.rightArm);
         boolean ArmHidden = false;
         boolean SleeveHidden = IsRenderRight ? !player.isModelPartShown(PlayerModelPart.RIGHT_SLEEVE) : !player.isModelPartShown(PlayerModelPart.LEFT_SLEEVE);
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
-            // 设置手臂组件是否显示
             if (IsRenderRight) {
                 ArmHidden |= formModel.Hidden_RightArm;
                 SleeveHidden |= formModel.Hidden_RightSleeve;
@@ -258,50 +268,93 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         sleeve.visible = !SleeveHidden;
     }
 
-    public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
-        boolean IsRenderRight = arm.equals(playerEntityRenderer.getModel().rightArm);
+    // 第一人称手臂：自定义手动渲染（GL5 BoneSnapshot + 隐藏非手臂骨骼 + positionAndRender 语义）
+    public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
+        boolean IsRenderRight = arm.equals(((PlayerModel) playerEntityRenderer.getModel()).rightArm);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getLevelRenderState().cameraRenderState;
+        float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+        boolean slim = isSlim(player);
         for (FormRenderer formRenderer : formRendererList) {
-            @Nullable GeoBone geoBone = null;
-            if (formRenderer == null) {return;}
-            PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
+            if (formRenderer == null) {
+                return;
+            }
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             FormAnimatable formAnimatable = formRenderer.realAnimatable;
-            formRenderer.setPlayer(player, playerEntityModel.slim);
+            formRenderer.setPlayer(player, slim);
+
+            // 先确定手臂骨骼（缓存查找，不依赖 render pass）
+            GeoBone armGeoBone = formModel.AnimationSystem.beforeRenderFirstPerson(null, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+            String armBoneName = armGeoBone != null ? armGeoBone.name() : null;
+
             matrices.pushPose();
             matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             matrices.translate(0, -1.51f, 0);
-            geoBone = formModel.AnimationSystem.beforeRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
-            geoBone = formModel.AnimationSystem.processAnimationFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
-            if (geoBone == null) {
-                formModel.AnimationSystem.afterRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
-                matrices.popPose();
-                continue;
+
+            // 正常通道 + fullbright 通道（单骨骼渲染）
+            submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, light, partialTick,
+                    FormRenderer.CHANNEL_NORMAL, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
+            if (formModel.getFullBrightTextureResource(slim) != null) {
+                submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, Integer.MAX_VALUE - 1, partialTick,
+                        FormRenderer.CHANNEL_FULLBRIGHT, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
             }
-            RenderType renderLayerNormal = RenderType.entityTranslucent(formModel.getTextureResource(formAnimatable));
-            renderGeoBone(formRenderer, geoBone, matrices, formAnimatable, vertexConsumers, renderLayerNormal, vertexConsumers.getBuffer(renderLayerNormal), light);
-            RenderType renderLayerFullBright = RenderType.entityTranslucent(formModel.getFullbrightTextureResource(formAnimatable));
-            renderGeoBone(formRenderer, geoBone, matrices, formAnimatable, vertexConsumers, renderLayerFullBright, vertexConsumers.getBuffer(renderLayerFullBright), Integer.MAX_VALUE - 1);
+
             matrices.popPose();
 
-            // Render Overlay 藏得够深的 要不是发现悦灵手臂无法显示我都不会发现
-            // 从 PlayerEntityRendererMixin.renderOverlayTexture 提取的代码并进行修改
-            Identifier OverlayTextureID = formModel.getOverlayTextureResource(playerEntityModel.slim);
+            // Overlay 纹理（vanilla 手臂 overlay）
+            Identifier OverlayTextureID = formModel.getOverlayTextureResource(slim);
             if (OverlayTextureID != null) {
-                // 玩家看自己绝对是非隐身
-                // boolean bl = this.isVisible(player);
-                // boolean bl2 = !bl && !player.isInvisibleTo(MinecraftClient.getInstance().player);
-                RenderType OverlayLayer = null;
-                if ((FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled) {
-                    OverlayLayer = RenderType.entityCutoutNoCullZOffset(OverlayTextureID);
-                } else {
-                    OverlayLayer = RenderType.entityCutout(OverlayTextureID);
-                }
-                float animProgress = player.hurtTime > 0 ? (float) player.hurtTime - Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true) : 0;
+                RenderType OverlayLayer = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
+                        ? RenderTypes.entityCutoutNoCullZOffset(OverlayTextureID)
+                        : RenderTypes.entityCutout(OverlayTextureID);
+                float animProgress = player.hurtTime > 0 ? (float) player.hurtTime - partialTick : 0;
                 int OverlayInt = OverlayTexture.pack(OverlayTexture.u(animProgress), OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
-                arm.render(matrices, vertexConsumers.getBuffer(OverlayLayer), light, OverlayInt);
+                submitNodeCollector.submitModelPart(arm, matrices, OverlayLayer, light, OverlayInt, null);
             }
-            formModel.AnimationSystem.afterRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+            formModel.AnimationSystem.afterRenderFirstPerson(armGeoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+        }
+    }
+
+    private static void submitArmPass(FormRenderer formRenderer, FormAnimatable formAnimatable, PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
+                                      CameraRenderState cameraState, int light, float partialTick, int channel, Player player,
+                                      String armBoneName, @Nullable GeoBone armGeoBone, ModelPart arm, ModelPart sleeve, AvatarRenderer renderer) {
+        GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
+        formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
+        rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
+        rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
+        formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, (renderPassInfo, snapshots) -> {
+            FormModel formModel = formRenderer.realModel;
+            formModel.beginRenderPass(snapshots);
+            try {
+                if (armBoneName != null) {
+                    hideNonArmBones(renderPassInfo, snapshots, armBoneName);
+                }
+                formModel.AnimationSystem.processAnimationFirstPerson(armGeoBone, formRenderer, formModel, renderer, player, arm, sleeve);
+            } finally {
+                formModel.endRenderPass();
+            }
+        });
+    }
+
+    // 隐藏模型中除指定手臂骨骼子树以外的所有骨骼（等价于 renderRecursively(armBone) 语义）
+    private static void hideNonArmBones(RenderPassInfo<?> renderPassInfo, BoneSnapshots snapshots, String armBoneName) {
+        BakedGeoModel model = renderPassInfo.model();
+        GeoBone armBone = model.getBone(armBoneName).orElse(null);
+        if (armBone == null) return;
+        Set<GeoBone> ancestors = new HashSet<>();
+        for (GeoBone b = armBone; b != null; b = b.parent()) {
+            ancestors.add(b);
+        }
+        for (GeoBone topBone : model.topLevelBones()) {
+            if (ancestors.contains(topBone)) {
+                if (topBone != armBone) {
+                    // 祖先骨骼：隐藏自身几何，但保留子树（手臂可见）
+                    snapshots.get(topBone.name()).ifPresent(s -> s.skipRender(true));
+                }
+            } else {
+                // 无关骨骼：完全隐藏
+                snapshots.get(topBone.name()).ifPresent(s -> s.skipRender(true).skipChildrenRender(true));
+            }
         }
     }
 }

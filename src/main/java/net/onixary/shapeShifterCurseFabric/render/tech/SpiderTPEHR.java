@@ -7,7 +7,6 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -21,7 +20,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
     public static final String INV_STRING = "extra_hand";
 
     @Override
-    public void render(ItemInHandRenderer heldItemRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void render(ItemInHandRenderer heldItemRenderer, PoseStack matrices, SubmitNodeCollector vertexConsumers, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         ItemStack stack = AccessoryUtils.getEntitySlot(player, "auto", GROUP_STRING, INV_STRING, 0);
         if (stack == null || stack.isEmpty()) {
             return;
@@ -52,7 +51,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
             matrices.mulPose(Axis.YP.rotationDegrees(15.0F));
             matrices.translate(1.0 / 16.0F, -2.0 / 16.0F, 1.0 / 16.0F);
         }
-        heldItemRenderer.renderItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, matrices, (SubmitNodeCollector)vertexConsumers, light);
+        heldItemRenderer.renderItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, matrices, vertexConsumers, light);
 
     }
 }

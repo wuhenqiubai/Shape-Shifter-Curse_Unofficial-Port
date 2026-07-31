@@ -4,10 +4,13 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HeadedModel;
+import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.player.AvatarRenderer;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderer;
@@ -21,12 +24,24 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // NECK FEATURES FILE
 
 @Mixin(CustomHeadLayer.class)
-public class LongNeckHeadFeatureRendererMixin<T extends LivingEntity, M extends EntityModel<T> & HeadedModel> {
+public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState, M extends EntityModel<S> & HeadedModel> {
     @Unique private static FormRenderUtils.BoneBipedState headBoneState;
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("HEAD"), cancellable = true)
-    private void shape_shifter_curse$modifyHeadStateForMAS(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, T livingEntity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch, CallbackInfo ci) {
-        if (!(livingEntity instanceof AbstractClientPlayer player)) {
+    // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
+    @Unique
+    private static AbstractClientPlayer getRenderedPlayer(LivingEntityRenderState livingEntityRenderState) {
+        if (livingEntityRenderState instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
+            if (Minecraft.getInstance().level.getEntity(avatarRenderState.id) instanceof AbstractClientPlayer player) {
+                return player;
+            }
+        }
+        return null;
+    }
+
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At("HEAD"), cancellable = true)
+    private void shape_shifter_curse$modifyHeadStateForMAS(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int light, S livingEntityRenderState, float limbAngle, float limbDistance, CallbackInfo ci) {
+        AbstractClientPlayer player = getRenderedPlayer(livingEntityRenderState);
+        if (player == null) {
             return;
         }
         AvatarRenderer playerEntityRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
@@ -38,13 +53,15 @@ public class LongNeckHeadFeatureRendererMixin<T extends LivingEntity, M extends 
             return formModel.AnimationSystem instanceof IModifyHead_MAS;
         });
         if (renderer != null) {
-            headBoneState = new FormRenderUtils.BoneBipedState(playerEntityRenderer.getModel().getHead());
-            ((IModifyHead_MAS)renderer.realModel.AnimationSystem).modifyHeadPart(player, playerEntityRenderer.getModel(), renderer.realModel);
+            // AvatarRenderer 原类型下 getModel() 返回原始类型 EntityModel，玩家模型实际是 HumanoidModel，这里转回以便操作头部
+            HumanoidModel<?> playerModel = (HumanoidModel<?>) playerEntityRenderer.getModel();
+            headBoneState = new FormRenderUtils.BoneBipedState(playerModel.getHead());
+            ((IModifyHead_MAS)renderer.realModel.AnimationSystem).modifyHeadPart(player, playerModel, renderer.realModel);
         }
     }
 
-    @Inject(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At("RETURN"))
-    private void shape_shifter_curse$restoreVanillaHeadFeatureForLongNeck(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int light, T livingEntity, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch, CallbackInfo ci) {
+    @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At("RETURN"))
+    private void shape_shifter_curse$restoreVanillaHeadFeatureForLongNeck(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int light, S livingEntityRenderState, float limbAngle, float limbDistance, CallbackInfo ci) {
         if (headBoneState != null) {
             headBoneState.restore();
             headBoneState = null;

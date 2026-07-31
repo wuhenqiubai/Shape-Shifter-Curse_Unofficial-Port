@@ -14,7 +14,8 @@ import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStat
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.ON_GET_TRANSFORM_EFFECT;
@@ -232,14 +233,16 @@ public class EffectManager {
             ShapeShifterCurseFabric.LOGGER.error("Attempted to clear effect with null player");
             return false;
         }
-        Iterator<MobEffectInstance> iterator = player.getActiveEffects().iterator();
         boolean hasEffect = false;
-        for(hasEffect = false; iterator.hasNext(); hasEffect = true) {
-            MobEffectInstance effectInstance = iterator.next();
+        List<Holder<MobEffect>> toRemove = new ArrayList<>();
+        for (MobEffectInstance effectInstance : player.getActiveEffects()) {
             if (effectInstance instanceof TransformativeStatusInstance || effectInstance.getEffect().value() instanceof BaseTransformativeStatusEffect) {
-                player.onEffectRemoved(effectInstance);
-                iterator.remove();
+                toRemove.add(effectInstance.getEffect());
+                hasEffect = true;
             }
+        }
+        for (Holder<MobEffect> holder : toRemove) {
+            player.removeEffect(holder);
         }
         return hasEffect;
     }

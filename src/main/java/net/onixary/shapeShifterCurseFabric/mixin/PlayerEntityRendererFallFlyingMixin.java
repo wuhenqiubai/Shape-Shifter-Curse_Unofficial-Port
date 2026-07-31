@@ -2,19 +2,19 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.entity.state.AvatarRenderState;
-import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // 这一mixin与ViveCraft mod冲突，当其存在时禁用此mixin
@@ -26,15 +26,19 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
         super(ctx, model, shadowRadius);
     }
 
+    // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
+    @Unique
+    private static AbstractClientPlayer ssc$getRenderedPlayer(AvatarRenderState avatarRenderState) {
+        if (Minecraft.getInstance().level != null) {
+            if (Minecraft.getInstance().level.getEntity(avatarRenderState.id) instanceof AbstractClientPlayer player) {
+                return player;
+            }
+        }
+        return null;
+    }
 
     @Inject(method = "setupRotations(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;FF)V",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/PoseStack;mulPose(Lorg/joml/Quaternionf;)V"),
-            slice = {
-                @Slice(
-                        from = @At(value = "INVOKE", target = "Ljava/lang/Math;acos(D)D"),
-                        to = @At(value = "RETURN")
-                ),
-            },
+            at = @At("HEAD"),
             cancellable = true
     )
     public void setupTransformsInject(AvatarRenderState avatarRenderState, PoseStack poseStack, float f, float g, CallbackInfo ci) {
@@ -45,24 +49,25 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             return;
         }
         */
+        if (!avatarRenderState.isFallFlying) {
+            return;
+        }
+        AbstractClientPlayer abstractClientPlayerEntity = ssc$getRenderedPlayer(avatarRenderState);
+        if (abstractClientPlayerEntity == null) {
+            return;
+        }
         boolean isFeral = FormTextureUtils.getPlayerForm_Render(abstractClientPlayerEntity).getBodyType() == PlayerFormBodyType.FERAL;
         if(!isFeral){
             return;
         }
         else{
-            // 补充变量
-            Vec3 vec3d = abstractClientPlayerEntity.getViewVector(h);
-            Vec3 vec3d2 = abstractClientPlayerEntity.getDeltaMovementLerped(h);
-            double d = vec3d2.horizontalDistanceSqr();
-            double e = vec3d.horizontalDistanceSqr();
-            double l = (vec3d2.x * vec3d.x + vec3d2.z * vec3d.z) / Math.sqrt(d * e);
-            double m = vec3d2.x * vec3d.z - vec3d2.z * vec3d.x;
-
-            // Feral形态的特殊旋转
-            matrixStack.mulPose(Axis.YP.rotationDegrees((float)(Math.signum(m) * Math.acos(l)) * 180.0F / (float)Math.PI));
-            matrixStack.mulPose(Axis.XP.rotationDegrees(0.0F)); // 不向下倾斜
+            // 1.21.11 中飞行偏航角已由 extractFlightData 预计算进渲染状态（flyingYRot），
+            // 这里将其转回角度制以保持原有 Feral 形态的旋转行为
+            super.setupRotations(avatarRenderState, poseStack, f, g);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(avatarRenderState.flyingYRot)));
+            poseStack.mulPose(Axis.XP.rotationDegrees(0.0F)); // 不向下倾斜
             // 你可以在这里添加任何额外的旋转
-            matrixStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 使翅膀向上
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 使翅膀向上
             ci.cancel();
         }
     }

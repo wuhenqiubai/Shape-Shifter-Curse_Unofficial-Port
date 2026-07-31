@@ -20,25 +20,25 @@ public class TransformRelatedItems {
         IForm nowForm = FormUtils.getPlayerForm(player);
         int Tier = nowForm.getFormTier();
         if (EffectManager.hasTransformativeEffect(player)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformative_effect_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformative_effect_cure").withStyle(ChatFormatting.YELLOW));
             EffectManager.clearTransformativeEffect(player);
         }
         else if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) { }
         else if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_cure").withStyle(ChatFormatting.YELLOW));
         }
         else if (Tier == 1) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure_0").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure_0").withStyle(ChatFormatting.YELLOW));
             ShapeShifterCurseFabric.ON_TRANSFORM_BY_CURE.trigger(serverPlayer);
         }
         else if (FormUtils.InhibitorImmune.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.permanent_form_used_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.permanent_form_used_cure").withStyle(ChatFormatting.YELLOW));
         }
         else if (FormUtils.InhibitorResist.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_cure").withStyle(ChatFormatting.YELLOW));
         }
         else {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure").withStyle(ChatFormatting.YELLOW));
             ShapeShifterCurseFabric.ON_TRANSFORM_BY_CURE.trigger(serverPlayer);
         }
         IForm nextForm = nowForm._getPrevForm(player, ITransformReason.ItemReasonBuilder.apply(stack));
@@ -55,23 +55,23 @@ public class TransformRelatedItems {
         }
         IForm nowForm = FormUtils.getPlayerForm(player);
         if (EffectManager.hasTransformativeEffect(player)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformative_effect_cure").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformative_effect_cure").withStyle(ChatFormatting.YELLOW));
             EffectManager.clearTransformativeEffect(player);
         }
         else if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) { }
         else if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
         }
         else if (FormUtils.InhibitorImmune.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.permanent_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.permanent_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
         }
         else if (FormUtils.InhibitorResist.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_cure_final").withStyle(ChatFormatting.YELLOW));
             ShapeShifterCurseFabric.ON_TRANSFORM_BY_CURE_FINAL.trigger(serverPlayer);
             ShapeShifterCurseFabric.ON_TRANSFORM_BY_CURE.trigger(serverPlayer);
         }
         else {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure_final").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.transformed_by_cure_final").withStyle(ChatFormatting.YELLOW));
             ShapeShifterCurseFabric.ON_TRANSFORM_BY_CURE.trigger(serverPlayer);
         }
         IForm nextForm = nowForm._getPrevForm(player, ITransformReason.ItemReasonBuilder.apply(stack));
@@ -104,11 +104,11 @@ public class TransformRelatedItems {
         if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player) || EffectManager.playerCanHaveTransformativeEffect(player)) {
             if (EffectManager.hasTransformativeEffect(player)) {
                 EffectManager.ActiveTransformativeEffect(serverPlayer);
-                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_catalyst_attached").withStyle(ChatFormatting.YELLOW));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_catalyst_attached").withStyle(ChatFormatting.YELLOW));
                 ShapeShifterCurseFabric.ON_TRANSFORM_BY_CATALYST.trigger(serverPlayer);
             }
             else{
-                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.origin_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
             }
         }
         else if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(player)) {
@@ -116,16 +116,16 @@ public class TransformRelatedItems {
         }
         else if (FormUtils.SpecialForm.hasFlag(nowForm)) {
             // 为了这句文本 专门加了一个flag
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.sp_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.sp_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
         }
         else if (FormUtils.CatalystImmune.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.use_catalyst_when_ignore").withStyle(ChatFormatting.DARK_PURPLE));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.use_catalyst_when_ignore").withStyle(ChatFormatting.DARK_PURPLE));
         }
         else if (FormUtils.CatalystResist.hasFlag(nowForm)) {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_catalyst").withStyle(ChatFormatting.YELLOW));
         }
         else {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.use_catalyst").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.use_catalyst").withStyle(ChatFormatting.YELLOW));
         }
         IForm nextForm = nowForm._getNextForm(player, ITransformReason.ItemReasonBuilder.apply(stack));
         if (nextForm != nowForm) {
@@ -142,13 +142,13 @@ public class TransformRelatedItems {
         else if (FormUtils.CanTFToFinalForm.hasFlag(nowForm)) {
             IForm nextForm = nowForm._getNextForm(player, ITransformReason.ItemReasonBuilder.apply(stack));
             if (nextForm != nowForm) {
-                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_powerful_catalyst").withStyle(ChatFormatting.YELLOW));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.max_form_used_powerful_catalyst").withStyle(ChatFormatting.YELLOW));
                 TransformManager.startTransform(player, nextForm, null);
             } else {
-                player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.form_used_powerful_catalyst_failed").withStyle(ChatFormatting.YELLOW));
+                serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.form_used_powerful_catalyst_failed").withStyle(ChatFormatting.YELLOW));
             }
         } else {
-            player.sendSystemMessage(Component.translatable("info.shape-shifter-curse.form_used_powerful_catalyst_failed").withStyle(ChatFormatting.YELLOW));
+            serverPlayer.sendSystemMessage(Component.translatable("info.shape-shifter-curse.form_used_powerful_catalyst_failed").withStyle(ChatFormatting.YELLOW));
         }
     }
 }

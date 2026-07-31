@@ -5,7 +5,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
-import io.github.apace100.apoli.power.factory.PowerFactories;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import net.minecraft.resources.Identifier;
@@ -323,12 +322,12 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
         try {
             Identifier PowerID = Identifier.tryParse(powerData.get("type").getAsString());
             PowerFactory<Power> pf = null;
-            pf = ApoliRegistries.POWER_FACTORY.get(PowerFactories.ALIASES.resolveAlias(PowerID, id -> ApoliRegistries.POWER_FACTORY.containsKey(id)));
+            pf = ApoliRegistries.POWER_FACTORY.getOptional(PowerID).orElse(null);
             if (pf == null) {
                 ShapeShifterCurseFabric.LOGGER.warn("Power Factory is null! From {}", this.formID.toString());
                 return null;
             }
-            PowerFactory<Power>.Instance pi = pf.read(powerData);
+            PowerFactory<Power>.Instance pi = pf.read(powerData, null);
             PowerType<?> powerType = new PowerType<>(powerID, pi);
             PowerTypeRegistryAccessor.Invoke_Update(powerID, powerType);
         } catch (Exception e) {

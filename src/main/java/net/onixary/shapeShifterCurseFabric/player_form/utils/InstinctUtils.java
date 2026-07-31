@@ -49,7 +49,7 @@ public class InstinctUtils {
         }
 
         public static InstinctEffect fromNBT(CompoundTag nbt) {
-            return new InstinctEffect(Identifier.parse(nbt.getString("id")), nbt.getFloat("value"), nbt.getInt("duration"));
+            return new InstinctEffect(Identifier.parse(nbt.getStringOr("id", "")), nbt.getFloatOr("value", 0.0f), nbt.getIntOr("duration", 0));
         }
     }
     // ServerSide Data

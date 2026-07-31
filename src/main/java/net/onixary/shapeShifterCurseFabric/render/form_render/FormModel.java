@@ -13,10 +13,11 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector3d;
 import org.jspecify.annotations.NonNull;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
 import software.bernie.geckolib.cache.model.GeoBone;
 import software.bernie.geckolib.model.GeoModel;
+import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 import java.util.*;
@@ -412,103 +413,126 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public final HashMap<String, GeoBone> geoBoneCache = new HashMap<>();
 
+    // GL5 render pass 会话：BoneSnapshots 在 adjustModelBonesForRender 时注入，render 结束后清理
+    public BoneSnapshots currentSnapshots = null;
+
+    public void beginRenderPass(BoneSnapshots snapshots) {
+        this.currentSnapshots = snapshots;
+    }
+
+    public void endRenderPass() {
+        this.currentSnapshots = null;
+    }
+
+    private @Nullable BoneSnapshot getBoneSnapshot(String bone_name) {
+        if (currentSnapshots == null) return null;
+        return currentSnapshots.get(bone_name).orElse(null);
+    }
+
     public final @Nullable GeoBone getCachedGeoBone(String name) {
         GeoBone bone = geoBoneCache.get(name);
         if (bone == null) {
-            Optional<GeoBone> boneOptional = this.getBone(name);
-            if (boneOptional.isPresent()) {
-                bone = boneOptional.get();
+            Identifier modelRes = getModelResource(SlimMap.getOrDefault(this.entity, false));
+            bone = getBakedModel(modelRes).getBone(name).orElse(null);
+            if (bone != null) {
                 geoBoneCache.put(name, bone);
             }
         }
         return bone;
     }
 
-
-
-    public final GeoBone translatePositionForBone(String bone_name, Vec3 pos) {
-        var b = this.getCachedGeoBone(bone_name);
-        if (b == null) {
-            return null;
-        }
-        var posOut = new Vec3(pos.x + b.getPosX(), (float)pos.y + b.getPosY(),(float)pos.z + b.getPosZ());
-        return this.setPositionForBone(bone_name, posOut);
+    public final @Nullable GeoBone translatePositionForBone(String bone_name, Vec3 pos) {
+        BoneSnapshot s = getBoneSnapshot(bone_name);
+        if (s == null) return null;
+        s.setTranslation((float)pos.x + s.getTranslateX(), (float)pos.y + s.getTranslateY(), (float)pos.z + s.getTranslateZ());
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone setPositionForBone(String bone_name, Vec3 pos) {
-        var b = this.getCachedGeoBone(bone_name);
-        if (b == null) {
-            return null;
-        }
-        b.setPosX((float)pos.x);
-        b.setPosY((float)pos.y);
-        b.setPosZ((float)pos.z);
-        return (GeoBone) b;
+    public final @Nullable GeoBone setPositionForBone(String bone_name, Vec3 pos) {
+        BoneSnapshot s = getBoneSnapshot(bone_name);
+        if (s == null) return null;
+        s.setTranslation((float)pos.x, (float)pos.y, (float)pos.z);
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3 rot) {
-        var b = this.getCachedGeoBone(bone_name);
-        if (b == null) {
-            return null;
-        }
-        b.setRotX((float)rot.x);
-        b.setRotY((float)rot.y);
-        b.setRotZ((float)rot.z);
-        return (GeoBone) b;
+    public final @Nullable GeoBone setRotationForBone(String bone_name, Vec3 rot) {
+        BoneSnapshot s = getBoneSnapshot(bone_name);
+        if (s == null) return null;
+        s.setRotation((float)rot.x, (float)rot.y, (float)rot.z);
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone setRotationForBone(String bone_name, Vec3f rot) {
+    public final @Nullable GeoBone setRotationForBone(String bone_name, Vec3f rot) {
         return setRotationForBone(bone_name, new Vec3(rot.x(), rot.y(), rot.z()));
     }
 
-    public final GeoBone setModelPositionForBone(String bone_name, Vec3 pos) {
-        var b = this.getCachedGeoBone(bone_name);
-        if (b == null) {
-            return null;
-        }
-        b.setModelPosition(new Vector3d(pos.x, pos.y, pos.z));
-        return (GeoBone) b;
+    public final @Nullable GeoBone setModelPositionForBone(String bone_name, Vec3 pos) {
+        // GL5 中 GeoBone 无 modelPosition 概念，骨骼绑定位置由 pivot 决定，此方法仅保留签名以兼容调用方
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
+    public final @Nullable GeoBone setModelPositionForBone(String bone_name, Vec3f pos) {
         return setModelPositionForBone(bone_name, new Vec3(pos.x(), pos.y(), pos.z()));
     }
 
-    public final GeoBone setScaleForBone(String bone_name, Vec3 scale) {
-        var b = this.getCachedGeoBone(bone_name);
-        if (b == null) {
-            return null;
-        }
-        b.setScaleX((float)scale.x);
-        b.setScaleY((float)scale.y);
-        b.setScaleZ((float)scale.z);
-        return (GeoBone) b;
+    public final @Nullable GeoBone setScaleForBone(String bone_name, Vec3 scale) {
+        BoneSnapshot s = getBoneSnapshot(bone_name);
+        if (s == null) return null;
+        s.setScale((float)scale.x, (float)scale.y, (float)scale.z);
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone setScaleForBone(String bone_name, Vec3f scale) {
+    public final @Nullable GeoBone setScaleForBone(String bone_name, Vec3f scale) {
         return setScaleForBone(bone_name, new Vec3(scale.x(), scale.y(), scale.z()));
     }
 
-    public final GeoBone invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
-        var b = getCachedGeoBone(bone_name);
-        if (b == null) {return null;}
-        var r =b.getRotationVector().mul(x ? -1 : 1, y ? -1 : 1, z ? -1 : 1);
-        b.setRotX((float) r.x);
-        b.setRotY((float) r.y);
-        b.setRotZ((float) r.z);
-        return b;
+    public final @Nullable GeoBone invertRotForPart(String bone_name, boolean x, boolean y, boolean z) {
+        BoneSnapshot s = getBoneSnapshot(bone_name);
+        if (s == null) return null;
+        s.setRotation(s.getRotX() * (x ? -1 : 1), s.getRotY() * (y ? -1 : 1), s.getRotZ() * (z ? -1 : 1));
+        return getCachedGeoBone(bone_name);
     }
 
-    public final GeoBone resetBone(String bone_name) {
-        setPositionForBone(bone_name, new Vec3(0,0,0));
-        setRotationForBone(bone_name, new Vec3(0,0,0));
-        setModelPositionForBone(bone_name, Vec3.ZERO);
-        return setScaleForBone(bone_name, new Vec3(1,1,1));
+    public final @Nullable GeoBone resetBone(String bone_name) {
+        setPositionForBone(bone_name, new Vec3(0, 0, 0));
+        setRotationForBone(bone_name, new Vec3(0, 0, 0));
+        setScaleForBone(bone_name, new Vec3(1, 1, 1));
+        return getCachedGeoBone(bone_name);
+    }
+
+    /**
+     * GL5：对单根 GeoBone 按轴设置旋转（当前 render pass 会话内生效）。
+     * axisId 映射：0=x, 1=-x, 2=y, 3=-y, 4=z, 5=-z
+     */
+    public final void setRotationAxisForBone(@Nullable GeoBone bone, int axisId, float value) {
+        if (currentSnapshots == null || bone == null) return;
+        currentSnapshots.get(bone.name()).ifPresent(s -> {
+            switch (axisId) {
+                case 0 -> s.setRotX(value);
+                case 1 -> s.setRotX(-value);
+                case 2 -> s.setRotY(value);
+                case 3 -> s.setRotY(-value);
+                case 4 -> s.setRotZ(value);
+                case 5 -> s.setRotZ(-value);
+            }
+        });
+    }
+
+    /** GL5：清零单根 GeoBone 的三轴旋转（当前 render pass 会话内生效） */
+    public final void resetRotationForGeoBone(@Nullable GeoBone bone) {
+        if (currentSnapshots == null || bone == null) return;
+        currentSnapshots.get(bone.name()).ifPresent(s -> s.setRotation(0, 0, 0));
+    }
+
+    /** GL5：隐藏/显示单根 GeoBone（当前 render pass 会话内生效，对应 GL4 GeoBone.setHidden） */
+    public final void setBoneHidden(@Nullable GeoBone bone, boolean hidden) {
+        if (currentSnapshots == null || bone == null) return;
+        currentSnapshots.get(bone.name()).ifPresent(s -> s.skipRender(hidden));
     }
 
     @Override
     public @NonNull Identifier getModelResource(GeoRenderState animatable) {
-        Player player = animatable.e;
+        Player player = this.entity;
         // Skin Model System Not Implemented
         // if (player != null) {
         //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
@@ -524,7 +548,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     @Override
     public Identifier getTextureResource(GeoRenderState animatable) {
-        Player player = animatable.e;
+        Player player = this.entity;
         return getTextureResource(SlimMap.getOrDefault(player, false));
     }
 

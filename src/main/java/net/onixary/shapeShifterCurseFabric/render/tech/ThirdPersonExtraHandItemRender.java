@@ -1,14 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -17,10 +20,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
-public class ThirdPersonExtraHandItemRender<T extends LivingEntity, M extends EntityModel<T> & ArmedModel> extends RenderLayer<T, M> {
+public class ThirdPersonExtraHandItemRender<S extends EntityRenderState, M extends EntityModel<? super S> & ArmedModel<S>> extends RenderLayer<S, M> {
 
     public static abstract class TPEHR_Render {
-        public abstract void render(ItemInHandRenderer heldItemRenderer, PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch);
+        public abstract void render(ItemInHandRenderer heldItemRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch);
     }
 
     public record TPEHRData(Predicate<AbstractClientPlayer> shouldRender, TPEHR_Render render) { }
@@ -41,21 +44,25 @@ public class ThirdPersonExtraHandItemRender<T extends LivingEntity, M extends En
         data.get(form).add(Rdata);
     }
 
-    public ThirdPersonExtraHandItemRender(RenderLayerParent<T, M> context, ItemInHandRenderer heldItemRenderer) {
+    public ThirdPersonExtraHandItemRender(RenderLayerParent<S, M> context, ItemInHandRenderer heldItemRenderer) {
         super(context);
         this.heldItemRenderer = heldItemRenderer;
     }
 
-    public void render(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T livingEntity, float f, float g, float h, float j, float k, float l) {
-        if (livingEntity instanceof AbstractClientPlayer player) {
-            IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
-            if (data.containsKey(curForm)) {
-                for (TPEHRData Rdata : data.get(curForm)) {
-                    if (Rdata.shouldRender().test(player)) {
-                        matrixStack.pushPose();
-                        Rdata.render().render(heldItemRenderer, matrixStack, vertexConsumerProvider, i, player, f, g, h, j, k, l);
-                        matrixStack.popPose();
-                    }
+    @Override
+    public void submit(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, S entityRenderState, float f, float g) {
+        if (!(entityRenderState instanceof AvatarRenderState avatarRenderState)) return;
+        Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
+        if (!(entity instanceof AbstractClientPlayer player)) return;
+        IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
+        if (data.containsKey(curForm)) {
+            float tickDelta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+            for (TPEHRData Rdata : data.get(curForm)) {
+                if (Rdata.shouldRender().test(player)) {
+                    poseStack.pushPose();
+                    Rdata.render().render(heldItemRenderer, poseStack, submitNodeCollector, i, player,
+                            avatarRenderState.walkAnimationPos, avatarRenderState.walkAnimationSpeed, tickDelta, 0f, f, g);
+                    poseStack.popPose();
                 }
             }
         }

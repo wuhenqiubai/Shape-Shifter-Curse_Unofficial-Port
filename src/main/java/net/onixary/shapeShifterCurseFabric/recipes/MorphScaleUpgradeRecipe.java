@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -9,23 +10,32 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.level.ItemLike;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.items.tools.SuperMorphScaleCore;
 
+import java.util.Optional;
+
 import static net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister.MORPH_SCALE_UPGRADE;
 
 public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     @Override
-    public net.minecraft.world.item.crafting.RecipeType<?> getType() {
+    public net.minecraft.world.item.crafting.RecipeType<SmithingRecipe> getType() {
         return net.minecraft.world.item.crafting.RecipeType.SMITHING;
     }
     public final Ingredient template;
     public final Ingredient addition;
+    // 1.21.11 配方书/槽位过滤用 baseIngredient()，这里用"全部非空气物品"宽泛表示任意可被升级的基座物品（实际匹配仍由 base 谓词控制）
+    private static final Ingredient BASE_INGREDIENT = Ingredient.of(
+            BuiltInRegistries.ITEM.stream().filter(item -> item != Items.AIR).toArray(ItemLike[]::new)
+    );
 
     public boolean isUpgradeAll() {
         return ShapeShifterCurseFabric.commonConfig.enableFullStackUpgrade;
@@ -41,7 +51,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
                 return true;
             }
 	        CompoundTag nbtCompound = customData.copyTag();
-            return !(nbtCompound.contains(IsMorphScaleItemCondition.IsMorphScaleArmorTagName) && nbtCompound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName));
+            return !(nbtCompound.contains(IsMorphScaleItemCondition.IsMorphScaleArmorTagName) && nbtCompound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName).orElse(false));
         }), addition, itemStack -> {
 	        // 使用 Component 系统设置标记
 	        CompoundTag nbt = itemStack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
@@ -51,6 +61,22 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         });
         this.template = template;
         this.addition = addition;
+    }
+
+    // 1.21.11 SmithingRecipe 新增的抽象方法实现
+    @Override
+    public Optional<Ingredient> templateIngredient() {
+        return Optional.of(this.template);
+    }
+
+    @Override
+    public Ingredient baseIngredient() {
+        return BASE_INGREDIENT;
+    }
+
+    @Override
+    public Optional<Ingredient> additionIngredient() {
+        return Optional.of(this.addition);
     }
 
     @Override
@@ -71,7 +97,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends SmithingRecipe> getSerializer() {
         return MORPH_SCALE_UPGRADE;
     }
 
@@ -104,8 +130,8 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     public static class Serializer implements RecipeSerializer<MorphScaleUpgradeRecipe> {
 
         private static final MapCodec<MorphScaleUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-            Ingredient.CODEC_NONEMPTY.fieldOf("template").forGetter(r -> r.template),
-            Ingredient.CODEC_NONEMPTY.fieldOf("addition").forGetter(r -> r.addition)
+            Ingredient.CODEC.fieldOf("template").forGetter(r -> r.template),
+            Ingredient.CODEC.fieldOf("addition").forGetter(r -> r.addition)
         ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.parse("morph_scale_upgrade"), template, addition)));
 
         private static final StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = StreamCodec.composite(

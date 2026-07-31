@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.util.List;
+import java.util.Optional;
 
 @Mixin(SmithingMenu.class)
 public class SmithingScreenHandlerMixin {
@@ -21,11 +21,11 @@ public class SmithingScreenHandlerMixin {
     public void onTake(Player player, ItemStack itemStack, CallbackInfo ci) {
         SmithingMenu realThis = (SmithingMenu) (Object) this;
         SmithingRecipeInput recipeInput = new SmithingRecipeInput(realThis.inputSlots.getItem(0), realThis.inputSlots.getItem(1), realThis.inputSlots.getItem(2));
-        List<RecipeHolder<SmithingRecipe>> list = realThis.level.getRecipeManager().getRecipesFor(RecipeType.SMITHING, recipeInput, realThis.level);
-        if (list.isEmpty()) {
+        Optional<RecipeHolder<SmithingRecipe>> recipeOptional = realThis.level.getServer().getRecipeManager().getRecipeFor(RecipeType.SMITHING, recipeInput, realThis.level);
+        if (recipeOptional.isEmpty()) {
             return;
         }
-        SmithingRecipe recipe = list.getFirst().value();
+        SmithingRecipe recipe = recipeOptional.get().value();
         if (recipe instanceof ISmithingRecipeEX iSmithingRecipeEX) {
             iSmithingRecipeEX.onTakeOutput(realThis, player, itemStack);
             if (iSmithingRecipeEX.overrideVanillaOnTakeOutput()) {

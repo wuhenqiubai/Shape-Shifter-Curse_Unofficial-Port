@@ -2,6 +2,8 @@ package net.onixary.shapeShifterCurseFabric.player_form.skin;
 
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
@@ -74,14 +76,25 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     }
 
     @Override
+    public void readData(ValueInput readView) {
+        readView.read("data", CompoundTag.CODEC).ifPresent(tag -> this.readFromNbt(tag, null));
+    }
+
+    @Override
+    public void writeData(ValueOutput writeView) {
+        CompoundTag tag = new CompoundTag();
+        this.writeToNbt(tag, null);
+        writeView.store("data", CompoundTag.CODEC, tag);
+    }
+
     public void readFromNbt(CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         // 直接往里面加了 反正在玩家进服务器后会同步 理论上连持久化都没必要
         try {
-            this.keepOriginalSkin = tag.getBoolean("KeepOriginalSkin");
-            this.enableFormColor = tag.getBoolean("EnableFormColor");
-            this.formColor = new FormTextureUtils.ColorSetting(FormTextureUtils.RGBA2ABGR(tag.getInt("PrimaryColor")), FormTextureUtils.RGBA2ABGR(tag.getInt("AccentColor1")), FormTextureUtils.RGBA2ABGR(tag.getInt("AccentColor2")), FormTextureUtils.RGBA2ABGR(tag.getInt("EyeColorA")), FormTextureUtils.RGBA2ABGR(tag.getInt("EyeColorB")),
-                    tag.getBoolean("PrimaryGreyReverse"), tag.getBoolean("Accent1GreyReverse"), tag.getBoolean("Accent2GreyReverse"));
-            this.enableFormRandomSound = tag.getBoolean("EnableFormRandomSound");
+            this.keepOriginalSkin = tag.getBooleanOr("KeepOriginalSkin", false);
+            this.enableFormColor = tag.getBooleanOr("EnableFormColor", false);
+            this.formColor = new FormTextureUtils.ColorSetting(FormTextureUtils.RGBA2ABGR(tag.getIntOr("PrimaryColor", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("AccentColor1", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("AccentColor2", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("EyeColorA", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("EyeColorB", 0)),
+                    tag.getBooleanOr("PrimaryGreyReverse", false), tag.getBooleanOr("Accent1GreyReverse", false), tag.getBooleanOr("Accent2GreyReverse", false));
+            this.enableFormRandomSound = tag.getBooleanOr("EnableFormRandomSound", true);
         }
         catch(IllegalArgumentException e)
         {
@@ -92,7 +105,6 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
         }
     }
 
-    @Override
     public void writeToNbt(CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         tag.putBoolean("KeepOriginalSkin", this.keepOriginalSkin);
         tag.putBoolean("EnableFormColor", this.enableFormColor);

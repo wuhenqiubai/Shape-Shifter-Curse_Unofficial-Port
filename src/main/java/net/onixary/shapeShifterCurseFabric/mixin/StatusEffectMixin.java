@@ -26,7 +26,7 @@ public class StatusEffectMixin {
         // 返回值是是否覆盖了原版效果 如果返回false 还会执行原版效果
         int EffectValue = 4;
         float FinalValue;
-        if (realThis == MobEffects.HEAL) {
+        if (realThis == MobEffects.INSTANT_HEALTH.value()) {
             List<ModifyInstantHealthPower> PowerList = PowerHolderComponent.getPowers(entity, ModifyInstantHealthPower.class);
             if (PowerList.isEmpty()) {
                 return false;
@@ -44,7 +44,7 @@ public class StatusEffectMixin {
             applyEffectDamage(entity, source, attacker, IsInstantEffect, FinalValue);
             return true;
         }
-        if (realThis == MobEffects.HARM)  {
+        if (realThis == MobEffects.INSTANT_DAMAGE.value())  {
             List<ModifyInstantDamagePower> PowerList = PowerHolderComponent.getPowers(entity, ModifyInstantDamagePower.class);
             if (PowerList.isEmpty()) {
                 return false;

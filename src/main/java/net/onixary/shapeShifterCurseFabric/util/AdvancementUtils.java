@@ -123,8 +123,7 @@ public class AdvancementUtils {
         return new ItemPredicate(
                 Optional.of(HolderSet.direct(entries)),
                 predicate.count(),
-                predicate.components(),
-                predicate.subPredicates()
+                predicate.components()
         );
     }
 

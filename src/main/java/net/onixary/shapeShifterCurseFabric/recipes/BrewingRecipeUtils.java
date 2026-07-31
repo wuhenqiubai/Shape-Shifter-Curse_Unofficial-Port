@@ -84,17 +84,17 @@ public class BrewingRecipeUtils {
             ShapeShifterCurseFabric.LOGGER.error("recipe json has invalid input or ingredient or output");
             return;
         }
-        Item ingredientItem = BuiltInRegistries.ITEM.get(ingredient);
+        Item ingredientItem = BuiltInRegistries.ITEM.getValue(ingredient);
         Ingredient ingredientObject = Ingredient.of(new ItemLike[]{ingredientItem});
         switch (recipeJson.get("type").getAsString()) {
             case "potion" -> {
-                Potion inputPotion = BuiltInRegistries.POTION.get(input);
-                Potion outputPotion = BuiltInRegistries.POTION.get(output);
+                Potion inputPotion = BuiltInRegistries.POTION.getValue(input);
+                Potion outputPotion = BuiltInRegistries.POTION.getValue(output);
                 POTION_RECIPES.add(new DynamicRecipe<>(inputPotion, ingredientObject, outputPotion, targetForm));
             }
             case "item" -> {
-                Item inputItem = BuiltInRegistries.ITEM.get(input);
-                Item outputItem = BuiltInRegistries.ITEM.get(output);
+                Item inputItem = BuiltInRegistries.ITEM.getValue(input);
+                Item outputItem = BuiltInRegistries.ITEM.getValue(output);
                 ITEM_RECIPES.add(new DynamicRecipe<>(inputItem, ingredientObject, outputItem, targetForm));
             }
         }

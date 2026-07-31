@@ -93,7 +93,7 @@ public class PlayerEventHandler {
                 // 在主线程中执行同步
                 server.execute(() -> {
                     if (player.connection != null && !player.hasDisconnected()) {
-                        ServerLevel currentWorld = player.serverLevel();
+                        ServerLevel currentWorld = (ServerLevel) player.level();
                         ModPacketsS2CServer.sendCursedMoonData(player, CursedMoon.isCursedMoonDay(currentWorld));
                     }
                 });
@@ -152,7 +152,7 @@ public class PlayerEventHandler {
                 // CursedMoon.resetMoonEffect(player);
 
                 // Set doDaylightCycle to true forced
-                server.getGameRules().getRule(GameRules.RULE_DAYLIGHT).set(true, server);
+                server.overworld().getGameRules().set(GameRules.ADVANCE_TIME, true, server);
                 MobTeamManager.registerTeam(world);
             }
         });
@@ -215,7 +215,7 @@ public class PlayerEventHandler {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
         CompoundTag nbt = new CompoundTag();
-        var lookup = Objects.requireNonNull(oldPlayer.getServer()).registryAccess();
+        var lookup = Objects.requireNonNull(oldPlayer.level().getServer()).registryAccess();
         oldComponent.writeToNbt(nbt, lookup);
         newComponent.readFromNbt(nbt, lookup);
         // CCA 的 ALWAYS_COPY 已自动复制了组件和 origin。

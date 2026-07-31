@@ -7,6 +7,8 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -79,13 +81,24 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     }
 
     @Override
+    public void readData(ValueInput readView) {
+        readView.read("data", CompoundTag.CODEC).ifPresent(tag -> this.readFromNbt(tag, null));
+    }
+
+    @Override
+    public void writeData(ValueOutput writeView) {
+        CompoundTag tag = new CompoundTag();
+        this.writeToNbt(tag, null);
+        writeView.store("data", CompoundTag.CODEC, tag);
+    }
+
     public void readFromNbt(CompoundTag tag, HolderLookup.Provider registryLookup) {
-        if (tag.contains("no_form_id") && tag.getBoolean("no_form_id")) {
+        if (tag.contains("no_form_id") && tag.getBooleanOr("no_form_id", false)) {
             nowFormID = null;
             nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
         } else {
             if (tag.contains("nowFormID")) {
-                nowFormID = Identifier.tryParse(tag.getString("nowFormID"));
+                nowFormID = Identifier.tryParse(tag.getStringOr("nowFormID", ""));
                 nowForm = FormUtils.parseForm(nowFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
             } else {
                 nowFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
@@ -93,70 +106,72 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             }
         }
         if (tag.contains("fallbackFormID")) {
-            Identifier fallbackFormIDNullable = Identifier.tryParse(tag.getString("fallbackFormID"));
+            Identifier fallbackFormIDNullable = Identifier.tryParse(tag.getStringOr("fallbackFormID", ""));
             fallbackFormID = fallbackFormIDNullable == null ? RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID() : fallbackFormIDNullable;
         }
         // 旧版兼容补丁 只迁移形态数据 其他全Drop了
         if (tag.contains("currentForm")) {
-            nowFormID = Identifier.tryParse(tag.getString("currentForm"));
+            nowFormID = Identifier.tryParse(tag.getStringOr("currentForm", ""));
             nowForm = FormUtils.parseForm(nowFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE);
         }
         if (tag.contains("formHistory")) {
             formHistory.clear();
-            ListTag history = tag.getList("formHistory", Tag.TAG_STRING);
+            ListTag history = tag.getListOrEmpty("formHistory");
             formHistory.clear();
             for (Tag element : history) {
-                IForm form = FormUtils.parseForm(Identifier.tryParse(element.getAsString()), null);
-                if (form != null) {
-                    formHistory.add(form);
+                if (element instanceof StringTag stringTag) {
+                    IForm form = FormUtils.parseForm(Identifier.tryParse(stringTag.value()), null);
+                    if (form != null) {
+                        formHistory.add(form);
+                    }
                 }
             }
         }
         if (tag.contains("isCursedMoonApplied")) {
-            isCursedMoonApplied = tag.getBoolean("isCursedMoonApplied");
+            isCursedMoonApplied = tag.getBooleanOr("isCursedMoonApplied", false);
         } else {
             isCursedMoonApplied = false;
         }
         if (tag.contains("lastTransformByCure")) {
-            lastTransformByCure = tag.getBoolean("lastTransformByCure");
+            lastTransformByCure = tag.getBooleanOr("lastTransformByCure", false);
         } else {
             lastTransformByCure = false;
         }
         if (tag.contains("BeforeCursedMoonAppliedForm")) {
-            BeforeCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("BeforeCursedMoonAppliedForm")), null);
+            BeforeCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getStringOr("BeforeCursedMoonAppliedForm", "")), null);
         } else {
             BeforeCursedMoonAppliedForm = null;
         }
         if (tag.contains("AfterCursedMoonAppliedForm")) {
-            AfterCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("AfterCursedMoonAppliedForm")), null);
+            AfterCursedMoonAppliedForm = FormUtils.parseForm(Identifier.tryParse(tag.getStringOr("AfterCursedMoonAppliedForm", "")), null);
         } else {
             AfterCursedMoonAppliedForm = null;
         }
         if (tag.contains("transformTargetForm")) {
-            transformTargetForm = FormUtils.parseForm(Identifier.tryParse(tag.getString("transformTargetForm")), null);
+            transformTargetForm = FormUtils.parseForm(Identifier.tryParse(tag.getStringOr("transformTargetForm", "")), null);
         } else {
             transformTargetForm = null;
         }
         if (tag.contains("customPotionFormID")) {
-            customPotionFormID = Identifier.tryParse(tag.getString("customPotionFormID"));
+            customPotionFormID = Identifier.tryParse(tag.getStringOr("customPotionFormID", ""));
         } else {
             customPotionFormID = RegPlayerForms.ORIGINAL_BEFORE_ENABLE.getFormID();
         }
         if (tag.contains("instinctValue")) {
-            instinctValue = tag.getFloat("instinctValue");
+            instinctValue = tag.getFloatOr("instinctValue", 0f);
         } else {
             instinctValue = 0f;
         }
         if (tag.contains("instinctRate")) {
-            instinctRate = tag.getFloat("instinctRate");
+            instinctRate = tag.getFloatOr("instinctRate", 0f);
         } else {
             instinctRate = 0f;
         }
         if (tag.contains("instinctEffects")) {
             instinctEffects.clear();
-            CompoundTag effects = tag.getCompound("instinctEffects");
-            for (String key : effects.getAllKeys()) {
-                instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompound(key)));
+            CompoundTag effects = tag.getCompoundOrEmpty("instinctEffects");
+            for (String key : effects.keySet()) {
+                instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompoundOrEmpty(key)));
             }
         }
         if (player.level().isClientSide()) {
@@ -164,7 +179,6 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         }
     }
 
-    @Override
     public void writeToNbt(CompoundTag tag, HolderLookup.Provider registryLookup) {
         if (nowFormID != null) {
             tag.putString("nowFormID", nowFormID.toString());

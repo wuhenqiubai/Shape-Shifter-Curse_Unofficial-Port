@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.status_effects;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
+import org.joml.Matrix3x2fStack;
 
 // 暂时弃用，描述放在书页UI中
 public class TStatusHUDHandler {
@@ -26,9 +26,9 @@ public class TStatusHUDHandler {
                         if (effect.getEffect() instanceof BaseTransformativeStatusEffect) {
                             Component description = Component.translatable(effect.getDescriptionId() + ".description");
 
-                            PoseStack matrices = context.pose();
-                            matrices.pushPose();
-                            matrices.scale(0.5f, 0.5f, 1.0f); // 缩放为 75% 大小
+                            Matrix3x2fStack matrices = context.pose();
+                            matrices.pushMatrix();
+                            matrices.scale(0.5f, 0.5f); // 缩放为 75% 大小
                             // 计算 Y 坐标（每个效果间隔 20 像素）
                             int y = baseY + (index * (int)(20 / 0.5));
 
@@ -39,7 +39,7 @@ public class TStatusHUDHandler {
                                     (int)(y / 0.5f),
                                     0xFFFFFF
                             );
-                            matrices.popPose();
+                            matrices.popMatrix();
                         }
                         index++;
                     }

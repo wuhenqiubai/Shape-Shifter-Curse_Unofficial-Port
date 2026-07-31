@@ -9,6 +9,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnJumpPower;
@@ -161,7 +163,7 @@ public class ModPacketsC2S {
         ServerPlayer player = ctx.player();
         UUID target = buf.readUUID();
         Identifier formID = Identifier.tryParse(buf.readUtf());
-        if (target.equals(player.getUUID()) || player.hasPermissions(2)) {
+        if (target.equals(player.getUUID()) || player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             ServerPlayer targetPlayer = player.level().getServer().getPlayerList().getPlayer(target);
             if (targetPlayer != null) {
                 IForm form = RegPlayerForms.getPlayerForm(formID);

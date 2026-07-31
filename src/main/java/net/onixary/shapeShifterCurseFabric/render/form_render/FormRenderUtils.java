@@ -22,6 +22,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
 import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.*;
@@ -89,8 +90,38 @@ public class FormRenderUtils {
 
         @SuppressWarnings("removal")
         public BoneBipedState(GeoBone bone) {
-            this(bone.getPosX(), bone.getPosY(), bone.getPosZ(), bone.getRotX(), bone.getRotY(), bone.getRotZ(), bone.getPivotX(), bone.getPivotY(), bone.getPivotZ(), bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
+            this(getTranslateOrZero(bone.frameSnapshot, 0), getTranslateOrZero(bone.frameSnapshot, 1), getTranslateOrZero(bone.frameSnapshot, 2),
+                 getRotOrZero(bone.frameSnapshot, 0), getRotOrZero(bone.frameSnapshot, 1), getRotOrZero(bone.frameSnapshot, 2),
+                 bone.pivotX(), bone.pivotY(), bone.pivotZ(),
+                 getScaleOrOne(bone.frameSnapshot, 0), getScaleOrOne(bone.frameSnapshot, 1), getScaleOrOne(bone.frameSnapshot, 2));
             this.cachedBone = bone;
+        }
+
+        private static float getTranslateOrZero(@Nullable BoneSnapshot s, int index) {
+            if (s == null) return 0f;
+            return switch (index) {
+                case 0 -> s.getTranslateX();
+                case 1 -> s.getTranslateY();
+                default -> s.getTranslateZ();
+            };
+        }
+
+        private static float getRotOrZero(@Nullable BoneSnapshot s, int index) {
+            if (s == null) return 0f;
+            return switch (index) {
+                case 0 -> s.getRotX();
+                case 1 -> s.getRotY();
+                default -> s.getRotZ();
+            };
+        }
+
+        private static float getScaleOrOne(@Nullable BoneSnapshot s, int index) {
+            if (s == null) return 1f;
+            return switch (index) {
+                case 0 -> s.getScaleX();
+                case 1 -> s.getScaleY();
+                default -> s.getScaleZ();
+            };
         }
 
         public void apply(ModelPart part) {
@@ -107,18 +138,14 @@ public class FormRenderUtils {
 
         @SuppressWarnings("removal")
         public void apply(GeoBone bone) {
-            bone.setPosX(x);
-            bone.setPosY(y);
-            bone.setPosZ(z);
-            bone.setRotX(rot_x);
-            bone.setRotY(rot_y);
-            bone.setRotZ(rot_z);
-            bone.setPivotX(pivot_x);
-            bone.setPivotY(pivot_y);
-            bone.setPivotZ(pivot_z);
-            bone.setScaleX(scale_x);
-            bone.setScaleY(scale_y);
-            bone.setScaleZ(scale_z);
+            BoneSnapshot s = bone.frameSnapshot;
+            if (s == null) {
+                s = BoneSnapshot.create(bone);
+                bone.frameSnapshot = s;
+            }
+            s.setTranslation(x, y, z);
+            s.setRotation(rot_x, rot_y, rot_z);
+            s.setScale(scale_x, scale_y, scale_z);
         }
 
         public void restore() {
@@ -132,8 +159,8 @@ public class FormRenderUtils {
     }
 
     public static void onClientInit() {
-        WorldRenderEvents.END.register(context -> isRenderingInWorld = false);
-        WorldRenderEvents.START.register(context -> isRenderingInWorld = true);
+        WorldRenderEvents.END_MAIN.register(context -> isRenderingInWorld = false);
+        WorldRenderEvents.START_MAIN.register(context -> isRenderingInWorld = true);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FormModelResourceReloadListener());
     }
 
@@ -175,13 +202,11 @@ public class FormRenderUtils {
     }
 
     public static Vec3 getPartPosition(ModelPart part) {
-        var t = part.storePose();
-        return new Vec3(t.x, t.y, t.z).reverse();
+        return new Vec3(part.x, part.y, part.z).reverse();
     }
 
     public static Vec3 getPartRotation(ModelPart part) {
-        var t = part.storePose();
-        return new Vec3(t.xRot, t.yRot, t.zRot);
+        return new Vec3(part.xRot, part.yRot, part.zRot);
     }
 
     @SuppressWarnings("removal")
@@ -189,21 +214,31 @@ public class FormRenderUtils {
         PoseStack matrices = new PoseStack();
         if (bone == null) return matrices;
         List<GeoBone> chain = new ArrayList<>();
-        for (GeoBone b = bone; b != null; b = b.getParent()) {
+        for (GeoBone b = bone; b != null; b = b.parent()) {
             chain.add(b);
         }
         Collections.reverse(chain);
         // matrices.translate(0.5F, 0.51F, 0.5F);
         for (int i = 0; i < chain.size(); i++) {
             GeoBone b = chain.get(i);
-            matrices.translate(-b.getPosX(), b.getPosY(), b.getPosZ());
-            matrices.translate(b.getPivotX(), b.getPivotY(), b.getPivotZ());
-            matrices.mulPose(Axis.ZP.rotation(b.getRotZ()));
-            matrices.mulPose(Axis.YP.rotation(b.getRotY()));
-            matrices.mulPose(Axis.XP.rotation(b.getRotX()));
-            matrices.scale(b.getScaleX(), b.getScaleY(), b.getScaleZ());
+            BoneSnapshot s = b.frameSnapshot;
+            float posX = s != null ? s.getTranslateX() : 0f;
+            float posY = s != null ? s.getTranslateY() : 0f;
+            float posZ = s != null ? s.getTranslateZ() : 0f;
+            float rotX = s != null ? s.getRotX() : 0f;
+            float rotY = s != null ? s.getRotY() : 0f;
+            float rotZ = s != null ? s.getRotZ() : 0f;
+            float scaleX = s != null ? s.getScaleX() : 1f;
+            float scaleY = s != null ? s.getScaleY() : 1f;
+            float scaleZ = s != null ? s.getScaleZ() : 1f;
+            matrices.translate(-posX, posY, posZ);
+            matrices.translate(b.pivotX(), b.pivotY(), b.pivotZ());
+            matrices.mulPose(Axis.ZP.rotation(rotZ));
+            matrices.mulPose(Axis.YP.rotation(rotY));
+            matrices.mulPose(Axis.XP.rotation(rotX));
+            matrices.scale(scaleX, scaleY, scaleZ);
             if (i < chain.size() - 1) {
-                matrices.translate(-b.getPivotX(), -b.getPivotY(), -b.getPivotZ());
+                matrices.translate(-b.pivotX(), -b.pivotY(), -b.pivotZ());
             }
         }
         return matrices;

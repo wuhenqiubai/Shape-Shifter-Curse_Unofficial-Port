@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.status_effects.other_effects;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -20,7 +21,7 @@ public class EntangledEffect extends MobEffect {
     }
 
     @Override
-    public boolean applyEffectTick(LivingEntity entity, int amplifier) {
+    public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity entity, int amplifier) {
         Holder<MobEffect> entangled = BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.ENTANGLED_EFFECT);
         MobEffectInstance instance = entity.getEffect(entangled);
         if (instance != null) {

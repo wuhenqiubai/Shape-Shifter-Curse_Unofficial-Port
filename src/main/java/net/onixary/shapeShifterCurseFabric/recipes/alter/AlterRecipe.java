@@ -8,6 +8,7 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -24,7 +25,7 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
     public static final RecipeType<AlterRecipe> ALTER_RECIPE = RecipeUtils.registerRecipeType(ShapeShifterCurseFabric.identifier("alter"));
     public static final Identifier EmptyRecipeId = ShapeShifterCurseFabric.identifier("empty_alter_recipe");
 
-    public static final AlterRecipe EmptyRecipe = new AlterRecipe(EmptyRecipeId, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, Ingredient.EMPTY, (inventory) -> new ArrayList<>(), 0);
+    public static final AlterRecipe EmptyRecipe = new AlterRecipe(EmptyRecipeId, Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), Ingredient.of(Items.BARRIER), (inventory) -> new ArrayList<>(), 0);  // 1.21.11 起 Ingredient 不允许为空，用屏障占位（matches 会按 EmptyRecipeId 提前返回 false）
 
     public static final int InputSlotIndex = 0;
     public static final int InputSlotCount = 7;
@@ -99,12 +100,10 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
 	    return this.getVirtualOutput(input.getInventory());
     }
 
-    @Override
     public boolean canCraftInDimensions(int width, int height) {
         return !this.id.equals(EmptyRecipeId);
     }
 
-    @Override
     public ItemStack getResultItem(HolderLookup.Provider lookup) {
 	    return this.VirtualOutput;
     }
@@ -136,25 +135,36 @@ public class AlterRecipe implements Recipe<AlterRecipe.AlterRecipeInput> {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<AlterRecipe.AlterRecipeInput>> getSerializer() {
         return RecipeSerializerRegister.ALTER_RECIPE;
     }
 
     @Override
-    public RecipeType<?> getType() {
+    public RecipeType<? extends Recipe<AlterRecipe.AlterRecipeInput>> getType() {
         return ALTER_RECIPE;
+    }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() {
+        return RecipeBookCategories.FURNACE_MISC;
+    }
+
+    @Override
+    public PlacementInfo placementInfo() {
+        // 类熔炉配方未接入配方书自动摆放，返回 NOT_PLACEABLE
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     public static class Serializer implements RecipeSerializer<AlterRecipe> {
 
 	    private static final MapCodec<AlterRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input1").forGetter(r -> r.input1),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input2").forGetter(r -> r.input2),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input3").forGetter(r -> r.input3),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input4").forGetter(r -> r.input4),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input5").forGetter(r -> r.input5),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input6").forGetter(r -> r.input6),
-			    Ingredient.CODEC_NONEMPTY.fieldOf("input7").forGetter(r -> r.input7),
+			    Ingredient.CODEC.fieldOf("input1").forGetter(r -> r.input1),
+			    Ingredient.CODEC.fieldOf("input2").forGetter(r -> r.input2),
+			    Ingredient.CODEC.fieldOf("input3").forGetter(r -> r.input3),
+			    Ingredient.CODEC.fieldOf("input4").forGetter(r -> r.input4),
+			    Ingredient.CODEC.fieldOf("input5").forGetter(r -> r.input5),
+			    Ingredient.CODEC.fieldOf("input6").forGetter(r -> r.input6),
+			    Ingredient.CODEC.fieldOf("input7").forGetter(r -> r.input7),
 			    ItemStack.CODEC.listOf().fieldOf("output").forGetter(r -> r.output.apply(null)),
 			    com.mojang.serialization.Codec.INT.optionalFieldOf("recipeTime", 200).forGetter(r -> r.recipeTime)
 	    ).apply(instance, (i1, i2, i3, i4, i5, i6, i7, outputList, time) ->

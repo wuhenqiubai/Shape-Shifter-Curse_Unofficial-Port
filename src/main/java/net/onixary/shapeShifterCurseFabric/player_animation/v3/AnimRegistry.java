@@ -92,12 +92,12 @@ public class AnimRegistry {
     }
 
     public static @Nullable AnimState getAnimState(Identifier identifier) {
-        return animStateRegistry.get(identifier);
+        return animStateRegistry.getOptional(identifier).orElse(null);
     }
 
     // 每个Form里都有一个预设了不同参数的AnimStateController
     public static @Nullable AbstractAnimStateController getAnimStateController(Identifier identifier, JsonObject jsonData) {
-        Function<JsonObject, AbstractAnimStateController> animStateController = animStateControllerRegistry.get(identifier);
+        Function<JsonObject, AbstractAnimStateController> animStateController = animStateControllerRegistry.getOptional(identifier).orElse(null);
         if (animStateController != null) {
             return animStateController.apply(jsonData);
         }
@@ -105,15 +105,15 @@ public class AnimRegistry {
     }
 
     public static @Nullable Function<JsonObject, AbstractAnimStateController> getAnimStateControllerSupplier(Identifier identifier) {
-        return animStateControllerRegistry.get(identifier);
+        return animStateControllerRegistry.getOptional(identifier).orElse(null);
     }
 
     public static @Nullable AbstractAnimFSM getAnimFSM(Identifier identifier) {
-        return animFSMRegistry.get(identifier);
+        return animFSMRegistry.getOptional(identifier).orElse(null);
     }
 
     public static @Nullable PowerDefaultAnim getPowerDefaultAnim(Identifier identifier) {
-        return powerAnimIDRegistry.get(identifier);
+        return powerAnimIDRegistry.getOptional(identifier).orElse(null);
     }
 
     static {

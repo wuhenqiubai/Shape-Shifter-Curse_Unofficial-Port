@@ -24,7 +24,7 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
     PlayerAnimationController controller;
 
     public PlayerEntityAnimOverrideMixin(ClientLevel world, GameProfile gameProfile) {
-        super(world, world.getSharedSpawnPos(), world.getSharedSpawnAngle(), gameProfile);
+        super(world, gameProfile);
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))

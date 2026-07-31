@@ -51,11 +51,12 @@ public final class FormEyeBlinkController {
         }
         BlinkState state = STATE_MAP.get(player);
         state.update(player, tickDelta, BlinkConfig.fromClientConfig(), this);
-        applyScale(eyeRoot, state.currentScaleY);
+        applyScale(model, eyeRoot, state.currentScaleY);
     }
 
-    private void applyScale(GeoBone bone, float scaleY) {
-        bone.setScaleY(scaleY);
+    private void applyScale(FormModel model, GeoBone bone, float scaleY) {
+        if (model.currentSnapshots == null || bone == null) return;
+        model.currentSnapshots.get(bone.name()).ifPresent(s -> s.setScaleY(scaleY));
     }
 
     private static final class BlinkState {

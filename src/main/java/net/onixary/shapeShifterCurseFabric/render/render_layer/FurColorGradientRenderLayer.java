@@ -1,60 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.render.render_layer;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
-import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import org.joml.Vector4f;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public abstract class FurColorGradientRenderLayer extends RenderType {
-    // 缓存 RenderLayer 实例以提高性能
-    private static final Map<String, RenderType> LAYER_CACHE = new HashMap<>();
-
-    private FurColorGradientRenderLayer(String name, VertexFormat vertexFormat, VertexFormat.Mode drawMode, int expectedBufferSize, boolean hasCrumbling, boolean translucent, Runnable startAction, Runnable endAction) {
-        super(name, vertexFormat, drawMode, expectedBufferSize, hasCrumbling, translucent, startAction, endAction);
-    }
-
-
+/**
+ * TODO: 1.21.11 移除 Satin，fur gradient shader（ShapeShifterCurseFabricClient.getFurGradientShader）
+ * 无法复刻。此 RenderType 退化为普通 translucent 渲染（颜色渐变效果暂不可用）。
+ * 复刻方向：1.21.11 自定义 core shader 需走 RenderPipeline / PostChain。
+ */
+public abstract class FurColorGradientRenderLayer {
     public static RenderType getFurLayer(Identifier texture, Vector4f startColor, Vector4f endColor) {
-        // 使用所有可变参数生成唯一的缓存键
-        String cacheKey = "fur_layer_" + texture + startColor + endColor;
-
-        return LAYER_CACHE.computeIfAbsent(cacheKey, key -> {
-            // 创建一个自定义的 Shader 渲染阶段
-            // 这个阶段在被激活时，会设置我们的颜色 Uniforms
-            RenderStateShard.ShaderStateShard shaderPhase = new RenderStateShard.ShaderStateShard(() -> {
-                net.minecraft.client.renderer.ShaderInstance shader = ShapeShifterCurseFabricClient.getFurGradientShader();
-                if (shader != null) {
-                    // 在绑定着色器后，立即设置 Uniform 变量
-                    //shader.getUniform("StartColor").set(startColor);
-                    //shader.getUniform("EndColor").set(endColor);
-                }
-                return shader;
-            });
-
-            // 使用 MultiPhaseParameters 构建 RenderLayer 的所有状态
-            RenderType.CompositeState params = RenderType.CompositeState.builder()
-                    .setShaderState(shaderPhase) // 使用我们自定义的着色器阶段
-                    .setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
-                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
-                    .setCullState(RenderType.NO_CULL)
-                    .setLightmapState(RenderType.LIGHTMAP)
-                    .setOverlayState(RenderType.OVERLAY)
-                    .createCompositeState(true);
-
-            // 使用 RenderLayer.of 创建一个复合渲染层
-            // 这是创建自定义 RenderLayer 的标准、兼容方式
-            return RenderType.create("fur_gradient_layer",
-                    DefaultVertexFormat.NEW_ENTITY,
-                    VertexFormat.Mode.QUADS,
-                    256,
-                    true, // hasCrumbling
-                    true, // translucent
-                    params);
-        });
+        return RenderTypes.entityTranslucent(texture);
     }
 }

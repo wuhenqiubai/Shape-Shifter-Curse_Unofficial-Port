@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
 import com.zigythebird.playeranimcore.animation.Animation;
-import net.minecraft.client.Minecraft;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;
@@ -25,10 +24,5 @@ public class EmptyAnimatable implements GeoAnimatable {
     @Override
     public AnimatableInstanceCache getAnimatableInstanceCache() {
         return cache;
-    }
-
-    @Override
-    public double getTick(Object object) {
-        return Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(false);
     }
 }

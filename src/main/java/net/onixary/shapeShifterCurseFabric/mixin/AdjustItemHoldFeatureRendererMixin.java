@@ -5,12 +5,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.client.renderer.entity.state.ArmedEntityRenderState;
+import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.onixary.shapeShifterCurseFabric.additional_power.HideTPHeldItemPower;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
@@ -22,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Environment(EnvType.CLIENT)
 @Mixin(value = ItemInHandLayer.class, priority = 99999999)
-public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity, M extends EntityModel<T> & ArmedModel> {
+public abstract class AdjustItemHoldFeatureRendererMixin<S extends ArmedEntityRenderState, M extends EntityModel<S> & ArmedModel> {
     /*private LivingEntity cachedEntity; // 缓存 livingEntity
 
     @Inject(
@@ -70,31 +72,30 @@ public abstract class AdjustItemHoldFeatureRendererMixin<T extends LivingEntity,
 
     @Inject(at =
     @At(value = "HEAD"),
-            method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V",
+            method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/ArmedEntityRenderState;FF)V",
             cancellable = true
     )
     private void hideHeldItem(
             PoseStack matrices,
-            MultiBufferSource vertexConsumers,
+            SubmitNodeCollector vertexConsumers,
             int light,
-            LivingEntity entity,
+            S armedEntityRenderState,
             float limbAngle,
             float limbDistance,
-            float tickDelta,
-            float animationProgress,
-            float headYaw,
-            float headPitch,
             CallbackInfo ci
     ) {
         // 条件判断：例如隐藏特定玩家或满足条件时
 
-        if (shouldHideItem(entity)) {
+        if (shouldHideItem(armedEntityRenderState)) {
             ci.cancel(); // 取消原版渲染逻辑
         }
     }
 
-    private boolean shouldHideItem(LivingEntity entity) {
-        if (entity instanceof AbstractClientPlayer player) {
+    private boolean shouldHideItem(S armedEntityRenderState) {
+        // 1.21.11 渲染状态中无法直接拿到实体，通过 AvatarRenderState 的实体 id 反查
+        if (armedEntityRenderState instanceof AvatarRenderState avatarRenderState
+                && Minecraft.getInstance().level != null
+                && Minecraft.getInstance().level.getEntity(avatarRenderState.id) instanceof AbstractClientPlayer player) {
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
             //ShapeShifterCurseFabric.LOGGER.info("Is Feral Form : " + isFeral);

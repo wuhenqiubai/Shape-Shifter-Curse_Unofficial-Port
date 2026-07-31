@@ -1,13 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3;
 
+import com.zigythebird.playeranim.accessors.IAnimatedAvatar;
+import com.zigythebird.playeranim.animation.AvatarAnimManager;
 import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.math.Vec3f;
-import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -200,9 +202,9 @@ public class AnimSystem {
     }
 
 	public static @NotNull Vec3f getPlayerBone3DTransform(Player player, @NotNull String boneName, @NotNull TransformType type, @NotNull Vec3f defaultValue) {
-		if (!(player instanceof AbstractClientPlayer clientPlayer) || !(clientPlayer instanceof IAnimatedPlayer animatedPlayer))
+		if (!(player instanceof Avatar avatar) || !(avatar instanceof IAnimatedAvatar animatedAvatar))
 			return defaultValue;
-		PlayerAnimManager manager = animatedPlayer.playerAnimLib$getAnimManager();
+		AvatarAnimManager manager = animatedAvatar.playerAnimLib$getAnimManager();
 		if (manager == null || !manager.isActive()) return defaultValue;
 		PlayerAnimBone bone = new PlayerAnimBone(boneName);
 		bone = manager.get3DTransform(bone);

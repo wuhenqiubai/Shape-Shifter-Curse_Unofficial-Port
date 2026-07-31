@@ -16,7 +16,7 @@ public class ActiveTargetGoalWithCondition<T extends LivingEntity> extends Neare
     }
 
     public ActiveTargetGoalWithCondition(Mob mob, Class<T> targetClass, boolean checkVisibility, Predicate targetPredicate, Predicate<Mob> condition) {
-        super(mob, targetClass, checkVisibility, targetPredicate);
+        super(mob, targetClass, checkVisibility, (entity, level) -> targetPredicate.test(entity));
         this.condition = condition;
     }
 
@@ -26,7 +26,7 @@ public class ActiveTargetGoalWithCondition<T extends LivingEntity> extends Neare
     }
 
     public ActiveTargetGoalWithCondition(Mob mob, Class<T> targetClass, int reciprocalChance, boolean checkVisibility, boolean checkCanNavigate, @Nullable Predicate<LivingEntity> targetPredicate, Predicate<Mob> condition) {
-        super(mob, targetClass, reciprocalChance, checkVisibility, checkCanNavigate, targetPredicate);
+        super(mob, targetClass, reciprocalChance, checkVisibility, checkCanNavigate, targetPredicate == null ? null : (entity, level) -> targetPredicate.test(entity));
         this.condition = condition;
     }
 

@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.util.Accessory;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -37,7 +38,7 @@ public class AccessoryUtils {
     }
 
     public static void onPlayerEquip(Player player, Identifier itemID, String pluginID) {
-        if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
+        if (BuiltInRegistries.ITEM.get(itemID).map(Holder::value).orElse(null) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
         TrinketUtils.ApplyAccessoryPowerOnEquip(player, itemID);
@@ -45,7 +46,7 @@ public class AccessoryUtils {
     }
 
     public static void onPlayerUnEquip(Player player, Identifier itemID, String pluginID) {
-        if (BuiltInRegistries.ITEM.get(itemID) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
+        if (BuiltInRegistries.ITEM.get(itemID).map(Holder::value).orElse(null) instanceof AccessoryItem && !nowAccessoryModID.equals(pluginID)) {
             return;
         }
         TrinketUtils.ApplyAccessoryPowerOnUnEquip(player, itemID);

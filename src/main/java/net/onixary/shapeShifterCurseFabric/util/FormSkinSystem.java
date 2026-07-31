@@ -179,8 +179,8 @@ public class FormSkinSystem {
         public Identifier setSkinTexture(NativeImage image, boolean slim) {
             this.CleanSkinTexture(slim);
             if (image != null) {
-                DynamicTexture texture = new DynamicTexture(image);
                 Identifier id = this.getNextID();
+                DynamicTexture texture = new DynamicTexture(() -> id.toString(), image);
                 Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinTextureSlimDynamic = true;
@@ -204,8 +204,8 @@ public class FormSkinSystem {
         public Identifier setSkinOverlayTexture(NativeImage image, boolean slim) {
             this.CleanSkinOverlayTexture(slim);
             if (image != null) {
-                DynamicTexture texture = new DynamicTexture(image);
                 Identifier id = this.getNextID();
+                DynamicTexture texture = new DynamicTexture(() -> id.toString(), image);
                 Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinOverlayTextureSlimDynamic = true;
@@ -229,8 +229,8 @@ public class FormSkinSystem {
         public Identifier setSkinEmissiveTexture(NativeImage image, boolean slim) {
             this.CleanSkinEmissiveTexture(slim);
             if (image != null) {
-                DynamicTexture texture = new DynamicTexture(image);
                 Identifier id = this.getNextID();
+                DynamicTexture texture = new DynamicTexture(() -> id.toString(), image);
                 Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinEmissiveTextureSlimDynamic = true;
@@ -254,8 +254,8 @@ public class FormSkinSystem {
         public Identifier setSkinFullBrightTexture(NativeImage image, boolean slim) {
             this.CleanSkinFullBrightTexture(slim);
             if (image != null) {
-                DynamicTexture texture = new DynamicTexture(image);
                 Identifier id = this.getNextID();
+                DynamicTexture texture = new DynamicTexture(() -> id.toString(), image);
                 Minecraft.getInstance().getTextureManager().register(id, texture);
                 if (slim) {
                     this.isSkinFullBrightTextureSlimDynamic = true;

@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -15,7 +16,7 @@ public abstract  class ThrowablePotionStackMixin {
     @Inject(method = "use", at = @At("RETURN"))
     private void addCooldown(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if (!world.isClientSide()) {
-            player.getCooldowns().addCooldown((ThrowablePotionItem) (Object) this, 20); // 20 ticks = 1 second
+            player.getCooldowns().addCooldown(BuiltInRegistries.ITEM.getKey((ThrowablePotionItem) (Object) this), 20); // 20 ticks = 1 second
         }
     }
 }

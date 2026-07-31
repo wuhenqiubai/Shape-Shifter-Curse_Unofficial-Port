@@ -34,7 +34,7 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import software.bernie.geckolib.cache.model.BakedGeoModel;
+import software.bernie.geckolib.animation.state.BoneSnapshot;
 import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.*;
@@ -78,15 +78,14 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (bone == null) {
                 return;
             }
-            bone.setPosX(bone.getPosX() + pos.x());
-            bone.setPosY(bone.getPosY() + pos.y());
-            bone.setPosZ(bone.getPosZ() + pos.z());
-            bone.setRotX(bone.getRotX() + rot.x());
-            bone.setRotY(bone.getRotY() + rot.y());
-            bone.setRotZ(bone.getRotZ() + rot.z());
-            bone.setPivotX(bone.getPivotX() + pivot.x());
-            bone.setPivotY(bone.getPivotY() + pivot.y());
-            bone.setPivotZ(bone.getPivotZ() + pivot.z());
+            BoneSnapshot s = bone.frameSnapshot;
+            if (s == null) {
+                s = BoneSnapshot.create(bone);
+                bone.frameSnapshot = s;
+            }
+            s.setTranslation(s.getTranslateX() + pos.x(), s.getTranslateY() + pos.y(), s.getTranslateZ() + pos.z());
+            s.setRotation(s.getRotX() + rot.x(), s.getRotY() + rot.y(), s.getRotZ() + rot.z());
+            // GL5 中 pivot 为只读（绑定位置由模型 JSON 决定），忽略 pivot 累加
         }
 
         public static partTransform of(JsonObject json) {
@@ -298,14 +297,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
 
         public void setAxisRotation(@NotNull GeoBone bone, int axis, float value) {
-            switch (axis) {
-                case 0 -> bone.setRotX(value);
-                case 1 -> bone.setRotX(-value);
-                case 2 -> bone.setRotY(value);
-                case 3 -> bone.setRotY(-value);
-                case 4 -> bone.setRotZ(value);
-                case 5 -> bone.setRotZ(-value);
-            }
+            // GL5: GeoBone 只读，此方法逻辑已由 FormModel.setRotationAxisForBone 替代（经 render pass 会话）
         }
 
         public static float[] readWeights(JsonArray json, @Nullable Float total, int size) {
@@ -508,21 +500,21 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             float tailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
             float tailBalance = Mth.cos(limbAngle * 0.6662F) * 0.325F * limbDistance;
             if(!isFeral){
-                firstTail.setRotY(-Mth.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
+                model.setRotationAxisForBone(firstTail, 2, -Mth.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
             } else {
-                firstTail.setRotZ(Mth.lerp(limbDistance, tailSway, tailBalance) + tailDragAmount * 0.75F);
+                model.setRotationAxisForBone(firstTail, 4, Mth.lerp(limbDistance, tailSway, tailBalance) + tailDragAmount * 0.75F);
             }
-            firstTail.setRotX(-tailDragAmountVertical * 0.75f);
+            model.setRotationAxisForBone(firstTail, 0, -tailDragAmountVertical * 0.75f);
             float offset = 0.0F;
             for(int i = 1; i < tailChain.size(); i++){
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
                 if(!isFeral){
-                    chainBone.setRotY(- Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                    model.setRotationAxisForBone(chainBone, 2, - Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
                 } else{
-                    chainBone.setRotZ(Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * 0.75F);
+                    model.setRotationAxisForBone(chainBone, 4, Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * 0.75F);
                 }
-                chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
+                model.setRotationAxisForBone(chainBone, 0, -tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
             }
         }
@@ -539,14 +531,14 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             }
             float headTailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
             float headTailBalance = Mth.cos(headAngle * 0.6662F) * 0.325F * 0.1f;
-            firstHeadTail.setRotY(-Mth.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
-            firstHeadTail.setRotX(-tailDragAmountVertical * 0.75f);
+            model.setRotationAxisForBone(firstHeadTail, 2, -Mth.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
+            model.setRotationAxisForBone(firstHeadTail, 0, -tailDragAmountVertical * 0.75f);
             float offset = 0.0F;
             for (int i = 1; i < tailChain.size(); i++){
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
-                chainBone.setRotY(- Mth.lerp(0.1f, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
-                chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
+                model.setRotationAxisForBone(chainBone, 2, - Mth.lerp(0.1f, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                model.setRotationAxisForBone(chainBone, 0, -tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
             }
         }
@@ -562,13 +554,13 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             for (List<String> wingChain : this.wingChainL.chain) {
                 GeoBone firstWing = model.getCachedGeoBone(wingChain.get(0));
                 if (firstWing == null) { continue; }
-                firstWing.setRotY(sway_l);
-                firstWing.setRotX(-tailDragAmountVertical * 0.35f);
+                model.setRotationAxisForBone(firstWing, 2, sway_l);
+                model.setRotationAxisForBone(firstWing, 0, -tailDragAmountVertical * 0.35f);
                 float offset = 0.0F;
                 for (int i = 1; i < wingChain.size(); i++) {
                     GeoBone chainBone = model.getCachedGeoBone(wingChain.get(i));
                     if (chainBone == null) { continue; }
-                    chainBone.setRotX(-tailDragAmountVertical * 0.75f * offset);
+                    model.setRotationAxisForBone(chainBone, 0, -tailDragAmountVertical * 0.75f * offset);
                     offset += 0.75F;
                 }
             }
@@ -577,13 +569,13 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             for (List<String> wingChain : this.wingChainR.chain) {
                 GeoBone firstWing = model.getCachedGeoBone(wingChain.get(0));
                 if (firstWing == null)  continue;
-                firstWing.setRotY(sway_r);
-                firstWing.setRotX(-tailDragAmountVertical * 0.35f);
+                model.setRotationAxisForBone(firstWing, 2, sway_r);
+                model.setRotationAxisForBone(firstWing, 0, -tailDragAmountVertical * 0.35f);
                 float offset = 0.0F;
                 for (int i = 1; i < wingChain.size(); i++) {
                     GeoBone chainBone = model.getCachedGeoBone(wingChain.get(i));
                     if (chainBone == null) { continue; }
-                    chainBone.setRotX(-tailDragAmountVertical * 0.75f * offset);
+                    model.setRotationAxisForBone(chainBone, 0, -tailDragAmountVertical * 0.75f * offset);
                     offset += 0.75F;
                 }
             }
@@ -633,11 +625,9 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (bone == null) {
                 continue;
             }
-            bone.setRotX(0.0f);
-            bone.setRotY(0.0f);
-            bone.setRotZ(0.0f);
-            neckConfig.setAxisRotation(bone, neckConfig.yawAxis, yawRad * neckConfig.yawWeights[i]);
-            neckConfig.setAxisRotation(bone, neckConfig.pitchAxis, pitchRad * neckConfig.pitchWeights[i]);
+            model.resetRotationForGeoBone(bone);
+            model.setRotationAxisForBone(bone, neckConfig.yawAxis, yawRad * neckConfig.yawWeights[i]);
+            model.setRotationAxisForBone(bone, neckConfig.pitchAxis, pitchRad * neckConfig.pitchWeights[i]);
         }
     }
 
@@ -710,20 +700,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             GeoBone neckHead = neckConfig.getHead(model);
             GeoBone neckRoot = neckConfig.getRoot(model);
             if (neckHead != null && neckRoot != null) {
-                neckHead.setTrackingMatrices(true);  // 不知道为什么这么干 等之后试试
-                neckRoot.setHidden(LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player));
+                // GL5: setTrackingMatrices 无对应物（骨骼位置由渲染管线自动追踪），忽略
+                model.setBoneHidden(neckRoot, LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player));
             }
         }
     }
 
     @Override
     public void afterRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        if (neckConfig != null) {
-            GeoBone neckRoot = neckConfig.getRoot(model);
-            if (neckRoot != null) {
-                neckRoot.setHidden(false);
-            }
-        }
+        // GL5: 骨骼隐藏由 render pass 内的 snapshot 控制，renderPosed 后自动清理，无需在此恢复
     }
 
     @Override
@@ -743,25 +728,18 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
     @Override
     public @Nullable GeoBone beforeRenderFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
-        boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
+        PlayerModel playerModel = (PlayerModel) renderer.getModel();
+        boolean IsRenderRight = arm.equals(playerModel.rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
-        Optional<GeoBone> OptionalGeoBone = model.getBone(GeoBoneName);
-        if (OptionalGeoBone.isEmpty()) {
-            // 有时AzureLib 未能及时注册 GeoBone 因此需要手动注册
-            if (model.getAnimationProcessor().getRegisteredBones().isEmpty()) {
-                ShapeShifterCurseFabric.LOGGER.info("GeoBone 未注册, 尝试重新注册模型");
-                BakedGeoModel bakedGeoModel = model.getBakedModel(model.getModelResource(formRenderer.realAnimatable));
-                model.getAnimationProcessor().setActiveModel(bakedGeoModel);
-            }
-            return null;
-        }
-        geoBone = OptionalGeoBone.get();
+        // GL5: GeoBone 从 BakedGeoModel 直接按名查找并缓存，无 AnimationProcessor 注册流程
+        geoBone = model.getCachedGeoBone(GeoBoneName);
         return geoBone;
     }
 
     @Override
     public @Nullable GeoBone processAnimationFirstPerson(@Nullable GeoBone geoBone, FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, ModelPart arm, ModelPart sleeve) {
-        boolean IsRenderRight = arm.equals(renderer.getModel().rightArm);
+        PlayerModel playerModel = (PlayerModel) renderer.getModel();
+        boolean IsRenderRight = arm.equals(playerModel.rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
         model.resetBone(GeoBoneName);
         model.translatePositionForBone(GeoBoneName, FormRenderUtils.getPartPosition(arm));
