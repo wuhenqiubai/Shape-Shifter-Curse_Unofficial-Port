@@ -18,7 +18,7 @@ public class PlayerTransformEffectManager {
 
     public static void applyEndTransformEffect(ServerPlayer player, int duration) {
         // add nausea effect
-        MobEffectInstance nauseaEffect = new MobEffectInstance(MobEffects.CONFUSION, duration);
+        MobEffectInstance nauseaEffect = new MobEffectInstance(MobEffects.NAUSEA, duration);
         player.addEffect(nauseaEffect);
 
         ModPacketsS2CServer.sendNoMoveTick(player, duration);
