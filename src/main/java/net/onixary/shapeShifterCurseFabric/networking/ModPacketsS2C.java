@@ -5,6 +5,7 @@ import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -33,6 +34,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile;
 import org.jetbrains.annotations.Nullable;
@@ -88,6 +90,7 @@ public class ModPacketsS2C {
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_PATRON_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenPatronFormSelectMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenFormSelectMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), ModPacketsS2C::receiveSetNoJumpTick);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), ModPacketsS2C::receiveSetNoMoveTick);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), ModPacketsS2C::receiveOpenFCSMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MODIFY_FCD_DATA), ModPacketsS2C::receiveModifyFCDData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), ModPacketsS2C::receiveRequestPatronAuthFile);
@@ -453,6 +456,15 @@ public class ModPacketsS2C {
         ctx.client().execute(() -> {
             if (ctx.client().player instanceof IJumpController jumpController) {
                 jumpController.shape_shifter_curse$setNoJumpTick(tick);
+            }
+        });
+    }
+
+    public static void receiveSetNoMoveTick(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        int tick = payload.data().readInt();
+        ctx.client().execute(() -> {
+            if (ctx.client().player instanceof IMoveController moveController) {
+                moveController.shape_shifter_curse$setNoMoveTick(tick);
             }
         });
     }

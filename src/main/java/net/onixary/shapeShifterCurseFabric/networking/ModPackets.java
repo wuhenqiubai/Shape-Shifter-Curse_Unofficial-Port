@@ -60,6 +60,7 @@ public class ModPackets {
     public static final ResourceLocation OPEN_FORM_SELECT_MENU = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_select_menu");
 
     public static final ResourceLocation SET_NO_JUMP_TICK = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_no_jump_tick");
+    public static final ResourceLocation SET_NO_MOVE_TICK = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_no_move_tick");
 
     public static final ResourceLocation OPEN_FORM_COLOR_SELECT_MENU = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_color_select_menu");
     public static final ResourceLocation MODIFY_FCD_DATA = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "modify_fcd_data");
