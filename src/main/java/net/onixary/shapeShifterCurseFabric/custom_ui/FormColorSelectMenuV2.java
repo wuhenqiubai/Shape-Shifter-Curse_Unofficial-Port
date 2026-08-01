@@ -297,7 +297,8 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
 
     @Override
     public Identifier getLayerID() {
-        return this.getForm().getFormLayer().getB();
+        IForm playerForm = this.getForm();
+        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
     }
 
     @Override

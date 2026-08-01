@@ -269,6 +269,12 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), buf));
     }
 
+    public static void sendNoMoveTick(ServerPlayer player, int tick) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeInt(tick);
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), buf));
+    }
+
 
     public static void sendOpenFCSMenu(ServerPlayer player) {
         FriendlyByteBuf buf = PacketByteBufs.create();

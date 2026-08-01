@@ -59,7 +59,8 @@ public class ModPackets {
     public static final Identifier SET_FORM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_form");
     public static final Identifier OPEN_FORM_SELECT_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_select_menu");
 
-    public static final Identifier SET_NO_JUMP_TICK = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_no_jump_tick");
+    public static final ResourceLocation SET_NO_JUMP_TICK = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_no_jump_tick");
+    public static final ResourceLocation SET_NO_MOVE_TICK = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_no_move_tick");
 
     public static final Identifier OPEN_FORM_COLOR_SELECT_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_color_select_menu");
     public static final Identifier MODIFY_FCD_DATA = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "modify_fcd_data");

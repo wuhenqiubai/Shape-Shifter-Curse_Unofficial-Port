@@ -12,7 +12,9 @@ import net.onixary.shapeShifterCurseFabric.additional_power.SlowdownPercentPower
 import net.onixary.shapeShifterCurseFabric.additional_power.SprintingStateTracker;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
+import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -22,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(Player.class)
-public class PlayerMovementControlMixin {
+public class PlayerMovementControlMixin implements IMoveController {
 
     @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
     private void preventTravelWhenAttached(Vec3 movementInput, CallbackInfo ci) {
@@ -56,6 +58,9 @@ public class PlayerMovementControlMixin {
 
     @Inject(method = "getSpeed()F", at = @At("RETURN"), cancellable = true)
     private void zeroMovementSpeedWhenAttached(CallbackInfoReturnable<Float> cir) {
+        if (noMoveTick > 0) {
+            cir.setReturnValue(0.0f);
+        }
         Player player = (Player) (Object) this;
 
         // 添加空值检查
@@ -68,7 +73,6 @@ public class PlayerMovementControlMixin {
 			    .stream()
 			    .filter(BatBlockAttachPower::isAttached)
 			    .findFirst().ifPresent(attachPower -> cir.setReturnValue(0.0f));
-
     }
 
     // TODO(1.21.11): Player 不再覆写 jumpFromGround —— 该方法已上移到 LivingEntity（LivingEntity.tick 的 "jump" 阶段调用）。
@@ -187,4 +191,25 @@ public class PlayerMovementControlMixin {
         }
         return multiplier.scale(slowdownPercent);
     }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void onTick(CallbackInfo ci) {
+        if (this.noMoveTick > 0) {
+            this.noMoveTick--;
+        }
+    }
+
+    @Unique
+    public int noMoveTick = 0;
+
+    @Override
+    public void shape_shifter_curse$setNoMoveTick(int tick) {
+        this.noMoveTick = tick;
+    }
+
+    @Override
+    public int shape_shifter_curse$getNoMoveTick() {
+        return this.noMoveTick;
+    }
+
 }
