@@ -26,7 +26,7 @@ public class PlayerTransformEffectManager {
 
     }
 
-    public static void applyFinaleTransformEffect(ServerPlayerEntity player, int duration){
+    public static void applyFinaleTransformEffect(ServerPlayer player, int duration){
         ModPacketsS2CServer.sendNoMoveTick(player, duration);
     }
 }

@@ -25,7 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.List;
 
 @Mixin(Player.class)
-public class PlayerMovementControlMixin {
+public class PlayerMovementControlMixin implements IMoveController {
 
     @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
     private void preventTravelWhenAttached(Vec3 movementInput, CallbackInfo ci) {
@@ -67,10 +67,6 @@ public class PlayerMovementControlMixin {
 			    .stream()
 			    .filter(BatBlockAttachPower::isAttached)
 			    .findFirst().ifPresent(attachPower -> cir.setReturnValue(0.0f));
-
-        if (attachPower != null) {
-            cir.setReturnValue(0.0f);
-        }
     }
 
     @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)

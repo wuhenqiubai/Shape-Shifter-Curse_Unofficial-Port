@@ -269,10 +269,10 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), buf));
     }
 
-    public static void sendNoMoveTick(ServerPlayerEntity player, int tick) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void sendNoMoveTick(ServerPlayer player, int tick) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(tick);
-        ServerPlayNetworking.send(player, ModPackets.SET_NO_MOVE_TICK, buf);
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), buf));
     }
 
 
