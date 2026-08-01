@@ -12,11 +12,8 @@ public class PlayerTransformEffectManager {
         MobEffectInstance darknessEffect = new MobEffectInstance(MobEffects.BLINDNESS, duration);
         player.addEffect(darknessEffect);
 
-        // add immobility effect
-        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 245);
-        player.addEffect(immobilityEffect);
-
-	    ModPacketsS2CServer.sendNoJumpTick(player, duration);
+        ModPacketsS2CServer.sendNoMoveTick(player, duration);
+        ModPacketsS2CServer.sendNoJumpTick(player, duration);
     }
 
     public static void applyEndTransformEffect(ServerPlayer player, int duration) {
@@ -24,18 +21,12 @@ public class PlayerTransformEffectManager {
         MobEffectInstance nauseaEffect = new MobEffectInstance(MobEffects.CONFUSION, duration);
         player.addEffect(nauseaEffect);
 
-        // add immobility effect
-        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 245);
-        player.addEffect(immobilityEffect);
+        ModPacketsS2CServer.sendNoMoveTick(player, duration);
+        ModPacketsS2CServer.sendNoJumpTick(player, duration);
 
-	    ModPacketsS2CServer.sendNoJumpTick(player, duration);
     }
 
-    public static void applyFinaleTransformEffect(ServerPlayer player, int duration){
-
-        // slowness effect remain some time
-        MobEffectInstance immobilityEffect = new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, duration, 200);
-        player.addEffect(immobilityEffect);
-
+    public static void applyFinaleTransformEffect(ServerPlayerEntity player, int duration){
+        ModPacketsS2CServer.sendNoMoveTick(player, duration);
     }
 }

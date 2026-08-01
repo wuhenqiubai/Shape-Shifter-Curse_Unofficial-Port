@@ -13,7 +13,9 @@ import net.onixary.shapeShifterCurseFabric.additional_power.SlowdownPercentPower
 import net.onixary.shapeShifterCurseFabric.additional_power.SprintingStateTracker;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
+import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -50,6 +52,9 @@ public class PlayerMovementControlMixin {
 
     @Inject(method = "getSpeed()F", at = @At("RETURN"), cancellable = true)
     private void zeroMovementSpeedWhenAttached(CallbackInfoReturnable<Float> cir) {
+        if (noMoveTick > 0) {
+            cir.setReturnValue(0.0f);
+        }
         Player player = (Player) (Object) this;
 
         // 添加空值检查
@@ -63,6 +68,9 @@ public class PlayerMovementControlMixin {
 			    .filter(BatBlockAttachPower::isAttached)
 			    .findFirst().ifPresent(attachPower -> cir.setReturnValue(0.0f));
 
+        if (attachPower != null) {
+            cir.setReturnValue(0.0f);
+        }
     }
 
     @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)
@@ -176,4 +184,25 @@ public class PlayerMovementControlMixin {
         }
         return multiplier.scale(slowdownPercent);
     }
+
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void onTick(CallbackInfo ci) {
+        if (this.noMoveTick > 0) {
+            this.noMoveTick--;
+        }
+    }
+
+    @Unique
+    public int noMoveTick = 0;
+
+    @Override
+    public void shape_shifter_curse$setNoMoveTick(int tick) {
+        this.noMoveTick = tick;
+    }
+
+    @Override
+    public int shape_shifter_curse$getNoMoveTick() {
+        return this.noMoveTick;
+    }
+
 }
