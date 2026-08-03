@@ -13,9 +13,7 @@
 					"actions": [
 						{
 							"type": "apoli:spawn_particles",
-							"particle": {
-								"type": "minecraft:cloud"
-							},
+							"particle": "minecraft:cloud",
 							"count": 8,
 							"speed": 0.0,
 							"force": false,

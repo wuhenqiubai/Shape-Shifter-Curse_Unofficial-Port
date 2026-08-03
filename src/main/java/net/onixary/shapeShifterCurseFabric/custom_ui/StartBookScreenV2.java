@@ -4,6 +4,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -75,7 +76,7 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
     private void RenderBook(GuiGraphics context) {
         int BookPosX = width / 2 - BookSizeX / 2;
         int BookPosY = height / 2 - BookSizeY / 2;
-        context.blit(StartBook_TexID, BookPosX, BookPosY, 0, 0, BookSizeX, BookSizeY, BookSizeX, BookSizeY);
+        context.blit(RenderPipelines.GUI_TEXTURED, StartBook_TexID, BookPosX, BookPosY, 0, 0, BookSizeX, BookSizeY, BookSizeX, BookSizeY, BookSizeX, BookSizeY, -1);
     }
 
     @Override

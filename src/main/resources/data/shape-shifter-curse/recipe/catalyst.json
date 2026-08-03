@@ -2,15 +2,9 @@
 	"type": "minecraft:crafting_shapeless",
 	"category": "misc",
 	"ingredients": [
-		{
-			"item": "minecraft:nether_wart"
-		},
-		{
-			"item": "shape-shifter-curse:moondust_matrix"
-		},
-		{
-			"item": "minecraft:bowl"
-		}
+		"minecraft:nether_wart",
+		"shape-shifter-curse:moondust_matrix",
+		"minecraft:bowl"
 	],
 	"result": {
 		"count": 1,

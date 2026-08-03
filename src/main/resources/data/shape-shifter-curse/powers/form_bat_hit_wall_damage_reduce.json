@@ -6,7 +6,7 @@
 	},
 	"modifier": {
 		"name": "no_hit_wall_damage",
-		"operation": "apoli:set_total",
+		"operation": "set_total",
 		"value": 0.0
 	}
 }

@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.components.StringWidget;
@@ -99,7 +100,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
-        context.blit(page_texID, BookPosX, BookPosY, FinalBookSizeX, FinalBookSizeY, 0, 0, FinalBookSizeX, FinalBookSizeY);
+        context.blit(RenderPipelines.GUI_TEXTURED, page_texID, BookPosX, BookPosY, 0, 0, FinalBookSizeX, FinalBookSizeY, FinalBookSizeX, FinalBookSizeY, FinalBookSizeX, FinalBookSizeY, -1);
     }
 
     private void NextPage() {

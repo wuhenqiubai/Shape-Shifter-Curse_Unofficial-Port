@@ -1,10 +1,10 @@
 {
 	"type": "apoli:conditioned_attribute",
 	"modifier": {
-		"id": "shape-shifter-curse:oxygen_health_5",
 		"attribute": "minecraft:generic.max_health",
 		"value": 0.0,
-		"operation": "add_value"
+		"operation": "addition",
+		"name": "shape-shifter-curse:oxygen_health_5"
 	},
 	"tick_rate": 20,
 	"condition": {

@@ -6,15 +6,9 @@
 		"E  "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"E": {
-			"item": "shape-shifter-curse:ectoplasm_rag"
-		},
-		"H": {
-			"item": "minecraft:wither_skeleton_skull"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"E": "shape-shifter-curse:ectoplasm_rag",
+		"H": "minecraft:wither_skeleton_skull"
 	},
 	"result": {
 		"count": 1,

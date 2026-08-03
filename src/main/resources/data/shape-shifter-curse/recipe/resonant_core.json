@@ -6,15 +6,9 @@
 		"BAB"
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"A": {
-			"item": "minecraft:amethyst_shard"
-		},
-		"B": {
-			"item": "minecraft:amethyst_block"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"A": "minecraft:amethyst_shard",
+		"B": "minecraft:amethyst_block"
 	},
 	"result": {
 		"count": 1,

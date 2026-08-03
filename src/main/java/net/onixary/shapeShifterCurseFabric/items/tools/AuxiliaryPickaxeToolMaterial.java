@@ -5,12 +5,5 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ToolMaterial;
 
 public class AuxiliaryPickaxeToolMaterial {
-    public static final ToolMaterial INSTANCE = new ToolMaterial(
-        BlockTags.INCORRECT_FOR_WOODEN_TOOL,
-        781,
-        1.5f,
-        2f,
-        0,
-        ItemTags.DIAMOND_TOOL_MATERIALS
-    );
+    public static final ToolMaterial INSTANCE = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL,781,1.5f,2f,1,ItemTags.DIAMOND_TOOL_MATERIALS);
 }

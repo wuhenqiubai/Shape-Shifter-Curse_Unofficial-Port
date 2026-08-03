@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -40,7 +41,7 @@ public class FamiliarFoxManaBar implements IManaRender{
 
     private void renderBar(GuiGraphics context, float tickDelta, int x, int y) {
         int instinctWidth = (int) Math.ceil(80 * ManaUtils.getPlayerManaPercent(mc.player, 0.0d));
-        context.blit(BarTexEmptyID, x, y, 0, 0, 80, 5, 80, 5);
-        context.blit(BarTexFullID, x, y, 0, 0, instinctWidth, 5, 80, 5);
+        context.blit(RenderPipelines.GUI_TEXTURED, BarTexEmptyID, x, y, 0, 0, 80, 5, 80, 5, 80, 5, -1);
+        context.blit(RenderPipelines.GUI_TEXTURED, BarTexFullID, x, y, 0, 0, instinctWidth, 5, instinctWidth, 5, 80, 5, -1);
     }
 }

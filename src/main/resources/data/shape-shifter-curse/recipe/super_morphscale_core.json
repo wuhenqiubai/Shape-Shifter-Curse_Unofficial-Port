@@ -2,15 +2,9 @@
 	"type": "minecraft:crafting_shaped",
 	"category": "misc",
 	"key": {
-		"A": {
-			"item": "shape-shifter-curse:morphscale_core"
-		},
-		"B": {
-			"item": "minecraft:nether_star"
-		},
-		"C": {
-			"item": "minecraft:gold_block"
-		}
+		"A": "shape-shifter-curse:morphscale_core",
+		"B": "minecraft:nether_star",
+		"C": "minecraft:gold_block"
 	},
 	"pattern": [
 		"CBC",

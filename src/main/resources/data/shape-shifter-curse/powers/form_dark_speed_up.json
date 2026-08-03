@@ -2,9 +2,9 @@
 	"type": "apoli:conditioned_attribute",
 	"modifier": {
 		"attribute": "minecraft:generic.movement_speed",
-		"operation": "add_multiplied_total",
+		"operation": "multiply_total",
 		"value": 0.35,
-		"id": "shape-shifter-curse:increased_speed_when_dark"
+		"name": "shape-shifter-curse:increased_speed_when_dark"
 	},
 	"tick_rate": 20,
 	"condition": {

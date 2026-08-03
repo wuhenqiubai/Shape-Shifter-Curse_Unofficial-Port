@@ -6,21 +6,11 @@
 		" M "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"S": {
-			"item": "minecraft:string"
-		},
-		"L": {
-			"item": "minecraft:lava_bucket"
-		},
-		"G": {
-			"item": "minecraft:glass"
-		},
-		"P": {
-			"item": "minecraft:powder_snow_bucket"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"S": "minecraft:string",
+		"L": "minecraft:lava_bucket",
+		"G": "minecraft:glass",
+		"P": "minecraft:powder_snow_bucket"
 	},
 	"result": {
 		"count": 1,

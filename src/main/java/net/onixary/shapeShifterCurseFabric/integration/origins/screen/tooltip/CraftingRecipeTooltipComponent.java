@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.screen.tooltip;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.Identifier;
@@ -53,7 +54,7 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
 
     public void drawBackground(GuiGraphics context, int x, int y) {
         // setColor 在 1.21.11 移除，blit 参数顺序调整为 (x, y, w, h, u, v, texW, texH)
-        context.blit(TEXTURE, x, y, 130, 86, 0, 0, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 130, 86, 130, 86, 256, 256, -1);
     }
 
 }

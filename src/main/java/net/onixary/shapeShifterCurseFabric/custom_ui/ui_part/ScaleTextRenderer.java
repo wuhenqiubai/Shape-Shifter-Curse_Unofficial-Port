@@ -7,10 +7,9 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
+import net.onixary.shapeShifterCurseFabric.mixin.FontAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
-
-import java.lang.reflect.Field;
 
 
 @Environment(EnvType.CLIENT)
@@ -18,17 +17,9 @@ public class ScaleTextRenderer extends Font {
     public float Scale = 1.0f;
 
 	public ScaleTextRenderer(@NotNull Font textRenderer) {
-        super(extractProvider(textRenderer));
-    }
-
-    private static Font.Provider extractProvider(Font font) {
-        try {
-            Field field = Font.class.getDeclaredField("provider");
-            field.setAccessible(true);
-            return (Font.Provider) field.get(font);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to extract Font provider", e);
-        }
+        // 1.21.11: Font.provider 字段运行时是 intermediary 混淆名，反射 getDeclaredField("provider") 找不到
+        // （NoSuchFieldException）。改用 mixin @Accessor（处理器会映射字段名）。
+        super(((FontAccessor) textRenderer).getProvider());
     }
 
     public int width(@NonNull FormattedText text) {

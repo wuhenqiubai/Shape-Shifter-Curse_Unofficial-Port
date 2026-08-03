@@ -1,13 +1,10 @@
 {
   "load_priority": 0,
-
   "name": "shape-shifter-curse.form_spider_3.model_name",
   "layer": "origins:origin",
   "form": "shape-shifter-curse:form_spider_3",
-
   "wide_only": true,
-
-  "model": "shape-shifter-curse:geo/form/form_spider_3.geo.json",
+  "model": "shape-shifter-curse:geo/form/form_spider_3",
   "texture": "shape-shifter-curse:textures/form/form_spider_3/form_spider_3.png",
   "texture_mask": "shape-shifter-curse:textures/form/form_spider_3/form_spider_3_colormask.png",
   "fullbright_texture": "shape-shifter-curse:textures/form/form_spider_3/form_spider_3_emission.png",
@@ -26,7 +23,6 @@
     "head",
     "hat"
   ],
-
   "animation_system": "shape-shifter-curse:default",
   "animation_system_config": {
     "extra_parts_map": {
@@ -39,7 +35,9 @@
     },
     "tail": {
       "chain": {
-        "tail": [0]
+        "tail": [
+          0
+        ]
       }
     },
     "eye_blink": {

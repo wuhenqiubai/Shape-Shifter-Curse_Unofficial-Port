@@ -2,9 +2,9 @@
 	"type": "apoli:conditioned_attribute",
 	"modifier": {
 		"attribute": "minecraft:generic.movement_speed",
-		"operation": "add_multiplied_total",
+		"operation": "multiply_total",
 		"value": -0.07,
-		"id": "shape-shifter-curse:decrease_sprinting_speed"
+		"name": "shape-shifter-curse:decrease_sprinting_speed"
 	},
 	"tick_rate": 1,
 	"condition": {

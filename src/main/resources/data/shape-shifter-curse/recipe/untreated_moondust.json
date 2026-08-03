@@ -6,12 +6,8 @@
 		"   "
 	],
 	"key": {
-		"L": {
-			"item": "minecraft:lapis_lazuli"
-		},
-		"A": {
-			"item": "minecraft:amethyst_shard"
-		}
+		"L": "minecraft:lapis_lazuli",
+		"A": "minecraft:amethyst_shard"
 	},
 	"result": {
 		"count": 4,

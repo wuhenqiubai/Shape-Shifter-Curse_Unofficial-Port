@@ -6,15 +6,9 @@
 		"RPR"
 	],
 	"key": {
-		"G": {
-			"item": "minecraft:gunpowder"
-		},
-		"P": {
-			"item": "minecraft:paper"
-		},
-		"R": {
-			"item": "minecraft:redstone"
-		}
+		"G": "minecraft:gunpowder",
+		"P": "minecraft:paper",
+		"R": "minecraft:redstone"
 	},
 	"result": {
 		"count": 8,

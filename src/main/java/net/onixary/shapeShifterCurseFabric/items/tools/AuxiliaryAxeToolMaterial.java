@@ -5,12 +5,5 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.ToolMaterial;
 
 public class AuxiliaryAxeToolMaterial {
-    public static final ToolMaterial INSTANCE = new ToolMaterial(
-        BlockTags.INCORRECT_FOR_WOODEN_TOOL,
-        781,
-        1f,
-        6f,
-        0,
-        ItemTags.DIAMOND_TOOL_MATERIALS
-    );
+    public static final ToolMaterial INSTANCE = new ToolMaterial(BlockTags.INCORRECT_FOR_WOODEN_TOOL,781,1f,6f,1,ItemTags.DIAMOND_TOOL_MATERIALS);
 }

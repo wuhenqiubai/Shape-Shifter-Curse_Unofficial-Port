@@ -29,9 +29,9 @@
 		},
 		"modifier": {
 			"attribute": "minecraft:generic.attack_damage",
-			"id": "shape-shifter-curse:extra_attack_damage",
-			"operation": "add_value",
-			"value": 9.0
+			"operation": "addition",
+			"value": 9.0,
+			"name": "shape-shifter-curse:extra_attack_damage"
 		},
 		"tick_rate": 1
 	},
@@ -51,9 +51,7 @@
 						"actions": [
 							{
 								"type": "apoli:spawn_particles",
-								"particle": {
-									"type": "minecraft:crit"
-								},
+								"particle": "minecraft:crit",
 								"count": 8,
 								"speed": 0.0,
 								"force": true,

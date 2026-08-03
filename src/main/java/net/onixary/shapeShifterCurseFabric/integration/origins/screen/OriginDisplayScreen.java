@@ -4,6 +4,7 @@ import io.github.apace100.apoli.power.PowerType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -97,7 +98,7 @@ public class OriginDisplayScreen extends Screen {
         if(!canScroll()) {
             return;
         }
-        context.blit(WINDOW, guiLeft + 155, guiTop + 35, 8, 134, 188, 24, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft + 155, guiTop + 35, 188, 24, 8, 134, 8, 134, 256, 256, -1);
         int scrollbarY = 36;
         int maxScrollbarOffset = 141;
         int u = 176;
@@ -110,7 +111,7 @@ public class OriginDisplayScreen extends Screen {
                 u += 6;
             }
         }
-        context.blit(WINDOW, guiLeft + 156, guiTop + scrollbarY, 6, 27, u, 24, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft + 156, guiTop + scrollbarY, u, 24, 6, 27, 6, 27, 256, 256, -1);
     }
 
     private boolean scrolling = false;
@@ -184,7 +185,7 @@ public class OriginDisplayScreen extends Screen {
         if(origin != null) {
             this.renderOriginContent(context, mouseX, mouseY);
         }
-        context.blit(WINDOW, guiLeft, guiTop, windowWidth, windowHeight, 0, 0, 256, 256);
+        context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft, guiTop, 0, 0, windowWidth, windowHeight, windowWidth, windowHeight, 256, 256, -1);
         if(origin != null) {
             // 2D 变换栈不支持 z 平移，删除原 pose().pushPose()/translate(0,0,5)/popPose()
             renderOriginName(context);
@@ -200,9 +201,9 @@ public class OriginDisplayScreen extends Screen {
         int wOffset = impactValue * 8;
         for(int i = 0; i < 3; i++) {
             if(i < impactValue) {
-                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, 8, 8, windowWidth + wOffset, 16, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth + wOffset, 16, 8, 8, 8, 8, 256, 256, -1);
             } else {
-                context.blit(WINDOW, guiLeft + 128 + i * 10, guiTop + 19, 8, 8, windowWidth, 16, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft + 128 + i * 10, guiTop + 19, windowWidth, 16, 8, 8, 8, 8, 256, 256, -1);
             }
         }
         if(mouseX >= guiLeft + 128 && mouseX <= guiLeft + 158
@@ -225,7 +226,7 @@ public class OriginDisplayScreen extends Screen {
         int endY = guiTop + windowHeight - border;
         for(int x = guiLeft; x < endX; x += 16) {
             for(int y = guiTop + offsetYStart; y < endY + offsetYEnd; y += 16) {
-                context.blit(WINDOW, x, y, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y), windowWidth, 0, 256, 256);
+                context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, x, y, windowWidth, 0, Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y), Math.max(16, endX - x), Math.max(16, endY + offsetYEnd - y), 256, 256, -1);
             }
         }
     }
@@ -285,7 +286,7 @@ public class OriginDisplayScreen extends Screen {
                     for(Badge badge : badges) {
                         RenderedBadge renderedBadge = new RenderedBadge(p, badge,xStart + 10 * bi, y - 1);
                         renderedBadges.add(renderedBadge);
-                        context.blit(badge.spriteId(), xStart + 10 * bi, y - 1, 9, 9, 0, 0, 9, 9);
+                        context.blit(RenderPipelines.GUI_TEXTURED, badge.spriteId(), xStart + 10 * bi, y - 1, 0, 0, 9, 9, 9, 9, 9, 9, -1);
                         bi++;
                     }
                 }

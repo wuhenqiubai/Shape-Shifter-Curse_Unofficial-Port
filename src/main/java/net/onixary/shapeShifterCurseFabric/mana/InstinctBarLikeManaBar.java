@@ -4,6 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -40,8 +41,8 @@ public class InstinctBarLikeManaBar implements IManaRender{
             remainTicks = (int) Math.ceil((maxMana - mana) / manaRegen);
         }
         int instinctWidth = (int) Math.ceil(80 * ManaUtils.getManaPercent(mana, maxMana, 0.0d));
-        context.blit(BarTexEmptyID, x, y, 0, 0, 80, 5, 80, 5);
-        context.blit(BarTexFullID, x, y, 0, 0, instinctWidth, 5, 80, 5);
+        context.blit(RenderPipelines.GUI_TEXTURED, BarTexEmptyID, x, y, 0, 0, 80, 5, 80, 5, 80, 5, -1);
+        context.blit(RenderPipelines.GUI_TEXTURED, BarTexFullID, x, y, 0, 0, instinctWidth, 5, instinctWidth, 5, 80, 5, -1);
         StringBuilder manaString = new StringBuilder();
         manaString.append((int) mana).append("/").append((int) maxMana);
         if (remainTicks > 0) {

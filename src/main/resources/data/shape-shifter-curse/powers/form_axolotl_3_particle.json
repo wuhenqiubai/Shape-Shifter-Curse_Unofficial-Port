@@ -5,9 +5,7 @@
 		"actions": [
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:nautilus"
-				},
+				"particle": "minecraft:nautilus",
 				"count": 8,
 				"speed": 0.0,
 				"force": true,
@@ -19,9 +17,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:splash"
-				},
+				"particle": "minecraft:splash",
 				"count": 8,
 				"speed": 0.0,
 				"force": true,

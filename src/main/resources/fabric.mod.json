@@ -143,7 +143,8 @@
     "minecraft": "${minecraft_version}",
     "pehkui": ">=3.8.3+1.14.4-1.21.11",
     "player_animation_library": ">=1.1.9",
-    "geckolib": ">=5.4.0"
+    "geckolib": ">=5.4.0",
+    "cardinal-components": ">=7.3.2"
   },
   "breaks": {
     "origins": ">0.0.0",

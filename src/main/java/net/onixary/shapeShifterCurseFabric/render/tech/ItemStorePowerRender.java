@@ -4,6 +4,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
@@ -69,7 +70,7 @@ public class ItemStorePowerRender {
         int SlotYFinal = SlotBegin.getB() + SlotY;
         // 2D 变换栈不支持 z 平移，去除 translate(0,0,-90)
         context.pose().pushMatrix();
-        context.blit(WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 22, 22, 0, 1, 29, 24);
+        context.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 22, 22, 29, 24, -1);
         context.pose().popMatrix();
         ItemStack stack = power.getStack();
         if (stack.isEmpty()) {

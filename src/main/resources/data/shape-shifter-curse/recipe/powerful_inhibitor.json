@@ -2,15 +2,9 @@
 	"type": "minecraft:crafting_shapeless",
 	"category": "misc",
 	"ingredients": [
-		{
-			"item": "minecraft:enchanted_golden_apple"
-		},
-		{
-			"item": "shape-shifter-curse:moondust_matrix"
-		},
-		{
-			"item": "minecraft:bowl"
-		}
+		"minecraft:enchanted_golden_apple",
+		"shape-shifter-curse:moondust_matrix",
+		"minecraft:bowl"
 	],
 	"result": {
 		"count": 1,

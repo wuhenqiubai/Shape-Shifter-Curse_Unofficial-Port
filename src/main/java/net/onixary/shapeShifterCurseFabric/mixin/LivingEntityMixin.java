@@ -180,13 +180,11 @@ public abstract class LivingEntityMixin {
      * used for damage computation, without affecting the original fall distance value
      * used in form's falling protection powers.
      */
-    @ModifyVariable(
-            method = "calculateFallDamage(DF)I",
-            at = @At("HEAD"),
-            argsOnly = true,
-            ordinal = 0
-    )
-    // 1.21.11: calculateFallDamage 首参由 float 改为 double（int calculateFallDamage(double, float)）
+    // 1.21.11: causeFallDamage(double, float, DamageSource) 内 calculateFallDamage(d, f) 调用点改 fallDistance。
+    // 用 @ModifyArg 而非 @ModifyVariable（double 参数占 2 个 JVM 槽位，HEAD+argsOnly 的 ModifyVariable 对 double 有已知问题）
+    @ModifyArg(method = "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"),
+            index = 0)
     private double modifyFallDistanceForDamageCalc(double fallDistance) {
         LivingEntity self = (LivingEntity) (Object) this;
 
@@ -221,7 +219,7 @@ public abstract class LivingEntityMixin {
     // Origins的LikeWaterPower
     // 1.21.11: travel 重构拆分为 travelInAir / travelInFluid / travelFallFlying，
     // 原 travel 内的 setDeltaMovement(流体下落调整) 调用现在位于 travelInWater
-    @ModifyArg(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"))
+    @ModifyArg(method = "travelInWater(Lnet/minecraft/world/phys/Vec3;DZD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"))
     public Vec3 likeWaterMixin(Vec3 movementInput, @Local(ordinal = 0) double d) {
         LivingEntity self = (LivingEntity) (Object) this;
         if(AdditionalPowers.LIKE_WATER.isActive((LivingEntity) (Object) this)) {
@@ -249,7 +247,7 @@ public abstract class LivingEntityMixin {
         return this.getMovementSpeed() * 0.2f;  // g * (this.getMovementSpeed() / 0.1f) 或者 0.10000000149011612f g = 0.02f
     }*/
 
-    @ModifyArg(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"), index = 0)
+    @ModifyArg(method = "travelInWater(Lnet/minecraft/world/phys/Vec3;DZD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;moveRelative(FLnet/minecraft/world/phys/Vec3;)V"), index = 0)
     private float ModifyInWaterSpeed(float g) {
         if ((LivingEntity)(Object)this instanceof Player player) {
             // g -> 水中速度
@@ -279,7 +277,7 @@ public abstract class LivingEntityMixin {
         return g;
     }
 
-    @ModifyArgs(method = "travelInWater", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;", ordinal = 0))
+    @ModifyArgs(method = "travelInWater(Lnet/minecraft/world/phys/Vec3;DZD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/phys/Vec3;multiply(DDD)Lnet/minecraft/world/phys/Vec3;", ordinal = 0))
     private void modifyInWaterFlexibility(Args args) {
         if ((LivingEntity)(Object)this instanceof Player player) {
             double targetSpeedX = args.get(0);
@@ -325,7 +323,10 @@ public abstract class LivingEntityMixin {
         return Math.max(0.0D, finalV);
     }
 
-    @ModifyVariable(method = "causeFallDamage", at = @At("HEAD"), ordinal = 1, argsOnly = true)
+    // 1.21.11: causeFallDamage 内 calculateFallDamage(d, f) 调用点改 multiplier（index=1）
+    @ModifyArg(method = "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"),
+            index = 1)
     private float handleFallDamageB(float damageMultiplier) {
         float finalV = applyModifier(ModifyFallDamagePower.class, damageMultiplier, ModifyFallDamagePower::getModifiers_DamageMultiplier);
         return Math.max(0f, finalV);

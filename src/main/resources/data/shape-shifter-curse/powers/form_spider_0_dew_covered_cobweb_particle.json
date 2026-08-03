@@ -5,9 +5,7 @@
 		"actions": [
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:poof"
-				},
+				"particle": "minecraft:poof",
 				"count": 1,
 				"speed": 0.0,
 				"force": false,

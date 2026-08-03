@@ -1,8 +1,6 @@
 {
 	"type": "apoli:particle",
-	"particle": {
-		"type": "minecraft:white_ash"
-	},
+	"particle": "minecraft:white_ash",
 	"frequency": 10,
 	"visible_while_invisible": true,
 	"offset_y": 0.15

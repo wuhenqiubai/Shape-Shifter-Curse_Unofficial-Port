@@ -2,9 +2,9 @@
 	"type": "apoli:conditioned_attribute",
 	"modifier": {
 		"attribute": "minecraft:generic.movement_speed",
-		"operation": "add_value",
+		"operation": "addition",
 		"value": 0.65,
-		"id": "shape-shifter-curse:sneaking_rush"
+		"name": "shape-shifter-curse:sneaking_rush"
 	},
 	"tick_rate": 1,
 	"condition": {

@@ -97,7 +97,9 @@ public class TransformativeEntitySpawning {
                     .get(Identifier.fromNamespaceAndPath("minecraft", "desert_pyramid")).map(Holder::value).orElse(null),
                 MobCategory.CREATURE,
                 new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
-                    WeightedList.of(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 20, 3)))
+                    WeightedList.<MobSpawnSettings.SpawnerData>builder()
+                        .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 3, 5), 20)
+                        .build())
             );
             // 2. 在废弃矿井添加蜘蛛生成
             for (Holder<Structure> structureEntry : server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
@@ -106,7 +108,9 @@ public class TransformativeEntitySpawning {
                     structureEntry.value(),
                     MobCategory.MONSTER,
                     new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
-                        WeightedList.of(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 5, 1)))
+                        WeightedList.<MobSpawnSettings.SpawnerData>builder()
+                            .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 1, 2), 5)
+                            .build())
                 );
             }
         });

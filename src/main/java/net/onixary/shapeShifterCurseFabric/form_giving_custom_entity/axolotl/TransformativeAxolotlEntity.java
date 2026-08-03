@@ -10,6 +10,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Bucketable;
@@ -36,7 +37,9 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        // 1.21.11: 必须用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要），
+        // Mob.createMobAttributes() 缺 TEMPT_RANGE → 服务端 tick 崩 "Can't find attribute minecraft:tempt_range"
+        return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 1.0);

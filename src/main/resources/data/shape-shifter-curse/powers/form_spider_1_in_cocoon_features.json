@@ -5,8 +5,8 @@
 		"modifier": {
 			"attribute": "minecraft:generic.max_health",
 			"value": -12.0,
-			"operation": "add_value",
-			"id": "shape-shifter-curse:auto_generated"
+			"operation": "addition",
+			"name": "shape-shifter-curse:auto_generated"
 		}
 	},
 	"armor_value_up": {
@@ -14,8 +14,8 @@
 		"modifier": {
 			"attribute": "minecraft:generic.armor",
 			"value": 20.0,
-			"operation": "add_value",
-			"id": "shape-shifter-curse:auto_generated"
+			"operation": "addition",
+			"name": "shape-shifter-curse:auto_generated"
 		}
 	},
 	"no_armors": {

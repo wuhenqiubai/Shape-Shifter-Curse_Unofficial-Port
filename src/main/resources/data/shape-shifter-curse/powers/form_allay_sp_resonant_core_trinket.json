@@ -43,9 +43,7 @@
 				},
 				{
 					"type": "shape-shifter-curse:spawn_particles_in_circle",
-					"particle": {
-						"type": "minecraft:glow"
-					},
+					"particle": "minecraft:glow",
 					"count": 1,
 					"speed": 0.01,
 					"force": true,

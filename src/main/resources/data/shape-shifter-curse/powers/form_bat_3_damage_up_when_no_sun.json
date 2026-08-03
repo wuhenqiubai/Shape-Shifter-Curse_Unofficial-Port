@@ -8,9 +8,9 @@
 		},
 		"modifier": {
 			"attribute": "minecraft:generic.attack_damage",
-			"id": "shape-shifter-curse:extra_attack_damage_normal",
-			"operation": "add_value",
-			"value": 1.0
+			"operation": "addition",
+			"value": 1.0,
+			"name": "shape-shifter-curse:extra_attack_damage_normal"
 		},
 		"tick_rate": 1
 	},
@@ -52,9 +52,9 @@
 		},
 		"modifier": {
 			"attribute": "minecraft:generic.attack_damage",
-			"id": "shape-shifter-curse:extra_attack_damage_normal",
-			"operation": "add_value",
-			"value": 5.0
+			"operation": "addition",
+			"value": 5.0,
+			"name": "shape-shifter-curse:extra_attack_damage_normal"
 		},
 		"tick_rate": 1
 	}

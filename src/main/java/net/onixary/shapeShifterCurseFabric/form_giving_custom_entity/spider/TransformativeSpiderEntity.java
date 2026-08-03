@@ -6,6 +6,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -26,7 +27,8 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
     }
 
     public static AttributeSupplier.@NonNull Builder createAttributes() {
-        return Mob.createMobAttributes()
+        // 1.21.11: 用 Monster.createMonsterAttributes()（Spider 是 Monster，含对应属性）
+        return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 8.0f)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 0.3f);

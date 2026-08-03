@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -159,7 +160,7 @@ public class NormalFormSelectScreen extends Screen {
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
         int bgY = (this.height - BG_HEIGHT) / 2;
-        context.blit(BG_TEXTURE, bgX, bgY, BG_WIDTH, BG_HEIGHT, 0, 0, BG_WIDTH, BG_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, -1);
     }
 
 

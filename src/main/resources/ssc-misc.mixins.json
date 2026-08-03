@@ -5,8 +5,13 @@
 	"compatibilityLevel": "JAVA_21",
 	"refmap": "ssc-misc.refmap.json",
 	"plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
-	"mixins": [],
-	"client": [],
+	"mixins": [
+		"CalioParticleEffectMixin",
+		"CreativeModeTabsSuspiciousStewMixin"
+	],
+	"client": [
+		"FontAccessor"
+	],
 	"injectors": {
 		"defaultRequire": 1
   }

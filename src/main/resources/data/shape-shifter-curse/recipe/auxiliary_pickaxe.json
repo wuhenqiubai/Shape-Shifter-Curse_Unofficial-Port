@@ -6,18 +6,10 @@
 		"   "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:untreated_moondust"
-		},
-		"D": {
-			"item": "minecraft:diamond"
-		},
-		"G": {
-			"item": "minecraft:gold_ingot"
-		},
-		"S": {
-			"item": "minecraft:stick"
-		}
+		"M": "shape-shifter-curse:untreated_moondust",
+		"D": "minecraft:diamond",
+		"G": "minecraft:gold_ingot",
+		"S": "minecraft:stick"
 	},
 	"result": {
 		"count": 1,

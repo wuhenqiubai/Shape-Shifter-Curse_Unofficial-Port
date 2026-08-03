@@ -20,9 +20,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:rain"
-				},
+				"particle": "minecraft:rain",
 				"count": 16,
 				"speed": 0.0,
 				"force": true,
@@ -36,14 +34,7 @@
 				"type": "apoli:spawn_particles",
 				"particle": {
 					"type": "minecraft:dust",
-					"params": {
-						"color": [
-							0.11,
-							0.18,
-							0.69
-						],
-						"scale": 2
-					}
+					"params": "0.11 0.18 0.69 2"
 				},
 				"count": 8,
 				"speed": 0.0,

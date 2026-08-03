@@ -38,9 +38,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:cloud"
-				},
+				"particle": "minecraft:cloud",
 				"count": 64,
 				"speed": 0.0,
 				"force": true,
@@ -119,9 +117,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:cloud"
-				},
+				"particle": "minecraft:cloud",
 				"count": 64,
 				"speed": 0.0,
 				"force": true,
@@ -200,9 +196,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:cloud"
-				},
+				"particle": "minecraft:cloud",
 				"count": 64,
 				"speed": 0.0,
 				"force": true,

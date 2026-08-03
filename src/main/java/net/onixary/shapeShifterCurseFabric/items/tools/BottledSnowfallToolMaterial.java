@@ -10,7 +10,7 @@ public class BottledSnowfallToolMaterial {
         300,
         1f,
         0f,
-        0,
+        1,
         ItemTags.STONE_TOOL_MATERIALS
     );
 }

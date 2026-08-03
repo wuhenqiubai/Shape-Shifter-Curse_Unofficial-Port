@@ -4,9 +4,9 @@
 		"type": "apoli:conditioned_attribute",
 		"modifier": {
 			"attribute": "minecraft:generic.attack_speed",
-			"operation": "add_value",
+			"operation": "addition",
 			"value": 1.2,
-			"id": "shape-shifter-curse:increased_attack_speed"
+			"name": "shape-shifter-curse:increased_attack_speed"
 		},
 		"tick_rate": 20,
 		"condition": {
@@ -91,9 +91,9 @@
 		"type": "apoli:conditioned_attribute",
 		"modifier": {
 			"attribute": "minecraft:generic.attack_speed",
-			"operation": "add_multiplied_base",
+			"operation": "multiply_base",
 			"value": -0.4,
-			"id": "shape-shifter-curse:decreased_attack_speed"
+			"name": "shape-shifter-curse:decreased_attack_speed"
 		},
 		"tick_rate": 20,
 		"condition": {

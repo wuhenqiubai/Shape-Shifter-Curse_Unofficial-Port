@@ -6,15 +6,9 @@
 		"WSW"
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"W": {
-			"item": "minecraft:wheat_seeds"
-		},
-		"S": {
-			"item": "minecraft:string"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"W": "minecraft:wheat_seeds",
+		"S": "minecraft:string"
 	},
 	"result": {
 		"count": 1,

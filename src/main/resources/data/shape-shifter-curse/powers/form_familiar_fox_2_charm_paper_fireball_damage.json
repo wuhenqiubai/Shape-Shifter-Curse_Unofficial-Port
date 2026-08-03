@@ -40,9 +40,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:explosion"
-				},
+				"particle": "minecraft:explosion",
 				"count": 2,
 				"speed": 0.0,
 				"force": false,
@@ -54,9 +52,7 @@
 			},
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:soul_fire_flame"
-				},
+				"particle": "minecraft:soul_fire_flame",
 				"count": 8,
 				"speed": 0.0,
 				"force": false,

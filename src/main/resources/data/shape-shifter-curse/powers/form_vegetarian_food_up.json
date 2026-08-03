@@ -8,7 +8,7 @@
 		},
 		{
 			"name": "increase food points",
-			"operation": "apoli:min_base",
+			"operation": "min_base",
 			"value": 4.0
 		},
 		{
@@ -20,7 +20,7 @@
 	"saturation_modifiers": [
 		{
 			"name": "increase food points",
-			"operation": "apoli:min_total",
+			"operation": "min_total",
 			"value": 0.6
 		}
 	],

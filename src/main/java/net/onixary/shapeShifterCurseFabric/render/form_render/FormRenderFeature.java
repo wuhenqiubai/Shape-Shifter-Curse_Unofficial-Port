@@ -35,7 +35,8 @@ import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
 import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
-import java.util.HashSet;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -341,7 +342,9 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         BakedGeoModel model = renderPassInfo.model();
         GeoBone armBone = model.getBone(armBoneName).orElse(null);
         if (armBone == null) return;
-        Set<GeoBone> ancestors = new HashSet<>();
+        // 必须用 identity 集合：GL5 的 GeoBone.hashCode 因 parent 与 children 互相包含会无限递归（StackOverflow），
+        // HashSet.add(bone) 会调用 hashCode → 崩溃。IdentityHashMap 用引用比较不调 hashCode。
+        Set<GeoBone> ancestors = Collections.newSetFromMap(new IdentityHashMap<>());
         for (GeoBone b = armBone; b != null; b = b.parent()) {
             ancestors.add(b);
         }

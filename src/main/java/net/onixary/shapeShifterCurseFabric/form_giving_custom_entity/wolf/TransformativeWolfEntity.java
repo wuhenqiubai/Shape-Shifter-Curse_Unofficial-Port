@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
@@ -72,7 +73,8 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
 
     public static AttributeSupplier.Builder createAttributes() {
         // 我觉得把逆天攻击距离移除之后 攻击力高点也没多大问题
-        return Mob.createMobAttributes()
+        // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
+        return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 12.0)
                 .add(Attributes.ATTACK_DAMAGE, 3.0f)
                 .add(Attributes.MOVEMENT_SPEED, 0.2);

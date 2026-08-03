@@ -150,7 +150,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
-        context.blit(page_texID, BookPosX, BookPosY, FinalBookSizeX, FinalBookSizeY, 0, 0, FinalBookSizeX, FinalBookSizeY);
+        context.blit(RenderPipelines.GUI_TEXTURED, page_texID, BookPosX, BookPosY, 0, 0, FinalBookSizeX, FinalBookSizeY, FinalBookSizeX, FinalBookSizeY, FinalBookSizeX, FinalBookSizeY, -1);
     }
 
     private void NextPage() {

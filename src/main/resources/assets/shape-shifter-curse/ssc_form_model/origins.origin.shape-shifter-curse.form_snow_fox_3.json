@@ -1,13 +1,10 @@
 {
   "load_priority": 0,
-
   "name": "shape-shifter-curse.form_snow_fox_3.model_name",
   "layer": "origins:origin",
   "form": "shape-shifter-curse:form_snow_fox_3",
-
   "wide_only": true,
-
-  "model": "shape-shifter-curse:geo/form/form_snow_fox_3.geo.json",
+  "model": "shape-shifter-curse:geo/form/form_snow_fox_3",
   "texture": "shape-shifter-curse:textures/form/form_snow_fox_3/form_snow_fox_3.png",
   "texture_mask": "shape-shifter-curse:textures/form/form_snow_fox_3/form_snow_fox_3_colormask.png",
   "hidden": [
@@ -24,18 +21,27 @@
     "head",
     "hat"
   ],
-
   "animation_system": "shape-shifter-curse:default",
   "animation_system_config": {
     "tail": {
       "chain": {
-        "tail": [0, 1, 2, 3, 4]
+        "tail": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ]
       }
     },
     "head_tail": {
       "chain": {
-        "ear_a": [0],
-        "ear_b": [0]
+        "ear_a": [
+          0
+        ],
+        "ear_b": [
+          0
+        ]
       }
     },
     "eye_blink": {

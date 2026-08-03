@@ -27,9 +27,13 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
     public static HashMap<Player, Boolean> SlimMap = new HashMap<>();
 
-    public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing.geo.json";
+    // 1.21.11 (GL5): 模型资源 key 是 stripPrefixAndSuffix 结果（geckolib/models/geo/missing.geo.json → geo/missing），
+    // 返回 "geo/missing.geo.json" 会在加载时被 stripLegacyPath 处理并每次打印 "Superfluous prefix or suffix" 警告刷屏
+    public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
-    public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/missing.animation.json";
+    // 1.21.11 (GL5): 动画资源 key 是 stripPrefixAndSuffix 后的结果（geckolib/animations/missing.animation.json → missing），
+    // 若返回 "animations/missing.animation.json" 会在 BakedAnimationCache.getAnimation 的 stripLegacyPath 后 miss（missing.animation ≠ missing）→ 崩服
+    public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":missing";
 
     public Player entity;
 
@@ -48,8 +52,8 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public boolean WideOnly = false;
     public boolean UseMultiplyMask = false;
     public boolean UseAzureAnim = false;
-    public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
-    public Identifier ModelResource_Slim = ShapeShifterCurseFabric.identifier("geo/missing.geo.json");
+    public Identifier ModelResource = ShapeShifterCurseFabric.identifier("geo/missing");
+    public Identifier ModelResource_Slim = ShapeShifterCurseFabric.identifier("geo/missing");
 
     public Identifier TextureResource = ShapeShifterCurseFabric.identifier("textures/missing.png");
     public Identifier TextureMaskResource = null;
@@ -71,7 +75,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public Identifier FullBrightTextureResource_Slim = ShapeShifterCurseFabric.identifier("textures/missing.png");
     public Identifier FullBrightTextureMaskResource_Slim = null;
 
-    public Identifier Animation = ShapeShifterCurseFabric.identifier("animations/missing.animation.json");
+    public Identifier Animation = ShapeShifterCurseFabric.identifier("missing");
 
     public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
     public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();

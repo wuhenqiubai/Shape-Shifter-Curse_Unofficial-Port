@@ -6,18 +6,10 @@
 		"   "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"C": {
-			"item": "minecraft:copper_ingot"
-		},
-		"I": {
-			"item": "minecraft:iron_ingot"
-		},
-		"N": {
-			"item": "minecraft:iron_nugget"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"C": "minecraft:copper_ingot",
+		"I": "minecraft:iron_ingot",
+		"N": "minecraft:iron_nugget"
 	},
 	"result": {
 		"count": 1,

@@ -6,18 +6,10 @@
 		"DD "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"C": {
-			"item": "minecraft:copper_ingot"
-		},
-		"D": {
-			"item": "minecraft:diamond"
-		},
-		"I": {
-			"item": "minecraft:iron_ingot"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"C": "minecraft:copper_ingot",
+		"D": "minecraft:diamond",
+		"I": "minecraft:iron_ingot"
 	},
 	"result": {
 		"count": 1,

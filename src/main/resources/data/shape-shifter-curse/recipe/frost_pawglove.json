@@ -6,21 +6,11 @@
 		"NN "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"P": {
-			"item": "minecraft:packed_ice"
-		},
-		"I": {
-			"item": "minecraft:iron_ingot"
-		},
-		"N": {
-			"item": "minecraft:iron_nugget"
-		},
-		"C": {
-			"item": "minecraft:copper_ingot"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"P": "minecraft:packed_ice",
+		"I": "minecraft:iron_ingot",
+		"N": "minecraft:iron_nugget",
+		"C": "minecraft:copper_ingot"
 	},
 	"result": {
 		"count": 1,

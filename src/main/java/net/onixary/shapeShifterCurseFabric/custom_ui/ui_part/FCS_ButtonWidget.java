@@ -33,8 +33,9 @@ public class FCS_ButtonWidget extends Button {
         // renderWidget 在 1.21.11 为 final，改重写 renderContents
         // RenderSystem.enableBlend()/enableDepthTest() 已移除，RenderPipeline 自带渲染状态
         int color = ARGB.white(this.alpha);
+        // 1.21.11: 13参 blit 语义 (pipeline,id,x,y,u,v,w,h,uWidth,vHeight,texW,texH,color)，uWidth/vHeight 是 UV 区域尺寸（=15x15），不能为 0
         context.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, this.getX(), this.getY(),
-                TEXTURE_X, this.getTextureY(), 15, 15, 0, 0, 45, 45, color);
+                TEXTURE_X, this.getTextureY(), 15, 15, 15, 15, 45, 45, color);
         this.renderDefaultLabel(context.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
     }
 }

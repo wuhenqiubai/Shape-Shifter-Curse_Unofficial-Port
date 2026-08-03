@@ -6,18 +6,10 @@
 		" P "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"S": {
-			"item": "minecraft:string"
-		},
-		"A": {
-			"item": "minecraft:amethyst_shard"
-		},
-		"P": {
-			"item": "minecraft:phantom_membrane"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"S": "minecraft:string",
+		"A": "minecraft:amethyst_shard",
+		"P": "minecraft:phantom_membrane"
 	},
 	"result": {
 		"count": 1,

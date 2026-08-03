@@ -76,7 +76,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		OriginsPowerTypes.register();
 		OriginsEntityConditions.register();
 
-		ModBlocks.register();
+		// ModBlocks 静态初始化已注册（1.21.11 Block 需 setId）
 		ModItems.register();
 		ModTags.register();
 		ModPacketsC2S.register();
@@ -115,8 +115,8 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		manager.register(PackType.SERVER_DATA, tagLoader).before(powerData).complete();
 		PowerTypes.DEPENDENCIES.add(tagLoader.getFabricId());
 
-		OriginManager originLoader = new OriginManager();
-		manager.register(PackType.SERVER_DATA, originLoader).after(powerData).complete();
+		// 1.21.11: 用 registerWithRegistries 传入 HolderLookup.Provider（Origin 解析 icon 的 ItemStack 需要非 null registry）
+		manager.registerWithRegistries(originData, OriginManager::new).after(powerData).complete();
 		manager.register(PackType.SERVER_DATA, new OriginLayers()).after(originData).complete();
 
 		BadgeManager.init();

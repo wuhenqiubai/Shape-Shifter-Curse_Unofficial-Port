@@ -6,21 +6,11 @@
 		"BCI"
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"L": {
-			"item": "minecraft:leather"
-		},
-		"B": {
-			"item": "minecraft:water_bucket"
-		},
-		"I": {
-			"item": "minecraft:soul_sand"
-		},
-		"C": {
-			"item": "minecraft:conduit"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"L": "minecraft:leather",
+		"B": "minecraft:water_bucket",
+		"I": "minecraft:soul_sand",
+		"C": "minecraft:conduit"
 	},
 	"result": {
 		"count": 1,

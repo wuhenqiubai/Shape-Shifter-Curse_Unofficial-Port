@@ -6,18 +6,10 @@
 		"IMI"
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"G": {
-			"item": "minecraft:glass_bottle"
-		},
-		"I": {
-			"item": "minecraft:iron_ingot"
-		},
-		"B": {
-			"item": "minecraft:powder_snow_bucket"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"G": "minecraft:glass_bottle",
+		"I": "minecraft:iron_ingot",
+		"B": "minecraft:powder_snow_bucket"
 	},
 	"result": {
 		"count": 1,

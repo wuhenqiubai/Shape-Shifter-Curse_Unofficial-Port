@@ -6,18 +6,10 @@
 		" B "
 	],
 	"key": {
-		"M": {
-			"item": "shape-shifter-curse:moondust_crystal_shard"
-		},
-		"S": {
-			"item": "minecraft:string"
-		},
-		"P": {
-			"item": "minecraft:prismarine_shard"
-		},
-		"B": {
-			"item": "minecraft:bone_meal"
-		}
+		"M": "shape-shifter-curse:moondust_crystal_shard",
+		"S": "minecraft:string",
+		"P": "minecraft:prismarine_shard",
+		"B": "minecraft:bone_meal"
 	},
 	"result": {
 		"count": 1,

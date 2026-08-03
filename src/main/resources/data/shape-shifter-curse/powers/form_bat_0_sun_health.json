@@ -1,10 +1,10 @@
 {
 	"type": "shape-shifter-curse:delay_attribute",
 	"modifier": {
-		"id": "shape-shifter-curse:reduced_health_in_the_sun",
 		"attribute": "minecraft:generic.max_health",
 		"value": -4.0,
-		"operation": "add_value"
+		"operation": "addition",
+		"name": "shape-shifter-curse:reduced_health_in_the_sun"
 	},
 	"tick_rate": 1,
 	"updateHealth": true,

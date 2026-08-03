@@ -5,9 +5,7 @@
 		"actions": [
 			{
 				"type": "apoli:spawn_particles",
-				"particle": {
-					"type": "minecraft:enchant"
-				},
+				"particle": "minecraft:enchant",
 				"count": 1,
 				"speed": 0.0,
 				"force": false,

@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
@@ -158,7 +159,7 @@ public class PatronFormSelectScreen extends Screen {
         // 最小 UI 420x227 翻页按钮 [80,207 20x20] [320,207 20x20] 按钮
         int TexturePosX = width / 2 - 210;
         int TexturePosY = height / 2 - 112;
-        context.blit(page_texID, TexturePosX, TexturePosY, 0, 0, 420, 227, 420, 227);
+        context.blit(RenderPipelines.GUI_TEXTURED, page_texID, TexturePosX, TexturePosY, 0, 0, 420, 227, 420, 227, 420, 227, -1);
     }
 
 

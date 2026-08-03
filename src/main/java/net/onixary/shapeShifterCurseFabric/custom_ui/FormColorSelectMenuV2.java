@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -1063,13 +1064,13 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     private void drawExtraPart(GuiGraphics context, int x, int y, int PartX, int PartY, int Width, int Height) {
         int realX = PartX + EXTRA_PART_START_X;
         int realY = PartY + EXTRA_PART_START_Y;
-        context.blit(BG_TEXTURE, x, y, Width, Height, realX, realY, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, x, y, realX, realY, Width, Height, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT, -1);
     }
 
     public void renderTextureBackground(GuiGraphics context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
-        context.blit(BG_TEXTURE, BG_X, BG_Y, BG_WIDTH, BG_HEIGHT, 0, 0, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, BG_X, BG_Y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT, -1);
         if (!isOpenPanel02) {
             // 172,34,148,173,0,0
             this.drawExtraPart(context, BG_X + 172, BG_Y + 34, 0, 0, 148, 173);

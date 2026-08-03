@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -248,10 +249,10 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
         int j = this.getY();
         if (this.enableScrollableIconRender) {
             if (this.scroll > 0) {
-                context.blit(IconTexID, i + realWidth - IconSize, j, IconSize, IconSize, 0, 0, IconSize, IconSize * 2);
+                context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j, 0, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
             }
             if (this.scroll < this.texts.size() - this.MaxRows) {
-                context.blit(IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, IconSize, IconSize, 0, IconSize, IconSize, IconSize * 2);
+                context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
             }
         }
         Objects.requireNonNull(this.getFont());

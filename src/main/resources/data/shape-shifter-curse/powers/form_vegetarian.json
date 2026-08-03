@@ -2,13 +2,13 @@
 	"type": "apoli:modify_food",
 	"food_modifiers": [
 		{
-			"operation": "apoli:set_total",
+			"operation": "set_total",
 			"value": 0.0
 		}
 	],
 	"saturation_modifiers": [
 		{
-			"operation": "apoli:set_total",
+			"operation": "set_total",
 			"value": 0.0
 		}
 	],

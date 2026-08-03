@@ -8,6 +8,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.feline.Ocelot;
@@ -29,7 +30,8 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        return Mob.createMobAttributes()
+        // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
+        return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 0.3);
