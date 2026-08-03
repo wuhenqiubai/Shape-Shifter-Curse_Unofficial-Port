@@ -1055,10 +1055,10 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
-        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，f=0 时模型脚会落在视口中心下方半个身高 → 显示偏下。
-        // 恢复 1.21.1 drawEntity 语义（模型脚对齐视口中心 (x,y)）：f 取 -bboxHeight/2。
-        float yOffset = -(entity.getDimensions(entity.getPose()).height() / 2.0F);
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, yOffset, (float)(x - mouseX), (float)(y - mouseY), entity);
+        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
+        // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
+        // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在背景框内的位置由 y 参数补偿。
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
     }
 
     private static int timer = 0;
