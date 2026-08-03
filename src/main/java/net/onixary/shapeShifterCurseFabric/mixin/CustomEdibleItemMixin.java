@@ -9,6 +9,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
+import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -47,6 +48,9 @@ public abstract class CustomEdibleItemMixin {
             if (fc != null) {
                 // 1.21.11 Player.eat(Level, ItemStack, FoodProperties) 移除，改用 FoodData.eat(FoodProperties)
                 player.getFoodData().eat(fc);
+                // 1.21.11 恢复食用粒子/声音：自定义食物无 CONSUMABLE 组件（原 triggerItemUseEffects 已移除，
+                // 粒子/声音迁入 Consumable.emitParticlesAndSounds，仅 onConsume 触发），复用 Consumable 默认 builder。
+                Consumable.builder().build().emitParticlesAndSounds(user.getRandom(), user, stack, 16);
                 cir.setReturnValue(stack);
             }
         }

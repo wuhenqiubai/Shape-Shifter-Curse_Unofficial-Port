@@ -40,5 +40,6 @@ public class EnchantmentHelperMixin {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
         }
     }
-    // TODO：hasSoulSpeed和getPossibleEntries在1.21没了，之后找替代
+    // 1.21.11：hasSoulSpeed 判定已被 getEnchantmentLevel(SOUL_SPEED) 吸收（上方注入已提升）；
+    // getPossibleEntries 已由 EnchantmentUtilAnvilMixin / EnchantmentUtilEnchantCommandMixin 接管（util/EnchantmentUtils）。
 }

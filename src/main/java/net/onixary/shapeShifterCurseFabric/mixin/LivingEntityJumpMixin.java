@@ -2,8 +2,15 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
 import net.onixary.shapeShifterCurseFabric.additional_power.TripleJumpPower;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
+import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -21,6 +28,16 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
         LivingEntity entity = (LivingEntity) (Object) this;
         // 在计算跳跃速度之前，先让 Power 更新它的内部状态（如跳跃次数）
         PowerHolderComponent.getPowers(entity, TripleJumpPower.class).forEach(TripleJumpPower::onJump);
+        // 1.21.11 恢复 jump_event 条件 + JUMP_EVENT 包：jumpFromGround 上移到 LivingEntity，
+        // 原 PlayerMovementControlMixin.handleJump（@Mixin(Player) 注入 Player.jumpFromGround）失效
+        if (entity instanceof Player player) {
+            JumpEventCondition.setJumping(player, true);
+            if (player.level().isClientSide()) {
+                FriendlyByteBuf buf = PacketByteBufs.create();
+                buf.writeUUID(player.getUUID());
+                ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID), buf));
+            }
+        }
     }
 
     @ModifyReturnValue(method = "getJumpPower", at = @At("RETURN"))

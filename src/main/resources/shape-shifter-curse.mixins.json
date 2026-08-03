@@ -53,6 +53,7 @@
 		"SneakEdgeCheckMixin",
 		"StatusEffectMixin",
 		"ThrowablePotionStackMixin",
+		"ThrownLingeringPotionMixin",
 		"TippedArrowItemMixin",
 		"VirtualTotemMixin",
 		"accessor.MobEntityAccessor",
