@@ -51,6 +51,14 @@ public final class TransformOverlay {
     @Environment(EnvType.CLIENT)
     private void renderHud(GuiGraphics guiGraphics) {
         if (!enableOverlay) {
+            // 1.21.11 恢复黑屏渐变（无 shader，iris 兼容）：退出时每帧衰减至透明后停止，
+            // 避免 setEnableOverlay(false) 后黑屏瞬变消失
+            if (strength_black <= 0.01f && strength_nausea <= 0.01f) {
+                return;
+            }
+            strength_black *= 0.85f;
+            strength_nausea *= 0.85f;
+        } else if (strength_black <= 0.01f && strength_nausea <= 0.01f) {
             return;
         }
         int width = guiGraphics.guiWidth();

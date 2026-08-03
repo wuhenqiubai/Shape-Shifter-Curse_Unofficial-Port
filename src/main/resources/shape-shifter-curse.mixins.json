@@ -114,7 +114,8 @@
 		"render.LivingEntityRendererMixin",
 		"render.OverlayRenderMixin",
 		"render.PlayerEntityRendererMixin",
-		"render.PlayerModelMixin"
+		"render.PlayerModelMixin",
+		"SkyRendererMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

@@ -13,10 +13,10 @@ public final class TransformFX implements ClientTickEvents.EndTick {
     public static final TransformFX INSTANCE = new TransformFX();
     private final Minecraft mc = Minecraft.getInstance();
 
-    // TODO: Satin 无 1.21.11 版，post shader 需改用原版 PostChain。
-    // 复刻方向：minecraft.getShaderManager().getPostChain(TRANSFORM_EFFECT_SHADER_ID, PostChain.TargetBundle.MAIN_TARGETS)
-    // 在 GameRenderer 的 post 渲染阶段（Mixin）调用 postChain.addToFrame(...)。原 Satin 的
-    // ShaderEffectManager/ManagedShaderEffect/Uniform1f 已移除。
+    // TODO(2026-08-04)：黑屏渐变放弃 post shader（Satin/PostChain 与 iris 兼容极差），改用 TransformOverlay
+    // （HudRenderCallback + GuiGraphics 叠加层）实现：进入渐变由 TransformManager 每帧驱动 strength，
+    // 退出渐变在 TransformOverlay.renderHud 每帧衰减（setEnableOverlay(false) 后平滑淡出）。
+    // TRANSFORM_EFFECT_SHADER_ID 保留仅作记录。
     private static float transformEffectDuration = 0.0f;
     private static boolean doEffectIn = false;
     private static boolean doEffectOut = false;
