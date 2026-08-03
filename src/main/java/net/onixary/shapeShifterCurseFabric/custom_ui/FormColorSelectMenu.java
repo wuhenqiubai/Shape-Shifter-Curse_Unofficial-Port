@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -11,6 +10,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.network.chat.Component;
@@ -1055,7 +1055,10 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，f=0 时模型脚会落在视口中心下方半个身高 → 显示偏下。
+        // 恢复 1.21.1 drawEntity 语义（模型脚对齐视口中心 (x,y)）：f 取 -bboxHeight/2。
+        float yOffset = -(entity.getDimensions(entity.getPose()).height() / 2.0F);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, yOffset, (float)(x - mouseX), (float)(y - mouseY), entity);
     }
 
     private static int timer = 0;

@@ -2,12 +2,13 @@ package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -212,32 +213,50 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     private void drawCenterWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
+        // 1.21.11 文字渲染走 GuiTextRenderState（延迟提交），字形缩放只能由保存的 2D pose 决定：
+        // 在 (x,y) 处缩放 GUI pose Scale 倍，行距/行宽按未缩放值绘制，真正缩小 Scale 倍显示。
         int i = y;
         Font textRenderer = this.getFont();
+        Matrix3x2fStack pose = context.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(this.Scale, this.Scale);
+        pose.translate(-x, -y);
         for(FormattedCharSequence line : lines) {
-            context.drawString(textRenderer, line, x - textRenderer.width(line) / 2, i, color);
+            context.drawString(textRenderer, line, x - Math.round(textRenderer.width(line) / this.Scale) / 2, i, color);
             i += lineHeight;
         }
+        pose.popMatrix();
     }
 
     public void drawWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
         int i = y;
         Font textRenderer = this.getFont();
+        Matrix3x2fStack pose = context.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(this.Scale, this.Scale);
+        pose.translate(-x, -y);
         for(FormattedCharSequence line : lines) {
             context.drawString(textRenderer, line, x, i, color);
             i += lineHeight;
         }
-
+        pose.popMatrix();
     }
 
     public void drawWithOutShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
         int i = y;
         Font textRenderer = this.getFont();
+        Matrix3x2fStack pose = context.pose();
+        pose.pushMatrix();
+        pose.translate(x, y);
+        pose.scale(this.Scale, this.Scale);
+        pose.translate(-x, -y);
         for(FormattedCharSequence line : lines) {
             context.drawString(textRenderer, line, x, i, color, false);
             i += lineHeight;
         }
-
+        pose.popMatrix();
     }
 
     @Override
@@ -256,17 +275,15 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
             }
         }
         Objects.requireNonNull(this.getFont());
-        int k = Math.round(9 * this.Scale);
+        // 文字行距/居中用未缩放值，缩放由 draw* 方法内的 GUI pose 完成
+        int k = 9;
         int l = this.getColor();
         if (this.centered) {
-            this.drawCenterWithShadow(context, this.currentTexts, i + this.getWidth() / 2, j, k, l);
+            this.drawCenterWithShadow(context, this.currentTexts, i + (this.MaxWidth + this.modMaxWidth) / 2, j, k, l);
+        } else if (this.shadow) {
+            this.drawWithShadow(context, this.currentTexts, i, j, k, l);
         } else {
-            if(this.shadow){
-                this.drawWithShadow(context, this.currentTexts, i, j, k, l);
-            }
-            else{
-                this.drawWithOutShadow(context, this.currentTexts, i, j, k, l);
-            }
+            this.drawWithOutShadow(context, this.currentTexts, i, j, k, l);
         }
     }
 }

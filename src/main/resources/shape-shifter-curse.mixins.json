@@ -113,7 +113,8 @@
 		"render.AbstractClientPlayerEntityMixin",
 		"render.LivingEntityRendererMixin",
 		"render.OverlayRenderMixin",
-		"render.PlayerEntityRendererMixin"
+		"render.PlayerEntityRendererMixin",
+		"render.PlayerModelMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

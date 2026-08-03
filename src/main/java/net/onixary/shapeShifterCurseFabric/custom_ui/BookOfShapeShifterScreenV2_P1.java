@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -14,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
+import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ColorStringWidget;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleTextRenderer;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
@@ -49,8 +49,10 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - (BookSizeX * BookScale) / 2;
         int BookPosY = height / 2 - (BookSizeY * BookScale) / 2;
-        int DefaultTextColor = 0x222222;  // 这里的颜色属于乘法模式 (float)(R1*R2,G1*G2,B1*B2) 需要在lang中修改
-        int HeaderTextColor = 0xDDDDDD;
+        // 1.21.11 文字渲染用标准 ARGB alpha 做透明度：0x222222 的 alpha=0x22(13%) 会让正文几乎透明不可见。
+        // 保持 RGB 不变（上游乘法模式语义），补全 alpha=FF 恢复可见性。
+        int DefaultTextColor = 0xFF222222;
+        int HeaderTextColor = 0xFFDDDDDD;
         ScaleTextRenderer scaleTextRenderer = new ScaleTextRenderer(font);
         scaleTextRenderer.Scale = Scale;
         // Title
@@ -65,7 +67,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // D -> (9, 9), (116, 143)
         // Size -> (107, 56) Pos -> (17, 153)
         this.addRenderableWidget(BuildDetailScreenButton(116, 143, 9, 9, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer)));
-        this.addRenderableWidget(new StringWidget(BookPosX + 17 * BookScale, BookPosY + 143 * BookScale, 107 * BookScale, 6 * BookScale, CodexData.headerEquip, font));
+        this.addRenderableWidget(new ColorStringWidget(BookPosX + 17 * BookScale, BookPosY + 143 * BookScale, 107 * BookScale, 6 * BookScale, CodexData.headerEquip, font).setColor(HeaderTextColor));
         ScaleScrollTextWidget StatusLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 153 * BookScale, 107 * BookScale, 6 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         StatusLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) StatusLabel);
@@ -93,7 +95,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // D -> (9, 9), (311, 13)
         // Size -> (176, 184) Pos -> (142, 23)
         this.addRenderableWidget(BuildDetailScreenButton(311, 13, 9, 9, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer)));
-        this.addRenderableWidget(new StringWidget(BookPosX + 142 * BookScale, BookPosY + 11 * BookScale, 176 * BookScale, 8 * BookScale, CodexData.headerAppearance, font));
+        this.addRenderableWidget(new ColorStringWidget(BookPosX + 142 * BookScale, BookPosY + 11 * BookScale, 176 * BookScale, 8 * BookScale, CodexData.headerAppearance, font).setColor(HeaderTextColor));
         ScaleScrollTextWidget AppearanceLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 142 * BookScale, BookPosY + 26 * BookScale, 176 * BookScale, 20 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         AppearanceLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) AppearanceLabel);
