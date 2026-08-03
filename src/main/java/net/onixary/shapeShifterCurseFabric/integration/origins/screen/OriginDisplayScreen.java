@@ -4,11 +4,11 @@ import io.github.apace100.apoli.power.PowerType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FormattedText;
@@ -85,7 +85,8 @@ public class OriginDisplayScreen extends Screen {
     public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderedBadges.clear();
         this.time += delta;
-        this.renderBackground(context, mouseX, mouseY, delta);
+        // 1.21.11: renderWithTooltipAndSubtitles 已自动调 renderBackground（blur），
+        // 这里再手动调会 "Can only blur once per frame" 崩溃
         this.renderOriginWindow(context, mouseX, mouseY);
         super.render(context, mouseX, mouseY, delta);
         if(origin != null) {
