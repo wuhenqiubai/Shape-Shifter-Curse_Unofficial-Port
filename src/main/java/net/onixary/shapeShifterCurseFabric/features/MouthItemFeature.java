@@ -11,7 +11,6 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -79,7 +78,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         if (!mainHandStack.isEmpty()) {
             if (isBlockingWithMainHandShield) {
                 // 如果用主手盾牌格挡，则渲染在背后
-                renderShieldOnBack(matrixStack, (MultiBufferSource)vertexConsumerProvider, i, renderState, mainHandStack);
+                renderShieldOnBack(matrixStack, vertexConsumerProvider, i, renderState, mainHandStack);
             } else {
                 // 否则，渲染在嘴里
                 float headYaw = Mth.lerp(limbAngle, player.yHeadRotO, player.getYHeadRot());
@@ -95,10 +94,10 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
 
             if (isBlockingWithOffHandShield) {
                 // 如果用副手盾牌格挡，则渲染在背后
-                renderShieldOnBack(matrixStack, (MultiBufferSource)vertexConsumerProvider, i, renderState, offHandStack);
+                renderShieldOnBack(matrixStack, vertexConsumerProvider, i, renderState, offHandStack);
             } else {
                 // 否则，渲染在背后的默认位置
-                renderDefaultItemOnBack(matrixStack, (MultiBufferSource)vertexConsumerProvider, i, renderState, offHandStack);
+                renderDefaultItemOnBack(matrixStack, vertexConsumerProvider, i, renderState, offHandStack);
             }
         }
     }
@@ -143,7 +142,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.popPose();
     }
 
-    private void renderShieldOnBack(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T renderState, ItemStack itemStack) {
+    private void renderShieldOnBack(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int i, T renderState, ItemStack itemStack) {
         matrixStack.pushPose();
         var eR = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(renderState);
         var body = ((PlayerModel)eR.getModel()).body;
@@ -156,12 +155,12 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.scale(1.2f, 1.2f, 1.2f);
         // --- 调整结束 ---
 	    if (Minecraft.getInstance().player != null) {
-		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.FIXED, matrixStack, (SubmitNodeCollector)vertexConsumerProvider, i);
+		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.FIXED, matrixStack, vertexConsumerProvider, i);
 	    }
 	    matrixStack.popPose();
     }
 
-    private void renderDefaultItemOnBack(PoseStack matrixStack, MultiBufferSource vertexConsumerProvider, int i, T renderState, ItemStack itemStack) {
+    private void renderDefaultItemOnBack(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int i, T renderState, ItemStack itemStack) {
         matrixStack.pushPose();
         var eR = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(renderState);
         var body = ((PlayerModel)eR.getModel()).body;
@@ -169,7 +168,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.translate(0.0F, 0.5F, 0.25F);
         matrixStack.scale(1.5F, 1.5F, 1.5F);
 	    if (Minecraft.getInstance().player != null) {
-		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.GROUND, matrixStack, (SubmitNodeCollector)vertexConsumerProvider, i);
+		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
 	    }
 	    matrixStack.popPose();
     }

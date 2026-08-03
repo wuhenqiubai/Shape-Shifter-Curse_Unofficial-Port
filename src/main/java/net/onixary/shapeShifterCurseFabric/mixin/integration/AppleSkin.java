@@ -10,7 +10,9 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.Consumable;
 import net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils;
+import squeek.appleskin.helpers.ConsumableFood;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,16 +42,22 @@ public class AppleSkin {
     }
 
     @Inject(method = "getDefaultFoodValues", at = @At("HEAD"), cancellable = true)
-    private static void shapeShifterCurseFabric$getDefaultFoodValues(ItemStack itemStack, CallbackInfoReturnable<FoodProperties> cir) {
-        if (itemStack == null) return;
-
+    private static void shapeShifterCurseFabric$getDefaultFoodValues(ItemStack itemStack, CallbackInfoReturnable<ConsumableFood> cir) {
         Player player = Minecraft.getInstance().player;
-        if (player == null) return;
-
-        // Get base food values from SSC custom edible power or item defaults
-        FoodProperties itemFood = CustomEdibleUtils.getPowerFoodComponent(player, itemStack);
-        itemFood = itemFood != null ? itemFood : itemStack.get(DataComponents.FOOD);
-        if (itemFood == null) return;
+        FoodProperties itemFood = null;
+        if (player != null && itemStack != null) {
+            // Get base food values from SSC custom edible power or item defaults
+            itemFood = CustomEdibleUtils.getPowerFoodComponent(player, itemStack);
+            itemFood = itemFood != null ? itemFood : itemStack.get(DataComponents.FOOD);
+        }
+        if (itemFood == null) {
+            // 非食物/空手/无玩家上下文：按 AppleSkin 默认包装返回（EMPTY/DEFAULT 组件），
+            // 不 return 走原逻辑，避免任何 FoodProperties→ConsumableFood 的转换路径。
+            FoodProperties food = itemStack != null ? itemStack.getOrDefault(DataComponents.FOOD, FoodHelper.EMPTY_FOOD_COMPONENT) : FoodHelper.EMPTY_FOOD_COMPONENT;
+            Consumable consumable = itemStack != null ? itemStack.getOrDefault(DataComponents.CONSUMABLE, FoodHelper.DEFAULT_CONSUMABLE_COMPONENT) : FoodHelper.DEFAULT_CONSUMABLE_COMPONENT;
+            cir.setReturnValue(new ConsumableFood(food, consumable));
+            return;
+        }
 
         // Apply Apoli ModifyFoodPower modifiers (restored from upstream)
         List<ModifyFoodPower> mfps = PowerHolderComponent.getPowers(player, ModifyFoodPower.class);
@@ -70,9 +78,14 @@ public class AppleSkin {
                 ? itemFood.saturation()
                 : (float) ModifierUtil.applyModifiers(player, saturationModifiers, itemFood.saturation());
 
-        if (hunger != itemFood.nutrition() || saturation != itemFood.saturation()) {
-            // 1.21.11 FoodProperties 构造器只剩 (nutrition, saturation, canAlwaysEat)
-            cir.setReturnValue(new FoodProperties(hunger, saturation, itemFood.canAlwaysEat()));
-        }
+        // 1.21.11 + AppleSkin 3.0.8：getDefaultFoodValues 返回 ConsumableFood（包装 FoodProperties + Consumable）。
+        // handler 必须 setReturnValue(ConsumableFood)——若返回 FoodProperties，Mixin 在方法返回点生成的
+        // checkcast ConsumableFood 会对 FoodProperties 抛 ClassCastException（主手为食物时崩，栈内 getDefaultFoodValues 无行号）。
+        FoodProperties finalFood = (hunger == itemFood.nutrition() && saturation == itemFood.saturation())
+                ? itemFood
+                : new FoodProperties(hunger, saturation, itemFood.canAlwaysEat());
+        cir.setReturnValue(new ConsumableFood(
+                finalFood,
+                itemStack.getOrDefault(DataComponents.CONSUMABLE, FoodHelper.DEFAULT_CONSUMABLE_COMPONENT)));
     }
 }

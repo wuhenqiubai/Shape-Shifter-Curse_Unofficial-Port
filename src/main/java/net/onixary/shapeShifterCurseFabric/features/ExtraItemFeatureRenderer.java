@@ -12,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -24,6 +23,7 @@ import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
+import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jspecify.annotations.NonNull;
 
@@ -72,7 +72,8 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
 
-            if (isFeral && Minecraft.getInstance().options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player) {
+            // 排除 GUI 预览（PIP）：预览渲染第一人称 FERAL 物品会跟随鼠标疯狂旋转
+            if (isFeral && Minecraft.getInstance().options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player && !ClientUtils.isOpenInventoryScreen) {
 
                 if(IS_FIRST_PERSON_MOD_LOADED) {
                     // Feral形态的forstperson配置必须固定为-25 offset，否则会导致物品位置不正确以及模型看不到
@@ -103,11 +104,9 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         Vec3 rotCenter = new Vec3(0.0F, -4.0F, -6.0F);
                         matrices.translate(rotCenter.x / 16.0F, rotCenter.y / 16.0F, rotCenter.z / 16.0F);
                         //Vec3d posOffset = ShapeShifterCurseFabric.feralItemPosOffset;
-                        Vec3 posOffset = new Vec3(-12.0F, 15.0F, 4.0F);
-                        float headYaw = Mth.lerp(limbAngle, player.yHeadRotO, player.getYHeadRot());
-                        float headPitch = Mth.lerp(limbAngle, player.xRotO, player.getXRot());
-                        matrices.mulPose(Axis.YP.rotationDegrees(headYaw));
-                        matrices.mulPose(Axis.XP.rotationDegrees(headPitch));
+                        // 叼物固定在玩家坐标系（跟随摄像机位移），更靠近摄像头（贴合 1.20 原版观感）：posOffset.z 4→12
+                        Vec3 posOffset = new Vec3(-12.0F, 15.0F, 12.0F);
+                        // 叼在嘴前的物品应固定朝向、不随头部旋转（跟随 headYaw/headPitch 会让转头时物品转动/疯狂旋转）
                         matrices.mulPose(Axis.ZP.rotationDegrees(240.0F));
                         matrices.translate(posOffset.x / 16.0F, posOffset.y / 16.0F, posOffset.z / 16.0F);
                         float pitch = Mth.lerp(limbAngle, player.xRotO, player.getXRot());
@@ -122,7 +121,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                                 player.getMainHandItem(),
                                 equipProgress,
                                 matrices,
-                                (MultiBufferSource)vertexConsumers,
+                                vertexConsumers,
                                 light
                         );
                         matrices.popPose();

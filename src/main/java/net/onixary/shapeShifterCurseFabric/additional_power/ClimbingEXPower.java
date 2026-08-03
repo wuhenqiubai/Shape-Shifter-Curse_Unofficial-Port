@@ -33,10 +33,13 @@ public class ClimbingEXPower extends ClimbingPower {
         if (!this.allowHolding) {
             return false;
         }
-        if (this.holdingCondition == null) {
-            return entity.isShiftKeyDown();
+        if (this.holdingCondition != null) {
+            return this.holdingCondition.test(this.entity);
         }
-        return this.holdingCondition.test(this.entity);
+        // 1.21.11 修复：holdingCondition 为 null 时不能只看 isShiftKeyDown——
+        // Apoli 的 LivingEntityMixin.doSpiderClimbing 用 canHold() 判定攀爬，任何 shift（含空中）都会触发
+        // 攀爬 → 玩家在空中按 shift 悬停。改为复用 isActive()（start/continue 条件 = 贴住可攀爬面）判定。
+        return this.isActive();
     }
 
     @Override

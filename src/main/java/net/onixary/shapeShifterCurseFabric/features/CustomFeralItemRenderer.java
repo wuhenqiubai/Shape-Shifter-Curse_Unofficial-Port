@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.features;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -11,7 +10,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemInHandRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -140,7 +138,7 @@ public class CustomFeralItemRenderer {
 		return -Mth.cos(f * (float) Math.PI) * 0.5F + 0.5F;
 	}
 
-	private void renderArm(PoseStack matrices, MultiBufferSource vertexConsumers, int light, HumanoidArm arm) {
+	private void renderArm(PoseStack matrices, SubmitNodeCollector vertexConsumers, int light, HumanoidArm arm) {
 		if (this.client.player == null) {
 			return;
 		}
@@ -152,10 +150,10 @@ public class CustomFeralItemRenderer {
 		matrices.mulPose(Axis.ZP.rotationDegrees(f * -41.0F));
 		matrices.translate(f * 0.3F, -1.1F, 0.45F);
 		if (arm == HumanoidArm.RIGHT) {
-			playerEntityRenderer.renderRightHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light,
 					this.client.player.getSkin().body().texturePath(), false);
 		} else {
-			playerEntityRenderer.renderLeftHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light,
 					this.client.player.getSkin().body().texturePath(), false);
 		}
 
@@ -163,7 +161,7 @@ public class CustomFeralItemRenderer {
 	}
 
 	private void renderMapInOneHand(
-		PoseStack matrices, MultiBufferSource vertexConsumers, int light, float equipProgress, HumanoidArm arm, float swingProgress, ItemStack stack
+		PoseStack matrices, SubmitNodeCollector vertexConsumers, int light, float equipProgress, HumanoidArm arm, float swingProgress, ItemStack stack
 	) {
 		if (this.client.player == null) {
 			return;
@@ -193,7 +191,7 @@ public class CustomFeralItemRenderer {
 	}
 
 	private void renderMapInBothHands(
-		PoseStack matrices, MultiBufferSource vertexConsumers, int light, float pitch, float equipProgress, float swingProgress
+		PoseStack matrices, SubmitNodeCollector vertexConsumers, int light, float pitch, float equipProgress, float swingProgress
 	) {
 		if (this.client.player == null) {
 			return;
@@ -220,7 +218,7 @@ public class CustomFeralItemRenderer {
 		this.renderFirstPersonMap(matrices, vertexConsumers, light, this.mainHand);
 	}
 
-	private void renderFirstPersonMap(PoseStack matrices, MultiBufferSource vertexConsumers, int swingProgress, ItemStack stack) {
+	private void renderFirstPersonMap(PoseStack matrices, SubmitNodeCollector vertexConsumers, int swingProgress, ItemStack stack) {
 		if (this.client.level == null || stack == null || vertexConsumers == null) {
 			return;
 		}
@@ -232,23 +230,22 @@ public class CustomFeralItemRenderer {
 		matrices.scale(0.0078125F, 0.0078125F, 0.0078125F);
 		MapId mapId = stack.get(DataComponents.MAP_ID);
 		MapItemSavedData mapState = MapItem.getSavedData(mapId, this.client.level);
-		VertexConsumer vertexConsumer = vertexConsumers.getBuffer(mapState == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD);
-		if (vertexConsumer == null || matrices.last() == null) {
-			return;
-		}
-		Matrix4f matrix4f = matrices.last().pose();
-		vertexConsumer.addVertex(matrix4f, -7.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(swingProgress);
-		vertexConsumer.addVertex(matrix4f, 135.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setLight(swingProgress);
-		vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(swingProgress);
-		vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(swingProgress);
+		// 1.21.11 submit 管线：SubmitNodeCollector 无 getBuffer，改用 submitCustomGeometry 提交地图背景 quad
+		vertexConsumers.submitCustomGeometry(matrices, mapState == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD, (pose, vertexConsumer) -> {
+			Matrix4f matrix4f = pose.pose();
+			vertexConsumer.addVertex(matrix4f, -7.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(swingProgress);
+			vertexConsumer.addVertex(matrix4f, 135.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 1.0F).setLight(swingProgress);
+			vertexConsumer.addVertex(matrix4f, 135.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(1.0F, 0.0F).setLight(swingProgress);
+			vertexConsumer.addVertex(matrix4f, -7.0F, -7.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 0.0F).setLight(swingProgress);
+		});
 		if (mapState != null) {
 			MapRenderState mapRenderState = new MapRenderState();
 			this.client.getMapRenderer().extractRenderState(mapId, mapState, mapRenderState);
-			this.client.getMapRenderer().render(mapRenderState, matrices, (SubmitNodeCollector)vertexConsumers, false, swingProgress);
+			this.client.getMapRenderer().render(mapRenderState, matrices, vertexConsumers, false, swingProgress);
 		}
 	}
 
-	private void renderArmHoldingItem(PoseStack matrices, MultiBufferSource vertexConsumers, int light, float equipProgress, float swingProgress, HumanoidArm arm) {
+	private void renderArmHoldingItem(PoseStack matrices, SubmitNodeCollector vertexConsumers, int light, float equipProgress, float swingProgress, HumanoidArm arm) {
 		if (this.client.player == null) {
 			return;
 		}
@@ -276,10 +273,10 @@ public class CustomFeralItemRenderer {
 		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher
 			.<AbstractClientPlayer>getRenderer(abstractClientPlayerEntity);
 		if (bl) {
-			playerEntityRenderer.renderRightHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light,
 					abstractClientPlayerEntity.getSkin().body().texturePath(), false);
 		} else {
-			playerEntityRenderer.renderLeftHand(matrices, (SubmitNodeCollector)vertexConsumers, light,
+			playerEntityRenderer.renderLeftHand(matrices, vertexConsumers, light,
 					abstractClientPlayerEntity.getSkin().body().texturePath(), false);
 		}
 	}
@@ -349,7 +346,7 @@ public class CustomFeralItemRenderer {
 		matrices.translate((float)i * 0.56F, -0.52F + equipProgress * -0.6F, -0.72F);
 	}
 
-	public void renderItem(float tickDelta, PoseStack matrices, MultiBufferSource.BufferSource vertexConsumers, LocalPlayer player, int light) {
+	public void renderItem(float tickDelta, PoseStack matrices, SubmitNodeCollector vertexConsumers, LocalPlayer player, int light) {
 		if (player == null || this.client.level == null) {
 			return;
 		}
@@ -373,8 +370,6 @@ public class CustomFeralItemRenderer {
 			float k = 1.0F - Mth.lerp(tickDelta, this.prevEquipProgressOffHand, this.equipProgressOffHand);
 			this.renderFirstPersonItem(player, tickDelta, g, InteractionHand.OFF_HAND, j, this.offHand, k, matrices, vertexConsumers, light);
 		}
-
-		vertexConsumers.endBatch();
 	}
 
 	@VisibleForTesting
@@ -424,7 +419,7 @@ public class CustomFeralItemRenderer {
 		ItemStack item,
 		float equipProgress,
 		PoseStack matrices,
-		MultiBufferSource vertexConsumers,
+		SubmitNodeCollector vertexConsumers,
 		int light
 	) {
 		if (player == null || matrices == null || vertexConsumers == null) {
@@ -497,7 +492,7 @@ public class CustomFeralItemRenderer {
 					item,
 					bl3 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					matrices,
-					(SubmitNodeCollector)vertexConsumers,
+					vertexConsumers,
 					light
 				);
 			} else {
@@ -593,7 +588,7 @@ public class CustomFeralItemRenderer {
 					item,
 					bl2 ? ItemDisplayContext.FIRST_PERSON_RIGHT_HAND : ItemDisplayContext.FIRST_PERSON_LEFT_HAND,
 					matrices,
-					(SubmitNodeCollector)vertexConsumers,
+					vertexConsumers,
 					light
 				);
 			}

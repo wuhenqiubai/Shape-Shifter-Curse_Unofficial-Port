@@ -177,21 +177,19 @@ dependencies {
     // Trinkets
     modCompileOnly "maven.modrinth:trinkets-updated:${project.trinkets_version}"
 
-    modCompileOnly "maven.modrinth:iris:zsoi0dso"
-    modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
-    modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
-    modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
-    modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
-    modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
+    modCompileOnly "maven.modrinth:iris:fDpuVzVr"
+    modCompileOnly "maven.modrinth:better-combat:MLmCv38Y"
+    modCompileOnly "maven.modrinth:first-person-model:EqDE0uC5"
+    modRuntimeOnly "maven.modrinth:first-person-model:EqDE0uC5"
 
-    modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
-    modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
+    modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21.11-3.0.8"
+    modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21.11-3.0.8"
 
-    modCompileOnly "maven.modrinth:vivecraft:Q589olkQ"
+    modCompileOnly "maven.modrinth:vivecraft:aWyVennV"
 
 
     // Tough as nails
-    modCompileOnly "maven.modrinth:tough-as-nails:dLxSK1xF"
+    modCompileOnly "maven.modrinth:tough-as-nails:WPscGvLW"
 
 }
 

@@ -4,9 +4,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Consumer;
@@ -23,14 +21,16 @@ public class FoodUtilsCondition {
     }
 
 
-    public static void registerCondition(Consumer<ConditionFactory<Tuple<Level, ItemStack>>> register) {
+    // 1.21.11 修复：is_vegan_ex 注册为 ITEM_CONDITION（checkInventory 里 itemCondition.test(ItemStack)），
+    // 泛型必须 ItemStack；原 Tuple<Level, ItemStack> 会在 itemstack.getB() 处运行时 ClassCastException。
+    public static void registerCondition(Consumer<ConditionFactory<ItemStack>> register) {
         register.accept(
-		        new ConditionFactory<>(
+		        new ConditionFactory<ItemStack>(
 				        ShapeShifterCurseFabric.identifier("is_vegan_ex"),
 				        new SerializableData()
 						        .add("default", SerializableDataTypes.BOOLEAN, false),
                         (data, itemstack) -> {
-                            return FC_isVegan(itemstack.getB(), data.getBoolean("default"));
+                            return FC_isVegan(itemstack, data.getBoolean("default"));
                         }
 		        )
         );

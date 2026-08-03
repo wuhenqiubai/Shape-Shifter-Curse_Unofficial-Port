@@ -695,6 +695,18 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.invertRotForPart(RM_LeftArmGeoBoneID, false, true, true);
         model.invertRotForPart(RM_LeftLegGeoBoneID, false, true, true);
         model.invertRotForPart(RM_RightLegGeoBoneID, false, true, true);
+        // FPM 第一人称：FPM 只隐藏 vanilla PlayerModel.head，Geo 形态模型的所有头部相关骨骼需自行隐藏
+        // （head 及整个子树：头饰/耳朵/角/挂在 head 下的 headTail，以及独立的 headTail 链），否则第一人称仍会看到。
+        if (LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player)) {
+            hideBoneAndChildren(model, model.getCachedGeoBone(RM_HeadGeoBoneID));
+            if (headTailChain != null) {
+                for (List<String> chain : headTailChain.chain) {
+                    for (String boneName : chain) {
+                        model.setBoneHidden(model.getCachedGeoBone(boneName), true);
+                    }
+                }
+            }
+        }
         if (eyeBlinkController != null) {
             eyeBlinkController.update(model, player, tickDelta);
         }
@@ -705,6 +717,17 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
                 // GL5: setTrackingMatrices 无对应物（骨骼位置由渲染管线自动追踪），忽略
                 model.setBoneHidden(neckRoot, LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player));
             }
+        }
+    }
+
+    /** GL5：递归隐藏骨骼及其整个子树（BoneSnapshot skipRender，需在 render pass 会话内调用） */
+    private void hideBoneAndChildren(FormModel model, GeoBone bone) {
+        if (bone == null) {
+            return;
+        }
+        model.setBoneHidden(bone, true);
+        for (GeoBone child : bone.children()) {
+            hideBoneAndChildren(model, child);
         }
     }
 

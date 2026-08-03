@@ -195,18 +195,21 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             rightLegHidden |= formModel.Hidden_RightLeg;
             rightPantsHidden |= formModel.Hidden_RightPants;
         }
-        playerEntityModel.hat.visible = !hatHidden;
-        playerEntityModel.head.visible = !headHidden;
-        playerEntityModel.body.visible = !bodyHidden;
-        playerEntityModel.jacket.visible = !jacketHidden;
-        playerEntityModel.leftArm.visible = !leftArmHidden;
-        playerEntityModel.leftSleeve.visible = !leftSleeveHidden;
-        playerEntityModel.rightArm.visible = !rightArmHidden;
-        playerEntityModel.rightSleeve.visible = !rightSleeveHidden;
-        playerEntityModel.leftLeg.visible = !leftLegHidden;
-        playerEntityModel.leftPants.visible = !leftPantsHidden;
-        playerEntityModel.rightLeg.visible = !rightLegHidden;
-        playerEntityModel.rightPants.visible = !rightPantsHidden;
+        // 只对需要隐藏的部件设 visible=false，非 hidden 部件不动：
+        // 1.21.11 中 FPM（FirstPersonModel）等第三方 mod 会在 setupAnim 里把 head.visible 设为 false 隐藏第一人称头部，
+        // 这里若无条件 visible=!hidden（强制显示）会覆盖它们 → FPM 头部隐藏失效。vanilla 的 showXxx 已在 setupAnim 处理。
+        if (hatHidden) playerEntityModel.hat.visible = false;
+        if (headHidden) playerEntityModel.head.visible = false;
+        if (bodyHidden) playerEntityModel.body.visible = false;
+        if (jacketHidden) playerEntityModel.jacket.visible = false;
+        if (leftArmHidden) playerEntityModel.leftArm.visible = false;
+        if (leftSleeveHidden) playerEntityModel.leftSleeve.visible = false;
+        if (rightArmHidden) playerEntityModel.rightArm.visible = false;
+        if (rightSleeveHidden) playerEntityModel.rightSleeve.visible = false;
+        if (leftLegHidden) playerEntityModel.leftLeg.visible = false;
+        if (leftPantsHidden) playerEntityModel.leftPants.visible = false;
+        if (rightLegHidden) playerEntityModel.rightLeg.visible = false;
+        if (rightPantsHidden) playerEntityModel.rightPants.visible = false;
     }
 
     // 渲染 vanilla PlayerModel 的额外纹理（form overlay/emissive），1.21.11 submit 模式
