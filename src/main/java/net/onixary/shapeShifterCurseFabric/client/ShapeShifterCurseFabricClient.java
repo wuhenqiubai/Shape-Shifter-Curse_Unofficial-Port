@@ -18,6 +18,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
+import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
@@ -99,6 +100,9 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 
 	private static void onClientTick(Minecraft minecraftClient){
+		// 预加载咒月月亮纹理：onInitializeClient 时 getTextureManager() 仍为 null（初始化太早），
+		// 改在首帧 tick 上传（textureManager 已就绪，且 tick 阶段不在渲染 pass 内）
+		CursedMoonSkyTextures.preload();
 		TickManager.tickClientAll();
 		LocalPlayer clientPlayer = minecraftClient.player;
 		if(clientPlayer == null){

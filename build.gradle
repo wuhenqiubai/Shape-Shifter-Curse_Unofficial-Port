@@ -150,14 +150,12 @@ dependencies {
     // satin shader 1.21.11没有
 //    modImplementation "org.ladysnake:satin:${satin_version}"
 
-    modImplementation "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
-    include "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
+    modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
+    include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
     modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
-    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
+//    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
-    modApi("maven.modrinth:pehkui-continuation:${pehkui_version}", {
-        exclude group: "net.fabricmc.fabric-api"
-    })
+    include modApi ("wuhenqiubai:pehkui:${pehkui_version}")
 
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")

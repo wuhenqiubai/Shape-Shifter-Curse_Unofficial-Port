@@ -4,17 +4,13 @@ import com.mojang.blaze3d.buffers.GpuBuffer;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.MeshData;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SkyRenderer;
 import net.minecraft.client.renderer.texture.AbstractTexture;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.MoonPhase;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
+import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -28,8 +24,6 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(SkyRenderer.class)
 public abstract class SkyRendererMixin {
     @Unique
-    private AbstractTexture ssc$cursedMoonTexture;
-    @Unique
     private GpuBuffer ssc$cursedMoonBuffer;
 
     @Unique
@@ -40,11 +34,9 @@ public abstract class SkyRendererMixin {
 
     @Unique
     private AbstractTexture ssc$getCursedMoonTexture() {
-        if (this.ssc$cursedMoonTexture == null) {
-            this.ssc$cursedMoonTexture = Minecraft.getInstance().getTextureManager()
-                    .getTexture(Identifier.fromNamespaceAndPath("shape-shifter-curse", "textures/environment/cursed_moon_phases.png"));
-        }
-        return this.ssc$cursedMoonTexture;
+        // 纹理由 CursedMoonSkyTextures.preload() 在客户端初始化时上传（渲染 pass 外，
+        // 不能在 renderMoon 的 render pass 内 getTexture，否则 GlCommandEncoder 抛 "Close the existing render pass"）
+        return CursedMoonSkyTextures.getCursedMoonTexture();
     }
 
     @Unique
