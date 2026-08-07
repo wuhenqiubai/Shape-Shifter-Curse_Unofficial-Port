@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
@@ -20,7 +20,7 @@ public class IdleStayAnimController extends AbstractAnimStateController {
     }
 
     @Override
-    public @Nullable AnimationHolder getAnimation(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
         if (data.ContinueIdleStayTickCounter >= stayTickThreshold) {
             return stayController.getAnimation(player, data);
         }
@@ -28,14 +28,14 @@ public class IdleStayAnimController extends AbstractAnimStateController {
     }
 
     @Override
-    public boolean isRegistered(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public boolean isRegistered(Player player, AnimSystem.AnimSystemData data) {
         return super.isRegistered(player, data)
                 && baseController.isRegistered(player, data)
                 && stayController.isRegistered(player, data);
     }
 
     @Override
-    public void registerAnim(PlayerEntity player, AnimSystem.AnimSystemData data) {
+    public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
         if (!baseController.isRegistered(player, data)) {
             baseController.registerAnim(player, data);
         }
