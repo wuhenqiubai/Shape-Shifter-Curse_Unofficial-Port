@@ -28,6 +28,45 @@ public class FSMUtils {
         return null;
     }
 
+    public static @Nullable IdleStayAnimController GetIdleStayController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+        AbstractAnimStateController idleController = animSystemData.playerForm.getAnimStateController(
+                player,
+                animSystemData,
+                AnimRegistries.ANIM_STATE_IDLE
+        );
+        if (idleController instanceof IdleStayAnimController idleStayController) {
+            return idleStayController;
+        }
+        return null;
+    }
+
+    // 判定玩家是否处于"静止Idle"状态(在地面且无任何动作) 用于Idle停留动画 潜行时不触发
+    public static boolean IsIdleStayCondition(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+        // 只为实际配置了停留动画的形态计时，避免从其他形态继承已经累计的静止时间
+        if (GetIdleStayController(player, animSystemData) == null) {
+            return false;
+        }
+        if (!animSystemData.IsOnGround) {
+            return false;
+        }
+        if (ProcessUniversalAnim(player, animSystemData) != null) {  // Sleep/Ride/Climb/Swim
+            return false;
+        }
+        if (player.isCrawling()) {
+            return false;
+        }
+        if (player.isSneaking()) {  // 潜行时不触发停留动画
+            return false;
+        }
+        if (animSystemData.IsWalking) {
+            return false;
+        }
+        if (player.isUsingItem() || player.handSwinging) {
+            return false;
+        }
+        return true;
+    }
+
     // 祖传代码 从第1代修改攀爬条件时就开始使用了 从v2上复制的
     public static boolean IsPlayerClimbing(Player player, AnimSystem.AnimSystemData animSystemData) {
         if (!player.onClimbable() || player.onGround() || player.getAbilities().flying || player.isFallFlying()) {
