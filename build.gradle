@@ -155,7 +155,7 @@ dependencies {
     modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
 //    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
-    include modApi ("wuhenqiubai:pehkui:${pehkui_version}")
+    modApi ("wuhenqiubai:pehkui-rebuilt:${pehkui_version}")
 
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
