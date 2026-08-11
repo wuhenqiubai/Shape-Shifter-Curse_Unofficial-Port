@@ -25,8 +25,8 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import virtuoel.pehkui.api.ScaleTypes;
 import org.jspecify.annotations.NonNull;
+import virtuoel.pehkui.api.ScaleTypes;
 
 import java.util.Optional;
 
@@ -106,7 +106,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         // 的 base scale。因此必须用 getBaseScale() 比较同一坐标系下的值，否则 0.9 * 0.55
                         // 会被错误地与 0.6 相减，导致补偿方向和幅度都不正确。
                         // 此处是在 Pehkui 模型缩放矩阵内平移，HEIGHT scale 会在矩阵上自动应用，无需再手动除以它。
-                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(tickDelta);
+                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(limbDistance);
                         float feralDefaultEyeScale = curForm.getDefaultEyeScale();
                         // Entity feature 渲染坐标的 Y 轴与世界坐标相反：eye height 增加时需要减小局部 Y。
                         float eyeHeightDeltaPixels = (feralDefaultEyeScale - eyeScale) * 1.62F * 16.0F;
