@@ -14,10 +14,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.integration.origins.component.PlayerOriginComponent;
-import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
-import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
-import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModComponents;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
@@ -38,8 +34,8 @@ public class FormRenderUtils {
         registerCondition(ShapeShifterCurseFabric.identifier("is_sprinting"), Entity::isSprinting);
     }
 
-    public static void registerCondition(ResourceLocation identifier, Predicate<Player> condition) {
-        conditionRegistry.put(identifier, condition);
+    public static void registerCondition(ResourceLocation ResourceLocation, Predicate<Player> condition) {
+        conditionRegistry.put(ResourceLocation, condition);
     }
 
     public static boolean isRenderingInWorld = false;
@@ -156,7 +152,7 @@ public class FormRenderUtils {
 			        return system;
 		        }
 	        } catch (Exception e) {
-		        ShapeShifterCurseFabric.LOGGER.warn("Failed to create or configure animation system for identifier: {}", id, e);
+		        ShapeShifterCurseFabric.LOGGER.warn("Failed to create or configure animation system for ResourceLocation: {}", id, e);
 	        }
         }
         return null;
@@ -217,6 +213,8 @@ public class FormRenderUtils {
         return getPlayerAllFormRenderer(player).stream().filter(predicate).findFirst().orElse(null);
     }
 
+    /*
+    // 暂时废弃 有渲染Bug 用于后续参考逻辑
     // Origins 版本核心 如果需要重构形态系统需要重新写一份这个函数
     public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
         if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
@@ -234,7 +232,7 @@ public class FormRenderUtils {
             // IForm playerFormBase = FormUtils.getPlayerForm(player);
             // if (playerFormBase instanceof DynamicForm pfd) {
             //     List<FormRenderer> formRenderers = new ArrayList<>();
-            //     Pair<Identifier, Identifier> currentLayer = pfd.getCurrentRenderLayer();
+            //     Pair<ResourceLocation, ResourceLocation> currentLayer = pfd.getCurrentRenderLayer();
             //     if (currentLayer != null) {
             //         FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getLeft(), currentLayer.getRight());
             //         if (formRenderer == null) {
@@ -262,13 +260,54 @@ public class FormRenderUtils {
         HashMap<OriginLayer, Origin> OriginData = poc.getOrigins();
         List<FormRenderer> formRenderers = new ArrayList<>();
         for (Map.Entry<OriginLayer, Origin> entry : OriginData.entrySet()) {
-            ResourceLocation layer = entry.getKey().getIdentifier();
-            ResourceLocation form = entry.getValue().getIdentifier();
+            ResourceLocation layer = entry.getKey().getResourceLocation();
+            ResourceLocation form = entry.getValue().getResourceLocation();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layer, form);
             if (formRenderer != null) {
                 formRenderers.add(formRenderer);
             }
         }
+        return formRenderers;
+    }
+     */
+
+
+    // 由于服务器端有时没有同步Origins的数据 所以先临时删掉多重layer的功能 改为直接由Form Class提供数据 但是这个功能后续得加 得等剔除Origins
+    public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
+        if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
+            List<FormRenderer> formRenderers = new ArrayList<>();
+            ResourceLocation formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
+            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(ResourceLocation.fromNamespaceAndPath("origins", "origin"), formID);
+            if (formRenderer == null) {
+                return new ArrayList<>();
+            }
+            formRenderers.add(formRenderer);
+            return formRenderers;
+        }
+        List<FormRenderer> formRenderers = new ArrayList<>();
+        try {
+            IForm form = FormUtils.getPlayerForm(player);
+            Tuple<ResourceLocation, ResourceLocation> layerOverride = form.getRenderLayerOverride();
+            if (layerOverride != null) {
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layerOverride.getA(), layerOverride.getB());
+                if (formRenderer != null) {
+                    formRenderers.add(formRenderer);
+                } else {
+                    ShapeShifterCurseFabric.LOGGER.warn("IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", layerOverride.getA(), layerOverride.getB());
+                }
+                return formRenderers;
+            }
+            Tuple<ResourceLocation, ResourceLocation> currentLayer = form.getFormLayer();
+            if (currentLayer != null) {
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
+                if (formRenderer != null) {
+                    formRenderers.add(formRenderer);
+                } else {
+                    ShapeShifterCurseFabric.LOGGER.warn("IForm.formLayer is not null, but the model is not registered: {} - {}", currentLayer.getA(), currentLayer.getB());
+                }
+                return formRenderers;
+            }
+        } catch (Exception ignored) {}
         return formRenderers;
     }
 }

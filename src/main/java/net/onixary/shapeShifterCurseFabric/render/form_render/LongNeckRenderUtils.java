@@ -5,6 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 
 
 public class LongNeckRenderUtils {
@@ -12,7 +13,11 @@ public class LongNeckRenderUtils {
 
     public static boolean isFirstPersonModelActiveForSelf(Player player) {
         Minecraft client = Minecraft.getInstance();
-        return IS_FIRST_PERSON_MOD_LOADED && player.isLocalPlayer() && client.options.getCameraType().isFirstPerson() && FirstPersonModelCore.instance.isEnabled();
+        return IS_FIRST_PERSON_MOD_LOADED
+                && !ClientUtils.isOpenInventoryScreen
+                && player.isLocalPlayer()
+                && client.options.getCameraType().isFirstPerson()
+                && FirstPersonModelCore.instance.isEnabled();
     }
 
     public static float lerpAngle(float delta, float start, float end) {
