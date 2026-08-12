@@ -15,8 +15,8 @@ public class LongNeckRenderUtils {
         Minecraft client = Minecraft.getInstance();
         return IS_FIRST_PERSON_MOD_LOADED
                 && !ClientUtils.isOpenInventoryScreen
-                && player.isMainPlayer()
-                && client.options.getPerspective().isFirstPerson()
+                && player.isLocalPlayer()
+                && client.options.getCameraType().isFirstPerson()
                 && FirstPersonModelCore.instance.isEnabled();
     }
 
