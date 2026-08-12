@@ -311,8 +311,8 @@ public class FormRenderUtils {
     public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
         if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
             List<FormRenderer> formRenderers = new ArrayList<>();
-            ResourceLocation formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
-            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(ResourceLocation.fromNamespaceAndPath("origins", "origin"), formID);
+            Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
+            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.fromNamespaceAndPath("origins", "origin"), formID);
             if (formRenderer == null) {
                 return new ArrayList<>();
             }
@@ -322,7 +322,7 @@ public class FormRenderUtils {
         List<FormRenderer> formRenderers = new ArrayList<>();
         try {
             IForm form = FormUtils.getPlayerForm(player);
-            Tuple<ResourceLocation, ResourceLocation> layerOverride = form.getRenderLayerOverride();
+            Tuple<Identifier, Identifier> layerOverride = form.getRenderLayerOverride();
             if (layerOverride != null) {
                 FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layerOverride.getA(), layerOverride.getB());
                 if (formRenderer != null) {
@@ -332,7 +332,7 @@ public class FormRenderUtils {
                 }
                 return formRenderers;
             }
-            Tuple<ResourceLocation, ResourceLocation> currentLayer = form.getFormLayer();
+            Tuple<Identifier, Identifier> currentLayer = form.getFormLayer();
             if (currentLayer != null) {
                 FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
                 if (formRenderer != null) {
