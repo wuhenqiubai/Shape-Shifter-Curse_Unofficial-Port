@@ -19,25 +19,12 @@ import java.util.Optional;
 public interface ITMob {
     public float getStatusChance();
     public BaseTransformativeStatusEffect getStatusEffect();
-    public void TickCooldown();
-    public void ApplyCooldown();
-    public boolean IsInCooldown();
+    public default void TickCooldown() {};
+    public default void ApplyCooldown() {};
+    public default boolean IsInCooldown() { return false; };
 
-    public default void TMob_Tick(Mob TMob) {
-        TickCooldown();
-
-        LivingEntity target = TMob.getTarget();
-        if (target instanceof Player && !this.IsInCooldown()) {
-            Player player = (Player) target;
-
-			double distance = TMob.distanceToSqr(player);
-            if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                TMob.doHurtTarget(player);
-                applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
-                this.ApplyCooldown();
-            }
-        }
-
+    public default void TMob_Tick(MobEntity TMob) {
+        this.TickCooldown();
         // 生成粒子效果
         if (TMob.level().isClientSide) {
             for (int i = 0; i < 1; i++) {
@@ -50,6 +37,7 @@ public interface ITMob {
         }
     }
 
+    // 老版攻击逻辑
     public default Optional<Boolean> TMob_TryAttack(Mob TMob, Entity target) {
         if(target instanceof Player player) {
             IForm currentForm = FormUtils.getPlayerForm(player);

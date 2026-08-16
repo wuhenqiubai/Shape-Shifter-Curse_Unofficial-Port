@@ -51,25 +51,6 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         return TO_SPIDER_0_EFFECT;
     }
 
-    private int cooldown = 0;
-
-    @Override
-    public void TickCooldown() {
-        if (this.cooldown > 0) {
-            this.cooldown --;
-        }
-    }
-
-    @Override
-    public void ApplyCooldown() {
-        this.cooldown = 100;
-    }
-
-    @Override
-    public boolean IsInCooldown() {
-        return this.cooldown > 0;
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -77,9 +58,11 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
-        return attacked.orElseGet(() -> super.doHurtTarget(target));
+    public void applyDamageEffects(LivingEntity attacker, Entity target) {
+        // 在applyStatusByChance里面已经判断形态了 无需在外面判断
+        if (target instanceof PlayerEntity player) {
+            ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+        }
     }
 
     @Override
@@ -94,5 +77,5 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         return ResourceKey.create(Registries.LOOT_TABLE, id);
     }
 
-    
+
 }

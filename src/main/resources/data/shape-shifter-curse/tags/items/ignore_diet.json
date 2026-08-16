@@ -1,6 +1,10 @@
 {
   "replace": false,
   "values": [
+    {
+      "id": "#origins:ignore_diet",
+      "required": false
+    },
     "minecraft:enchanted_golden_apple",
     "minecraft:golden_apple",
     "minecraft:golden_carrot",

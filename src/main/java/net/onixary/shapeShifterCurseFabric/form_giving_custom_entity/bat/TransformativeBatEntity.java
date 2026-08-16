@@ -30,7 +30,7 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
-                .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
+                .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE_OLD)
                 .add(Attributes.MOVEMENT_SPEED, 1.0);
     }
 
@@ -48,7 +48,6 @@ public class TransformativeBatEntity extends Bat implements ITMob {
             return i <= random.nextInt(j) && checkMobSpawnRules(type, world, spawnReason, pos, random);
         }
     }
-
 
     @Override
     public float getStatusChance() {
@@ -82,6 +81,17 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     @Override
     public void tick() {
         super.tick();
+        // 由于大部分变形生物都改了攻击逻辑 所以把这个逻辑放唯一一个没改的蝙蝠代码里
+        LivingEntity target = this.getTarget();
+        if (target instanceof PlayerEntity && !this.IsInCooldown()) {
+            PlayerEntity player = (PlayerEntity) target;
+            double distance = this.squaredDistanceTo(player);
+            if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
+                this.tryAttack(player);
+                ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+                this.ApplyCooldown();
+            }
+        }
         this.TMob_Tick(this);
     }
 

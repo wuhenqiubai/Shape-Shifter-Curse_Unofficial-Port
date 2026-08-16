@@ -14,15 +14,21 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
+import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_OCELOT_0_EFFECT;
 
 public class TransformativeOcelotEntity extends Ocelot implements ITMob {
+    public FleeGoalModified<PlayerEntity> fleeGoal;
+
     public TransformativeOcelotEntity(EntityType<? extends Ocelot> entityType, Level world) {
         super(entityType, world);
     }
@@ -51,25 +57,6 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
         return TO_OCELOT_0_EFFECT;
     }
 
-    private int cooldown = 0;
-
-    @Override
-    public void TickCooldown() {
-        if (this.cooldown > 0) {
-            this.cooldown --;
-        }
-    }
-
-    @Override
-    public void ApplyCooldown() {
-        this.cooldown = 100;
-    }
-
-    @Override
-    public boolean IsInCooldown() {
-        return this.cooldown > 0;
-    }
-
     @Override
     public void tick() {
         super.tick();
@@ -77,28 +64,66 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     }
 
     @Override
-    public boolean doHurtTarget(Entity target) {
-        Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
-        return attacked.orElseGet(() -> super.doHurtTarget(target));
+    public void applyDamageEffects(LivingEntity attacker, Entity target) {
+        // 在applyStatusByChance里面已经判断形态了 无需在外面判断
+        if (target instanceof PlayerEntity player) {
+            ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+        }
     }
 
     @Override
-    protected void registerGoals() {
-        super.registerGoals();
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+    public boolean tryAttack(Entity target) {
+        boolean bl = super.tryAttack(target);
+        if (bl) {
+            this.applyDamageEffects(this, target);
+        }
+        return bl;
+    }
 
-        // this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true, livingEntity -> {
-        //     if (livingEntity instanceof PlayerEntity player) {
-        //         return RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player);
-        //     }
-        //     return false;
-        // }));
+    @Override
+    protected void initGoals() {
+        super.initGoals();
+        this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, entity -> entity instanceof PlayerEntity player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)));
+    }
 
-        // this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, true, livingEntity -> {
-        //     if (livingEntity instanceof PlayerEntity player) {
-        //         return !AdditionalPowers.CAT_FRIENDLY.isActive(player);
-        //     }
-        //     return true;
-        // }));
+    public static final Predicate<LivingEntity> FLEE_PREDICATE = (entity) -> {
+        if (entity instanceof PlayerEntity player) {
+            if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
+                return false;
+            }
+            if (AdditionalPowers.CAT_FRIENDLY.isActive(player)) {
+                return false;
+            }
+        }
+        return true;
+    };
+
+    @Override
+    protected void updateFleeing() {
+        if (this.fleeGoal == null) {
+            this.fleeGoal = new FleeGoalModified<PlayerEntity>(this, PlayerEntity.class, 16.0F, 0.8, 1.33, FLEE_PREDICATE);
+        }
+
+        this.goalSelector.remove(this.fleeGoal);
+        if (!this.isTrusting()) {
+            this.goalSelector.add(4, this.fleeGoal);
+        }
+    }
+
+    public static class FleeGoalModified<T extends LivingEntity> extends FleeEntityGoal<T> {
+        private final TransformativeOcelotEntity ocelot;
+
+        public FleeGoalModified(TransformativeOcelotEntity ocelot, Class<T> fleeFromType, float distance, double slowSpeed, double fastSpeed, Predicate<LivingEntity> predicate) {
+            super(ocelot, fleeFromType, distance, slowSpeed, fastSpeed, predicate);
+            this.ocelot = ocelot;
+        }
+
+        public boolean canStart() {
+            return !this.ocelot.isTrusting() && super.canStart();
+        }
+
+        public boolean shouldContinue() {
+            return !this.ocelot.isTrusting() && super.shouldContinue();
+        }
     }
 }

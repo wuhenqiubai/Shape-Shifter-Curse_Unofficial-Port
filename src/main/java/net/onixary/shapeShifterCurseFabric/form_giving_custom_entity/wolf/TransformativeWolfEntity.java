@@ -47,8 +47,6 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
-    private float cooldown = 0;
-
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new FloatGoal(this));
@@ -105,21 +103,7 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
     @Override
     public void tick() {
         super.tick();
-        // 更新冷却时间
-        if (cooldown > 0) {
-            cooldown--;
-        }
-
-        // 生成粒子效果
-        if (this.level().isClientSide) {
-            for (int i = 0; i < 1; i++) {
-                this.level().addParticle(StaticParams.CUSTOM_MOB_DEFAULT_PARTICLE,
-                        this.getX() + (this.random.nextDouble() - 0.5) * 0.5,
-                        this.getY() + this.random.nextDouble() * 0.5,
-                        this.getZ() + (this.random.nextDouble() - 0.5) * 0.5,
-                        0, 0, 0);
-            }
-        }
+        this.TMob_Tick(this);
     }
 
     @Override
@@ -128,16 +112,6 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
         if (target instanceof Player player) {
             TStatusApplier.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
-    }
-
-    @Override
-    public boolean doHurtTarget(Entity target) {
-        if(target instanceof Player) {
-            this.setLastHurtMob(target);
-            boolean attacked = target.hurt(this.damageSources().mobAttack(this), (float)this.getAttributeValue(Attributes.ATTACK_DAMAGE));
-            return attacked;
-        }
-        return super.doHurtTarget(target);
     }
 
     // 禁止与此生物交互 防止使用Wolf的驯服逻辑
@@ -178,19 +152,7 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
     }
 
     @Override
-    public void TickCooldown() {
-        if (this.cooldown > 0) {
-            this.cooldown --;
-        }
-    }
-
-    @Override
-    public void ApplyCooldown() {
-        this.cooldown = 100;
-    }
-
-    @Override
-    public boolean IsInCooldown() {
-        return this.cooldown > 0;
+    public EntityView method_48926() {
+        return super.getWorld();
     }
 }
