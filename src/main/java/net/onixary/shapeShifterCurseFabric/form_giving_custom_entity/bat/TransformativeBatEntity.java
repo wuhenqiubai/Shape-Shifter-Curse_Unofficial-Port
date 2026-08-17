@@ -3,10 +3,7 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -33,7 +30,7 @@ public class TransformativeBatEntity extends Bat implements ITMob {
         // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
-                .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
+                .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE_OLD)
                 .add(Attributes.MOVEMENT_SPEED, 1.0);
     }
 
@@ -51,7 +48,6 @@ public class TransformativeBatEntity extends Bat implements ITMob {
             return i <= random.nextInt(j) && checkMobSpawnRules(type, world, spawnReason, pos, random);
         }
     }
-
 
     @Override
     public float getStatusChance() {
@@ -85,6 +81,16 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     @Override
     public void tick() {
         super.tick();
+        // 由于大部分变形生物都改了攻击逻辑 所以把这个逻辑放唯一一个没改的蝙蝠代码里
+        LivingEntity target = this.getTarget();
+        if (target instanceof Player player && !this.IsInCooldown()) {
+            double distance = this.distanceToSqr(player);
+            if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
+                this.doHurtTarget(player);
+                ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
+                this.ApplyCooldown();
+            }
+        }
         this.TMob_Tick(this);
     }
 

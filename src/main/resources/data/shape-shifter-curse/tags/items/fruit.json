@@ -79,8 +79,8 @@
       "required": false
     },
     {
-      "id": "vinery:cherry",
-      "required": false
+      "id":"vinery:cherry",
+      "required":false
     },
     {
       "id": "farm_and_charm:strawberry",

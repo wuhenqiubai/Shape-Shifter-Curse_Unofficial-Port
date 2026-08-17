@@ -31,7 +31,7 @@ atlassian-ide-plugin.xml
 *.tar.gz
 *.rar
 
-# virtual machine crash logs
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
 *~
@@ -173,4 +173,4 @@ build_*.txt
 /remappedSrc/
 /docs/
 /AGENTS.md
-/docs/
+/.zcode/plans/plan-sess_f76410b7-f958-4e04-9e4c-1307dab3c9fb.md

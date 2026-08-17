@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -19,27 +18,12 @@ import java.util.Optional;
 public interface ITMob {
     public float getStatusChance();
     public BaseTransformativeStatusEffect getStatusEffect();
-    public void TickCooldown();
-    public void ApplyCooldown();
-    public boolean IsInCooldown();
+    public default void TickCooldown() {};
+    public default void ApplyCooldown() {};
+    public default boolean IsInCooldown() { return false; };
 
     public default void TMob_Tick(Mob TMob) {
-        TickCooldown();
-
-        LivingEntity target = TMob.getTarget();
-        if (target instanceof Player && !this.IsInCooldown()) {
-            Player player = (Player) target;
-
-			double distance = TMob.distanceToSqr(player);
-            if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                if (TMob.level() instanceof net.minecraft.server.level.ServerLevel serverLevel) {
-                    TMob.doHurtTarget(serverLevel, player);
-                }
-                applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
-                this.ApplyCooldown();
-            }
-        }
-
+        this.TickCooldown();
         // 生成粒子效果
         if (TMob.level().isClientSide()) {
             for (int i = 0; i < 1; i++) {
@@ -52,6 +36,7 @@ public interface ITMob {
         }
     }
 
+    // 老版攻击逻辑
     public default Optional<Boolean> TMob_TryAttack(Mob TMob, Entity target) {
         if(target instanceof Player player) {
             IForm currentForm = FormUtils.getPlayerForm(player);

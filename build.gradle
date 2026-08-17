@@ -189,6 +189,11 @@ dependencies {
     // Tough as nails
     modCompileOnly "maven.modrinth:tough-as-nails:WPscGvLW"
 
+    // Presence Footsteps
+    modCompileOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
+    modRuntimeOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
+
+    // modCompileOnly "curse.maven:biomes-o-plenty-220318:6364066"
 }
 
 processResources {
@@ -200,7 +205,8 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
-                "loader_version": project.loader_version
+                "loader_version": project.loader_version,
+                "CHANNEL_VERSION": build_version
     }
 }
 
