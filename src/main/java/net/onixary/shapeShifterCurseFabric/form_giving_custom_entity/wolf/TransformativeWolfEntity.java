@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.TWolfFriendlyPower;
-import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.TStatusApplier;
@@ -149,10 +148,5 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
     @Override
     public BaseTransformativeStatusEffect getStatusEffect() {
         return TO_ANUBIS_WOLF_0_EFFECT;
-    }
-
-    @Override
-    public EntityView method_48926() {
-        return super.getWorld();
     }
 }

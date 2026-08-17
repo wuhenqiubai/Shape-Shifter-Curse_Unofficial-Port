@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.ai.sensing.Sensor;
+import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
 import net.minecraft.world.entity.player.Player;
@@ -22,12 +22,12 @@ import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
-import net.onixary.shapeShifterCurseFabric.status_effects.TStatusApplier;
+import org.jetbrains.annotations.NotNull;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_AXOLOTL_0_EFFECT;
 
 public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, ITMob {
-    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super AxolotlEntity>>> SENSORS = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, TAxolotlEntitySensor.T_AXOLOTL_ENTITY_SENSOR, SensorType.AXOLOTL_TEMPTATIONS);;
+    protected static final ImmutableList<? extends SensorType<? extends Sensor<? super Axolotl>>> SENSORS = ImmutableList.of(SensorType.NEAREST_LIVING_ENTITIES, SensorType.NEAREST_ADULT, SensorType.HURT_BY, TAxolotlEntitySensor.T_AXOLOTL_ENTITY_SENSOR, SensorType.AXOLOTL_TEMPTATIONS);;
 
     public TransformativeAxolotlEntity(EntityType<? extends Axolotl> entityType, Level world) {
         super(entityType, world);
@@ -50,11 +50,12 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
     }
 
     @Override
-    public InteractionResult mobInteract(Player player, InteractionHand hand) {
+    public @NotNull InteractionResult mobInteract(Player player, InteractionHand hand) {
         return Bucketable.bucketMobPickup(player, hand, this).orElse(super.mobInteract(player, hand));
     }
 
-    public ItemStack getBucketItemStack() {
+    @Override
+    public @NotNull ItemStack getBucketItemStack() {
         return new ItemStack(RegCustomItem.TRANSFORMATIVE_AXOLOTL_BUCKET);
     }
 
@@ -74,16 +75,15 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
         this.TMob_Tick(this);
     }
 
-    @Override
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // 在applyStatusByChance里面已经判断形态了 无需在外面判断
-        if (target instanceof PlayerEntity player) {
+        if (target instanceof Player player) {
             ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
     }
 
     @Override
-    protected Brain.Profile<AxolotlEntity> createBrainProfile() {
-        return Brain.createProfile(MEMORY_MODULES, SENSORS);
+    protected Brain.@NotNull Provider<Axolotl> brainProvider() {
+        return Brain.provider(MEMORY_TYPES, SENSORS);
     }
 }

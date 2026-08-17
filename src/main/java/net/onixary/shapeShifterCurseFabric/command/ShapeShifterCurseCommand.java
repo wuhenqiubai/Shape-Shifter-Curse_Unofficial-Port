@@ -491,7 +491,7 @@ public class ShapeShifterCurseCommand {
         return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
     }
 
-    private static boolean CheckConfigDebugEnvironment(CommandContext<ServerCommandSource> commandContext) {
+    private static boolean CheckConfigDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
         return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
     }
 
@@ -711,23 +711,23 @@ public class ShapeShifterCurseCommand {
         return 0;
     }
 
-    private static int SU_Command(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+    private static int SU_Command(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         // 需要开启配置后才能使用 毕竟如果还允许权限2 那么就能实现提权了
         if (!CheckConfigDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
         int level = commandContext.getArgument("level", Integer.class);
         try {
             SuperUserUtils.setSULevel(player, level);
-            player.getServer().getPlayerManager().sendCommandTree(player);
-            player.getCommandSource().sendFeedback(() -> Text.literal("Set SU level to " + level), false);
+            player.getServer().getPlayerList().sendPlayerPermissionLevel(player);
+            player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
         } catch (Exception e) {
-            player.getCommandSource().sendError(Text.literal("Error to set SU level"));
+            player.createCommandSourceStack().sendFailure(Component.literal("Error to set SU level"));
             return 0;
         }
         return 1;

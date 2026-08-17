@@ -9,6 +9,7 @@ import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -17,8 +18,6 @@ import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
-
-import java.util.Optional;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_SPIDER_0_EFFECT;
 
@@ -57,10 +56,9 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         this.TMob_Tick(this);
     }
 
-    @Override
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // 在applyStatusByChance里面已经判断形态了 无需在外面判断
-        if (target instanceof PlayerEntity player) {
+        if (target instanceof Player player) {
             ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
     }

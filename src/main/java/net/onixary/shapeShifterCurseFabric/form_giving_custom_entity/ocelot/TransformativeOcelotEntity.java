@@ -2,12 +2,10 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.animal.Ocelot;
 import net.minecraft.world.entity.player.Player;
@@ -20,14 +18,12 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_OCELOT_0_EFFECT;
 
 public class TransformativeOcelotEntity extends Ocelot implements ITMob {
-    public FleeGoalModified<PlayerEntity> fleeGoal;
+    public FleeGoalModified<Player> fleeGoal;
 
     public TransformativeOcelotEntity(EntityType<? extends Ocelot> entityType, Level world) {
         super(entityType, world);
@@ -63,17 +59,16 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
         this.TMob_Tick(this);
     }
 
-    @Override
     public void applyDamageEffects(LivingEntity attacker, Entity target) {
         // 在applyStatusByChance里面已经判断形态了 无需在外面判断
-        if (target instanceof PlayerEntity player) {
+        if (target instanceof Player player) {
             ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
     }
 
     @Override
-    public boolean tryAttack(Entity target) {
-        boolean bl = super.tryAttack(target);
+    public boolean doHurtTarget(Entity target) {
+        boolean bl = super.doHurtTarget(target);
         if (bl) {
             this.applyDamageEffects(this, target);
         }
@@ -81,13 +76,13 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     }
 
     @Override
-    protected void initGoals() {
-        super.initGoals();
-        this.targetSelector.add(1, new ActiveTargetGoal<>(this, PlayerEntity.class, 10, true, false, entity -> entity instanceof PlayerEntity player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)));
+    protected void registerGoals() {
+        super.registerGoals();
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, entity -> entity instanceof Player player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)));
     }
 
     public static final Predicate<LivingEntity> FLEE_PREDICATE = (entity) -> {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             if (RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)) {
                 return false;
             }
@@ -99,18 +94,18 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     };
 
     @Override
-    protected void updateFleeing() {
+    protected void reassessTrustingGoals() {
         if (this.fleeGoal == null) {
-            this.fleeGoal = new FleeGoalModified<PlayerEntity>(this, PlayerEntity.class, 16.0F, 0.8, 1.33, FLEE_PREDICATE);
+            this.fleeGoal = new FleeGoalModified<>(this, Player.class, 16.0F, 0.8, 1.33, FLEE_PREDICATE);
         }
 
-        this.goalSelector.remove(this.fleeGoal);
+        this.goalSelector.removeGoal(this.fleeGoal);
         if (!this.isTrusting()) {
-            this.goalSelector.add(4, this.fleeGoal);
+            this.goalSelector.addGoal(4, this.fleeGoal);
         }
     }
 
-    public static class FleeGoalModified<T extends LivingEntity> extends FleeEntityGoal<T> {
+    public static class FleeGoalModified<T extends LivingEntity> extends AvoidEntityGoal<T> {
         private final TransformativeOcelotEntity ocelot;
 
         public FleeGoalModified(TransformativeOcelotEntity ocelot, Class<T> fleeFromType, float distance, double slowSpeed, double fastSpeed, Predicate<LivingEntity> predicate) {
@@ -118,12 +113,14 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
             this.ocelot = ocelot;
         }
 
-        public boolean canStart() {
-            return !this.ocelot.isTrusting() && super.canStart();
+        @Override
+        public boolean canUse() {
+            return !this.ocelot.isTrusting() && super.canUse();
         }
 
-        public boolean shouldContinue() {
-            return !this.ocelot.isTrusting() && super.shouldContinue();
+        @Override
+        public boolean canContinueToUse() {
+            return !this.ocelot.isTrusting() && super.canContinueToUse();
         }
     }
 }

@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
@@ -23,7 +22,7 @@ public interface ITMob {
     public default void ApplyCooldown() {};
     public default boolean IsInCooldown() { return false; };
 
-    public default void TMob_Tick(MobEntity TMob) {
+    public default void TMob_Tick(Mob TMob) {
         this.TickCooldown();
         // 生成粒子效果
         if (TMob.level().isClientSide) {

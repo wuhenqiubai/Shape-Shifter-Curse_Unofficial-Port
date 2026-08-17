@@ -2,10 +2,7 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.MobSpawnType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -83,11 +80,10 @@ public class TransformativeBatEntity extends Bat implements ITMob {
         super.tick();
         // 由于大部分变形生物都改了攻击逻辑 所以把这个逻辑放唯一一个没改的蝙蝠代码里
         LivingEntity target = this.getTarget();
-        if (target instanceof PlayerEntity && !this.IsInCooldown()) {
-            PlayerEntity player = (PlayerEntity) target;
-            double distance = this.squaredDistanceTo(player);
+        if (target instanceof Player player && !this.IsInCooldown()) {
+            double distance = this.distanceToSqr(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                this.tryAttack(player);
+                this.doHurtTarget(player);
                 ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
                 this.ApplyCooldown();
             }

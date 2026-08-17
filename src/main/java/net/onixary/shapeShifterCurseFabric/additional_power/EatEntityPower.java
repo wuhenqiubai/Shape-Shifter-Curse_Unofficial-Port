@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.additional_power;
 
-import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
@@ -10,19 +8,18 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.hit.EntityHitResult;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.food.FoodProperties;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.EntityHitResult;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,38 +28,38 @@ import java.util.List;
 
 public class EatEntityPower extends Power {
     public boolean mustEmptyHand = true;
-    public HashMap<Identifier, FoodComponent> entityFoodMap;
+    public HashMap<ResourceLocation, FoodProperties> entityFoodMap;
 
-    public EatEntityPower(PowerType<?> type, LivingEntity entity, boolean mustEmptyHand, HashMap<Identifier, FoodComponent> entityFoodMap) {
+    public EatEntityPower(PowerType<?> type, LivingEntity entity, boolean mustEmptyHand, HashMap<ResourceLocation, FoodProperties> entityFoodMap) {
         super(type, entity);
         this.mustEmptyHand = mustEmptyHand;
         this.entityFoodMap = entityFoodMap;
     }
 
-    public boolean onUseEntity(Entity targetEntity, Hand playerHand, EntityHitResult hitResult) {
-        if (targetEntity == null || !targetEntity.isAlive() || !(entity instanceof PlayerEntity player) || !this.isActive()) {
+    public boolean onUseEntity(Entity targetEntity, InteractionHand playerHand, EntityHitResult hitResult) {
+        if (targetEntity == null || !targetEntity.isAlive() || !(entity instanceof Player player) || !this.isActive()) {
             return false;
         }
-        if (this.mustEmptyHand && !player.getStackInHand(playerHand).isEmpty()) {
+        if (this.mustEmptyHand && !player.getItemInHand(playerHand).isEmpty()) {
             return false;
         }
-        @Nullable FoodComponent foodComponent = entityFoodMap.get(EntityType.getId(targetEntity.getType()));
-        World world = player.getWorld();
-        if (foodComponent != null && player.canConsume(foodComponent.isAlwaysEdible())) {
-            player.getHungerManager().add(foodComponent.getHunger(), foodComponent.getSaturationModifier());
-            for(Pair<StatusEffectInstance, Float> pair : foodComponent.getStatusEffects()) {
-                if (!world.isClient && pair.getFirst() != null && world.random.nextFloat() < (Float)pair.getSecond()) {
-                    player.addStatusEffect(new StatusEffectInstance((StatusEffectInstance)pair.getFirst()));
+        @Nullable FoodProperties foodComponent = entityFoodMap.get(EntityType.getKey(targetEntity.getType()));
+        Level world = player.level();
+        if (foodComponent != null && player.canEat(foodComponent.canAlwaysEat())) {
+            player.getFoodData().eat(foodComponent.nutrition(), foodComponent.saturation());
+            for (FoodProperties.PossibleEffect possibleEffect : foodComponent.effects()) {
+                if (!world.isClientSide && world.random.nextFloat() < possibleEffect.probability()) {
+                    player.addEffect(possibleEffect.effect());
                 }
             }
-            world.playSound((PlayerEntity)null, player.getX(), player.getY(), player.getZ(), SoundEvents.ENTITY_PLAYER_BURP, SoundCategory.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            world.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
             targetEntity.discard();
             return true;
         }
         return false;
     }
 
-    public record FoodPair(Identifier entity, FoodComponent food) {}
+    public record FoodPair(ResourceLocation entity, FoodProperties food) {}
 
     public static final SerializableDataType<FoodPair> ENTITY_FOOD_PAIR = SerializableDataType.compound(
             FoodPair.class,
@@ -85,11 +82,11 @@ public class EatEntityPower extends Power {
             if (player != null) {
                 for (EatEntityPower power : PowerHolderComponent.getPowers(player, EatEntityPower.class)) {
                     if (power.onUseEntity(entity, hand, hitResult)) {
-                        return ActionResult.SUCCESS;
+                        return InteractionResult.SUCCESS;
                     }
                 }
             }
-            return ActionResult.PASS;
+            return InteractionResult.PASS;
         });
     }
 
@@ -101,7 +98,7 @@ public class EatEntityPower extends Power {
                         .add("food_map", ENTITY_FOOD_PAIR_LIST, null),
                 data -> (powerType, livingEntity) -> {
                     @Nullable List<FoodPair> foodMap = data.get("food_map");
-                    HashMap<Identifier, FoodComponent> entityFoodMap = new HashMap<>();
+                    HashMap<ResourceLocation, FoodProperties> entityFoodMap = new HashMap<>();
                     if (foodMap != null) {
                         for (FoodPair pair : foodMap) {
                             entityFoodMap.put(pair.entity(), pair.food());

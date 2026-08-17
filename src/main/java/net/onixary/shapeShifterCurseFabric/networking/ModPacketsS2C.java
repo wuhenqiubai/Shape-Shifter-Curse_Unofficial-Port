@@ -33,6 +33,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
+import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile;
@@ -314,7 +315,9 @@ public class ModPacketsS2C {
     public static void sendUpdateCustomSetting(boolean ForceUpdate) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         boolean autoSyncConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_config;
-        if (!ForceUpdate && !autoSyncConfig) return;
+        if (!ForceUpdate && !autoSyncConfig) {
+            return;
+        }
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.keep_original_skin);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_color);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_random_sound);
@@ -646,7 +649,7 @@ public class ModPacketsS2C {
     }
 
     private static void receiveSetSuperUserLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        int level = payload.readInt();
+        int level = payload.data().readInt();
         ctx.client().execute(() -> {
             SuperUserUtils.setClientSULevel(level);
         });

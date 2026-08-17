@@ -334,9 +334,9 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), buf));
     }
 
-    public static void sendSetSuperUserLevel(ServerPlayerEntity player, int level) {
-        PacketByteBuf buf = PacketByteBufs.create();
+    public static void sendSetSuperUserLevel(ServerPlayer player, int level) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(level);
-        ServerPlayNetworking.send(player, ModPackets.SET_SUPER_USER_LEVEL, buf);
+        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), buf));
     }
 }
