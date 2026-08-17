@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.mixin.integration;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.ModifyFootstepSoundSpeedPower;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,7 +25,7 @@ public abstract class PresenceFootstepsStepSpeedMixin {
             remap = false),
         remap = false)
     private float shapeShifter$modifyStepDistance(float original) {
-        if (entity instanceof PlayerEntity player) {
+        if (entity instanceof Player player) {
             var powers = PowerHolderComponent.getPowers(player, ModifyFootstepSoundSpeedPower.class);
             if (!powers.isEmpty()) {
                 return original / powers.get(0).getSpeedMultiplier();

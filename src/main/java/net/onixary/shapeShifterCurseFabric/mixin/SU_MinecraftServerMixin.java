@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(MinecraftServer.class)
 public class SU_MinecraftServerMixin {
-    @Inject(method = "getPermissionLevel", at = @At("HEAD"), cancellable = true)
-    private void getPermissionLevel(GameProfile profile, CallbackInfoReturnable<Integer> cir) {
+    @Inject(method = "getProfilePermissions", at = @At("HEAD"), cancellable = true)
+    private void getProfilePermissions(GameProfile profile, CallbackInfoReturnable<Integer> cir) {
         int superUserLevel = SuperUserUtils.getCurrentPermissionLevel(profile.getId());
         if (superUserLevel != -1) {
             cir.setReturnValue(superUserLevel);
