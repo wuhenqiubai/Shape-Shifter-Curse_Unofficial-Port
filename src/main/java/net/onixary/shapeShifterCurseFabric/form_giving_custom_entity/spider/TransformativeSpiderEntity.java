@@ -1,11 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -13,12 +7,8 @@ import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.storage.loot.LootTable;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
-import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 import org.jspecify.annotations.NonNull;
 
@@ -35,13 +25,6 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
                 .add(Attributes.MAX_HEALTH, 8.0f)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
                 .add(Attributes.MOVEMENT_SPEED, 0.3f);
-    }
-
-    public static boolean canCustomSpawn(EntityType<TransformativeOcelotEntity> type, LevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
-        float Chance = ShapeShifterCurseFabric.commonConfig.transformativeSpiderSpawnChance;
-        if (Chance <= 0.0f) { return false; }
-        if (Chance >= 1.0f) { return true; }
-        return random.nextFloat() < Chance;
     }
 
     @Override
@@ -73,11 +56,7 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
     }
 
 
-    @Override
-    protected ResourceKey<LootTable> getDefaultLootTable() {
-        Identifier id = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
-        return ResourceKey.create(Registries.LOOT_TABLE, id);
-    }
+    // 1.21.11: 掉落表默认按 entities/<entity_id> 解析，数据包 data/shape-shifter-curse/loot_table/entities/t_spider.json 自动生效，无需 override
 
 
 }

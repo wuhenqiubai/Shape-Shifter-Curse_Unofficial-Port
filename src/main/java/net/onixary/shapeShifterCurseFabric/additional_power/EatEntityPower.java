@@ -8,7 +8,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -28,9 +28,9 @@ import java.util.List;
 
 public class EatEntityPower extends Power {
     public boolean mustEmptyHand = true;
-    public HashMap<ResourceLocation, FoodProperties> entityFoodMap;
+    public HashMap<Identifier, FoodProperties> entityFoodMap;
 
-    public EatEntityPower(PowerType<?> type, LivingEntity entity, boolean mustEmptyHand, HashMap<ResourceLocation, FoodProperties> entityFoodMap) {
+    public EatEntityPower(PowerType<?> type, LivingEntity entity, boolean mustEmptyHand, HashMap<Identifier, FoodProperties> entityFoodMap) {
         super(type, entity);
         this.mustEmptyHand = mustEmptyHand;
         this.entityFoodMap = entityFoodMap;
@@ -47,11 +47,7 @@ public class EatEntityPower extends Power {
         Level world = player.level();
         if (foodComponent != null && player.canEat(foodComponent.canAlwaysEat())) {
             player.getFoodData().eat(foodComponent.nutrition(), foodComponent.saturation());
-            for (FoodProperties.PossibleEffect possibleEffect : foodComponent.effects()) {
-                if (!world.isClientSide && world.random.nextFloat() < possibleEffect.probability()) {
-                    player.addEffect(possibleEffect.effect());
-                }
-            }
+            // 1.21.11 降级：FoodProperties record 不再含 effects 列表（移到 ConsumableListener，无公开 API），无法应用食物附带的药水效果
             world.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
             targetEntity.discard();
             return true;
@@ -59,7 +55,7 @@ public class EatEntityPower extends Power {
         return false;
     }
 
-    public record FoodPair(ResourceLocation entity, FoodProperties food) {}
+    public record FoodPair(Identifier entity, FoodProperties food) {}
 
     public static final SerializableDataType<FoodPair> ENTITY_FOOD_PAIR = SerializableDataType.compound(
             FoodPair.class,
@@ -98,7 +94,7 @@ public class EatEntityPower extends Power {
                         .add("food_map", ENTITY_FOOD_PAIR_LIST, null),
                 data -> (powerType, livingEntity) -> {
                     @Nullable List<FoodPair> foodMap = data.get("food_map");
-                    HashMap<ResourceLocation, FoodProperties> entityFoodMap = new HashMap<>();
+                    HashMap<Identifier, FoodProperties> entityFoodMap = new HashMap<>();
                     if (foodMap != null) {
                         for (FoodPair pair : foodMap) {
                             entityFoodMap.put(pair.entity(), pair.food());

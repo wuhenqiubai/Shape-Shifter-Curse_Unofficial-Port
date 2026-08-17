@@ -726,7 +726,8 @@ public class ShapeShifterCurseCommand {
         int level = commandContext.getArgument("level", Integer.class);
         try {
             SuperUserUtils.setSULevel(player, level);
-            player.getServer().getPlayerList().sendPlayerPermissionLevel(player);
+            // 1.21.11: ServerPlayer.getServer() 移除，改用 level()（返回 ServerLevel）.getServer()
+            player.level().getServer().getPlayerList().sendPlayerPermissionLevel(player);
             player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
         } catch (Exception e) {
             player.createCommandSourceStack().sendFailure(Component.literal("Error to set SU level"));

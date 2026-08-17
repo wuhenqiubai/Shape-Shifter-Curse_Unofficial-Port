@@ -3,12 +3,15 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ambient.Bat;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -16,6 +19,7 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
@@ -86,7 +90,10 @@ public class TransformativeBatEntity extends Bat implements ITMob {
         if (target instanceof Player player && !this.IsInCooldown()) {
             double distance = this.distanceToSqr(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                this.doHurtTarget(player);
+                // 1.21.11: doHurtTarget 需要 ServerLevel，客户端 tick 无 ServerLevel 直接跳过
+                if (this.level() instanceof ServerLevel serverLevel) {
+                    this.doHurtTarget(serverLevel, player);
+                }
                 ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
                 this.ApplyCooldown();
             }
@@ -95,7 +102,7 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     }
 
     @Override
-    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
+    public boolean doHurtTarget(@NonNull ServerLevel serverLevel, @NonNull Entity target) {
         Optional<Boolean> attacked = this.TMob_TryAttack(this, target);
         return attacked.orElseGet(() -> super.doHurtTarget(serverLevel, target));
     }

@@ -3,12 +3,15 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.feline.Ocelot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -71,7 +74,7 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
 
     @Override
     public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
-        boolean bl = super.doHurtTarget(target);
+        boolean bl = super.doHurtTarget(serverLevel, target);
         if (bl) {
             this.applyDamageEffects(this, target);
         }
@@ -81,7 +84,7 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     @Override
     protected void registerGoals() {
         super.registerGoals();
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, entity -> entity instanceof Player player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)));
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (entity, level) -> entity instanceof Player player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player)));
     }
 
     public static final Predicate<LivingEntity> FLEE_PREDICATE = (entity) -> {

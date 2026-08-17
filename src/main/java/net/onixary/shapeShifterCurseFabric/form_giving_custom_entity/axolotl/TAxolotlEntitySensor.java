@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.EntityTypeTags;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
@@ -23,8 +24,8 @@ public class TAxolotlEntitySensor extends AxolotlAttackablesSensor {
     public static void init() {}
 
     @Override
-    protected boolean isMatchingEntity(LivingEntity entity, LivingEntity target) {
-        return this.isInRange(entity, target) && target.isInWaterOrBubble() && (this.isAlwaysHostileTo(target) || this.canHunt(entity, target)) && Sensor.isEntityAttackable(entity, target);
+    protected boolean isMatchingEntity(ServerLevel serverLevel, LivingEntity entity, LivingEntity target) {
+        return this.isInRange(entity, target) && target.isInWater() && (this.isAlwaysHostileTo(target) || this.canHunt(entity, target)) && Sensor.isEntityAttackable(serverLevel, entity, target);
     }
 
     private boolean isInRange(LivingEntity axolotl, LivingEntity target) {

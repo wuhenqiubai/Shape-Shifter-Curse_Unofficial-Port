@@ -1,6 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
+import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
@@ -19,13 +22,13 @@ public class SU_ServerCommandSourceMixin {
     @Nullable
     private Entity entity;
 
-    @Inject(method = "hasPermission", at = @At("HEAD"), cancellable = true)
-    private void hasPermission(int permissionLevel, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "permissions", at = @At("HEAD"), cancellable = true)
+    private void injectPermissions(CallbackInfoReturnable<PermissionSet> cir) {
         Entity nowEntity = this.entity;
         if (nowEntity instanceof Player playerEntity) {
             int superUserLevel = SuperUserUtils.getCurrentPermissionLevel(playerEntity);
             if (superUserLevel != -1) {
-                cir.setReturnValue(superUserLevel >= permissionLevel);
+                cir.setReturnValue(LevelBasedPermissionSet.forLevel(PermissionLevel.byId(superUserLevel)));
             }
         }
     }

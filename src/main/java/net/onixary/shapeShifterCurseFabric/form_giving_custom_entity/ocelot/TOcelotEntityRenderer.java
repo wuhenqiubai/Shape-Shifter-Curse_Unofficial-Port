@@ -26,7 +26,8 @@ public class TOcelotEntityRenderer extends MobRenderer<Ocelot, FelineRenderState
 		return new FelineRenderState();
 	}
 
-    public @NonNull Identifier getTextureLocation(Ocelot ocelotEntity) {
+    @Override
+    public @NonNull Identifier getTextureLocation(@NonNull FelineRenderState state) {
 		return TEXTURE;
 	}
 }
