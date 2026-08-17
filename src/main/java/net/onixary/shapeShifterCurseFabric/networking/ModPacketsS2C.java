@@ -34,6 +34,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
+import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile;
 import org.jetbrains.annotations.Nullable;
@@ -74,6 +75,7 @@ public class ModPacketsS2C {
         BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
         BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
         BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
+        BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), ModPacketsS2C::receiveCursedMoonData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), ModPacketsS2C::receiveFormChange);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), ModPacketsS2C::receiveTransformState);
@@ -95,6 +97,7 @@ public class ModPacketsS2C {
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MODIFY_FCD_DATA), ModPacketsS2C::receiveModifyFCDData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), ModPacketsS2C::receiveRequestPatronAuthFile);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), ModPacketsS2C::receiveNewSubKey);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), ModPacketsS2C::receiveSetSuperUserLevel);
     }
 
     /* 重构后不需要了 仅用于参考旧实现逻辑
@@ -312,7 +315,9 @@ public class ModPacketsS2C {
     public static void sendUpdateCustomSetting(boolean ForceUpdate) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         boolean autoSyncConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_config;
-        if (!ForceUpdate && !autoSyncConfig) return;
+        if (!ForceUpdate && !autoSyncConfig) {
+            return;
+        }
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.keep_original_skin);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_color);
         buf.writeBoolean(ShapeShifterCurseFabric.playerCustomConfig.enable_form_random_sound);
@@ -640,6 +645,13 @@ public class ModPacketsS2C {
         FriendlyByteBuf keyBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
         ctx.client().execute(() -> {
             AuthClient.loadServerKey(keyBuf);
+        });
+    }
+
+    private static void receiveSetSuperUserLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        int level = payload.data().readInt();
+        ctx.client().execute(() -> {
+            SuperUserUtils.setClientSULevel(level);
         });
     }
 }

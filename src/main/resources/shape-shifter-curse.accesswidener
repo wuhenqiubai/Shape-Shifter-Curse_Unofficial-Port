@@ -23,3 +23,4 @@ accessible method net/minecraft/client/renderer/entity/LivingEntityRenderer isBo
 accessible field net/minecraft/world/level/levelgen/structure/Structure$StructureSettings spawnOverrides Ljava/util/Map;
 accessible field net/minecraft/world/entity/ai/targeting/TargetingConditions selector Ljava/util/function/Predicate;
 accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetType Ljava/lang/Class;
+accessible method net/minecraft/world/entity/animal/Ocelot isTrusting ()Z

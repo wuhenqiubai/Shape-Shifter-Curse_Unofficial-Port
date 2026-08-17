@@ -42,8 +42,8 @@ public class TransformativeEntitySpawning {
                 MobCategory.MONSTER,
                 ShapeShifterCurseFabric.T_OCELOT,
                 10,
-                1,
-                3
+                2,
+                4
         );
         // T_AXOLOTL
         SpawnPlacements.register(
@@ -57,8 +57,8 @@ public class TransformativeEntitySpawning {
                 MobCategory.AXOLOTLS,
                 ShapeShifterCurseFabric.T_AXOLOTL,
                 8,
-                4,
-                6
+                2,
+                3
         );
         // T_BAT
         SpawnPlacements.register(

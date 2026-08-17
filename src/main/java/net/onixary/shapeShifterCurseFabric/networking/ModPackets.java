@@ -68,4 +68,6 @@ public class ModPackets {
     public static final ResourceLocation REQUEST_PATRON_AUTH_FILE = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_patron_auth_file");
     public static final ResourceLocation UPLOAD_PATRON_AUTH_FILE = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "upload_patron_auth_file");
     public static final ResourceLocation MELT_AUTH_SUB_KEY = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "melt_auth_sub_key");
+
+    public static final ResourceLocation SET_SUPER_USER_LEVEL = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_super_user_level");
 }

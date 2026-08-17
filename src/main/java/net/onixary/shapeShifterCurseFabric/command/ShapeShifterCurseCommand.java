@@ -28,6 +28,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 
 import java.time.Instant;
@@ -131,7 +132,7 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        .then(literal("debug").requires(cs -> cs.hasPermission(0))
+                        .then(literal("debug")
                                 .then(literal("dev_command").executes(ShapeShifterCurseCommand::devCommand))
                                 .then(literal("clear_player_form_data")
                                         .then(argument("target", EntityArgument.player())
@@ -151,6 +152,11 @@ public class ShapeShifterCurseCommand {
                                 .then(literal("clear_player_mana_data")
                                         .then(argument("target", EntityArgument.player())
                                                 .executes(ShapeShifterCurseCommand::clearPlayerManaData)
+                                        )
+                                )
+                                .then(literal("su")
+                                        .then(argument("level", IntegerArgumentType.integer(-1, 4))
+                                                .executes(ShapeShifterCurseCommand::SU_Command)
                                         )
                                 )
                         )
@@ -485,6 +491,10 @@ public class ShapeShifterCurseCommand {
         return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
     }
 
+    private static boolean CheckConfigDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
+        return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
+    }
+
     private static int devCommand(CommandContext<CommandSourceStack> commandContext) {
         if (!CheckDebugEnvironment(commandContext)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
@@ -699,5 +709,27 @@ public class ShapeShifterCurseCommand {
             return 0;
         }
         return 0;
+    }
+
+    private static int SU_Command(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
+        // 需要开启配置后才能使用 毕竟如果还允许权限2 那么就能实现提权了
+        if (!CheckConfigDebugEnvironment(commandContext)) {
+            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+            return 0;
+        }
+        ServerPlayer player = commandContext.getSource().getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        int level = commandContext.getArgument("level", Integer.class);
+        try {
+            SuperUserUtils.setSULevel(player, level);
+            player.getServer().getPlayerList().sendPlayerPermissionLevel(player);
+            player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
+        } catch (Exception e) {
+            player.createCommandSourceStack().sendFailure(Component.literal("Error to set SU level"));
+            return 0;
+        }
+        return 1;
     }
 }
