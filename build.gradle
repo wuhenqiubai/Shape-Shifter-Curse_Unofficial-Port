@@ -156,8 +156,8 @@ dependencies {
 
     // Apoli + Calio by Apace100
     // 1.21.1 alpha versions are on Ladysnake snapshots maven
-    modImplementation "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
-    include "io.github.apace100:apoli-wuhenqiubai:${project.apoli_version}"
+    modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
+    include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
 
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
