@@ -13,12 +13,11 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.LevelAccessor;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
-import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
+import org.jetbrains.annotations.NotNull;
 
 import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect.TO_SPIDER_0_EFFECT;
 
@@ -65,17 +64,13 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
     }
 
     @Override
-    public EntityDimensions getDefaultDimensions(Pose pose) {
-        return EntityDimensions.fixed(0.7f, 0.45f);
+    public @NotNull EntityDimensions getDefaultDimensions(Pose pose) {
+        // 1.21.1: getActiveEyeHeight 已移除，眼睛高度改为通过 EntityDimensions.withEyeHeight 设置
+        return EntityDimensions.fixed(0.7f, 0.45f).withEyeHeight(0.325F);
     }
 
     @Override
-    protected float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) {
-        return 0.325F;
-    }
-
-    @Override
-    protected ResourceKey<LootTable> getDefaultLootTable() {
+    protected @NotNull ResourceKey<LootTable> getDefaultLootTable() {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
         return ResourceKey.create(Registries.LOOT_TABLE, id);
     }

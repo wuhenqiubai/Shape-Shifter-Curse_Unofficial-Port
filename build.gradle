@@ -208,8 +208,8 @@ dependencies {
     // modCompileOnly "curse.maven:biomes-o-plenty-220318:6364066"
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
-    // modImplementation "mezz.jei:jei-${minecraft_version}-fabric:${jei_version}"
-    modImplementation "curse.maven:jei-238222:8622779"
+     modImplementation "maven.modrinth:jei:HWSzfi9w" //JEI 19.44.0.401 for Fabric 1.21.1
+//    modImplementation "curse.maven:jei-238222:8622779"
 }
 
 processResources {

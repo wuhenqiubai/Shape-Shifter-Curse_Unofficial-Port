@@ -1,20 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
-import net.minecraft.client.network.AbstractClientPlayerEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.ClimbAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.OneAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.RideAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.WithSneakAnimController;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
@@ -26,17 +25,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, ModifyCapeRender {
-    public Form_Bat3_Sub_Avali(Identifier formID) {
+    public Form_Bat3_Sub_Avali(ResourceLocation formID) {
         super(formID, RegPlayerForms.BAT_3);
     }
 
     @Override
-    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
-        return new Pair<>(Identifier.of("origins", "origin"), Identifier.of(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
+        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
-    public boolean checkCanUse(@Nullable PlayerEntity player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
+    public boolean checkCanUse(@Nullable Player player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
         if (patronData == null || player == null) {
             return false;
         }
@@ -46,17 +45,17 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     // 以下暂时沿用 bat_3 的披风渲染参数
 
     @Override
-    public Vec3d getCapeIdleLoc(AbstractClientPlayerEntity player) {
-        if (player.isOnGround()) {
-            return new Vec3d(0.0f, 0.7f, 0.2f);
+    public Vec3 getCapeIdleLoc(AbstractClientPlayer player) {
+        if (player.onGround()) {
+            return new Vec3(0.0f, 0.7f, 0.2f);
         }
         else {
-            return new Vec3d(0.0, 0.0, 0.125);
+            return new Vec3(0.0, 0.0, 0.125);
         }
     }
 
     @Override
-    public float getCapeBaseRotateAngle(AbstractClientPlayerEntity player) {
+    public float getCapeBaseRotateAngle(AbstractClientPlayer player) {
         return 100.0f;
     }
 
@@ -87,7 +86,7 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {

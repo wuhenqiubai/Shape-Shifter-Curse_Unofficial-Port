@@ -91,10 +91,10 @@ public class TransformativeEntitySpawning {
                 2
         );
         // T_SPIDER
-        SpawnRestriction.register(
+        SpawnPlacements.register(
                 ShapeShifterCurseFabric.T_SPIDER,
-                SpawnRestriction.Location.ON_GROUND,
-                Heightmap.Type.MOTION_BLOCKING_NO_LEAVES,
+                SpawnPlacementTypes.ON_GROUND,
+                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
                 TransformativeSpiderEntity::canCustomSpawn
         );
 
