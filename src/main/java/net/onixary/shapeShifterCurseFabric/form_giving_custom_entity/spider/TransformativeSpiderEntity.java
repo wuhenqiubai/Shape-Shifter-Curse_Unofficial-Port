@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.LevelAccessor;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
@@ -33,7 +34,7 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
                 .add(Attributes.MOVEMENT_SPEED, 0.3f);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeOcelotEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeSpiderEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
         float Chance = ShapeShifterCurseFabric.commonConfig.transformativeSpiderSpawnChance;
         if (Chance <= 0.0f) { return false; }
         if (Chance >= 1.0f) { return true; }
@@ -68,12 +69,14 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         return EntityDimensions.fixed(0.7f, 0.45f);
     }
 
+    @Override
+    protected float getActiveEyeHeight(EntityPose pose, EntityDimensions dimensions) {
+        return 0.325F;
+    }
 
     @Override
     protected ResourceKey<LootTable> getDefaultLootTable() {
         ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
         return ResourceKey.create(Registries.LOOT_TABLE, id);
     }
-
-
 }
