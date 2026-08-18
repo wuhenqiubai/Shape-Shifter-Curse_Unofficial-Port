@@ -35,7 +35,6 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginsJsonC
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class Origins implements ModInitializer, OrderedResourceListenerInitializer {
 
@@ -49,7 +48,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 	@Override
 	public void onInitialize() {
-		FabricLoader.getInstance().getModContainer(MOD_ID).ifPresent(modContainer -> {
+		FabricLoader.getInstance().getModContainer("shape-shifter-curse-unofficial").ifPresent(modContainer -> {
 			VERSION = modContainer.getMetadata().getVersion().getFriendlyString();
 			if(VERSION.contains("+")) {
 				VERSION = VERSION.split("\\+")[0];
@@ -117,8 +116,8 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		manager.register(PackType.SERVER_DATA, tagLoader).before(powerData).complete();
 		PowerTypes.DEPENDENCIES.add(tagLoader.getFabricId());
 
-		OriginManager originLoader = new OriginManager();
-		manager.register(PackType.SERVER_DATA, originLoader).after(powerData).complete();
+		// 1.21.11: 用 registerWithRegistries 传入 HolderLookup.Provider（Origin 解析 icon 的 ItemStack 需要非 null registry）
+		manager.registerWithRegistries(originData, OriginManager::new).after(powerData).complete();
 		manager.register(PackType.SERVER_DATA, new OriginLayers()).after(originData).complete();
 
 		BadgeManager.init();

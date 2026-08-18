@@ -156,12 +156,9 @@ dependencies {
     // satin shader
     modImplementation "org.ladysnake:satin:${satin_version}"
 
-    // Apoli + Calio by Apace100
-    // 1.21.1 alpha versions are on Ladysnake snapshots maven
-    modImplementation "io.github.apace100:apoli:${project.apoli_version}"
-    include "io.github.apace100:apoli:${project.apoli_version}"
-    modImplementation "io.github.apace100:calio:${project.calio_version}"
-    include "io.github.apace100:calio:${project.calio_version}"
+    // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
+    modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
+    include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
 
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
@@ -188,8 +185,9 @@ dependencies {
     modCompileOnly "maven.modrinth:iris:zsoi0dso"
     modCompileOnly "maven.modrinth:extra-origins:fXaPHAoU"
     modCompileOnly "maven.modrinth:better-combat:nsxmEb8y"
-    modCompileOnly "maven.modrinth:first-person-model:yJYhNAS9"
-    modRuntimeOnly "maven.modrinth:first-person-model:yJYhNAS9"
+    // firstperson transition 依赖问题（dev.tr7zw.transition.mc.GeneralUtil ClassNotFound），暂时不加载
+    modCompileOnly "maven.modrinth:first-person-model:fSfRdYJ6"
+    // modRuntimeOnly "maven.modrinth:first-person-model:fSfRdYJ6"
     modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
 
     modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
@@ -202,8 +200,8 @@ dependencies {
     modCompileOnly "maven.modrinth:tough-as-nails:dLxSK1xF"
 
     // Presence Footsteps
-    modCompileOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
-    // modRuntimeOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
+    modCompileOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
+    // modRuntimeOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
 
     // modCompileOnly "curse.maven:biomes-o-plenty-220318:6364066"
 
@@ -250,63 +248,6 @@ java {
     // If you remove this line, sources will not be generated.
     withSourcesJar()
 }
-
-
-// Patch embedded Apoli/Calio fabric.mod.json from "1.21" to "1.21.1"
-// Needed because Apoli hasn't released a 1.21.1 build yet
-tasks.register('fixEmbeddedModVersions') {
-    group = 'fabric'
-    dependsOn remapJar
-    doLast {
-        def sscJar = remapJar.archiveFile.get().asFile
-        def tmpDir = layout.buildDirectory.dir('tmp/embedded-patch').get().asFile
-        tmpDir.deleteDir()
-        tmpDir.mkdirs()
-        copy {
-            from zipTree(sscJar)
-            into tmpDir
-            include 'META-INF/jars/*.jar'
-        }
-        def jarsDir = new File(tmpDir, 'META-INF/jars')
-        jarsDir.listFiles()?.each { embedded ->
-            if (embedded.name.contains('apoli') || embedded.name.contains('calio')) {
-                def extractDir = new File(tmpDir, embedded.name + '-tmp')
-                extractDir.mkdir()
-                copy { from zipTree(embedded); into extractDir }
-                def modJson = new File(extractDir, 'fabric.mod.json')
-                if (modJson.exists()) {
-                    def txt = modJson.text
-                    txt = txt.replace('"minecraft": "1.21"', '"minecraft": "1.21.1"')
-                    txt = txt.replace('"minecraft": "1.21.x"', '"minecraft": "1.21.1"')
-                    modJson.text = txt
-                }
-//                if (embedded.name.contains('apoli')) {
-//                    // Delete EquipmentMixin - restrict_armor condition context mismatch in 1.21
-//                    project.delete fileTree(extractDir) { include '**/EquipmentMixin*.class' }
-//                    def cfg = new File(extractDir, 'apoli.mixins.json')
-//                    if (cfg.exists()) {
-//                        def json = new groovy.json.JsonSlurper().parse(cfg) as Map
-//                        json.mixins = json.mixins.findAll { !it.contains('EquipmentMixin') }
-//                        json.client = (json.client ?: []).findAll { !it.contains('EquipmentMixin') }
-//                        json.server = (json.server ?: []).findAll { !it.contains('EquipmentMixin') }
-//                        cfg.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
-//                    }
-//                }
-                embedded.delete()
-                ant.jar(destfile: embedded, basedir: extractDir)
-                extractDir.deleteDir()
-            }
-        }
-        // Use jar update instead of full repack to preserve data pack structure
-        ant.jar(update: true, destfile: sscJar) {
-            fileset(dir: tmpDir) {
-                include(name: 'META-INF/**')
-            }
-        }
-        tmpDir.deleteDir()
-    }
-}
-build.dependsOn fixEmbeddedModVersions
 
 jar {
     from("LICENSE") {

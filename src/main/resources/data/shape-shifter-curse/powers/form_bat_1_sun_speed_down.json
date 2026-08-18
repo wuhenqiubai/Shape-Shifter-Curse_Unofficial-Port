@@ -1,13 +1,13 @@
 {
-	"type": "apoli:conditioned_attribute",
-	"modifier": {
-		"attribute": "minecraft:generic.movement_speed",
-		"operation": "add_multiplied_total",
-		"value": -0.02,
-		"id": "shape-shifter-curse:decrease_speed_when_under_the_sun"
-	},
-	"tick_rate": 20,
-	"condition": {
-		"type": "apoli:exposed_to_sun"
-	}
+    "type": "apoli:conditioned_attribute",
+    "modifier": {
+        "attribute": "minecraft:generic.movement_speed",
+        "operation": "multiply_total",
+        "value": -0.02,
+        "name": "Decrease speed when under the sun"
+    },
+    "tick_rate": 20,
+    "condition": {
+        "type": "apoli:exposed_to_sun"
+    }
 }

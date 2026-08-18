@@ -3,7 +3,6 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.badge;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ModifyCraftingPower;
 import io.github.apace100.apoli.power.PowerType;
-import io.github.apace100.apoli.util.InventoryUtil;
 import io.github.apace100.calio.data.SerializableData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,15 +16,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.*;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.screen.tooltip.CraftingRecipeTooltipComponent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Comparator;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -67,26 +63,33 @@ public record CraftingRecipeBadge(ResourceLocation spriteId,
             return tooltips;
         }
         RegistryAccess registryManager = client.level.registryAccess();
-        var outputStackReference = InventoryUtil.createStackReference(recipe.value().getResultItem(registryManager));
-        PowerHolderComponent.getPowers(client.player, ModifyCraftingPower.class)
-            .stream()
-            .filter(p -> p.doesApply(recipe.id(), outputStackReference.get()))
-            .max(Comparator.comparing(ModifyCraftingPower::getPriority))
-            .ifPresent(p -> p.getNewResult(outputStackReference));
+        ItemStack output = recipe.value().getResultItem(registryManager);
 
         int recipeWidth = recipe.value() instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getWidth() : 3;
+        int recipeHeight = recipe.value() instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getHeight() : 3;
+        NonNullList<ItemStack> inputs = this.peekInputs(time);
+        // Apoli-Legacy 2.11.4 移除了 alpha7 的 InventoryUtil.createStackReference / ModifyCraftingPower.getPriority，
+        // doesApply/getNewResult 改为接收 CraftingInput，这里从合成材料构造。
+        CraftingInput craftingInput = CraftingInput.of(recipeWidth, recipeHeight,
+            new ArrayList<>(inputs.subList(0, Math.min(recipeWidth * recipeHeight, inputs.size()))));
+        ItemStack[] outputRef = { output };
+        PowerHolderComponent.getPowers(client.player, ModifyCraftingPower.class)
+            .stream()
+            .filter(p -> p.doesApply(craftingInput, recipe))
+            .findFirst()
+            .ifPresent(p -> outputRef[0] = p.getNewResult(craftingInput, recipe.value()));
 
         if (client.options.advancedItemTooltips) {
             Component recipeIdText = Component.literal(recipe.id().toString()).withStyle(ChatFormatting.DARK_GRAY);
             widthLimit = Math.max(130, textRenderer.width(recipeIdText));
             if(prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
-            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, this.peekInputs(time), outputStackReference.get()));
+            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, inputs, outputRef[0]));
             if(suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
             TooltipBadge.addLines(tooltips, recipeIdText, textRenderer, widthLimit);
         } else {
             widthLimit = 130;
             if(prefix != null) TooltipBadge.addLines(tooltips, prefix, textRenderer, widthLimit);
-            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, this.peekInputs(time), outputStackReference.get()));
+            tooltips.add(new CraftingRecipeTooltipComponent(recipeWidth, inputs, outputRef[0]));
             if(suffix != null) TooltipBadge.addLines(tooltips, suffix, textRenderer, widthLimit);
         }
         return tooltips;

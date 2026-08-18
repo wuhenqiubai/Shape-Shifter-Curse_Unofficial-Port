@@ -21,7 +21,7 @@ public class ClimbingEXPower extends ClimbingPower {
     public boolean lastIsClimbing = false;
 
     public ClimbingEXPower(PowerType<?> type, LivingEntity entity, Predicate<Entity> startClimbCondition, Predicate<Entity> continueClimbCondition, Predicate<Entity> holdingCondition, boolean allowHolding) {
-        super(type, entity, holdingCondition, allowHolding);
+        super(type, entity, allowHolding, holdingCondition);
         this.startClimbCondition = startClimbCondition;
         this.continueClimbCondition = continueClimbCondition;
         this.holdingCondition = holdingCondition;

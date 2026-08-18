@@ -54,7 +54,7 @@ public record OriginUpgrade(ResourceLocation advancementCondition, ResourceLocat
     }
 
     public static OriginUpgrade fromJson(JsonElement jsonElement) {
-        return OriginsDataTypes.UPGRADE.read(jsonElement);
+        return OriginsDataTypes.UPGRADE.read(jsonElement, null);
     }
 
 }

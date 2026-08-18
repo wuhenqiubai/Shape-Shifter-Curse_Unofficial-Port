@@ -1,4 +1,4 @@
 {
-	"type": "apoli:elytra_flight",
-	"render_elytra": false
+    "type": "apoli:elytra_flight",
+    "render_elytra": false
 }

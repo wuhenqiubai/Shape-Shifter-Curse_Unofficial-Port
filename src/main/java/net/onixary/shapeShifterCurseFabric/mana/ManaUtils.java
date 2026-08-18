@@ -58,7 +58,7 @@ public class ManaUtils {
                 jsonData.addProperty("add", modifier.add);
                 jsonData.addProperty("multiply", modifier.multiply);
                 jsonData.addProperty("add_total", modifier.add_total);
-                return serializableData.read(jsonData);
+                return serializableData.read(jsonData, null);
             }
     );
 

@@ -6,7 +6,6 @@
   "mixins": [
     "ArgumentTypesMixin",
     "ConduitOnLandMixin",
-    "InTagConditionMixin",
     "LikeWaterMixin",
     "LoginMixin",
     "ModifyTypeTagMixin",

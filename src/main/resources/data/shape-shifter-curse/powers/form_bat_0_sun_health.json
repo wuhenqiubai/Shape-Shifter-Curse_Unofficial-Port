@@ -1,15 +1,15 @@
 {
-	"type": "shape-shifter-curse:delay_attribute",
-	"modifier": {
-		"id": "shape-shifter-curse:reduced_health_in_the_sun",
-		"attribute": "minecraft:generic.max_health",
-		"value": -4.0,
-		"operation": "add_value"
-	},
-	"tick_rate": 1,
-	"updateHealth": true,
-	"delay": 100,
-	"condition": {
-		"type": "apoli:exposed_to_sun"
-	}
+    "type": "shape-shifter-curse:delay_attribute",
+    "modifier": {
+        "name": "Reduced health in the sun",
+        "attribute": "minecraft:generic.max_health",
+        "value": -4.0,
+        "operation": "addition"
+    },
+    "tick_rate": 1,
+    "updateHealth": true,
+    "delay": 100,
+    "condition": {
+        "type": "apoli:exposed_to_sun"
+    }
 }

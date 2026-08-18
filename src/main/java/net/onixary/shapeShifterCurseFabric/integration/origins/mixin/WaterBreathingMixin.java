@@ -48,7 +48,7 @@ public final class WaterBreathingMixin {
                         && !this.hasEffect(MobEffects.WATER_BREATHING)
                         && !this.hasEffect(MobEffects.CONDUIT_POWER))
                 {
-                    if(!((EntityAccessor) this).callIsBeingRainedOn()) {
+                    if(!((EntityAccessor) this).callIsInRain()) {
                         int landGain = this.increaseAirSupply(0);
                         this.setAirSupply(this.decreaseAirSupply(this.getAirSupply()) - landGain);
                         if (this.getAirSupply() == -20) {

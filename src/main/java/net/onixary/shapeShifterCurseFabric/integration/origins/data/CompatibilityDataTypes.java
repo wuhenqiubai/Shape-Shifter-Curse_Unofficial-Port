@@ -12,13 +12,12 @@ public final class CompatibilityDataTypes {
         ItemStack.class,
         SerializableDataTypes.ITEM_STACK::send,
         SerializableDataTypes.ITEM_STACK::receive,
-        jsonElement -> {
+        (jsonElement, provider) -> {
             if (!(jsonElement instanceof JsonPrimitive jsonPrimitive) || !jsonPrimitive.isString()) {
-                return SerializableDataTypes.ITEM_STACK.read(jsonElement);
+                return SerializableDataTypes.ITEM_STACK.read(jsonElement, provider);
             }
-            Item item = SerializableDataTypes.ITEM.read(jsonPrimitive);
+            Item item = SerializableDataTypes.ITEM.read(jsonPrimitive, provider);
             return new ItemStack(item);
-        },
-        SerializableDataTypes.ITEM_STACK::write
+        }
     );
 }

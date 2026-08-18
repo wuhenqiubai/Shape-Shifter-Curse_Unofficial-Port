@@ -38,17 +38,16 @@ public final class OriginsDataTypes {
         OriginLayer.ConditionedOrigin.class,
         CONDITIONED_ORIGIN::send,
         CONDITIONED_ORIGIN::receive,
-        jsonElement -> {
+        (jsonElement, provider) -> {
             if (jsonElement instanceof JsonObject jsonObject) {
-                return CONDITIONED_ORIGIN.read(jsonObject);
+                return CONDITIONED_ORIGIN.read(jsonObject, provider);
             }
             if (!(jsonElement instanceof JsonPrimitive jsonPrimitive) || !jsonPrimitive.isString()) {
                 throw new JsonSyntaxException("Expected a JSON object or string.");
             }
-            ResourceLocation originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive);
+            ResourceLocation originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive, provider);
             return new OriginLayer.ConditionedOrigin(null, Lists.newArrayList(originId));
-        },
-        CONDITIONED_ORIGIN::write
+        }
     );
 
     public static final SerializableDataType<List<OriginLayer.ConditionedOrigin>> ORIGINS_OR_CONDITIONED_ORIGINS = SerializableDataType.list(ORIGIN_OR_CONDITIONED_ORIGIN);

@@ -1,23 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.power;
 
-import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeReference;
-import io.github.apace100.apoli.power.factory.PowerFactories;
 import io.github.apace100.apoli.power.factory.PowerFactory;
-import io.github.apace100.apoli.power.factory.action.BiEntityActions;
-import io.github.apace100.apoli.power.factory.action.BlockActions;
-import io.github.apace100.apoli.power.factory.action.EntityActions;
-import io.github.apace100.apoli.power.factory.action.ItemActions;
-import io.github.apace100.apoli.power.factory.condition.*;
 import io.github.apace100.apoli.registry.ApoliRegistries;
+import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -32,23 +24,9 @@ public class OriginsPowerTypes {
     public static final PowerType<?> CONDUIT_POWER_ON_LAND = new PowerTypeReference<>(Origins.identifier("conduit_power_on_land"));
 
     public static void register() {
-        // Register namespace alias so origins:* power types resolve to apoli:* equivalents
-        // This uses PowerFactories.ALIASES (not the registry) so it works regardless of init order,
-        // which is critical for NeoForge/Connector where Apoli may not have populated its registries yet.
-        PowerFactories.ALIASES.addNamespaceAlias("origins", "apoli");
-        // Also add namespace aliases for all condition and action registries, since they
-        // each have their own ALIASES instance used during data loading (see ApoliDataTypes).
-        EntityConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        BiEntityConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        ItemConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        BlockConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        DamageConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        FluidConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        BiomeConditions.ALIASES.addNamespaceAlias("origins", "apoli");
-        EntityActions.ALIASES.addNamespaceAlias("origins", "apoli");
-        BiEntityActions.ALIASES.addNamespaceAlias("origins", "apoli");
-        BlockActions.ALIASES.addNamespaceAlias("origins", "apoli");
-        ItemActions.ALIASES.addNamespaceAlias("origins", "apoli");
+        // Register namespace alias so origins:* types resolve to apoli:* equivalents.
+        // Apoli-Legacy 用全局静态 NamespaceAlias（一次注册即覆盖 power/condition/action 数据加载解析）。
+        NamespaceAlias.addAlias("origins", "apoli");
 
         // Register all apoli:* types as origins:* aliases
         // Needed because SSC JSONs use origins: namespace but Origins mod is not installed
@@ -116,14 +94,15 @@ public class OriginsPowerTypes {
 
 	    // apoli:modify_type_tag — makes entity be considered in the specified entity type tag
 	    // Replacement for the removed apoli:entity_group power type
-	    register(new PowerFactory<>(Apoli.identifier("modify_type_tag"),
-			    new SerializableData()
-					    .add("tag", SerializableDataTypes.ENTITY_TAG),
-			    data ->
-					    (type, entity) -> {
-						    TagKey<EntityType<?>> tag = data.get("tag");
-						    return new ModifyTypeTagPower(type, entity, tag);
-					    }).allowCondition());
+	    // 1.21.1: 改用 Legacy 原生 apoli:entity_group（数据已切换为 aquatic/arthropod 枚举值），此注册保留但不再使用
+	    // register(new PowerFactory<>(Apoli.identifier("modify_type_tag"),
+	    //         new SerializableData()
+	    //                 .add("tag", SerializableDataTypes.ENTITY_TAG),
+	    //         data ->
+	    //                 (type, entity) -> {
+	    //                     TagKey<EntityType<?>> tag = data.get("tag");
+	    //                     return new ModifyTypeTagPower(type, entity, tag);
+	    //                 }).allowCondition());
     }
 
     private static void register(PowerFactory<?> serializer) {

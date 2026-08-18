@@ -8,6 +8,7 @@ import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
@@ -74,12 +75,12 @@ public class VirtualTotemPower extends CooldownPower {
     }
 
     // 应该不用同步配置 Apoli应该会把SerializableData.Instance同步到客户端
-    public Tag toTag() {
-        return super.toTag();
+    public Tag toTag(HolderLookup.Provider provider) {
+        return super.toTag(provider);
     }
 
-    public void fromTag(Tag tag) {
-        super.fromTag(tag);
+    public void fromTag(Tag tag, HolderLookup.Provider provider) {
+        super.fromTag(tag, provider);
     }
 
     public void use() {

@@ -4,10 +4,9 @@
     {
       "entity": "minecraft:cod",
       "food": {
-        "hunger": 8,
+        "nutrition": 8,
         "saturation": 0.8,
-        "meat": true,
-        "always_edible": true,
+        "can_always_eat": true,
         "effects": [
           {
             "effect": {
@@ -17,7 +16,7 @@
               "show_particles": false,
               "show_icon": true
             },
-            "chance": 1.0
+            "probability": 1.0
           }
         ]
       }

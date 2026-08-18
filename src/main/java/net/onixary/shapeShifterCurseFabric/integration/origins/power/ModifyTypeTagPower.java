@@ -18,7 +18,8 @@ public class ModifyTypeTagPower extends Power {
 
     /**
      * ThreadLocal holding the entity currently executing an entity-type tag check.
-     * Set by the InTagConditionMixin before calling EntityType#isIn.
+     * 注(Apoli-Legacy 2.11.4 降级): 上游由 InTagConditionMixin 设置，但 Legacy 无 InTagCondition 类，
+     * 该 mixin 已移除，CURRENT_ENTITY 恒为 null → modify_type_tag 的 tag 效果不生效（见 ModifyTypeTagMixin 注释）。
      */
     public static final ThreadLocal<net.minecraft.world.entity.Entity> CURRENT_ENTITY = new ThreadLocal<>();
 

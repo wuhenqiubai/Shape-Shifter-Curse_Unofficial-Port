@@ -4,7 +4,6 @@ import io.github.apace100.apoli.power.EffectImmunityPower;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
@@ -33,7 +32,7 @@ public class OptionalEffectImmunityPower {
                     if (data.isPresent("effect")) {
                         MobEffect effect = getStatusEffect(data.get("effect"));
                         if (effect != null) {
-                            power.addEffect((Holder<MobEffect>) effect);
+                            power.addEffect(effect);
                         }
                     }
                     if (data.isPresent("effects")) {
@@ -41,7 +40,7 @@ public class OptionalEffectImmunityPower {
                         for (ResourceLocation effectID : effectIDs) {
                             MobEffect effect = getStatusEffect(effectID);
                             if (effect != null) {
-                                power.addEffect((Holder<MobEffect>) effect);
+                                power.addEffect(effect);
                             }
                         }
                     }
