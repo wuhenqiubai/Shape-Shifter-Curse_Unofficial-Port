@@ -1,17 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.power.RestrictArmorPower;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.util.ModTags;
 import net.onixary.shapeShifterCurseFabric.util.MorphScaleTagLoader;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,24 +16,13 @@ public abstract class ArmorSlotMixin {
     @Unique
     private static final String MSI_TAG = "MorphScaleItem";
 
-    @Shadow @Final private LivingEntity owner;
-    @Shadow @Final private EquipmentSlot slot;
-
     @Inject(method = "mayPlace", at = @At("RETURN"), cancellable = true)
-    private void preventRestrictedArmorInsert(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+    private void allowMorphScaleArmor(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        // MorphScale 装备可放入任意防具槽（专属装备机制）。
+        // RestrictArmorPower 由 Apoli-Legacy 的 PlayerScreenHandlerMixin 处理，此处不再重复。
         if (isMorphScaleItem(stack)) {
             cir.setReturnValue(true);
-            return;
         }
-        for (RestrictArmorPower rap : PowerHolderComponent.KEY.get(this.owner).getPowers(RestrictArmorPower.class)) {
-            if (!rap.canEquip(stack, this.slot)) {
-                cir.setReturnValue(false);
-                return;
-            }
-        }
-        // Apoli 的 ArmorSlotMixin 谓词写反（p.canEquip 而非 !p.canEquip），
-        // 导致未被限制的槽位也返回 false。此处主动返回 true 覆盖。
-        cir.setReturnValue(true);
     }
 
     @Unique
