@@ -159,6 +159,8 @@ dependencies {
     // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
     modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
     include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
+    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
+    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
