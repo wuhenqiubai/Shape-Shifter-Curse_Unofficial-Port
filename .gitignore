@@ -123,6 +123,8 @@ runs/
 /.claude/
 /bin/
 /.sisyphus/
+# Local working notes (not part of the repo)
+/docs/
 build_*.txt
 /compile_errors.txt
 /__pycache__/
