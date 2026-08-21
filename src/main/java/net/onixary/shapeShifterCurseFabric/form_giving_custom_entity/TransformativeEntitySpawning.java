@@ -19,6 +19,7 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TransformativeAxolotlEntity;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.StructureAccessor;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider.TransformativeSpiderEntity;
@@ -130,6 +131,8 @@ public class TransformativeEntitySpawning {
             .generationStep(structure.step())
             .terrainAdapation(structure.terrainAdaptation())
             .build();
-        structure.settings = newSettings;
+        // NeoForge/Connector 兼容：Structure.settings 是 private final，NeoForge 下 accesswidener 不生效 → IllegalAccessError。
+        // 改用 @Accessor mixin（StructureAccessor，@Accessor("settings") + @Mutable），跨 Fabric/NeoForge 统一。
+        ((StructureAccessor) structure).ssc_setSettings(newSettings);
     }
 }

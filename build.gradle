@@ -29,6 +29,11 @@ loom {
         }
     }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
+    mixin {
+        // NeoForge/Connector 兼容：legacy Mixin AP 按 mixins.json 的 refmap 字段生成 refmap，
+        // Connector 靠 refmap 把发布 jar 的 intermediary 注入点重映射回 mojmap（NeoForge 环境）
+        useLegacyMixinAp = true
+    }
 }
 
 
@@ -157,10 +162,13 @@ dependencies {
     modImplementation "org.ladysnake:satin:${satin_version}"
 
     // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
+    // 注意：Apoli-Legacy 不能 include（嵌套）。NeoForge/Connector 下 CCA（CcaBootstrap）只从外层 mod 读
+    // fabric.mod.json 的 custom.cardinal-components 元数据来注册组件，嵌套 Apoli 导致 apoli:powers 组件未注册，
+    // PowerHolderComponent.<clinit> 崩溃。Apoli-Legacy 需独立安装（mods 目录）。
     modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
     include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
-    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
-    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
+//    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
+//    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
     modApi("com.github.Virtuoel:Pehkui:${pehkui_version}", {
         exclude group: "net.fabricmc.fabric-api"
@@ -169,9 +177,11 @@ dependencies {
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}"
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -223,6 +233,10 @@ processResources {
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
                 "CHANNEL_VERSION": build_version
+    }
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": project.version
     }
 }
 

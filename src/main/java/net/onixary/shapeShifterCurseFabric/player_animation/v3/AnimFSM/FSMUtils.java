@@ -75,6 +75,12 @@ public class FSMUtils {
         if (!player.onClimbable() || player.onGround() || player.getAbilities().flying || player.isFallFlying()) {
             return false;
         }
+        // 回归修复（Apoli-Legacy 引入后）：onClimbable() 在 Apoli-Legacy 下可能浮空/跳跃时也返回 true
+        // （无贴墙校验），导致潜行+空格浮空误播爬墙动画。增加「真正贴墙（水平碰撞）」校验：
+        // 不贴墙时浮空/跳跃不判定为爬墙。
+        if (!player.horizontalCollision) {
+            return false;
+        }
         // 检测碰撞箱 防止出现身体与地面穿模 如果卡顿可以直接可以修改为 return true
         BlockPos down1pos = player.blockPosition().below();
         BlockState down1block = player.level().getBlockState(down1pos);

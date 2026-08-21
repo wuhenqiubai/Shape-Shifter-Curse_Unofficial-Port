@@ -3,6 +3,7 @@
   "minVersion": "0.8",
   "package": "net.onixary.shapeShifterCurseFabric.integration.origins.mixin",
   "compatibilityLevel": "JAVA_21",
+  "refmap": "shape-shifter-curse-unofficial-refmap.json",
   "mixins": [
     "ArgumentTypesMixin",
     "ConduitOnLandMixin",
@@ -17,7 +18,6 @@
     "WaterBreathingMixin$UpdateAir"
   ],
   "client": [
-    "DrawContextAccessor",
     "ServerCheckMixin",
     "WaterVisibilityMixin"
   ],

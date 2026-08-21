@@ -37,10 +37,41 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
         mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketImpl", "trinkets");
     }
 
+    private boolean isNeoForge = false;
+
     @Override
     public void onLoad(String mixinPackage) {
-        // 插件加载时调用
+        // Sinytra Connector 检测：NeoForge 下禁用依赖 Fabric 版依赖 mod API 的 integration mixin
+        isNeoForge = isConnectorLoaded();
     }
+
+    private boolean isConnectorLoaded() {
+        try {
+            if (FabricLoader.getInstance().isModLoaded("connector")) {
+                return true;
+            }
+        } catch (Throwable ignored) {
+        }
+        try {
+            Class<?> modListClass;
+            try {
+                modListClass = Class.forName("net.neoforged.fml.loading.moddiscovery.ModList");
+            } catch (ClassNotFoundException cnfe) {
+                modListClass = Class.forName("net.minecraftforge.fml.loading.moddiscovery.ModList");
+            }
+            Object modList = modListClass.getMethod("get").invoke(null);
+            return (Boolean) modListClass.getMethod("isLoaded", String.class).invoke(modList, "connector");
+        } catch (Throwable ignored) {
+        }
+        return false;
+    }
+
+    // NeoForge 下禁用的 mixin：依赖 Fabric 版依赖 mod 的 API。如 AppleSkin 的
+    // FoodHelper.getDefaultFoodValues，Fabric 版签名 (ItemStack)，NeoForge 版是 (ItemStack, Player)，
+    // 注入点失效会崩服。NeoForge 下禁用（集成功能降级）。
+    private static final List<String> neoForgeDisabledMixins = List.of(
+            "net.onixary.shapeShifterCurseFabric.mixin.integration.AppleSkin"
+    );
 
     @Override
     public String getRefMapperConfig() {
@@ -49,6 +80,11 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        // NeoForge 下禁用依赖 Fabric 版 API 的 integration mixin
+        if (isNeoForge && neoForgeDisabledMixins.stream().anyMatch(mixinClassName::contains)) {
+            LOGGER.info("NeoForge detected, skipping {} (NeoForge 版依赖 mod API 不同)", mixinClassName);
+            return false;
+        }
         // 原先的代码 使用硬编码的方式
         // 检查是否为 PlayerEntityRendererFallFlyingMixin
         // if (mixinClassName.endsWith("PlayerEntityRendererFallFlyingMixin")) {

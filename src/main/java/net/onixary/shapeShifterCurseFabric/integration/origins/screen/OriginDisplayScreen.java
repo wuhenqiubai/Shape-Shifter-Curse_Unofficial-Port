@@ -7,6 +7,7 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipPositioner;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
 import net.minecraft.locale.Language;
 import net.minecraft.network.chat.Component;
@@ -18,11 +19,11 @@ import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.Badge;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
-import net.onixary.shapeShifterCurseFabric.integration.origins.mixin.DrawContextAccessor;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 
+import java.lang.reflect.Method;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -166,7 +167,27 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                ((DrawContextAccessor)context).invokeRenderTooltipInternal(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE);
+                invokeRenderTooltipInternal(context, font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY);
+            }
+        }
+    }
+
+    // NeoForge/Connector 兼容：原 @Invoker DrawContextAccessor（origins.mixins.json）在 Connector 下无法重映射
+    // intermediary 方法名（method_51435 → mojmap renderTooltipInternal）而启动崩溃，已从 mixins.json 移除。
+    // 改反射调用 GuiGraphics.renderTooltipInternal（Fabric 运行时=intermediary method_51435，NeoForge=mojmap
+    // renderTooltipInternal，方法名不同故尝试两者），运行时安全；失败时降级为不渲染 badge tooltip。
+    private static void invokeRenderTooltipInternal(GuiGraphics context, Font font, List<ClientTooltipComponent> components, int x, int y) {
+        for(String name : new String[]{"renderTooltipInternal", "method_51435"}) {
+            try {
+                Method m = GuiGraphics.class.getDeclaredMethod(name, Font.class, List.class, int.class, int.class, ClientTooltipPositioner.class);
+                m.setAccessible(true);
+                m.invoke(context, font, components, x, y, DefaultTooltipPositioner.INSTANCE);
+                return;
+            } catch (NoSuchMethodException ignored) {
+                // 尝试下一个环境的方法名
+            } catch (Exception e) {
+                Origins.LOGGER.warn("[Origins] Failed to render badge tooltip via {}: {}", name, e.toString());
+                return;
             }
         }
     }

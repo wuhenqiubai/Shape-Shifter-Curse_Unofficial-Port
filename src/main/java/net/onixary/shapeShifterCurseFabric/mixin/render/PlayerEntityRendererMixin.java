@@ -34,7 +34,10 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
     }
 
     // 挂载Feature
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/player/PlayerRenderer;addLayer(Lnet/minecraft/client/renderer/entity/layers/RenderLayer;)Z", ordinal = 0))
+    // NeoForge/Connector 兼容：原注入 <init> 内 addLayer INVOKE（NeoForge 把 LivingEntityRenderer.addLayer 从 protected 改成 public，
+    // 构造器里 this.addLayer(...) 调用点的字节码符号引用 owner 变化，注入点失效）。改 <init> RETURN（构造器末尾，所有 addLayer
+    // 已执行，跨 Fabric/NeoForge 稳定）。
+    @Inject(method = "<init>(Lnet/minecraft/client/renderer/entity/EntityRendererProvider$Context;Z)V", at = @At("RETURN"))
     public void onInit(EntityRendererProvider.Context ctx, boolean slim, CallbackInfo ci) {
         this.addLayer(new FormRenderFeature<>((PlayerRenderer) (Object) this));
     }
