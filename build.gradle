@@ -1,7 +1,6 @@
 plugins {
     id 'fabric-loom' version '1.17-SNAPSHOT'
     id 'maven-publish'
-    //id("com.gradleup.shadow") version "8.3.6"
 }
 
 group = project.maven_group
@@ -9,7 +8,7 @@ group = project.maven_group
 // 版本号: mod_version.build_number（mc 版本信息在 jar 文件名中）
 // CI 通过环境变量 build_version 覆盖，本地使用 gradle.properties 默认值
 def build_version = System.getenv('build_version') ?: build_number
-version = "${project.mod_version}-${build_type}+.${build_version}+${minecraft_version}"
+version = "${project.mod_version}-${build_type}+build.${build_version}+${minecraft_version}"
 
 base {
     archivesName = "${project.archives_base_name}"
