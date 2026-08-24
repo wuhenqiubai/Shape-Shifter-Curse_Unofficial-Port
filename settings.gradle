@@ -4,6 +4,10 @@ pluginManagement {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+        maven {
+            name = 'Fabric-BMCL'
+            url = 'https://bmclapi2.bangbang93.com/maven/'
+        }
         mavenCentral()
         gradlePluginPortal()
     }

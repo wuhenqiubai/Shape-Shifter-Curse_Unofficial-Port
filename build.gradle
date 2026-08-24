@@ -47,6 +47,10 @@ repositories {
         url 'https://maven.aliyun.com/nexus/content/groups/public'
     }
     mavenCentral()
+    maven {
+        name = "NeoForge"
+        url = "https://maven.neoforged.net/releases/"
+    }
     //}
 
     exclusiveContent {
@@ -200,6 +204,10 @@ dependencies {
     modCompileOnly "maven.modrinth:first-person-model:fSfRdYJ6"
     // modRuntimeOnly "maven.modrinth:first-person-model:fSfRdYJ6"
     modCompileOnly "maven.modrinth:1j76DVHU:QJsQvQpC" //TacZ
+    modCompileOnly "maven.modrinth:curios:9.5.1+1.21.1"
+    // Curios(NeoForge) 的 API（IDynamicStackHandler 等）依赖 NeoForge 的 IItemHandlerModifiable，
+    // SSC 是 Fabric 编译（无 NeoForge classpath），补 NeoForge compileOnly 仅供编译期解析，运行时由 Connector 提供。
+    compileOnly "net.neoforged:neoforge:21.1.248"
 
     modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
     modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21-3.0.6"
@@ -226,6 +234,10 @@ processResources {
     inputs.property "minecraft_version", project.minecraft_version
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
+
+    // Curios 兼容层已改为 src 源码编译（mixin/forge/CurioImpl.java 等），resources 里残留的上游预编译 .class
+    // 会与编译产物在 jar 里重名冲突，打包时排除（源码保存在 src/main/resources 不变，仅不进 jar）。
+    exclude "net/onixary/shapeShifterCurseFabric/mixin/forge/*.class"
 
     filesMatching("fabric.mod.json") {
         expand "version": project.version,

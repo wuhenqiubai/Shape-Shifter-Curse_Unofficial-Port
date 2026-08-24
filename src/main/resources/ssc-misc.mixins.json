@@ -6,6 +6,8 @@
   "refmap": "ssc-misc.refmap.json",
   "plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
   "mixins": [
+    "forge.CurioImpl",
+    "forge.CurioItemImpl"
   ],
   "client": [
   ],

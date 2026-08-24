@@ -34,7 +34,10 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketImpl", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketItemMixin", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketSlotMixin", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioItemImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
         mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketImpl", "trinkets");
+        mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioImpl", "curios");
     }
 
     private boolean isNeoForge = false;
