@@ -91,7 +91,11 @@ public class SneakingJumpClashPower extends Power {
         for (LivingEntity target : player.level().getEntitiesOfClass(
                 LivingEntity.class, expandedBox, 
                 e -> e != player && e.isAlive() && !e.isRemoved())) {
-            
+
+            if (player.getWorld().raycast(new RaycastContext(new Vec3d(player.getX(), player.getBodyY(0.5f), player.getZ()), new Vec3d(target.getX(), target.getBodyY(0.5f), target.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, player)).getType() == HitResult.Type.BLOCK) {
+                continue;
+            }
+
             // 触发碰撞action
             if (bientityAction != null) {
                 this.bientityAction.accept(new Tuple<>(player, target));
