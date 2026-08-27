@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
@@ -13,7 +13,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
@@ -37,11 +36,9 @@ public class SuperMorphScaleCore extends Item {
     }
 
     public static int getUpgradeDamageMultiplier(ItemStack stack) {
-        int upgradeItemStackCount = stack.getMaxStackSize();
-        if (upgradeItemStackCount == 0) {
-            return 1;
-        }
-        return 64 / upgradeItemStackCount;
+        // 持久耐久工具：每次升级固定耗 damagePerItem(64) 耐久（core 耐久 4096 ≈ 可升级约 64 次）。
+        // 不再按 base 的 maxStackSize 放大——护甲 maxStack=1 会算出 multiplier=64，一次即耗光 4096 耐久（核心一次报废）。
+        return 1;
     }
 
     public static void damageItemAfterUpgrade(ItemStack stack, int multiplier) {
@@ -96,7 +93,8 @@ public class SuperMorphScaleCore extends Item {
             int max_repair = damage;
             need_repair = Math.min(need_repair, max_repair);
             float exp_multiplier = mendingMultiplier;
-            if (EnchantmentHelper.getItemEnchantmentLevel((Holder<Enchantment>) Enchantments.MENDING, stack) > 0) {
+            // 1.21.1 Enchantments.MENDING 是 ResourceKey，getItemEnchantmentLevel 只收 Holder，需先转 Holder（直接强转 ResourceKey→Holder 会 ClassCastException）
+            if (EnchantmentHelper.getItemEnchantmentLevel(world.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolderOrThrow(Enchantments.MENDING), stack) > 0) {
                 exp_multiplier *= quickChargeCostMultiplier;
             } else {
                 exp_multiplier *= quickChargeCostMultiplierNoMending;
