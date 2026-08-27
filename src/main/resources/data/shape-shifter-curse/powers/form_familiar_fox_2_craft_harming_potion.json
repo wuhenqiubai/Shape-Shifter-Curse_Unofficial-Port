@@ -20,13 +20,16 @@
         "type": "apoli:consume",
         "amount": 1
     },
+    "result": {
+        "id": "minecraft:splash_potion",
+        "count": 3,
+        "components": {
+            "minecraft:potion_contents": { "potion": "minecraft:harming" }
+        }
+    },
     "entity_action": {
         "type": "apoli:and",
         "actions": [
-            {
-                "type": "apoli:execute_command",
-                "command": "/give @p minecraft:splash_potion[minecraft:potion_contents={potion:\"minecraft:harming\"}] 3"
-            },
             {
                 "type": "shape-shifter-curse:consume_mana",
                 "mana": 5
