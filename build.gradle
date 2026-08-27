@@ -165,9 +165,6 @@ dependencies {
     modImplementation "org.ladysnake:satin:${satin_version}"
 
     // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
-    // 注意：Apoli-Legacy 不能 include（嵌套）。NeoForge/Connector 下 CCA（CcaBootstrap）只从外层 mod 读
-    // fabric.mod.json 的 custom.cardinal-components 元数据来注册组件，嵌套 Apoli 导致 apoli:powers 组件未注册，
-    // PowerHolderComponent.<clinit> 崩溃。Apoli-Legacy 需独立安装（mods 目录）。
     modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
     include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
 //    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"

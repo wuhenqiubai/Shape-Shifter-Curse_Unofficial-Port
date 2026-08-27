@@ -25,7 +25,7 @@
         "actions": [
             {
                 "type": "apoli:execute_command",
-                "command": "/give @p minecraft:splash_potion{Potion:\"minecraft:harming\"} 3"
+                "command": "/give @p minecraft:splash_potion[minecraft:potion_contents={potion:\"minecraft:harming\"}] 3"
             },
             {
                 "type": "shape-shifter-curse:consume_mana",

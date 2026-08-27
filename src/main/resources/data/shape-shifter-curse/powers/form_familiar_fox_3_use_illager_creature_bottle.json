@@ -26,7 +26,7 @@
                     "actions": [
                         {
                             "type": "apoli:execute_command",
-                            "command": "/give @p minecraft:splash_potion{Potion:\"shape-shifter-curse:feed_potion\"}"
+                            "command": "/give @p minecraft:splash_potion[minecraft:potion_contents={potion:\"shape-shifter-curse:feed_potion\"}]"
                         },
                         {
                             "type": "apoli:trigger_cooldown",
