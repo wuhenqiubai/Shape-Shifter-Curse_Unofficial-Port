@@ -22,7 +22,9 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
+import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsC2S;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginManager;
@@ -79,6 +81,12 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		ModItems.register();
 		ModTags.register();
 		ModPacketsC2S.register();
+		// 服务端也要注册 S2C payload 类型（发送端必须注册 playS2C，否则 id 未知回退 DiscardedPayload 编码失败，进服即崩 -- issue #21）
+		BytePayload.registerS2C(ModPackets.ORIGIN_LIST);
+		BytePayload.registerS2C(ModPackets.LAYER_LIST);
+		BytePayload.registerS2C(ModPackets.OPEN_ORIGIN_SCREEN);
+		BytePayload.registerS2C(ModPackets.CONFIRM_ORIGIN);
+		BytePayload.registerS2C(ModPackets.BADGE_LIST);
 		ModEnchantments.register();
 		ModEntities.register();
 		ModLoot.registerLootTables();
