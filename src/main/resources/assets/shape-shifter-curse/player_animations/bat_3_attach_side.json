@@ -3,6 +3,7 @@
 	"animations": {
 		"bat_3_attach_side": {
 			"loop": true,
+			"animation_length": 0.5417,
 			"bones": {
 				"head": {
 					"position": {
