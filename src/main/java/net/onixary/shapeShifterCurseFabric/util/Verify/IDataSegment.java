@@ -10,7 +10,7 @@ public interface IDataSegment {
 
     int getVersion();
 
-    default void onLoad(PlayerEntity player, KeySegment keySegment) { }
+    default void onLoad(Player player, KeySegment keySegment) { }
 
     default boolean isTypeEqual(IDataSegment newDataSegment) {
         return getType() == newDataSegment.getType() && getVersion() == newDataSegment.getVersion();

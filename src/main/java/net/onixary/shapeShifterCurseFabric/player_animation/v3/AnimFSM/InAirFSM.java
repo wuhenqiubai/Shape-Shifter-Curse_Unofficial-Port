@@ -32,7 +32,7 @@ public class InAirFSM extends AbstractAnimFSM {
         if (player.isFallFlying()) {
             return ANIM_STATE_FALL_FLYING;
         }
-        if (animSystemData.fakeVelocity.getY() < 0 && (FormUtils.HasSlowFall.hasFlag(animSystemData.playerForm) || animSystemData.fallDistance > 0.6f)) {
+        if (animSystemData.fakeVelocity.y() < 0 && (FormUtils.HasSlowFall.hasFlag(animSystemData.playerForm) || animSystemData.fallDistance > 0.6f)) {
             return ANIM_STATE_FALL;
         }
         return ANIM_STATE_JUMP;

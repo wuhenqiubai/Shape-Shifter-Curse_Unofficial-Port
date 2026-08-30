@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -71,7 +70,7 @@ public final class AuthFile {
             dataBuf.skipBytes(8);
             int dataLength = dataBuf.readInt();
             dataBuf.setIndex(rollBack, dataBuf.capacity());
-            this.dataSegments[i] = AuthUtils.readDataSegment(this.keySegment, new PacketByteBuf(dataBuf.readBytes(dataLength)));
+            this.dataSegments[i] = AuthUtils.readDataSegment(this.keySegment, new FriendlyByteBuf(dataBuf.readBytes(dataLength)));
         }
     }
 

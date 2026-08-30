@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager.KeyManagerWithExpire;
@@ -33,7 +33,7 @@ public final class PatronDataSegment implements IDataSegment {
 
     private final KeySegment key;
 
-    PatronDataSegment(KeySegment key, PacketByteBuf buf) {
+    PatronDataSegment(KeySegment key, FriendlyByteBuf buf) {
         this.type = buf.readInt();
         this.version = buf.readInt();
         buf.skipBytes(4);
@@ -44,7 +44,7 @@ public final class PatronDataSegment implements IDataSegment {
         this.expireTime = startTime + expiresIn;
         int extraDataCount = buf.readShort();
         for (int i = 0; i < extraDataCount; i++) {
-            String k = buf.readString(256);
+            String k = buf.readUtf(256);
             byte[] v = buf.readByteArray(4096);
             extraData.put(k, v);
         }
@@ -130,7 +130,7 @@ public final class PatronDataSegment implements IDataSegment {
     }
 
     private void onLost(MinecraftServer server) {
-        PlayerEntity currentPlayer = server.getPlayerManager().getPlayer(uuid);
+        Player currentPlayer = server.getPlayerList().getPlayer(uuid);
         if (currentPlayer == null) {
             return;
         }

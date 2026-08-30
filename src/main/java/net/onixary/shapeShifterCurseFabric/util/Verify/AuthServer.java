@@ -19,12 +19,12 @@ public final class AuthServer {
 
     static {
         VerifyEvent.ON_KEY_MELT.register((player, keySegment, newKeySegment) -> {
-            if (!(player instanceof ServerPlayerEntity serverPlayerEntity)) {
+            if (!(player instanceof ServerPlayer serverPlayerEntity)) {
                 return;
             }
             MinecraftServer server = player.getServer();
             if (server != null) {
-                for (ServerPlayerEntity otherServerPlayerEntity : serverPlayerEntity.getServer().getPlayerManager().getPlayerList()) {
+                for (ServerPlayer otherServerPlayerEntity : serverPlayerEntity.getServer().getPlayerList().getPlayers()) {
                     ModPacketsS2CServer.sendNewSubKey(otherServerPlayerEntity, newKeySegment);
                 }
             }
@@ -32,7 +32,7 @@ public final class AuthServer {
         });
     }
 
-    public static void loadPatronAuthFile(ServerPlayerEntity player, PacketByteBuf buf) {
+    public static void loadPatronAuthFile(ServerPlayer player, FriendlyByteBuf buf) {
         AuthFile authFile = AuthUtils.readAuthFile(buf);
         if (authFile == null) {
             return;

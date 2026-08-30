@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager;
 
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeySegment;
 import net.onixary.shapeShifterCurseFabric.util.Verify.VerifyEvent;
@@ -24,7 +24,7 @@ public class KeyManagerWithExpire extends KeyManager {
         VerifyEvent.CHECK_AUTH.register(this::checkExpire);
     }
 
-    public void onKeyMelt(PlayerEntity player, KeySegment oldKeySegment, KeySegment newKeySegment) {
+    public void onKeyMelt(Player player, KeySegment oldKeySegment, KeySegment newKeySegment) {
         keyExpireMap.computeIfAbsent(oldKeySegment.getType(), k -> new HashMap<>()).put(oldKeySegment.getVersion(), System.currentTimeMillis() + ExpireTime);
     }
 

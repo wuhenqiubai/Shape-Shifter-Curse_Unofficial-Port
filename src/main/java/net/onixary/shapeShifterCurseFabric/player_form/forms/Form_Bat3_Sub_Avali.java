@@ -6,18 +6,12 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimRegistries;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
+import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
+import net.onixary.shapeShifterCurseFabric.player_animation.v3.*;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.ClimbAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.OneAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.RideAnimController;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.WithSneakAnimController;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateEnum;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
-import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
@@ -156,15 +150,15 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     private static AnimationHolder POWER_ANIM_ATTACH_SIDE = AnimationHolder.EMPTY;
 
     @Override
-    public void registerPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData) {
+    public void registerPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData) {
         POWER_ANIM_ATTACH_SIDE = new AnimationHolder(ShapeShifterCurseFabric.identifier("avali_attach_side"), true);
         super.registerPowerAnim(player, animSystemData);
     }
 
     @Override
-    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(PlayerEntity player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
-            return new Pair<>(true, POWER_ANIM_ATTACH_SIDE);
+            return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
         }
         return super.getPowerAnim(player, animSystemData, powerAnimID);
     }

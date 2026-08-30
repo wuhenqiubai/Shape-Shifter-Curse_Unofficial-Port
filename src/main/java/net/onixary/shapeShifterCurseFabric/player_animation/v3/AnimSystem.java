@@ -38,12 +38,12 @@ public class AnimSystem {
         public Vec3 fakeVelocity = Vec3.ZERO;
         public double fallDistanceTemp;
         public double fallDistance = 0;
-        public NbtCompound customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
+        public CompoundTag customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
 
         public AnimSystemData(Player player) {
             this.playerForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
-            this.customData = new NbtCompound();
-            this.LastPosition = player.getPos();
+            this.customData = new CompoundTag();
+            this.LastPosition = player.position();
             this.fallDistanceTemp = LastPosition.y;
         }
     }
@@ -107,11 +107,11 @@ public class AnimSystem {
     }
 
     private void PreProcessAnimSystemData() {
-        Vec3d nowPos = this.player.getPos();
+        Vec3 nowPos = this.player.position();
         this.data.fakeVelocity = nowPos.subtract(this.data.LastPosition);
         this.data.playerForm = FormTextureUtils.getPlayerForm_Render(this.player);
         this.data.IsWalking = !this.data.LastPosition.equals(nowPos);
-        if (this.player.handSwinging) {
+        if (this.player.swinging) {
             this.data.ContinueSwingAnimCounter ++;
         }
         else {

@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager;
 
 import io.netty.buffer.Unpooled;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeySegment;
@@ -26,7 +26,7 @@ public class RootKeyManager extends KeyManager {
     }
 
     @Override
-    public void onKeyLoad(@Nullable PlayerEntity invoker, KeySegment keySegment) {
+    public void onKeyLoad(@Nullable Player invoker, KeySegment keySegment) {
         return;
     }
 
@@ -38,7 +38,7 @@ public class RootKeyManager extends KeyManager {
         return oldKeySegment == null || keySegment.getVersion() >= oldKeySegment.getVersion();
     }
 
-    public void loadKey(@Nullable PlayerEntity invoker, @Nullable KeySegment keySegment) {
+    public void loadKey(@Nullable Player invoker, @Nullable KeySegment keySegment) {
         if (!canLoad(keySegment)) {
             return;
         }
@@ -67,7 +67,7 @@ public class RootKeyManager extends KeyManager {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(folderPath)) {
             for (Path path : stream) {
                 if (path.getFileName().toString().endsWith(".key")) {
-                    KeySegment keySegment = AuthUtils.readKeySegment(new PacketByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(path))));
+                    KeySegment keySegment = AuthUtils.readKeySegment(new FriendlyByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(path))));
                     if (keySegment != null) {
                         this.loadKey(null, keySegment);
                     }

@@ -3,18 +3,18 @@ package net.onixary.shapeShifterCurseFabric.util.Verify;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class VerifyEvent {
     @FunctionalInterface
     public static interface KeyMelt {
-        void onKeyMelt(@Nullable PlayerEntity invoker, KeySegment oldKeySegment, KeySegment newKeySegment);
+        void onKeyMelt(@Nullable Player invoker, KeySegment oldKeySegment, KeySegment newKeySegment);
     }
 
     @FunctionalInterface
     public static interface KeyLoad {
-        void onKeyLoad(@Nullable PlayerEntity invoker, KeySegment keySegment);
+        void onKeyLoad(@Nullable Player invoker, KeySegment keySegment);
     }
 
     public static final Event<KeyMelt> ON_KEY_MELT = EventFactory.createArrayBacked(KeyMelt.class, callbacks -> (invoker, oldKeySegment, newKeySegment) -> {

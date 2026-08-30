@@ -5,17 +5,17 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager.RootKeyManager;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.function.Function;
 
 // XuHaoNan:
 // 在此警告一下 任何拓展未经允许不得修改此Package中的任何函数/类 理论上调用也没有必要 毕竟没有对应根私钥 无法创建auth文件
@@ -70,7 +70,7 @@ public final class AuthUtils {
     static final @NotNull String rootPublicKeyPEM = "MEMwBQYDK2VxAzoA775GpvHNH+fuvZ0k293H6TBNCNGVyWaVv50XtEjIeWsupe3/VfxNlOTvuQiIETZy3MDo3Rb/ynwA";
     static final @NotNull PublicKey rootPublickey;
 
-    private static final List<Pair<BiPredicate<Integer, Integer>, BiFunction<KeySegment, PacketByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
+    private static final List<Tuple<BiPredicate<Integer, Integer>, BiFunction<KeySegment, FriendlyByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
 
     static {
         try {
@@ -161,18 +161,18 @@ public final class AuthUtils {
     }
 
 
-    public static void registerDataReader(BiPredicate<Integer, Integer> typeVersionPredicate, BiFunction<KeySegment, PacketByteBuf, IDataSegment> dataReader) {
-        dataReaderRegistry.add(new Pair<>(typeVersionPredicate, dataReader));
+    public static void registerDataReader(BiPredicate<Integer, Integer> typeVersionPredicate, BiFunction<KeySegment, FriendlyByteBuf, IDataSegment> dataReader) {
+        dataReaderRegistry.add(new Tuple<>(typeVersionPredicate, dataReader));
     }
 
     // 由于DataSegment没有对应验证 所以改为package private
-    static @Nullable IDataSegment readDataSegment(KeySegment key, PacketByteBuf buf) {
+    static @Nullable IDataSegment readDataSegment(KeySegment key, FriendlyByteBuf buf) {
         int type = buf.readInt();
         int version = buf.readInt();
-        for (Pair<BiPredicate<Integer, Integer>, BiFunction<KeySegment, PacketByteBuf, IDataSegment>> reader : dataReaderRegistry) {
-            if (reader.getLeft().test(type, version)) {
+        for (Tuple<BiPredicate<Integer, Integer>, BiFunction<KeySegment, FriendlyByteBuf, IDataSegment>> reader : dataReaderRegistry) {
+            if (reader.getA().test(type, version)) {
                 buf.setIndex(0, buf.capacity());
-                return reader.getRight().apply(key, buf);
+                return reader.getB().apply(key, buf);
             }
         }
         return null;
