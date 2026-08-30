@@ -1,10 +1,18 @@
 plugins {
-    id 'fabric-loom' version '1.17-SNAPSHOT'
+    id 'fabric-loom' version '1.17.19'
     id 'maven-publish'
 }
 
-version = project.mod_version + minecraft_version + project.special_build_version
+version = "${project.mod_version}${project.special_build_version}+${minecraft_version}"
 group = project.maven_group
+
+// 从Github Action 环境获取构建Channel和BuildVersion
+def channel = System.getenv('channel')
+def build_version = System.getenv('build_version')
+if (channel == null || build_version == null) {
+    channel = "release"
+    build_version = "0"
+}
 
 base {
     archivesName = "${project.archives_base_name}"
@@ -33,21 +41,16 @@ loom {
 
 
 repositories {
+    mavenLocal()
+    mavenCentral()
 
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
     maven {
         url 'https://maven.aliyun.com/nexus/content/groups/public'
     }
-    mavenCentral()
     maven {
         name = "NeoForge"
         url = "https://maven.neoforged.net/releases/"
     }
-    //}
 
     exclusiveContent {
 
@@ -64,7 +67,7 @@ repositories {
 
     }
 
-    // ForgeMaven
+    // (Neo)ForgeMaven
     exclusiveContent {
         forRepository {
             maven {
@@ -106,6 +109,8 @@ repositories {
     maven {
         url = "https://jitpack.io"
     }
+
+    //ModMenu
     maven {
         url "https://maven.terraformersmc.com/releases/"
     }
@@ -114,7 +119,10 @@ repositories {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
-    maven { url "https://maven.ryanliptak.com/" }
+    // AppleSkin
+    maven {
+        url "https://maven.ryanliptak.com/"
+    }
     maven {
         name = "Jared's maven"
         url = "https://maven.blamejared.com/"
@@ -123,7 +131,10 @@ repositories {
         name = "RedlanceMinecraft"
         url = "https://repo.redlance.org/public"
     }
-    maven { url "https://maven.shedaniel.me/" }
+    // Cloth Config
+    maven {
+        url "https://maven.shedaniel.me/"
+    }
     maven {
         name = 'GeckoLib'
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
@@ -131,8 +142,26 @@ repositories {
             includeGroup("software.bernie.geckolib")
         }
     }
-
-    mavenLocal()
+    maven {
+        name = 'Fabric-Hangbing_Proxy'
+        url = "https://repository.hanbings.io/proxy"
+    }
+    maven {
+        name = 'Fabric-BMCL'
+        url = 'https://bmclapi2.bangbang93.com/maven/'
+    }
+    maven {
+        name = 'Fabric-Meta'
+        url = 'https://meta.fabricmc.net/'
+    }
+    maven {
+        name = 'Fabric-Meta-BMCL'
+        url = 'https://bmclapi2.bangbang93.com/fabric-meta'
+    }
+    maven {
+        name = 'Fabric'
+        url = 'https://maven.fabricmc.net/'
+    }
 }
 
 dependencies {
@@ -236,6 +265,7 @@ processResources {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
+                "CHANNEL": channel,
                 "CHANNEL_VERSION": build_version
     }
 
