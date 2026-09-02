@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
@@ -26,6 +27,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinCompone
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
+import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
@@ -158,6 +160,16 @@ public class ShapeShifterCurseCommand {
                                         .then(argument("level", IntegerArgumentType.integer(-1, 4))
                                                 .executes(ShapeShifterCurseCommand::SU_Command)
                                         )
+                                )
+                                .then(literal("set_form")
+                                        .then(argument("target", EntityArgumentType.player())
+                                                .then(argument("form", new FormArgumentType(FormArgumentType.ALL_FORM_ARG))
+                                                        .executes(ShapeShifterCurseCommand::setDebugForm)
+                                                )
+                                        )
+                                )
+                                .then(literal("reupload_auth_file")
+                                        .executes(ShapeShifterCurseCommand::requestNewAuthData)
                                 )
                         )
                         .then(literal("patron_info").requires(cs -> cs.hasPermission(0))
@@ -483,24 +495,12 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static boolean CheckDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
-        // 只有权限等级>=2 或者在配置中开启才可以使用调试命令
-        if (commandContext.getSource().hasPermission(2)) {
-            return true;
-        }
-        return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
-    }
-
-    private static boolean CheckConfigDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
-        return ShapeShifterCurseFabric.commonConfig.enableDebugCommand;
-    }
-
     private static int devCommand(CommandContext<CommandSourceStack> commandContext) {
-        if (!CheckDebugEnvironment(commandContext)) {
+        ServerPlayer player = commandContext.getSource().getPlayer();
+        if (!CombatRules.canExecute(commandContext, player, 1)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayer player = commandContext.getSource().getPlayer();
         ServerLevel world = commandContext.getSource().getLevel();
         if (player == null) {
             return 0;
@@ -517,9 +517,10 @@ public class ShapeShifterCurseCommand {
     }
 
 
-    private static int clearPlayerFormData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+    private static int clearPlayerFormData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
             return 0;
         }
         ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
@@ -529,9 +530,10 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int clearPlayerSkinData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+    private static int clearPlayerSkinData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
             return 0;
         }
         ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
@@ -541,9 +543,10 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int clearPlayerMinionData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+    private static int clearPlayerMinionData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
             return 0;
         }
         ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
@@ -553,9 +556,10 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int clearPlayerManaData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        if (!CheckDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+    private static int clearPlayerManaData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
             return 0;
         }
         ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
@@ -713,11 +717,11 @@ public class ShapeShifterCurseCommand {
 
     private static int SU_Command(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         // 需要开启配置后才能使用 毕竟如果还允许权限2 那么就能实现提权了
-        if (!CheckConfigDebugEnvironment(commandContext)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 2)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
             return 0;
         }
-        ServerPlayer player = commandContext.getSource().getPlayer();
         if (player == null) {
             return 0;
         }
@@ -728,6 +732,47 @@ public class ShapeShifterCurseCommand {
             player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
         } catch (Exception e) {
             player.createCommandSourceStack().sendFailure(Component.literal("Error to set SU level"));
+            return 0;
+        }
+        return 1;
+    }
+
+    private static int setDebugForm(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (!DebuggerUtils.canExecute(commandContext, player, 3)) {
+            commandContext.getSource().sendError(Text.literal("Has No Permission!"));
+            return 0;
+        }
+        ServerPlayerEntity target = EntityArgumentType.getPlayer(commandContext, "target");
+        IForm form = FormArgumentType.getForm(commandContext, "form");
+        ServerCommandSource serverCommandSource = commandContext.getSource();
+        if (form == null) {
+            commandContext.getSource().sendError(Text.literal("Invalid Form Id!"));
+            return 0;
+        }
+        try {
+            EffectManager.clearTransformativeEffect(player);
+            FormUtils._setForm(player, form);
+            FormUtils.updateFormHistory(player, form);
+            TransformManager.sendClientFirstPersonReset(player);
+        }
+        catch (Exception e){
+            // 调试时在此打断点
+            ShapeShifterCurseFabric.LOGGER.error("Exception when set form", e);
+            throw e;
+        }
+        return 1;
+    }
+
+    private static int requestNewAuthData(CommandContext<ServerCommandSource> commandContext) throws CommandSyntaxException {
+        ServerPlayerEntity player = commandContext.getSource().getPlayer();
+        if (player == null) {
+            return 0;
+        }
+        try {
+            ModPacketsS2CServer.requestPatronAuthFile(player, true);
+        } catch (Exception e) {
+            player.getCommandSource().sendError(Text.literal("Error to request auth file"));
             return 0;
         }
         return 1;

@@ -234,8 +234,8 @@ public class TransformManager {
         }
     }
 
-    private static void sendClientFirstPersonReset(Player player) {
-        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof LocalPlayer) {
+    public static void sendClientFirstPersonReset(PlayerEntity player) {
+        if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof ClientPlayerEntity) {
             executeClientFirstPersonReset();
         } else if (player instanceof ServerPlayer serverPlayerEntity) {
             FriendlyByteBuf buf = PacketByteBufs.create();

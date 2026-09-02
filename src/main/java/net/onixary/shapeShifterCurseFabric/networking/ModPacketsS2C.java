@@ -634,10 +634,12 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
     }
 
-    private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID playerID = payload.data().readUUID();
-        ctx.client().execute(() -> {
-            AuthClient.requestAuthFile(playerID);
+    private static void receiveRequestPatronAuthFile(MinecraftClient client, ClientPlayNetworkHandler handler, PacketByteBuf buf, PacketSender responseSender) {
+        UUID playerID = buf.readUuid();
+        boolean forceReReadFile = buf.readBoolean();
+        client.execute(() -> {
+            ShapeShifterCurseFabricClient.onRequestAuthFile();
+            AuthClient.requestAuthFile(playerID, forceReReadFile);
         });
     }
 
