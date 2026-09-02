@@ -318,11 +318,11 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
     }
 
-    public static void requestPatronAuthFile(ServerPlayerEntity player, boolean forceReReadFile) {
-        PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(player.getUuid());
+    public static void requestPatronAuthFile(ServerPlayer player, boolean forceReReadFile) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeUUID(player.getUUID());
         buf.writeBoolean(forceReReadFile);
-        ServerPlayNetworking.send(player, ModPackets.REQUEST_PATRON_AUTH_FILE, buf);
+        ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
     }
 
     public static void sendNewSubKey(ServerPlayer player, KeySegment newKey) {

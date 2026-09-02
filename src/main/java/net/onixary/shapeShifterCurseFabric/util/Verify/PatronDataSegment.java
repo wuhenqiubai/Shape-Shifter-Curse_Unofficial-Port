@@ -33,7 +33,7 @@ public final class PatronDataSegment implements IDataSegment {
 
     private final KeySegment key;
 
-    PatronDataSegment(KeySegment key, PacketByteBuf buf) {
+    PatronDataSegment(KeySegment key, FriendlyByteBuf buf) {
         int type = buf.readInt();
         if (type != 1) {
             throw new RuntimeException("Invalid Patron Data Segment");

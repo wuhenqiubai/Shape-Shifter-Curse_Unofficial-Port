@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -15,7 +15,7 @@ public final class DebuggerDataSegment implements IDataSegment {
     private final int level;
     private final long expireTime;
 
-    DebuggerDataSegment(KeySegment key, PacketByteBuf buf) {
+    DebuggerDataSegment(KeySegment key, FriendlyByteBuf buf) {
         int type = buf.readInt();
         if (type != 2) {
             throw new RuntimeException("Invalid Debugger Data Segment");
@@ -23,7 +23,7 @@ public final class DebuggerDataSegment implements IDataSegment {
         this.type = type;
         this.version = buf.readInt();
         buf.skipBytes(4);
-        this.uuid = buf.readUuid();
+        this.uuid = buf.readUUID();
         this.level = buf.readShort();
         long startTime = buf.readLong();
         long expiresIn = buf.readLong();
@@ -51,11 +51,11 @@ public final class DebuggerDataSegment implements IDataSegment {
         return this.level;
     }
 
-    public static int getLevel(@Nullable PlayerEntity player) {
+    public static int getLevel(@Nullable Player player) {
         if (player == null) {
             return 0;
         }
-        DebuggerDataSegment dataSegment = DEBUGGER_AUTH_DATA.get(player.getUuid());
+        DebuggerDataSegment dataSegment = DEBUGGER_AUTH_DATA.get(player.getUUID());
         if (dataSegment == null) {
             return 0;
         }

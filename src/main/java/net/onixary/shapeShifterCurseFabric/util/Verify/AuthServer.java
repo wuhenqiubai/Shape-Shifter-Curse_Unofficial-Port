@@ -64,7 +64,7 @@ public final class AuthServer {
             }
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
-            ServerPlayerEntity player = handler.getPlayer();
+            ServerPlayer player = handler.getPlayer();
             ModPacketsS2CServer.requestPatronAuthFile(player, false);
             new Thread(() -> {
                 try {
