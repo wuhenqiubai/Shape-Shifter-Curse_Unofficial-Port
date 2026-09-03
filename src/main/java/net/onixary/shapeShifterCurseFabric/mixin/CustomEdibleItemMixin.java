@@ -22,60 +22,115 @@ import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowe
 
 @Mixin(value = Item.class)
 public abstract class CustomEdibleItemMixin {
+    /*
+    boolean canConsumeCustomFood = false;
 
     @Unique
-    private static final ThreadLocal<Player> ssc$currentPlayer = new ThreadLocal<>();
+    private static final FoodComponent ALLAY_AMETHYST_SHARD_FOOD = new FoodComponent.Builder()
+            .hunger(10)
+            .alwaysEdible()
+            .saturationModifier(0.3f)
+            .build();
+
+    @Inject(method = "getFoodComponent", at = @At("HEAD"), cancellable = true)
+    private void onGetFoodComponent(CallbackInfoReturnable<FoodComponent> cir) {
+
+        Item self = (Item)(Object)this;
+        if (self == Items.AMETHYST_SHARD) {
+            cir.setReturnValue(ALLAY_AMETHYST_SHARD_FOOD);
+        }
+    }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void onUse(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
-        ItemStack stack = user.getItemInHand(hand);
-        FoodProperties fc = getPowerFoodComponent(user, stack);
-        if (fc != null) {
-            if (user.canEat(fc.canAlwaysEat())) {
-                ssc$currentPlayer.set(user);
-                user.startUsingItem(hand);
-                cir.setReturnValue(InteractionResultHolder.consume(stack));
-            } else {
-                ssc$currentPlayer.remove();
-                cir.setReturnValue(InteractionResultHolder.fail(stack));
+    private void onUse(World world, PlayerEntity user, Hand hand, CallbackInfoReturnable<TypedActionResult<ItemStack>> cir) {
+        ItemStack stack = user.getStackInHand(hand);
+        IForm currentForm = FormAbilityManager.getForm(user);
+        canConsumeCustomFood = false;
+        if(currentForm != null){
+
+//            if (stack.getItem() == Items.AMETHYST_SHARD && currentForm == PlayerForms.ALLAY_SP) {
+            if (stack.getItem() == Items.AMETHYST_SHARD && PowerHolderComponent.hasPower(user, CanEatOtherItemPower.class)) {
+                if (user.canConsume(ALLAY_AMETHYST_SHARD_FOOD.isAlwaysEdible())) {
+                    user.setCurrentHand(hand);
+                    canConsumeCustomFood = true;
+                    cir.setReturnValue(TypedActionResult.consume(stack));
+                } else {
+                    canConsumeCustomFood = false;
+                    cir.setReturnValue(TypedActionResult.fail(stack));
+                }
             }
+        }
+        else{
+            cir.setReturnValue(TypedActionResult.fail(stack));
+        }
+
+    }
+
+    @ModifyReturnValue(method = "getUseAction", at = @At("RETURN"))
+    private UseAction replaceUseAction(UseAction original) {
+        return canConsumeCustomFood? UseAction.EAT : original;
+    }
+
+    @ModifyReturnValue(method = "getEatSound", at = @At("RETURN"))
+    private SoundEvent replaceEatingSound(SoundEvent original) {
+        return canConsumeCustomFood? SoundEvents.ENTITY_GENERIC_EAT: original;
+    }
+
+     设置食用耗时
+    @Inject(method = "getMaxUseTime", at = @At("HEAD"), cancellable = true)
+    private void onGetMaxUseTime(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+        if ((Object)this == Items.AMETHYST_SHARD) {
+            cir.setReturnValue(32); // 32tick=1.6秒
         }
     }
 
-    @Inject(method = "finishUsingItem", at = @At("HEAD"), cancellable = true)
-    private void onFinishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (user instanceof Player player) {
-            FoodProperties fc = getPowerFoodComponent(player, stack);
-            if (fc != null) {
-                cir.setReturnValue(player.eat(world, stack, fc));
+    // TODO:此处和上游有些不同，后面思考一下怎么重写
+     处理食用完成效果
+    @Inject(method = "finishUsing", at = @At("HEAD"), cancellable = true)
+    private void onFinishUsing(ItemStack stack, World world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
+        if(user instanceof PlayerEntity){
+            IForm currentForm = FormAbilityManager.getForm((PlayerEntity) user);
+//            if ((stack.getItem() == Items.AMETHYST_SHARD) && (currentForm == PlayerForms.ALLAY_SP)) {
+            if ((stack.getItem() == Items.AMETHYST_SHARD) && (PowerHolderComponent.hasPower(user, CanEatOtherItemPower.class))) {
+                if (user instanceof PlayerEntity player) {
+                    player.getHungerManager().add(ALLAY_AMETHYST_SHARD_FOOD.getHunger(), ALLAY_AMETHYST_SHARD_FOOD.getSaturationModifier());
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(),
+                            SoundEvents.BLOCK_AMETHYST_BLOCK_BREAK, SoundCategory.NEUTRAL,
+                            1.0F, 1.0F + (world.random.nextFloat() - world.random.nextFloat()) * 0.4F);
+
+                    if (!player.getAbilities().creativeMode) {
+                        stack.decrement(1);
+                    }
+                }
+                cir.setReturnValue(stack);
             }
         }
     }
+     */
 
-    @ModifyReturnValue(method = "getUseAnimation", at = @At("RETURN"))
-    private UseAnim replaceUseAction(UseAnim original, ItemStack stack) {
-        if (original == UseAnim.EAT) {
+    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;isFood()Z"))
+    private boolean use$isFood(boolean original, World world, PlayerEntity user, Hand hand) {
+        // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEI_01");
+        return getPowerFoodComponent(user, user.getStackInHand(hand)) != null || original;
+    }
+
+    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;getFoodComponent()Lnet/minecraft/item/FoodComponent;"))
+    private FoodComponent use$getFoodComponent(FoodComponent original, World world, PlayerEntity user, Hand hand) {
+        // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEI_02");
+        FoodComponent fc = getPowerFoodComponent(user, user.getStackInHand(hand));
+        if (fc == null) {
             return original;
         }
-        Player player = ssc$currentPlayer.get();
-        if (player != null && getPowerFoodComponent(player, stack) != null) {
-            return UseAnim.EAT;
+        return fc;
+    }
+
+    @ModifyExpressionValue(method = "finishUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/Item;isFood()Z"))
+    private boolean finishUsing$isFood(boolean original, ItemStack stack, World world, LivingEntity user) {
+        // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEI_03");
+        if (user instanceof PlayerEntity playerEntity) {
+            return getPowerFoodComponent(playerEntity, stack) != null || original;
         }
         return original;
     }
-
-    @ModifyReturnValue(method = "getEatingSound", at = @At("RETURN"))
-    private SoundEvent replaceEatSound(SoundEvent original) {
-        return ssc$currentPlayer.get() != null ? SoundEvents.GENERIC_EAT : original;
-    }
-
-    @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
-    private void onGetMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
-        if (user instanceof Player player) {
-            FoodProperties fc = getPowerFoodComponent(player, stack);
-            if (fc != null) {
-                cir.setReturnValue(fc.eatSeconds() < 1.0f ? 16 : 32);
-            }
-        }
-    }
 }
+

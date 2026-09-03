@@ -25,10 +25,11 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Inject(method = "eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;", at = @At(value = "HEAD"), cancellable = true)
-    private void eatFood(Level world, ItemStack stack, FoodProperties vanillaComponent, CallbackInfoReturnable<ItemStack> cir) {
-        if ((Object)this instanceof Player playerEntity) {
-            FoodProperties foodComponent = getPowerFoodComponent(playerEntity, stack);
+    @Inject(method = "eatFood", at = @At(value = "HEAD"), cancellable = true)
+    private void eatFood(World world, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
+        // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEPB_01");
+        if ((Object)this instanceof PlayerEntity playerEntity) {
+            FoodComponent foodComponent = getPowerFoodComponent(playerEntity, stack);
             if (foodComponent == null) {
                 return;
             }
