@@ -62,7 +62,7 @@ public class ExplosionDamageEntityAction {
         List<Entity> list = entity.level().getEntities(entity, new AABB((double)k, (double)r, (double)t, (double)l, (double)s, (double)u));
         for (int v = 0; v < list.size(); ++v) {
             Entity target_entity = (Entity) list.get(v);
-            if (!target_entity.ignoreExplosion() && (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity)))) {
+            if (!target_entity.ignoreExplosion(null) && (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity)))) {
                 double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double)q;
                 if (w <= 1.0) {
                     double x = target_entity.getX() - ExplosionPos.x();
