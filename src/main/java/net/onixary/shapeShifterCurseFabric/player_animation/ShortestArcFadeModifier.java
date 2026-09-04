@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
  * <p>
  * 只依赖外部 PAL（不改/不打包 PAL），在 SSCU 侧实现，避开 NeoForge 下对 PAL 类的 Mixin。
  */
+// TODO：到时候写为 时序连续 unwrap
 public class ShortestArcFadeModifier extends AbstractFadeModifier {
 
 	private final EasingType easing;

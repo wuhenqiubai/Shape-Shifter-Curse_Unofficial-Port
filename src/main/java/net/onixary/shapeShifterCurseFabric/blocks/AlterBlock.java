@@ -1,50 +1,60 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
-import net.minecraft.block.BlockRenderType;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.BlockWithEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.dedicated.Settings;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.RenderShape;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 
 // 渲染先用透明方案吧 BlockEntity类方块由BlockEntity动态渲染
-public class AlterBlock extends BlockWithEntity {
-    protected AlterBlock(Settings settings) {
+public class AlterBlock extends BaseEntityBlock {
+    protected AlterBlock(Properties settings) {
         super(settings);
     }
 
     @Override
-    public @Nullable BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+    public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
         return new AlterBlockEntity(pos, state);
     }
 
 
-    public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
-        if (world.isClient) {
-            return ActionResult.SUCCESS;
+    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (world.isClientSide) {
+            return InteractionResult.SUCCESS;
         } else {
             this.openScreen(world, pos, player);
-            return ActionResult.CONSUME;
+            return InteractionResult.CONSUME;
         }
     }
 
-    protected void openScreen(World world, BlockPos pos, PlayerEntity player) {
+    protected void openScreen(Level world, BlockPos pos, Player player) {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof AlterBlockEntity alterBlockEntity) {
-            alterBlockEntity.lastUser = player.getUuid();
+            alterBlockEntity.lastUser = player.getUUID();
             // TODO 开启UI
         }
     }
 
     @Override
-    public BlockRenderType getRenderType(BlockState state) {
-        return BlockRenderType.MODEL;
+    public @NotNull RenderShape getRenderShape(BlockState state) {
+        return RenderShape.MODEL;
+    }
+
+    // 1.21 BaseEntityBlock 要求实现抽象的 codec()（用于 Block 的注册/网络同步）
+    @Override
+    protected MapCodec<AlterBlock> codec() {
+        return Block.simpleCodec(AlterBlock::new);
     }
 }

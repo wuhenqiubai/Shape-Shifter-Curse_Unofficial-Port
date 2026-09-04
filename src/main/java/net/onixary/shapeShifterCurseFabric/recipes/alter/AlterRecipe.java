@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public abstract class AlterRecipe implements Recipe<WorldlyContainer> {
+public abstract class AlterRecipe implements Recipe<RecipeInput> {
 
     @Override
     public @NotNull RecipeType<?> getType() {

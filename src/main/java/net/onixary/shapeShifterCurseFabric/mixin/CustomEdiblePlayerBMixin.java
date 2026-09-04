@@ -25,21 +25,21 @@ public abstract class CustomEdiblePlayerBMixin extends LivingEntity {
         super(entityType, world);
     }
 
-    @Inject(method = "eatFood", at = @At(value = "HEAD"), cancellable = true)
-    private void eatFood(World world, ItemStack stack, CallbackInfoReturnable<ItemStack> cir) {
+    @Inject(method = "eat", at = @At(value = "HEAD"), cancellable = true)
+    private void eat(Level level, ItemStack itemStack, FoodProperties foodProperties, CallbackInfoReturnable<ItemStack> cir) {
         // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEPB_01");
-        if ((Object)this instanceof PlayerEntity playerEntity) {
-            FoodComponent foodComponent = getPowerFoodComponent(playerEntity, stack);
+        if ((Object)this instanceof Player playerEntity) {
+            FoodProperties foodComponent = getPowerFoodComponent(playerEntity, itemStack);
             if (foodComponent == null) {
                 return;
             }
             playerEntity.getFoodData().eat(foodComponent);
-            playerEntity.awardStat(Stats.ITEM_USED.get(stack.getItem()));
-            world.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            playerEntity.awardStat(Stats.ITEM_USED.get(itemStack.getItem()));
+            level.playSound(null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, level.random.nextFloat() * 0.1F + 0.9F);
             if (playerEntity instanceof ServerPlayer spe) {
-                CriteriaTriggers.CONSUME_ITEM.trigger(spe, stack);
+                CriteriaTriggers.CONSUME_ITEM.trigger(spe, itemStack);
             }
-            cir.setReturnValue(super.eat(world, stack, foodComponent));
+            cir.setReturnValue(super.eat(level, itemStack, foodComponent));
         }
     }
 }

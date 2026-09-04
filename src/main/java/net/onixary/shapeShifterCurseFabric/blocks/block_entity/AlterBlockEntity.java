@@ -1,28 +1,36 @@
 package net.onixary.shapeShifterCurseFabric.blocks.block_entity;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.recipe.*;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.text.Text;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.WorldlyContainer;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.RecipeCraftingHolder;
+import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -30,13 +38,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class AlterBlockEntity extends LockableContainerBlockEntity implements SidedInventory, RecipeUnlocker, RecipeInputProvider {
+public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible, RecipeInput {
     // 进度锁是个不错的设计 能降低难度(毕竟之前做限制进度使用得上对应阶段的材料 有些材料是真不好量产 有这个就能用便宜材料了)
     public UUID lastUser;
     public AlterRecipe nowRecipe;
+    public RecipeHolder<?> nowRecipeHolder;
     public int progress = 0;
     public int fuelTime = 0;
-    public final DefaultedList<ItemStack> inventory;
+    public final NonNullList<ItemStack> inventory;
 
     public static final int[] TOP = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     public static final int[] SIDE = {9};
@@ -44,7 +53,7 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
 
     public static final HashMap<Item, Integer> fuelTimeMap = new HashMap<>();
 
-    private final RecipeManager.MatchGetter<SidedInventory, ? extends AlterRecipe> matchGetter;
+    private final RecipeManager.CachedCheck<RecipeInput, ? extends AlterRecipe> matchGetter;
 
     static {
         fuelTimeMap.put(RegCustomItem.UNTREATED_MOONDUST, 800);
@@ -60,22 +69,33 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
 
     public AlterBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(RegCustomBlock.ALTER_BLOCK_ENTITY, blockPos, blockState);
-        this.inventory = DefaultedList.ofSize(11, ItemStack.EMPTY);
-        this.matchGetter = RecipeManager.createCachedMatchGetter(RecipeUtils.ALTER_RECIPE);
+        this.inventory = NonNullList.withSize(11, ItemStack.EMPTY);
+        this.matchGetter = RecipeManager.createCheck(RecipeUtils.ALTER_RECIPE);
     }
 
     @Override
-    protected Text getContainerName() {
+    protected @NotNull NonNullList<ItemStack> getItems() {
+        return this.inventory;
+    }
+
+    @Override
+    protected void setItems(NonNullList<ItemStack> items) {
+        this.inventory.clear();
+        this.inventory.addAll(items);
+    }
+
+    @Override
+    protected @NotNull Component getDefaultName() {
         return null;
     }
 
     @Override
-    protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
+    protected @NotNull AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
         return null;
     }
 
     @Override
-    public int[] getAvailableSlots(Direction side) {
+    public int @NotNull [] getSlotsForFace(Direction side) {
         return switch (side) {
             case UP -> TOP;
             case DOWN -> BOTTOM;
@@ -84,7 +104,7 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
     }
 
     @Override
-    public boolean canInsert(int slot, ItemStack stack, @Nullable Direction dir) {
+    public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
         return switch (slot) {
             case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> true;
             case 9 -> canFuel(stack);
@@ -94,13 +114,19 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
     }
 
     @Override
-    public boolean canExtract(int slot, ItemStack stack, Direction dir) {
+    public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction dir) {
         return true;
     }
 
     @Override
-    public int size() {
+    public int getContainerSize() {
         return inventory.size();
+    }
+
+    // RecipeInput（1.21.1）：getItem(int)/size()/isEmpty()
+    @Override
+    public int size() {
+        return this.inventory.size();
     }
 
     @Override
@@ -114,88 +140,91 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
     }
 
     @Override
-    public ItemStack getStack(int slot) {
+    public @NotNull ItemStack getItem(int slot) {
         return this.inventory.get(slot);
     }
 
     @Override
-    public ItemStack removeStack(int slot, int amount) {
+    public @NotNull ItemStack removeItem(int slot, int amount) {
         this.checkRecipe();
-        return Inventories.splitStack(this.inventory, slot, amount);
+        return ContainerHelper.removeItem(this.inventory, slot, amount);
     }
 
     @Override
-    public ItemStack removeStack(int slot) {
+    public @NotNull ItemStack removeItemNoUpdate(int slot) {
         this.checkRecipe();
-        return Inventories.removeStack(this.inventory, slot);
+        return ContainerHelper.takeItem(this.inventory, slot);
     }
 
-    public void setStack(int slot, ItemStack stack) {
+    public void setItem(int slot, ItemStack stack) {
         ItemStack itemStack = (ItemStack)this.inventory.get(slot);
-        boolean bl = !stack.isEmpty() && ItemStack.canCombine(itemStack, stack);
+        boolean bl = !stack.isEmpty() && ItemStack.isSameItemSameComponents(itemStack, stack);
         this.inventory.set(slot, stack);
-        if (stack.getCount() > this.getMaxCountPerStack()) {
-            stack.setCount(this.getMaxCountPerStack());
+        if (stack.getCount() > this.getMaxStackSize()) {
+            stack.setCount(this.getMaxStackSize());
         }
         this.checkRecipe();
-        this.markDirty();
+        this.setChanged();
     }
 
     @Override
-    public boolean canPlayerUse(PlayerEntity player) {
-        return Inventory.canPlayerUse(this, player);
+    public boolean stillValid(Player player) {
+        return Container.stillValidBlockEntity(this, player);
     }
 
     @Override
-    public void provideRecipeInputs(RecipeMatcher finder) {
+    public void fillStackedContents(StackedContents finder) {
         for(ItemStack itemStack : this.inventory) {
-            finder.addInput(itemStack);
+            finder.accountStack(itemStack);
         }
     }
 
-    @Override
-    public void setLastRecipe(@Nullable Recipe<?> recipe) {
+    private RecipeHolder<?> recipeUsed;
 
+    @Override
+    public void setRecipeUsed(@Nullable RecipeHolder<?> recipeHolder) {
+        this.recipeUsed = recipeHolder;
     }
 
     @Override
-    public @Nullable Recipe<?> getLastRecipe() {
-        return null;
+    public @Nullable RecipeHolder<?> getRecipeUsed() {
+        return this.recipeUsed;
     }
 
-    @Override
     public void clear() {
         this.inventory.clear();
     }
 
     public void checkRecipe() {
-        PlayerEntity playerEntity = null;
-        World world = this.getWorld();
+        Player playerEntity = null;
+        Level world = this.level;
         if (world != null && this.lastUser != null) {
-            playerEntity = world.getPlayerByUuid(this.lastUser);
+            playerEntity = world.getPlayerByUUID(this.lastUser);
         }
         if (this.nowRecipe != null) {
             if (this.nowRecipe.canCraft(playerEntity) && this.nowRecipe.matches(this, world)) {
                 return;
             }
         }
-        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getFirstMatch(this, world);
-        if (alterRecipe.isPresent() && alterRecipe.get().canCraft(playerEntity)) {
-            this.nowRecipe = alterRecipe.get();
+        var alterRecipe = this.matchGetter.getRecipeFor(this, world);
+        if (alterRecipe.isPresent() && alterRecipe.get().value().canCraft(playerEntity)) {
+            this.nowRecipe = alterRecipe.get().value();
+            this.nowRecipeHolder = alterRecipe.get();
         } else {
             this.nowRecipe = null;
+            this.nowRecipeHolder = null;
         }
         this.progress = 0;
     }
 
-    private boolean canCraftRecipe(DynamicRegistryManager registryManager) {
+    private boolean canCraftRecipe(RegistryAccess registryManager) {
         if (this.nowRecipe == null) {
             return false;
         }
-        PlayerEntity playerEntity = null;
-        World world = this.getWorld();
+        Player playerEntity = null;
+        Level world = this.level;
         if (world != null && this.lastUser != null) {
-            playerEntity = world.getPlayerByUuid(this.lastUser);
+            playerEntity = world.getPlayerByUUID(this.lastUser);
         }
         if (!nowRecipe.canCraft(playerEntity)) {
             return false;
@@ -203,38 +232,38 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
         if (!nowRecipe.matches(this, world) && !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
-        ItemStack output = this.nowRecipe.getOutput(registryManager);
+        ItemStack output = this.nowRecipe.getResultItem(registryManager);
         if (output.isEmpty() || this.inventory.get(10).isEmpty()) {
             return true;
         }
         ItemStack outputSlot = this.inventory.get(10);
-        if (!ItemStack.canCombine(output, outputSlot)) {
+        if (!ItemStack.isSameItemSameComponents(output, outputSlot)) {
             return false;
         }
-        if (outputSlot.getCount() + output.getCount() <= outputSlot.getMaxCount()) {
+        if (outputSlot.getCount() + output.getCount() <= outputSlot.getMaxStackSize()) {
             return true;
         }
-        return outputSlot.getCount() + output.getCount() <= this.getMaxCountPerStack();
+        return outputSlot.getCount() + output.getCount() <= this.getMaxStackSize();
     }
 
-    private boolean craftRecipe(DynamicRegistryManager registryManager) {
+    private boolean craftRecipe(RegistryAccess registryManager) {
         if (canCraftRecipe(registryManager)) {
-            ItemStack output = this.nowRecipe.getOutput(registryManager);
+            ItemStack output = this.nowRecipe.getResultItem(registryManager);
             ItemStack outputSlot = this.inventory.get(10);
             if (outputSlot.isEmpty()) {
                 this.inventory.set(10, output.copy());
-            } else if (ItemStack.canCombine(output, outputSlot)) {
-                outputSlot.increment(output.getCount());
+            } else if (ItemStack.isSameItemSameComponents(output, outputSlot)) {
+                outputSlot.grow(output.getCount());
             } else {
                 return false;
             }
             List<ItemStack> extraOutput = this.nowRecipe.getExtraOutput(this);
             if (extraOutput != null) {
-                World world = this.getWorld();
-                BlockPos pos = this.getPos().up();
+                Level world = this.level;
+                BlockPos pos = this.getBlockPos().above();
                 if (world != null) {
                     for (ItemStack extra : extraOutput) {
-                        world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), extra));
+                        world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(), extra));
                     }
                 }
             }
@@ -245,7 +274,7 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
         }
     }
 
-    public void tick(World world, BlockPos pos, BlockState state, AlterBlockEntity blockEntity) {
+    public void tick(Level world, BlockPos pos, BlockState state, AlterBlockEntity blockEntity) {
         boolean itemChanged = false;
         boolean hasRecipe = this.nowRecipe != null;
         boolean hasFuel = this.fuelTime > 0;
@@ -255,7 +284,7 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
                 int fuelRealTime = getFuelTime(fuel);
                 if (fuelRealTime > 0) {
                     this.fuelTime = fuelRealTime;
-                    fuel.decrement(1);
+                    fuel.shrink(1);
                     itemChanged = true;
                 }
             }
@@ -271,22 +300,22 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
             }
         }
         if (hasRecipe && this.progress >= this.nowRecipe.recipeTime()) {
-            if (craftRecipe(world.getRegistryManager())) {
-                blockEntity.setLastRecipe(this.nowRecipe);
+            if (craftRecipe(world.registryAccess())) {
+                blockEntity.setRecipeUsed(this.nowRecipeHolder);
             }
             this.progress = 0;
             itemChanged = true;
         }
         if (itemChanged) {
-            this.markDirty();
+            this.setChanged();
         }
     }
 
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        Inventories.readNbt(nbt, this.inventory);
+    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.loadAdditional(nbt, provider);
+        ContainerHelper.loadAllItems(nbt, this.inventory, provider);
         if (nbt.contains("LastUser")) {
-            this.lastUser = nbt.getUuid("LastUser");
+            this.lastUser = nbt.getUUID("LastUser");
         } else {
             this.lastUser = null;
         }
@@ -295,11 +324,11 @@ public class AlterBlockEntity extends LockableContainerBlockEntity implements Si
         this.checkRecipe();
     }
 
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        Inventories.writeNbt(nbt, this.inventory);
+    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
+        super.saveAdditional(nbt, provider);
+        ContainerHelper.saveAllItems(nbt, this.inventory, provider);
         if (this.lastUser != null) {
-            nbt.putUuid("LastUser", this.lastUser);
+            nbt.putUUID("LastUser", this.lastUser);
         }
         nbt.putInt("FuelTime", this.fuelTime);
         nbt.putInt("Process", this.progress);

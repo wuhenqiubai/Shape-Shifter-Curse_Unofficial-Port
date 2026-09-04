@@ -1,32 +1,36 @@
 package net.onixary.shapeShifterCurseFabric.recipes.alter;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.RecipeInputInventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.recipe.*;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-import net.minecraft.util.collection.DefaultedList;
-import net.minecraft.world.World;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.NonNullList;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
+import org.jetbrains.annotations.Nullable;
 
 public class AlterShapelessRecipe extends AlterRecipe {
-    public final Identifier id;
-    public final ItemStack output;
-    public final DefaultedList<Ingredient> input;
+    public final String group;
+    public final CraftingBookCategory category;
+    public final ItemStack result;
+    public final NonNullList<Ingredient> input;
     public final int recipeTime;
 
-
-    public AlterShapelessRecipe(Identifier id, ItemStack output, DefaultedList<Ingredient> input, int recipeTime) {
-        this.id = id;
-        this.output = output;
+    public AlterShapelessRecipe(String group, CraftingBookCategory category, ItemStack result, NonNullList<Ingredient> input, int recipeTime) {
+        this.group = group;
+        this.category = category;
+        this.result = result;
         this.input = input;
         this.recipeTime = recipeTime;
     }
@@ -36,45 +40,39 @@ public class AlterShapelessRecipe extends AlterRecipe {
         return recipeTime;
     }
 
+    // 进度锁
     @Override
-    public boolean canCraft(PlayerEntity player) {
+    public boolean canCraft(@Nullable Player player) {
         return true;
     }
 
     @Override
-    public boolean matches(SidedInventory inventory, World world) {
-        RecipeMatcher recipeMatcher = new RecipeMatcher();
+    public boolean matches(RecipeInput recipeInput, Level level) {
+        StackedContents recipeMatcher = new StackedContents();
         int i = 0;
-
-        for(int j = 0; j < inventory.size(); ++j) {
-            ItemStack itemStack = inventory.getStack(j);
+        for (int j = 0; j < recipeInput.size(); ++j) {
+            ItemStack itemStack = recipeInput.getItem(j);
             if (!itemStack.isEmpty()) {
                 ++i;
-                recipeMatcher.addInput(itemStack, 1);
+                recipeMatcher.accountStack(itemStack, 1);
             }
         }
-
-        return i == this.input.size() && recipeMatcher.match(this, (IntList)null);
+        return i == this.input.size() && recipeMatcher.canCraft(this, (IntList) null);
     }
 
     @Override
-    public ItemStack craft(SidedInventory inventory, DynamicRegistryManager registryManager) {
-        return this.output.copy();
+    public ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
+        return this.result.copy();
     }
 
     @Override
-    public boolean fits(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         return width * height >= this.input.size();
     }
 
     @Override
-    public ItemStack getOutput(DynamicRegistryManager registryManager) {
-        return this.output;
-    }
-
-    @Override
-    public Identifier getId() {
-        return this.id;
+    public ItemStack getResultItem(HolderLookup.Provider provider) {
+        return this.result;
     }
 
     @Override
@@ -83,48 +81,60 @@ public class AlterShapelessRecipe extends AlterRecipe {
     }
 
     public static class Serializer implements RecipeSerializer<AlterShapelessRecipe> {
-        public AlterShapelessRecipe read(Identifier identifier, JsonObject jsonObject) {
-            int time = JsonHelper.getInt(jsonObject, "time", 200);
-            DefaultedList<Ingredient> defaultedList = getIngredients(JsonHelper.getArray(jsonObject, "ingredients"));
-            if (defaultedList.isEmpty()) {
-                throw new JsonParseException("No ingredients for alter shapeless recipe");
-            } else if (defaultedList.size() > 9) {
-                throw new JsonParseException("Too many ingredients for alter shapeless recipe");
-            } else {
-                ItemStack itemStack = ShapedRecipe.outputFromJson(JsonHelper.getObject(jsonObject, "result"));
-                return new AlterShapelessRecipe(identifier, itemStack, defaultedList, time);
-            }
+        private static final MapCodec<AlterShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> instance.group(
+                Codec.STRING.optionalFieldOf("group", "").forGetter(r -> r.group),
+                CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(r -> r.category),
+                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.result),
+                Ingredient.CODEC_NONEMPTY.listOf().fieldOf("ingredients").flatXmap(
+                    list -> {
+                        Ingredient[] arr = list.stream().filter(i -> !i.isEmpty()).toArray(Ingredient[]::new);
+                        if (arr.length == 0) {
+                            return DataResult.error(() -> "No ingredients for alter shapeless recipe");
+                        }
+                        if (arr.length > 9) {
+                            return DataResult.error(() -> "Too many ingredients for alter shapeless recipe");
+                        }
+                        return DataResult.success(NonNullList.of(Ingredient.EMPTY, arr));
+                    }, DataResult::success)
+                    .forGetter(r -> r.input),
+                Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime)
+            ).apply(instance, AlterShapelessRecipe::new)
+        );
+        private static final StreamCodec<RegistryFriendlyByteBuf, AlterShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+            Serializer::toNetwork, Serializer::fromNetwork
+        );
+
+        @Override
+        public MapCodec<AlterShapelessRecipe> codec() {
+            return CODEC;
         }
 
-        private static DefaultedList<Ingredient> getIngredients(JsonArray json) {
-            DefaultedList<Ingredient> defaultedList = DefaultedList.of();
-            for(int i = 0; i < json.size(); ++i) {
-                Ingredient ingredient = Ingredient.fromJson(json.get(i), false);
-                if (!ingredient.isEmpty()) {
-                    defaultedList.add(ingredient);
-                }
-            }
-            return defaultedList;
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, AlterShapelessRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
 
-        public AlterShapelessRecipe read(Identifier identifier, PacketByteBuf packetByteBuf) {
-            int i = packetByteBuf.readVarInt();
-            DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i, Ingredient.EMPTY);
-            for(int j = 0; j < defaultedList.size(); ++j) {
-                defaultedList.set(j, Ingredient.fromPacket(packetByteBuf));
-            }
-            ItemStack itemStack = packetByteBuf.readItemStack();
-            int time = packetByteBuf.readVarInt();
-            return new AlterShapelessRecipe(identifier, itemStack, defaultedList, time);
+        private static AlterShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
+            String group = buf.readUtf();
+            CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
+            int n = buf.readVarInt();
+            NonNullList<Ingredient> list = NonNullList.withSize(n, Ingredient.EMPTY);
+            list.replaceAll(i -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
+            ItemStack result = ItemStack.STREAM_CODEC.decode(buf);
+            int time = buf.readVarInt();
+            return new AlterShapelessRecipe(group, category, result, list, time);
         }
 
-        public void write(PacketByteBuf packetByteBuf, AlterShapelessRecipe shapelessRecipe) {
-            packetByteBuf.writeVarInt(shapelessRecipe.input.size());
-            for(Ingredient ingredient : shapelessRecipe.input) {
-                ingredient.write(packetByteBuf);
+        private static void toNetwork(RegistryFriendlyByteBuf buf, AlterShapelessRecipe r) {
+            buf.writeUtf(r.group);
+            buf.writeEnum(r.category);
+            buf.writeVarInt(r.input.size());
+            for (Ingredient ingredient : r.input) {
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
             }
-            packetByteBuf.writeItemStack(shapelessRecipe.output);
-            packetByteBuf.writeVarInt(shapelessRecipe.recipeTime);
+            ItemStack.STREAM_CODEC.encode(buf, r.result);
+            buf.writeVarInt(r.recipeTime);
         }
     }
 }
