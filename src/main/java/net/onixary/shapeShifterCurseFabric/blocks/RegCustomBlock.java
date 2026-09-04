@@ -5,13 +5,14 @@ import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Instrument;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
@@ -25,6 +26,10 @@ public final class RegCustomBlock {
     public static final Block WEB_COMPOSTER = register("web_composter", new WebComposterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion()));
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", new DewCoveredCobwebBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollission().noOcclusion()));
 
+    public static final Block ALTER_BLOCK = register("alter", new AlterBlock(AbstractBlock.Settings.create().mapColor(MapColor.WOOL).instrument(Instrument.BELL).strength(1.0F).sounds(SoundType.STONE).nonOpaque()));
+    public static final BlockEntityType<AlterBlockEntity> ALTER_BLOCK_ENTITY = registerBlockEntity("alter_block_entity", BlockEntityType.Builder.of(AlterBlockEntity::new, ALTER_BLOCK).build(null));
+
+
     public static void ClientInit() {
         // transparent透明模式不写Z，会出现自排序问题遮挡自己，只需要镂空的模型应该使用getCutout
         BlockRenderLayerMap.INSTANCE.putBlock(TEMP_WEB_BRIDGE, RenderType.cutout());
@@ -33,14 +38,18 @@ public final class RegCustomBlock {
     }
 
     private static <T extends Block> T registerWithOutItem(String path, T block) {
-        Registry.register(BuiltInRegistries.BLOCK, ResourceKey.create(BuiltInRegistries.BLOCK.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), block);
+        Registry.register(BuiltInRegistries.BLOCK, ShapeShifterCurseFabric.identifier(path), block);
         return block;
     }
 
     private static <T extends Block> T register(String path, T block) {
-        Registry.register(BuiltInRegistries.BLOCK, ResourceKey.create(BuiltInRegistries.BLOCK.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), block);
-        Registry.register(BuiltInRegistries.ITEM, ResourceKey.create(BuiltInRegistries.ITEM.key(), ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, path)), new BlockItem(block, new Item.Properties()));
+        Registry.register(BuiltInRegistries.BLOCK, ShapeShifterCurseFabric.identifier(path), block);
+        Registry.register(BuiltInRegistries.ITEM, ShapeShifterCurseFabric.identifier(path), new BlockItem(block, new Item.Properties()));
         return block;
+    }
+
+    private static <T extends BlockEntity> BlockEntityType<T> registerBlockEntity(String path, BlockEntityType<T> blockEntityType) {
+        return Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, ShapeShifterCurseFabric.identifier(path), blockEntityType);
     }
 
     public static void initialize() {
