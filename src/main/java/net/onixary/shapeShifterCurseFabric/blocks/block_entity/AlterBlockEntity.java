@@ -21,6 +21,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible, RecipeInput {
+public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible {
     // 进度锁是个不错的设计 能降低难度(毕竟之前做限制进度使用得上对应阶段的材料 有些材料是真不好量产 有这个就能用便宜材料了)
     public UUID lastUser;
     public AlterRecipe nowRecipe;
@@ -123,10 +124,10 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         return inventory.size();
     }
 
-    // RecipeInput（1.21.1）：getItem(int)/size()/isEmpty()
-    @Override
-    public int size() {
-        return this.inventory.size();
+    // 构造 3x3 的 RecipeInput（前 9 格）给 Recipe 匹配。
+    // AlterBlockEntity 自身不 implements RecipeInput，避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义。
+    private RecipeInput craftInput() {
+        return CraftingInput.of(3, 3, List.copyOf(this.inventory.subList(0, 9)));
     }
 
     @Override
@@ -202,11 +203,11 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             playerEntity = world.getPlayerByUUID(this.lastUser);
         }
         if (this.nowRecipe != null) {
-            if (this.nowRecipe.canCraft(playerEntity) && this.nowRecipe.matches(this, world)) {
+            if (this.nowRecipe.canCraft(playerEntity) && this.nowRecipe.matches(this.craftInput(), world)) {
                 return;
             }
         }
-        var alterRecipe = this.matchGetter.getRecipeFor(this, world);
+        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
         if (alterRecipe.isPresent() && alterRecipe.get().value().canCraft(playerEntity)) {
             this.nowRecipe = alterRecipe.get().value();
             this.nowRecipeHolder = alterRecipe.get();
@@ -229,7 +230,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.canCraft(playerEntity)) {
             return false;
         }
-        if (!nowRecipe.matches(this, world) && !nowRecipe.InputsCountEnough(this)) {
+        if (!nowRecipe.matches(this.craftInput(), world) && !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
         ItemStack output = this.nowRecipe.getResultItem(registryManager);
