@@ -2,7 +2,8 @@ package net.onixary.shapeShifterCurseFabric.blocks;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.dedicated.Settings;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -11,9 +12,13 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
+import net.onixary.shapeShifterCurseFabric.custom_ui.AlterCraftUIHandler;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,7 +48,7 @@ public class AlterBlock extends BaseEntityBlock {
         BlockEntity blockEntity = world.getBlockEntity(pos);
         if (blockEntity instanceof AlterBlockEntity alterBlockEntity) {
             alterBlockEntity.lastUser = player.getUUID();
-            // TODO 开启UI
+            player.openMenu(alterBlockEntity);
         }
     }
 
@@ -54,7 +59,32 @@ public class AlterBlock extends BaseEntityBlock {
 
     // 1.21 BaseEntityBlock 要求实现抽象的 codec()（用于 Block 的注册/网络同步）
     @Override
-    protected MapCodec<AlterBlock> codec() {
+    protected @NotNull MapCodec<AlterBlock> codec() {
         return Block.simpleCodec(AlterBlock::new);
+    }
+
+    @Override
+    public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
+        return checkType(world, type, RegCustomBlock.ALTER_BLOCK_ENTITY);
+    }
+
+    @Nullable
+    public static <T extends BlockEntity> BlockEntityTicker<T> checkType(Level world, BlockEntityType<T> givenType, BlockEntityType<? extends AlterBlockEntity> expectedType) {
+        return world.isClientSide ? null : checkType(givenType, expectedType, (world1, pos, state, blockEntity) -> {
+            blockEntity.tick(world1, pos, state, blockEntity);
+        });
+    }
+
+    @Override
+    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
+        if (!state.is(newState.getBlock())) {
+            BlockEntity blockEntity = world.getBlockEntity(pos);
+            if (blockEntity instanceof AlterBlockEntity alterBlockEntity) {
+                if (world instanceof ServerLevel) {
+                    Containers.dropContents(world, pos, alterBlockEntity);
+                }
+            }
+            super.onRemove(state, world, pos, newState, moved);
+        }
     }
 }

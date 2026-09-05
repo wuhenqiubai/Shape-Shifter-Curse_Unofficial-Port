@@ -23,6 +23,8 @@ import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntityRenderer;
@@ -321,6 +323,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		RegCustomBlock.ClientInit();
 		PatronUtils.OnClientInit();
 		AuthClient.init();
+		RegMenuScreen.init();
 	}
 
 	public static ShaderInstance getFurGradientShader() {

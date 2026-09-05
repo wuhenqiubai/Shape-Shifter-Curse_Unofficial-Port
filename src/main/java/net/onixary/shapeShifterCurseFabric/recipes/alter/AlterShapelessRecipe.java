@@ -50,7 +50,8 @@ public class AlterShapelessRecipe extends AlterRecipe {
     public boolean matches(RecipeInput recipeInput, Level level) {
         StackedContents recipeMatcher = new StackedContents();
         int i = 0;
-        for (int j = 0; j < recipeInput.size(); ++j) {
+
+        for(int j = 0; j < 9; ++j) {
             ItemStack itemStack = recipeInput.getItem(j);
             if (!itemStack.isEmpty()) {
                 ++i;

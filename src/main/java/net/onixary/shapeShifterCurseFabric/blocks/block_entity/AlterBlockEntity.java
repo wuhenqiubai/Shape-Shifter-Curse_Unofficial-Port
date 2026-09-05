@@ -15,11 +15,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.inventory.RecipeCraftingHolder;
 import net.minecraft.world.inventory.StackedContentsCompatible;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeInput;
@@ -28,6 +28,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
+import net.onixary.shapeShifterCurseFabric.custom_ui.AlterCraftUIHandler;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
@@ -45,8 +47,13 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     public AlterRecipe nowRecipe;
     public RecipeHolder<?> nowRecipeHolder;
     public int progress = 0;
+    public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
+    public int totalFuelTime = 0;  // Only Client
     public final NonNullList<ItemStack> inventory;
+
+    public boolean needCheckRecipe = true;
+    public final ContainerData propertyDelegate;
 
     public static final int[] TOP = {0, 1, 2, 3, 4, 5, 6, 7, 8};
     public static final int[] SIDE = {9};
@@ -72,27 +79,51 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         super(RegCustomBlock.ALTER_BLOCK_ENTITY, blockPos, blockState);
         this.inventory = NonNullList.withSize(11, ItemStack.EMPTY);
         this.matchGetter = RecipeManager.createCheck(RecipeUtils.ALTER_RECIPE);
-    }
+        this.propertyDelegate = new ContainerData() {
+            public int get(int index) {
+                switch (index) {
+                    case 0 -> {
+                        return AlterBlockEntity.this.progress;
+                    }
+                    case 1 -> {
+                        return AlterBlockEntity.this.totalProgress;
+                    }
+                    case 2 -> {
+                        return AlterBlockEntity.this.fuelTime;
+                    }
+                    case 3 -> {
+                        return AlterBlockEntity.this.totalFuelTime;
+                    }
+                    default -> {
+                        return 0;
+                    }
+                }
+            }
 
-    @Override
-    protected @NotNull NonNullList<ItemStack> getItems() {
-        return this.inventory;
-    }
+            public void set(int index, int value) {
+                switch (index) {
+                    case 0 -> AlterBlockEntity.this.progress = value;
+                    case 1 -> AlterBlockEntity.this.totalProgress = value;
+                    case 2 -> AlterBlockEntity.this.fuelTime = value;
+                    case 3 -> AlterBlockEntity.this.totalFuelTime = value;
+                }
 
-    @Override
-    protected void setItems(NonNullList<ItemStack> items) {
-        this.inventory.clear();
-        this.inventory.addAll(items);
+            }
+
+            public int size() {
+                return 4;
+            }
+        };
     }
 
     @Override
     protected @NotNull Component getDefaultName() {
-        return null;
+        return Component.literal("ALTER TEST NAME");
     }
 
     @Override
     protected @NotNull AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
-        return null;
+        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, syncId, playerInventory, this, ScreenHandlerContext.EMPTY, this.propertyDelegate);
     }
 
     @Override
@@ -207,10 +238,10 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 return;
             }
         }
-        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
-        if (alterRecipe.isPresent() && alterRecipe.get().value().canCraft(playerEntity)) {
-            this.nowRecipe = alterRecipe.get().value();
-            this.nowRecipeHolder = alterRecipe.get();
+        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getRecipeFor(this, world);
+        if (alterRecipe.isPresent() && alterRecipe.get().canCraft(playerEntity)) {
+            this.nowRecipe = alterRecipe.get();
+            this.totalProgress = this.nowRecipe.recipeTime();
         } else {
             this.nowRecipe = null;
             this.nowRecipeHolder = null;
@@ -276,6 +307,10 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     public void tick(Level world, BlockPos pos, BlockState state, AlterBlockEntity blockEntity) {
+        if (needCheckRecipe) {
+            this.checkRecipe();
+            needCheckRecipe = false;
+        }
         boolean itemChanged = false;
         boolean hasRecipe = this.nowRecipe != null;
         boolean hasFuel = this.fuelTime > 0;
@@ -285,6 +320,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 int fuelRealTime = getFuelTime(fuel);
                 if (fuelRealTime > 0) {
                     this.fuelTime = fuelRealTime;
+                    this.totalFuelTime = fuelRealTime;
                     fuel.shrink(1);
                     itemChanged = true;
                 }
@@ -295,7 +331,11 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.progress++;
             this.fuelTime--;
         } else {
-            this.progress = 0;
+            if (hasRecipe && this.progress > 0) {
+                this.progress --;
+            } else {
+                this.progress = 0;
+            }
             if (hasFuel) {
                 this.fuelTime--;
             }
@@ -322,7 +362,8 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         }
         this.fuelTime = nbt.getInt("FuelTime");
         this.progress = nbt.getInt("Process");
-        this.checkRecipe();
+        this.totalProgress = nbt.getInt("TotalProcess");
+        this.totalFuelTime = nbt.getInt("TotalFuelTime");
     }
 
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
@@ -333,5 +374,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         }
         nbt.putInt("FuelTime", this.fuelTime);
         nbt.putInt("Process", this.progress);
+        nbt.putInt("TotalProcess", this.totalProgress);
+        nbt.putInt("TotalFuelTime", this.totalFuelTime);
     }
 }
