@@ -13,7 +13,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -37,7 +37,7 @@ public class VirtualTotemPower extends CooldownPower {
     public final int priority;
     public final boolean highPriority;
     public final boolean lowPriority;
-    public static final HashMap<ResourceLocation, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
+    public static final HashMap<Identifier, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
 
     static {
         virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("default"), (Player playerEntity, ItemStack totemStack) -> {
@@ -62,7 +62,7 @@ public class VirtualTotemPower extends CooldownPower {
         });
     }
 
-    public ResourceLocation virtualTotemType;  // 用于播放动画
+    public Identifier virtualTotemType;  // 用于播放动画
     public ItemStack totemStack;  // 当VirtualTotemPowerID == 0时 模拟原版不死图腾
     private final List<Consumer<Entity>> entityAction;
     private final int totemHealth;
@@ -125,7 +125,7 @@ public class VirtualTotemPower extends CooldownPower {
         return null;
     }
 
-    public static void process_virtual_totem_type(@NotNull Player entity, ResourceLocation virtualTotemType, @Nullable ItemStack totemStack) {
+    public static void process_virtual_totem_type(@NotNull Player entity, Identifier virtualTotemType, @Nullable ItemStack totemStack) {
         Minecraft client = Minecraft.getInstance();
         if (virtualTotemTypeMap.containsKey(virtualTotemType)) {
             virtualTotemTypeMap.get(virtualTotemType).accept(entity, totemStack);

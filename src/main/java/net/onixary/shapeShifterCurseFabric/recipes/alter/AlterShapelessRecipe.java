@@ -12,13 +12,11 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public class AlterShapelessRecipe extends AlterRecipe {
     public final String group;
@@ -62,7 +60,7 @@ public class AlterShapelessRecipe extends AlterRecipe {
     }
 
     @Override
-    public ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
+    public @NonNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
         return this.result.copy();
     }
 
@@ -77,7 +75,7 @@ public class AlterShapelessRecipe extends AlterRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
         return RecipeSerializerRegister.ALTER_SHAPELESS_RECIPE;
     }
 
@@ -107,12 +105,12 @@ public class AlterShapelessRecipe extends AlterRecipe {
         );
 
         @Override
-        public MapCodec<AlterShapelessRecipe> codec() {
+        public @NonNull MapCodec<AlterShapelessRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, AlterShapelessRecipe> streamCodec() {
+        public @NonNull StreamCodec<RegistryFriendlyByteBuf, AlterShapelessRecipe> streamCodec() {
             return STREAM_CODEC;
         }
 

@@ -3,12 +3,12 @@ package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.monster.Spider;
+import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -33,7 +33,7 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
                 .add(Attributes.MOVEMENT_SPEED, 0.3f);
     }
 
-    public static boolean canCustomSpawn(EntityType<TransformativeSpiderEntity> type, LevelAccessor world, MobSpawnType spawnReason, BlockPos pos, RandomSource random) {
+    public static boolean canCustomSpawn(EntityType<TransformativeSpiderEntity> type, LevelAccessor world, EntitySpawnReason spawnReason, BlockPos pos, RandomSource random) {
         float Chance = ShapeShifterCurseFabric.commonConfig.transformativeSpiderSpawnChance;
         if (Chance <= 0.0f) { return false; }
         if (Chance >= 1.0f) { return true; }
@@ -71,7 +71,7 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
 
     @Override
     protected @NotNull ResourceKey<LootTable> getDefaultLootTable() {
-        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
+        Identifier id = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_spider");
         return ResourceKey.create(Registries.LOOT_TABLE, id);
     }
 }

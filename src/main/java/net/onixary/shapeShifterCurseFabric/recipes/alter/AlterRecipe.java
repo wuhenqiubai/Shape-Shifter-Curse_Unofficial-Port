@@ -5,15 +5,15 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.List;
 
 public abstract class AlterRecipe implements Recipe<RecipeInput> {
 
     @Override
-    public @NotNull RecipeType<?> getType() {
+    public @NonNull RecipeType<? extends Recipe<RecipeInput>> getType() {
         return RecipeUtils.ALTER_RECIPE;
     }
 

@@ -6,7 +6,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.Potion;
@@ -18,28 +18,28 @@ import static net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotio
 
 public class RegCustomPotions {
     public static final Potion MOONDUST_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "moondust_potion")), new Potion());
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "moondust_potion")), new Potion());
     public static final Potion BAT_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_bat_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_BAT_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_bat_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_BAT_0_POTION), 3600)));
     public static final Potion AXOLOTL_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_axolotl_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_AXOLOTL_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_axolotl_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_AXOLOTL_0_POTION), 3600)));
     public static final Potion OCELOT_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_ocelot_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_OCELOT_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_ocelot_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_OCELOT_0_POTION), 3600)));
     public static final Potion FAMILIAR_FOX_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_familiar_fox_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_FAMILIAR_FOX_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_familiar_fox_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_FAMILIAR_FOX_0_POTION), 3600)));
     public static final Potion SNOW_FOX_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_snow_fox_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_SNOW_FOX_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_snow_fox_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_SNOW_FOX_0_POTION), 3600)));
     public static final Potion ANUBIS_WOLF_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_anubis_wolf_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_ANUBIS_WOLF_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_anubis_wolf_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_ANUBIS_WOLF_0_POTION), 3600)));
     public static final Potion SPIDER_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_spider_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_SPIDER_0_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_spider_0_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_SPIDER_0_POTION), 3600)));
 
     public static final Potion ALLEY_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_allay_sp_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_ALLAY_SP_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_allay_sp_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_ALLAY_SP_POTION), 3600)));
     public static final Potion FERAL_CAT_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_feral_cat_sp_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_FERAL_CAT_SP_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_feral_cat_sp_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_FERAL_CAT_SP_POTION), 3600)));
     public static final Potion CUSTOM_STATUE_FORM_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "to_custom_statue_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_CUSTOM_STATUE_POTION), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "to_custom_statue_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TO_CUSTOM_STATUE_POTION), 3600)));
 
     /* 未支持数据包时代的占位形态 现在可以使用数据添加形态了
     // custom empty forms
@@ -61,7 +61,7 @@ public class RegCustomPotions {
     // other custom potions
     // feed potion can only be obtained via familiar_fox_2 and familiar_fox_3, no recipe
     public static final Potion FEED_POTION =
-            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, ResourceLocation.fromNamespaceAndPath(MOD_ID, "feed_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(FEED_EFFECT), 3600)));
+            Registry.register(BuiltInRegistries.POTION, ResourceKey.create(Registries.POTION, Identifier.fromNamespaceAndPath(MOD_ID, "feed_potion")), new Potion(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(FEED_EFFECT), 3600)));
 
     public static void registerPotions(){
 

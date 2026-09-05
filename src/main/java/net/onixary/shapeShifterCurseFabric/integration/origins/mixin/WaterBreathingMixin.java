@@ -10,7 +10,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.OriginsPowerTypes;
-import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModDamageSources;
+import net.onixary.shapeShifterCurseFabric.util.ModDamageSources;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

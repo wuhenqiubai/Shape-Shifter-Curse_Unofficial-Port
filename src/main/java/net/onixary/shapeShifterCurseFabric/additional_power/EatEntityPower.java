@@ -109,10 +109,8 @@ public class EatEntityPower extends Power {
             (data) -> new FoodProperties(
                     data.getInt("nutrition"),
                     data.getFloat("saturation"),
-                    data.getBoolean("can_always_eat"),
-                    1.6F,
-                    Optional.empty(),
-                    data.get("effects")),
+                    data.getBoolean("can_always_eat")
+            ),
             (data, food) -> {
                 SerializableData.Instance inst = data.new Instance();
                 inst.set("nutrition", food.nutrition());

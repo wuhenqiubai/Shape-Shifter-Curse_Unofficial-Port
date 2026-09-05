@@ -9,7 +9,7 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
@@ -32,7 +32,7 @@ public class WebComposterCategory extends AbstractRecipeCategory<WebComposterRec
         ((ITextWidget)builder.addText(text, this.getWidth() - 40, this.getHeight()).setPosition(12, 0)).setTextAlignment(HorizontalAlignment.CENTER).setTextAlignment(VerticalAlignment.CENTER).setColor(-8355712);
     }
 
-    public ResourceLocation getRegistryName(WebComposterRecipe recipe) {
+    public Identifier getRegistryName(WebComposterRecipe recipe) {
         return recipe.getUid();
     }
 }

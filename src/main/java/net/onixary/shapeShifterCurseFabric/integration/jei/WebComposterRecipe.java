@@ -6,7 +6,7 @@ import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.subtypes.UidContext;
 import mezz.jei.api.runtime.IIngredientManager;
 import mezz.jei.library.util.ResourceLocationUtil;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.blocks.WebComposterBlock;
@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 public class WebComposterRecipe {
     private final List<ItemStack> inputs;
     private final float chance;
-    private final ResourceLocation uid;
+    private final Identifier uid;
 
-    public WebComposterRecipe(ItemStack input, float chance, ResourceLocation uid) {
+    public WebComposterRecipe(ItemStack input, float chance, Identifier uid) {
         Preconditions.checkArgument(chance > 0.0F, "web_composting chance must be greater than 0");
         this.inputs = List.of(input);
         this.chance = chance;
@@ -37,7 +37,7 @@ public class WebComposterRecipe {
         return this.chance;
     }
 
-    public ResourceLocation getUid() {
+    public Identifier getUid() {
         return this.uid;
     }
 
@@ -50,7 +50,7 @@ public class WebComposterRecipe {
                     float chance = WebComposterBlock.getIncreaseChance(itemStack);
                     String ingredientUid = ingredientHelper.getUniqueId(itemStack, UidContext.Recipe);
                     String ingredientUidPath = ResourceLocationUtil.sanitizePath(ingredientUid);
-                    ResourceLocation recipeUid = ShapeShifterCurseFabric.identifier("jei/web_composting/" + ingredientUidPath);
+                    Identifier recipeUid = ShapeShifterCurseFabric.identifier("jei/web_composting/" + ingredientUidPath);
                     return new WebComposterRecipe(itemStack, chance, recipeUid);
                 })
                 .sorted(Comparator.comparingDouble(WebComposterRecipe::getChance))

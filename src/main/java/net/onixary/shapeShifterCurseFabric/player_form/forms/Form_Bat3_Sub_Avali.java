@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.UUID;
 
 public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, ModifyCapeRender {
-    public Form_Bat3_Sub_Avali(ResourceLocation formID) {
+    public Form_Bat3_Sub_Avali(Identifier formID) {
         super(formID, RegPlayerForms.BAT_3);
         this.removePower(ShapeShifterCurseFabric.identifier("form_bat_3_sky_speed"));
         this.removePower(ShapeShifterCurseFabric.identifier("form_bat_3_damage_up_when_no_sun"));
@@ -46,8 +46,8 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     }
 
     @Override
-    public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
-        return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
+        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
@@ -114,7 +114,7 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     public static final AbstractAnimStateController SWIM_CONTROLLER = new SwimAnimController(ANIM_FLOAT, null);
 
     @Override
-    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation animStateID) {
+    public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
             switch (animStateEnum) {
@@ -168,7 +168,7 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull ResourceLocation powerAnimID) {
+    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
             return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
         }

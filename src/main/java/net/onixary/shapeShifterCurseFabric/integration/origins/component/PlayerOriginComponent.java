@@ -252,7 +252,7 @@ public class PlayerOriginComponent implements OriginComponent {
                         if(powerComponent.hasPower(type)) {
                             Tag data = powerTag.get("Data");
                             try {
-                                powerComponent.getPower(type).fromTag(data, registryLookup);
+                                powerComponent.getPower(type).fromTag(data);
                             } catch(ClassCastException e) {
                                 // Occurs when power was overriden by data pack since last world load
                                 // to be a power type which uses different data class.

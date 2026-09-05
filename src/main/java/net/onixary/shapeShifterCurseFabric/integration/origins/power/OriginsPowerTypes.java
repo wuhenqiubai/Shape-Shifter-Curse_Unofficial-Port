@@ -9,7 +9,7 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -49,14 +49,14 @@ public class OriginsPowerTypes {
                 var values = new java.util.ArrayList<>();
                 registry.forEach(values::add);
                 for (var value : values) {
-                    ResourceLocation apoliId = switch (value) {
+                    Identifier apoliId = switch (value) {
                         case io.github.apace100.apoli.power.factory.PowerFactory pf -> pf.getSerializerId();
                         case io.github.apace100.apoli.power.factory.condition.ConditionFactory<?> cf -> cf.getSerializerId();
                         case io.github.apace100.apoli.power.factory.action.ActionFactory<?> af -> af.getSerializerId();
                         default -> null;
                     };
                     if (apoliId != null && "apoli".equals(apoliId.getNamespace())) {
-                        ResourceLocation originsId = Origins.identifier(apoliId.getPath());
+                        Identifier originsId = Origins.identifier(apoliId.getPath());
                         if (!registry.containsKey(originsId)) {
                             Registry.register(registry, originsId, value);
                         }

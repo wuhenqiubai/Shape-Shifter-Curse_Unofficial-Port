@@ -66,7 +66,7 @@ public abstract class AccessoryItem extends Item {
     public void onEquip(ItemStack stack, LivingEntity accessoryOwner, SlotData slotData) {
 /*
         if (accessoryOwner instanceof Player player) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
+            Identifier id = BuiltInRegistries.ITEM.getKey(this);
             if (TrinketUtils.getAccessoryMixinAuto(id)) {
                 TrinketUtils.ApplyAccessoryPowerOnEquip(player, id);
             }
@@ -78,7 +78,7 @@ public abstract class AccessoryItem extends Item {
     public void onUnequip(ItemStack stack, LivingEntity accessoryOwner, SlotData slotData) {
 /*
         if (accessoryOwner instanceof Player player) {
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
+            Identifier id = BuiltInRegistries.ITEM.getKey(this);
             if (TrinketUtils.getAccessoryMixinAuto(id)) {
                 TrinketUtils.ApplyAccessoryPowerOnUnEquip(player, id);
             }

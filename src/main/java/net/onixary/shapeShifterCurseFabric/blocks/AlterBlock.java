@@ -2,8 +2,6 @@ package net.onixary.shapeShifterCurseFabric.blocks;
 
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Containers;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -34,7 +32,7 @@ public class AlterBlock extends BaseEntityBlock {
 
 
     public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {
             this.openScreen(world, pos, player);
@@ -63,19 +61,7 @@ public class AlterBlock extends BaseEntityBlock {
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
-        return world.isClientSide ? null : createTickerHelper(type, RegCustomBlock.ALTER_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> blockEntity.tick(world1, pos, blockState, blockEntity));
+        return world.isClientSide() ? null : createTickerHelper(type, RegCustomBlock.ALTER_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> blockEntity.tick(world1, pos, blockState, blockEntity));
     }
 
-    @Override
-    public void onRemove(BlockState state, Level world, BlockPos pos, BlockState newState, boolean moved) {
-        if (!state.is(newState.getBlock())) {
-            BlockEntity blockEntity = world.getBlockEntity(pos);
-            if (blockEntity instanceof AlterBlockEntity alterBlockEntity) {
-                if (world instanceof ServerLevel) {
-                    Containers.dropContents(world, pos, alterBlockEntity);
-                }
-            }
-            super.onRemove(state, world, pos, newState, moved);
-        }
-    }
 }

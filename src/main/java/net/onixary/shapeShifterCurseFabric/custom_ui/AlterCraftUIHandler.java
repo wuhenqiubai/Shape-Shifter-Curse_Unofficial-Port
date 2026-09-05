@@ -2,13 +2,14 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
+import net.minecraft.recipebook.ServerPlaceRecipe;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
@@ -16,7 +17,9 @@ import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.AlterOutputSlot;
 import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
 import org.jetbrains.annotations.NotNull;
 
-public class AlterCraftUIHandler extends RecipeBookMenu<RecipeInput, AlterRecipe> {
+import java.util.List;
+
+public class AlterCraftUIHandler extends RecipeBookMenu {
     public final Inventory playerInventory;
     public final Container alterBlockEntity;
     public final ContainerLevelAccess context;
@@ -60,58 +63,49 @@ public class AlterCraftUIHandler extends RecipeBookMenu<RecipeInput, AlterRecipe
     }
 
     @Override
-    public void fillCraftSlotsStackedContents(StackedContents finder) {
+    public void fillCraftSlotsStackedContents(StackedItemContents finder) {
         if (this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
             realAlter.fillStackedContents(finder);
         }
     }
 
-    @Override
-    public void clearCraftingContent() {
-        for (int i = 0; i < this.alterBlockEntity.getContainerSize(); ++i) {
-            if (i == 9) {
-                continue;
-            }
-            this.getSlot(i).set(ItemStack.EMPTY);
-        }
-    }
-
-    @Override
-    public boolean recipeMatches(RecipeHolder<AlterRecipe> recipeHolder) {
-        if (this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
-            return recipeHolder.value().matches(realAlter.craftInput(), world);
-        }
-        return false;
-    }
-
-    @Override
-    public int getResultSlotIndex() {
-        return 10;
-    }
-
-    @Override
     public int getGridWidth() {
         return 3;
     }
 
-    @Override
     public int getGridHeight() {
         return 3;
     }
 
     @Override
-    public int getSize() {
-        return 11;
+    public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, ServerLevel serverLevel, Inventory inventory) {
+        RecipeHolder<AlterRecipe> recipeHolder2 = (RecipeHolder<AlterRecipe>) recipeHolder;
+        List<Slot> inputGrid = this.slots.subList(0, 9);
+        return ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<AlterRecipe>() {
+            @Override
+            public void fillCraftSlotsStackedContents(StackedItemContents contents) {
+                AlterCraftUIHandler.this.fillCraftSlotsStackedContents(contents);
+            }
+            @Override
+            public void clearCraftingContent() {
+                for (int i = 0; i < AlterCraftUIHandler.this.alterBlockEntity.getContainerSize(); ++i) {
+                    if (i == 9) continue;
+                    AlterCraftUIHandler.this.getSlot(i).set(ItemStack.EMPTY);
+                }
+            }
+            @Override
+            public boolean recipeMatches(RecipeHolder<AlterRecipe> r) {
+                if (AlterCraftUIHandler.this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
+                    return r.value().matches(realAlter.craftInput(), AlterCraftUIHandler.this.world);
+                }
+                return false;
+            }
+        }, getGridWidth(), getGridHeight(), inputGrid, inputGrid, inventory, recipeHolder2, bl, bl2);
     }
 
     @Override
     public @NotNull RecipeBookType getRecipeBookType() {
         return RecipeBookType.CRAFTING;
-    }
-
-    @Override
-    public boolean shouldMoveToInventory(int index) {
-        return index != this.getResultSlotIndex();
     }
 
     @Override

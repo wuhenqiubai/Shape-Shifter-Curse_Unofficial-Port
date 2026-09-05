@@ -17,7 +17,7 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -128,7 +128,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Bat
     public static final EntityType<TransformativeBatEntity> T_BAT = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
+            Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
             FabricEntityTypeBuilder.create(MobCategory.AMBIENT, TransformativeBatEntity::new)
                     .dimensions(EntityDimensions.fixed(0.5f, 0.9f))
                     .build()
@@ -136,7 +136,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Axolotl
     public static final EntityType<TransformativeAxolotlEntity> T_AXOLOTL = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
+            Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
             FabricEntityTypeBuilder.create(MobCategory.AXOLOTLS, TransformativeAxolotlEntity::new)
                     .dimensions(EntityDimensions.fixed(0.75f, 0.42f))
                     .build()
@@ -144,7 +144,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Ocelot
     public static final EntityType<TransformativeOcelotEntity> T_OCELOT = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
+            Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
             FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeOcelotEntity::new)
                     .dimensions(EntityDimensions.fixed(0.6f, 0.7f))
                     .build()
@@ -152,7 +152,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
     public static final EntityType<TransformativeWolfEntity> T_WOLF = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
+            Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
             FabricEntityTypeBuilder.create(MobCategory.CREATURE, TransformativeWolfEntity::new)
                 .dimensions(EntityDimensions.fixed(0.6f, 0.85f))
                 .build()
@@ -160,7 +160,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
     public static final EntityType<TransformativeSpiderEntity> T_SPIDER = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
-            ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
+            Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
             FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeSpiderEntity::new)
                     .dimensions(EntityDimensions.fixed(0.7f, 0.45f))
                     .build()
@@ -170,8 +170,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     private int save_timer = 0;
 
 
-    public static ResourceLocation identifier(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MOD_ID, path);
+    public static Identifier identifier(String path) {
+        return Identifier.fromNamespaceAndPath(MOD_ID, path);
     }
 
 
@@ -273,12 +273,12 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> ShapeShifterCurseCommand.register(dispatcher));
         ArgumentTypeRegistry.registerArgumentType(
-                ResourceLocation.fromNamespaceAndPath(MOD_ID, "form_argument_type"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "form_argument_type"),
                 FormArgumentType.class,
                 new FormArgumentType.Form_ArgumentType_Serializer()
         );
         ArgumentTypeRegistry.registerArgumentType(
-                ResourceLocation.fromNamespaceAndPath(MOD_ID, "string_enum_argument_type"),
+                Identifier.fromNamespaceAndPath(MOD_ID, "string_enum_argument_type"),
                 MiscArgumentType.Enum_ArgumentType.class,
                 new MiscArgumentType.Enum_ArgumentType_Serializer()
         );

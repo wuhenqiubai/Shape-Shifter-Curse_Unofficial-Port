@@ -1,15 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.blocks.block_entity;
 
 import net.minecraft.core.*;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +20,8 @@ import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.custom_ui.AlterCraftUIHandler;
 import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
@@ -53,7 +55,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     public static final HashMap<Item, Integer> fuelTimeMap = new HashMap<>();
 
-    private final RecipeManager.CachedCheck<RecipeInput, ? extends AlterRecipe> matchGetter;
+    private final RecipeManager.CachedCheck<RecipeInput, AlterRecipe> matchGetter;
 
     static {
         fuelTimeMap.put(RegCustomItem.UNTREATED_MOONDUST, 800);
@@ -214,7 +216,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     @Override
-    public void fillStackedContents(StackedContents finder) {
+    public void fillStackedContents(StackedItemContents finder) {
         for(ItemStack itemStack : this.inventory) {
             finder.accountStack(itemStack);
         }
@@ -245,11 +247,17 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.nowRecipe = null;
             this.totalProgress = 0;
         }
-        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
+        if (!(world instanceof ServerLevel serverLevel)) {
+            this.nowRecipe = null;
+            this.totalProgress = 0;
+            this.progress = 0;
+            return;
+        }
+        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), serverLevel);
         if (alterRecipe.isPresent()) {
             this.nowRecipe = alterRecipe.get().value();
             this.totalProgress = this.nowRecipe.recipeTime();
-            if (!(world != null && this.canCraftRecipe(world.registryAccess()))) {
+            if (!this.canCraftRecipe(world.registryAccess())) {
                 this.nowRecipe = null;
                 this.totalProgress = 0;
             }
@@ -275,7 +283,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.matches(this.craftInput(), world) || !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
-        ItemStack output = this.nowRecipe.getResultItem(registryManager);
+        ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
         if (output.isEmpty() || this.inventory.get(10).isEmpty()) {
             return true;
         }
@@ -291,7 +299,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     private boolean craftRecipe(RegistryAccess registryManager) {
         if (canCraftRecipe(registryManager)) {
-            ItemStack output = this.nowRecipe.getResultItem(registryManager);
+            ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
             ItemStack outputSlot = this.inventory.get(10);
             if (outputSlot.isEmpty()) {
                 this.inventory.set(10, output.copy());
@@ -364,29 +372,25 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         }
     }
 
-    public void loadAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
-        super.loadAdditional(nbt, provider);
-        ContainerHelper.loadAllItems(nbt, this.inventory, provider);
-        if (nbt.contains("LastUser")) {
-            this.lastUser = nbt.getUUID("LastUser");
-        } else {
-            this.lastUser = null;
-        }
-        this.fuelTime = nbt.getInt("FuelTime");
-        this.progress = nbt.getInt("Process");
-        this.totalProgress = nbt.getInt("TotalProcess");
-        this.totalFuelTime = nbt.getInt("TotalFuelTime");
+    @Override
+    protected void loadAdditional(ValueInput valueInput) {
+        super.loadAdditional(valueInput);
+        ContainerHelper.loadAllItems(valueInput, this.inventory);
+        this.lastUser = valueInput.read("LastUser", UUIDUtil.CODEC).orElse(null);
+        this.fuelTime = valueInput.getIntOr("FuelTime", 0);
+        this.progress = valueInput.getIntOr("Process", 0);
+        this.totalProgress = valueInput.getIntOr("TotalProcess", 0);
+        this.totalFuelTime = valueInput.getIntOr("TotalFuelTime", 0);
     }
 
-    protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
-        super.saveAdditional(nbt, provider);
-        ContainerHelper.saveAllItems(nbt, this.inventory, provider);
-        if (this.lastUser != null) {
-            nbt.putUUID("LastUser", this.lastUser);
-        }
-        nbt.putInt("FuelTime", this.fuelTime);
-        nbt.putInt("Process", this.progress);
-        nbt.putInt("TotalProcess", this.totalProgress);
-        nbt.putInt("TotalFuelTime", this.totalFuelTime);
+    @Override
+    protected void saveAdditional(ValueOutput valueOutput) {
+        super.saveAdditional(valueOutput);
+        ContainerHelper.saveAllItems(valueOutput, this.inventory);
+        valueOutput.storeNullable("LastUser", UUIDUtil.CODEC, this.lastUser);
+        valueOutput.putInt("FuelTime", this.fuelTime);
+        valueOutput.putInt("Process", this.progress);
+        valueOutput.putInt("TotalProcess", this.totalProgress);
+        valueOutput.putInt("TotalFuelTime", this.totalFuelTime);
     }
 }

@@ -3,14 +3,14 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
 
-    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/alter_craft_ui.png");
+    private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/alter_craft_ui.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
     private int baseX;

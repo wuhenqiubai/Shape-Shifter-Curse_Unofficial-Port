@@ -8,14 +8,11 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeSerializer;
-import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 public class AlterShapedRecipe extends AlterRecipe {
     public final String group;
@@ -95,7 +92,7 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public RecipeSerializer<?> getSerializer() {
+    public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
         return RecipeSerializerRegister.ALTER_SHAPED_RECIPE;
     }
 

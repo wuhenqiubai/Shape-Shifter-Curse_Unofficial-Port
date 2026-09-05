@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -18,7 +18,7 @@ public class RecipeSerializerRegister {
         // 用于加载静态注册
     }
 
-    public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(ResourceLocation id, S serializer) {
+    public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(Identifier id, S serializer) {
         return (S)(Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, id, serializer));
     };
 }

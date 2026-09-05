@@ -11,7 +11,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
@@ -583,9 +583,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -600,9 +600,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -617,9 +617,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
@@ -629,7 +629,7 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static final ResourceLocation NO_ID = ShapeShifterCurseFabric.identifier("empty");
+    private static final Identifier NO_ID = ShapeShifterCurseFabric.identifier("empty");
 
     private static int FC_Config(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
@@ -646,9 +646,9 @@ public class ShapeShifterCurseCommand {
         if (player == null) {
             return 0;
         }
-        ResourceLocation formID = null;
+        Identifier formID = null;
         try {
-            formID = commandContext.getArgument("form", ResourceLocation.class);
+            formID = commandContext.getArgument("form", Identifier.class);
         } catch (Exception e) {
             formID = FormUtils.getPlayerForm(player).getFormID();
         }
