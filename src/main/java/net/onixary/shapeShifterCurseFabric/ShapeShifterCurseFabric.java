@@ -9,21 +9,20 @@ import net.fabricmc.fabric.api.entity.event.v1.EntitySleepEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
@@ -65,7 +64,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.recipes.BrewingRecipeReloadListener;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
-import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
@@ -125,45 +123,49 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = CriteriaTriggers.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());
 
     // Reg custom entities
+    private static ResourceKey<EntityType<?>> entityKey(String path) {
+        return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, path));
+    }
+
     // Bat
     public static final EntityType<TransformativeBatEntity> T_BAT = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_bat"),
-            FabricEntityTypeBuilder.create(MobCategory.AMBIENT, TransformativeBatEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.5f, 0.9f))
-                    .build()
+            EntityType.Builder.of(TransformativeBatEntity::new, MobCategory.AMBIENT)
+                    .sized(0.5F, 0.9F)
+                    .build(entityKey("t_bat"))
     );
     // Axolotl
     public static final EntityType<TransformativeAxolotlEntity> T_AXOLOTL = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_axolotl"),
-            FabricEntityTypeBuilder.create(MobCategory.AXOLOTLS, TransformativeAxolotlEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.75f, 0.42f))
-                    .build()
+            EntityType.Builder.of(TransformativeAxolotlEntity::new, MobCategory.AXOLOTLS)
+                    .sized(0.75F, 0.42F)
+                    .build(entityKey("t_axolotl"))
     );
     // Ocelot
     public static final EntityType<TransformativeOcelotEntity> T_OCELOT = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_ocelot"),
-            FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeOcelotEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.6f, 0.7f))
-                    .build()
+            EntityType.Builder.of(TransformativeOcelotEntity::new, MobCategory.MONSTER)
+                    .sized(0.6F, 0.7F)
+                    .build(entityKey("t_ocelot"))
     );
 
     public static final EntityType<TransformativeWolfEntity> T_WOLF = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_wolf"),
-            FabricEntityTypeBuilder.create(MobCategory.CREATURE, TransformativeWolfEntity::new)
-                .dimensions(EntityDimensions.fixed(0.6f, 0.85f))
-                .build()
+            EntityType.Builder.of(TransformativeWolfEntity::new, MobCategory.CREATURE)
+                .sized(0.6F, 0.85F)
+                .build(entityKey("t_wolf"))
     );
 
     public static final EntityType<TransformativeSpiderEntity> T_SPIDER = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "t_spider"),
-            FabricEntityTypeBuilder.create(MobCategory.MONSTER, TransformativeSpiderEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.7f, 0.45f))
-                    .build()
+            EntityType.Builder.of(TransformativeSpiderEntity::new, MobCategory.MONSTER)
+                    .sized(1.4F, 0.9F)
+                    .build(entityKey("t_spider"))
     );
 
 
@@ -227,7 +229,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         // network package
         ModPacketsC2S.register();
-        ModPacketsS2CServer.registerServerS2C();
 
         //TransformFX.INSTANCE.registerCallbacks();
         TransformOverlay.INSTANCE.init();
@@ -239,7 +240,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         // 注册配方
         RecipeSerializerRegister.register();
-        RecipeUtils.register();
 
         ManaRegistries.register();
         DefaultAccessory.init();
@@ -300,6 +300,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
                 onPlayerEndSleeping(entity);
             }
         });
+        /* TODO: ALLOW_SLEEP_TIME无了，到时候找个替代(划掉），写了个mixin替代
         // allow sleep when status effect is active
         EntitySleepEvents.ALLOW_SLEEP_TIME.register((entity, world, pos) -> {
             if (entity instanceof Player) {
@@ -312,6 +313,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
             }
             return InteractionResult.PASS;
         });
+        */
 
         /// Debug instinct: unregister this to see instinct debug info
         //InstinctDebugHUD.register();

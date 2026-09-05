@@ -13,7 +13,6 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,11 +23,8 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 public class EatEntityPower extends Power {
     public boolean mustEmptyHand = true;
@@ -61,51 +57,12 @@ public class EatEntityPower extends Power {
 
     public record FoodPair(Identifier entity, FoodProperties food) {}
 
-    // 1.21.1: FoodProperties 是 6 字段 record（nutrition/saturation/canAlwaysEat/eatSeconds/usingConvertsTo/effects）。
-    // Calio-Legacy 的 FOOD_COMPONENT 返回 DataComponentPatch 且 write 不完整（meat 字段报错导致 power_list 编码崩），
-    // 改用自定义类型直接解析 FoodProperties，read/write 完整。
-    public static final SerializableDataType<FoodProperties.PossibleEffect> POSSIBLE_EFFECT_TYPE = SerializableDataType.compound(
-            FoodProperties.PossibleEffect.class,
-            new SerializableData()
-                    .add("effect", SerializableDataTypes.STATUS_EFFECT_INSTANCE)
-                    .add("probability", SerializableDataTypes.FLOAT),
-            (data) -> createPossibleEffect(data.get("effect"), data.getFloat("probability")),
-            (data, possibleEffect) -> {
-                SerializableData.Instance inst = data.new Instance();
-                inst.set("effect", possibleEffect.effect());
-                inst.set("probability", possibleEffect.probability());
-                return inst;
-            }
-    );
-
-    // NeoForge/Connector 兼容：NeoForge 重编译把 FoodProperties$PossibleEffect 的 canonical 构造器改成
-    // (Supplier<MobEffectInstance>, float)（effect 延迟实例化），并保留 private (MobEffectInstance, float) 兼容构造器。
-    // 直接 new 在 NeoForge 下撞 private 构造器 IllegalAccessError。改用反射选 public canonical 构造器
-    // （Fabric=(MobEffectInstance,float)，NeoForge=(Supplier,float)），跨环境安全。
-    private static FoodProperties.PossibleEffect createPossibleEffect(MobEffectInstance effect, float probability) {
-        try {
-            Constructor<FoodProperties.PossibleEffect> c = FoodProperties.PossibleEffect.class.getConstructor(Supplier.class, float.class);
-            return c.newInstance((Supplier<MobEffectInstance>) () -> effect, probability);
-        } catch (NoSuchMethodException ignored) {
-            // Fabric：canonical 构造器是 (MobEffectInstance, float)
-            try {
-                Constructor<FoodProperties.PossibleEffect> c = FoodProperties.PossibleEffect.class.getConstructor(MobEffectInstance.class, float.class);
-                return c.newInstance(effect, probability);
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to create FoodProperties.PossibleEffect", e);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to create FoodProperties.PossibleEffect", e);
-        }
-    }
-
     public static final SerializableDataType<FoodProperties> FOOD_TYPE = SerializableDataType.compound(
             FoodProperties.class,
             new SerializableData()
                     .add("nutrition", SerializableDataTypes.INT)
                     .add("saturation", SerializableDataTypes.FLOAT)
-                    .add("can_always_eat", SerializableDataTypes.BOOLEAN, false)
-                    .add("effects", SerializableDataType.list(POSSIBLE_EFFECT_TYPE), List.of()),
+                    .add("can_always_eat", SerializableDataTypes.BOOLEAN, false),
             (data) -> new FoodProperties(
                     data.getInt("nutrition"),
                     data.getFloat("saturation"),
@@ -116,7 +73,6 @@ public class EatEntityPower extends Power {
                 inst.set("nutrition", food.nutrition());
                 inst.set("saturation", food.saturation());
                 inst.set("can_always_eat", food.canAlwaysEat());
-                inst.set("effects", food.effects());
                 return inst;
             }
     );

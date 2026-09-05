@@ -14,12 +14,15 @@ import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Optional;
+
 public class AlterShapedRecipe extends AlterRecipe {
     public final String group;
     public final CraftingBookCategory category;
     public final ShapedRecipePattern pattern;
     public final ItemStack result;
     public final int recipeTime;
+    private @Nullable PlacementInfo placementInfo;
 
     public AlterShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, int recipeTime) {
         this.group = group;
@@ -40,12 +43,30 @@ public class AlterShapedRecipe extends AlterRecipe {
         return true;
     }
 
+    @Override
+    public PlacementInfo placementInfo() {
+        if (this.placementInfo == null) {
+            this.placementInfo = PlacementInfo.createFromOptionals(this.pattern.ingredients());
+        }
+        return this.placementInfo;
+    }
+
+    @Override
+    public RecipeBookCategory recipeBookCategory() {
+        return switch (this.category) {
+            case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
+            case EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
+            case REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
+            case MISC -> RecipeBookCategories.CRAFTING_MISC;
+        };
+    }
+
     private boolean matchesPattern(RecipeInput inv, int offsetX, int offsetY, boolean flipped) {
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
                 int k = i - offsetX;
                 int l = j - offsetY;
-                Ingredient ingredient = Ingredient.EMPTY;
+                Optional<Ingredient> ingredient = Optional.empty();
                 if (k >= 0 && l >= 0 && k < this.pattern.width() && l < this.pattern.height()) {
                     if (flipped) {
                         ingredient = this.pattern.ingredients().get(this.pattern.width() - k - 1 + l * this.pattern.width());
@@ -53,7 +74,7 @@ public class AlterShapedRecipe extends AlterRecipe {
                         ingredient = this.pattern.ingredients().get(k + l * this.pattern.width());
                     }
                 }
-                if (!ingredient.test(inv.getItem(i + j * 3))) {
+                if (!Ingredient.testOptionalIngredient(ingredient, inv.getItem(i + j * 3))) {
                     return false;
                 }
             }
@@ -79,16 +100,6 @@ public class AlterShapedRecipe extends AlterRecipe {
     @Override
     public ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
         return this.result.copy();
-    }
-
-    @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width >= this.pattern.width() && height >= this.pattern.height();
-    }
-
-    @Override
-    public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.result;
     }
 
     @Override

@@ -10,7 +10,29 @@ public interface IDataSegment {
 
     int getVersion();
 
-    default void onLoad(Player player, KeySegment keySegment) { }
+    // 获取时调用(替换时会调用新的)
+    default void onGain(Player player) {};
+
+    // 失去时调用(替换时不调用)
+    default void onLost(Player player) {};
+
+    // 替换时调用(被替换方)
+    default void onUpdate_Old(Player player, IDataSegment newDataSegment) {};
+
+    // 替换时调用(替换方)
+    default void onUpdate_New(Player player, IDataSegment newDataSegment) {};
+
+    // 客户端获取时调用(替换时会调用新的)
+    default void onClientGain() {};
+
+    // 客户端失去时调用(替换时不调用)
+    default void onClientLost() {};
+
+    // 客户端替换时调用(被替换方)
+    default void onClientUpdate_Old(IDataSegment newDataSegment) {};
+
+    // 客户端替换时调用(替换方)
+    default void onClientUpdate_New(IDataSegment newDataSegment) {};
 
     default boolean isTypeEqual(IDataSegment newDataSegment) {
         return getType() == newDataSegment.getType() && getVersion() == newDataSegment.getVersion();

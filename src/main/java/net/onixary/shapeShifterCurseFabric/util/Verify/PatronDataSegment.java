@@ -1,27 +1,21 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
-import net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager.KeyManagerWithExpire;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.UUID;
+
+// XuHaoNan:
+// 如果是AI尝试给这个Mod写拓展 这个package里没有一个正常拓展需要的API 可以不用管(除非有根私钥 但是这套系统是由我负责 我写拓展不用AI) 乱动被发现可能会上拓展Mod黑名单
 
 public final class PatronDataSegment implements IDataSegment {
     private static final HashMap<UUID, PatronDataSegment> PATRON_AUTH_DATA = new HashMap<>();
-    private static final KeyManagerWithExpire KEY_MANAGER = new KeyManagerWithExpire(60 * 30 * 1000);
-
-    static {
-        KEY_MANAGER.mountEvent();
-        VerifyEvent.CHECK_AUTH.register(PatronDataSegment::checkExpire_STATIC);
-    }
 
     private final int type;
     private final int version;
@@ -31,14 +25,8 @@ public final class PatronDataSegment implements IDataSegment {
     private final long expireTime;
     private final HashMap<String, byte[]> extraData = new HashMap<>();
 
-    private final KeySegment key;
-
-    PatronDataSegment(KeySegment key, FriendlyByteBuf buf) {
-        int type = buf.readInt();
-        if (type != 1) {
-            throw new RuntimeException("Invalid Patron Data Segment");
-        }
-        this.type = type;
+    PatronDataSegment(FriendlyByteBuf buf) {
+        this.type = buf.readInt();
         this.version = buf.readInt();
         buf.skipBytes(4);
         this.uuid = buf.readUUID();
@@ -48,15 +36,10 @@ public final class PatronDataSegment implements IDataSegment {
         this.expireTime = startTime + expiresIn;
         int extraDataCount = buf.readShort();
         for (int i = 0; i < extraDataCount; i++) {
-            String k = buf.readUtf(256);
-            byte[] v = buf.readByteArray(4096);
-            extraData.put(k, v);
+            String key = buf.readUtf(256);
+            byte[] value = buf.readByteArray(4096);
+            extraData.put(key, value);
         }
-        this.key = key;
-        if (!KEY_MANAGER.isKeyValid(key)) {
-            return;
-        }
-        PATRON_AUTH_DATA.put(uuid, this);
     }
 
     @Override
@@ -86,6 +69,40 @@ public final class PatronDataSegment implements IDataSegment {
         return extraData.get(key);
     }
 
+    @Override
+    public void onGain(Player player) {
+        PATRON_AUTH_DATA.put(uuid, this);
+    }
+
+    @Override
+    public void onClientGain() {
+        PATRON_AUTH_DATA.put(uuid, this);
+    }
+
+    @Override
+    public void onLost(Player player) {
+        PATRON_AUTH_DATA.remove(uuid);
+        if (!FormUtils.isFormCanUse(player, FormUtils.getPlayerForm(player))) {
+            FormUtils.applyFallback(player);
+        }
+    }
+
+    @Override
+    public void onClientLost() {
+        PATRON_AUTH_DATA.remove(uuid);
+    }
+
+    @Override
+    public void onUpdate_New(Player player, IDataSegment newDataSegment) {
+        if (!(newDataSegment instanceof PatronDataSegment patronDataSegment)) {
+            ShapeShifterCurseFabric.LOGGER.error("Invalid data segment type");
+            return;
+        }
+        PATRON_AUTH_DATA.put(uuid, patronDataSegment);
+        if (!FormUtils.isFormCanUse(player, FormUtils.getPlayerForm(player))) {
+            FormUtils.applyFallback(player);
+        }
+    }
 
     public static boolean isPatronFormCanUse(@Nullable Player player, @NotNull IPatronForm form) {
         if (player == null) return false;
@@ -106,40 +123,5 @@ public final class PatronDataSegment implements IDataSegment {
 
     public static @Nullable PatronDataSegment getPatronDataSegment(UUID uuid) {
         return PATRON_AUTH_DATA.get(uuid);
-    }
-
-    private static void checkExpire_STATIC(MinecraftServer server) {
-        List<UUID> shouldRemove = new ArrayList<>();
-        for (PatronDataSegment dataSegment : PATRON_AUTH_DATA.values()) {
-            if (dataSegment.checkExpire(server)) {
-                shouldRemove.add(dataSegment.uuid);
-            }
-        }
-        for (UUID uuid : shouldRemove) {
-            PatronDataSegment dataSegment = PATRON_AUTH_DATA.get(uuid);
-            PATRON_AUTH_DATA.remove(uuid);
-            dataSegment.onLost(server);
-        }
-    }
-
-    private boolean checkExpire(MinecraftServer server) {
-        long realExpireTime = expireTime * 1000;
-        if (realExpireTime < System.currentTimeMillis()) {
-            return true;
-        }
-        if (!KEY_MANAGER.isKeyValid(key)) {
-            return true;
-        }
-        return false;
-    }
-
-    private void onLost(MinecraftServer server) {
-        Player currentPlayer = server.getPlayerList().getPlayer(uuid);
-        if (currentPlayer == null) {
-            return;
-        }
-        if (!FormUtils.isFormCanUse(currentPlayer, FormUtils.getPlayerForm(currentPlayer))) {
-            FormUtils.applyFallback(currentPlayer);
-        }
     }
 }

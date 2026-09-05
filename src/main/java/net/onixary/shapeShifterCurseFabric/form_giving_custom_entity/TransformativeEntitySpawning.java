@@ -19,10 +19,8 @@ import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureSpawnOverride;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TransformativeAxolotlEntity;
-import net.onixary.shapeShifterCurseFabric.mixin.accessor.StructureAccessor;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
-import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider.TransformativeSpiderEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
 
 import java.util.HashMap;
@@ -91,13 +89,6 @@ public class TransformativeEntitySpawning {
                 1,
                 2
         );
-        // T_SPIDER
-        SpawnPlacements.register(
-                ShapeShifterCurseFabric.T_SPIDER,
-                SpawnPlacementTypes.ON_GROUND,
-                Heightmap.Types.MOTION_BLOCKING_NO_LEAVES,
-                TransformativeSpiderEntity::canCustomSpawn
-        );
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 1. 在沙漠神殿添加狼生成
@@ -135,8 +126,6 @@ public class TransformativeEntitySpawning {
             .generationStep(structure.step())
             .terrainAdapation(structure.terrainAdaptation())
             .build();
-        // NeoForge/Connector 兼容：Structure.settings 是 private final，NeoForge 下 accesswidener 不生效 → IllegalAccessError。
-        // 改用 @Accessor mixin（StructureAccessor，@Accessor("settings") + @Mutable），跨 Fabric/NeoForge 统一。
-        ((StructureAccessor) structure).ssc_setSettings(newSettings);
+        structure.settings = newSettings;
     }
 }

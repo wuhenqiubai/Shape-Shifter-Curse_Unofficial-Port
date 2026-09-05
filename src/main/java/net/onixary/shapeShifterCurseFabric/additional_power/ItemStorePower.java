@@ -120,8 +120,9 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
 
 
     @Override
-    public Tag toTag(HolderLookup.Provider registries) {
+    public Tag toTag() {
         CompoundTag tag = new CompoundTag();
+        HolderLookup.Provider registries = this.entity.registryAccess();
         ItemStack.CODEC.encodeStart(registries.createSerializationContext(NbtOps.INSTANCE), this.storedItem)
                 .result()
                 .ifPresent(nbtElement -> tag.put("stored_item", nbtElement));
@@ -130,8 +131,9 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider registries) {
+    public void fromTag(Tag tag) {
         if (tag instanceof CompoundTag compound) {
+            HolderLookup.Provider registries = this.entity.registryAccess();
             Tag itemNbt = compound.get("stored_item");
             if (itemNbt != null) {
                 ItemStack.CODEC.parse(registries.createSerializationContext(NbtOps.INSTANCE), itemNbt)

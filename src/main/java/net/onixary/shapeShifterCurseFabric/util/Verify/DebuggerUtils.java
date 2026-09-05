@@ -4,6 +4,8 @@ package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.Permission;
+import net.minecraft.server.permissions.PermissionLevel;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +15,7 @@ public class DebuggerUtils {
 
     public static int getDebuggerLevel(@Nullable CommandContext<CommandSourceStack> commandContext, @Nullable Player player) {
         int maxLevel = 0;
-        if (commandContext != null && commandContext.getSource().hasPermission(2)) {
+        if (commandContext != null && commandContext.getSource().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             maxLevel = 1;
         }
         if (ShapeShifterCurseFabric.commonConfig.enableDebugCommand) {

@@ -35,8 +35,8 @@ public abstract class LodeStoneIntegrationMixin {
             if (fc == null) {
                 return;
             }
-            this.useItemRemaining = fc.eatSeconds() < 1.0f ? 16 : 32;
-            if (!playerEntity.level().isClientSide) {
+            this.useItemRemaining = 32;
+            if (!playerEntity.level().isClientSide()) {
                 this.setLivingEntityFlag(1, true);
                 this.setLivingEntityFlag(2, interactionHand == InteractionHand.OFF_HAND);
                 playerEntity.gameEvent(GameEvent.ITEM_INTERACT_START);

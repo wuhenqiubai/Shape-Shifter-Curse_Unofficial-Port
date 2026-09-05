@@ -32,7 +32,7 @@ public final class DebuggerDataSegment implements IDataSegment {
         if (realExpireTime < System.currentTimeMillis()) {
             return;
         }
-        if (AuthUtils.isKeyValid(key)) {
+        if (AuthUtils.isKeyCanUse(key)) {
             DEBUGGER_AUTH_DATA.put(uuid, this);
         }
     }

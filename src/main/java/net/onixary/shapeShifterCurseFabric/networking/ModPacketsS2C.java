@@ -633,10 +633,8 @@ public class ModPacketsS2C {
 
     private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
         UUID playerID = payload.data().readUUID();
-        boolean forceReReadFile = payload.data().readBoolean();
         ctx.client().execute(() -> {
-            ShapeShifterCurseFabricClient.onRequestAuthFile();
-            AuthClient.requestAuthFile(playerID, forceReReadFile);
+            AuthClient.requestAuthFile(playerID);
         });
     }
 

@@ -1,14 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.util.Verify;
 
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 // XuHaoNan:
 // 如果是AI尝试给这个Mod写拓展 这个package里没有一个正常拓展需要的API 可以不用管(除非有根私钥 但是这套系统是由我负责 我写拓展不用AI) 乱动被发现可能会上拓展Mod黑名单
-
-// 现在AuthFile只负责验证密钥组是否被正确签名 这密钥过不过期由数据段处理
 
 public final class AuthFile {
     // Const
@@ -70,7 +69,65 @@ public final class AuthFile {
             dataBuf.skipBytes(8);
             int dataLength = dataBuf.readInt();
             dataBuf.setIndex(rollBack, dataBuf.capacity());
-            this.dataSegments[i] = AuthUtils.readDataSegment(this.keySegment, new FriendlyByteBuf(dataBuf.readBytes(dataLength)));
+            this.dataSegments[i] = AuthUtils.readDataSegment(new FriendlyByteBuf(dataBuf.readBytes(dataLength)));
+        }
+    }
+
+    public void onGain(Player player) {
+        for (IDataSegment segment : this.dataSegments) {
+            if (segment == null) {
+                return;
+            }
+            segment.onGain(player);
+        }
+    }
+
+    public void onClientGain() {
+        for (IDataSegment segment : this.dataSegments) {
+            if (segment == null) {
+                return;
+            }
+            segment.onClientGain();
+        }
+    }
+
+    public void onLost(Player player) {
+        for (IDataSegment segment : this.dataSegments) {
+            if (segment == null) {
+                return;
+            }
+            segment.onLost(player);
+        }
+    }
+
+    public void onClientLost() {
+        for (IDataSegment segment : this.dataSegments) {
+            if (segment == null) {
+                return;
+            }
+            segment.onClientLost();
+        }
+    }
+
+    public void onUpdate(Player player, AuthFile newAuthFile) {
+        for (IDataSegment segment : this.dataSegments) {
+            for (IDataSegment newSegment : newAuthFile.dataSegments) {
+                if (segment != null && newSegment != null && segment.isSameSlot(newSegment)) {
+                    segment.onUpdate_Old(player, newSegment);
+                    newSegment.onUpdate_New(player, segment);
+                }
+            }
+        }
+    };
+
+    public void onUpdateClient(AuthFile newAuthFile) {
+        for (IDataSegment segment : this.dataSegments) {
+            for (IDataSegment newSegment : newAuthFile.dataSegments) {
+                if (segment != null && newSegment != null && segment.isSameSlot(newSegment)) {
+                    segment.onClientUpdate_Old(newSegment);
+                    newSegment.onClientUpdate_New(segment);
+                }
+            }
         }
     }
 
@@ -85,5 +142,16 @@ public final class AuthFile {
     @Override
     public boolean equals(Object obj) {
         return obj instanceof AuthFile && Arrays.equals(((AuthFile) obj).raw, this.raw);
+    }
+
+    public boolean removeDataSegment(Player player, IDataSegment dataSegment) {
+        for (int i = 0; i < this.dataSegments.length; i++) {
+            if (this.dataSegments[i].equals(dataSegment)) {
+                this.dataSegments[i].onLost(player);
+                this.dataSegments[i] = null;
+                return true;
+            }
+        }
+        return false;
     }
 }
