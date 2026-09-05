@@ -31,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible {
@@ -246,9 +245,9 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.nowRecipe = null;
             this.totalProgress = 0;
         }
-        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getRecipeFor(this, world);
+        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
         if (alterRecipe.isPresent()) {
-            this.nowRecipe = alterRecipe.get();
+            this.nowRecipe = alterRecipe.get().value();
             this.totalProgress = this.nowRecipe.recipeTime();
             if (!(world != null && this.canCraftRecipe(world.registryAccess()))) {
                 this.nowRecipe = null;
@@ -273,7 +272,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.canCraft(playerEntity)) {
             return false;
         }
-        if (!nowRecipe.matches(this, world) || !nowRecipe.InputsCountEnough(this)) {
+        if (!nowRecipe.matches(this.craftInput(), world) || !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
         ItemStack output = this.nowRecipe.getResultItem(registryManager);
