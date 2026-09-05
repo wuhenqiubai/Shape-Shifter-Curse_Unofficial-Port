@@ -1,40 +1,40 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SidedInventory;
-import net.minecraft.inventory.SimpleInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.recipe.Recipe;
-import net.minecraft.recipe.RecipeMatcher;
-import net.minecraft.recipe.book.RecipeBookCategory;
-import net.minecraft.screen.*;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.world.World;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.*;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.AlterOutputSlot;
+import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
+import org.jetbrains.annotations.NotNull;
 
-public class AlterCraftUIHandler extends AbstractRecipeScreenHandler<SidedInventory> {
-    public final PlayerInventory playerInventory;
-    public final Inventory alterBlockEntity;
-    public final ScreenHandlerContext context;
-    public final PlayerEntity player;
-    public final World world;
-    public final PropertyDelegate propertyDelegate;
+public class AlterCraftUIHandler extends RecipeBookMenu<RecipeInput, AlterRecipe> {
+    public final Inventory playerInventory;
+    public final Container alterBlockEntity;
+    public final ContainerLevelAccess context;
+    public final Player player;
+    public final Level world;
+    public final ContainerData propertyDelegate;
 
-    public static AlterCraftUIHandler createMenu(int i, PlayerInventory inventory) {
-        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, i, inventory, new SimpleInventory(11), ScreenHandlerContext.EMPTY, new ArrayPropertyDelegate(4));
+    public static AlterCraftUIHandler createMenu(int i, Inventory inventory) {
+        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, i, inventory, new SimpleContainer(11), ContainerLevelAccess.NULL, new SimpleContainerData(4));
     }
 
-    public AlterCraftUIHandler(ScreenHandlerType<?> screenHandlerType, int syncId, PlayerInventory playerInventory, Inventory alterBlockEntity, ScreenHandlerContext context, PropertyDelegate propertyDelegate) {
+    public AlterCraftUIHandler(MenuType<?> screenHandlerType, int syncId, Inventory playerInventory, Container alterBlockEntity, ContainerLevelAccess context, ContainerData propertyDelegate) {
         super(screenHandlerType, syncId);
         this.playerInventory = playerInventory;
         this.alterBlockEntity = alterBlockEntity;
         this.context = context;
         this.player = playerInventory.player;
-        this.world = playerInventory.player.getWorld();
+        this.world = playerInventory.player.level();
         this.propertyDelegate = propertyDelegate;
 
         for(int i = 0; i < 3; ++i) {
@@ -56,103 +56,103 @@ public class AlterCraftUIHandler extends AbstractRecipeScreenHandler<SidedInvent
             this.addSlot(new Slot(playerInventory, i, 8 + i * 18, 142));
         }
 
-        this.addProperties(propertyDelegate);
+        this.addDataSlots(propertyDelegate);
     }
 
     @Override
-    public void populateRecipeFinder(RecipeMatcher finder) {
+    public void fillCraftSlotsStackedContents(StackedContents finder) {
         if (this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
-            realAlter.provideRecipeInputs(finder);
+            realAlter.fillStackedContents(finder);
         }
     }
 
     @Override
-    public void clearCraftingSlots() {
-        for (int i = 0; i < this.alterBlockEntity.size(); ++i) {
+    public void clearCraftingContent() {
+        for (int i = 0; i < this.alterBlockEntity.getContainerSize(); ++i) {
             if (i == 9) {
                 continue;
             }
-            this.getSlot(i).setStackNoCallbacks(ItemStack.EMPTY);
+            this.getSlot(i).set(ItemStack.EMPTY);
         }
     }
 
     @Override
-    public boolean matches(Recipe<? super SidedInventory> recipe) {
+    public boolean recipeMatches(RecipeHolder<AlterRecipe> recipeHolder) {
         if (this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
-            return recipe.matches(realAlter, world);
+            return recipeHolder.value().matches(realAlter.craftInput(), world);
         }
         return false;
     }
 
     @Override
-    public int getCraftingResultSlotIndex() {
+    public int getResultSlotIndex() {
         return 10;
     }
 
     @Override
-    public int getCraftingWidth() {
+    public int getGridWidth() {
         return 3;
     }
 
     @Override
-    public int getCraftingHeight() {
+    public int getGridHeight() {
         return 3;
     }
 
     @Override
-    public int getCraftingSlotCount() {
+    public int getSize() {
         return 11;
     }
 
     @Override
-    public RecipeBookCategory getCategory() {
-        return RecipeBookCategory.CRAFTING;
+    public @NotNull RecipeBookType getRecipeBookType() {
+        return RecipeBookType.CRAFTING;
     }
 
     @Override
-    public boolean canInsertIntoSlot(int index) {
-        return index != this.getCraftingResultSlotIndex();
+    public boolean shouldMoveToInventory(int index) {
+        return index != this.getResultSlotIndex();
     }
 
     @Override
-    public ItemStack quickMove(PlayerEntity player, int slotIndex) {
+    public @NotNull ItemStack quickMoveStack(Player player, int slotIndex) {
         // 0~8 -> Input
         // 9 -> Fuel
         // 10 -> Output
         // 11~37 -> Player Inventory
         // 38~46 -> Player Hotbar
         Slot slot = this.slots.get(slotIndex);
-        ItemStack slotItem = slot.hasStack() ? slot.getStack() : ItemStack.EMPTY;
+        ItemStack slotItem = slot.hasItem() ? slot.getItem() : ItemStack.EMPTY;
         ItemStack slotItemCopy = slotItem.copy();
         if (slotIndex >= 0 && slotIndex < 11) {
-            if (!this.insertItem(slotItem, 11, 47, slotIndex == 10)) {
+            if (!this.moveItemStackTo(slotItem, 11, 47, slotIndex == 10)) {
                 return ItemStack.EMPTY;
             }
             if (slotIndex == 0) {
-                slot.onQuickTransfer(slotItem, slotItemCopy);
+                slot.onQuickCraft(slotItem, slotItemCopy);
             }
         }
         else if (slotIndex >= 11 && slotIndex < 47) {
             if (AlterBlockEntity.canFuel(slotItem)) {
-                if (!this.insertItem(slotItem, 9, 10, false)) {
-                    if (!this.insertItem(slotItem, 0, 9, false)) {
+                if (!this.moveItemStackTo(slotItem, 9, 10, false)) {
+                    if (!this.moveItemStackTo(slotItem, 0, 9, false)) {
                         return ItemStack.EMPTY;
                     }
                 }
             }
-            if (!this.insertItem(slotItem, 0, 9, false)) {
+            if (!this.moveItemStackTo(slotItem, 0, 9, false)) {
                 return ItemStack.EMPTY;
             }
         }
         if (slotItem.isEmpty()) {
-            slot.setStack(ItemStack.EMPTY);
+            slot.setByPlayer(ItemStack.EMPTY);
         } else {
-            slot.markDirty();
+            slot.setChanged();
         }
         if (slotItem.getCount() == slotItemCopy.getCount()) {
             return ItemStack.EMPTY;
         }
-        slot.onTakeItem(player, slotItem);
+        slot.onTake(player, slotItem);
 
         return ItemStack.EMPTY;
     }
@@ -174,7 +174,7 @@ public class AlterCraftUIHandler extends AbstractRecipeScreenHandler<SidedInvent
     }
 
     @Override
-    public boolean canUse(PlayerEntity player) {
-        return canUse(this.context, player, Blocks.CRAFTING_TABLE);
+    public boolean stillValid(Player player) {
+        return stillValid(this.context, player, Blocks.CRAFTING_TABLE);
     }
 }

@@ -8,8 +8,8 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BaseEntityBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -17,8 +17,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
-import net.onixary.shapeShifterCurseFabric.custom_ui.AlterCraftUIHandler;
-import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,14 +63,7 @@ public class AlterBlock extends BaseEntityBlock {
 
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
-        return checkType(world, type, RegCustomBlock.ALTER_BLOCK_ENTITY);
-    }
-
-    @Nullable
-    public static <T extends BlockEntity> BlockEntityTicker<T> checkType(Level world, BlockEntityType<T> givenType, BlockEntityType<? extends AlterBlockEntity> expectedType) {
-        return world.isClientSide ? null : checkType(givenType, expectedType, (world1, pos, state, blockEntity) -> {
-            blockEntity.tick(world1, pos, state, blockEntity);
-        });
+        return world.isClientSide ? null : createTickerHelper(type, RegCustomBlock.ALTER_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> blockEntity.tick(world1, pos, blockState, blockEntity));
     }
 
     @Override

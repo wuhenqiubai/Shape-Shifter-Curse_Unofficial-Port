@@ -1,15 +1,15 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public class AlterOutputSlot extends Slot {
-    public AlterOutputSlot(Inventory inventory, int index, int x, int y) {
+    public AlterOutputSlot(Container inventory, int index, int x, int y) {
         super(inventory, index, x, y);
     }
 
-    public boolean canInsert(ItemStack stack) {
+    public boolean mayPlace(ItemStack stack) {
         return false;
     }
 }

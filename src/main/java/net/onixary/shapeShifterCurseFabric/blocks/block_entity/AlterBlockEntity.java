@@ -1,10 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.blocks.block_entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
@@ -14,14 +10,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedContents;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ContainerData;
-import net.minecraft.world.inventory.RecipeCraftingHolder;
-import net.minecraft.world.inventory.StackedContentsCompatible;
+import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
@@ -38,7 +31,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible {
@@ -113,6 +105,10 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             public int size() {
                 return 4;
             }
+
+            public int getCount() {
+                return 4;
+            }
         };
     }
 
@@ -123,7 +119,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     @Override
     protected @NotNull AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
-        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, syncId, playerInventory, this, ScreenHandlerContext.EMPTY, this.propertyDelegate);
+        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, syncId, playerInventory, this, ContainerLevelAccess.NULL, this.propertyDelegate);
     }
 
     @Override
@@ -155,9 +151,22 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         return inventory.size();
     }
 
+    @Override
+    protected @NotNull NonNullList<ItemStack> getItems() {
+        return this.inventory;
+    }
+
+    @Override
+    protected void setItems(@NotNull NonNullList<ItemStack> items) {
+        for (int i = 0; i < items.size() && i < this.inventory.size(); i++) {
+            this.inventory.set(i, items.get(i).copy());
+        }
+        this.setChanged();
+    }
+
     // 构造 3x3 的 RecipeInput（前 9 格）给 Recipe 匹配。
     // AlterBlockEntity 自身不 implements RecipeInput，避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义。
-    private RecipeInput craftInput() {
+    public RecipeInput craftInput() {
         return CraftingInput.of(3, 3, List.copyOf(this.inventory.subList(0, 9)));
     }
 
@@ -238,9 +247,9 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 return;
             }
         }
-        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getRecipeFor(this, world);
-        if (alterRecipe.isPresent() && alterRecipe.get().canCraft(playerEntity)) {
-            this.nowRecipe = alterRecipe.get();
+        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
+        if (alterRecipe.isPresent() && alterRecipe.get().value().canCraft(playerEntity)) {
+            this.nowRecipe = alterRecipe.get().value();
             this.totalProgress = this.nowRecipe.recipeTime();
         } else {
             this.nowRecipe = null;

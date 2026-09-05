@@ -1,9 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.screen.ingame.HandledScreens;
+
+import net.minecraft.client.gui.screens.MenuScreens;
 
 public class RegMenuScreen {
     public static void init() {
-        HandledScreens.register(RegMenuType.AlterCraftUI, AlterCraftUI::new);
+        MenuScreens.register(RegMenuType.AlterCraftUI, AlterCraftUI::new);
     }
 }

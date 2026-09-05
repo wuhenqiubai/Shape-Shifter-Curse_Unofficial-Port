@@ -1,16 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Inventory;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
-public class AlterCraftUI extends HandledScreen<AlterCraftUIHandler> {
+public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
 
-    private static final Identifier BACKGROUND = new Identifier(MOD_ID,"textures/gui/alter_craft_ui.png");
+    private static final ResourceLocation BACKGROUND = ResourceLocation.fromNamespaceAndPath(MOD_ID,"textures/gui/alter_craft_ui.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
     private int baseX;
@@ -19,7 +19,7 @@ public class AlterCraftUI extends HandledScreen<AlterCraftUIHandler> {
     // 90,60,54,5
     // 90,65,54,5
 
-    public AlterCraftUI(AlterCraftUIHandler handler, PlayerInventory inventory, Text title) {
+    public AlterCraftUI(AlterCraftUIHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
@@ -27,22 +27,22 @@ public class AlterCraftUI extends HandledScreen<AlterCraftUIHandler> {
         super.init();
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         baseX = width / 2 - WIDTH / 2;
         baseY = height / 2 - HEIGHT / 2;
-        this.renderBackground(context);
+        this.renderBackground(context, mouseX, mouseY, delta);
         super.render(context, mouseX, mouseY, delta);
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        this.renderTooltip(context, mouseX, mouseY);
         this.drawBar(context);
     }
 
     @Override
-    protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-        context.drawTexture(BACKGROUND, baseX, baseY, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
+    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+        context.blit(BACKGROUND, baseX, baseY, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT);
     }
 
-    public void drawBar(DrawContext context) {
-        AlterCraftUIHandler uiHandler = this.getScreenHandler();
+    public void drawBar(GuiGraphics context) {
+        AlterCraftUIHandler uiHandler = this.getMenu();
         int maxProgress = uiHandler.getMaxProgress();
         if (maxProgress > 0) {
             int ProcessWidth = (int) (54 * ((float) uiHandler.getNowProgress() / (float) maxProgress));
