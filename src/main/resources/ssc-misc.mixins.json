@@ -3,7 +3,7 @@
   "minVersion": "0.8",
   "package": "net.onixary.shapeShifterCurseFabric.mixin",
   "compatibilityLevel": "JAVA_17",
-  "refmap": "ssc-misc.refmap.json",
+  "refmap": "shape-shifter-curse-unofficial-refmap.json",
   "plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
   "mixins": [
     "forge.CurioImpl",
