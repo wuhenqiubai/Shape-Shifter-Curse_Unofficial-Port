@@ -119,7 +119,9 @@ public final class CustomWaterBreathingMixin {
             }
         }
 
-        @ModifyExpressionValue(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"), method = "turtleHelmetTick")
+        // 1.21.11 把乌龟头盔的 isEyeInFluid 判断从 turtleHelmetTick() 移到了调用方 tick()（见 Player.tick 的 line 284），
+        // 故注入点需改为 method = "tick"，否则 @ModifyExpressionValue 找不到 INVOKE target（静默失效）。
+        @ModifyExpressionValue(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;isEyeInFluid(Lnet/minecraft/tags/TagKey;)Z"), method = "tick")
         public boolean isSubmergedInProxy(boolean submerged) {
             if(PowerHolderComponent.getPowers(this, CustomWaterBreathingPower.class).stream().anyMatch(Power::isActive)) {
                 return !submerged;

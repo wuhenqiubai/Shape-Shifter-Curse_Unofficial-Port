@@ -13,7 +13,9 @@
     "NoCobwebSlowdownMixin",
     "OriginUpgradeMixin",
     "ScareCreepersMixin",
-    "SelectionInvulnerabilityMixin"
+    "SelectionInvulnerabilityMixin",
+    "WaterBreathingMixin$CanBreatheInWater",
+    "WaterBreathingMixin$UpdateAir"
   ],
   "client": [
     "ServerCheckMixin",
