@@ -13,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
 
 import java.util.function.Consumer;
 
@@ -40,7 +41,10 @@ public class PowerfulCatalyst extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
-        // 实际效果在ItemStackMixin的注入中进行处理
+        // 1.21.11 修复：效果改由自身直接调用（此前依赖 ItemStackMixin 注入，但该 mixin 已不处理 powerful_catalyst）
+        if (user instanceof Player player) {
+            TransformRelatedItems.OnUsePowerfulCatalyst(player, stack);
+        }
         super.finishUsingItem(stack, world, user);
         if (user instanceof Player playerEntity) {
             if (playerEntity.getAbilities().instabuild) {

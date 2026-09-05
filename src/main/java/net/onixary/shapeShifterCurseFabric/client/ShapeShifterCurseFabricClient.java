@@ -20,6 +20,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntityRenderer;
@@ -54,6 +55,24 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	//public static final EntityModelLayer T_OCELOT_LAYER = new EntityModelLayer(Identifier.of(MOD_ID, "t_ocelot"), "main");
 
 	public static final FormColorData formColorData = new FormColorData();
+
+	private static int requestAuthCount = 0;
+
+	public static void onRequestAuthFile() {
+		if (requestAuthCount != 0) {
+			if (Minecraft.getInstance().player != null) {
+				Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.shapeShifterCurseFabric.authing", requestAuthCount + 1), false);
+			}
+		}
+		requestAuthCount++;
+	}
+
+	public static void refreshPlayerAnimations() {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player != null) {
+			ShapeShifterCurseFabric.LOGGER.info("Refreshing player animations on client");
+		}
+	}
 
 	public static Minecraft getClient() {
 		return Minecraft.getInstance();
@@ -302,6 +321,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		RegCustomBlock.ClientInit();
 		PatronUtils.OnClientInit();
 		AuthClient.init();
+		RegMenuScreen.init();
 	}
 
 	// TODO: 1.21.11 Satin已移除，需新方案注册着色器

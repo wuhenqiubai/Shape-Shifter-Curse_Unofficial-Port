@@ -32,14 +32,18 @@ public class ExplosionDamageEntityAction {
         @SuppressWarnings("unchecked")
         ActionFactory<Entity>.Instance entityAction = data.get("entity_action");
         boolean explosion_damage_entity = data.get("explosion_damage_entity");
-        explosion(entity, Power, entityCondition, entityAction, explosion_damage_entity);
+        float baseDamage = data.getFloat("base_damage");
+        float damageMultiplier = data.getFloat("damage_multiplier");
+        explosion(entity, Power, entityCondition, entityAction, explosion_damage_entity, baseDamage, damageMultiplier);
     }
 
     private static void explosion(Entity entity,
                                   int power,
                                   ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition,
                                   ActionFactory<Entity>.Instance entityAction,
-                                  boolean explosion_damage_entity
+                                  boolean explosion_damage_entity,
+                                  float baseDamage,
+                                  float damageMultiplier
     ) {
         Vec3 ExplosionPos = entity.position();
         DamageSource source = entity.level().damageSources().explosion(entity, entity);
@@ -54,7 +58,7 @@ public class ExplosionDamageEntityAction {
         int u = Mth.floor(ExplosionPos.z() + (double)q + 1.0);
         List<Entity> list = entity.level().getEntities(entity, new AABB(k, r, t, l, s, u));
         for (Entity target_entity : list) {
-            if (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity))) {
+            if (!target_entity.ignoreExplosion(null) && (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity)))) {
 			    double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double)q;
 			    if (w <= 1.0) {
 				    double x = target_entity.getX() - ExplosionPos.x();
@@ -68,7 +72,7 @@ public class ExplosionDamageEntityAction {
                         double ab = ServerExplosion.getSeenPercent(ExplosionPos, target_entity);
 					    double ac = (1.0 - w) * ab;
                         if(explosion_damage_entity){
-                            target_entity.hurt(source, (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)));
+                            target_entity.hurt(source, (float)((int)((ac * ac + ac) / 2.0 * 7.0 * (double)q + 1.0)) * damageMultiplier + baseDamage);
 					    }
 					    double ad;
 					    if (target_entity instanceof LivingEntity livingEntity) {
@@ -83,6 +87,7 @@ public class ExplosionDamageEntityAction {
 					    z *= ad;
 					    Vec3 vec3d2 = new Vec3(x, y, z);
 					    target_entity.setDeltaMovement(target_entity.getDeltaMovement().add(vec3d2));
+						    target_entity.hurtMarked = true;
 					    // 加入额外可选的EntityAction
 					    if (entityAction != null) {
 						    entityAction.accept(target_entity);
@@ -98,6 +103,8 @@ public class ExplosionDamageEntityAction {
                 ShapeShifterCurseFabric.identifier("explosion_damage_entity"),
                 new SerializableData()
                         .add("power", SerializableDataTypes.INT, 0)
+                        .add("base_damage", SerializableDataTypes.FLOAT, 0.0f)
+                        .add("damage_multiplier", SerializableDataTypes.FLOAT, 1.0f)
                         .add("entity_condition", ApoliDataTypes.BIENTITY_CONDITION, null)
                         .add("entity_action", ApoliDataTypes.ENTITY_ACTION, null)
                         .add("explosion_damage_entity", SerializableDataTypes.BOOLEAN, true),

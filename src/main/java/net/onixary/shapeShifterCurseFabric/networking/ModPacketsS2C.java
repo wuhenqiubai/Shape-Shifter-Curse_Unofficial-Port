@@ -132,6 +132,9 @@ public class ModPacketsS2C {
 
         ctx.client().execute(() -> {
             if (ctx.client().player != null) {
+                // 触发动画重新初始化
+                ShapeShifterCurseFabricClient.refreshPlayerAnimations();
+
                 // 更新 formColorData 的数据(其实是FormColorSelectMenu的数据) 如果启动了自动切换 那么还会自动切换颜色数据
                 ShapeShifterCurseFabricClient.formColorData.onClientFormChange(newFormID);
             }
@@ -633,8 +636,10 @@ public class ModPacketsS2C {
 
     private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
         UUID playerID = payload.data().readUUID();
+        boolean forceReReadFile = payload.data().readBoolean();
         ctx.client().execute(() -> {
-            AuthClient.requestAuthFile(playerID);
+            ShapeShifterCurseFabricClient.onRequestAuthFile();
+            AuthClient.requestAuthFile(playerID, forceReReadFile);
         });
     }
 

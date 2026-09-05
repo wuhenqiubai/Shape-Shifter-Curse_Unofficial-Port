@@ -128,7 +128,7 @@ public final class AuthServer {
         });
         ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
             ServerPlayer player = handler.getPlayer();
-            ModPacketsS2CServer.requestPatronAuthFile(player);
+            ModPacketsS2CServer.requestPatronAuthFile(player, false);
             new Thread(() -> {
                 try {
                     Thread.sleep(30 * 1000);  // 30s

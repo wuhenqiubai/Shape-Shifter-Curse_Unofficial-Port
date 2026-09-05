@@ -318,10 +318,37 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
     }
 
-    public static void requestPatronAuthFile(ServerPlayer player) {
+    public static void requestPatronAuthFile(ServerPlayer player, boolean forceReReadFile) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUUID(player.getUUID());
+        buf.writeBoolean(forceReReadFile);
         ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
+    }
+
+    // 服务端注册全部 S2C payload 类型（修复 issue #21：服务端漏注册导致进服 ClassCastException）
+    public static void registerServerS2C() {
+        BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
+        BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
+        BytePayload.registerS2C(ModPackets.SYNC_TRANSFORM_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.RESET_FIRST_PERSON);
+        BytePayload.registerS2C(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_FORCE_SNEAK_STATE);
+        BytePayload.registerS2C(ModPackets.UPDATE_DYNAMIC_FORM);
+        BytePayload.registerS2C(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT);
+        BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
+        BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
+        BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
+        BytePayload.registerS2C(ModPackets.UPDATE_PATRON_LEVEL);
+        BytePayload.registerS2C(ModPackets.OPEN_PATRON_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
+        BytePayload.registerS2C(ModPackets.SET_NO_MOVE_TICK);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
+        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
+        BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
+        BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
     }
 
     public static void sendNewSubKey(ServerPlayer player, KeySegment newKey) {
