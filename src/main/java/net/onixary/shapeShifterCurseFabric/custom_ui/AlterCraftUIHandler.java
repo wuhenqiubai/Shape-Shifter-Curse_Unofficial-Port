@@ -25,7 +25,7 @@ public class AlterCraftUIHandler extends RecipeBookMenu<RecipeInput, AlterRecipe
     public final ContainerData propertyDelegate;
 
     public static AlterCraftUIHandler createMenu(int i, Inventory inventory) {
-        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, i, inventory, new SimpleContainer(11), ScreenHandlerContext.EMPTY, new ArrayPropertyDelegate(3));
+        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, i, inventory, new SimpleContainer(11), ContainerLevelAccess.NULL, new SimpleContainerData(3));
     }
 
     public AlterCraftUIHandler(MenuType<?> screenHandlerType, int syncId, Inventory playerInventory, Container alterBlockEntity, ContainerLevelAccess context, ContainerData propertyDelegate) {

@@ -1,51 +1,35 @@
 package net.onixary.shapeShifterCurseFabric.recipes.alter;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 
 public class AlterShapedRecipe extends AlterRecipe {
-    public final String group;
-    public final CraftingBookCategory category;
     public final ShapedRecipePattern pattern;
-    public final ItemStack result;
-    public final int recipeTime;
-
-    public final int width;
-    public final int height;
-
-    public final NonNullList<Ingredient> input;
-    public final @Nullable Ingredient catalyst;
     public final ItemStack output;
-    public final ResourceLocation id;
+    public final @Nullable Ingredient catalyst;
+    public final int recipeTime;
     public final int fuelCostPerTick;
 
-    public AlterShapedRecipe(ResourceLocation id, int width, int height, NonNullList<Ingredient> input, Ingredient catalyst, ItemStack output, int recipeTime, int fuelCostPerTick) {
-        this.id = id;
-        this.width = width;
-        this.height = height;
-        this.input = input;
+    public AlterShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick) {
+        this.pattern = pattern;
         this.output = output;
-        this.recipeTime = recipeTime;
         this.catalyst = catalyst;
+        this.recipeTime = recipeTime;
         this.fuelCostPerTick = fuelCostPerTick;
     }
 
@@ -90,8 +74,8 @@ public class AlterShapedRecipe extends AlterRecipe {
             }
         }
 
-        for(int i = 0; i <= 3 - this.width; ++i) {
-            for(int j = 0; j <= 3 - this.height; ++j) {
+        for (int i = 0; i <= 3 - this.pattern.width(); ++i) {
+            for (int j = 0; j <= 3 - this.pattern.height(); ++j) {
                 if (this.matchesPattern(recipeInput, i, j, true)) {
                     return true;
                 }
@@ -110,7 +94,7 @@ public class AlterShapedRecipe extends AlterRecipe {
 
     @Override
     public ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
-        return this.result.copy();
+        return this.output.copy();
     }
 
     @Override
@@ -120,7 +104,7 @@ public class AlterShapedRecipe extends AlterRecipe {
 
     @Override
     public ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.result;
+        return this.output;
     }
 
     @Override
@@ -129,54 +113,53 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     public static class Serializer implements RecipeSerializer<AlterShapedRecipe> {
-        public AlterShapedRecipe read(ResourceLocation identifier, JsonObject jsonObject) {
-            int time = GsonHelper.getAsInt(jsonObject, "time", 200);
-            Ingredient catalyst = null;
-            if (jsonObject.has("catalyst")) {
-                catalyst = Ingredient.fromJson(jsonObject.get("catalyst"), true);
-            }
-            int fuelCost = GsonHelper.getAsInt(jsonObject, "fuel_cost", 1);
-            Map<String, Ingredient> map = readSymbols(GsonHelper.getAsJsonObject(jsonObject, "key"));
-            String[] strings = removePadding(getPattern(GsonHelper.getAsJsonArray(jsonObject, "pattern")));
-            int i = strings[0].length();
-            int j = strings.length;
-            NonNullList<Ingredient> defaultedList = createPatternMatrix(strings, map, i, j);
-            ItemStack itemStack = ShapedRecipe.outputFromJson(GsonHelper.getObject(jsonObject, "result"));
-            return new AlterShapedRecipe(identifier, i, j, defaultedList, catalyst, itemStack, time, fuelCost);
+        private static final MapCodec<AlterShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
+            instance -> instance.group(
+                ShapedRecipePattern.MAP_CODEC.forGetter(r -> r.pattern),
+                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
+                Ingredient.CODEC_NONEMPTY.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
+                Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
+                Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick)
+            ).apply(instance, (pattern, output, catalyst, time, fuelCost) -> new AlterShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost))
+        );
+
+        private static final StreamCodec<RegistryFriendlyByteBuf, AlterShapedRecipe> STREAM_CODEC = StreamCodec.of(
+            Serializer::toNetwork, Serializer::fromNetwork
+        );
+
+        @Override
+        public MapCodec<AlterShapedRecipe> codec() {
+            return CODEC;
         }
 
-        public AlterShapedRecipe read(ResourceLocation identifier, FriendlyByteBuf packetByteBuf) {
-            Ingredient catalyst = null;
-            if (packetByteBuf.readBoolean()) {
-                catalyst = Ingredient.fromPacket(packetByteBuf);
-            }
-            int i = packetByteBuf.readVarInt();
-            int j = packetByteBuf.readVarInt();
-            NonNullList<Ingredient> defaultedList = NonNullList.withSize(i * j, Ingredient.EMPTY);
-            for(int k = 0; k < defaultedList.size(); ++k) {
-                defaultedList.set(k, Ingredient.fromPacket(packetByteBuf));
-            }
-            ItemStack itemStack = packetByteBuf.readItemStack();
-            int time = packetByteBuf.readVarInt();
-            int fuelCost = packetByteBuf.readVarInt();
-            return new AlterShapedRecipe(identifier, i, j, defaultedList, catalyst, itemStack, time, fuelCost);
+        @Override
+        public StreamCodec<RegistryFriendlyByteBuf, AlterShapedRecipe> streamCodec() {
+            return STREAM_CODEC;
         }
 
-        public void write(FriendlyByteBuf packetByteBuf, AlterShapedRecipe alterRecipe) {
-            if (alterRecipe.catalyst != null) {
-                packetByteBuf.writeBoolean(true);
-                alterRecipe.catalyst.write(packetByteBuf);
+        private static AlterShapedRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
+            Ingredient catalyst = null;
+            if (buf.readBoolean()) {
+                catalyst = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+            }
+            ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
+            ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
+            int time = buf.readVarInt();
+            int fuelCost = buf.readVarInt();
+            return new AlterShapedRecipe(pattern, output, catalyst, time, fuelCost);
+        }
+
+        private static void toNetwork(RegistryFriendlyByteBuf buf, AlterShapedRecipe r) {
+            if (r.catalyst != null) {
+                buf.writeBoolean(true);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, r.catalyst);
             } else {
-                packetByteBuf.writeBoolean(false);
+                buf.writeBoolean(false);
             }
-            packetByteBuf.writeVarInt(alterRecipe.width);
-            packetByteBuf.writeVarInt(alterRecipe.height);
-            for(Ingredient ingredient : alterRecipe.input) {
-                ingredient.write(packetByteBuf);
-            }
-            packetByteBuf.writeItemStack(alterRecipe.output);
-            packetByteBuf.writeVarInt(alterRecipe.recipeTime);
-            packetByteBuf.writeVarInt(alterRecipe.fuelCostPerTick);
+            ShapedRecipePattern.STREAM_CODEC.encode(buf, r.pattern);
+            ItemStack.STREAM_CODEC.encode(buf, r.output);
+            buf.writeVarInt(r.recipeTime);
+            buf.writeVarInt(r.fuelCostPerTick);
         }
     }
 }

@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.StackedContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -26,6 +25,7 @@ import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
+import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipeInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,6 +37,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     // 进度锁是个不错的设计 能降低难度(毕竟之前做限制进度使用得上对应阶段的材料 有些材料是真不好量产 有这个就能用便宜材料了)
     public UUID lastUser;
     public AlterRecipe nowRecipe;
+    public RecipeHolder<?> nowRecipeHolder;
     public static final int maxFuel = 102400;
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
@@ -160,10 +161,12 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.setChanged();
     }
 
-    // 构造 3x3 的 RecipeInput（前 9 格）给 Recipe 匹配。
+    // 构造包含燃料/催化剂槽(slot 9)的 RecipeInput 给 Recipe 匹配。
+    // 1.21.1 的 CraftingInput.of 会按非空网格裁剪、丢弃 slot 9，使 matches().getItem(9) 越界；
+    // 故改用自定义 AlterRecipeInput 线性映射 inventory 0-9（0-8 键材 + slot 9 燃料/催化剂）。
     // AlterBlockEntity 自身不 implements RecipeInput，避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义。
     public RecipeInput craftInput() {
-        return CraftingInput.of(3, 3, List.copyOf(this.inventory.subList(0, 9)));
+        return new AlterRecipeInput(this.inventory);
     }
 
     @Override
@@ -239,18 +242,22 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 return;
             }
             this.nowRecipe = null;
+            this.nowRecipeHolder = null;
             this.totalProgress = 0;
         }
         var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
         if (alterRecipe.isPresent()) {
             this.nowRecipe = alterRecipe.get().value();
+            this.nowRecipeHolder = alterRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
             if (!(world != null && this.canCraftRecipe(world.registryAccess()))) {
                 this.nowRecipe = null;
+                this.nowRecipeHolder = null;
                 this.totalProgress = 0;
             }
         } else {
             this.nowRecipe = null;
+            this.nowRecipeHolder = null;
             this.totalProgress = 0;
         }
         this.progress = 0;
@@ -343,7 +350,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
             if (this.progress >= this.nowRecipe.recipeTime()) {
                 if (craftRecipe(world.registryAccess())) {
-                    blockEntity.setRecipeUsed(this.nowRecipe);
+                    blockEntity.setRecipeUsed(this.nowRecipeHolder);
                 }
                 this.progress = 0;
                 itemChanged = true;
