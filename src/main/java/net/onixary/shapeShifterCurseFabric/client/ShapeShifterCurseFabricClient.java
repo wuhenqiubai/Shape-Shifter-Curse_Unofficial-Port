@@ -6,6 +6,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -267,6 +268,11 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			// }
 			PowerHolderComponent.KEY.get(clientPlayer).getPowers().stream().filter(p -> p instanceof LevitatePower).forEach(p -> ((LevitatePower) p).clientTick(clientPlayer));
 			CustomEdiblePower.OnClientTick(clientPlayer);
+		});
+
+		// 断开连接时重置 auth 计数，避免跨世界累积导致"总请求次数"误报（对齐 1.21.1_main）
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+			requestAuthCount = 0;
 		});
 
 		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);

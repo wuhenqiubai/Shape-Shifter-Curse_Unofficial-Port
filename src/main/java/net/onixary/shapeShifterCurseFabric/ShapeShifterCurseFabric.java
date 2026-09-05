@@ -27,6 +27,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.additional_power.*;
 import net.onixary.shapeShifterCurseFabric.advancement.*;
@@ -64,6 +65,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.recipes.BrewingRecipeReloadListener;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
+import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
@@ -125,6 +127,11 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     // Reg custom entities
     private static ResourceKey<EntityType<?>> entityKey(String path) {
         return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, path));
+    }
+
+    // Reg custom blocks
+    public static ResourceKey<Block> blockKey(String path) {
+        return ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(MOD_ID, path));
     }
 
     // Bat
@@ -239,8 +246,9 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         RegCustomPotions.registerPotions();
         RegCustomPotions.registerPotionsRecipes();
 
-        // 注册配方
+        // 注册配方（必须在 registry freeze 前触发静态字段注册，否则 recipe_type/serializer lazy 初始化会 "Registry is already frozen"）
         RecipeSerializerRegister.register();
+        RecipeUtils.register();
 
         ManaRegistries.register();
         DefaultAccessory.init();

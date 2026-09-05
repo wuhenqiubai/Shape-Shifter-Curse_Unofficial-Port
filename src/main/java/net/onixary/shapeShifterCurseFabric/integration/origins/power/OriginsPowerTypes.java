@@ -9,7 +9,6 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -28,49 +27,10 @@ public class OriginsPowerTypes {
         // Apoli-Legacy 用全局静态 NamespaceAlias（一次注册即覆盖 power/condition/action 数据加载解析）。
         NamespaceAlias.addAlias("origins", "apoli");
 
-        // Register all apoli:* types as origins:* aliases
-        // Needed because SSC JSONs use origins: namespace but Origins mod is not installed
-        for (var registry : new Registry[]{
-            ApoliRegistries.POWER_FACTORY,
-            ApoliRegistries.ENTITY_CONDITION,
-            ApoliRegistries.BIENTITY_CONDITION,
-            ApoliRegistries.ITEM_CONDITION,
-            ApoliRegistries.BLOCK_CONDITION,
-            ApoliRegistries.DAMAGE_CONDITION,
-            ApoliRegistries.FLUID_CONDITION,
-            ApoliRegistries.BIOME_CONDITION,
-            ApoliRegistries.ENTITY_ACTION,
-            ApoliRegistries.ITEM_ACTION,
-            ApoliRegistries.BLOCK_ACTION,
-            ApoliRegistries.BIENTITY_ACTION,
-        }) {
-            try {
-                // Copy values first to avoid ConcurrentModificationException
-                var values = new java.util.ArrayList<>();
-                registry.forEach(values::add);
-                for (var value : values) {
-                    Identifier apoliId = switch (value) {
-                        case io.github.apace100.apoli.power.factory.PowerFactory pf -> pf.getSerializerId();
-                        case io.github.apace100.apoli.power.factory.condition.ConditionFactory<?> cf -> cf.getSerializerId();
-                        case io.github.apace100.apoli.power.factory.action.ActionFactory<?> af -> af.getSerializerId();
-                        default -> null;
-                    };
-                    if (apoliId != null && "apoli".equals(apoliId.getNamespace())) {
-                        Identifier originsId = Origins.identifier(apoliId.getPath());
-                        if (!registry.containsKey(originsId)) {
-                            Registry.register(registry, originsId, value);
-                        }
-                    }
-                }
-                Origins.LOGGER.info("Aliased {} apoli->origins types in registry", values.size());
-            } catch (Exception e) {
-                Origins.LOGGER.error("Failed to alias registry", e);
-            }
-            // Debug: check if apoli:multiple was aliased
-            if (!ApoliRegistries.POWER_FACTORY.containsKey(Origins.identifier("multiple"))) {
-                Origins.LOGGER.warn("origins:multiple not found in POWER_FACTORY after alias!");
-            }
-        }
+        // 1.21.11 修复：移除重复注册 apoli->origins 的 copy-registry 段。
+        // Apoli 2.12.10 读取 power/condition/action 类型时已用 NamespaceAlias.resolveAlias 把 origins:* 解析到 apoli:*
+        // （见 PowerTypes.readPower / ActionType / ConditionType），且 1.21.11 MappedRegistry 校验 value 唯一，
+        // 把同一 factory 复制到 origins:* key 会抛 "Adding duplicate value"。故仅需上方 addAlias，无需复制 value。
 
         register(new PowerFactory<>(Origins.identifier("action_on_callback"),
             new SerializableData()

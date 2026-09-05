@@ -12,7 +12,8 @@ public class RecipeUtils {
     public static final RecipeType<AlterRecipe> ALTER_RECIPE = registerRecipeType(ShapeShifterCurseFabric.identifier("alter"));
 
     public static void register() {
-        // 用于加载静态注册
+        // 触发静态字段注册，否则 lazy 初始化会在 registry freeze 之后才注册 recipe_type（"Registry is already frozen"）
+        ALTER_RECIPE.toString();
     };
 
     public static <T extends Recipe<?>> RecipeType<T> registerRecipeType(Identifier id) {

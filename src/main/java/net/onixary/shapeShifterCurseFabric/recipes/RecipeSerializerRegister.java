@@ -15,7 +15,10 @@ public class RecipeSerializerRegister {
     public static RecipeSerializer<AlterShapelessRecipe> ALTER_SHAPELESS_RECIPE = register(ShapeShifterCurseFabric.identifier("alter_shapeless"), new AlterShapelessRecipe.Serializer());
 
     public static void register() {
-        // 用于加载静态注册
+        // 触发静态字段注册，否则 lazy 初始化会在 registry freeze 之后才注册 recipe_serializer
+        MORPH_SCALE_UPGRADE.toString();
+        ALTER_SHAPED_RECIPE.toString();
+        ALTER_SHAPELESS_RECIPE.toString();
     }
 
     public static <S extends RecipeSerializer<T>, T extends Recipe<?>> S register(Identifier id, S serializer) {
