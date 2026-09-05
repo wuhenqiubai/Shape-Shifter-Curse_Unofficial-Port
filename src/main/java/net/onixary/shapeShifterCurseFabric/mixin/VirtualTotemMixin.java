@@ -18,7 +18,7 @@ public class VirtualTotemMixin {
 
     @Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true, order = 500)
     public void checkTotemDeathProtectionH(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
         if (!cir.getReturnValue()) {
@@ -40,7 +40,7 @@ public class VirtualTotemMixin {
 
     @Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true, order = 1000)
     public void checkTotemDeathProtectionN(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
         if (!cir.getReturnValue()) {
@@ -62,7 +62,7 @@ public class VirtualTotemMixin {
 
     @Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true, order = 2000)
     public void checkTotemDeathProtectionL(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if (source.isIn(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
         if (!cir.getReturnValue()) {

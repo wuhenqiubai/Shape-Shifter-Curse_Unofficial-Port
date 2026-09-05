@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 public class AlterBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer, RecipeCraftingHolder, StackedContentsCompatible {
@@ -237,19 +238,19 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     public void checkRecipe() {
-        Level world = this.getWorld();
+        Level world = this.getLevel();
         if (this.nowRecipe != null) {
-            if (world != null && this.canCraftRecipe(world.getRegistryManager())) {
+            if (world != null && this.canCraftRecipe(world.registryAccess())) {
                 return;
             }
             this.nowRecipe = null;
             this.totalProgress = 0;
         }
-        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getFirstMatch(this, world);
+        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getRecipeFor(this, world);
         if (alterRecipe.isPresent()) {
             this.nowRecipe = alterRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
-            if (!(world != null && this.canCraftRecipe(world.getRegistryManager()))) {
+            if (!(world != null && this.canCraftRecipe(world.registryAccess()))) {
                 this.nowRecipe = null;
                 this.totalProgress = 0;
             }
@@ -360,7 +361,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         }
         if (itemChanged) {
             this.checkRecipe();
-            this.markDirty();
+            this.setChanged();
         }
     }
 

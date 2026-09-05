@@ -31,7 +31,7 @@ public abstract class PlayerEntityPoseMixin extends LivingEntity implements Name
         Player player = (Player) (Object) this;
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         if (FormUtils.LockPoseToStand.hasFlag(curForm)) {
-            this.setPose(EntityPose.STANDING);
+            this.setPose(Pose.STANDING);
             ci.cancel();
         }
         boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
