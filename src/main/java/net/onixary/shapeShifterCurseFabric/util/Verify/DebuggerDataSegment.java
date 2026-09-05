@@ -15,7 +15,7 @@ public final class DebuggerDataSegment implements IDataSegment {
     private final int level;
     private final long expireTime;
 
-    DebuggerDataSegment(KeySegment key, FriendlyByteBuf buf) {
+    DebuggerDataSegment(FriendlyByteBuf buf) {
         int type = buf.readInt();
         if (type != 2) {
             throw new RuntimeException("Invalid Debugger Data Segment");
@@ -32,9 +32,7 @@ public final class DebuggerDataSegment implements IDataSegment {
         if (realExpireTime < System.currentTimeMillis()) {
             return;
         }
-        if (AuthUtils.isKeyCanUse(key)) {
-            DEBUGGER_AUTH_DATA.put(uuid, this);
-        }
+        DEBUGGER_AUTH_DATA.put(uuid, this);
     }
 
     @Override
