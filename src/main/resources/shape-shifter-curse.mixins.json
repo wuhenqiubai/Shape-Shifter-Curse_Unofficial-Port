@@ -47,6 +47,7 @@
     "ServerAdvancementMixin",
     "ServerPlayerEntityForceInputMixin",
     "ServerPlayerEntityMixin",
+    "ServerPlayerSleepMixin",
     "ShearsItemMixin",
     "SmithingScreenHandlerMixin",
     "SneakEdgeCheckMixin",
@@ -55,6 +56,7 @@
     "SU_ServerCommandSourceMixin",
     "SU_ServerPlayerEntityMixin",
     "ThrowablePotionStackMixin",
+    "ThrownLingeringPotionMixin",
     "TippedArrowItemMixin",
     "VirtualTotemMixin",
     "accessor.MobEntityAccessor",
@@ -111,15 +113,16 @@
     "PlayerEntitySpeedFOVMixin",
     "PlayerMovementControlMixin",
     "PlayerRotationRendererMixin",
+    "SkyRendererMixin",
     "SU_ClientCommandSourceMixin",
     "SU_ClientPlayerEntityMixin",
     "accessor.ApoliClientAccessor",
-    "integration.TacZ_Anim",
-    "integration.TacZ_AnimThird",
     "render.AbstractClientPlayerEntityMixin",
+    "render.GuiEntityRendererMixin",
     "render.LivingEntityRendererMixin",
     "render.OverlayRenderMixin",
-    "render.PlayerEntityRendererMixin"
+    "render.PlayerEntityRendererMixin",
+    "render.PlayerModelMixin"
   ],
   "injectors": {
     "defaultRequire": 1
