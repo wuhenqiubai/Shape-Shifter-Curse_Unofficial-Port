@@ -77,6 +77,15 @@ public class ShortestArcFadeModifier extends AbstractFadeModifier {
 	/** 把 {@code value} 折算为离 {@code ref} 最近的等价角（弧度），保证 |value-ref| ≤ π。 */
 	private static float unwrapToward(float value, float ref) {
 		final float TWO_PI = (float) (2.0 * Math.PI);
-		return value + Math.round((ref - value) / TWO_PI) * TWO_PI;
+		// 用 fmod + if 把 (value-ref) 折到最短弧邻域 (-π, π]。
+		// 比 Math.round((ref-value)/2π)*2π 更鲁棒：round 在差值恰好 ±0.5 圈（|Δ|=π）时
+		// 四舍五入方向不定，可能误选长弧一侧；fmod+if 用严格比较把边界确定地归到 +π 侧。
+		float diff = (value - ref) % TWO_PI;
+		if (diff > Math.PI) {
+			diff -= TWO_PI;
+		} else if (diff < -Math.PI) {
+			diff += TWO_PI;
+		}
+		return ref + diff;
 	}
 }

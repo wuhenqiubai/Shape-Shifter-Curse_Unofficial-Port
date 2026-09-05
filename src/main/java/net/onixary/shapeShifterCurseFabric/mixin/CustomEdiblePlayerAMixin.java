@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,15 +16,6 @@ import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowe
 public class CustomEdiblePlayerAMixin {
     @Shadow
     protected ItemStack useItem;
-
-    @ModifyExpressionValue(method = "eat", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;eat(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/food/FoodProperties;)Lnet/minecraft/world/item/ItemStack;"))
-    private boolean eat$isFood(boolean original, Level world, ItemStack stack) {
-        // ShapeShifterCurseFabric.LOGGER.error("SSC_CE_SYSTEM_CEPA_01");
-        if ((Object)this instanceof Player playerEntity) {
-            return getPowerFoodComponent(playerEntity, stack) != null || original;
-        }
-        return original;
-    }
 
     @ModifyExpressionValue(method = "shouldTriggerItemUseEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseDuration(Lnet/minecraft/world/entity/LivingEntity;)I"))
     private int shouldTriggerItemUseEffects$getUseDuration(int original) {
