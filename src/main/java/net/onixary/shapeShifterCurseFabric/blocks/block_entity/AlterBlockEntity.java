@@ -37,11 +37,11 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     // 进度锁是个不错的设计 能降低难度(毕竟之前做限制进度使用得上对应阶段的材料 有些材料是真不好量产 有这个就能用便宜材料了)
     public UUID lastUser;
     public AlterRecipe nowRecipe;
-    public RecipeHolder<?> nowRecipeHolder;
+    public static final int maxFuel = 102400;
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
-    public int totalFuelTime = 0;  // Only Client
+    // public int totalFuelTime = 0;  // Only Client
     public final NonNullList<ItemStack> inventory;
 
     public boolean needCheckRecipe = true;
@@ -83,9 +83,6 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                     case 2 -> {
                         return AlterBlockEntity.this.fuelTime;
                     }
-                    case 3 -> {
-                        return AlterBlockEntity.this.totalFuelTime;
-                    }
                     default -> {
                         return 0;
                     }
@@ -97,13 +94,12 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                     case 0 -> AlterBlockEntity.this.progress = value;
                     case 1 -> AlterBlockEntity.this.totalProgress = value;
                     case 2 -> AlterBlockEntity.this.fuelTime = value;
-                    case 3 -> AlterBlockEntity.this.totalFuelTime = value;
                 }
 
             }
 
             public int size() {
-                return 4;
+                return 3;
             }
 
             public int getCount() {
@@ -114,7 +110,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     @Override
     protected @NotNull Component getDefaultName() {
-        return Component.literal("ALTER TEST NAME");
+        return Component.translatable("block.shape-shifter-curse.alter");
     }
 
     @Override
@@ -323,41 +319,37 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             needCheckRecipe = false;
         }
         boolean itemChanged = false;
-        boolean hasRecipe = this.nowRecipe != null;
-        boolean hasFuel = this.fuelTime > 0;
-        if (hasRecipe && !hasFuel) {
-            ItemStack fuel = this.inventory.get(9);
-            if (!fuel.isEmpty()) {
-                int fuelRealTime = getFuelTime(fuel);
-                if (fuelRealTime > 0) {
-                    this.fuelTime = fuelRealTime;
-                    this.totalFuelTime = fuelRealTime;
-                    fuel.shrink(1);
-                    itemChanged = true;
+        ItemStack fuel = this.inventory.get(9);
+        if (!fuel.isEmpty()) {
+            int fuelRealTime = getFuelTime(fuel);
+            if (fuelRealTime > 0 && this.fuelTime + fuelRealTime <= maxFuel) {
+                this.fuelTime += fuelRealTime;
+                fuel.shrink(1);
+                itemChanged = true;
+            }
+        }
+        if (this.nowRecipe != null) {
+            int fuelCost = nowRecipe.fuelUsage();
+            if (this.fuelTime >= fuelCost) {
+                this.fuelTime -= fuelCost;
+                this.progress++;
+            } else {
+                if (this.progress > 0) {
+                    this.progress--;
+                } else {
+                    this.progress = 0;
                 }
             }
-        }
-        hasFuel = this.fuelTime > 0;
-        if (hasRecipe && hasFuel) {
-            this.progress++;
-            this.fuelTime--;
-        } else {
-            if (hasRecipe && this.progress > 0) {
-                this.progress --;
-            } else {
+
+            if (this.progress >= this.nowRecipe.recipeTime()) {
+                if (craftRecipe(world.registryAccess())) {
+                    blockEntity.setRecipeUsed(this.nowRecipe);
+                }
                 this.progress = 0;
-            }
-            if (hasFuel) {
-                this.fuelTime--;
+                itemChanged = true;
             }
         }
-        if (hasRecipe && this.progress >= this.nowRecipe.recipeTime()) {
-            if (craftRecipe(world.registryAccess())) {
-                blockEntity.setRecipeUsed(this.nowRecipeHolder);
-            }
-            this.progress = 0;
-            itemChanged = true;
-        }
+
         if (itemChanged) {
             this.checkRecipe();
             this.setChanged();
@@ -375,7 +367,6 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.fuelTime = nbt.getInt("FuelTime");
         this.progress = nbt.getInt("Process");
         this.totalProgress = nbt.getInt("TotalProcess");
-        this.totalFuelTime = nbt.getInt("TotalFuelTime");
     }
 
     protected void saveAdditional(CompoundTag nbt, HolderLookup.Provider provider) {
@@ -387,6 +378,5 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         nbt.putInt("FuelTime", this.fuelTime);
         nbt.putInt("Process", this.progress);
         nbt.putInt("TotalProcess", this.totalProgress);
-        nbt.putInt("TotalFuelTime", this.totalFuelTime);
     }
 }

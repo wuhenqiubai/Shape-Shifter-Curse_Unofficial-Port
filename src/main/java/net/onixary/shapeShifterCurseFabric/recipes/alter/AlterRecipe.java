@@ -38,4 +38,8 @@ public abstract class AlterRecipe implements Recipe<RecipeInput> {
     public List<ItemStack> getExtraOutput(WorldlyContainer inventory) {
         return List.of();
     }
+
+    public int fuelUsage() {
+        return 1;
+    }
 }

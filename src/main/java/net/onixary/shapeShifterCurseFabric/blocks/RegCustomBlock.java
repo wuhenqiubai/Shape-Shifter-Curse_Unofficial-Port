@@ -26,7 +26,7 @@ public final class RegCustomBlock {
     public static final Block WEB_COMPOSTER = register("web_composter", new WebComposterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion()));
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", new DewCoveredCobwebBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollission().noOcclusion()));
 
-    public static final Block ALTER_BLOCK = register("alter", new AlterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.STONE).noOcclusion()));
+    public static final Block ALTER_BLOCK = register("alter", new AlterBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion()));
     public static final BlockEntityType<AlterBlockEntity> ALTER_BLOCK_ENTITY = registerBlockEntity("alter_block_entity", BlockEntityType.Builder.of(AlterBlockEntity::new, ALTER_BLOCK).build(null));
 
 
@@ -35,6 +35,7 @@ public final class RegCustomBlock {
         BlockRenderLayerMap.INSTANCE.putBlock(TEMP_WEB_BRIDGE, RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(WEB_COMPOSTER, RenderType.cutout());
         BlockRenderLayerMap.INSTANCE.putBlock(DEW_COVERED_COBWEB, RenderType.cutout());
+        BlockRenderLayerMap.INSTANCE.putBlock(ALTER_BLOCK, RenderType.cutout());
     }
 
     private static <T extends Block> T registerWithOutItem(String path, T block) {
