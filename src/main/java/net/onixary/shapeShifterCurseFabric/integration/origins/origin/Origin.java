@@ -14,7 +14,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -46,7 +46,7 @@ public class Origin {
     public static final Origin EMPTY;
 
     static {
-        EMPTY = register(new Origin(Identifier.fromNamespaceAndPath(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
+        EMPTY = register(new Origin(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
     }
 
     public static void init() {
@@ -68,7 +68,7 @@ public class Origin {
         return ModComponents.ORIGIN.get(player).getOrigins();
     }
 
-    private Identifier identifier;
+    private ResourceLocation identifier;
     private List<PowerType<?>> powerTypes = new LinkedList<>();
     private final ItemStack displayItem;
     private final Impact impact;
@@ -82,7 +82,7 @@ public class Origin {
     private String nameTranslationKey;
     private String descriptionTranslationKey;
 
-    public Origin(Identifier id, ItemStack icon, Impact impact, int order, int loadingPriority) {
+    public Origin(ResourceLocation id, ItemStack icon, Impact impact, int order, int loadingPriority) {
         this.identifier = id;
         this.displayItem = icon.copy();
         this.impact = impact;
@@ -109,7 +109,7 @@ public class Origin {
         return Optional.empty();
     }
 
-    public Identifier getIdentifier() {
+    public ResourceLocation getIdentifier() {
         return identifier;
     }
 
@@ -226,7 +226,7 @@ public class Origin {
     }
 
     @SuppressWarnings("unchecked")
-    public static Origin createFromData(Identifier id, SerializableData.Instance data) {
+    public static Origin createFromData(ResourceLocation id, SerializableData.Instance data) {
         Origin origin = new Origin(id,
             (ItemStack)data.get("icon"),
             (Impact)data.get("impact"),
@@ -237,7 +237,7 @@ public class Origin {
             origin.setUnchoosable();
         }
 
-        ((List<Identifier>)data.get("powers")).forEach(powerId -> {
+        ((List<ResourceLocation>)data.get("powers")).forEach(powerId -> {
             try {
                 PowerType powerType = PowerTypeRegistry.get(powerId);
                 origin.add(powerType);
@@ -258,11 +258,11 @@ public class Origin {
 
     @Environment(EnvType.CLIENT)
     public static Origin read(RegistryFriendlyByteBuf buffer) {
-        Identifier identifier = Identifier.tryParse(buffer.readUtf(32767));
+        ResourceLocation identifier = ResourceLocation.tryParse(buffer.readUtf(32767));
         return createFromData(identifier, DATA.read(buffer));
     }
 
-    public static Origin fromJson(Identifier id, JsonObject json, HolderLookup.Provider provider) {
+    public static Origin fromJson(ResourceLocation id, JsonObject json, HolderLookup.Provider provider) {
         return createFromData(id, DATA.read(json, provider));
     }
 

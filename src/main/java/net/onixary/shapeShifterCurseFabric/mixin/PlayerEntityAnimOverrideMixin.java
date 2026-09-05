@@ -4,13 +4,13 @@ import com.mojang.authlib.GameProfile;
 import com.zigythebird.playeranim.animation.PlayerAnimationController;
 import com.zigythebird.playeranim.api.PlayerAnimationAccess;
 import com.zigythebird.playeranimcore.animation.Animation;
-import com.zigythebird.playeranimcore.animation.layered.modifier.AbstractFadeModifier;
 import com.zigythebird.playeranimcore.animation.layered.modifier.SpeedModifier;
 import com.zigythebird.playeranimcore.easing.EasingType;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
+import net.onixary.shapeShifterCurseFabric.player_animation.ShortestArcFadeModifier;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -95,6 +95,6 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
         if (modified) controller.removeModifier(0);
         modified = true;
         controller.addModifierBefore(new SpeedModifier(speed));
-        controller.replaceAnimationWithFade(AbstractFadeModifier.standardFadeIn(fade, easing), anim, true);
+        controller.replaceAnimationWithFade(new ShortestArcFadeModifier(fade, easing), anim, true);
     }
 }

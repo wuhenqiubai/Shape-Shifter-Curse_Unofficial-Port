@@ -1,15 +1,18 @@
 plugins {
-    id 'fabric-loom' version '1.17-SNAPSHOT'
+    id 'fabric-loom' version '1.17.19'
     id 'maven-publish'
-    //id("com.gradleup.shadow") version "8.3.6"
 }
 
+version = "${project.mod_version}${project.special_build_version}+${minecraft_version}"
 group = project.maven_group
 
-// 版本号: mod_version.build_number（mc 版本信息在 jar 文件名中）
-// CI 通过环境变量 build_version 覆盖，本地使用 gradle.properties 默认值
-def build_version = System.getenv('build_version') ?: build_number
-version = "${project.mod_version}-${build_type}+build.${build_version}+mc${minecraft_version}"
+// 从Github Action 环境获取构建Channel和BuildVersion
+def channel = System.getenv('channel')
+def build_version = System.getenv('build_version')
+if (channel == null || build_version == null) {
+    channel = "release"
+    build_version = "0"
+}
 
 base {
     archivesName = "${project.archives_base_name}"
@@ -29,21 +32,25 @@ loom {
         }
     }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
+    mixin {
+        // NeoForge/Connector 兼容：legacy Mixin AP 按 mixins.json 的 refmap 字段生成 refmap，
+        // Connector 靠 refmap 把发布 jar 的 intermediary 注入点重映射回 mojmap（NeoForge 环境）
+        useLegacyMixinAp = true
+    }
 }
 
 
 repositories {
+    mavenLocal()
+    mavenCentral()
 
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
     maven {
         url 'https://maven.aliyun.com/nexus/content/groups/public'
     }
-    mavenCentral()
-    mavenLocal()
+    maven {
+        name = "NeoForge"
+        url = "https://maven.neoforged.net/releases/"
+    }
 
     exclusiveContent {
 
@@ -60,7 +67,7 @@ repositories {
 
     }
 
-    // ForgeMaven
+    // (Neo)ForgeMaven
     exclusiveContent {
         forRepository {
             maven {
@@ -102,6 +109,8 @@ repositories {
     maven {
         url = "https://jitpack.io"
     }
+
+    //ModMenu
     maven {
         url "https://maven.terraformersmc.com/releases/"
     }
@@ -110,18 +119,48 @@ repositories {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
-    maven { url "https://maven.ryanliptak.com/" }
+    // AppleSkin
+    maven {
+        url "https://maven.ryanliptak.com/"
+    }
+    maven {
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
     maven {
         name = "RedlanceMinecraft"
         url = "https://repo.redlance.org/public"
     }
-    maven { url "https://maven.shedaniel.me/" }
+    // Cloth Config
+    maven {
+        url "https://maven.shedaniel.me/"
+    }
     maven {
         name = 'GeckoLib'
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
         content {
             includeGroup("software.bernie.geckolib")
         }
+    }
+    maven {
+        name = 'Fabric-Hangbing_Proxy'
+        url = "https://repository.hanbings.io/proxy"
+    }
+    maven {
+        name = 'Fabric-BMCL'
+        url = 'https://bmclapi2.bangbang93.com/maven/'
+    }
+    maven {
+        name = 'Fabric-Meta'
+        url = 'https://meta.fabricmc.net/'
+    }
+    maven {
+        name = 'Fabric-Meta-BMCL'
+        url = 'https://bmclapi2.bangbang93.com/fabric-meta'
+    }
+    maven {
+        name = 'Fabric'
+        url = 'https://maven.fabricmc.net/'
     }
 }
 
@@ -150,9 +189,10 @@ dependencies {
     // satin shader 1.21.11没有
 //    modImplementation "org.ladysnake:satin:${satin_version}"
 
+    // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
     modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
     include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
-    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
+//    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
 //    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
 
     // Pehkui-Rebuilt 3.8.5+1.21.11
@@ -161,9 +201,11 @@ dependencies {
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
     modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}"
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -191,10 +233,14 @@ dependencies {
     modCompileOnly "maven.modrinth:tough-as-nails:WPscGvLW"
 
     // Presence Footsteps
-    modCompileOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
-    modRuntimeOnly "maven.modrinth:presence-footsteps:1.10.1+1.20.1"
+    modCompileOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
+    // modRuntimeOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
 
     // modCompileOnly "curse.maven:biomes-o-plenty-220318:6364066"
+
+    // 官方Maven仓库速度太慢 改为CurseMaven的源
+     modImplementation "maven.modrinth:jei:HWSzfi9w" //JEI 19.44.0.401 for Fabric 1.21.1
+//    modImplementation "curse.maven:jei-238222:8622779"
 }
 
 processResources {
@@ -203,11 +249,20 @@ processResources {
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
+    // Curios 兼容层已改为 src 源码编译（mixin/forge/CurioImpl.java 等），resources 里残留的上游预编译 .class
+    // 会与编译产物在 jar 里重名冲突，打包时排除（源码保存在 src/main/resources 不变，仅不进 jar）。
+    exclude "net/onixary/shapeShifterCurseFabric/mixin/forge/*.class"
+
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
                 "loader_version": project.loader_version,
+                "CHANNEL": channel,
                 "CHANNEL_VERSION": build_version
+    }
+
+    filesMatching("META-INF/neoforge.mods.toml") {
+        expand "version": project.version
     }
 }
 

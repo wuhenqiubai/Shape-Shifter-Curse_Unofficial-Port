@@ -123,6 +123,8 @@ runs/
 /.claude/
 /bin/
 /.sisyphus/
+# Local working notes (not part of the repo)
+/docs/
 build_*.txt
 /compile_errors.txt
 /__pycache__/
@@ -171,7 +173,8 @@ build_*.txt
 /.codegraph/
 /CLAUDE.md
 /remappedSrc/
-/docs/
 /AGENTS.md
 /.zcode/plans/plan-sess_f76410b7-f958-4e04-9e4c-1307dab3c9fb.md
 /.dsh/
+/.zcode/plans/plan-sess_a92b9483-6476-49c6-9101-c989238133c9.md
+/*.log

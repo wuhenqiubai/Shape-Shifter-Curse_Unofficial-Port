@@ -8,17 +8,16 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
-import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class OriginManager extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
-
+	
 	private static final Gson GSON = (new GsonBuilder()).setPrettyPrinting().disableHtmlEscaping().create();
 
 	private final HolderLookup.Provider provider;
@@ -29,7 +28,7 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 	}
 
 	@Override
-	protected void apply(Map<Identifier, List<JsonElement>> loader, @NonNull ResourceManager manager, @NonNull ProfilerFiller profiler) {
+	protected void apply(Map<ResourceLocation, List<JsonElement>> loader, ResourceManager manager, ProfilerFiller profiler) {
 		OriginRegistry.reset();
 		AtomicBoolean hasConfigChanged = new AtomicBoolean(false);
 		loader.forEach((id, jel) -> {
@@ -70,12 +69,12 @@ public class OriginManager extends MultiJsonDataLoader implements IdentifiableRe
 	}
 
 	@Override
-	public @NonNull Identifier getFabricId() {
-		return Identifier.fromNamespaceAndPath(Origins.MODID, "origins");
+	public ResourceLocation getFabricId() {
+		return ResourceLocation.fromNamespaceAndPath(Origins.MODID, "origins");
 	}
 
 	@Override
-	public @NonNull Collection<Identifier> getFabricDependencies() {
+	public Collection<ResourceLocation> getFabricDependencies() {
 		return Set.of(Apoli.identifier("powers"));
 	}
 }

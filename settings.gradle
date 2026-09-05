@@ -1,9 +1,27 @@
 pluginManagement {
     repositories {
+        mavenCentral()
+        gradlePluginPortal()
         maven {
-            name = 'Fabric'
+            name = 'Fabric-Hangbing_Proxy'
             url = "https://repository.hanbings.io/proxy"
         }
-        gradlePluginPortal()
+        maven {
+            name = 'Fabric-BMCL'
+            url = 'https://bmclapi2.bangbang93.com/maven/'
+        }
+        maven {
+            name = 'Fabric-Meta'
+            url = 'https://meta.fabricmc.net/'
+        }
+        maven {
+            name = 'Fabric-Meta-BMCL'
+            url = 'https://bmclapi2.bangbang93.com/fabric-meta'
+        }
+        maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
     }
 }
+rootProject.name = "Shape-Shifter-Curse_Unofficial-Port"

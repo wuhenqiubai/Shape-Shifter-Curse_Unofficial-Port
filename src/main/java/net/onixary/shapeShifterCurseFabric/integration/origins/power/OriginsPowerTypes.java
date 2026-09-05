@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.power;
 
-import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeReference;
@@ -10,8 +9,7 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Registry;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -25,42 +23,87 @@ public class OriginsPowerTypes {
     public static final PowerType<?> MASTER_OF_WEBS_NO_SLOWDOWN = new PowerTypeReference<>(Origins.identifier("master_of_webs_no_slowdown"));
     public static final PowerType<?> CONDUIT_POWER_ON_LAND = new PowerTypeReference<>(Origins.identifier("conduit_power_on_land"));
 
-	public static void register() {
-		// 1.21.11 (Apoli-Legacy 2.12.10)：origins:* 类型的 power/condition/action 别名解析到 apoli:*
-		// （2.12.10 没有 PowerFactories.ALIASES，改用 NamespaceAlias；origins:toggle → apoli:toggle 等）
-		NamespaceAlias.addAlias("origins", "apoli");
+    public static void register() {
+        // Register namespace alias so origins:* types resolve to apoli:* equivalents.
+        // Apoli-Legacy 用全局静态 NamespaceAlias（一次注册即覆盖 power/condition/action 数据加载解析）。
+        NamespaceAlias.addAlias("origins", "apoli");
 
-		register(new PowerFactory<>(Origins.identifier("action_on_callback"),
-				new SerializableData()
-						.add("entity_action_respawned", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("entity_action_removed", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("entity_action_gained", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("entity_action_lost", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("entity_action_added", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("entity_action_chosen", ApoliDataTypes.ENTITY_ACTION, null)
-						.add("execute_chosen_when_orb", SerializableDataTypes.BOOLEAN, true),
-				data ->
-						(type, player) -> new OriginsCallbackPower(type, player,
-								data.get("entity_action_respawned"),
-								data.get("entity_action_removed"),
-								data.get("entity_action_gained"),
-								data.get("entity_action_lost"),
-								data.get("entity_action_added"),
-								data.get("entity_action_chosen"),
-								data.getBoolean("execute_chosen_when_orb")))
-				.allowCondition());
+        // Register all apoli:* types as origins:* aliases
+        // Needed because SSC JSONs use origins: namespace but Origins mod is not installed
+        for (var registry : new Registry[]{
+            ApoliRegistries.POWER_FACTORY,
+            ApoliRegistries.ENTITY_CONDITION,
+            ApoliRegistries.BIENTITY_CONDITION,
+            ApoliRegistries.ITEM_CONDITION,
+            ApoliRegistries.BLOCK_CONDITION,
+            ApoliRegistries.DAMAGE_CONDITION,
+            ApoliRegistries.FLUID_CONDITION,
+            ApoliRegistries.BIOME_CONDITION,
+            ApoliRegistries.ENTITY_ACTION,
+            ApoliRegistries.ITEM_ACTION,
+            ApoliRegistries.BLOCK_ACTION,
+            ApoliRegistries.BIENTITY_ACTION,
+        }) {
+            try {
+                // Copy values first to avoid ConcurrentModificationException
+                var values = new java.util.ArrayList<>();
+                registry.forEach(values::add);
+                for (var value : values) {
+                    ResourceLocation apoliId = switch (value) {
+                        case io.github.apace100.apoli.power.factory.PowerFactory pf -> pf.getSerializerId();
+                        case io.github.apace100.apoli.power.factory.condition.ConditionFactory<?> cf -> cf.getSerializerId();
+                        case io.github.apace100.apoli.power.factory.action.ActionFactory<?> af -> af.getSerializerId();
+                        default -> null;
+                    };
+                    if (apoliId != null && "apoli".equals(apoliId.getNamespace())) {
+                        ResourceLocation originsId = Origins.identifier(apoliId.getPath());
+                        if (!registry.containsKey(originsId)) {
+                            Registry.register(registry, originsId, value);
+                        }
+                    }
+                }
+                Origins.LOGGER.info("Aliased {} apoli->origins types in registry", values.size());
+            } catch (Exception e) {
+                Origins.LOGGER.error("Failed to alias registry", e);
+            }
+            // Debug: check if apoli:multiple was aliased
+            if (!ApoliRegistries.POWER_FACTORY.containsKey(Origins.identifier("multiple"))) {
+                Origins.LOGGER.warn("origins:multiple not found in POWER_FACTORY after alias!");
+            }
+        }
 
-		// apoli:modify_type_tag — makes entity be considered in the specified entity type tag
-		// Replacement for the removed apoli:entity_group power type (SSC 1.21.1 迁移时丢失，这里恢复)
-		register(new PowerFactory<>(Apoli.identifier("modify_type_tag"),
-				new SerializableData()
-						.add("tag", SerializableDataTypes.ENTITY_TAG),
-				data ->
-						(type, entity) -> {
-							TagKey<EntityType<?>> tag = data.get("tag");
-							return new ModifyTypeTagPower(type, entity, tag);
-						}).allowCondition());
-	}
+        register(new PowerFactory<>(Origins.identifier("action_on_callback"),
+            new SerializableData()
+                .add("entity_action_respawned", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("entity_action_removed", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("entity_action_gained", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("entity_action_lost", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("entity_action_added", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("entity_action_chosen", ApoliDataTypes.ENTITY_ACTION, null)
+                .add("execute_chosen_when_orb", SerializableDataTypes.BOOLEAN, true),
+            data ->
+                (type, player) -> new OriginsCallbackPower(type, player,
+		                data.get("entity_action_respawned"),
+		                data.get("entity_action_removed"),
+		                data.get("entity_action_gained"),
+		                data.get("entity_action_lost"),
+		                data.get("entity_action_added"),
+		                data.get("entity_action_chosen"),
+                    data.getBoolean("execute_chosen_when_orb")))
+            .allowCondition());
+
+	    // apoli:modify_type_tag — makes entity be considered in the specified entity type tag
+	    // Replacement for the removed apoli:entity_group power type
+	    // 1.21.1: 改用 Legacy 原生 apoli:entity_group（数据已切换为 aquatic/arthropod 枚举值），此注册保留但不再使用
+	    // register(new PowerFactory<>(Apoli.identifier("modify_type_tag"),
+	    //         new SerializableData()
+	    //                 .add("tag", SerializableDataTypes.ENTITY_TAG),
+	    //         data ->
+	    //                 (type, entity) -> {
+	    //                     TagKey<EntityType<?>> tag = data.get("tag");
+	    //                     return new ModifyTypeTagPower(type, entity, tag);
+	    //                 }).allowCondition());
+    }
 
     private static void register(PowerFactory<?> serializer) {
         Registry.register(ApoliRegistries.POWER_FACTORY, serializer.getSerializerId(), serializer);

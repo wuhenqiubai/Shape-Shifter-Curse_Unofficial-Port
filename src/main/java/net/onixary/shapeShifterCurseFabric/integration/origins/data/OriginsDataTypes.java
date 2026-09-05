@@ -1,7 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.data;
 
+import com.google.common.collect.Lists;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSyntaxException;
 import io.github.apace100.calio.data.SerializableDataType;
+import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
+import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginUpgrade;
 import java.util.List;
 
@@ -9,11 +16,39 @@ public final class OriginsDataTypes {
 
     public static final SerializableDataType<Impact> IMPACT = SerializableDataType.enumValue(Impact.class);
 
-    public static final SerializableDataType<OriginUpgrade> UPGRADE = new SerializableDataType<>(
-            OriginUpgrade.class,
-            (buf, upgrade) -> upgrade.write(buf),
-            OriginUpgrade::read,
-            OriginUpgrade::fromJson);
+    public static final SerializableDataType<OriginUpgrade> UPGRADE = SerializableDataType.compound(
+        OriginUpgrade.class,
+        OriginUpgrade.DATA,
+        OriginUpgrade::fromData,
+        (serializableData, originUpgrade) -> originUpgrade.toData()
+    );
 
     public static final SerializableDataType<List<OriginUpgrade>> UPGRADES = SerializableDataType.list(UPGRADE);
+
+    public static final SerializableDataType<OriginLayer.ConditionedOrigin> CONDITIONED_ORIGIN = SerializableDataType.compound(
+        OriginLayer.ConditionedOrigin.class,
+        OriginLayer.ConditionedOrigin.DATA,
+        OriginLayer.ConditionedOrigin::fromData,
+        (serializableData, conditionedOrigin) -> conditionedOrigin.toData()
+    );
+
+    public static final SerializableDataType<List<OriginLayer.ConditionedOrigin>> CONDITIONED_ORIGINS = SerializableDataType.list(CONDITIONED_ORIGIN);
+
+    public static final SerializableDataType<OriginLayer.ConditionedOrigin> ORIGIN_OR_CONDITIONED_ORIGIN = new SerializableDataType<>(
+        OriginLayer.ConditionedOrigin.class,
+        CONDITIONED_ORIGIN::send,
+        CONDITIONED_ORIGIN::receive,
+        (jsonElement, provider) -> {
+            if (jsonElement instanceof JsonObject jsonObject) {
+                return CONDITIONED_ORIGIN.read(jsonObject, provider);
+            }
+            if (!(jsonElement instanceof JsonPrimitive jsonPrimitive) || !jsonPrimitive.isString()) {
+                throw new JsonSyntaxException("Expected a JSON object or string.");
+            }
+            ResourceLocation originId = SerializableDataTypes.IDENTIFIER.read(jsonPrimitive, provider);
+            return new OriginLayer.ConditionedOrigin(null, Lists.newArrayList(originId));
+        }
+    );
+
+    public static final SerializableDataType<List<OriginLayer.ConditionedOrigin>> ORIGINS_OR_CONDITIONED_ORIGINS = SerializableDataType.list(ORIGIN_OR_CONDITIONED_ORIGIN);
 }

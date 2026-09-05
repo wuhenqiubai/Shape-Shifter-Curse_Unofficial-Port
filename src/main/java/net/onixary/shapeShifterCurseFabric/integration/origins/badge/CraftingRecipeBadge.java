@@ -13,14 +13,10 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
-import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.display.*;
+import net.minecraft.world.item.crafting.*;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.screen.tooltip.CraftingRecipeTooltipComponent;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +25,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public record CraftingRecipeBadge(Identifier spriteId,
+public record CraftingRecipeBadge(ResourceLocation spriteId,
                                    RecipeHolder<CraftingRecipe> recipe,
                                    @Nullable Component prefix,
                                    @Nullable Component suffix) implements Badge {
@@ -46,60 +42,13 @@ public record CraftingRecipeBadge(Identifier spriteId,
         return true;
     }
 
-    private List<SlotDisplay> getIngredientDisplays() {
-        for (RecipeDisplay display : this.recipe.value().display()) {
-            if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                return shaped.ingredients();
-            } else if (display instanceof ShapelessCraftingRecipeDisplay shapeless) {
-                return shapeless.ingredients();
-            }
-        }
-        return List.of();
-    }
-
-    private int getRecipeWidth() {
-        for (RecipeDisplay display : this.recipe.value().display()) {
-            if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                return shaped.width();
-            }
-        }
-        return 3;
-    }
-
-    private int getRecipeHeight() {
-        for (RecipeDisplay display : this.recipe.value().display()) {
-            if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                return shaped.height();
-            }
-        }
-        return 3;
-    }
-
-    private ItemStack getResultStack() {
-        for (RecipeDisplay display : this.recipe.value().display()) {
-            SlotDisplay result;
-            if (display instanceof ShapedCraftingRecipeDisplay shaped) {
-                result = shaped.result();
-            } else if (display instanceof ShapelessCraftingRecipeDisplay shapeless) {
-                result = shapeless.result();
-            } else {
-                continue;
-            }
-            List<ItemStack> stacks = result.resolveForStacks(SlotDisplayContext.fromLevel(Minecraft.getInstance().level));
-            if (!stacks.isEmpty()) return stacks.get(0);
-        }
-        return ItemStack.EMPTY;
-    }
-
     public NonNullList<ItemStack> peekInputs(float time) {
         int seed = Mth.floor(time / 30);
         NonNullList<ItemStack> inputs = NonNullList.withSize(9, ItemStack.EMPTY);
-        List<SlotDisplay> slotDisplays = getIngredientDisplays();
-        if (slotDisplays.isEmpty()) return inputs;
-        ContextMap contextMap = SlotDisplayContext.fromLevel(Minecraft.getInstance().level);
-        for(int index = 0; index < slotDisplays.size() && index < 9; ++index) {
-            List<ItemStack> stacks = slotDisplays.get(index).resolveForStacks(contextMap);
-            if(!stacks.isEmpty()) inputs.set(index, stacks.get(seed % stacks.size()));
+        List<Ingredient> ingredients = this.recipe.value().getIngredients();
+        for(int index = 0; index < ingredients.size(); ++index) {
+            ItemStack[] stacks = ingredients.get(index).getItems();
+            if(stacks.length > 0) inputs.set(index, stacks[seed % stacks.length]);
         }
         return inputs;
     }
@@ -109,20 +58,21 @@ public record CraftingRecipeBadge(Identifier spriteId,
     public List<ClientTooltipComponent> getTooltipComponents(PowerType<?> powerType, int widthLimit, float time, Font textRenderer) {
         Minecraft client = Minecraft.getInstance();
         List<ClientTooltipComponent> tooltips = new LinkedList<>();
-        if(client.level == null) {
+        if(Minecraft.getInstance().level == null) {
             Origins.LOGGER.warn("Could not construct crafting recipe badge, because world was null");
             return tooltips;
         }
         RegistryAccess registryManager = client.level.registryAccess();
-        NonNullList<ItemStack> inputs = this.peekInputs(time);
-        int recipeWidth = getRecipeWidth();
-        int recipeHeight = getRecipeHeight();
-        ItemStack output = getResultStack();
+        ItemStack output = recipe.value().getResultItem(registryManager);
 
-        // 应用 ModifyCraftingPower 修改输出
-        ItemStack[] outputRef = { output };
+        int recipeWidth = recipe.value() instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getWidth() : 3;
+        int recipeHeight = recipe.value() instanceof ShapedRecipe shapedRecipe ? shapedRecipe.getHeight() : 3;
+        NonNullList<ItemStack> inputs = this.peekInputs(time);
+        // Apoli-Legacy 2.11.4 移除了 alpha7 的 InventoryUtil.createStackReference / ModifyCraftingPower.getPriority，
+        // doesApply/getNewResult 改为接收 CraftingInput，这里从合成材料构造。
         CraftingInput craftingInput = CraftingInput.of(recipeWidth, recipeHeight,
-                new ArrayList<>(inputs.subList(0, Math.min(recipeWidth * recipeHeight, inputs.size()))));
+            new ArrayList<>(inputs.subList(0, Math.min(recipeWidth * recipeHeight, inputs.size()))));
+        ItemStack[] outputRef = { output };
         PowerHolderComponent.getPowers(client.player, ModifyCraftingPower.class)
             .stream()
             .filter(p -> p.doesApply(craftingInput, recipe))

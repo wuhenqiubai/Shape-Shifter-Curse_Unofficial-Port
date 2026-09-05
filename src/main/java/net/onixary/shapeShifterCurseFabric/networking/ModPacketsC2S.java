@@ -61,19 +61,71 @@ public class ModPacketsC2S {
                     .stream().filter(BatBlockAttachPower::isAttached).findFirst().orElse(null);
             if (attachPower != null) attachPower.handleJump(player);
         });
+
+        // jump_event condition handle
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(JUMP_EVENT_ID), (payload, ctx) -> {
-            FriendlyByteBuf buf = payload.data();
-            UUID playerUuid = buf.readUUID();
-            ServerPlayer player = ctx.player();
-            if (player.getUUID().equals(playerUuid)) JumpEventCondition.setJumping(player, true);
-            PowerHolderComponent.getPowers(player, ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
+            ctx.server().execute(() -> {
+                // 在服务器端设置跳跃状态
+                JumpEventCondition.setJumping(ctx.player(), true);
+                PowerHolderComponent.getPowers(ctx.player(), ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
+            });
         });
+
+        // SPRINTING_TO_SNEAKING_EVENT condition handle
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(SPRINTING_TO_SNEAKING_EVENT_ID), (payload, ctx) -> {
-            FriendlyByteBuf buf = payload.data();
-            UUID playerUuid = buf.readUUID();
-            ServerPlayer player = ctx.player();
-            if (player.getUUID().equals(playerUuid)) {
-                PowerHolderComponent.getPowers(player, ActionOnSprintingToSneakingPower.class).forEach(ActionOnSprintingToSneakingPower::executeAction);
+            ctx.server().execute(() -> {
+                // 在服务器端处理疾跑转潜行事件
+                PowerHolderComponent.getPowers(ctx.player(), ActionOnSprintingToSneakingPower.class).forEach(ActionOnSprintingToSneakingPower::executeAction);
+            });
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(UPDATE_CUSTOM_SETTING),
+                ModPacketsC2S::onUpdatePlayerCustomConfig
+        );
+
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(UPDATE_CUSTOM_COLOR),
+                net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S::onUpdatePlayerCustomColor
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(SET_PATRON_FORM),
+                net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S::receiveSetPatronForm
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(SET_FORM),
+                net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S::receiveSetForm
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_SERVER),
+                ModPacketsC2S::onUpdatePowerAnimationData
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(REQUEST_POWER_ANIM_DATA),
+                ModPacketsC2S::onRequestPowerAnimationData
+        );
+
+        ServerPlayNetworking.registerGlobalReceiver(
+                BytePayload.id(UPLOAD_PATRON_AUTH_FILE),
+                ModPacketsC2S::receivePatronAuthFile
+        );
+    }
+
+    private static void onPressStartBookButton(BytePayload payload, ServerPlayNetworking.Context ctx) {
+        // 就凭这个网络Bug 我就可以做一个可以直接还原形态的作弊客户端 还可以给其他玩家还原 不知道为什么要往buf里写uuid
+        // UUID playerUuid = packetByteBuf.readUuid();
+        ctx.server().execute(() -> {
+            // 通过 UUID 获取玩家实例
+            // ServerPlayerEntity targetPlayer = minecraftServer.getPlayerManager().getPlayer(playerUuid);
+            if (ctx.player() != null && RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isPlayerForm(ctx.player())) {
+                TransformManager.startTransform(ctx.player(), RegPlayerForms.ORIGINAL_SHIFTER, null);
+                ShapeShifterCurseFabric.ON_ENABLE_MOD.trigger(ctx.player());
+                ctx.player().sendSystemMessage(Component.translatable("info.shape-shifter-curse.on_enable_mod").withStyle(ChatFormatting.LIGHT_PURPLE));
             }
         });
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(UPDATE_CUSTOM_SETTING), ModPacketsC2S::onUpdatePlayerCustomConfig);

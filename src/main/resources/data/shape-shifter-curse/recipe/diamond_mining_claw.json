@@ -12,7 +12,7 @@
 		"I": "minecraft:iron_ingot"
 	},
 	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:diamond_mining_claw"
+		"id": "shape-shifter-curse:diamond_mining_claw",
+		"count": 1
 	}
 }

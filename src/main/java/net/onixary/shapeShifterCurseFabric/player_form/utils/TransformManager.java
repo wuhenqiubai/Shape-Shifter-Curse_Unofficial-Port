@@ -234,7 +234,7 @@ public class TransformManager {
         }
     }
 
-    private static void sendClientFirstPersonReset(Player player) {
+    public static void sendClientFirstPersonReset(Player player) {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof LocalPlayer) {
             executeClientFirstPersonReset();
         } else if (player instanceof ServerPlayer serverPlayerEntity) {

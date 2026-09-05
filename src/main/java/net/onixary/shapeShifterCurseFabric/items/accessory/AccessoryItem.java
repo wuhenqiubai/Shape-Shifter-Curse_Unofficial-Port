@@ -4,6 +4,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.Enchantments;
 
 /**
  * 饰品物品基类。提供饰品生命周期钩子（tick/装备/卸下/破坏）和掉落规则。
@@ -63,10 +64,26 @@ public abstract class AccessoryItem extends Item {
 
     /** 装备时调用。 */
     public void onEquip(ItemStack stack, LivingEntity accessoryOwner, SlotData slotData) {
+/*
+        if (accessoryOwner instanceof Player player) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
+            if (TrinketUtils.getAccessoryMixinAuto(id)) {
+                TrinketUtils.ApplyAccessoryPowerOnEquip(player, id);
+            }
+        }
+*/
     }
 
     /** 卸下时调用。 */
     public void onUnequip(ItemStack stack, LivingEntity accessoryOwner, SlotData slotData) {
+/*
+        if (accessoryOwner instanceof Player player) {
+            ResourceLocation id = BuiltInRegistries.ITEM.getKey(this);
+            if (TrinketUtils.getAccessoryMixinAuto(id)) {
+                TrinketUtils.ApplyAccessoryPowerOnUnEquip(player, id);
+            }
+        }
+*/
     }
 
     /** @return 是否允许装备此饰品 */
@@ -74,9 +91,11 @@ public abstract class AccessoryItem extends Item {
         return true;
     }
 
-    /** @return 是否允许卸下此饰品 */
+    /** @return 是否允许卸下此饰品（绑定诅咒的饰品不可卸，对齐上游语义） */
     public boolean canUnequip(ItemStack stack, LivingEntity entity, SlotData slotData) {
-        return true;
+        // 1.21.1：hasBindingCurse 便利方法已移除；ItemEnchantments 非 Map，用 keySet + Holder.is 判断 BINDING_CURSE
+        return stack.getEnchantments().keySet().stream()
+                .noneMatch(holder -> holder.is(Enchantments.BINDING_CURSE));
     }
 
     /** 饰品被破坏时调用。 */

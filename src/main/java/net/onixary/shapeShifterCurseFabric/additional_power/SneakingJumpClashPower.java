@@ -11,7 +11,9 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -91,7 +93,11 @@ public class SneakingJumpClashPower extends Power {
         for (LivingEntity target : player.level().getEntitiesOfClass(
                 LivingEntity.class, expandedBox, 
                 e -> e != player && e.isAlive() && !e.isRemoved())) {
-            
+
+            if (player.level().clip(new ClipContext(new Vec3(player.getX(), player.getY(0.5f), player.getZ()), new Vec3(target.getX(), target.getY(0.5f), target.getZ()), ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, player)).getType() == HitResult.Type.BLOCK) {
+                continue;
+            }
+
             // 触发碰撞action
             if (bientityAction != null) {
                 this.bientityAction.accept(new Tuple<>(player, target));

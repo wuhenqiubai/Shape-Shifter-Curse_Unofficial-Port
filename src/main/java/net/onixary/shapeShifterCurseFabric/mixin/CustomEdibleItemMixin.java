@@ -1,80 +1,46 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
-import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowerFoodComponent;
 
-@Mixin(value = Item.class)
+@Mixin(Item.class)
 public abstract class CustomEdibleItemMixin {
+    /*
+     * 1.21.1 食物 = 数据组件 DataComponents.FOOD（Item.isFood()/getFoodComponent() 已删除）。
+     * 唯一的"食物判定"seam 是 itemStack.get(DataComponents.FOOD)（编译为 DataComponentHolder.get）。
+     * 这里把它替换成 SSC 的自定义 FoodProperties（非 null），use/finishUsingItem 里的 foodProperties != null 判定自然成立，
+     * 再走进 LivingEntity.eat（addEatEffect 应用 mob 效果、Player.eat→FoodData.eat 恢复饥饿/饱和度）。
+     */
 
-    @Unique
-    private static final ThreadLocal<Player> ssc$currentPlayer = new ThreadLocal<>();
-
-    @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void onUse(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        ItemStack stack = user.getItemInHand(hand);
-        FoodProperties fc = getPowerFoodComponent(user, stack);
-        if (fc != null) {
-            if (user.canEat(fc.canAlwaysEat())) {
-                ssc$currentPlayer.set(user);
-                user.startUsingItem(hand);
-                cir.setReturnValue(InteractionResult.CONSUME);
-            } else {
-                ssc$currentPlayer.remove();
-                cir.setReturnValue(InteractionResult.FAIL);
-            }
-        }
-    }
-
-    @Inject(method = "finishUsingItem", at = @At("HEAD"), cancellable = true)
-    private void onFinishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (user instanceof Player player) {
-            FoodProperties fc = getPowerFoodComponent(player, stack);
-            if (fc != null) {
-                // 1.21.11 Player.eat(Level, ItemStack, FoodProperties) 移除，改用 FoodData.eat(FoodProperties)
-                player.getFoodData().eat(fc);
-                // 1.21.11 恢复食用粒子/声音：自定义食物无 CONSUMABLE 组件（原 triggerItemUseEffects 已移除，
-                // 粒子/声音迁入 Consumable.emitParticlesAndSounds，仅 onConsume 触发），复用 Consumable 默认 builder。
-                Consumable.builder().build().emitParticlesAndSounds(user.getRandom(), user, stack, 16);
-                cir.setReturnValue(stack);
-            }
-        }
-    }
-
-    @ModifyReturnValue(method = "getUseAnimation", at = @At("RETURN"))
-    private ItemUseAnimation replaceUseAction(ItemUseAnimation original, ItemStack stack) {
-        if (original == ItemUseAnimation.EAT) {
-            return original;
-        }
-        Player player = ssc$currentPlayer.get();
-        if (player != null && getPowerFoodComponent(player, stack) != null) {
-            return ItemUseAnimation.EAT;
+    // Item.use 里 itemStack.get(DataComponents.FOOD) 处：让自定义可食物品被识别为食物
+    @ModifyExpressionValue(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"))
+    private Object use$getFoodProperties(Object original, Level world, Player user, InteractionHand hand) {
+        if (original instanceof FoodProperties) {
+            FoodProperties fc = getPowerFoodComponent(user, user.getItemInHand(hand));
+            return fc != null ? fc : original;
         }
         return original;
     }
 
-    @Inject(method = "getUseDuration", at = @At("HEAD"), cancellable = true)
-    private void onGetMaxUseTime(ItemStack stack, LivingEntity user, CallbackInfoReturnable<Integer> cir) {
-        if (user instanceof Player player) {
-            FoodProperties fc = getPowerFoodComponent(player, stack);
-            if (fc != null) {
-                cir.setReturnValue(32);
+    // Item.finishUsingItem 里 itemStack.get(DataComponents.FOOD) 处：食用完成后用自定义 FoodProperties
+    @ModifyExpressionValue(method = "finishUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"))
+    private Object finishUsing$getFoodProperties(Object original, ItemStack stack, Level world, LivingEntity user) {
+        if (original instanceof FoodProperties) {
+            if (user instanceof Player player) {
+                FoodProperties fc = getPowerFoodComponent(player, stack);
+                return fc != null ? fc : original;
             }
         }
+        return original;
     }
 }

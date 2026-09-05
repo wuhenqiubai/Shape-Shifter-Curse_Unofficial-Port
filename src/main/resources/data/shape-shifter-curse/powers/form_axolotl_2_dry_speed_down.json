@@ -1,15 +1,15 @@
 {
-	"type": "apoli:conditioned_attribute",
-	"modifier": {
-		"attribute": "minecraft:generic.movement_speed",
-		"operation": "multiply_total",
-		"value": -0.5,
-		"name": "shape-shifter-curse:decrease_speed_when_not_having_air_moist_"
-	},
-	"tick_rate": 20,
-	"condition": {
-		"type": "apoli:air",
-		"comparison": "<=",
-		"compare_to": 0
-	}
+    "type": "apoli:conditioned_attribute",
+    "modifier": {
+        "name": "Decrease speed when not having air moist",
+        "attribute": "minecraft:generic.movement_speed",
+        "operation": "multiply_total",
+        "value": -0.5
+    },
+    "tick_rate": 20,
+    "condition": {
+        "type": "apoli:air",
+        "comparison": "<=",
+        "compare_to": 0
+    }
 }

@@ -140,12 +140,12 @@ class PatronDataSegment(ScriptTypes.SubDataSegment):
 
 
 def loadAllData() -> dict[str, list[ScriptTypes.SubDataSegment]]:
-	PatronJson = [
+	PatronJsons = [
 		os.path.join("./PatronData", f) for f in os.listdir("./PatronData")
 		if f.endswith(".json") and os.path.isfile(os.path.join("./PatronData", f))
 	]
 	PatronData = {}
-	for PatronFilePath in PatronJson:
+	for PatronFilePath in PatronJsons:
 		with open(PatronFilePath, "r", encoding="utf-8") as f:
 			PatronJson = json.load(f)
 		try:

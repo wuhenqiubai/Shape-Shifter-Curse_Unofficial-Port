@@ -318,9 +318,10 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
     }
 
-    public static void requestPatronAuthFile(ServerPlayer player) {
+    public static void requestPatronAuthFile(ServerPlayer player, boolean forceReReadFile) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeUUID(player.getUUID());
+        buf.writeBoolean(forceReReadFile);
         ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
     }
 
@@ -338,5 +339,33 @@ public class ModPacketsS2CServer {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeInt(level);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), buf));
+    }
+
+    // 服务端也要注册 S2C payload 类型（fabric networking：发送端必须注册 playS2C，否则 id 未知会回退 DiscardedPayload codec、
+    // 把 BytePayload 强转 DiscardedPayload 抛 ClassCastException，玩家进服即崩 -- issue #21）。
+    // 只注册类型、不注册客户端 receiver（receiver 仍在客户端 ModPacketsS2C）。REGISTERED_S2C 幂等，双端注册互不冲突。
+    public static void registerServerS2C() {
+        BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
+        BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
+        BytePayload.registerS2C(ModPackets.SYNC_TRANSFORM_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.RESET_FIRST_PERSON);
+        BytePayload.registerS2C(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
+        BytePayload.registerS2C(ModPackets.SYNC_FORCE_SNEAK_STATE);
+        BytePayload.registerS2C(ModPackets.UPDATE_DYNAMIC_FORM);
+        BytePayload.registerS2C(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT);
+        BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
+        BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
+        BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
+        BytePayload.registerS2C(ModPackets.UPDATE_PATRON_LEVEL);
+        BytePayload.registerS2C(ModPackets.OPEN_PATRON_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
+        BytePayload.registerS2C(ModPackets.SET_NO_MOVE_TICK);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
+        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
+        BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
+        BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
     }
 }

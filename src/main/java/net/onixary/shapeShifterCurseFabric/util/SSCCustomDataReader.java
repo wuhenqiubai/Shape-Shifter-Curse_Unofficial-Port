@@ -22,27 +22,31 @@ public class SSCCustomDataReader {
      */
 
     static {
-        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer("shape-shifter-curse");
+        // fabric.mod.json 的 id 是 shape-shifter-curse-unofficial（MOD_ID 只是资源命名空间）
+        Optional<ModContainer> container = FabricLoader.getInstance().getModContainer("shape-shifter-curse-unofficial");
         if (container.isEmpty()) {
             ShapeShifterCurseFabric.LOGGER.error("ShapeShifterCurseFabric ModContainer is not found!");  // 除非哪个小天才直接复制代码连改都没改 否则不应该到这个分支
-        }
-        ModContainer modContainer = container.get();
-        ModMetadata metadata = modContainer.getMetadata();
-        if (metadata.containsCustomValue("ssc-data")) {
-            CustomValue.CvObject customValue = metadata.getCustomValue("ssc-data").getAsObject();
-            if (customValue.containsKey("Channel")) {
-                Channel = customValue.get("Channel").getAsString();
-            } else {
-                Channel = "ERROR";
-            }
-            if (customValue.containsKey("ChannelVersion")) {
-                ChannelVersion = customValue.get("ChannelVersion").getAsString();
-            } else {
-                ChannelVersion = "ERROR";
-            }
-        } else {
             Channel = "ERROR";
             ChannelVersion = "ERROR";
+        } else {
+            ModContainer modContainer = container.get();
+            ModMetadata metadata = modContainer.getMetadata();
+            if (metadata.containsCustomValue("ssc-data")) {
+                CustomValue.CvObject customValue = metadata.getCustomValue("ssc-data").getAsObject();
+                if (customValue.containsKey("Channel")) {
+                    Channel = customValue.get("Channel").getAsString();
+                } else {
+                    Channel = "ERROR";
+                }
+                if (customValue.containsKey("ChannelVersion")) {
+                    ChannelVersion = customValue.get("ChannelVersion").getAsString();
+                } else {
+                    ChannelVersion = "ERROR";
+                }
+            } else {
+                Channel = "ERROR";
+                ChannelVersion = "ERROR";
+            }
         }
     }
 }

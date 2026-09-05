@@ -54,6 +54,9 @@ public class ClimbingEXPower extends ClimbingPower {
         if (!super.isActive()) {
             return false;
         }
+        // 注：不能用 horizontalCollision 区分「贴墙爬墙」与「开阔地浮空」——爬墙（竖直移动）时 horizontalCollision 为 false，
+        // 会误伤爬墙悬停。真正的区分靠 start/continue 条件（start 要求 collided_horizontally 贴墙；
+        // continue 要求不在地面 + 旁边有方块）。开阔地（无墙）start/continue 均 false → 不激活。
         boolean active;
         if (lastIsClimbing) {
             active = continueClimbCondition == null || continueClimbCondition.test(this.entity);

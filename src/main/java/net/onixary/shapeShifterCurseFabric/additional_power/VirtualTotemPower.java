@@ -8,11 +8,12 @@ import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.client.Minecraft;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -33,7 +34,10 @@ import java.util.function.Consumer;
 
 // 由于网络同步问题 仅支持玩家实体 非玩家实体不会触发客户端效果
 public class VirtualTotemPower extends CooldownPower {
-    public static final HashMap<Identifier, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
+    public final int priority;
+    public final boolean highPriority;
+    public final boolean lowPriority;
+    public static final HashMap<ResourceLocation, BiConsumer<Player, ItemStack>> virtualTotemTypeMap = new HashMap<>();
 
     static {
         virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("default"), (Player playerEntity, ItemStack totemStack) -> {
@@ -58,7 +62,7 @@ public class VirtualTotemPower extends CooldownPower {
         });
     }
 
-    public Identifier virtualTotemType;  // 用于播放动画
+    public ResourceLocation virtualTotemType;  // 用于播放动画
     public ItemStack totemStack;  // 当VirtualTotemPowerID == 0时 模拟原版不死图腾
     private final List<Consumer<Entity>> entityAction;
     private final int totemHealth;
@@ -71,15 +75,18 @@ public class VirtualTotemPower extends CooldownPower {
         this.entityAction = data.get("entity_actions");
         this.totemHealth = data.get("totem_health");
         this.totemStatusEffects = data.get("totem_status_effects");
+        this.priority = data.get("priority");
+        this.highPriority = data.get("high_priority");
+        this.lowPriority = data.get("low_priority");
     }
 
     // 应该不用同步配置 Apoli应该会把SerializableData.Instance同步到客户端
-    public Tag toTag() {
-        return super.toTag();
+    public Tag toTag(HolderLookup.Provider provider) {
+        return super.toTag(provider);
     }
 
-    public void fromTag(Tag tag) {
-        super.fromTag(tag);
+    public void fromTag(Tag tag, HolderLookup.Provider provider) {
+        super.fromTag(tag, provider);
     }
 
     public void use() {
@@ -98,7 +105,7 @@ public class VirtualTotemPower extends CooldownPower {
                 consumer.accept(this.entity);
             }
         }
-        if (!this.entity.level().isClientSide() && this.entity instanceof ServerPlayer serverPlayerEntity) {
+        if (!this.entity.level().isClientSide && this.entity instanceof ServerPlayer serverPlayerEntity) {
             ModPacketsS2CServer.sendActiveVirtualTotem(serverPlayerEntity, this);
         }
         super.use();
@@ -106,9 +113,9 @@ public class VirtualTotemPower extends CooldownPower {
 
     public @Nullable FriendlyByteBuf create_packet_byte_buf() {
         if (this.entity instanceof ServerPlayer serverPlayerEntity) {
-            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.level().getServer().registryAccess());
+            RegistryFriendlyByteBuf buf = new RegistryFriendlyByteBuf(io.netty.buffer.Unpooled.buffer(), serverPlayerEntity.getServer().registryAccess());
             buf.writeUUID(serverPlayerEntity.getUUID());
-            buf.writeIdentifier(this.virtualTotemType);
+            buf.writeResourceLocation(this.virtualTotemType);
             buf.writeBoolean(this.totemStack != null && !this.totemStack.isEmpty());
             if (this.totemStack != null && !this.totemStack.isEmpty()) {
                 ItemStack.STREAM_CODEC.encode(buf, this.totemStack);
@@ -118,7 +125,7 @@ public class VirtualTotemPower extends CooldownPower {
         return null;
     }
 
-    public static void process_virtual_totem_type(@NotNull Player entity, Identifier virtualTotemType, @Nullable ItemStack totemStack) {
+    public static void process_virtual_totem_type(@NotNull Player entity, ResourceLocation virtualTotemType, @Nullable ItemStack totemStack) {
         Minecraft client = Minecraft.getInstance();
         if (virtualTotemTypeMap.containsKey(virtualTotemType)) {
             virtualTotemTypeMap.get(virtualTotemType).accept(entity, totemStack);
@@ -131,6 +138,9 @@ public class VirtualTotemPower extends CooldownPower {
         return new PowerFactory<>(
                 ShapeShifterCurseFabric.identifier("virtual_totem"),
                 new SerializableData()
+                        .add("priority", SerializableDataTypes.INT, 1000)
+                        .add("high_priority", SerializableDataTypes.BOOLEAN, false)
+                        .add("low_priority", SerializableDataTypes.BOOLEAN, false)
                         .add("virtual_totem_type", SerializableDataTypes.IDENTIFIER, ShapeShifterCurseFabric.identifier("default"))
                         .add("totem_stack", SerializableDataTypes.ITEM_STACK, new ItemStack(Items.TOTEM_OF_UNDYING, 1))
                         .add("entity_actions", ApoliDataTypes.ENTITY_ACTIONS, null)

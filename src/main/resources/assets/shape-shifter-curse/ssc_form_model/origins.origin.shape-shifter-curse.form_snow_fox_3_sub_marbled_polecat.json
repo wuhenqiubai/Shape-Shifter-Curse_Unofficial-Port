@@ -6,6 +6,8 @@
   "wide_only": true,
   "model": "shape-shifter-curse:geo/form/form_snow_fox_3_sub_marbled_polecat",
   "texture": "shape-shifter-curse:textures/form/form_snow_fox_3_sub_marbled_polecat/form_snow_fox_3_sub_marbled_polecat.png",
+  "texture_mask": "shape-shifter-curse:textures/form/form_snow_fox_3_sub_marbled_polecat/form_snow_fox_3_sub_marbled_polecat_colormask.png",
+
   "hidden": [
     "leftLeg",
     "rightLeg",

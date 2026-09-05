@@ -55,18 +55,11 @@ public final class AuthClient {
 
     private static void SetLocalPatronAuthFile(UUID playerUUID, AuthFile authFile) {
         if (playerUUID == null || authFile == null) {
-            if (LOCAL_PATRON_AUTH_FILE != null) {
-                LOCAL_PATRON_AUTH_FILE.onClientLost();
-            }
             LOCAL_PLAYER_UUID = null;
             LOCAL_PATRON_AUTH_FILE = null;
         } else {
-            if (LOCAL_PATRON_AUTH_FILE != null) {
-                LOCAL_PATRON_AUTH_FILE.onUpdateClient(authFile);
-            }
             LOCAL_PLAYER_UUID = playerUUID;
             LOCAL_PATRON_AUTH_FILE = authFile;
-            LOCAL_PATRON_AUTH_FILE.onClientGain();
         }
     }
 
@@ -200,13 +193,13 @@ public final class AuthClient {
         try {
             AuthFile loadedFile = AuthUtils.readAuthFile(new FriendlyByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(localPatronAuthFilePath))));
             if (loadedFile != null) {
-                AuthUtils.loadKey(loadedFile.getKeySegment());
+                AuthUtils.keyManager.loadKey(null, loadedFile.getKeySegment());
             }
             SetLocalPatronAuthFile(playerUUID, loadedFile);
         } catch (IOException e) {
             return;
         }
-        if (LOCAL_PATRON_AUTH_FILE != null && !AuthUtils.isKeyCanUse(LOCAL_PATRON_AUTH_FILE.getKeySegment())) {
+        if (LOCAL_PATRON_AUTH_FILE != null && !AuthUtils.keyManager.isKeyValid(LOCAL_PATRON_AUTH_FILE.getKeySegment())) {
             checkUpdate(playerUUID, true);
         }
     }
@@ -231,17 +224,17 @@ public final class AuthClient {
         if (keySegment == null) {
             return;
         }
-        AuthUtils.loadKey(keySegment);
-        if (LOCAL_PATRON_AUTH_FILE != null && !AuthUtils.isKeyCanUse(LOCAL_PATRON_AUTH_FILE.getKeySegment())) {
+        AuthUtils.keyManager.loadKey(null, keySegment);
+        if (LOCAL_PATRON_AUTH_FILE != null && !AuthUtils.keyManager.isKeyValid(LOCAL_PATRON_AUTH_FILE.getKeySegment())) {
             checkUpdate(LOCAL_PLAYER_UUID, true);
         }
     }
 
-    public static void requestAuthFile(UUID playerUUID) {
+    public static void requestAuthFile(UUID playerUUID, boolean forceReReadFile) {
         if (playerUUID == null) {
             return;
         }
-        if (!playerUUID.equals(LOCAL_PLAYER_UUID)) {
+        if (forceReReadFile || !playerUUID.equals(LOCAL_PLAYER_UUID)) {
             loadLocalPatronAuthFile(playerUUID);
         }
         if (LOCAL_PATRON_AUTH_FILE != null) {

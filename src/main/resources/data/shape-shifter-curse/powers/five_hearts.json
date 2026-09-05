@@ -1,9 +1,9 @@
 {
-	"type": "apoli:attribute",
-	"modifier": {
-		"attribute": "minecraft:generic.max_health",
-		"value": -10.0,
-		"operation": "addition",
-		"name": "shape-shifter-curse:nine_lives_health_reduction"
-	}
+    "type": "apoli:attribute",
+    "modifier": {
+        "name": "Nine lives health reduction",
+        "attribute": "minecraft:generic.max_health",
+        "value": -10.0,
+        "operation": "addition"
+    }
 }

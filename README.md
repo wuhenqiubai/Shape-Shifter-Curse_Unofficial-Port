@@ -1,6 +1,7 @@
 
 # 感谢 [onixary](https://github.com/onixary) 与 [xu233333](https://github.com/xu233333) 开发了这个优秀的模组！本项目仅为适配与修复维护，所有核心功能版权归原作者所有。
-# 本Mod将于2026/8/22开始进入半停更状态，因为我的高中学业非常繁重，再没有多少空余时间支持我开发，但仍然欢迎PR和提交Issue。
+# 本Mod将于2026/8/22开始进入随机停更状态，因为我的在校时间长，缺少时间进行开发，但仍然欢迎PR和提交Issue。
+# This mod will be randomly suspended starting August 22, 2026, due to my long hours at school and lack of time for development. However, pull requests and issue submissions are still welcome.
 
 ## **幻形者诅咒（Shape Shifter Curse Mod）** 的 **非官方移植版本**
 - 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
@@ -10,7 +11,7 @@
 > 在发布稳定版本后会偶尔发布我的小巧思。
 
 >
-> **基于上游commit**: [2deecb4](https://github.com/onixary/shape-shifter-curse-fabric/commits/master/)
+> **基于上游commit**: [986c0cc](https://github.com/onixary/shape-shifter-curse-fabric/commits/master/)
 > 
 ## 已知问题
 

@@ -3,12 +3,13 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -18,16 +19,15 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animation.state.BoneSnapshot;
-import software.bernie.geckolib.cache.model.GeoBone;
+import software.bernie.geckolib.cache.object.GeoBone;
 
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public class FormRenderUtils {
-    public static final HashMap<Identifier, Supplier<IModelAnimationSystem>> modelAnimationSystemRegistry = new HashMap<>();
-    public static final HashMap<Identifier, Predicate<Player>> conditionRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, Supplier<IModelAnimationSystem>> modelAnimationSystemRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, Predicate<Player>> conditionRegistry = new HashMap<>();
     static {
         registerCondition(ShapeShifterCurseFabric.identifier("always_true"), player -> true);
         registerCondition(ShapeShifterCurseFabric.identifier("always_false"), player -> false);
@@ -35,16 +35,16 @@ public class FormRenderUtils {
         registerCondition(ShapeShifterCurseFabric.identifier("is_sprinting"), Entity::isSprinting);
     }
 
-    public static void registerCondition(Identifier ResourceLocation, Predicate<Player> condition) {
+    public static void registerCondition(ResourceLocation ResourceLocation, Predicate<Player> condition) {
         conditionRegistry.put(ResourceLocation, condition);
     }
 
     public static boolean isRenderingInWorld = false;
 
     // { "layer(slot)": {"form": formRenderer} }
-    public static final HashMap<Identifier, HashMap<Identifier, FormRenderer>> formRendererRegistry = new HashMap<>();
+    public static final HashMap<ResourceLocation, HashMap<ResourceLocation, FormRenderer>> formRendererRegistry = new HashMap<>();
 
-    public static final Identifier DEFAULT_MAS = register_MAS(ShapeShifterCurseFabric.identifier("default"), DefaultModelAnimationSystem::new);
+    public static final ResourceLocation DEFAULT_MAS = register_MAS(ShapeShifterCurseFabric.identifier("default"), DefaultModelAnimationSystem::new);
 
     public static class BoneBipedState {
         public final float x;
@@ -86,38 +86,8 @@ public class FormRenderUtils {
 
         @SuppressWarnings("removal")
         public BoneBipedState(GeoBone bone) {
-            this(getTranslateOrZero(bone.frameSnapshot, 0), getTranslateOrZero(bone.frameSnapshot, 1), getTranslateOrZero(bone.frameSnapshot, 2),
-                 getRotOrZero(bone.frameSnapshot, 0), getRotOrZero(bone.frameSnapshot, 1), getRotOrZero(bone.frameSnapshot, 2),
-                 bone.pivotX(), bone.pivotY(), bone.pivotZ(),
-                 getScaleOrOne(bone.frameSnapshot, 0), getScaleOrOne(bone.frameSnapshot, 1), getScaleOrOne(bone.frameSnapshot, 2));
+            this(bone.getPosX(), bone.getPosY(), bone.getPosZ(), bone.getRotX(), bone.getRotY(), bone.getRotZ(), bone.getPivotX(), bone.getPivotY(), bone.getPivotZ(), bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
             this.cachedBone = bone;
-        }
-
-        private static float getTranslateOrZero(@Nullable BoneSnapshot s, int index) {
-            if (s == null) return 0f;
-            return switch (index) {
-                case 0 -> s.getTranslateX();
-                case 1 -> s.getTranslateY();
-                default -> s.getTranslateZ();
-            };
-        }
-
-        private static float getRotOrZero(@Nullable BoneSnapshot s, int index) {
-            if (s == null) return 0f;
-            return switch (index) {
-                case 0 -> s.getRotX();
-                case 1 -> s.getRotY();
-                default -> s.getRotZ();
-            };
-        }
-
-        private static float getScaleOrOne(@Nullable BoneSnapshot s, int index) {
-            if (s == null) return 1f;
-            return switch (index) {
-                case 0 -> s.getScaleX();
-                case 1 -> s.getScaleY();
-                default -> s.getScaleZ();
-            };
         }
 
         public void apply(ModelPart part) {
@@ -134,14 +104,18 @@ public class FormRenderUtils {
 
         @SuppressWarnings("removal")
         public void apply(GeoBone bone) {
-            BoneSnapshot s = bone.frameSnapshot;
-            if (s == null) {
-                s = BoneSnapshot.create(bone);
-                bone.frameSnapshot = s;
-            }
-            s.setTranslation(x, y, z);
-            s.setRotation(rot_x, rot_y, rot_z);
-            s.setScale(scale_x, scale_y, scale_z);
+            bone.setPosX(x);
+            bone.setPosY(y);
+            bone.setPosZ(z);
+            bone.setRotX(rot_x);
+            bone.setRotY(rot_y);
+            bone.setRotZ(rot_z);
+            bone.setPivotX(pivot_x);
+            bone.setPivotY(pivot_y);
+            bone.setPivotZ(pivot_z);
+            bone.setScaleX(scale_x);
+            bone.setScaleY(scale_y);
+            bone.setScaleZ(scale_z);
         }
 
         public void restore() {
@@ -155,17 +129,17 @@ public class FormRenderUtils {
     }
 
     public static void onClientInit() {
-        WorldRenderEvents.END_MAIN.register(context -> isRenderingInWorld = false);
-        WorldRenderEvents.START_MAIN.register(context -> isRenderingInWorld = true);
+        WorldRenderEvents.END.register(context -> isRenderingInWorld = false);
+        WorldRenderEvents.START.register(context -> isRenderingInWorld = true);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FormModelResourceReloadListener());
     }
 
-    public static Identifier register_MAS(Identifier id, Supplier<IModelAnimationSystem> supplier) {
+    public static ResourceLocation register_MAS(ResourceLocation id, Supplier<IModelAnimationSystem> supplier) {
         modelAnimationSystemRegistry.put(id, supplier);
         return id;
     }
 
-    public static @Nullable IModelAnimationSystem get_MAS(Identifier id, @Nullable JsonObject json) {
+    public static @Nullable IModelAnimationSystem get_MAS(ResourceLocation id, @Nullable JsonObject json) {
 	    if (id == null) {
 		    return null;
 	    }
@@ -185,24 +159,36 @@ public class FormRenderUtils {
         return null;
     }
 
-    public static void registerFormRenderer(Identifier slotID, Identifier formID, FormRenderer renderer) {
+    public static void registerFormRenderer(ResourceLocation slotID, ResourceLocation formID, FormRenderer renderer) {
         formRendererRegistry.computeIfAbsent(slotID, k -> new HashMap<>()).put(formID, renderer);
     }
 
-    public static @Nullable FormRenderer getFormRenderer(Identifier slotID, Identifier formID) {
+    public static @Nullable FormRenderer getFormRenderer(ResourceLocation slotID, ResourceLocation formID) {
         return formRendererRegistry.getOrDefault(slotID, new HashMap<>()).get(formID);
     }
 
-    public static void loadFormRenderer(Identifier slotID, Identifier formID, FormRenderer renderer) {
+    public static void loadFormRenderer(ResourceLocation slotID, ResourceLocation formID, FormRenderer renderer) {
         formRendererRegistry.computeIfAbsent(slotID, k -> new HashMap<>()).put(formID, renderer);
     }
 
     public static Vec3 getPartPosition(ModelPart part) {
-        return new Vec3(part.x, part.y, part.z).reverse();
+        var t = part.storePose();
+        return new Vec3(t.x, t.y, t.z).reverse();
     }
 
     public static Vec3 getPartRotation(ModelPart part) {
-        return new Vec3(part.xRot, part.yRot, part.zRot);
+        var t = part.storePose();
+        return new Vec3(wrapRadians(t.xRot), wrapRadians(t.yRot), wrapRadians(t.zRot));
+    }
+
+    // 把欧拉角弧度 wrap 到 [-π, π]，等价 Mth.wrapDegrees 的弧度版。
+    // PAL 动画对右臂常用 >180° 的表示（如 axolotl_3_crawling 右臂 x=+190°，物理等价 -170°），
+    // 直接写入 GeoBone 会让渲染插值走长弧（非最短路翻转）；wrap 只改表示不改物理姿态，确保走最短路。
+    private static float wrapRadians(float v) {
+        float twoPi = Mth.TWO_PI;
+        float pi = Mth.PI;
+        float wrapped = (v % twoPi + twoPi) % twoPi;
+        return wrapped >= pi ? wrapped - twoPi : wrapped;
     }
 
     @SuppressWarnings("removal")
@@ -210,31 +196,21 @@ public class FormRenderUtils {
         PoseStack matrices = new PoseStack();
         if (bone == null) return matrices;
         List<GeoBone> chain = new ArrayList<>();
-        for (GeoBone b = bone; b != null; b = b.parent()) {
+        for (GeoBone b = bone; b != null; b = b.getParent()) {
             chain.add(b);
         }
         Collections.reverse(chain);
         // matrices.translate(0.5F, 0.51F, 0.5F);
         for (int i = 0; i < chain.size(); i++) {
             GeoBone b = chain.get(i);
-            BoneSnapshot s = b.frameSnapshot;
-            float posX = s != null ? s.getTranslateX() : 0f;
-            float posY = s != null ? s.getTranslateY() : 0f;
-            float posZ = s != null ? s.getTranslateZ() : 0f;
-            float rotX = s != null ? s.getRotX() : 0f;
-            float rotY = s != null ? s.getRotY() : 0f;
-            float rotZ = s != null ? s.getRotZ() : 0f;
-            float scaleX = s != null ? s.getScaleX() : 1f;
-            float scaleY = s != null ? s.getScaleY() : 1f;
-            float scaleZ = s != null ? s.getScaleZ() : 1f;
-            matrices.translate(-posX, posY, posZ);
-            matrices.translate(b.pivotX(), b.pivotY(), b.pivotZ());
-            matrices.mulPose(Axis.ZP.rotation(rotZ));
-            matrices.mulPose(Axis.YP.rotation(rotY));
-            matrices.mulPose(Axis.XP.rotation(rotX));
-            matrices.scale(scaleX, scaleY, scaleZ);
+            matrices.translate(-b.getPosX(), b.getPosY(), b.getPosZ());
+            matrices.translate(b.getPivotX(), b.getPivotY(), b.getPivotZ());
+            matrices.mulPose(Axis.ZP.rotation(b.getRotZ()));
+            matrices.mulPose(Axis.YP.rotation(b.getRotY()));
+            matrices.mulPose(Axis.XP.rotation(b.getRotX()));
+            matrices.scale(b.getScaleX(), b.getScaleY(), b.getScaleZ());
             if (i < chain.size() - 1) {
-                matrices.translate(-b.pivotX(), -b.pivotY(), -b.pivotZ());
+                matrices.translate(-b.getPivotX(), -b.getPivotY(), -b.getPivotZ());
             }
         }
         return matrices;
@@ -254,8 +230,8 @@ public class FormRenderUtils {
     public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
         if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
             List<FormRenderer> formRenderers = new ArrayList<>();
-            Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
-            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.fromNamespaceAndPath("origins", "origin"), formID);
+            ResourceLocation formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
+            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(ResourceLocation.fromNamespaceAndPath("origins", "origin"), formID);
             if (formRenderer == null) {
                 ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: PlayerFormDynamic.ModelID is not null, but the model is not registered: {}", formID);
                 return new ArrayList<>();
@@ -279,7 +255,7 @@ public class FormRenderUtils {
             //     }
             // }
             IForm playerFormBase = FormUtils.getPlayerForm(player);
-            Tuple<Identifier, Identifier> currentLayer = playerFormBase.getRenderLayerOverride();
+            Tuple<ResourceLocation, ResourceLocation> currentLayer = playerFormBase.getRenderLayerOverride();
             if (currentLayer != null) {
                 List<FormRenderer> formRenderers = new ArrayList<>();
                 FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
@@ -295,8 +271,8 @@ public class FormRenderUtils {
         HashMap<OriginLayer, Origin> OriginData = poc.getOrigins();
         List<FormRenderer> formRenderers = new ArrayList<>();
         for (Map.Entry<OriginLayer, Origin> entry : OriginData.entrySet()) {
-            Identifier layer = entry.getKey().getResourceLocation();
-            Identifier form = entry.getValue().getResourceLocation();
+            ResourceLocation layer = entry.getKey().getResourceLocation();
+            ResourceLocation form = entry.getValue().getResourceLocation();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layer, form);
             if (formRenderer != null) {
                 formRenderers.add(formRenderer);
@@ -311,8 +287,8 @@ public class FormRenderUtils {
     public static List<FormRenderer> getPlayerAllFormRenderer(Player player) {
         if (FormTextureUtils.useTempFormModel && Objects.equals(player, Minecraft.getInstance().player)) {
             List<FormRenderer> formRenderers = new ArrayList<>();
-            Identifier formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
-            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(Identifier.fromNamespaceAndPath("origins", "origin"), formID);
+            ResourceLocation formID = FormTextureUtils.tempFormModelProcessor.getLayerID();
+            FormRenderer formRenderer = FormRenderUtils.getFormRenderer(ResourceLocation.fromNamespaceAndPath("origins", "origin"), formID);
             if (formRenderer == null) {
                 return new ArrayList<>();
             }
@@ -322,7 +298,7 @@ public class FormRenderUtils {
         List<FormRenderer> formRenderers = new ArrayList<>();
         try {
             IForm form = FormUtils.getPlayerForm(player);
-            Tuple<Identifier, Identifier> layerOverride = form.getRenderLayerOverride();
+            Tuple<ResourceLocation, ResourceLocation> layerOverride = form.getRenderLayerOverride();
             if (layerOverride != null) {
                 FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layerOverride.getA(), layerOverride.getB());
                 if (formRenderer != null) {
@@ -332,7 +308,7 @@ public class FormRenderUtils {
                 }
                 return formRenderers;
             }
-            Tuple<Identifier, Identifier> currentLayer = form.getFormLayer();
+            Tuple<ResourceLocation, ResourceLocation> currentLayer = form.getFormLayer();
             if (currentLayer != null) {
                 FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
                 if (formRenderer != null) {

@@ -1,0 +1,59 @@
+package net.onixary.shapeShifterCurseFabric.integration.jei;
+
+import com.google.common.base.Preconditions;
+import mezz.jei.api.constants.VanillaTypes;
+import mezz.jei.api.ingredients.IIngredientHelper;
+import mezz.jei.api.ingredients.subtypes.UidContext;
+import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.library.util.ResourceLocationUtil;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.blocks.WebComposterBlock;
+
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class WebComposterRecipe {
+    private final List<ItemStack> inputs;
+    private final float chance;
+    private final ResourceLocation uid;
+
+    public WebComposterRecipe(ItemStack input, float chance, ResourceLocation uid) {
+        Preconditions.checkArgument(chance > 0.0F, "web_composting chance must be greater than 0");
+        this.inputs = List.of(input);
+        this.chance = chance;
+        this.uid = uid;
+    }
+
+
+    public List<ItemStack> getInputs() {
+        return this.inputs;
+    }
+
+    public float getChance() {
+        return this.chance;
+    }
+
+    public ResourceLocation getUid() {
+        return this.uid;
+    }
+
+    public static List<WebComposterRecipe> getRecipes(IIngredientManager ingredientManager) {
+        Collection<ItemStack> allIngredients = ingredientManager.getAllItemStacks();
+        IIngredientHelper<ItemStack> ingredientHelper = ingredientManager.getIngredientHelper(VanillaTypes.ITEM_STACK);
+        return allIngredients.stream()
+                .filter(WebComposterBlock::canIncrease)
+                .map(itemStack -> {
+                    float chance = WebComposterBlock.getIncreaseChance(itemStack);
+                    String ingredientUid = ingredientHelper.getUniqueId(itemStack, UidContext.Recipe);
+                    String ingredientUidPath = ResourceLocationUtil.sanitizePath(ingredientUid);
+                    ResourceLocation recipeUid = ShapeShifterCurseFabric.identifier("jei/web_composting/" + ingredientUidPath);
+                    return new WebComposterRecipe(itemStack, chance, recipeUid);
+                })
+                .sorted(Comparator.comparingDouble(WebComposterRecipe::getChance))
+                .collect(Collectors.toList());
+    }
+}
