@@ -237,23 +237,25 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     public void checkRecipe() {
-        Player playerEntity = null;
-        Level world = this.level;
-        if (world != null && this.lastUser != null) {
-            playerEntity = world.getPlayerByUUID(this.lastUser);
-        }
+        Level world = this.getWorld();
         if (this.nowRecipe != null) {
-            if (this.nowRecipe.canCraft(playerEntity) && this.nowRecipe.matches(this.craftInput(), world)) {
+            if (world != null && this.canCraftRecipe(world.getRegistryManager())) {
                 return;
             }
+            this.nowRecipe = null;
+            this.totalProgress = 0;
         }
-        var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), world);
-        if (alterRecipe.isPresent() && alterRecipe.get().value().canCraft(playerEntity)) {
-            this.nowRecipe = alterRecipe.get().value();
+        Optional<? extends AlterRecipe> alterRecipe = this.matchGetter.getFirstMatch(this, world);
+        if (alterRecipe.isPresent()) {
+            this.nowRecipe = alterRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
+            if (!(world != null && this.canCraftRecipe(world.getRegistryManager()))) {
+                this.nowRecipe = null;
+                this.totalProgress = 0;
+            }
         } else {
             this.nowRecipe = null;
-            this.nowRecipeHolder = null;
+            this.totalProgress = 0;
         }
         this.progress = 0;
     }
@@ -270,7 +272,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.canCraft(playerEntity)) {
             return false;
         }
-        if (!nowRecipe.matches(this.craftInput(), world) && !nowRecipe.InputsCountEnough(this)) {
+        if (!nowRecipe.matches(this, world) || !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
         ItemStack output = this.nowRecipe.getResultItem(registryManager);
@@ -357,7 +359,8 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             itemChanged = true;
         }
         if (itemChanged) {
-            this.setChanged();
+            this.checkRecipe();
+            this.markDirty();
         }
     }
 

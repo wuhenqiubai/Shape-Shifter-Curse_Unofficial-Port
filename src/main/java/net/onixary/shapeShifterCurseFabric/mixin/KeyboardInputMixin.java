@@ -3,6 +3,9 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import net.minecraft.client.player.Input;
 import net.minecraft.client.player.KeyboardInput;
 import net.onixary.shapeShifterCurseFabric.client.ClientPlayerStateManager;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,9 +37,18 @@ public abstract class KeyboardInputMixin extends Input {
                 }
 
         }*/
-
+        MinecraftClient client = MinecraftClient.getInstance();
+        PlayerEntity player = client.player;
+        if (player != null) {
+            IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
+            if (FormUtils.LockPoseToStand.hasFlag(curForm)) {
+                this.sneaking = false;
+                return;
+            }
+        }
         if (ClientPlayerStateManager.shouldForceSneak) {
-            this.shiftKeyDown = true;
+            this.sneaking = true;
+            return;
         }
     }
 }
