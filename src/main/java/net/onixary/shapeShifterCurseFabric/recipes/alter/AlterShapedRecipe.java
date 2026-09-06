@@ -8,7 +8,7 @@ import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -22,18 +22,16 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
-// 1.21.1 复原：RecipeSerializer 只有 codec()/streamCodec()，上游 1.20 手写 read(JsonObject)/write 无法用。
-// 采用语义层方案：字段用 ShapedRecipePattern（含 pattern/key Data，codec 完整），保留 catalyst/fuel_cost/time/
-// requireAdvancement 进度锁 + 全部匹配/合成逻辑；id 由 RecipeHolder.id() 管理，recipe 不再自带 id。
 public class AlterShapedRecipe extends AlterRecipe {
     public final ShapedRecipePattern pattern;
     public final ItemStack output;
     public final @Nullable Ingredient catalyst;
     public final int recipeTime;
     public final int fuelCostPerTick;
-    public final @Nullable ResourceLocation requireAdvancement;
+    public final @Nullable Identifier requireAdvancement;
+    private @Nullable PlacementInfo placementInfo;
 
-    public AlterShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable ResourceLocation requireAdvancement) {
+    public AlterShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.pattern = pattern;
         this.output = output;
         this.catalyst = catalyst;
@@ -54,10 +52,7 @@ public class AlterShapedRecipe extends AlterRecipe {
             return true;
         }
         if (player instanceof ServerPlayer playerEntity) {
-            MinecraftServer server = playerEntity.getServer();
-            if (server == null) {
-                return false;
-            }
+            MinecraftServer server = playerEntity.level().getServer();
             AdvancementHolder advancement = server.getAdvancements().get(requireAdvancement);
             if (advancement == null) {
                 return false;
@@ -69,7 +64,7 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public PlacementInfo placementInfo() {
+    public @NonNull PlacementInfo placementInfo() {
         if (this.placementInfo == null) {
             this.placementInfo = PlacementInfo.createFromOptionals(this.pattern.ingredients());
         }
@@ -90,9 +85,9 @@ public class AlterShapedRecipe extends AlterRecipe {
                 Optional<Ingredient> ingredient = Optional.empty();
                 if (k >= 0 && l >= 0 && k < this.pattern.width() && l < this.pattern.height()) {
                     if (flipped) {
-                        ingredient = Optional.of(this.pattern.ingredients().get(this.pattern.width() - k - 1 + l * this.pattern.width()));
+                        ingredient = this.pattern.ingredients().get(this.pattern.width() - k - 1 + l * this.pattern.width());
                     } else {
-                        ingredient = Optional.of(this.pattern.ingredients().get(k + l * this.pattern.width()));
+                        ingredient = this.pattern.ingredients().get(k + l * this.pattern.width());
                     }
                 }
                 if (!Ingredient.testOptionalIngredient(ingredient, inv.getItem(i + j * 3))) {
@@ -104,7 +99,7 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public boolean matches(RecipeInput recipeInput, Level world) {
+    public boolean matches(@NonNull RecipeInput recipeInput, @NonNull Level world) {
         if (this.catalyst != null) {
             ItemStack itemStack = recipeInput.getItem(9);
             if (!this.catalyst.test(itemStack)) {
@@ -131,22 +126,12 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
+    public @NotNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
         return this.output.copy();
     }
 
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return width >= this.pattern.width() && height >= this.pattern.height();
-    }
-
-    @Override
-    public @NotNull ItemStack getResultItem(HolderLookup.Provider provider) {
-        return this.output;
-    }
-
-    @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
         return RecipeSerializerRegister.ALTER_SHAPED_RECIPE;
     }
 
@@ -158,7 +143,7 @@ public class AlterShapedRecipe extends AlterRecipe {
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                ResourceLocation.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
+                Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
             ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement) ->
                 new AlterShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
@@ -182,9 +167,9 @@ public class AlterShapedRecipe extends AlterRecipe {
             if (buf.readBoolean()) {
                 catalyst = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
             }
-            ResourceLocation requireAdvancement = null;
+            Identifier requireAdvancement = null;
             if (buf.readBoolean()) {
-                requireAdvancement = ResourceLocation.STREAM_CODEC.decode(buf);
+                requireAdvancement = Identifier.STREAM_CODEC.decode(buf);
             }
             ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
@@ -202,7 +187,7 @@ public class AlterShapedRecipe extends AlterRecipe {
             }
             if (r.requireAdvancement != null) {
                 buf.writeBoolean(true);
-                ResourceLocation.STREAM_CODEC.encode(buf, r.requireAdvancement);
+                Identifier.STREAM_CODEC.encode(buf, r.requireAdvancement);
             } else {
                 buf.writeBoolean(false);
             }
