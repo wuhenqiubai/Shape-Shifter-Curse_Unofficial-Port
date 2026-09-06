@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
@@ -40,7 +41,7 @@ public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
 
     @Override
     protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
-        context.blit(BACKGROUND, baseX, baseY, 0, 0, WIDTH, HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, baseX, baseY, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
     }
 
     public void drawBar(GuiGraphics context) {
@@ -50,7 +51,7 @@ public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
             // clamp 到 [0,24]：防止 ratio>1 时 ProcessWidth>24，blit 采样 u1=(176+w)/200>1.0 越过纹理右缘 wrap（视觉"反转到左侧"）
             int ProcessWidth = (int) (24 * ((float) uiHandler.getNowProgress() / (float) maxProgress));
             ProcessWidth = Math.clamp(ProcessWidth, 0, 24);
-            context.blit(BACKGROUND, baseX+89, baseY+35, 176, 0, ProcessWidth, 17, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            context.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, baseX+89, baseY+35, 176, 0, ProcessWidth, 17, ProcessWidth, 17, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         }
         int maxFuel = AlterBlockEntity.maxFuel;
         if (maxFuel > 0) {

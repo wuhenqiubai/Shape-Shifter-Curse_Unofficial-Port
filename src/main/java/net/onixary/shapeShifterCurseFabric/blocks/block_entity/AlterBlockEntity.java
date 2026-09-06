@@ -388,7 +388,6 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.fuelTime = valueInput.getIntOr("FuelTime", 0);
         this.progress = valueInput.getIntOr("Process", 0);
         this.totalProgress = valueInput.getIntOr("TotalProcess", 0);
-        this.totalFuelTime = valueInput.getIntOr("TotalFuelTime", 0);
     }
 
     @Override
@@ -399,6 +398,5 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         valueOutput.putInt("FuelTime", this.fuelTime);
         valueOutput.putInt("Process", this.progress);
         valueOutput.putInt("TotalProcess", this.totalProgress);
-        valueOutput.putInt("TotalFuelTime", this.totalFuelTime);
     }
 }

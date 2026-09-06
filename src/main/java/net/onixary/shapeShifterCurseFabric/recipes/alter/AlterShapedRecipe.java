@@ -16,8 +16,6 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
-import java.util.Optional;
-
 public class AlterShapedRecipe extends AlterRecipe {
     public final ShapedRecipePattern pattern;
     public final ItemStack output;
@@ -54,13 +52,9 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public RecipeBookCategory recipeBookCategory() {
-        return switch (this.category) {
-            case BUILDING -> RecipeBookCategories.CRAFTING_BUILDING_BLOCKS;
-            case EQUIPMENT -> RecipeBookCategories.CRAFTING_EQUIPMENT;
-            case REDSTONE -> RecipeBookCategories.CRAFTING_REDSTONE;
-            case MISC -> RecipeBookCategories.CRAFTING_MISC;
-        };
+    public @NonNull RecipeBookCategory recipeBookCategory() {
+        // 该类无 category 字段（1.21.1 版）；alter 配方无分类概念，固定 MISC
+        return RecipeBookCategories.CRAFTING_MISC;
     }
 
     private boolean matchesPattern(RecipeInput inv, int offsetX, int offsetY, boolean flipped) {
@@ -126,7 +120,7 @@ public class AlterShapedRecipe extends AlterRecipe {
             instance -> instance.group(
                 ShapedRecipePattern.MAP_CODEC.forGetter(r -> r.pattern),
                 ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
-                Ingredient.CODEC_NONEMPTY.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
+                Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick)
             ).apply(instance, (pattern, output, catalyst, time, fuelCost) -> new AlterShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost))
