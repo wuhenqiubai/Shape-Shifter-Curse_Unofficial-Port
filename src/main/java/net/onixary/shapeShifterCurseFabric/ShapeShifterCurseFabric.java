@@ -40,6 +40,7 @@ import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import net.onixary.shapeShifterCurseFabric.config.CommonConfig;
 import net.onixary.shapeShifterCurseFabric.config.PlayerCustomConfig;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
+import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.RegTransformativeEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.RegTransformativeEntitySpawnEgg;
@@ -249,6 +250,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         // 注册配方（必须在 registry freeze 前触发静态字段注册，否则 recipe_type/serializer lazy 初始化会 "Registry is already frozen"）
         RecipeSerializerRegister.register();
         RecipeUtils.register();
+        // 服务端注册 MenuType（MenuType 需注册到 BuiltInRegistries.MENU，否则 openMenu 生成的 MenuType 无效 → 右键祭坛静默无法交互）
+        RegMenuType.AlterCraftUI.hashCode();
 
         ManaRegistries.register();
         DefaultAccessory.init();

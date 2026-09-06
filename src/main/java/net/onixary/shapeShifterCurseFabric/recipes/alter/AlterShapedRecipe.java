@@ -16,20 +16,22 @@ import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
+import java.util.Optional;
+
 public class AlterShapedRecipe extends AlterRecipe {
-    public final String group;
-    public final CraftingBookCategory category;
     public final ShapedRecipePattern pattern;
-    public final ItemStack result;
+    public final ItemStack output;
+    public final @Nullable Ingredient catalyst;
     public final int recipeTime;
+    public final int fuelCostPerTick;
     private @Nullable PlacementInfo placementInfo;
 
-    public AlterShapedRecipe(String group, CraftingBookCategory category, ShapedRecipePattern pattern, ItemStack result, int recipeTime) {
-        this.group = group;
-        this.category = category;
+    public AlterShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick) {
         this.pattern = pattern;
-        this.result = result;
+        this.output = output;
+        this.catalyst = catalyst;
         this.recipeTime = recipeTime;
+        this.fuelCostPerTick = fuelCostPerTick;
     }
 
     @Override
@@ -83,7 +85,14 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
-    public boolean matches(RecipeInput recipeInput, Level level) {
+    public boolean matches(RecipeInput recipeInput, Level world) {
+        if (this.catalyst != null) {
+            ItemStack itemStack = recipeInput.getItem(9);
+            if (!this.catalyst.test(itemStack)) {
+                return false;
+            }
+        }
+
         for (int i = 0; i <= 3 - this.pattern.width(); ++i) {
             for (int j = 0; j <= 3 - this.pattern.height(); ++j) {
                 if (this.matchesPattern(recipeInput, i, j, true)) {
@@ -98,8 +107,13 @@ public class AlterShapedRecipe extends AlterRecipe {
     }
 
     @Override
+    public int fuelUsage() {
+        return fuelCostPerTick;
+    }
+
+    @Override
     public ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
-        return this.result.copy();
+        return this.output.copy();
     }
 
     @Override
@@ -110,13 +124,14 @@ public class AlterShapedRecipe extends AlterRecipe {
     public static class Serializer implements RecipeSerializer<AlterShapedRecipe> {
         private static final MapCodec<AlterShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
-                Codec.STRING.optionalFieldOf("group", "").forGetter(r -> r.group),
-                CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(r -> r.category),
                 ShapedRecipePattern.MAP_CODEC.forGetter(r -> r.pattern),
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.result),
-                Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime)
-            ).apply(instance, AlterShapedRecipe::new)
+                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
+                Ingredient.CODEC_NONEMPTY.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
+                Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
+                Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick)
+            ).apply(instance, (pattern, output, catalyst, time, fuelCost) -> new AlterShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost))
         );
+
         private static final StreamCodec<RegistryFriendlyByteBuf, AlterShapedRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork, Serializer::fromNetwork
         );
@@ -132,20 +147,28 @@ public class AlterShapedRecipe extends AlterRecipe {
         }
 
         private static AlterShapedRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
-            String group = buf.readUtf();
-            CraftingBookCategory category = buf.readEnum(CraftingBookCategory.class);
+            Ingredient catalyst = null;
+            if (buf.readBoolean()) {
+                catalyst = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+            }
             ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
-            ItemStack result = ItemStack.STREAM_CODEC.decode(buf);
+            ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
-            return new AlterShapedRecipe(group, category, pattern, result, time);
+            int fuelCost = buf.readVarInt();
+            return new AlterShapedRecipe(pattern, output, catalyst, time, fuelCost);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buf, AlterShapedRecipe r) {
-            buf.writeUtf(r.group);
-            buf.writeEnum(r.category);
+            if (r.catalyst != null) {
+                buf.writeBoolean(true);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, r.catalyst);
+            } else {
+                buf.writeBoolean(false);
+            }
             ShapedRecipePattern.STREAM_CODEC.encode(buf, r.pattern);
-            ItemStack.STREAM_CODEC.encode(buf, r.result);
+            ItemStack.STREAM_CODEC.encode(buf, r.output);
             buf.writeVarInt(r.recipeTime);
+            buf.writeVarInt(r.fuelCostPerTick);
         }
     }
 }

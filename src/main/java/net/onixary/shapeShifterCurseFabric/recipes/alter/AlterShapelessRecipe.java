@@ -13,10 +13,13 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
 import java.util.List;
+
+import java.util.Optional;
 
 public class AlterShapelessRecipe extends AlterRecipe {
     public final String group;
@@ -31,7 +34,9 @@ public class AlterShapelessRecipe extends AlterRecipe {
         this.category = category;
         this.result = result;
         this.input = input;
+        this.catalyst = catalyst;
         this.recipeTime = recipeTime;
+        this.fuelCostPerTick = fuelCostPerTick;
     }
 
     @Override
@@ -117,6 +122,36 @@ public class AlterShapelessRecipe extends AlterRecipe {
         @Override
         public @NonNull StreamCodec<RegistryFriendlyByteBuf, AlterShapelessRecipe> streamCodec() {
             return STREAM_CODEC;
+        }
+
+        private static AlterShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
+            Ingredient catalyst = null;
+            if (buf.readBoolean()) {
+                catalyst = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+            }
+            int n = buf.readVarInt();
+            NonNullList<Ingredient> list = NonNullList.withSize(n, Ingredient.EMPTY);
+            list.replaceAll(i -> Ingredient.CONTENTS_STREAM_CODEC.decode(buf));
+            ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
+            int time = buf.readVarInt();
+            int fuelCost = buf.readVarInt();
+            return new AlterShapelessRecipe(output, list, catalyst, time, fuelCost);
+        }
+
+        private static void toNetwork(RegistryFriendlyByteBuf buf, AlterShapelessRecipe r) {
+            if (r.catalyst != null) {
+                buf.writeBoolean(true);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, r.catalyst);
+            } else {
+                buf.writeBoolean(false);
+            }
+            buf.writeVarInt(r.input.size());
+            for (Ingredient ingredient : r.input) {
+                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, ingredient);
+            }
+            ItemStack.STREAM_CODEC.encode(buf, r.output);
+            buf.writeVarInt(r.recipeTime);
+            buf.writeVarInt(r.fuelCostPerTick);
         }
     }
 }

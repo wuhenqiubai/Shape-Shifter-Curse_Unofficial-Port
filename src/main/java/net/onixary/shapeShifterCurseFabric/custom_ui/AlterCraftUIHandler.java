@@ -160,11 +160,9 @@ public class AlterCraftUIHandler extends RecipeBookMenu {
     }
 
     public int getNowFuel() {
-        return this.propertyDelegate.get(2);
-    }
-
-    public int getMaxFuel() {
-        return this.propertyDelegate.get(3);
+        // data slot 以 16-bit(short) 传输，原先只传 slot2=fuelTime 会被 writeShort 截断成负值。
+        // 现在 slot2=低16位、slot3=高16位，这里拼回完整 fuelTime（无损）。
+        return (this.propertyDelegate.get(2) & 0xFFFF) | ((this.propertyDelegate.get(3) & 0xFFFF) << 16);
     }
 
     @Override

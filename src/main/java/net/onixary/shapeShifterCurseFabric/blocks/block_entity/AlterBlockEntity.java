@@ -13,7 +13,6 @@ import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeManager;
@@ -28,8 +27,10 @@ import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuType;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
+import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipeInput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -40,10 +41,15 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     public UUID lastUser;
     public AlterRecipe nowRecipe;
     public RecipeHolder<?> nowRecipeHolder;
+    public static final int maxFuel = 102400;
+    // data slot 网络用 16-bit(short) 传输，值域 [-32768,32767]；而 fuelTime 可累积到 102400 超上限，
+    // 超过 32767 会被 writeShort 截断成负值 → 客户端燃料条"消失-重涨"。
+    // 按原作者建议：用 2 个 short 无损拆分传输 fuelTime —— slot 2=低16位, slot 3=高16位，
+    // 客户端 getNowFuel() 拼回完整 int。getCount()/size() 相应从 3 增到 4。
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
-    public int totalFuelTime = 0;  // Only Client
+    // public int totalFuelTime = 0;  // Only Client
     public final NonNullList<ItemStack> inventory;
 
     public boolean needCheckRecipe = true;
@@ -83,10 +89,10 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                         return AlterBlockEntity.this.totalProgress;
                     }
                     case 2 -> {
-                        return AlterBlockEntity.this.fuelTime;
+                        return AlterBlockEntity.this.fuelTime & 0xFFFF;
                     }
                     case 3 -> {
-                        return AlterBlockEntity.this.totalFuelTime;
+                        return (AlterBlockEntity.this.fuelTime >>> 16) & 0xFFFF;
                     }
                     default -> {
                         return 0;
@@ -98,8 +104,8 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 switch (index) {
                     case 0 -> AlterBlockEntity.this.progress = value;
                     case 1 -> AlterBlockEntity.this.totalProgress = value;
-                    case 2 -> AlterBlockEntity.this.fuelTime = value;
-                    case 3 -> AlterBlockEntity.this.totalFuelTime = value;
+                    case 2 -> AlterBlockEntity.this.fuelTime = (AlterBlockEntity.this.fuelTime & 0xFFFF0000) | (value & 0xFFFF);
+                    case 3 -> AlterBlockEntity.this.fuelTime = (AlterBlockEntity.this.fuelTime & 0x0000FFFF) | ((value & 0xFFFF) << 16);
                 }
 
             }
@@ -116,7 +122,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     @Override
     protected @NotNull Component getDefaultName() {
-        return Component.literal("ALTER TEST NAME");
+        return Component.translatable("block.shape-shifter-curse.alter");
     }
 
     @Override
@@ -166,10 +172,12 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.setChanged();
     }
 
-    // 构造 3x3 的 RecipeInput（前 9 格）给 Recipe 匹配。
+    // 构造包含燃料/催化剂槽(slot 9)的 RecipeInput 给 Recipe 匹配。
+    // 1.21.1 的 CraftingInput.of 会按非空网格裁剪、丢弃 slot 9，使 matches().getItem(9) 越界；
+    // 故改用自定义 AlterRecipeInput 线性映射 inventory 0-9（0-8 键材 + slot 9 燃料/催化剂）。
     // AlterBlockEntity 自身不 implements RecipeInput，避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义。
     public RecipeInput craftInput() {
-        return CraftingInput.of(3, 3, List.copyOf(this.inventory.subList(0, 9)));
+        return new AlterRecipeInput(this.inventory);
     }
 
     @Override
@@ -245,6 +253,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
                 return;
             }
             this.nowRecipe = null;
+            this.nowRecipeHolder = null;
             this.totalProgress = 0;
         }
         if (!(world instanceof ServerLevel serverLevel)) {
@@ -256,13 +265,16 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
         var alterRecipe = this.matchGetter.getRecipeFor(this.craftInput(), serverLevel);
         if (alterRecipe.isPresent()) {
             this.nowRecipe = alterRecipe.get().value();
+            this.nowRecipeHolder = alterRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
             if (!this.canCraftRecipe(world.registryAccess())) {
                 this.nowRecipe = null;
+                this.nowRecipeHolder = null;
                 this.totalProgress = 0;
             }
         } else {
             this.nowRecipe = null;
+            this.nowRecipeHolder = null;
             this.totalProgress = 0;
         }
         this.progress = 0;
@@ -331,41 +343,37 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
             needCheckRecipe = false;
         }
         boolean itemChanged = false;
-        boolean hasRecipe = this.nowRecipe != null;
-        boolean hasFuel = this.fuelTime > 0;
-        if (hasRecipe && !hasFuel) {
-            ItemStack fuel = this.inventory.get(9);
-            if (!fuel.isEmpty()) {
-                int fuelRealTime = getFuelTime(fuel);
-                if (fuelRealTime > 0) {
-                    this.fuelTime = fuelRealTime;
-                    this.totalFuelTime = fuelRealTime;
-                    fuel.shrink(1);
-                    itemChanged = true;
+        ItemStack fuel = this.inventory.get(9);
+        if (!fuel.isEmpty()) {
+            int fuelRealTime = getFuelTime(fuel);
+            if (fuelRealTime > 0 && this.fuelTime + fuelRealTime <= maxFuel) {
+                this.fuelTime += fuelRealTime;
+                fuel.shrink(1);
+                itemChanged = true;
+            }
+        }
+        if (this.nowRecipe != null) {
+            int fuelCost = nowRecipe.fuelUsage();
+            if (this.fuelTime >= fuelCost) {
+                this.fuelTime -= fuelCost;
+                this.progress++;
+            } else {
+                if (this.progress > 0) {
+                    this.progress--;
+                } else {
+                    this.progress = 0;
                 }
             }
-        }
-        hasFuel = this.fuelTime > 0;
-        if (hasRecipe && hasFuel) {
-            this.progress++;
-            this.fuelTime--;
-        } else {
-            if (hasRecipe && this.progress > 0) {
-                this.progress --;
-            } else {
+
+            if (this.progress >= this.nowRecipe.recipeTime()) {
+                if (craftRecipe(world.registryAccess())) {
+                    blockEntity.setRecipeUsed(this.nowRecipeHolder);
+                }
                 this.progress = 0;
-            }
-            if (hasFuel) {
-                this.fuelTime--;
+                itemChanged = true;
             }
         }
-        if (hasRecipe && this.progress >= this.nowRecipe.recipeTime()) {
-            if (craftRecipe(world.registryAccess())) {
-                blockEntity.setRecipeUsed(this.nowRecipeHolder);
-            }
-            this.progress = 0;
-            itemChanged = true;
-        }
+
         if (itemChanged) {
             this.checkRecipe();
             this.setChanged();
@@ -373,7 +381,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     @Override
-    protected void loadAdditional(ValueInput valueInput) {
+    protected void loadAdditional(@NonNull ValueInput valueInput) {
         super.loadAdditional(valueInput);
         ContainerHelper.loadAllItems(valueInput, this.inventory);
         this.lastUser = valueInput.read("LastUser", UUIDUtil.CODEC).orElse(null);
@@ -384,7 +392,7 @@ public class AlterBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     @Override
-    protected void saveAdditional(ValueOutput valueOutput) {
+    protected void saveAdditional(@NonNull ValueOutput valueOutput) {
         super.saveAdditional(valueOutput);
         ContainerHelper.saveAllItems(valueOutput, this.inventory);
         valueOutput.storeNullable("LastUser", UUIDUtil.CODEC, this.lastUser);
