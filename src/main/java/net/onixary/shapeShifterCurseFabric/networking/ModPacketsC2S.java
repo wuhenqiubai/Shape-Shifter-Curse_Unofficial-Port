@@ -63,21 +63,17 @@ public class ModPacketsC2S {
         });
 
         // jump_event condition handle
-        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(JUMP_EVENT_ID), (payload, ctx) -> {
-            ctx.server().execute(() -> {
-                // 在服务器端设置跳跃状态
-                JumpEventCondition.setJumping(ctx.player(), true);
-                PowerHolderComponent.getPowers(ctx.player(), ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
-            });
-        });
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(JUMP_EVENT_ID), (payload, ctx) -> ctx.server().execute(() -> {
+            // 在服务器端设置跳跃状态
+            JumpEventCondition.setJumping(ctx.player(), true);
+            PowerHolderComponent.getPowers(ctx.player(), ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
+        }));
 
         // SPRINTING_TO_SNEAKING_EVENT condition handle
-        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(SPRINTING_TO_SNEAKING_EVENT_ID), (payload, ctx) -> {
-            ctx.server().execute(() -> {
-                // 在服务器端处理疾跑转潜行事件
-                PowerHolderComponent.getPowers(ctx.player(), ActionOnSprintingToSneakingPower.class).forEach(ActionOnSprintingToSneakingPower::executeAction);
-            });
-        });
+        ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(SPRINTING_TO_SNEAKING_EVENT_ID), (payload, ctx) -> ctx.server().execute(() -> {
+            // 在服务器端处理疾跑转潜行事件
+            PowerHolderComponent.getPowers(ctx.player(), ActionOnSprintingToSneakingPower.class).forEach(ActionOnSprintingToSneakingPower::executeAction);
+        }));
 
         ServerPlayNetworking.registerGlobalReceiver(
                 BytePayload.id(UPDATE_CUSTOM_SETTING),
@@ -135,11 +131,6 @@ public class ModPacketsC2S {
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(UPDATE_POWER_ANIM_DATA_TO_SERVER), ModPacketsC2S::onUpdatePowerAnimationData);
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(REQUEST_POWER_ANIM_DATA), ModPacketsC2S::onRequestPowerAnimationData);
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), ModPacketsC2S::receivePatronAuthFile);
-    }
-
-    public static void sendDetachRequest(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(JUMP_DETACH_REQUEST_ID),  buf));
     }
 
     private static void onUpdatePlayerCustomConfig(BytePayload payload, ServerPlayNetworking.Context ctx) {

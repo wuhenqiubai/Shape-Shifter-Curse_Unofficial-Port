@@ -30,18 +30,21 @@ import java.util.*;
 import java.util.function.Predicate;
 
 public class FormUtils {
-    public static class FlagData {
-        public final String flag;
-        public FlagData(String flag) { this.flag = flag; }
-        public String getFlag() { return flag; }
-        public boolean hasFlag(IForm form) { return form.getFormFlag().contains(flag); }
-        public Set<String> appendFlag(Set<String> oldFlag) {
-            Set<String> newSet = new HashSet<>(oldFlag);
-            newSet.add(flag);
-            return Set.copyOf(newSet);
+    public record FlagData(String flag) {
+        public boolean hasFlag(IForm form) {
+            return form.getFormFlag().contains(flag);
         }
-        public Predicate<IForm> hasFlag() { return form -> form.getFormFlag().contains(flag); }
-    }
+
+        public Set<String> appendFlag(Set<String> oldFlag) {
+                Set<String> newSet = new HashSet<>(oldFlag);
+                newSet.add(flag);
+                return Set.copyOf(newSet);
+            }
+
+        public Predicate<IForm> hasFlag() {
+            return form -> form.getFormFlag().contains(flag);
+        }
+        }
 
     public static final FlagData HasSlowFall = new FlagData("slow_fall"); // 给动画系统用的 替代hasSlowFall函数
     public static final FlagData NoInstinct = new FlagData("no_instinct"); // 禁用本能系统(条消失) 给sp 开书前后 最终形态用
@@ -153,7 +156,7 @@ public class FormUtils {
     public static Set<String> buildFormFlag(FlagData... flags) {
         Set<String> flagSet = new HashSet<>();
         for (FlagData flag : flags) {
-            flagSet.add(flag.getFlag());
+            flagSet.add(flag.flag());
         }
         return Set.copyOf(flagSet);
     }
@@ -192,7 +195,7 @@ public class FormUtils {
 
     public static @Nullable IForm getPrevForm(Player player) {
         List<IForm> formHistory = getPlayerFormHistory(player);
-        if (formHistory.size() > 1 && isFormEqual(getPlayerForm(player), formHistory.get(formHistory.size() - 1))) {
+        if (formHistory.size() > 1 && isFormEqual(getPlayerForm(player), formHistory.getLast())) {
             return formHistory.get(formHistory.size() - 2);
         }
         return null;
@@ -200,7 +203,7 @@ public class FormUtils {
 
     public static void ensureHistoryCurrent(Player player) {
         List<IForm> formHistory = getPlayerFormHistory(player);
-        if (!formHistory.isEmpty() && !isFormEqual(getPlayerForm(player), formHistory.get(formHistory.size() - 1))) {
+        if (!formHistory.isEmpty() && !isFormEqual(getPlayerForm(player), formHistory.getLast())) {
             formHistory.clear();
             ShapeShifterCurseFabric.LOGGER.warn("Player " + player.getName().getString() + " form history data error. clear form history data.");
             savePlayerFormHistory(player);
@@ -263,8 +266,8 @@ public class FormUtils {
 
     public static void checkAndPullFormHistory(Player player, IForm lastForm, IForm prevForm) {
         List<IForm> formHistory = getPlayerFormHistory(player);
-        if (formHistory.size() > 1 && isFormEqual(formHistory.get(formHistory.size() - 1), lastForm) && isFormEqual(formHistory.get(formHistory.size() - 2), prevForm)) {
-            formHistory.remove(formHistory.size() - 1);
+        if (formHistory.size() > 1 && isFormEqual(formHistory.getLast(), lastForm) && isFormEqual(formHistory.get(formHistory.size() - 2), prevForm)) {
+            formHistory.removeLast();
         } else {
             formHistory.clear();
             ShapeShifterCurseFabric.LOGGER.warn("Player " + player.getName().getString() + " form history data error. clear form history data.");
@@ -274,7 +277,7 @@ public class FormUtils {
 
     public static void checkHistorySize(List<IForm> formHistory, int maxSize) {
         while (formHistory.size() > maxSize && !formHistory.isEmpty()) {
-            formHistory.remove(0);
+            formHistory.removeFirst();
         }
     }
 

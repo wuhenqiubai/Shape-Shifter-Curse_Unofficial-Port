@@ -57,6 +57,7 @@ import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
+import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
 import net.onixary.shapeShifterCurseFabric.player_animation.form_animation.AnimationTransform;
 import net.onixary.shapeShifterCurseFabric.player_form.FormDataPackReloadListener;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -238,6 +239,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         // network package
         ModPacketsC2S.register();
         ModPacketsS2CServer.registerServerS2C();
+        // 网络包注册自检：防「注册了类型却忘挂 receiver」的静默失效，在服务端启动完成时执行
+        NetworkRegistrationSelfCheck.registerServer();
 
         //TransformFX.INSTANCE.registerCallbacks();
         TransformOverlay.INSTANCE.init();

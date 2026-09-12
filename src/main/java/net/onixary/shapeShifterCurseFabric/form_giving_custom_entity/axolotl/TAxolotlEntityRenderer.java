@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.AxolotlRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -28,7 +28,7 @@ public class TAxolotlEntityRenderer extends MobRenderer<Axolotl, AxolotlRenderSt
 	}
 
 	@Override
-	public @NonNull Identifier getTextureLocation(@NonNull AxolotlRenderState state) {
+	public @NotNull ResourceLocation getTextureLocation(Axolotl axolotlEntity) {
 		return TEXTURE;
 	}
 }

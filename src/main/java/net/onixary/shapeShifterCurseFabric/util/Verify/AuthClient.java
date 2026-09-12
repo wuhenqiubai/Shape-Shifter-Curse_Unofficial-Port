@@ -11,6 +11,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
@@ -72,6 +73,10 @@ public final class AuthClient {
 
     public static Path getClientConfigPath() {
         return FabricLoader.getInstance().getConfigDir().resolve("ssc_auth/config.json");
+    }
+
+    public static @NotNull Path getLocalPatronAuthFileFolderPath() {
+        return FabricLoader.getInstance().getConfigDir().resolve("ssc_auth/auth");
     }
 
     public static @Nullable Path getLocalPatronAuthFilePath(UUID playerUUID) {
@@ -196,6 +201,14 @@ public final class AuthClient {
         Path localPatronAuthFilePath = getLocalPatronAuthFilePath(playerUUID);
         if (localPatronAuthFilePath == null) {
             return;
+        }
+        Path folderPath = getLocalPatronAuthFileFolderPath();
+        if (!Files.exists(folderPath)) {
+            try {
+                Files.createDirectories(folderPath);
+            } catch (IOException e) {
+                ShapeShifterCurseFabric.LOGGER.warn("Failed to create auth folder: " + e.getMessage());
+            }
         }
         try {
             AuthFile loadedFile = AuthUtils.readAuthFile(new FriendlyByteBuf(Unpooled.wrappedBuffer(Files.readAllBytes(localPatronAuthFilePath))));

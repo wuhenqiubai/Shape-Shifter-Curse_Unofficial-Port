@@ -6,7 +6,7 @@ import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.TooltipDisplay;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -23,7 +23,12 @@ public class SpiderFluidCocoon extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type) {
-        consumer.accept(Component.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").withStyle(ChatFormatting.YELLOW));
+    public @NotNull SoundEvent getEatingSound(){
+        return SoundEvents.GENERIC_DRINK;
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltip, TooltipFlag type) {
+        tooltip.add(Component.translatable("item.shape-shifter-curse.spider_fluid_cocoon.tooltip").withStyle(ChatFormatting.YELLOW));
     }
 }

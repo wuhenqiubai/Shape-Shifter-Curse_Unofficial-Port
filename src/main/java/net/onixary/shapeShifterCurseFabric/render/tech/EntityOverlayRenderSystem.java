@@ -20,12 +20,12 @@ public class EntityOverlayRenderSystem {
         public abstract void render(Entity entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light);
     }
 
-    public static ArrayList<OverlayData> overlayDataList = new ArrayList<OverlayData>();
+    public static ArrayList<OverlayData> overlayDataList = new ArrayList<>();
 
     static {
         overlayDataList.add(new OverlayData() {
             private static CocoonModel cocoonModel = new CocoonModel();
-            private static GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl> cocoonRenderer = new GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl>(cocoonModel);
+            private static GeoObjectRenderer<EmptyAnimatable> cocoonRenderer = new GeoObjectRenderer<>(cocoonModel);
 
             @Override
             public boolean canRender(Entity entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {

@@ -20,6 +20,7 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.items.tools.SuperMorphScaleCore;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ import static net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegist
 
 public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     @Override
-    public net.minecraft.world.item.crafting.RecipeType<SmithingRecipe> getType() {
+    public net.minecraft.world.item.crafting.@NotNull RecipeType<SmithingRecipe> getType() {
         return net.minecraft.world.item.crafting.RecipeType.SMITHING;
     }
     public final Ingredient template;
@@ -80,7 +81,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public ItemStack assemble(net.minecraft.world.item.crafting.SmithingRecipeInput input, net.minecraft.core.HolderLookup.Provider lookup) {
+    public @NotNull ItemStack assemble(net.minecraft.world.item.crafting.SmithingRecipeInput input, net.minecraft.core.HolderLookup.Provider lookup) {
 	    ItemStack coreStack = input.template();
         if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
 	        ItemStack itemStack = input.base();
@@ -97,7 +98,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public RecipeSerializer<? extends SmithingRecipe> getSerializer() {
+    public @NotNull RecipeSerializer<? extends SmithingRecipe> getSerializer() {
         return MORPH_SCALE_UPGRADE;
     }
 
@@ -141,12 +142,12 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         );
 
         @Override
-        public MapCodec<MorphScaleUpgradeRecipe> codec() {
+        public @NotNull MapCodec<MorphScaleUpgradeRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> streamCodec() {
+        public @NotNull StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> streamCodec() {
             return PACKET_CODEC;
         }
     }

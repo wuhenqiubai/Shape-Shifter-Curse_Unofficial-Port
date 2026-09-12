@@ -41,9 +41,7 @@ public class NormalFormSelectScreen extends Screen {
 
     private List<Identifier> getAvailableForms() {
         List<Identifier> availableForms = new ArrayList<>();
-        RegPlayerForms.playerForms.forEach((formID, form) -> {
-            availableForms.add(form.getFormID());
-        });
+        RegPlayerForms.playerForms.forEach((formID, form) -> availableForms.add(form.getFormID()));
         return availableForms;
     }
 

@@ -25,7 +25,7 @@ public class IronGolemEntityMixin extends AbstractGolem implements NeutralMob {
 
     @Inject(at = @At("TAIL"), method = "registerGoals")
     private void addGoals(CallbackInfo info) {
-        Goal goal = new NearestAttackableTargetGoal<Player>(this, Player.class, 10, true, false, (entity, level) -> AdditionalPowers.HOSTILE_IRON_GOLEM.isActive(entity));
+        Goal goal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (entity, level) -> AdditionalPowers.HOSTILE_IRON_GOLEM.isActive(entity));
         this.targetSelector.addGoal(3, goal);
     }
 

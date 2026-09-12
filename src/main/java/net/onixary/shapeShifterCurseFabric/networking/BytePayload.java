@@ -1,10 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
+import org.jetbrains.annotations.NotNull;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -22,11 +24,30 @@ public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements
 	    return IDS.computeIfAbsent(identifier, Type::new);
     }
 
+    /** 单包字节上限，与原版 DiscardedPayload 对齐（防对端声明超大长度导致的内存分配）。 */
+    private static final int MAX_SIZE = 1048576;
+
     /** Create a per-ID CODEC whose decoder returns the correct Id */
     private static StreamCodec<FriendlyByteBuf, BytePayload> codecFor(Type<BytePayload> pid) {
         return StreamCodec.ofMember(
-            (payload, buf) -> buf.writeBytes(payload.data.readBytes(payload.data.readableBytes())),
-            buf -> new BytePayload(pid, new FriendlyByteBuf(buf.readBytes(buf.readableBytes())))
+            // 用三参 writeBytes（不推进源 buffer 的 readerIndex），保证同一 payload 实例可被重复编码。
+            // 若改回 readBytes(...)，编码会消耗 payload.data，第二次编码将静默发出空包。
+            (payload, buf) -> {
+                FriendlyByteBuf src = payload.data;
+                buf.writeBytes(src, src.readerIndex(), src.readableBytes());
+            },
+            buf -> {
+                int length = buf.readableBytes();
+                if (length > MAX_SIZE) {
+                    throw new IllegalArgumentException(
+                            "Payload " + pid.id() + " may not be larger than " + MAX_SIZE + " bytes, got " + length);
+                }
+                byte[] bytes = new byte[length];
+                buf.readBytes(bytes);
+                // Unpooled 包装：字节交由 GC 管理，无需 release。
+                // 不要改回 new FriendlyByteBuf(buf.readBytes(...)) —— 那会产生一个池化 buffer，生命周期归属不明。
+                return new BytePayload(pid, new FriendlyByteBuf(Unpooled.wrappedBuffer(bytes)));
+            }
         );
     }
 
@@ -44,6 +65,16 @@ public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements
         }
     }
 
+    /** 供自检读取：本端已注册的 C2S 包 id（防御性副本，见 NetworkRegistrationSelfCheck）。 */
+    public static java.util.Set<ResourceLocation> registeredC2S() {
+        return java.util.Set.copyOf(REGISTERED_C2S);
+    }
+
+    /** 供自检读取：本端已注册的 S2C 包 id（防御性副本，见 NetworkRegistrationSelfCheck）。 */
+    public static java.util.Set<ResourceLocation> registeredS2C() {
+        return java.util.Set.copyOf(REGISTERED_S2C);
+    }
+
     @Override
-    public Type<? extends CustomPacketPayload> type() { return id; }
+    public @NotNull Type<? extends CustomPacketPayload> type() { return id; }
 }

@@ -63,7 +63,7 @@ public interface OriginComponent extends AutoSyncedComponent {
 						List<Identifier> randomOrigins = layer.getRandomOrigins(player);
 						setOrigin(layer, OriginRegistry.get(randomOrigins.get(player.getRandom().nextInt(randomOrigins.size()))));
 					} else {
-						setOrigin(layer, origins.get(0));
+						setOrigin(layer, origins.getFirst());
 					}
 					choseOneAutomatically = true;
 					shouldContinue = true;

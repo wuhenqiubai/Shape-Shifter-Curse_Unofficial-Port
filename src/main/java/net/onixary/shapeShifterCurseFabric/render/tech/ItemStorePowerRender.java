@@ -26,7 +26,7 @@ public class ItemStorePowerRender {
     }
 
     private static final Minecraft mc = Minecraft.getInstance();
-    private static final List<itemStorePowerRenderInterface> tempPower = new ArrayList<itemStorePowerRenderInterface>();
+    private static final List<itemStorePowerRenderInterface> tempPower = new ArrayList<>();
     private static int timer = 0;
     private static final int MaxSlot = 12;
     private static final int SlotPerRow = 4;

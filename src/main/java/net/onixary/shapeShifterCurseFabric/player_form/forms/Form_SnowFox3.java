@@ -24,37 +24,22 @@ public class Form_SnowFox3 extends NormalForm {
     public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-            switch (animStateEnum) {
-                case ANIM_STATE_SLEEP:
-                    return Form_FeralBase.SLEEP_CONTROLLER;
-                case ANIM_STATE_CLIMB:
-                    return Form_FeralBase.CLIMB_CONTROLLER;
-                case ANIM_STATE_FALL:
-                    return FALL_CONTROLLER;
-                case ANIM_STATE_JUMP:
-                    return Form_FeralBase.JUMP_CONTROLLER;
-                case ANIM_STATE_RIDE:
-                    return RIDE_CONTROLLER;
-                case ANIM_STATE_SWIM:
-                    return Form_FeralBase.SWIM_CONTROLLER;
-                case ANIM_STATE_USE_ITEM:
-                    return Form_FeralBase.USE_ITEM_CONTROLLER;
-                case ANIM_STATE_WALK:
-                    return Form_FeralBase.WALK_CONTROLLER;
-                case ANIM_STATE_SPRINT:
-                    return Form_FeralBase.SPRINT_CONTROLLER;
-                case ANIM_STATE_IDLE:
-                    return Form_FeralBase.IDLE_CONTROLLER;
-                case ANIM_STATE_MINING:
-                    return Form_FeralBase.MINING_CONTROLLER;
-                case ANIM_STATE_ATTACK:
-                    return Form_FeralBase.ATTACK_CONTROLLER;
-                case ANIM_STATE_FLYING:
-                case ANIM_STATE_FALL_FLYING:
-                    return Form_FeralBase.FALL_FLYING_CONTROLLER;
-                default:
-                    return Form_FeralBase.IDLE_CONTROLLER;
-            }
+            return switch (animStateEnum) {
+                case ANIM_STATE_SLEEP -> Form_FeralBase.SLEEP_CONTROLLER;
+                case ANIM_STATE_CLIMB -> Form_FeralBase.CLIMB_CONTROLLER;
+                case ANIM_STATE_FALL -> FALL_CONTROLLER;
+                case ANIM_STATE_JUMP -> Form_FeralBase.JUMP_CONTROLLER;
+                case ANIM_STATE_RIDE -> RIDE_CONTROLLER;
+                case ANIM_STATE_SWIM -> Form_FeralBase.SWIM_CONTROLLER;
+                case ANIM_STATE_USE_ITEM -> Form_FeralBase.USE_ITEM_CONTROLLER;
+                case ANIM_STATE_WALK -> Form_FeralBase.WALK_CONTROLLER;
+                case ANIM_STATE_SPRINT -> Form_FeralBase.SPRINT_CONTROLLER;
+                case ANIM_STATE_IDLE -> Form_FeralBase.IDLE_CONTROLLER;
+                case ANIM_STATE_MINING -> Form_FeralBase.MINING_CONTROLLER;
+                case ANIM_STATE_ATTACK -> Form_FeralBase.ATTACK_CONTROLLER;
+                case ANIM_STATE_FLYING, ANIM_STATE_FALL_FLYING -> Form_FeralBase.FALL_FLYING_CONTROLLER;
+                default -> Form_FeralBase.IDLE_CONTROLLER;
+            };
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

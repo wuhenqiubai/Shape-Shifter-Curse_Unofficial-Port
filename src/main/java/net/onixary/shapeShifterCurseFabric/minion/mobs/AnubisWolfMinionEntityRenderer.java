@@ -4,10 +4,9 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.state.WolfRenderState;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.animal.wolf.Wolf;
-import org.jspecify.annotations.NonNull;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.animal.Wolf;
+import org.jetbrains.annotations.NotNull;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 import static net.onixary.shapeShifterCurseFabric.minion.MinionRegisterClient.WOLF_MINION_LAYER;
@@ -21,12 +20,7 @@ public class AnubisWolfMinionEntityRenderer extends MobRenderer<Wolf, WolfRender
     }
 
     @Override
-    public @NonNull WolfRenderState createRenderState() {
-        return new WolfRenderState();
-    }
-
-    @Override
-    public @NonNull Identifier getTextureLocation(@NonNull WolfRenderState state) {
+    public @NotNull ResourceLocation getTextureLocation(Wolf entity) {
         return ANUBIS_WOLF_MINION_TEXTURE;
     }
 }

@@ -13,7 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 public class EnderianPearlEntity extends ThrowableItemProjectile {
    public EnderianPearlEntity(EntityType<? extends EnderianPearlEntity> entityType, Level world) {
@@ -25,7 +25,7 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
       super(ModEntities.ENDERIAN_PEARL, world);
    }
 
-   protected @NonNull Item getDefaultItem() {
+   protected @NotNull Item getDefaultItem() {
       return Items.ENDER_PEARL;
    }
 
@@ -38,9 +38,8 @@ public class EnderianPearlEntity extends ThrowableItemProjectile {
       }
 
       if (!this.level().isClientSide() && !this.isRemoved()) {
-         if (entity instanceof ServerPlayer) {
-            ServerPlayer serverPlayerEntity = (ServerPlayer)entity;
-		      if (serverPlayerEntity.connection.isAcceptingMessages() && serverPlayerEntity.level() == this.level() && !serverPlayerEntity.isSleeping()) {
+         if (entity instanceof ServerPlayer serverPlayerEntity) {
+             if (serverPlayerEntity.connection.isAcceptingMessages() && serverPlayerEntity.level() == this.level() && !serverPlayerEntity.isSleeping()) {
 
                if (entity.isPassenger()) {
                   entity.stopRiding();

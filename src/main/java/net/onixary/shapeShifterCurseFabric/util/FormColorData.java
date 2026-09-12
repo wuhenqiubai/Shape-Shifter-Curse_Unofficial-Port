@@ -36,14 +36,14 @@ public class FormColorData {
     public static int LocalSlotCount = 3;
 
     public final HashMap<Identifier, List<String>> FormColorSelectMenu_Form_Local_Names = new HashMap<>();
-    public final List<String> FormColorSelectMenu_Global_Names = new ArrayList<String>();
+    public final List<String> FormColorSelectMenu_Global_Names = new ArrayList<>();
     public final HashMap<Identifier, String> FormColorSelectMenu_Form_Default_Names = new HashMap<>();
 
-    public final List<Identifier> unlockedForms = new ArrayList<Identifier>();
+    public final List<ResourceLocation> unlockedForms = new ArrayList<>();
 
     // V2 UI用的数据 由于UI没设计完 部分值不确定
     public static int V2_GlobalSlotCount = 9;
-    public final List<String> V2_FormColorSelectMenu_Global_Names = new ArrayList<String>();
+    public final List<String> V2_FormColorSelectMenu_Global_Names = new ArrayList<>();
 
     public CompoundTag dumpColorSetting(FormTextureUtils.ColorSetting colorSetting) {
         CompoundTag nbt = new CompoundTag();
@@ -229,9 +229,7 @@ public class FormColorData {
 
     // 移除V1后记得删
     static {
-        onFormChangeListeners.add((form) -> {
-            FormColorSelectMenu.onFormChange_STATIC(true, true);
-        });
+        onFormChangeListeners.add((form) -> FormColorSelectMenu.onFormChange_STATIC(true, true));
     }
 
     // 挂一个钩子在网络接受形态上 比如客户端的SYNC_FORM_CHANGE接收函数上

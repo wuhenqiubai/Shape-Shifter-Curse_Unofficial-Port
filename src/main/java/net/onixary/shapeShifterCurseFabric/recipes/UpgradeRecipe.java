@@ -11,6 +11,10 @@ import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +75,7 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
     }
 
     @Override
-    public ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider lookup) {
+    public @NotNull ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider lookup) {
         ItemStack itemStack = input.base();
         if (this.base.test(itemStack)) {
             ItemStack outputStack = itemStack.copy();
@@ -83,7 +87,7 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
         return ItemStack.EMPTY;
     }
 
-    public ItemStack getResultItem(HolderLookup.Provider registriesLookup) {
+    public @NotNull ItemStack getResultItem(HolderLookup.Provider registriesLookup) {
         ItemStack itemStack = new ItemStack(Items.IRON_CHESTPLATE);
         return this.upgradeResult.apply(itemStack.copy());
     }

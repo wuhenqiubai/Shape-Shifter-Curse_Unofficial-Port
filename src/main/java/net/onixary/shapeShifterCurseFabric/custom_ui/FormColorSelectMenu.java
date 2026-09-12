@@ -599,24 +599,16 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.addRenderableWidget(new StringWidget(BPosX + 320, BPosY + 182, 80, 9, FormDefaultSlotTitle, font));
         // Normal Button
         // 85,5,45,15 - 获取服务器数据
-        this.addRenderableWidget(Button.builder(DownloadFromServer, button -> {
-            loadData(true);
-        }).pos(BPosX + 85, BPosY + 5).size(45, 15).build()
+        this.addRenderableWidget(Button.builder(DownloadFromServer, button -> loadData(true)).pos(BPosX + 85, BPosY + 5).size(45, 15).build()
         );
         // 85,23,45,15 - 发送到服务器
-        this.addRenderableWidget(Button.builder(UploadToServer, button -> {
-            ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepOriginalSkin, this.enableFormColorSystem);
-        }).pos(BPosX + 85, BPosY + 23).size(45, 15).build()
+        this.addRenderableWidget(Button.builder(UploadToServer, button -> ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepOriginalSkin, this.enableFormColorSystem)).pos(BPosX + 85, BPosY + 23).size(45, 15).build()
         );
         // 85,41,45,15 - 获取客户端数据(配置)
-        this.addRenderableWidget(Button.builder(DownloadFromClient, button -> {
-            loadData(false);
-        }).pos(BPosX + 85, BPosY + 41).size(45, 15).build()
+        this.addRenderableWidget(Button.builder(DownloadFromClient, button -> loadData(false)).pos(BPosX + 85, BPosY + 41).size(45, 15).build()
         );
         // 85,59,45,15 - 发送到客户端(配置)
-        this.addRenderableWidget(Button.builder(UploadToClient, button -> {
-            this.saveDataToClient(true, true);
-        }).pos(BPosX + 85, BPosY + 59).size(45, 15).build()
+        this.addRenderableWidget(Button.builder(UploadToClient, button -> this.saveDataToClient(true, true)).pos(BPosX + 85, BPosY + 59).size(45, 15).build()
         );
         // 85,77,45,15 - 从剪切板获取
         this.addRenderableWidget(Button.builder(DownloadFromClipboard, button -> {
@@ -645,13 +637,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.addRenderableWidget(formScrollButton);
         this.formNameLabel = formScrollButton;
         // 20,128,15,15 Form Scroll Left Button
-        this.addRenderableWidget(Button.builder(Component.literal("<"), button -> {
-            this.scrollFormID(-1, true);
-        }).pos(BPosX + 20, BPosY + 128).size(15, 15).build());
+        this.addRenderableWidget(Button.builder(Component.literal("<"), button -> this.scrollFormID(-1, true)).pos(BPosX + 20, BPosY + 128).size(15, 15).build());
         // 115,128,15,15 Form Scroll Right Button
-        this.addRenderableWidget(Button.builder(Component.literal(">"), button -> {
-            this.scrollFormID(1, true);
-        }).pos(BPosX + 115, BPosY + 128).size(15, 15).build());
+        this.addRenderableWidget(Button.builder(Component.literal(">"), button -> this.scrollFormID(1, true)).pos(BPosX + 115, BPosY + 128).size(15, 15).build());
         this.reloadFormIDName();
         // Config Pair
         // 139,27,75,11 - PrimaryColor Label
@@ -661,9 +649,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,27,70,11 - PrimaryColor Input
         EditBox primaryColorInput = new EditBox(this.font, BPosX + 241, BPosY + 27, 70, 11, null, EmptyText);
         primaryColorInput.setMaxLength(9);
-        primaryColorInput.setResponder((text) -> {
-            this.onConfigChanged();
-        });
+        primaryColorInput.setResponder((text) -> this.onConfigChanged());
         this.addRenderableWidget(primaryColorInput);
         this.config_panel_01.add(primaryColorInput);
         this.primaryColorEditBox = primaryColorInput;
@@ -674,9 +660,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,41,70,11 - AccentColor1 Input
         EditBox accentColor1Input = new EditBox(this.font, BPosX + 241, BPosY + 41, 70, 11, null, EmptyText);
         accentColor1Input.setMaxLength(9);
-        accentColor1Input.setResponder((text) -> {
-            this.onConfigChanged();
-        });
+        accentColor1Input.setResponder((text) -> this.onConfigChanged());
         this.addRenderableWidget(accentColor1Input);
         this.config_panel_01.add(accentColor1Input);
         this.accentColor1EditBox = accentColor1Input;
@@ -687,9 +671,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,55,70,11 - AccentColor2 Input
         EditBox accentColor2Input = new EditBox(this.font, BPosX + 241, BPosY + 55, 70, 11, null, EmptyText);
         accentColor2Input.setMaxLength(9);
-        accentColor2Input.setResponder((text) -> {
-            this.onConfigChanged();
-        });
+        accentColor2Input.setResponder((text) -> this.onConfigChanged());
         this.addRenderableWidget(accentColor2Input);
         this.config_panel_01.add(accentColor2Input);
         this.accentColor2EditBox = accentColor2Input;
@@ -700,9 +682,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,69,70,11 - EyeColorA Input
         EditBox eyeColorAInput = new EditBox(this.font, BPosX + 241, BPosY + 69, 70, 11, null, EmptyText);
         eyeColorAInput.setMaxLength(9);
-        eyeColorAInput.setResponder((text) -> {
-            this.onConfigChanged();
-        });
+        eyeColorAInput.setResponder((text) -> this.onConfigChanged());
         this.addRenderableWidget(eyeColorAInput);
         this.config_panel_01.add(eyeColorAInput);
         this.eyeColorAEditBox = eyeColorAInput;
@@ -713,9 +693,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 241,83,70,11 - EyeColorB Input
         EditBox eyeColorBInput = new EditBox(this.font, BPosX + 241, BPosY + 83, 70, 11, null, EmptyText);
         eyeColorBInput.setMaxLength(9);
-        eyeColorBInput.setResponder((text) -> {
-            this.onConfigChanged();
-        });
+        eyeColorBInput.setResponder((text) -> this.onConfigChanged());
         this.addRenderableWidget(eyeColorBInput);
         this.config_panel_01.add(eyeColorBInput);
         this.eyeColorBEditBox = eyeColorBInput;
@@ -1462,9 +1440,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
         // X+15,Y+0,50,15 slot name input
         EditBox textFieldWidget = new EditBox(this.font, X + 15, Y, 50, 15, EmptyText);
-        textFieldWidget.setResponder((text) -> {
-            this.saveSlotName(ButtonType, Index);
-        });
+        textFieldWidget.setResponder((text) -> this.saveSlotName(ButtonType, Index));
 
         // X+65,Y+0,15,15 delete Button
         FCS_ButtonWidget deleteButtonWidget = new FCS_ButtonWidget(X + 65, Y, EmptyText, (button -> {

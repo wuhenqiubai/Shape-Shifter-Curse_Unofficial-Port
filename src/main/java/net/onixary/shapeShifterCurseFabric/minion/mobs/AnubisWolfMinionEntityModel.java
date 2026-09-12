@@ -9,6 +9,8 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.animal.Wolf;
+import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
@@ -68,11 +70,11 @@ public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
         return LayerDefinition.create(modelData, 64, 32);
     }
 
-    protected Iterable<ModelPart> headParts() {
+    protected @NotNull Iterable<ModelPart> headParts() {
         return ImmutableList.of(this.head);
     }
 
-    protected Iterable<ModelPart> bodyParts() {
+    protected @NotNull Iterable<ModelPart> bodyParts() {
         return ImmutableList.of(this.torso, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.neck);
     }
 

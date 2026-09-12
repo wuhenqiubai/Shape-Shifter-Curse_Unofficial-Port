@@ -22,7 +22,7 @@ public class MustCrawlingCondition {
     }
 
     public static ConditionFactory<Entity> getFactory() {
-        return new ConditionFactory<Entity>(
+        return new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("must_crawling"),
                 new SerializableData()
                         .add("width", SerializableDataTypes.FLOAT, 0.6f)

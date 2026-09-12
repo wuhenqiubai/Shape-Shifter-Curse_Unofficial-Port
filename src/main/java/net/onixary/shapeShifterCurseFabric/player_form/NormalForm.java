@@ -65,7 +65,7 @@ public class NormalForm implements IForm {
     public NormalForm formFlag(FormUtils.FlagData... flag) {
         Set<String> flagSet = new HashSet<>();
         for (FormUtils.FlagData flagData : flag) {
-            flagSet.add(flagData.getFlag());
+            flagSet.add(flagData.flag());
         }
         this.formFlag = Set.copyOf(flagSet);
         return this;
@@ -74,7 +74,7 @@ public class NormalForm implements IForm {
     public NormalForm appendFlag(FormUtils.FlagData... flag) {
         Set<String> flagSet = new HashSet<>(this.formFlag);
         for (FormUtils.FlagData flagData : flag) {
-            flagSet.add(flagData.getFlag());
+            flagSet.add(flagData.flag());
         }
         this.formFlag = Set.copyOf(flagSet);
         return this;

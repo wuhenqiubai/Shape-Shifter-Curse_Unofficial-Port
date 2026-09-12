@@ -16,9 +16,9 @@ public class FormAnimatable implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllerRegistrar) {
-        controllerRegistrar.add(new AnimationController<FormAnimatable>(animationState -> {
-	        animationState.setAnimation(RawAnimation.begin().thenLoop("idle"));
-	        return PlayState.CONTINUE;
+        controllerRegistrar.add(new AnimationController<>(animationState -> {
+            animationState.setAnimation(RawAnimation.begin().thenLoop("idle"));
+            return PlayState.CONTINUE;
         }));
     }
 

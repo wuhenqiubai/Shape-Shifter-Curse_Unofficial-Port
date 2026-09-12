@@ -41,32 +41,33 @@ public class FireArrowAction {
     }
 
     public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
-        ActionRegister.accept(new ActionFactory<Entity>(
-			    ShapeShifterCurseFabric.identifier("fire_arrow"),
-			    new SerializableData()
-					    .add("damage", SerializableDataTypes.FLOAT, 2.0f)
-					    .add("speed", SerializableDataTypes.FLOAT, 3.0f)
-					    .add("spread", SerializableDataTypes.FLOAT, 0.0f)
-					    .add("fire_time", SerializableDataTypes.INT, 0)
-					    .add("no_gravity", SerializableDataTypes.BOOLEAN, false)
-					    .add("critical", SerializableDataTypes.BOOLEAN, false)
-					    .add("has_owner", SerializableDataTypes.BOOLEAN, true)
-					    .add("projectile_action", ApoliDataTypes.ENTITY_ACTION, null)
-					    .add("count", SerializableDataTypes.INT, 1),
-			    (data, e) -> {
-				    if (e instanceof LivingEntity livingEntity) {
-					    float damage = data.get("damage");
-					    float speed = data.get("speed");
-					    float spread = data.get("spread");
-					    int fireTime = data.get("fire_time");
-					    boolean noGravity = data.get("no_gravity");
-					    boolean critical = data.get("critical");
-					    boolean hasOwner = data.get("has_owner");
-					    Consumer<Entity> projectileAction = data.get("projectile_action");
-					    int count = data.get("count");
-					    for (int i = 0; i < count; i++) {
-						    spawnFireArrow(livingEntity, damage, speed, spread, fireTime, noGravity, critical, hasOwner, projectileAction);
-					    }
-                }}));
+        ActionRegister.accept(new ActionFactory<>(
+                ShapeShifterCurseFabric.identifier("fire_arrow"),
+                new SerializableData()
+                        .add("damage", SerializableDataTypes.FLOAT, 2.0f)
+                        .add("speed", SerializableDataTypes.FLOAT, 3.0f)
+                        .add("spread", SerializableDataTypes.FLOAT, 0.0f)
+                        .add("fire_time", SerializableDataTypes.INT, 0)
+                        .add("no_gravity", SerializableDataTypes.BOOLEAN, false)
+                        .add("critical", SerializableDataTypes.BOOLEAN, false)
+                        .add("has_owner", SerializableDataTypes.BOOLEAN, true)
+                        .add("projectile_action", ApoliDataTypes.ENTITY_ACTION, null)
+                        .add("count", SerializableDataTypes.INT, 1),
+                (data, e) -> {
+                    if (e instanceof LivingEntity livingEntity) {
+                        float damage = data.get("damage");
+                        float speed = data.get("speed");
+                        float spread = data.get("spread");
+                        int fireTime = data.get("fire_time");
+                        boolean noGravity = data.get("no_gravity");
+                        boolean critical = data.get("critical");
+                        boolean hasOwner = data.get("has_owner");
+                        Consumer<Entity> projectileAction = data.get("projectile_action");
+                        int count = data.get("count");
+                        for (int i = 0; i < count; i++) {
+                            spawnFireArrow(livingEntity, damage, speed, spread, fireTime, noGravity, critical, hasOwner, projectileAction);
+                        }
+                    }
+                }));
     }
 }

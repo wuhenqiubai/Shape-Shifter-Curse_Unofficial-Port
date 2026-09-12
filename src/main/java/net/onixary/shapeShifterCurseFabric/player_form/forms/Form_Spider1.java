@@ -38,16 +38,12 @@ public class Form_Spider1 extends NormalForm {
         
         AnimStateEnum state = AnimStateEnum.getStateEnum(animStateID);
         if (state != null) {
-            switch (state) {
-                case ANIM_STATE_IDLE:
-                    return IDLE_CONTROLLER;
-                case ANIM_STATE_WALK:
-                    return MOVE_CONTROLLER;
-                case ANIM_STATE_SPRINT:
-                    return MOVE_CONTROLLER;
-                default:
-                    return null;
-            }
+            return switch (state) {
+                case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
+                case ANIM_STATE_WALK -> MOVE_CONTROLLER;
+                case ANIM_STATE_SPRINT -> MOVE_CONTROLLER;
+                default -> null;
+            };
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

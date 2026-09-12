@@ -44,6 +44,7 @@
     "PotionEntityMixin",
     "PotionItemMixin",
     "PotionStackMixin",
+    "RecipeManagerMixin",
     "ServerAdvancementMixin",
     "ServerPlayerEntityForceInputMixin",
     "ServerPlayerEntityMixin",

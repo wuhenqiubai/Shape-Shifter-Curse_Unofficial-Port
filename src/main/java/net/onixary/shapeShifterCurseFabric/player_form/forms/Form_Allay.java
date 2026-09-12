@@ -28,25 +28,15 @@ public class Form_Allay extends NormalForm {
     public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-            switch (animStateEnum) {
-                case ANIM_STATE_WALK:
-                    return WALK_CONTROLLER;
-                case ANIM_STATE_SPRINT:
-                    return SPRINT_CONTROLLER;
-                case ANIM_STATE_IDLE:
-                    return IDLE_CONTROLLER;
-                case ANIM_STATE_MINING:
-                    return MINING_CONTROLLER;
-                case ANIM_STATE_ATTACK:
-                    return ATTACK_CONTROLLER;
-                case ANIM_STATE_JUMP:
-                case ANIM_STATE_FALL:
-                case ANIM_STATE_FALL_FLYING:
-                case ANIM_STATE_FLYING:
-                    return FLYING_CONTROLLER;
-                default:
-                    return WALK_CONTROLLER;
-            }
+            return switch (animStateEnum) {
+                case ANIM_STATE_WALK -> WALK_CONTROLLER;
+                case ANIM_STATE_SPRINT -> SPRINT_CONTROLLER;
+                case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
+                case ANIM_STATE_MINING -> MINING_CONTROLLER;
+                case ANIM_STATE_ATTACK -> ATTACK_CONTROLLER;
+                case ANIM_STATE_JUMP, ANIM_STATE_FALL, ANIM_STATE_FALL_FLYING, ANIM_STATE_FLYING -> FLYING_CONTROLLER;
+                default -> WALK_CONTROLLER;
+            };
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

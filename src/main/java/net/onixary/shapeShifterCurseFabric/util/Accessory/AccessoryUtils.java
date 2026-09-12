@@ -79,7 +79,7 @@ public class AccessoryUtils {
         }
         list.sort((o1, o2) -> o2.getB() - o1.getB());
         if (!list.isEmpty()) {
-            nowAccessoryMod = list.get(0).getA();
+            nowAccessoryMod = list.getFirst().getA();
         }
         for (Map.Entry<String, AccessoryIO> entry : accessoryModInterfaces.entrySet()) {
             if (entry.getValue() == nowAccessoryMod) {

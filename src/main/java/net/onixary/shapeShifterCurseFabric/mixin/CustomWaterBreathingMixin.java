@@ -37,6 +37,33 @@ public final class CustomWaterBreathingMixin {
                 info.setReturnValue(true);
             }
         }
+
+        // 原版 baseTick 在「非眼浸水且 air < max」时执行 setAirSupply(increaseAirSupply(air)) 即每 tick +4。
+        // 而本 mixin 的 UpdateAir.tick（Player.tick 的 TAIL）要在干燥陆地自行接管氧气（按 landWaterBreathLevel
+        // 决定掉氧速度），两者叠加会互相拉锯：air=300 时 baseTick 不加（300 不 < 300），TAIL 却照样 -4，
+        // 于是稳态在 296<->300 每 tick 摆动，SynchedEntityData 每 tick 标脏发包 → 氧气 UI 一直闪。
+        // 这里把 baseTick 的那次 +4 抵消成恒等，让 SSC 独占干燥陆地的氧气管理。
+        // 只匹配 LivingEntity.baseTick 中唯一一处 increaseAirSupply 调用（:430）；decreaseAirSupply 不受影响。
+        @ModifyExpressionValue(
+            method = "baseTick",
+            require = 1,
+            at = @At(value = "INVOKE",
+                target = "Lnet/minecraft/world/entity/LivingEntity;increaseAirSupply(I)I")
+        )
+        private int ssc$suppressVanillaLandRefill(int original) {
+            LivingEntity self = (LivingEntity)(Object)this;
+            if(!PowerHolderComponent.getPowers(self, CustomWaterBreathingPower.class).stream().anyMatch(Power::isActive)) {
+                return original; // 非 SSC 形态：完全保持原版行为
+            }
+            // 与 UpdateAir.tick 的「干燥陆地」分支条件严格镜像；只有这些情况下才由 SSC 全权决定 air
+            if(!self.isEyeInFluid(FluidTags.WATER)
+                    && !self.hasEffect(MobEffects.WATER_BREATHING)
+                    && !self.hasEffect(MobEffects.CONDUIT_POWER)
+                    && !((EntityAccessor) self).callIsInRain()) {
+                return self.getAirSupply(); // 恒等：让 baseTick 那次 setAirSupply 不改变数值
+            }
+            return original; // 水下 / 雨天 / 有潮涌或水肺：保留原版恢复
+        }
     }
 
 
@@ -77,8 +104,10 @@ public final class CustomWaterBreathingMixin {
                                 .stream()
                                 .mapToInt(CustomWaterBreathingPower::getLandWaterBreathLevel).sum();
 
-                        int landGain = this.increaseAirSupply(0);
-                        this.setAirSupply(this.getNextAirUnderwaterSlow(this.getAirSupply(), landWaterBreathLevel) - landGain);
+                        // baseTick 的 +4 已在 ssc$suppressVanillaLandRefill 中抵消为恒等，
+                        // 故这里直接套用「陆地掉氧」公式，不再手动 landGain -4
+                        // （否则 air 已满时 baseTick 不加而这里照减，会导致 296<->300 振荡）。
+                        this.setAirSupply(this.getNextAirUnderwaterSlow(this.getAirSupply(), landWaterBreathLevel));
                     } else if(this.getAirSupply() < this.getMaxAirSupply()){
                         //int landGain = this.getNextAirOnLand(0);
                         //this.setAir(this.getAir() - landGain);

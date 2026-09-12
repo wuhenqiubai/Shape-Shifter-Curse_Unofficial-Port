@@ -44,17 +44,17 @@ public class IsMorphScaleItemCondition {
     }
 
     public static ConditionFactory<ItemStack> getFactory1() {
-        return new ConditionFactory<ItemStack>(
-            ShapeShifterCurseFabric.identifier("is_morph_scale_item"),
-            new SerializableData(),
-            IsMorphScaleItemCondition::MSI_condition
+        return new ConditionFactory<>(
+                ShapeShifterCurseFabric.identifier("is_morph_scale_item"),
+                new SerializableData(),
+                IsMorphScaleItemCondition::MSI_condition
         );
     }
     public static ConditionFactory<ItemStack> getFactory2() {
-        return new ConditionFactory<ItemStack>(
-            ShapeShifterCurseFabric.identifier("is_morph_scale_food"),
-            new SerializableData(),
-            IsMorphScaleItemCondition::MSF_condition
+        return new ConditionFactory<>(
+                ShapeShifterCurseFabric.identifier("is_morph_scale_food"),
+                new SerializableData(),
+                IsMorphScaleItemCondition::MSF_condition
         );
     }
 }

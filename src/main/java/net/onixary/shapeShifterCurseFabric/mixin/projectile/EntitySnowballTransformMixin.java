@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin.projectile;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import io.github.apace100.apoli.power.Power;
 import net.minecraft.core.BlockPos;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -38,12 +39,11 @@ public abstract class EntitySnowballTransformMixin {
     @Inject(method = "tick", at = @At("HEAD"))
     private void checkFluidCollision(CallbackInfo ci) {
         // 检查当前实体是否为雪球
-        if (!((Object) this instanceof Snowball)) {
+        if (!((Object) this instanceof Snowball snowball)) {
             return;
         }
 
-        Snowball snowball = (Snowball) (Object) this;
-	    Level world = snowball.level();
+        Level world = snowball.level();
 
         // 避免重复转换
         if (hasTransformedFluid || world.isClientSide()) {
@@ -58,7 +58,7 @@ public abstract class EntitySnowballTransformMixin {
 
         boolean hasTransformPower = PowerHolderComponent.getPowers(player, SnowballBlockTransformPower.class)
                 .stream()
-                .anyMatch(power -> power.isActive());
+                .anyMatch(Power::isActive);
 
         if (!hasTransformPower) {
             return;
@@ -85,12 +85,11 @@ public abstract class EntitySnowballTransformMixin {
     @Inject(method = "updateInWaterStateAndDoFluidPushing", at = @At("HEAD"))
     private void onEnterWater(CallbackInfoReturnable<Boolean> cir) {
         // 检查当前实体是否为雪球
-        if (!((Object) this instanceof Snowball)) {
+        if (!((Object) this instanceof Snowball snowball)) {
             return;
         }
 
-        Snowball snowball = (Snowball) (Object) this;
-	    Level world = snowball.level();
+        Level world = snowball.level();
 
         if (hasTransformedFluid || world.isClientSide()) {
             return;
@@ -103,7 +102,7 @@ public abstract class EntitySnowballTransformMixin {
 
         boolean hasTransformPower = PowerHolderComponent.getPowers(player, SnowballBlockTransformPower.class)
                 .stream()
-                .anyMatch(power -> power.isActive());
+                .anyMatch(Power::isActive);
 
         if (!hasTransformPower) {
             return;

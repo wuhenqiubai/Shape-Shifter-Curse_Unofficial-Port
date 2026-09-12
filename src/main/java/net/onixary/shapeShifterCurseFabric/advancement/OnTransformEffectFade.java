@@ -7,6 +7,7 @@ import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -22,7 +23,7 @@ public class OnTransformEffectFade extends SimpleCriterionTrigger<OnTransformEff
     }
 
     @Override
-    public Codec<Condition> codec() {
+    public @NotNull Codec<Condition> codec() {
         return Condition.CODEC;
     }
 

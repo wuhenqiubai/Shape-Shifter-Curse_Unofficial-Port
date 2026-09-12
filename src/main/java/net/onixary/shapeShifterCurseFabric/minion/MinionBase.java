@@ -11,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import org.jspecify.annotations.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
@@ -57,7 +57,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
     }
 
     @Override
-    public Level level() {
+    public @NotNull Level level() {
         return super.level();
     }
 

@@ -5,6 +5,7 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class CachedBlockPositionData extends BlockInWorld {
@@ -17,7 +18,7 @@ public class CachedBlockPositionData extends BlockInWorld {
         this.blockEntityCache = blockEntity;
     }
 
-    public BlockState getState() {
+    public @NotNull BlockState getState() {
         return this.stateCache;
     }
 

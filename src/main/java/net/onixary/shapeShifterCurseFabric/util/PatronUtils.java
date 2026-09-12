@@ -80,7 +80,7 @@ public class PatronUtils {
         if (dataPackZip == null) {
             return new LinkedList<>();
         }
-        List<JsonObject> jsonObjects = new LinkedList<JsonObject>();
+        List<JsonObject> jsonObjects = new LinkedList<>();
         try {
             ZipInputStream zipInputStream = new ZipInputStream(new ByteArrayInputStream(dataPackZip));
             ZipEntry zipEntry = zipInputStream.getNextEntry();

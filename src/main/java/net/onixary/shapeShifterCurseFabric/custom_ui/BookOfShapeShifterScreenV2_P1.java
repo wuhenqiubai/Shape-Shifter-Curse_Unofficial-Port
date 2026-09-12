@@ -59,7 +59,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // D -> (9, 9), (19, 95)
         // Size -> (108, 48) Pos -> (17, 92)
         this.addRenderableWidget(BuildDetailScreenButton(19, 95, 9, 9, CodexData.getContentText(CodexData.ContentType.TITLE, currentPlayer)));
-        ScaleScrollTextWidget TitleLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 105 * BookScale, 108 * BookScale, 5 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.TITLE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
+        ScaleScrollTextWidget TitleLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 105 * BookScale, 108 * BookScale, 48 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.TITLE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         TitleLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) TitleLabel);
         this.addRenderableWidget(TitleLabel);
@@ -68,7 +68,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // Size -> (107, 56) Pos -> (17, 153)
         this.addRenderableWidget(BuildDetailScreenButton(116, 143, 9, 9, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer)));
         this.addRenderableWidget(new ColorStringWidget(BookPosX + 17 * BookScale, BookPosY + 143 * BookScale, 107 * BookScale, 6 * BookScale, CodexData.headerEquip, font).setColor(HeaderTextColor));
-        ScaleScrollTextWidget StatusLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 153 * BookScale, 107 * BookScale, 6 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
+        ScaleScrollTextWidget StatusLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 17 * BookScale, BookPosY + 153 * BookScale, 107 * BookScale, 56 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.EQUIP, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         StatusLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) StatusLabel);
         this.addRenderableWidget(StatusLabel);
@@ -96,7 +96,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // Size -> (176, 184) Pos -> (142, 23)
         this.addRenderableWidget(BuildDetailScreenButton(311, 13, 9, 9, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer)));
         this.addRenderableWidget(new ColorStringWidget(BookPosX + 142 * BookScale, BookPosY + 11 * BookScale, 176 * BookScale, 8 * BookScale, CodexData.headerAppearance, font).setColor(HeaderTextColor));
-        ScaleScrollTextWidget AppearanceLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 142 * BookScale, BookPosY + 26 * BookScale, 176 * BookScale, 20 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
+        ScaleScrollTextWidget AppearanceLabel = (ScaleScrollTextWidget) new ScaleScrollTextWidget(BookPosX + 142 * BookScale, BookPosY + 26 * BookScale, 176 * BookScale, 184 * BookScale, Scale, CodexData.getContentText(CodexData.ContentType.APPEARANCE, currentPlayer), scaleTextRenderer).shadow(false).setColor(DefaultTextColor);
         AppearanceLabel.setEnableScrollableIconRender(true);
         this.addWidget((WidgetEXUtils.IWidgetEX) AppearanceLabel);
         this.addRenderableWidget(AppearanceLabel);

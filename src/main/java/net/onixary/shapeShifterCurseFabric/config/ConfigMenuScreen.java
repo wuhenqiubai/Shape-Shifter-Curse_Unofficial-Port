@@ -62,9 +62,7 @@ public class ConfigMenuScreen extends Screen {
     }
 
     public void AddButton(int PosX, int PosY, int SizeX, int SizeY, Component text, Supplier<Screen> ConfigScreenSupplier) {
-        addRenderableWidget(Button.builder(text, button -> {
-            Minecraft.getInstance().setScreen(ConfigScreenSupplier.get());
-        }).size(SizeX, SizeY).pos(PosX, PosY).build());
+        addRenderableWidget(Button.builder(text, button -> Minecraft.getInstance().setScreen(ConfigScreenSupplier.get())).size(SizeX, SizeY).pos(PosX, PosY).build());
     }
 
     public void AddCloseButton(int PosX, int PosY, int SizeX, int SizeY, Component text) {

@@ -23,12 +23,10 @@ public class Form_Axolotl1 extends NormalForm {
     public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-            switch (animStateEnum) {
-                case ANIM_STATE_SWIM:
-                    return SWIM_CONTROLLER;
-                default:
-                    return null;
-            }
+            return switch (animStateEnum) {
+                case ANIM_STATE_SWIM -> SWIM_CONTROLLER;
+                default -> null;
+            };
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

@@ -18,6 +18,7 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -53,7 +54,7 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public ItemUseAnimation getUseAnimation(ItemStack stack) {
+    public @NotNull ItemUseAnimation getUseAnimation(ItemStack stack) {
         return ItemUseAnimation.BOW;
     }
 
@@ -63,9 +64,9 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        player.startUsingItem(hand);
-        return InteractionResult.SUCCESS;
+    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        user.startUsingItem(hand);
+        return InteractionResultHolder.success(user.getItemInHand(hand));
     }
 
     // 我最早的Mod中的代码(没发布) 最后一次更新还是2年前了
@@ -85,7 +86,7 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+    public @NotNull ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         if (user instanceof Player player && !world.isClientSide()) {
             int damage = stack.getDamageValue();
             int need_repair = 0;

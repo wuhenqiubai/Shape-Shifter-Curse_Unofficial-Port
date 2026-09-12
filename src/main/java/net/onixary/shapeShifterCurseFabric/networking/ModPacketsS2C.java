@@ -227,17 +227,13 @@ public class ModPacketsS2C {
             attachedSide = null;
         }
 
-        ctx.client().execute(() -> {
-            ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached,
-                    attachType, attachedPos, attachedSide);
-        });
+        ctx.client().execute(() -> ClientPlayerStateManager.updatePlayerAttachState(targetPlayerUuid, isAttached,
+                attachType, attachedPos, attachedSide));
     }
 
     private static void receiveForceSneakState(BytePayload payload, ClientPlayNetworking.Context ctx) {
         boolean shouldForce = payload.data().readBoolean();
-        ctx.client().execute(() -> {
-            ClientPlayerStateManager.shouldForceSneak = shouldForce;
-        });
+        ctx.client().execute(() -> ClientPlayerStateManager.shouldForceSneak = shouldForce);
     }
 
     private static void handleUpdateDynamicForm(BytePayload payload, ClientPlayNetworking.Context ctx) {
@@ -250,9 +246,7 @@ public class ModPacketsS2C {
             JsonObject jsonObject = new Gson().fromJson(jsonStr, JsonObject.class);
             allFrom.add(formName, jsonObject);
         }
-        ctx.client().execute(() -> {
-            RegPlayerForms.ApplyDynamicPlayerForms(allFrom);
-        });
+        ctx.client().execute(() -> RegPlayerForms.ApplyDynamicPlayerForms(allFrom));
     }
 
     private static void handleRemoveDynamicExcept(BytePayload payload, ClientPlayNetworking.Context ctx) {
@@ -263,9 +257,7 @@ public class ModPacketsS2C {
             String formName = payload.data().readUtf();
             except.add(Identifier.tryParse(formName));
         }
-        ctx.client().execute(() -> {
-            RegPlayerForms.removeDynamicPlayerFormsExcept(except);
-        });
+        ctx.client().execute(() -> RegPlayerForms.removeDynamicPlayerFormsExcept(except));
     }
 
     public static void onPlayerConnectServer(BytePayload payload, ClientPlayNetworking.Context ctx) {
@@ -425,9 +417,7 @@ public class ModPacketsS2C {
             int level = payload.data().readInt();
             map.put(uuid, level);
         }
-        ctx.client().execute(() -> {
-            PatronUtils.ApplyPatronLevel(map);
-        });
+        ctx.client().execute(() -> PatronUtils.ApplyPatronLevel(map));
     }
 
     public static void receiveOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
@@ -645,15 +635,11 @@ public class ModPacketsS2C {
 
     private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context ctx) {
         FriendlyByteBuf keyBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
-        ctx.client().execute(() -> {
-            AuthClient.loadServerKey(keyBuf);
-        });
+        ctx.client().execute(() -> AuthClient.loadServerKey(keyBuf));
     }
 
     private static void receiveSetSuperUserLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
         int level = payload.data().readInt();
-        ctx.client().execute(() -> {
-            SuperUserUtils.setClientSULevel(level);
-        });
+        ctx.client().execute(() -> SuperUserUtils.setClientSULevel(level));
     }
 }

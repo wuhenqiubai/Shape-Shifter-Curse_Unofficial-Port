@@ -13,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -29,16 +30,16 @@ public class PowerfulInhibitor extends Item {
     }
 
     @Override
-    public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (player.canEat(true)) {
-            player.startUsingItem(hand);
-            return InteractionResult.CONSUME;
+    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+        if (user.canEat(true)) {
+            user.startUsingItem(hand);
+            return InteractionResultHolder.consume(user.getItemInHand(hand));
         }
         return InteractionResult.FAIL;
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+    public @NotNull ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         // 实际效果在ItemStackMixin的注入中进行处理
         super.finishUsingItem(stack, world, user);
         if (user instanceof Player playerEntity) {

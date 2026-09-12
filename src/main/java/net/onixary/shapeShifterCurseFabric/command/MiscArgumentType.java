@@ -11,6 +11,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.network.FriendlyByteBuf;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,7 +55,7 @@ public class MiscArgumentType {
         }
 
         @Override
-        public Enum_ArgumentType_Properties deserializeFromNetwork(FriendlyByteBuf buf) {
+        public @NotNull Enum_ArgumentType_Properties deserializeFromNetwork(FriendlyByteBuf buf) {
             int size = buf.readInt();
             List<String> datas = new ArrayList<>();
             for (int i = 0; i < size; i++) {
@@ -73,7 +74,7 @@ public class MiscArgumentType {
         }
 
         @Override
-        public Enum_ArgumentType_Properties unpack(Enum_ArgumentType argumentType) {
+        public @NotNull Enum_ArgumentType_Properties unpack(Enum_ArgumentType argumentType) {
             return new Enum_ArgumentType_Properties(this, argumentType.Suggestions);
         }
 
@@ -84,11 +85,11 @@ public class MiscArgumentType {
                 this.data = data;
             }
 
-            public Enum_ArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
+            public @NotNull Enum_ArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
                 return new Enum_ArgumentType(data.toArray(new String[0]));
             }
 
-            public ArgumentTypeInfo<Enum_ArgumentType, ?> type() {
+            public @NotNull ArgumentTypeInfo<Enum_ArgumentType, ?> type() {
                 return Enum_ArgumentType_Serializer.this;
             }
         }

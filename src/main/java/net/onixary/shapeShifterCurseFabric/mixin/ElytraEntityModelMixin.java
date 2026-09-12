@@ -99,10 +99,10 @@ public abstract class ElytraEntityModelMixin {
         }
 
         this.leftWing.y = m;
-        if (player != null) {
-            this.ssc$elytraRotX += (k - this.ssc$elytraRotX) * 0.1f;
-            this.ssc$elytraRotY += (n - this.ssc$elytraRotY) * 0.1f;
-            this.ssc$elytraRotZ += (l - this.ssc$elytraRotZ) * 0.1f;
+        if (entity instanceof AbstractClientPlayer abstractClientPlayerEntity) {
+            abstractClientPlayerEntity.elytraRotX += (k - abstractClientPlayerEntity.elytraRotX) * 0.1f;
+            abstractClientPlayerEntity.elytraRotY += (n - abstractClientPlayerEntity.elytraRotY) * 0.1f;
+            abstractClientPlayerEntity.elytraRotZ += (l - abstractClientPlayerEntity.elytraRotZ) * 0.1f;
 
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;

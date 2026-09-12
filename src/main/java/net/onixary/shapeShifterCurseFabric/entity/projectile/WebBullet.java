@@ -21,6 +21,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.WebBridgeAction;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.status_effects.EntangledEffectUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import static net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity.WEB_BULLET;
@@ -71,7 +72,7 @@ public class WebBullet extends ThrowableItemProjectile {
     }
 
     @Override
-    public Item getDefaultItem() {
+    public @NotNull Item getDefaultItem() {
         return RegCustomItem.WEB_PROJECTILE;
     }
 

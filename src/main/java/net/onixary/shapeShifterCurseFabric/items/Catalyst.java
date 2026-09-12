@@ -14,6 +14,7 @@ import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformRelatedItems;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -31,7 +32,7 @@ public class Catalyst extends Item {
     }
 
     @Override
-    public InteractionResult use(Level world, Player user, InteractionHand hand) {
+    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
         if (user.canEat(true)) {
             user.startUsingItem(hand);
             return InteractionResult.CONSUME;
@@ -40,7 +41,7 @@ public class Catalyst extends Item {
     }
 
     @Override
-    public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
+    public @NotNull ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
         super.finishUsingItem(stack, world, user);
 
         if (user instanceof Player player) {

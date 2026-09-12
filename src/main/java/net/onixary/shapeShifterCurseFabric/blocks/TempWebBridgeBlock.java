@@ -20,6 +20,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.NotNull;
 
 public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
     public static final int MAX_AGE = 3;
@@ -39,7 +40,7 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
     }
 
     @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
+    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
         return simpleCodec(TempWebBridgeBlock::new);
     }
 
@@ -126,7 +127,7 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
         return ItemStack.EMPTY;
     }
 
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public @NotNull VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         if (context.isAbove(Shapes.block(), pos, true) && !context.isDescending()) {
             return NORMAL_OUTLINE_SHAPE;
         } else {
@@ -134,7 +135,7 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
         }
     }
 
-    public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
+    public @NotNull VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
         return Shapes.block();
     }
 

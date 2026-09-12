@@ -29,9 +29,7 @@ public class FoodUtilsCondition {
 				        ShapeShifterCurseFabric.identifier("is_vegan_ex"),
 				        new SerializableData()
 						        .add("default", SerializableDataTypes.BOOLEAN, false),
-                        (data, itemstack) -> {
-                            return FC_isVegan(itemstack, data.getBoolean("default"));
-                        }
+                        (data, itemstack) -> FC_isVegan(itemstack, data.getBoolean("default"))
 		        )
         );
     }

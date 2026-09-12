@@ -35,6 +35,7 @@ import net.onixary.shapeShifterCurseFabric.minion.MinionRegisterClient;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
+import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
@@ -240,6 +241,8 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		registerEntityModels();
 		ModPacketsS2C.register();
         ModPacketsC2S.registerClient();
+        // 网络包注册自检：防「注册了类型却忘挂 receiver」的静默失效，在客户端启动完成时执行
+        NetworkRegistrationSelfCheck.registerClient();
 
 		// TODO: 1.21.11 Satin已移除，需新方案注册着色器
 		// registerShaderResource();
@@ -271,9 +274,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		});
 
 		// 断开连接时重置 auth 计数，避免跨世界累积导致"总请求次数"误报（对齐 1.21.1_main）
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
-			requestAuthCount = 0;
-		});
+		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> requestAuthCount = 0);
 
 		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);

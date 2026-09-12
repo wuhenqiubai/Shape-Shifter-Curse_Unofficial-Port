@@ -28,7 +28,7 @@ public class AdditionalEntityConditions {
         IdleStayCondition.init();
         TrinketsConditionAction.registerCondition(AdditionalEntityConditions::register);
         ManaUtilsApoli.registerCondition(AdditionalEntityConditions::register);
-        register(new ConditionFactory<Entity>(
+        register(new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("can_render_gui"),
                 new SerializableData(),
                 (data, e) -> {
@@ -38,7 +38,7 @@ public class AdditionalEntityConditions {
                     return true;
                 }
         ));
-        register(new ConditionFactory<Entity>(
+        register(new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("enable_random_sound"),
                 new SerializableData(),
                 (data, e) -> {
@@ -49,7 +49,7 @@ public class AdditionalEntityConditions {
                     return true;
                 }
         ));
-        register(new ConditionFactory<Entity>(
+        register(new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("last_attack_witch_time"),
                 new SerializableData()
                         .add("comparison", ApoliDataTypes.COMPARISON)
@@ -58,16 +58,16 @@ public class AdditionalEntityConditions {
                     if (e instanceof Player player) {
                         long lastAttackTime = AttackEntityDataTracker.lastAttackWitchTimeMap.getOrDefault(player.getUUID(), Long.MIN_VALUE / 16);
                         long trueLastAttackTime = player.level().getGameTime() - lastAttackTime;
-                        Comparison comparison = (Comparison)data.get("comparison");
+                        Comparison comparison = (Comparison) data.get("comparison");
                         if (comparison == null) {
                             return false;
                         }
-                        return comparison.compare(trueLastAttackTime, (int)data.get("compare_to"));
+                        return comparison.compare(trueLastAttackTime, (int) data.get("compare_to"));
                     }
                     return false;
                 }
         ));
-        register(new ConditionFactory<Entity>(
+        register(new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("last_attack_pillager_time"),
                 new SerializableData()
                         .add("comparison", ApoliDataTypes.COMPARISON)
@@ -76,16 +76,16 @@ public class AdditionalEntityConditions {
                     if (e instanceof Player player) {
                         long lastAttackTime = AttackEntityDataTracker.lastAttackPillagerTimeMap.getOrDefault(player.getUUID(), Long.MIN_VALUE / 16);
                         long trueLastAttackTime = player.level().getGameTime() - lastAttackTime;
-                        Comparison comparison = (Comparison)data.get("comparison");
+                        Comparison comparison = (Comparison) data.get("comparison");
                         if (comparison == null) {
                             return false;
                         }
-                        return comparison.compare(trueLastAttackTime, (int)data.get("compare_to"));
+                        return comparison.compare(trueLastAttackTime, (int) data.get("compare_to"));
                     }
                     return false;
                 }
         ));
-        register(new ConditionFactory<Entity>(
+        register(new ConditionFactory<>(
                 ShapeShifterCurseFabric.identifier("is_sleep"),
                 new SerializableData(),
                 (data, e) -> {

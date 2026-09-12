@@ -15,7 +15,7 @@ public class EmptyAnimatable implements GeoAnimatable {
 
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
-        controllers.add(new AnimationController<EmptyAnimatable>(animationState -> {
+        controllers.add(new AnimationController<>(animationState -> {
             animationState.setAnimation(RawAnimation.begin().then("idle", (LoopType) Animation.LoopType.LOOP));
             return PlayState.CONTINUE;
         }));

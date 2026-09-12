@@ -49,11 +49,11 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
 
     public boolean IsPatronForm = false;  // 可以使用特殊物品直接变形
     public int RequirePatronLevel = 0;  // 需要的赞助等级
-    public List<UUID> PlayerUUIDs = new ArrayList<UUID>();
+    public List<UUID> PlayerUUIDs = new ArrayList<>();
 
-    public List<Identifier> ExtraPower = new LinkedList<Identifier>();
-    public HashMap<Identifier, JsonObject> ExtraPowerData = new LinkedHashMap<>();
-    public List<Identifier> RemovedPower = new LinkedList<Identifier>();
+    public List<ResourceLocation> ExtraPower = new LinkedList<>();
+    public HashMap<ResourceLocation, JsonObject> ExtraPowerData = new LinkedHashMap<>();
+    public List<ResourceLocation> RemovedPower = new LinkedList<>();
     private int TempPowerIndex = 0;
 
     public Identifier fallbackFormID = null;
@@ -94,10 +94,7 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
 
     @Override
     public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
-        if (this.layerOverwrite != null) {
-            return layerOverwrite;
-        }
-        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.formID.getNamespace(), "form_" + this.formID.getPath()));
+        return Objects.requireNonNullElseGet(this.layerOverwrite, () -> new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.formID.getNamespace(), "form_" + this.formID.getPath())));
     }
 
     @Override

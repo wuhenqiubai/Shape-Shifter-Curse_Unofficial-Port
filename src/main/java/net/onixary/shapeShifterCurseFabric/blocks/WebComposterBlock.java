@@ -34,6 +34,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.util.ModTags;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
@@ -93,15 +94,15 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
 
     }
 
-    public VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public @NotNull VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return LEVEL_TO_COLLISION_SHAPE[state.getValue(LEVEL)];
     }
 
-    public VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
+    public @NotNull VoxelShape getInteractionShape(BlockState state, BlockGetter world, BlockPos pos) {
         return RAYCAST_SHAPE;
     }
 
-    public VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+    public @NotNull VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
         return LEVEL_TO_COLLISION_SHAPE[0];
     }
 
@@ -113,7 +114,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     }
 
     @Override
-    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int i = state.getValue(LEVEL);
         if (i < MAX_LEVEL + 1 && canIncrease(stack)) {
             if (i < MAX_LEVEL && !world.isClientSide()) {
@@ -130,7 +131,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     }
 
     @Override
-    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+    public @NotNull InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         int i = state.getValue(LEVEL);
         if (i == MAX_LEVEL + 1) {
             if (!world.isClientSide()) {
@@ -224,7 +225,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
         return false;
     }
 
-    public WorldlyContainer getContainer(BlockState state, LevelAccessor world, BlockPos pos) {
+    public @NotNull WorldlyContainer getContainer(BlockState state, LevelAccessor world, BlockPos pos) {
         int i = state.getValue(LEVEL);
         if (i == MAX_LEVEL + 1) {
 	        return new WebComposterBlock.FullComposterInventory(state, world, pos, new ItemStack(ResultItem, state.getValue(COCOON_COUNT)));
@@ -238,7 +239,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
             super(0);
         }
 
-        public int[] getSlotsForFace(Direction side) {
+        public int @NotNull [] getSlotsForFace(Direction side) {
             return new int[0];
         }
 
@@ -268,7 +269,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
 	        return 64;
         }
 
-        public int[] getSlotsForFace(Direction side) {
+        public int @NotNull [] getSlotsForFace(Direction side) {
             return side == Direction.DOWN ? new int[]{0} : new int[0];
         }
 
@@ -307,7 +308,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
             return 1;
         }
 
-        public int[] getSlotsForFace(Direction side) {
+        public int @NotNull [] getSlotsForFace(Direction side) {
             return side == Direction.UP ? new int[]{0} : new int[0];
         }
 

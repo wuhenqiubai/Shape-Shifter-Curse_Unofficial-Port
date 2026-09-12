@@ -45,7 +45,7 @@ public interface ITransformReason {
     }
 
     public static <T> ITransformReasonWithArg<T> create(Identifier reasonType, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, Player, IForm, IForm> fNextForm, ExtraFunctionInterface.TriFunction<ITransformReasonWithArg<T>, Player, IForm, IForm> fPrevForm, T arg) {
-        return new ITransformReasonWithArg<T>() {
+        return new ITransformReasonWithArg<>() {
             private T storedArg = arg;
 
             @Override
@@ -187,12 +187,8 @@ public interface ITransformReason {
 
     public static final Identifier ForceReasonID = ShapeShifterCurseFabric.identifier("force");
     public static final Function<IForm, ITransformReasonWithArg<IForm>> ForceReasonBuilder = (form) -> create(ForceReasonID,
-            (reason, player, nowForm) -> {
-                return reason.getArg() == null ? nowForm : reason.getArg();
-            },
-            (reason, player, nowForm) -> {
-                return reason.getArg() == null ? nowForm : reason.getArg();
-            },
+            (reason, player, nowForm) -> reason.getArg() == null ? nowForm : reason.getArg(),
+            (reason, player, nowForm) -> reason.getArg() == null ? nowForm : reason.getArg(),
             form
     );
 

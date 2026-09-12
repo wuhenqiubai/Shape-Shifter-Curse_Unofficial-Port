@@ -123,7 +123,7 @@ public class FormArgumentType implements ArgumentType<Identifier> {
         }
 
         @Override
-        public Form_ArgumentType_Properties deserializeFromNetwork(FriendlyByteBuf buf) {
+        public @NotNull Form_ArgumentType_Properties deserializeFromNetwork(FriendlyByteBuf buf) {
             return new Form_ArgumentType_Properties(this, buf.readIdentifier());
         }
 
@@ -133,7 +133,7 @@ public class FormArgumentType implements ArgumentType<Identifier> {
         }
 
         @Override
-        public Form_ArgumentType_Properties unpack(FormArgumentType argumentType) {
+        public @NotNull Form_ArgumentType_Properties unpack(FormArgumentType argumentType) {
             return new Form_ArgumentType_Properties(this, argumentType.suggestionsProvider);
         }
 
@@ -144,11 +144,11 @@ public class FormArgumentType implements ArgumentType<Identifier> {
                 this.data = data;
             }
 
-            public FormArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
+            public @NotNull FormArgumentType instantiate(CommandBuildContext commandRegistryAccess) {
                 return new FormArgumentType(data);
             }
 
-            public ArgumentTypeInfo<FormArgumentType, ?> type() {
+            public @NotNull ArgumentTypeInfo<FormArgumentType, ?> type() {
                 return Form_ArgumentType_Serializer.this;
             }
         }

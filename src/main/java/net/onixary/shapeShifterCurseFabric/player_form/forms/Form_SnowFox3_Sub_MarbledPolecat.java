@@ -100,35 +100,21 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements I
     public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-            switch (animStateEnum) {
-                case ANIM_STATE_SLEEP:
-                    return SLEEP_CONTROLLER;
-                case ANIM_STATE_CLIMB:
-                    return CLIMB_CONTROLLER;
-                case ANIM_STATE_JUMP:
-                    return JUMP_CONTROLLER;
-                case ANIM_STATE_FALL:
-                    return FALL_CONTROLLER;
-                case ANIM_STATE_SWIM:
-                    return SWIM_CONTROLLER;
-                case ANIM_STATE_USE_ITEM:
-                    return USE_ITEM_CONTROLLER;
-                case ANIM_STATE_WALK:
-                    return WALK_CONTROLLER;
-                case ANIM_STATE_SPRINT:
-                    return SPRINT_CONTROLLER;
-                case ANIM_STATE_IDLE:
-                    return IDLE_CONTROLLER;
-                case ANIM_STATE_MINING:
-                    return MINING_CONTROLLER;
-                case ANIM_STATE_ATTACK:
-                    return ATTACK_CONTROLLER;
-                case ANIM_STATE_FLYING:
-                case ANIM_STATE_FALL_FLYING:
-                    return FALL_FLYING_CONTROLLER;
-                default:
-                    return IDLE_CONTROLLER;
-            }
+            return switch (animStateEnum) {
+                case ANIM_STATE_SLEEP -> SLEEP_CONTROLLER;
+                case ANIM_STATE_CLIMB -> CLIMB_CONTROLLER;
+                case ANIM_STATE_JUMP -> JUMP_CONTROLLER;
+                case ANIM_STATE_FALL -> FALL_CONTROLLER;
+                case ANIM_STATE_SWIM -> SWIM_CONTROLLER;
+                case ANIM_STATE_USE_ITEM -> USE_ITEM_CONTROLLER;
+                case ANIM_STATE_WALK -> WALK_CONTROLLER;
+                case ANIM_STATE_SPRINT -> SPRINT_CONTROLLER;
+                case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
+                case ANIM_STATE_MINING -> MINING_CONTROLLER;
+                case ANIM_STATE_ATTACK -> ATTACK_CONTROLLER;
+                case ANIM_STATE_FLYING, ANIM_STATE_FALL_FLYING -> FALL_FLYING_CONTROLLER;
+                default -> IDLE_CONTROLLER;
+            };
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

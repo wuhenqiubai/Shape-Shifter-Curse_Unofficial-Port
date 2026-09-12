@@ -2,54 +2,52 @@ package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.NonNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class ScaleScrollTextWidget extends MultiLineTextWidget implements WidgetEXUtils.IWidgetEX {
     private final float Scale;
+    private final float realScale;
     private boolean shadow;
     private int textColor = 0xFFFFFFFF;
 
 
     private int realWidth;
-    private int realHeight;
     private int MaxWidth;
     private int MaxRows;
 
-    private boolean textDone = false;
+    private int boxHeight = 0;
 
     private final List<WidgetEXUtils.IWidgetEX> widgetList = List.of();
     private WidgetEXUtils.WidgetRect rect;
-
-    private List<FormattedCharSequence> texts = new ArrayList<>();
-    private List<FormattedCharSequence> currentTexts = new ArrayList<>();
 
     public boolean enableScrollableIconRender = false;
     public int IconSize = 8;
     public Identifier IconTexID = ShapeShifterCurseFabric.identifier("textures/gui/scrollable_icon.png");
 
-    public int textsLineCount = 0;
-    public int scroll = 0;
+    public int scroll = 0;  // 单位改成像素
 
-    public ScaleScrollTextWidget(int x, int y, int width, int maxRow, float Scale, Component message, Font textRenderer) {
+
+    public ScaleScrollTextWidget(int x, int y, int width, int height, float Scale, Component message, Font textRenderer) {
         super(x, y, message, textRenderer);
         this.Scale = Scale;
-        this.rect = new WidgetEXUtils.WidgetRect(x, y, width, maxRow * 9);
+        int textHeight = Math.round(textRenderer.lineHeight * Scale);
+        this.realScale = (float) textHeight / (float) textRenderer.lineHeight;
+        this.rect = new WidgetEXUtils.WidgetRect(x, y, width, height);
         assert width > 0;
-        assert maxRow > 0;
+        assert height > 0;
         this.setMaxWidth(width);
-        this.setMaxRows(maxRow);
-        this.calculateText();
+        this.setMaxRows(1_000_000_000);
+        this.boxHeight = height;
     }
 
     @Override
@@ -70,10 +68,10 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     public void onClickWidget(double mouseX, double mouseY, int button) {
         if (this.enableScrollableIconRender) {
             if (mouseX >= this.realWidth - IconSize && mouseX <= this.realWidth && mouseY >= 0 && mouseY < IconSize) {
-                this.scroll(-this.MaxRows);
+                this.scroll(-this.boxHeight);
             }
-            if (mouseX >= this.realWidth - IconSize && mouseX <= this.realWidth && mouseY >= this.realHeight - IconSize && mouseY < this.realHeight) {
-                this.scroll(this.MaxRows);
+            if (mouseX >= this.realWidth - IconSize && mouseX <= this.realWidth && mouseY >= this.boxHeight - IconSize && mouseY < this.boxHeight) {
+                this.scroll(this.boxHeight);
             }
         }
     }
@@ -84,9 +82,9 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
             return;
         }
         deltaYTotal += deltaY;
-        if (deltaYTotal > 9 || deltaYTotal < -9) {
-            int amount = (int) (deltaYTotal / 9);
-            deltaYTotal -= amount * 9;
+        if (deltaYTotal > 1 || deltaYTotal < -1) {
+            int amount = (int) (deltaYTotal);
+            deltaYTotal -= amount;
             this.scroll(-amount);
         }
     }
@@ -97,29 +95,10 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
             return;
         }
         scrollZTotal += mouseZ;
-        if (scrollZTotal > 0.5f || scrollZTotal < -0.5f) {
-            int amount = (int) (scrollZTotal * 2);
-            scrollZTotal -= amount * 0.5f;
+        if (scrollZTotal > 0.0625f || scrollZTotal < -0.0625f) {
+            int amount = (int) (scrollZTotal * 16);
+            scrollZTotal -= amount * 0.0625f;
             this.scroll(-amount);
-        }
-    }
-
-    private void calculateCurrentText() {
-        if (this.texts.size() < this.scroll + this.MaxRows) {
-            this.currentTexts = this.texts.subList(this.scroll, this.texts.size());
-        } else {
-            this.currentTexts = this.texts.subList(this.scroll, this.scroll + this.MaxRows);
-        }
-    }
-
-    private void calculateText() {
-        try {
-            this.texts = this.getFont().split(this.getMessage(), this.getTextWidth());
-            this.textsLineCount = this.texts.size();
-            this.calculateCurrentText();
-            this.textDone = true;
-        } catch (Exception e) {
-            ShapeShifterCurseFabric.LOGGER.error("Error while calculating text", e);
         }
     }
 
@@ -145,34 +124,24 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
                 this.modMaxWidth(0);
             }
             this.enableScrollableIconRender = enableScrollableIconRender;
-            this.reloadText();
+            this.scroll = 0;
         }
         return this;
     }
 
-    public void reloadText() {
-        this.textDone = false;
-        this.calculateText();
+    public void reloadText(Component message) {
+        this.setMessage(message);
         this.scroll = 0;
     }
 
-    public void reloadText(Component message) {
-        this.setMessage(message);
-        this.reloadText();
-    }
-
     public void scroll(int amount) {
-        if (!this.textDone) {
-            this.calculateText();
-        }
         this.scroll += amount;
-        if (this.scroll > this.texts.size() - this.MaxRows) {
-            this.scroll = this.texts.size() - this.MaxRows;
+        if (this.scroll > this.getHeight() - this.boxHeight) {
+            this.scroll = this.getHeight() - this.boxHeight;
         }
         if (this.scroll < 0) {
             this.scroll = 0;
         }
-        this.calculateCurrentText();
     }
 
     public int modMaxWidth = 0;
@@ -183,7 +152,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public @NonNull MultiLineTextWidget setMaxWidth(int maxWidth) {
+    public @NotNull MultiLineTextWidget setMaxWidth(int maxWidth) {
         this.realWidth = maxWidth;
         this.MaxWidth = Math.round(maxWidth * (1 / this.Scale));
         super.setMaxWidth(this.MaxWidth + this.modMaxWidth);
@@ -191,8 +160,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public @NonNull MultiLineTextWidget setMaxRows(int maxRows) {
-        this.realHeight = maxRows * 9;
+    public @NotNull MultiLineTextWidget setMaxRows(int maxRows) {
         this.MaxRows = Math.round(maxRows * (1 / this.Scale));
         super.setMaxRows(this.MaxRows);
         return this;
@@ -209,81 +177,40 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
 
     @Override
     public int getHeight() {
-        return (int) (super.getHeight() * this.Scale);
-    }
-
-    private void drawCenterWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
-        // 1.21.11 文字渲染走 GuiTextRenderState（延迟提交），字形缩放只能由保存的 2D pose 决定：
-        // 在 (x,y) 处缩放 GUI pose Scale 倍，行距/行宽按未缩放值绘制，真正缩小 Scale 倍显示。
-        int i = y;
-        Font textRenderer = this.getFont();
-        Matrix3x2fStack pose = context.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(this.Scale, this.Scale);
-        pose.translate(-x, -y);
-        for(FormattedCharSequence line : lines) {
-            context.drawString(textRenderer, line, x - Math.round(textRenderer.width(line) / this.Scale) / 2, i, color);
-            i += lineHeight;
-        }
-        pose.popMatrix();
-    }
-
-    public void drawWithShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
-        int i = y;
-        Font textRenderer = this.getFont();
-        Matrix3x2fStack pose = context.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(this.Scale, this.Scale);
-        pose.translate(-x, -y);
-        for(FormattedCharSequence line : lines) {
-            context.drawString(textRenderer, line, x, i, color);
-            i += lineHeight;
-        }
-        pose.popMatrix();
-    }
-
-    public void drawWithOutShadow(GuiGraphics context, List<FormattedCharSequence> lines, int x, int y, int lineHeight, int color) {
-        int i = y;
-        Font textRenderer = this.getFont();
-        Matrix3x2fStack pose = context.pose();
-        pose.pushMatrix();
-        pose.translate(x, y);
-        pose.scale(this.Scale, this.Scale);
-        pose.translate(-x, -y);
-        for(FormattedCharSequence line : lines) {
-            context.drawString(textRenderer, line, x, i, color, false);
-            i += lineHeight;
-        }
-        pose.popMatrix();
+        return (int) (super.getHeight() * this.realScale);
     }
 
     @Override
     public void renderWidget(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        if (!this.textDone) {
-            this.calculateText();
-        }
         int i = this.getX();
         int j = this.getY();
         if (this.enableScrollableIconRender) {
             if (this.scroll > 0) {
                 context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j, 0, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
             }
-            if (this.scroll < this.texts.size() - this.MaxRows) {
-                context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j + realHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
+            if (this.scroll < this.getHeight() - this.boxHeight) {
+                context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j + boxHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
             }
         }
+        MultiLineLabel multilineText = (MultiLineLabel)this.cache.getValue(this.getFreshCacheKey());
         Objects.requireNonNull(this.getFont());
         // 文字行距/居中用未缩放值，缩放由 draw* 方法内的 GUI pose 完成
         int k = 9;
         int l = this.getColor();
+        // 这API真好用 比我硬算剔除好写不止一点
+        context.enableScissor(i, j, i + this.getWidth(), j + this.boxHeight);
         if (this.centered) {
-            this.drawCenterWithShadow(context, this.currentTexts, i + (this.MaxWidth + this.modMaxWidth) / 2, j, k, l);
+            multilineText.renderCentered(context, i + (this.MaxWidth + this.modMaxWidth) / 2, j - scroll, k, l);
         } else if (this.shadow) {
             this.drawWithShadow(context, this.currentTexts, i, j, k, l);
         } else {
-            this.drawWithOutShadow(context, this.currentTexts, i, j, k, l);
+            if(this.shadow){
+                this.drawWithShadow(context, this.currentTexts, i, j, k, l);
+            }
+            else{
+                this.drawWithOutShadow(context, this.currentTexts, i, j, k, l);
+            }
         }
+        context.disableScissor();
     }
 }
