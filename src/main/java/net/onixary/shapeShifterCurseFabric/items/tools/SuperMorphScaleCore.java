@@ -39,11 +39,10 @@ public class SuperMorphScaleCore extends Item {
     }
 
     public static int getUpgradeDamageMultiplier(ItemStack stack) {
-        int upgradeItemStackCount = stack.getMaxStackSize();
-        if (upgradeItemStackCount == 0) {
-            return 1;
-        }
-        return 64 / upgradeItemStackCount;
+        // 持久耐久工具：每次升级固定耗 damagePerItem(64) 耐久（core 耐久 4096 ≈ 可升级约 64 次）。
+        // 不再按 base 的 maxStackSize 放大——护甲 maxStack=1 会算出 multiplier=64，一次即耗光 4096 耐久（核心一次报废）。
+        // 这是 1.21.1 侧 issue #22 的修复（108b814a），1.21.11 移植时被 ab8a610c「恢复干净版」连带回退了。
+        return 1;
     }
 
     public static void damageItemAfterUpgrade(ItemStack stack, int multiplier) {
