@@ -39,7 +39,7 @@ public class FormColorData {
     public final List<String> FormColorSelectMenu_Global_Names = new ArrayList<>();
     public final HashMap<Identifier, String> FormColorSelectMenu_Form_Default_Names = new HashMap<>();
 
-    public final List<ResourceLocation> unlockedForms = new ArrayList<>();
+    public final List<Identifier> unlockedForms = new ArrayList<>();
 
     // V2 UI用的数据 由于UI没设计完 部分值不确定
     public static int V2_GlobalSlotCount = 9;

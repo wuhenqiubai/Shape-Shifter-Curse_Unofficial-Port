@@ -99,10 +99,11 @@ public abstract class ElytraEntityModelMixin {
         }
 
         this.leftWing.y = m;
-        if (entity instanceof AbstractClientPlayer abstractClientPlayerEntity) {
-            abstractClientPlayerEntity.elytraRotX += (k - abstractClientPlayerEntity.elytraRotX) * 0.1f;
-            abstractClientPlayerEntity.elytraRotY += (n - abstractClientPlayerEntity.elytraRotY) * 0.1f;
-            abstractClientPlayerEntity.elytraRotZ += (l - abstractClientPlayerEntity.elytraRotZ) * 0.1f;
+        // 1.21.11 的渲染状态里拿不到实体（Entity 是上面块内的局部变量），统一用反查到的 player 判空
+        if (player != null) {
+            ssc$elytraRotX += (k - ssc$elytraRotX) * 0.1f;
+            ssc$elytraRotY += (n - ssc$elytraRotY) * 0.1f;
+            ssc$elytraRotZ += (l - ssc$elytraRotZ) * 0.1f;
 
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;

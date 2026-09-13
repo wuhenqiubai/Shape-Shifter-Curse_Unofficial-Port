@@ -25,7 +25,8 @@ public class EntityOverlayRenderSystem {
     static {
         overlayDataList.add(new OverlayData() {
             private static CocoonModel cocoonModel = new CocoonModel();
-            private static GeoObjectRenderer<EmptyAnimatable> cocoonRenderer = new GeoObjectRenderer<>(cocoonModel);
+            // GL5 的 GeoObjectRenderer 需要三个类型参数 <TAnimatable, TItemStack, TRenderState>
+            private static GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl> cocoonRenderer = new GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl>(cocoonModel);
 
             @Override
             public boolean canRender(Entity entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {

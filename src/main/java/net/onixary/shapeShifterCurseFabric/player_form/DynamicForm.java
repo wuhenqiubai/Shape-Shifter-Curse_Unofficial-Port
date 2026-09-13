@@ -51,9 +51,9 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     public int RequirePatronLevel = 0;  // 需要的赞助等级
     public List<UUID> PlayerUUIDs = new ArrayList<>();
 
-    public List<ResourceLocation> ExtraPower = new LinkedList<>();
-    public HashMap<ResourceLocation, JsonObject> ExtraPowerData = new LinkedHashMap<>();
-    public List<ResourceLocation> RemovedPower = new LinkedList<>();
+    public List<Identifier> ExtraPower = new LinkedList<>();
+    public HashMap<Identifier, JsonObject> ExtraPowerData = new LinkedHashMap<>();
+    public List<Identifier> RemovedPower = new LinkedList<>();
     private int TempPowerIndex = 0;
 
     public Identifier fallbackFormID = null;

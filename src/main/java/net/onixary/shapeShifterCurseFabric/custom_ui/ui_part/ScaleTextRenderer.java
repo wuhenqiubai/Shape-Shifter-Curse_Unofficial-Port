@@ -30,10 +30,6 @@ public class ScaleTextRenderer extends Font {
         return Mth.ceil(this.getSplitter().stringWidth(text) * this.Scale);
     }
 
-    public int width(FormattedCharSequence text) {
-        return Mth.ceil(this.getSplitter().stringWidth(text) * this.Scale);
-    }
-
     public @NotNull String plainSubstrByWidth(String text, int maxWidth, boolean backwards) {
         return backwards ? this.getSplitter().plainTailByWidth(text, (int) (maxWidth * (1.0f / this.Scale)), Style.EMPTY) : this.getSplitter().plainHeadByWidth(text, maxWidth, Style.EMPTY);
     }

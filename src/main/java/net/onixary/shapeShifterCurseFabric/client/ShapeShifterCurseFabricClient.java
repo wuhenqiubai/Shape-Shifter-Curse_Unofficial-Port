@@ -224,7 +224,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	{
 		CoreShaderRegistrationCallback.EVENT.register(context -> {
 			// 1. 定义着色器的 Identifier
-			ResourceLocation shaderId = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
+			Identifier shaderId = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
 
 			// 2. 使用 context.register 方法注册
 			//    这个方法会处理底层的加载逻辑

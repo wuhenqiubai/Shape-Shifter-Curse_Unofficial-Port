@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,22 +11,22 @@ import java.util.Map;
 
 // Common Side
 public class PerkTree {
-    public record PerkNode(ResourceLocation perkID, int tier, int y, @Nullable ResourceLocation dependentPerkID) {
+    public record PerkNode(Identifier perkID, int tier, int y, @Nullable Identifier dependentPerkID) {
     }
 
-    public final ResourceLocation treeID;
+    public final Identifier treeID;
     public final List<PerkNode> perkNodes = new ArrayList<>();
-    public final Map<ResourceLocation, PerkNode> perkNodeMap = new HashMap<>();
+    public final Map<Identifier, PerkNode> perkNodeMap = new HashMap<>();
 
-    public PerkTree(ResourceLocation treeID) {
+    public PerkTree(Identifier treeID) {
         this.treeID = treeID;
     }
 
-    public ResourceLocation getID() {
+    public Identifier getID() {
         return treeID;
     }
 
-    public PerkTree addNode(ResourceLocation perkID, int tier, int y, @Nullable ResourceLocation dependentPerkID) {
+    public PerkTree addNode(Identifier perkID, int tier, int y, @Nullable Identifier dependentPerkID) {
         return this.addNode(new PerkNode(perkID, tier, y, dependentPerkID));
     }
 
@@ -36,11 +36,11 @@ public class PerkTree {
         return this;
     }
 
-    public @Nullable PerkNode getNode(ResourceLocation perkID) {
+    public @Nullable PerkNode getNode(Identifier perkID) {
         return perkNodeMap.get(perkID);
     }
 
-    public @Nullable PerkNode getDependentNode(ResourceLocation perkID) {
+    public @Nullable PerkNode getDependentNode(Identifier perkID) {
         PerkNode perkNode = getNode(perkID);
         if (perkNode != null && perkNode.dependentPerkID != null) {
             return getNode(perkNode.dependentPerkID);
@@ -48,7 +48,7 @@ public class PerkTree {
         return null;
     }
 
-    public @NotNull List<ResourceLocation> getAllPerks() {
+    public @NotNull List<Identifier> getAllPerks() {
         return new ArrayList<>(perkNodeMap.keySet());
     }
 

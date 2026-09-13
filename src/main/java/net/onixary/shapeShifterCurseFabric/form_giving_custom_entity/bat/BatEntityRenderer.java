@@ -10,6 +10,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ambient.Bat;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -20,7 +21,12 @@ public class BatEntityRenderer extends MobRenderer<Bat, BatRenderState, BatModel
         super(context, new BatModel(context.bakeLayer(ModelLayers.BAT)), 0.25F);
     }
 
-    public @NotNull ResourceLocation getTextureLocation(Bat batEntity) {
+    @Override
+    public @NonNull BatRenderState createRenderState() {
+        return new BatRenderState();
+    }
+
+    public @NotNull Identifier getTextureLocation(@NonNull BatRenderState batEntity) {
         return TEXTURE;
     }
 

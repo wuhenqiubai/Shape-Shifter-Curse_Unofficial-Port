@@ -30,10 +30,10 @@ public class PowerfulInhibitor extends Item {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public @NotNull InteractionResult use(Level world, Player user, InteractionHand hand) {
         if (user.canEat(true)) {
             user.startUsingItem(hand);
-            return InteractionResultHolder.consume(user.getItemInHand(hand));
+            return InteractionResult.CONSUME;
         }
         return InteractionResult.FAIL;
     }

@@ -5,20 +5,19 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
-import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NonTameRandomTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.ResetUniversalAngerTargetGoal;
+import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.equine.Llama;
 import net.minecraft.world.entity.animal.turtle.Turtle;
 import net.minecraft.world.entity.animal.wolf.Wolf;
@@ -128,11 +127,9 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
         return;
     }
 
-    @Override
-    protected @NotNull ResourceKey<LootTable> getDefaultLootTable() {
-        return ResourceKey.create(Registries.LOOT_TABLE, ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "entities/t_wolf"));
-    }
-
+    // 1.21.11 起 Entity.getDefaultLootTable() 被移除，战利品表改由 EntityType 声明：
+    // EntityType.Builder 默认按「<命名空间>:entities/<实体id>」推导，本实体注册 id 为 t_wolf，
+    // 推导结果恰好等于原先 override 的返回值，故直接删除该 override（行为不变）。
     protected ResourceKey<LootTable> getLootTableKey() {
         return ResourceKey.create(
                 Registries.LOOT_TABLE,

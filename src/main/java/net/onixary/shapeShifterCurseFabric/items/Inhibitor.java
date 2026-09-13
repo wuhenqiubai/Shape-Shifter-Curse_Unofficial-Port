@@ -31,7 +31,7 @@ public class Inhibitor  extends Item {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
         if (user.canEat(true)) {
             user.startUsingItem(hand);
             return InteractionResult.CONSUME;

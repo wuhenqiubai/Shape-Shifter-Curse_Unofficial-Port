@@ -64,9 +64,9 @@ public class SuperMorphScaleCore extends Item {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public @NotNull InteractionResult use(Level world, Player user, InteractionHand hand) {
         user.startUsingItem(hand);
-        return InteractionResultHolder.success(user.getItemInHand(hand));
+        return InteractionResult.SUCCESS;
     }
 
     // 我最早的Mod中的代码(没发布) 最后一次更新还是2年前了

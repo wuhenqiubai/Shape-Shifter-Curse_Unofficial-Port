@@ -1,16 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
 import net.onixary.shapeShifterCurseFabric.perk.PerkTree;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3x2fStack;
 import org.joml.Vector2i;
 
 import java.util.ArrayList;
@@ -74,17 +75,21 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
 
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
+        // 1.21.11: mouseClicked 的形参改成了 MouseButtonEvent，旧代码里的 mouseX/mouseY/button 要从事件里取
+        double mouseX = mouseButtonEvent.x();
+        double mouseY = mouseButtonEvent.y();
+        int button = mouseButtonEvent.button();
         this.onClickWidget(mouseX, mouseY, button);
         this.NodeScreenMouseClickHandler((int)mouseX, (int)mouseY, button);
-        return super.mouseClicked(mouseX, mouseY, button);
+        return super.mouseClicked(mouseButtonEvent, bl);
     }
 
     // Utils
 
     // UNTESTED
     public void drawConnectLine(GuiGraphics context, PerkTree.PerkNode perkNode) {
-        ResourceLocation depend = perkNode.dependentPerkID();
+        Identifier depend = perkNode.dependentPerkID();
         if (depend == null) return;
         PerkTree.PerkNode dependNodeMetaData = perkTree.getNode(depend);
         if (dependNodeMetaData == null) return;
@@ -100,9 +105,9 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
 
     // UNTESTED
     // playerGainedPerk 由调用方获取 毕竟drawNode调用频繁
-    public void drawNode(GuiGraphics context, PerkTree.PerkNode perkNode, List<ResourceLocation> playerGainedPerk, int mouseX, int mouseY, float delta) {
+    public void drawNode(GuiGraphics context, PerkTree.PerkNode perkNode, List<Identifier> playerGainedPerk, int mouseX, int mouseY, float delta) {
         this.drawConnectLine(context, perkNode);
-        ResourceLocation icon = RegPerks.getPerkIcon(perkNode.perkID());
+        Identifier icon = RegPerks.getPerkIcon(perkNode.perkID());
         if (icon == null) {
             icon = RegPerks.FALLBACK_PERK_ICON;
         }
@@ -116,16 +121,17 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
     public void drawAllNode(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (this.minecraft == null) return;
         context.enableScissor(nodeWindowX, nodeWindowY, nodeWindowX + nodeWindowWidth, nodeWindowY + nodeWindowHeight);
-        PoseStack matrixStack = context.pose();
-        matrixStack.pushPose();
-        matrixStack.translate(cameraPosX, cameraPosY, 0);
-        matrixStack.scale(cameraScale, cameraScale, 1.0f);
+        // 1.21.11: GUI 的 2D 变换栈是 Matrix3x2fStack（PoseStack 只用于 3D 渲染）
+        Matrix3x2fStack matrixStack = context.pose();
+        matrixStack.pushMatrix();
+        matrixStack.translate(cameraPosX, cameraPosY);
+        matrixStack.scale(cameraScale, cameraScale);
         PerkTree tree = this.perkTree;
-        List<ResourceLocation> playerGainedPerk = PerkUtils.getPlayerPerks(this.minecraft.player, tree.getID());
+        List<Identifier> playerGainedPerk = PerkUtils.getPlayerPerks(this.minecraft.player, tree.getID());
         for (PerkTree.PerkNode perkNode : tree.getAllNodes()) {
             this.drawNode(context, perkNode, playerGainedPerk, mouseX, mouseY, delta);
         }
-        matrixStack.popPose();
+        matrixStack.popMatrix();
         context.disableScissor();
     }
 

@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.Set;
@@ -67,9 +67,9 @@ public final class NetworkRegistrationSelfCheck {
     }
 
     /** 比对「已注册的 id」与「已挂 receiver 的 id」，把差集逐条报出来。供 client 隔离类复用。 */
-    static void report(String direction, Set<ResourceLocation> registered,
-                       Set<ResourceLocation> withReceivers, String consequence) {
-        Set<ResourceLocation> orphans = new TreeSet<>(registered);
+    static void report(String direction, Set<Identifier> registered,
+                       Set<Identifier> withReceivers, String consequence) {
+        Set<Identifier> orphans = new TreeSet<>(registered);
         orphans.removeAll(withReceivers);
         if (orphans.isEmpty()) {
             return;
@@ -77,7 +77,7 @@ public final class NetworkRegistrationSelfCheck {
         ShapeShifterCurseFabric.LOGGER.error(
                 "[网络自检] {} 方向有 {} 个包只注册了类型、没挂 receiver —— {}：",
                 direction, orphans.size(), consequence);
-        for (ResourceLocation id : orphans) {
+        for (Identifier id : orphans) {
             ShapeShifterCurseFabric.LOGGER.error("[网络自检]   - {}", id);
         }
     }

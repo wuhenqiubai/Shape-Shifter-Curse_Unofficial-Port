@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -164,9 +163,8 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         int textureHeight = Math.round(textureWidth * (texture.imageHeight() / (float) texture.imageWidth()));
         int x = BookPosX + 220 * BookScale;
         int y = BookPosY + 160 * BookScale - textureHeight;
-        RenderSystem.enableBlend();
+        // 1.21.11: RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
         context.blit(texture.id(), x, y, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
-        RenderSystem.disableBlend();
     }
 
     @Override

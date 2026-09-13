@@ -53,6 +53,8 @@ public class ManaComponent implements AutoSyncedComponent {
     // 仅客户端 同步时更新
     public static Identifier LocalManaTypeID = null;  // 仅客户端 怎么想都不会出现在服务器端上 虽然服务器上的数据也会更新 我懒得给readFromNbt写客户端判断了 同步时更新
 
+    // 注意：这里必须是 Player，不能收窄成 ServerPlayer —— CCA 会在客户端为 LocalPlayer 也建一份组件
+    // （客户端 tick / HUD 渲染都会取它），收窄会在客户端 ClassCastException，且 isClient 会恒为 false。
     public final @NotNull Player player;
     public final boolean isClient;
     // 双端 常更新
@@ -108,7 +110,7 @@ public class ManaComponent implements AutoSyncedComponent {
         return ManaTypeID != null;
     }
 
-    public @Nullable ResourceLocation getManaTypeID() {
+    public @Nullable Identifier getManaTypeID() {
         return ManaTypeID;
     }
 

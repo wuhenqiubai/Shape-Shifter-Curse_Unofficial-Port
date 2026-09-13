@@ -114,7 +114,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
     }
 
     @Override
-    protected @NotNull ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    protected @NotNull InteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         int i = state.getValue(LEVEL);
         if (i < MAX_LEVEL + 1 && canIncrease(stack)) {
             if (i < MAX_LEVEL && !world.isClientSide()) {

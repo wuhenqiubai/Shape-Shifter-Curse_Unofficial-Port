@@ -7,26 +7,25 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.RecipeInput;
-import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.*;
 
 public class BuiltinAlterRecipe extends AlterRecipe {
-    public static final HashMap<ResourceLocation, BARecipeConfig> BARecipeConfigMap = new HashMap<>();
+    public static final HashMap<Identifier, BARecipeConfig> BARecipeConfigMap = new HashMap<>();
 
     public record BARecipeConfig (
             BiPredicate<AlterBlockEntity, Level> match,
@@ -39,11 +38,11 @@ public class BuiltinAlterRecipe extends AlterRecipe {
             Consumer<AlterBlockEntity> consumeInputs,
             Function<AlterBlockEntity, List<ItemStack>> extraOutput
     ) {
-        public void register(ResourceLocation id) {
+        public void register(Identifier id) {
             BARecipeConfigMap.put(id, this);
         }
 
-        public static @Nullable BARecipeConfig get(ResourceLocation id) {
+        public static @Nullable BARecipeConfig get(Identifier id) {
             return BARecipeConfigMap.get(id);
         }
     }
@@ -84,7 +83,8 @@ public class BuiltinAlterRecipe extends AlterRecipe {
                     }
                 }
 
-                StackedContents recipeMatcher = new StackedContents();
+                // 1.21.11: StackedContents 变成了泛型的 StackedItemContents（accountStack 仍在），与 AlterShapelessRecipe 对齐
+                StackedItemContents recipeMatcher = new StackedItemContents();
                 int i = 0;
                 for(int j = 0; j < 9; ++j) {
                     ItemStack itemStack = alterBlockEntity.getItem(j);
@@ -101,10 +101,10 @@ public class BuiltinAlterRecipe extends AlterRecipe {
     }
 
     /** 配方配置 id（指向 {@link BARecipeConfigMap}）；1.21.1 Recipe 不再自带配方 id（由 RecipeHolder 管理）。 */
-    public final ResourceLocation configId;
+    public final Identifier configId;
     public final BARecipeConfig recipeConfig;
 
-    public BuiltinAlterRecipe(ResourceLocation configId, BARecipeConfig recipeConfig) {
+    public BuiltinAlterRecipe(Identifier configId, BARecipeConfig recipeConfig) {
         this.configId = configId;
         this.recipeConfig = recipeConfig;
     }
@@ -130,13 +130,20 @@ public class BuiltinAlterRecipe extends AlterRecipe {
         return ItemStack.EMPTY;
     }
 
+    // 1.21.11 的 Recipe 接口删掉了 canCraftInDimensions / getResultItem（结果展示改走 display()/RecipeDisplay），
+    // 并新增了 placementInfo() / recipeBookCategory()。本配方由 Java 代码驱动、没有原料表，故不可放置。
     @Override
-    public boolean canCraftInDimensions(int width, int height) {
-        return true;
+    public @NonNull PlacementInfo placementInfo() {
+        return PlacementInfo.NOT_PLACEABLE;
     }
 
     @Override
-    public @NotNull ItemStack getResultItem(HolderLookup.Provider provider) {
+    public @NonNull RecipeBookCategory recipeBookCategory() {
+        return RecipeBookCategories.CRAFTING_MISC;
+    }
+
+    /** 原 getResultItem 的语义（虚拟产物），Recipe 接口已不再要求，保留为普通方法供内部/调试使用。 */
+    public @NotNull ItemStack getVirtualResultItem(HolderLookup.Provider provider) {
         return this.recipeConfig.virtualOutput.apply(provider);
     }
 
@@ -174,7 +181,7 @@ public class BuiltinAlterRecipe extends AlterRecipe {
     }
 
     @Override
-    public @NotNull RecipeSerializer<?> getSerializer() {
+    public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
         return RecipeSerializerRegister.BUILTIN_ALTER_RECIPE;
     }
 
@@ -182,7 +189,7 @@ public class BuiltinAlterRecipe extends AlterRecipe {
         /** JSON：只存 recipe_config_id，decode 时从 BARecipeConfigMap 查运行时配置。 */
         private static final MapCodec<BuiltinAlterRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
-                ResourceLocation.CODEC.fieldOf("recipe_config_id").forGetter(r -> r.configId)
+                Identifier.CODEC.fieldOf("recipe_config_id").forGetter(r -> r.configId)
             ).apply(instance, BuiltinAlterRecipe::fromConfigId)
         );
 
@@ -200,17 +207,17 @@ public class BuiltinAlterRecipe extends AlterRecipe {
         }
 
         private static BuiltinAlterRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
-            ResourceLocation configId = buf.readResourceLocation();
+            Identifier configId = buf.readIdentifier();
             return fromConfigId(configId);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf buf, BuiltinAlterRecipe alterRecipe) {
-            buf.writeResourceLocation(alterRecipe.configId);
+            buf.writeIdentifier(alterRecipe.configId);
         }
     }
 
     /** 从配置 id 查运行时配置构造配方（配置未注册则抛错）。 */
-    private static BuiltinAlterRecipe fromConfigId(ResourceLocation configId) {
+    private static BuiltinAlterRecipe fromConfigId(Identifier configId) {
         BARecipeConfig recipeConfig = BARecipeConfig.get(configId);
         if (recipeConfig == null) {
             throw new JsonSyntaxException("Unknown recipe_config_id: " + configId);

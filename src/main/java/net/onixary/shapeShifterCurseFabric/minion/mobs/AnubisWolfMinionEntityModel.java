@@ -9,7 +9,6 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.animal.Wolf;
 import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)

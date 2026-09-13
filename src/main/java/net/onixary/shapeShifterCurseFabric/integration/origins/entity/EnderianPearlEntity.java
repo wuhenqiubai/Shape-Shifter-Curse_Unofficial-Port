@@ -14,6 +14,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class EnderianPearlEntity extends ThrowableItemProjectile {
    public EnderianPearlEntity(EntityType<? extends EnderianPearlEntity> entityType, Level world) {

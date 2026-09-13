@@ -1,31 +1,31 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 
 public class RegPerks {
-    public static final HashMap<ResourceLocation, IPerk> PerkRegistry = new HashMap<>();
-    public static final HashMap<ResourceLocation, ResourceLocation> PerkIconRegistry = new HashMap<>();
-    public static final HashMap<ResourceLocation, PerkTree> PerkTreeRegistry = new HashMap<>();
+    public static final HashMap<Identifier, IPerk> PerkRegistry = new HashMap<>();
+    public static final HashMap<Identifier, Identifier> PerkIconRegistry = new HashMap<>();
+    public static final HashMap<Identifier, PerkTree> PerkTreeRegistry = new HashMap<>();
 
-    public static final ResourceLocation FALLBACK_PERK_ICON = ShapeShifterCurseFabric.identifier("textures/perk/fallback.png");
+    public static final Identifier FALLBACK_PERK_ICON = ShapeShifterCurseFabric.identifier("textures/perk/fallback.png");
 
-    public static final ResourceLocation P_FireBallPlusL1 = registerPerk(
+    public static final Identifier P_FireBallPlusL1 = registerPerk(
             new NormalPerk(ShapeShifterCurseFabric.identifier("fire_ball_plus_1"))
                     .addPower()
                     .removePower()
     );
 
-    public static final ResourceLocation P_FireBallPlusL2 = registerPerk(
+    public static final Identifier P_FireBallPlusL2 = registerPerk(
             new NormalPerk(ShapeShifterCurseFabric.identifier("fire_ball_plus_2"))
                     .addPower()
                     .removePower()
     );
 
-    public static final ResourceLocation T_FFoxTree = registerPerkTree(
+    public static final Identifier T_FFoxTree = registerPerkTree(
             new PerkTree(ShapeShifterCurseFabric.identifier("f_fox_tree"))
                     .addNode(ShapeShifterCurseFabric.identifier("fire_ball_plus_1"), 1, 0, null)
                     .addNode(ShapeShifterCurseFabric.identifier("fire_ball_plus_2"), 2, 0, ShapeShifterCurseFabric.identifier("fire_ball_plus_1"))
@@ -36,29 +36,29 @@ public class RegPerks {
         registerPerkIcon(P_FireBallPlusL2, ShapeShifterCurseFabric.identifier("textures/perk/fire_ball_plus_2.png"));
     }
 
-    public static ResourceLocation registerPerk(IPerk perk) {
+    public static Identifier registerPerk(IPerk perk) {
         PerkRegistry.put(perk.getID(), perk);
         return perk.getID();
     }
 
-    public static @Nullable IPerk getPerk(ResourceLocation perkID) {
+    public static @Nullable IPerk getPerk(Identifier perkID) {
         return PerkRegistry.get(perkID);
     }
 
-    public static ResourceLocation registerPerkTree(PerkTree perkTree) {
+    public static Identifier registerPerkTree(PerkTree perkTree) {
         PerkTreeRegistry.put(perkTree.getID(), perkTree);
         return perkTree.getID();
     }
 
-    public static @Nullable PerkTree getPerkTree(ResourceLocation perkTreeID) {
+    public static @Nullable PerkTree getPerkTree(Identifier perkTreeID) {
         return PerkTreeRegistry.get(perkTreeID);
     }
 
-    public static void registerPerkIcon(ResourceLocation perkID, ResourceLocation iconID) {
+    public static void registerPerkIcon(Identifier perkID, Identifier iconID) {
         PerkIconRegistry.put(perkID, iconID);
     }
 
-    public static @Nullable ResourceLocation getPerkIcon(ResourceLocation perkID) {
+    public static @Nullable Identifier getPerkIcon(Identifier perkID) {
         return PerkIconRegistry.get(perkID);
     }
 }

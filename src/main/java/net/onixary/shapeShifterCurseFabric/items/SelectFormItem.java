@@ -23,11 +23,11 @@ public class SelectFormItem extends Item {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
-        if (!world.isClientSide) {
+    public @NotNull InteractionResult use(Level world, Player user, InteractionHand hand) {
+        if (!world.isClientSide()) {
             ModPacketsS2CServer.OpenFormSelectMenu((ServerPlayer) user, user);
         }
-        return super.use(level, player, hand);
+        return super.use(world, user, hand);
     }
 
     @Override

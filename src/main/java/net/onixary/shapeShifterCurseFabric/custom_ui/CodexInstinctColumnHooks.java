@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,6 +38,6 @@ public final class CodexInstinctColumnHooks {
     }
 
     /** 贴图及其原始像素尺寸（用于保持宽高比）。 */
-    public record BottomTexture(ResourceLocation id, int imageWidth, int imageHeight) {
+    public record BottomTexture(Identifier id, int imageWidth, int imageHeight) {
     }
 }

@@ -47,7 +47,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     public float instinctRate = 0.0f;
     public HashMap<Identifier, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
 
-    public HashMap<ResourceLocation, List<ResourceLocation>> formPerkMap = new HashMap<>();
+    public HashMap<Identifier, List<Identifier>> formPerkMap = new HashMap<>();
 
     // 临时变量
     public Player player = null;
@@ -178,14 +178,20 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         }
         if (tag.contains("perks")) {
             formPerkMap.clear();
-            CompoundTag perks = tag.getCompound("perks");
-            for (String key : perks.getAllKeys()) {
-                ResourceLocation treeID = ResourceLocation.tryParse(key);
+            // 1.21.11 的 CompoundTag：getCompound 返回 Optional（有 getCompoundOrEmpty）、
+            // getAllKeys → keySet、getList(String, byte) → getList(String)/getListOrEmpty(String)、
+            // Tag.getAsString 没了（改判 StringTag 后取 value()）。写法对齐上面 instinctEffects 那段。
+            CompoundTag perks = tag.getCompoundOrEmpty("perks");
+            for (String key : perks.keySet()) {
+                Identifier treeID = Identifier.tryParse(key);
                 if (treeID != null) {
-                    List<ResourceLocation> perkList = new ArrayList<>();
-                    ListTag perkListNBT = perks.getList(key, Tag.TAG_STRING);
+                    List<Identifier> perkList = new ArrayList<>();
+                    ListTag perkListNBT = perks.getListOrEmpty(key);
                     for (Tag element : perkListNBT) {
-                        ResourceLocation perkID = ResourceLocation.tryParse(element.getAsString());
+                        if (!(element instanceof StringTag stringTag)) {
+                            continue;
+                        }
+                        Identifier perkID = Identifier.tryParse(stringTag.value());
                         if (perkID != null && !perkList.contains(perkID)) {
                             perkList.add(perkID);
                         }
@@ -234,9 +240,9 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             effects.put(entry.getKey().toString(), effect);
         }
         CompoundTag perks = new CompoundTag();
-        for (Map.Entry<ResourceLocation, List<ResourceLocation>> perkEntry : formPerkMap.entrySet()) {
+        for (Map.Entry<Identifier, List<Identifier>> perkEntry : formPerkMap.entrySet()) {
             ListTag perkTree = new ListTag();
-            for (ResourceLocation perkID : perkEntry.getValue()) {
+            for (Identifier perkID : perkEntry.getValue()) {
                 perkTree.add(StringTag.valueOf(perkID.toString()));
             }
             if (perkTree.isEmpty()) {

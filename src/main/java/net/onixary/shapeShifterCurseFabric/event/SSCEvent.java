@@ -42,7 +42,7 @@ public class SSCEvent {
 
     @FunctionalInterface
     public static interface BeforeApplyRecipe {
-        void beforeApplyRecipe(BiConsumer<@Nullable ResourceLocation, @NotNull Recipe<?>> register);
+        void beforeApplyRecipe(BiConsumer<@Nullable Identifier, @NotNull Recipe<?>> register);
     }
 
     public static final Event<FormChange> FORM_CHANGE_START = EventFactory.createArrayBacked(FormChange.class, callbacks -> (player, oldForm, newForm) -> {

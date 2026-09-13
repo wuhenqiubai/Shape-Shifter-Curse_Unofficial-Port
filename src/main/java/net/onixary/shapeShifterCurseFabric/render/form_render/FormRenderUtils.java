@@ -36,8 +36,8 @@ public class FormRenderUtils {
         registerCondition(ShapeShifterCurseFabric.identifier("is_sprinting"), Entity::isSprinting);
     }
 
-    public static void registerCondition(Identifier ResourceLocation, Predicate<Player> condition) {
-        conditionRegistry.put(ResourceLocation, condition);
+    public static void registerCondition(Identifier Identifier, Predicate<Player> condition) {
+        conditionRegistry.put(Identifier, condition);
     }
 
     public static boolean isRenderingInWorld = false;
@@ -180,7 +180,7 @@ public class FormRenderUtils {
 			        return system;
 		        }
 	        } catch (Exception e) {
-		        ShapeShifterCurseFabric.LOGGER.warn("Failed to create or configure animation system for ResourceLocation: {}", id, e);
+		        ShapeShifterCurseFabric.LOGGER.warn("Failed to create or configure animation system for Identifier: {}", id, e);
 	        }
         }
         return null;
@@ -278,7 +278,7 @@ public class FormRenderUtils {
             // IForm playerFormBase = FormUtils.getPlayerForm(player);
             // if (playerFormBase instanceof DynamicForm pfd) {
             //     List<FormRenderer> formRenderers = new ArrayList<>();
-            //     Pair<ResourceLocation, ResourceLocation> currentLayer = pfd.getCurrentRenderLayer();
+            //     Pair<Identifier, Identifier> currentLayer = pfd.getCurrentRenderLayer();
             //     if (currentLayer != null) {
             //         FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getLeft(), currentLayer.getRight());
             //         if (formRenderer == null) {

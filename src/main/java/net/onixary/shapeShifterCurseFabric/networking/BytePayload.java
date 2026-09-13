@@ -66,12 +66,12 @@ public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements
     }
 
     /** 供自检读取：本端已注册的 C2S 包 id（防御性副本，见 NetworkRegistrationSelfCheck）。 */
-    public static java.util.Set<ResourceLocation> registeredC2S() {
+    public static java.util.Set<Identifier> registeredC2S() {
         return java.util.Set.copyOf(REGISTERED_C2S);
     }
 
     /** 供自检读取：本端已注册的 S2C 包 id（防御性副本，见 NetworkRegistrationSelfCheck）。 */
-    public static java.util.Set<ResourceLocation> registeredS2C() {
+    public static java.util.Set<Identifier> registeredS2C() {
         return java.util.Set.copyOf(REGISTERED_S2C);
     }
 

@@ -9,8 +9,8 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.resources.Identifier;
-import org.jspecify.annotations.NonNull;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -28,6 +28,11 @@ public class TSpiderEntityRenderer extends MobRenderer<TransformativeSpiderEntit
 	}
 
 	public @NotNull Identifier getTextureLocation(TransformativeSpiderEntity ocelotEntity) {
+		return TEXTURE;
+	}
+
+	@Override
+	public Identifier getTextureLocation(LivingEntityRenderState livingEntityRenderState) {
 		return TEXTURE;
 	}
 

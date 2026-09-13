@@ -6,7 +6,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.function.BiConsumer;
 
 public class ManaHandler {
-    // 由于在Server端上没有ClientPlayerEntity 所以通一使用PlayerEntity
+    // 由于在Server端上没有LocalPlayer 所以统一使用Player
+    // （1.21.11 起 Entity 不再实现 CommandSource，sendSystemMessage 只剩 ServerPlayer 有；
+    //   服务端回调里需要发消息时由调用方自行强转，见 ManaRegistries）
     private @NotNull BiConsumer<ManaComponent, Player> onClientInit;
     private @NotNull BiConsumer<ManaComponent, Player> onServerInit;
     private @NotNull BiConsumer<ManaComponent, Player> onClientManaTick;

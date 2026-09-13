@@ -18,6 +18,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permission;
 import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomWaterBreathingPower;
@@ -31,9 +34,9 @@ import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinCompone
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
+import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.DebuggerUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
@@ -244,7 +247,7 @@ public class ShapeShifterCurseCommand {
                                 )
                         )
                         // 【临时诊断】axolotl3 氧气血量排查用，定位后可删
-                        .then(literal("debug_attrs").requires(cs -> cs.hasPermission(2))
+                        .then(literal("debug_attrs").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .executes(ShapeShifterCurseCommand::debugAttrs)
                                 )

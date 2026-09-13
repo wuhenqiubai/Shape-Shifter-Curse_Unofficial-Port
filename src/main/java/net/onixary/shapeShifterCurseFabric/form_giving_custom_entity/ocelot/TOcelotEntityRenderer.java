@@ -6,9 +6,11 @@ import net.minecraft.client.model.animal.feline.OcelotModel;
 import net.minecraft.client.model.geom.ModelLayers;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.animal.Ocelot;
+import net.minecraft.client.renderer.entity.state.FelineRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.animal.feline.Ocelot;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -21,7 +23,12 @@ public class TOcelotEntityRenderer extends MobRenderer<Ocelot, FelineRenderState
 	}
 
 	@Override
-    public @NotNull ResourceLocation getTextureLocation(Ocelot ocelotEntity) {
+	public FelineRenderState createRenderState() {
+		return new FelineRenderState();
+	}
+
+	@Override
+    public @NotNull Identifier getTextureLocation(@NonNull FelineRenderState livingEntityRenderState) {
 		return TEXTURE;
 	}
 }

@@ -1,44 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.items.tools;
 
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.Tier;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.block.Block;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.item.ToolMaterial;
+import net.onixary.shapeShifterCurseFabric.util.ModTags;
 
-public class BottledSnowfallToolMaterial implements Tier {
-    public static final BottledSnowfallToolMaterial INSTANCE = new BottledSnowfallToolMaterial();
-
-    @Override
-    public int getUses() {
-        return 300;
-    }
-
-    @Override
-    public float getSpeed() {
-        return 1;
-    }
-
-    @Override
-    public float getAttackDamageBonus() {
-        return 0;
-    }
-
-    @Override
-    public @NotNull TagKey<Block> getIncorrectBlocksForDrops() {
-        return BlockTags.INCORRECT_FOR_WOODEN_TOOL;
-    }
-
-    @Override
-    public int getEnchantmentValue() {
-        return 0;
-    }
-
-    @Override
-    public @NotNull Ingredient getRepairIngredient() {
-        return Ingredient.of(new ItemLike[]{Items.POWDER_SNOW_BUCKET});
-    }
+public class BottledSnowfallToolMaterial {
+    // 顺序: incorrectBlocksForDrops / durability / speed / attackDamageBonus / enchantmentValue / repairItems
+    // 修复材料沿用 1.21.1 的 Items.POWDER_SNOW_BUCKET —— 1.21.11 的 ToolMaterial 只收 TagKey<Item>，
+    // 故落在 mod 自带的 shape-shifter-curse:bottled_snowfall_tool_materials 上（内容仍是雪花桶）。
+    public static final ToolMaterial INSTANCE = new ToolMaterial(
+        BlockTags.INCORRECT_FOR_WOODEN_TOOL,
+        300,
+        1f,
+        0f,
+        0,
+        ModTags.BOTTLED_SNOWFALL_TOOL_MATERIALS
+    );
 }

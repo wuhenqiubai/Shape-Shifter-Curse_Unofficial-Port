@@ -16,7 +16,6 @@ import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -26,17 +25,17 @@ public class BookOfShapeShifter extends Item {
     }
 
     @Override
-    public @NotNull InteractionResultHolder<ItemStack> use(Level world, Player user, InteractionHand hand) {
+    public InteractionResult use(Level world, Player user, InteractionHand hand) {
         IForm currentForm = FormUtils.getPlayerForm(user);
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             // 客户端逻辑：仅处理打开界面
             if (currentForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE))
-                ShapeShifterCurseFabricClient.openStartBookScreen(player);
-            else ShapeShifterCurseFabricClient.openBookScreen(player);
+                ShapeShifterCurseFabricClient.openStartBookScreen(user);
+            else ShapeShifterCurseFabricClient.openBookScreen(user);
         } else {
             // 服务端逻辑：触发成就
             if (!currentForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {
-                if (player instanceof ServerPlayer serverPlayer) {
+                if (user instanceof ServerPlayer serverPlayer) {
                     ShapeShifterCurseFabric.ON_OPEN_BOOK_OF_SHAPE_SHIFTER.trigger(serverPlayer);
                 }
             }

@@ -2,12 +2,13 @@ package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.MultiLineLabel;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.NonNull;
 
@@ -192,25 +193,28 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
                 context.blit(RenderPipelines.GUI_TEXTURED, IconTexID, i + realWidth - IconSize, j + boxHeight - IconSize, 0, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize, IconSize * 2, -1);
             }
         }
-        MultiLineLabel multilineText = (MultiLineLabel)this.cache.getValue(this.getFreshCacheKey());
-        Objects.requireNonNull(this.getFont());
-        // 文字行距/居中用未缩放值，缩放由 draw* 方法内的 GUI pose 完成
+        Font font = Objects.requireNonNull(this.getFont());
+        // 文字行距/居中用未缩放值，缩放由下面的 GUI pose 完成
         int k = 9;
         int l = this.getColor();
+        List<FormattedCharSequence> lines = font.split(this.getMessage(), this.getTextWidth());
         // 这API真好用 比我硬算剔除好写不止一点
         context.enableScissor(i, j, i + this.getWidth(), j + this.boxHeight);
-        if (this.centered) {
-            multilineText.renderCentered(context, i + (this.MaxWidth + this.modMaxWidth) / 2, j - scroll, k, l);
-        } else if (this.shadow) {
-            this.drawWithShadow(context, this.currentTexts, i, j, k, l);
-        } else {
-            if(this.shadow){
-                this.drawWithShadow(context, this.currentTexts, i, j, k, l);
-            }
-            else{
-                this.drawWithOutShadow(context, this.currentTexts, i, j, k, l);
-            }
+        // 1.21.11: MultiLineLabel 只剩 visitLines(...)，renderCentered/renderLeftAligned 已删除；
+        // 且 AbstractStringWidget 不再提供 shadow 开关，文字渲染走 GuiTextRenderState（延迟提交）、
+        // 字形缩放只能由保存的 2D pose 决定。故这里自己按行画：pose 缩放 Scale 倍 + scroll 走设备像素。
+        Matrix3x2fStack pose = context.pose();
+        pose.pushMatrix();
+        pose.translate(i, j - this.scroll);
+        pose.scale(this.Scale, this.Scale);
+        pose.translate(-i, -j);
+        int lineY = j;
+        for (FormattedCharSequence line : lines) {
+            int lineX = this.centered ? i + (this.MaxWidth + this.modMaxWidth - font.width(line)) / 2 : i;
+            context.drawString(font, line, lineX, lineY, l, this.shadow);
+            lineY += k;
         }
+        pose.popMatrix();
         context.disableScissor();
     }
 }
