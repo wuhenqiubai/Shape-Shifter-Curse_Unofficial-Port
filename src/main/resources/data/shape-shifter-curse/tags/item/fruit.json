@@ -85,6 +85,14 @@
 		{
 			"id": "farm_and_charm:strawberry",
 			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:tomato",
+			"required": false
+		},
+		{
+			"id": "kaleidoscope_cookery:fruit_platter",
+			"required": false
 		}
 	]
 }
