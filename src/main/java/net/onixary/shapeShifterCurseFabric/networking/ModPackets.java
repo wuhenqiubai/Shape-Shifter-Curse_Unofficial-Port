@@ -68,4 +68,5 @@ public class ModPackets {
     public static final Identifier MELT_AUTH_SUB_KEY = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "melt_auth_sub_key");
 
     public static final Identifier SET_SUPER_USER_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_super_user_level");
+    public static final Identifier ADD_PERK = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "add_perk");
 }

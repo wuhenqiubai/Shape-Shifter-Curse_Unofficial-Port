@@ -139,7 +139,7 @@ public class RegCustomItem {
                 entries.accept(MOONDUST_CRYSTAL_GRIT);
                 entries.accept(WEB_COMPOSTER);
                 entries.accept(DEW_COVERED_COBWEB);
-                entries.accept(ALTER_BLOCK);
+                entries.accept(Altar_BLOCK);
                 entries.acceptAll(buildAllPotions(
                         RegCustomPotions.MOONDUST_POTION,
                         RegCustomPotions.BAT_FORM_POTION,

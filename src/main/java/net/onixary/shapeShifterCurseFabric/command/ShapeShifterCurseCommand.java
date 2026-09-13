@@ -25,10 +25,11 @@ import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomWaterBreathingPower;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
-import net.onixary.shapeShifterCurseFabric.entity.projectile.WebBullet;
 import net.onixary.shapeShifterCurseFabric.mana.RegManaComponent;
 import net.onixary.shapeShifterCurseFabric.minion.RegPlayerMinionComponent;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
+import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
+import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
@@ -45,6 +46,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -594,9 +596,14 @@ public class ShapeShifterCurseCommand {
             return 0;
         }
         try {
-            WebBullet webBullet = new WebBullet(player, 1);
-            webBullet.shootFromRotation(player, player.getXRot(), player.getYRot(), 0.0f, 2.25f, 0.5f);
-            player.level().addFreshEntity(webBullet);
+            List<Identifier> PerkTrees = new ArrayList<>(RegPerks.PerkTreeRegistry.keySet());
+            Identifier nowPerkTree = PerkUtils.getPlayerNowPerkTreeID(player);
+            int index = PerkTrees.indexOf(nowPerkTree);
+            if (index == -1) {
+                index = 0;
+            }
+            index = (index + 1) % PerkTrees.size();
+            PerkUtils.setPlayerNowPerkTreeID(player, PerkTrees.get(index));
         } catch (Exception e) {
             ShapeShifterCurseFabric.LOGGER.error("Error Dev Command", e);
             return 0;

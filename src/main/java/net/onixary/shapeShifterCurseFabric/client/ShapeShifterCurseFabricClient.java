@@ -21,6 +21,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
+import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpdateScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
@@ -36,6 +37,7 @@ import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntityRen
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
+import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
@@ -91,6 +93,8 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static KeyMapping useActiveSkill4PowerKeybind;
 	public static KeyMapping useActiveSkill5PowerKeybind;
 	public static KeyMapping useActiveSkill6PowerKeybind;
+
+	public static KeyMapping openTestUIKeybind;
 
 	public static boolean isBlockingClipAtLedge = false;
 
@@ -293,8 +297,13 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
+		// 合并 1.21.1：取新增的 openTestUIKeybind，但分类参数用 1.21.11 的 SSC_CATEGORY
+		// （1.21.11 起 KeyMapping 的最后一个参数是 KeyMapping.Category 而不是 "category.xxx" 字符串）
 		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		// 这个是开测试UI的 开发什么UI就绑哪个UI 发布时记得注释掉
+		openTestUIKeybind = new KeyMapping("key.shape-shifter-curse.open_test_ui", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_1", useActiveSkill1PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_2", useActiveSkill2PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_3", useActiveSkill3PowerKeybind);
@@ -307,6 +316,8 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		KeyBindingHelper.registerKeyBinding(useActiveSkill4PowerKeybind);
 		KeyBindingHelper.registerKeyBinding(useActiveSkill5PowerKeybind);
 		KeyBindingHelper.registerKeyBinding(useActiveSkill6PowerKeybind);
+
+		KeyBindingHelper.registerKeyBinding(openTestUIKeybind);
 
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (client.player == null) {
@@ -322,6 +333,10 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 					isBlockingClipAtLedge = false;
 					client.player.displayClientMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.on"), true);
 				}
+			}
+			if (openTestUIKeybind.isDown()) {
+				FormUpdateScreen screen = new FormUpdateScreen(Component.literal(""), false, PerkUtils.getPlayerNowPerkTree(client.player));
+				client.setScreen(screen);
 			}
 		});
 

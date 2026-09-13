@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.InitialFormUtils;
@@ -47,6 +48,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     public float instinctRate = 0.0f;
     public HashMap<Identifier, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
 
+    // 1.21.1 侧新增：当前所在的 Perk 树
+    public Identifier nowPerkTree = RegPerks.EMPTY_PERK_TREE;
     public HashMap<Identifier, List<Identifier>> formPerkMap = new HashMap<>();
 
     // 临时变量
@@ -176,6 +179,10 @@ public class PlayerFormComponent implements AutoSyncedComponent {
                 instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompoundOrEmpty(key)));
             }
         }
+        // 1.21.1 侧新增（1.21.11 侧原先没有）：当前 Perk 树
+        if (tag.contains("now_perk_tree")) {
+            nowPerkTree = Identifier.tryParse(tag.getStringOr("now_perk_tree", ""));
+        }
         if (tag.contains("perks")) {
             formPerkMap.clear();
             // 1.21.11 的 CompoundTag：getCompound 返回 Optional（有 getCompoundOrEmpty）、
@@ -252,6 +259,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         }
         tag.put("perks", perks);
         tag.put("instinctEffects", effects);
+        // 1.21.1 侧新增（1.21.11 侧原先没有）：当前 Perk 树
+        tag.putString("now_perk_tree", nowPerkTree.toString());
     }
 
     public void clear() {

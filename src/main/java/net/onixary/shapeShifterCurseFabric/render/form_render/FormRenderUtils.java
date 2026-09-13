@@ -306,8 +306,8 @@ public class FormRenderUtils {
         HashMap<OriginLayer, Origin> OriginData = poc.getOrigins();
         List<FormRenderer> formRenderers = new ArrayList<>();
         for (Map.Entry<OriginLayer, Origin> entry : OriginData.entrySet()) {
-            Identifier layer = entry.getKey().getResourceLocation();
-            Identifier form = entry.getValue().getResourceLocation();
+            Identifier layer = entry.getKey().getIdentifier();
+            Identifier form = entry.getValue().getIdentifier();
             FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layer, form);
             if (formRenderer != null) {
                 formRenderers.add(formRenderer);

@@ -1,4 +1,4 @@
-package net.onixary.shapeShifterCurseFabric.recipes.alter;
+package net.onixary.shapeShifterCurseFabric.recipes.altar;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -7,11 +7,13 @@ import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -20,22 +22,26 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
+import java.util.List;
 import java.util.Optional;
 
-public class AlterShapedRecipe extends AlterRecipe {
-    public final ShapedRecipePattern pattern;
+// 注：merge 时该文件被误解决（丢了 catalyst/fuelCostPerTick/output，拼成 1.21.11 骨架+1.21.1 网络残骸）。
+// 这里按 1.21.1 语义整体复原，并用 1.21.11 接口（PlacementInfo/recipeBookCategory/StackedItemContents/Ingredient.CODEC）。
+public class AltarShapelessRecipe extends AltarRecipe {
     public final ItemStack output;
+    public final List<Ingredient> input;
     public final @Nullable Ingredient catalyst;
     public final int recipeTime;
     public final int fuelCostPerTick;
-    public final @Nullable Identifier requireAdvancement;
     private @Nullable PlacementInfo placementInfo;
 
-    public AlterShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
-        this.pattern = pattern;
+    public final @Nullable Identifier requireAdvancement;
+
+    public AltarShapelessRecipe(ItemStack output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.output = output;
-        this.catalyst = catalyst;
+        this.input = input;
         this.recipeTime = recipeTime;
+        this.catalyst = catalyst;
         this.fuelCostPerTick = fuelCostPerTick;
         this.requireAdvancement = requireAdvancement;
     }
@@ -66,40 +72,19 @@ public class AlterShapedRecipe extends AlterRecipe {
     @Override
     public @NonNull PlacementInfo placementInfo() {
         if (this.placementInfo == null) {
-            this.placementInfo = PlacementInfo.createFromOptionals(this.pattern.ingredients());
+            this.placementInfo = PlacementInfo.create(this.input);
         }
         return this.placementInfo;
     }
 
+    // 1.21.11 Recipe 接口新增；alter 配方无分类概念（json 无 category/group），固定 MISC
     @Override
     public @NonNull RecipeBookCategory recipeBookCategory() {
-        // 该类无 category 字段（1.21.1 版）；alter 配方无分类概念，固定 MISC
         return RecipeBookCategories.CRAFTING_MISC;
     }
 
-    private boolean matchesPattern(RecipeInput inv, int offsetX, int offsetY, boolean flipped) {
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                int k = i - offsetX;
-                int l = j - offsetY;
-                Optional<Ingredient> ingredient = Optional.empty();
-                if (k >= 0 && l >= 0 && k < this.pattern.width() && l < this.pattern.height()) {
-                    if (flipped) {
-                        ingredient = this.pattern.ingredients().get(this.pattern.width() - k - 1 + l * this.pattern.width());
-                    } else {
-                        ingredient = this.pattern.ingredients().get(k + l * this.pattern.width());
-                    }
-                }
-                if (!Ingredient.testOptionalIngredient(ingredient, inv.getItem(i + j * 3))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     @Override
-    public boolean matches(@NonNull RecipeInput recipeInput, @NonNull Level world) {
+    public boolean matches(@NonNull RecipeInput recipeInput, @NonNull Level level) {
         if (this.catalyst != null) {
             ItemStack itemStack = recipeInput.getItem(9);
             if (!this.catalyst.test(itemStack)) {
@@ -107,62 +92,62 @@ public class AlterShapedRecipe extends AlterRecipe {
             }
         }
 
-        for (int i = 0; i <= 3 - this.pattern.width(); ++i) {
-            for (int j = 0; j <= 3 - this.pattern.height(); ++j) {
-                if (this.matchesPattern(recipeInput, i, j, true)) {
-                    return true;
-                }
-                if (this.matchesPattern(recipeInput, i, j, false)) {
-                    return true;
-                }
+        StackedItemContents contents = new StackedItemContents();
+        int i = 0;
+        for (int j = 0; j < 9; ++j) {
+            ItemStack itemStack = recipeInput.getItem(j);
+            if (!itemStack.isEmpty()) {
+                ++i;
+                contents.accountStack(itemStack, 1);
             }
         }
-        return false;
+        return i == this.input.size() && contents.canCraft(this, null);
     }
 
+    // 1.21.1 修复点：shapeless 必须返回 fuelCostPerTick，否则 fuel_cost 配置不生效
     @Override
     public int fuelUsage() {
         return fuelCostPerTick;
     }
 
     @Override
-    public @NotNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
+    public @NonNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
         return this.output.copy();
     }
 
     @Override
     public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
-        return RecipeSerializerRegister.ALTER_SHAPED_RECIPE;
+        return RecipeSerializerRegister.Altar_SHAPELESS_RECIPE;
     }
 
-    public static class Serializer implements RecipeSerializer<AlterShapedRecipe> {
-        private static final MapCodec<AlterShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
+    public static class Serializer implements RecipeSerializer<AltarShapelessRecipe> {
+        private static final MapCodec<AltarShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
-                ShapedRecipePattern.MAP_CODEC.forGetter(r -> r.pattern),
                 ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
+                Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter(r -> r.input),
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
                 Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
-            ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement) ->
-                new AlterShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
+            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement) ->
+                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, AlterShapedRecipe> STREAM_CODEC = StreamCodec.of(
+        private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork, Serializer::fromNetwork
         );
 
         @Override
-        public @NotNull MapCodec<AlterShapedRecipe> codec() {
+        public @NotNull MapCodec<AltarShapelessRecipe> codec() {
             return CODEC;
         }
 
         @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, AlterShapedRecipe> streamCodec() {
+        public @NotNull StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> streamCodec() {
             return STREAM_CODEC;
         }
 
-        private static AlterShapedRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
+        private static AltarShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             Ingredient catalyst = null;
             if (buf.readBoolean()) {
                 catalyst = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
@@ -171,14 +156,14 @@ public class AlterShapedRecipe extends AlterRecipe {
             if (buf.readBoolean()) {
                 requireAdvancement = Identifier.STREAM_CODEC.decode(buf);
             }
-            ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
+            List<Ingredient> list = Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf);
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            return new AlterShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement);
+            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement);
         }
 
-        private static void toNetwork(RegistryFriendlyByteBuf buf, AlterShapedRecipe r) {
+        private static void toNetwork(RegistryFriendlyByteBuf buf, AltarShapelessRecipe r) {
             if (r.catalyst != null) {
                 buf.writeBoolean(true);
                 Ingredient.CONTENTS_STREAM_CODEC.encode(buf, r.catalyst);
@@ -191,7 +176,7 @@ public class AlterShapedRecipe extends AlterRecipe {
             } else {
                 buf.writeBoolean(false);
             }
-            ShapedRecipePattern.STREAM_CODEC.encode(buf, r.pattern);
+            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, r.input);
             ItemStack.STREAM_CODEC.encode(buf, r.output);
             buf.writeVarInt(r.recipeTime);
             buf.writeVarInt(r.fuelCostPerTick);

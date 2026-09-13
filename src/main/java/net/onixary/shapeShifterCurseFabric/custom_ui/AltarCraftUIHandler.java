@@ -12,29 +12,29 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
-import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
-import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.AlterOutputSlot;
-import net.onixary.shapeShifterCurseFabric.recipes.alter.AlterRecipe;
+import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
+import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.AltarOutputSlot;
+import net.onixary.shapeShifterCurseFabric.recipes.altar.AltarRecipe;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class AlterCraftUIHandler extends RecipeBookMenu {
+public class AltarCraftUIHandler extends RecipeBookMenu {
     public final Inventory playerInventory;
-    public final Container alterBlockEntity;
+    public final Container altarBlockEntity;
     public final ContainerLevelAccess context;
     public final Player player;
     public final Level world;
     public final ContainerData propertyDelegate;
 
-    public static AlterCraftUIHandler createMenu(int i, Inventory inventory) {
-        return new AlterCraftUIHandler(RegMenuType.AlterCraftUI, i, inventory, new SimpleContainer(11), ContainerLevelAccess.NULL, new SimpleContainerData(4));
+    public static AltarCraftUIHandler createMenu(int i, Inventory inventory) {
+        return new AltarCraftUIHandler(RegMenuType.AltarCraftUI, i, inventory, new SimpleContainer(11), ContainerLevelAccess.NULL, new SimpleContainerData(4));
     }
 
-    public AlterCraftUIHandler(MenuType<?> screenHandlerType, int syncId, Inventory playerInventory, Container alterBlockEntity, ContainerLevelAccess context, ContainerData propertyDelegate) {
+    public AltarCraftUIHandler(MenuType<?> screenHandlerType, int syncId, Inventory playerInventory, Container altarBlockEntity, ContainerLevelAccess context, ContainerData propertyDelegate) {
         super(screenHandlerType, syncId);
         this.playerInventory = playerInventory;
-        this.alterBlockEntity = alterBlockEntity;
+        this.altarBlockEntity = altarBlockEntity;
         this.context = context;
         this.player = playerInventory.player;
         this.world = playerInventory.player.level();
@@ -42,12 +42,12 @@ public class AlterCraftUIHandler extends RecipeBookMenu {
 
         for(int i = 0; i < 3; ++i) {
             for(int j = 0; j < 3; ++j) {
-                this.addSlot(new Slot(this.alterBlockEntity, j + i * 3, 30 + j * 18, 17 + i * 18));
+                this.addSlot(new Slot(this.altarBlockEntity, j + i * 3, 30 + j * 18, 17 + i * 18));
             }
         }
 
-        this.addSlot(new Slot(this.alterBlockEntity, 9, 152, 57));
-        this.addSlot(new AlterOutputSlot(this.alterBlockEntity, 10, 124, 35));
+        this.addSlot(new Slot(this.altarBlockEntity, 9, 152, 57));
+        this.addSlot(new AltarOutputSlot(this.altarBlockEntity, 10, 124, 35));
 
         for(int i = 0; i < 3; ++i) {
             for(int j = 0; j < 9; ++j) {
@@ -64,8 +64,8 @@ public class AlterCraftUIHandler extends RecipeBookMenu {
 
     @Override
     public void fillCraftSlotsStackedContents(StackedItemContents finder) {
-        if (this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
-            realAlter.fillStackedContents(finder);
+        if (this.altarBlockEntity instanceof AltarBlockEntity realAltar) {
+            realAltar.fillStackedContents(finder);
         }
     }
 
@@ -79,24 +79,24 @@ public class AlterCraftUIHandler extends RecipeBookMenu {
 
     @Override
     public RecipeBookMenu.PostPlaceAction handlePlacement(boolean bl, boolean bl2, RecipeHolder<?> recipeHolder, ServerLevel serverLevel, Inventory inventory) {
-        RecipeHolder<AlterRecipe> recipeHolder2 = (RecipeHolder<AlterRecipe>) recipeHolder;
+        RecipeHolder<AltarRecipe> recipeHolder2 = (RecipeHolder<AltarRecipe>) recipeHolder;
         List<Slot> inputGrid = this.slots.subList(0, 9);
-        return ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<AlterRecipe>() {
+        return ServerPlaceRecipe.placeRecipe(new ServerPlaceRecipe.CraftingMenuAccess<AltarRecipe>() {
             @Override
             public void fillCraftSlotsStackedContents(StackedItemContents contents) {
-                AlterCraftUIHandler.this.fillCraftSlotsStackedContents(contents);
+                AltarCraftUIHandler.this.fillCraftSlotsStackedContents(contents);
             }
             @Override
             public void clearCraftingContent() {
-                for (int i = 0; i < AlterCraftUIHandler.this.alterBlockEntity.getContainerSize(); ++i) {
+                for (int i = 0; i < AltarCraftUIHandler.this.altarBlockEntity.getContainerSize(); ++i) {
                     if (i == 9) continue;
-                    AlterCraftUIHandler.this.getSlot(i).set(ItemStack.EMPTY);
+                    AltarCraftUIHandler.this.getSlot(i).set(ItemStack.EMPTY);
                 }
             }
             @Override
-            public boolean recipeMatches(RecipeHolder<AlterRecipe> r) {
-                if (AlterCraftUIHandler.this.alterBlockEntity instanceof AlterBlockEntity realAlter) {
-                    return r.value().matches(realAlter.craftInput(), AlterCraftUIHandler.this.world);
+            public boolean recipeMatches(RecipeHolder<AltarRecipe> r) {
+                if (AltarCraftUIHandler.this.altarBlockEntity instanceof AltarBlockEntity realAltar) {
+                    return r.value().matches(realAltar.craftInput(), AltarCraftUIHandler.this.world);
                 }
                 return false;
             }
@@ -127,7 +127,7 @@ public class AlterCraftUIHandler extends RecipeBookMenu {
             }
         }
         else if (slotIndex >= 11 && slotIndex < 47) {
-            if (AlterBlockEntity.canFuel(slotItem)) {
+            if (AltarBlockEntity.canFuel(slotItem)) {
                 if (!this.moveItemStackTo(slotItem, 9, 10, false)) {
                     if (!this.moveItemStackTo(slotItem, 0, 9, false)) {
                         return ItemStack.EMPTY;

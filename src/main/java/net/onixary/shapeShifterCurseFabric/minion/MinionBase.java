@@ -28,7 +28,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
             iPlayerEntityMinion.shape_shifter_curse$addMinion(this);
         }
         else {
-            ShapeShifterCurseFabric.LOGGER.error("PlayerEntity is not IPlayerEntityMinion, It Shouldn't Happen!");
+            ShapeShifterCurseFabric.LOGGER.error("Player is not IPlayerEntityMinion, It Shouldn't Happen!");
             this.setHealth(0.0f);   // 自动死亡
         }
     }

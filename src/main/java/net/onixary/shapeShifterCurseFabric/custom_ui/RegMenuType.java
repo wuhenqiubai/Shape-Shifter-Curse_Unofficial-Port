@@ -11,8 +11,9 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 // CV高手忘了怎么写了 从我很久以前的Mod CV的 自己借鉴自己属于是
 public class RegMenuType {
 
-    public static Identifier ALTER_CRAFT_UI_ID = ShapeShifterCurseFabric.identifier("alter_craft_ui");
-    public static MenuType<AlterCraftUIHandler> AlterCraftUI = register(ALTER_CRAFT_UI_ID, new MenuType<>(AlterCraftUIHandler::createMenu, FeatureFlags.VANILLA_SET));
+    // 合并 1.21.1：取 altar 改名，保留 1.21.11 的 Identifier
+    public static Identifier Altar_CRAFT_UI_ID = ShapeShifterCurseFabric.identifier("altar_craft_ui");
+    public static MenuType<AltarCraftUIHandler> AltarCraftUI = register(Altar_CRAFT_UI_ID, new MenuType<>(AltarCraftUIHandler::createMenu, FeatureFlags.VANILLA_SET));
     public static <T extends AbstractContainerMenu> MenuType<T> register(Identifier id, MenuType<T> factory) {
         Registry.register(BuiltInRegistries.MENU, id, factory);
         return factory;

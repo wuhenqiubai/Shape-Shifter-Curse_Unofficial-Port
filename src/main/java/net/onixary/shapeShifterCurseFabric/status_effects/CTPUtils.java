@@ -19,7 +19,7 @@ public class CTPUtils {
 
     public static IForm getTransformativePotionForm(Player player) {
         if (player == null) {
-            ShapeShifterCurseFabric.LOGGER.error("CustomTransformativeStatue PlayerEntity is null");
+            ShapeShifterCurseFabric.LOGGER.error("CustomTransformativeStatue Player is null");
             return RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
         }
         PlayerFormComponent playerFormComponent = RegPlayerFormComponent.PLAYER_FORM.get(player);
@@ -32,7 +32,7 @@ public class CTPUtils {
 
     public static void setTransformativePotionForm(Player player, Identifier formID) {
         if (player == null) {
-            ShapeShifterCurseFabric.LOGGER.error("CustomTransformativeStatue PlayerEntity is null");
+            ShapeShifterCurseFabric.LOGGER.error("CustomTransformativeStatue Player is null");
             return;
         }
         PlayerFormComponent playerFormComponent = RegPlayerFormComponent.PLAYER_FORM.get(player);

@@ -642,4 +642,14 @@ public class ModPacketsS2C {
         int level = payload.data().readInt();
         ctx.client().execute(() -> SuperUserUtils.setClientSULevel(level));
     }
+
+    public static void sendAddPerk(Identifier perkTreeID, Identifier perkID) {
+        if (perkTreeID == null || perkID == null) {
+            return;
+        }
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeIdentifier(perkTreeID);
+        buf.writeIdentifier(perkID);
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(ADD_PERK), buf));
+    }
 }

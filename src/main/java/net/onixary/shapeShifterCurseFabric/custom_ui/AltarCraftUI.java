@@ -6,13 +6,14 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
+import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
-public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
+public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
 
-    private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/alter_craft_ui.png");
+    // 合并 1.21.1：取 altar 改名后的贴图路径，保留 1.21.11 的 Identifier
+    private static final Identifier BACKGROUND = Identifier.fromNamespaceAndPath(MOD_ID,"textures/gui/altar_craft_ui.png");
     private static final int WIDTH = 176;
     private static final int HEIGHT = 166;
     private static final int TEXTURE_WIDTH = 200;
@@ -22,7 +23,7 @@ public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
 
     // 90,60,54,10
 
-    public AlterCraftUI(AlterCraftUIHandler handler, Inventory inventory, Component title) {
+    public AltarCraftUI(AltarCraftUIHandler handler, Inventory inventory, Component title) {
         super(handler, inventory, title);
     }
 
@@ -45,7 +46,7 @@ public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
     }
 
     public void drawBar(GuiGraphics context) {
-        AlterCraftUIHandler uiHandler = this.getMenu();
+        AltarCraftUIHandler uiHandler = this.getMenu();
         int maxProgress = uiHandler.getMaxProgress();
         if (maxProgress > 0) {
             // clamp 到 [0,24]：防止 ratio>1 时 ProcessWidth>24，blit 采样 u1=(176+w)/200>1.0 越过纹理右缘 wrap（视觉"反转到左侧"）
@@ -53,7 +54,7 @@ public class AlterCraftUI extends AbstractContainerScreen<AlterCraftUIHandler> {
             ProcessWidth = Math.clamp(ProcessWidth, 0, 24);
             context.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, baseX+89, baseY+35, 176, 0, ProcessWidth, 17, ProcessWidth, 17, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         }
-        int maxFuel = AlterBlockEntity.maxFuel;
+        int maxFuel = AltarBlockEntity.maxFuel;
         if (maxFuel > 0) {
             // clamp 到 [0,54]：防止 FuelWidth 越界(负值/超值)导致 fill 左端脱离 baseX+90(视觉"反转到增长起始点左侧")
             int FuelWidth = (int) (54 * ((float) uiHandler.getNowFuel() / (float) maxFuel));

@@ -5,6 +5,6 @@ import net.minecraft.client.gui.screens.MenuScreens;
 
 public class RegMenuScreen {
     public static void init() {
-        MenuScreens.register(RegMenuType.AlterCraftUI, AlterCraftUI::new);
+        MenuScreens.register(RegMenuType.AltarCraftUI, AltarCraftUI::new);
     }
 }

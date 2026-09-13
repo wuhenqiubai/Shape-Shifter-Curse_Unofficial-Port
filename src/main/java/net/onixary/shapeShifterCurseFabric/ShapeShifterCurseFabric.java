@@ -254,7 +254,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         RecipeSerializerRegister.register();
         RecipeUtils.register();
         // 服务端注册 MenuType（MenuType 需注册到 BuiltInRegistries.MENU，否则 openMenu 生成的 MenuType 无效 → 右键祭坛静默无法交互）
-        RegMenuType.AlterCraftUI.hashCode();
+        RegMenuType.AltarCraftUI.hashCode();
 
         ManaRegistries.register();
         DefaultAccessory.init();

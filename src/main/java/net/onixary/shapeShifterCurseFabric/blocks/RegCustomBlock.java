@@ -18,7 +18,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AlterBlockEntity;
+import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
 
 import java.util.function.Function;
 
@@ -30,15 +30,17 @@ public final class RegCustomBlock {
     public static final Block WEB_COMPOSTER = register("web_composter", WebComposterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion());
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", DewCoveredCobwebBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollision().noOcclusion());
 
-    public static final Block ALTER_BLOCK = register("alter", AlterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
-    public static final BlockEntityType<AlterBlockEntity> ALTER_BLOCK_ENTITY = registerBlockEntity("alter_block_entity", FabricBlockEntityTypeBuilder.create(AlterBlockEntity::new, ALTER_BLOCK).build());
+    // 合并 1.21.1：取「altar」改名（原 alter），但 API 保持 1.21.11 侧
+    // （register 是工厂签名、FabricBlockEntityTypeBuilder、ChunkSectionLayer.CUTOUT）
+    public static final Block Altar_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
+    public static final BlockEntityType<AltarBlockEntity> Altar_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, Altar_BLOCK).build());
 
 
     public static void ClientInit() {
         BlockRenderLayerMap.putBlock(TEMP_WEB_BRIDGE, ChunkSectionLayer.CUTOUT);
         BlockRenderLayerMap.putBlock(WEB_COMPOSTER, ChunkSectionLayer.CUTOUT);
         BlockRenderLayerMap.putBlock(DEW_COVERED_COBWEB, ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(ALTER_BLOCK, ChunkSectionLayer.CUTOUT);
+        BlockRenderLayerMap.putBlock(Altar_BLOCK, ChunkSectionLayer.CUTOUT);
     }
 
     private static Block registerWithOutItem(String path, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties props) {
