@@ -145,23 +145,21 @@
   },
 
   "depends": {
-    "java": ">=21",
+    "java": ">=25",
     "fabricloader": ">=0.14.0",
-    "fabric": ">=0.141.0",
-    "minecraft": "${minecraft_version}",
-    "pehkui": ">=3.8.3+1.21.11",
-    "player_animation_library": ">=1.1.9",
-    "geckolib": ">=5.4.0",
-    "cardinal-components": ">=7.3.2"
+    "fabric": ">=0.146.0",
+    "minecraft": "~26.1",
+    "pehkui": ">=3.8.3",
+    "player_animation_library": ">=1.2.2",
+    "geckolib": ">=5.5.1",
+    "cardinal-components": ">=8.0.0"
   },
   "breaks": {
     "origins": ">0.0.0",
-    "enchantedlib": ">0.3.0",
-    "optifabric": "*",
-    "geckolib": "<4.7.0"
+    "optifabric": "*"
   },
   "recommends": {
     "firstperson": "*",
-    "trinkets": ">=3.11.0"
+    "trinkets": "*"
   }
 }

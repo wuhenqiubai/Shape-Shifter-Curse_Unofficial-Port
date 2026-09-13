@@ -1,4 +1,4 @@
-accessWidener   v1  named
+accessWidener   v1  official
 accessible field net/minecraft/server/level/ServerPlayerGameMode isDestroyingBlock Z
 accessible field net/minecraft/client/gui/components/MultiLineTextWidget centered Z
 accessible field net/minecraft/client/gui/components/MultiLineTextWidget cache Lnet/minecraft/util/SingleKeyCache;
