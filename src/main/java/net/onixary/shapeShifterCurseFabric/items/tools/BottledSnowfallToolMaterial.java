@@ -13,7 +13,7 @@ public class BottledSnowfallToolMaterial {
         300,
         1f,
         0f,
-        0,
+        1,  // enchantmentValue 必须 > 0（1.21.11 的 Enchantable 会校验，0 会崩启动）
         ModTags.BOTTLED_SNOWFALL_TOOL_MATERIALS
     );
 }
