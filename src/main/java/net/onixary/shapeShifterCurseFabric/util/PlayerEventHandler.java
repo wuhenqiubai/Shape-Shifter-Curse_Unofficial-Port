@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerPlayerEvents;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLevelEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerWorldEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -122,7 +122,7 @@ public class PlayerEventHandler {
         });
 
         //load event
-        ServerWorldEvents.LOAD.register((server, world) -> {
+        ServerLevelEvents.LOAD.register((server, world) -> {
             for (ServerPlayer player : world.players()) {
                 IForm form = FormUtils.getPlayerForm(player);
                 if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {

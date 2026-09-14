@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.cache.model.GeoBone;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.model.geom.ModelPart;
@@ -7,7 +8,6 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.cache.model.GeoBone;
 
 @SuppressWarnings("removal")
 public interface IModelAnimationSystem {

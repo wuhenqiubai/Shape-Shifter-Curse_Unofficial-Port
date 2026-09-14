@@ -222,11 +222,15 @@ public class AnimSystem {
 		AvatarAnimManager manager = animatedAvatar.playerAnimLib$getAnimManager();
 		if (manager == null || !manager.isActive()) return defaultValue;
 		PlayerAnimBone bone = new PlayerAnimBone(boneName);
-		bone = manager.get3DTransform(bone);
+		// PAL 1.2.6: get3DTransform(PlayerAnimBone) 返回 void、原地修改传入的骨。
+		// ⚠ 不要写成 get3DTransform(String)——那是另一个重载，它会自己 new 一个骨并返回，
+		//   传入的名字也会被 toString() 成对象地址，结果是一具空骨。
+		manager.get3DTransform(bone);
 		return switch (type) {
-			case POSITION -> new Vec3f(bone.getPosX(), bone.getPosY(), bone.getPosZ());
-			case ROTATION -> new Vec3f(bone.getRotX(), bone.getRotY(), bone.getRotZ());
-			case SCALE -> new Vec3f(bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
+			// 注意三个分量取自不同的 Vector3f 字段：位置->position、旋转->rotation、缩放->scale
+			case POSITION -> new Vec3f(bone.position.x, bone.position.y, bone.position.z);
+			case ROTATION -> new Vec3f(bone.rotation.x, bone.rotation.y, bone.rotation.z);
+			case SCALE -> new Vec3f(bone.scale.x, bone.scale.y, bone.scale.z);
 			default -> defaultValue;
 		};
 	}

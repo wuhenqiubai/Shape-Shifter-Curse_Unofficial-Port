@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.items.armors;
 
+import com.geckolib.constant.dataticket.DataTicket;
+import com.geckolib.renderer.base.GeoRenderState;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
-import software.bernie.geckolib.constant.dataticket.DataTicket;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 import java.util.HashMap;
 import java.util.Map;

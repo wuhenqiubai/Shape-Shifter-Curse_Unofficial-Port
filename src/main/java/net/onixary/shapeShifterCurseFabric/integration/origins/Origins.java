@@ -14,7 +14,7 @@ import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.serializer.ConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
@@ -24,7 +24,6 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsC2S;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginManager;
@@ -34,6 +33,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.registry.*;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.ChoseOriginCriterion;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginsConfigSerializer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginsJsonConfigSerializer;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -93,7 +93,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		Origin.init();
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {});
-		ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((content) -> {
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register((content) -> {
 			//content.add(ModItems.ORB_OF_ORIGIN);
 		});
 

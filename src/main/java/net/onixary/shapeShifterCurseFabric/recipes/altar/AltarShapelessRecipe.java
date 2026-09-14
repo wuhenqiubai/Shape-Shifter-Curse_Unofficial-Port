@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,10 +14,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedItemContents;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
@@ -28,7 +27,7 @@ import java.util.Optional;
 // 注：merge 时该文件被误解决（丢了 catalyst/fuelCostPerTick/output，拼成 1.21.11 骨架+1.21.1 网络残骸）。
 // 这里按 1.21.1 语义整体复原，并用 1.21.11 接口（PlacementInfo/recipeBookCategory/StackedItemContents/Ingredient.CODEC）。
 public class AltarShapelessRecipe extends AltarRecipe {
-    public final ItemStack output;
+    public final ItemStackTemplate output;
     public final List<Ingredient> input;
     public final @Nullable Ingredient catalyst;
     public final int recipeTime;
@@ -37,7 +36,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     public final @Nullable Identifier requireAdvancement;
 
-    public AltarShapelessRecipe(ItemStack output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
+    public AltarShapelessRecipe(ItemStackTemplate output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.output = output;
         this.input = input;
         this.recipeTime = recipeTime;
@@ -111,8 +110,8 @@ public class AltarShapelessRecipe extends AltarRecipe {
     }
 
     @Override
-    public @NonNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
-        return this.output.copy();
+    public @NonNull ItemStack assemble(RecipeInput input) {
+        return this.output.create();
     }
 
     @Override
@@ -120,10 +119,10 @@ public class AltarShapelessRecipe extends AltarRecipe {
         return RecipeSerializerRegister.Altar_SHAPELESS_RECIPE;
     }
 
-    public static class Serializer implements RecipeSerializer<AltarShapelessRecipe> {
-        private static final MapCodec<AltarShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
+    public static class Serializer {
+        public static final MapCodec<AltarShapelessRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
+                ItemStackTemplate.CODEC.fieldOf("result").forGetter(r -> r.output),
                 Ingredient.CODEC.listOf(1, 9).fieldOf("ingredients").forGetter(r -> r.input),
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
@@ -133,19 +132,10 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
+        public static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork, Serializer::fromNetwork
         );
 
-        @Override
-        public @NotNull MapCodec<AltarShapelessRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
 
         private static AltarShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             Ingredient catalyst = null;
@@ -157,7 +147,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 requireAdvancement = Identifier.STREAM_CODEC.decode(buf);
             }
             List<Ingredient> list = Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).decode(buf);
-            ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
+            ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
             return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement);
@@ -177,7 +167,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 buf.writeBoolean(false);
             }
             Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, r.input);
-            ItemStack.STREAM_CODEC.encode(buf, r.output);
+            ItemStackTemplate.STREAM_CODEC.encode(buf, r.output);
             buf.writeVarInt(r.recipeTime);
             buf.writeVarInt(r.fuelCostPerTick);
         }

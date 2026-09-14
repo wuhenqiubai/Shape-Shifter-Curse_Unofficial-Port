@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen.tooltip;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -36,7 +36,7 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
     }
 
     @Override
-    public void renderImage(@NonNull Font textRenderer, int x, int y, int width, int height, GuiGraphics context) {
+    public void extractImage(@NonNull Font textRenderer, int x, int y, int width, int height, GuiGraphicsExtractor context) {
         this.drawBackground(context, x, y);
         for(int column = 0; column < 3; ++column) {
             for(int row = 0; row < 3; ++row) {
@@ -44,15 +44,15 @@ public class CraftingRecipeTooltipComponent implements ClientTooltipComponent {
                 int slotX = x + 8 + column * 18;
                 int slotY = y + 8 + row * 18;
                 ItemStack stack = column >= recipeWidth ? ItemStack.EMPTY : inputs.get(index);
-                context.renderItem(stack, slotX, slotY);
-                context.renderItemDecorations(textRenderer, stack, slotX, slotY);
+                context.item(stack, slotX, slotY);
+                context.itemDecorations(textRenderer, stack, slotX, slotY);
             }
         }
-        context.renderItem(output, x + 101, y + 25);
-        context.renderItemDecorations(textRenderer, output, x + 101, y + 25);
+        context.item(output, x + 101, y + 25);
+        context.itemDecorations(textRenderer, output, x + 101, y + 25);
     }
 
-    public void drawBackground(GuiGraphics context, int x, int y) {
+    public void drawBackground(GuiGraphicsExtractor context, int x, int y) {
         // setColor 在 1.21.11 移除，blit 参数顺序调整为 (x, y, w, h, u, v, texW, texH)
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, 130, 86, 130, 86, 256, 256, -1);
     }

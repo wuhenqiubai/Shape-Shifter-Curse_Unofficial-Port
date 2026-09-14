@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
@@ -470,7 +470,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.parsetScreen = parsetScreen;
     }
 
-    public void renderTextureBackground(GuiGraphics context) {
+    public void renderTextureBackground(GuiGraphicsExtractor context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
         context.blit(RenderPipelines.GUI_TEXTURED, texture, BG_X, BG_Y, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT, -1);
@@ -1031,27 +1031,29 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.updatePanel();
     }
 
-    private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
+    private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
         // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
         // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
         // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在背景框内的位置由 y 参数补偿。
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
     }
 
     private static int timer = 0;
 
-    private void drawExtraPart(GuiGraphics context, int x, int y, int PartX, int PartY, int Width, int Height) {
+    private void drawExtraPart(GuiGraphicsExtractor context, int x, int y, int PartX, int PartY, int Width, int Height) {
         int realX = PartX + EXTRA_PART_START_X;
         int realY = PartY + EXTRA_PART_START_Y;
         context.blit(RenderPipelines.GUI_TEXTURED, texture, x, y, realX, realY, Width, Height, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT, -1);
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
-        this.renderBackground(context, mouseX, mouseY, 1.0f);
+        // 26.1: 背景由框架经 extractBackground 自动调用，不再手动调。
+        // （本类的 extractBackground 是空实现，用于抑制原版 blur/panorama；此前它不构成覆写，
+        //   导致「抑制原版背景」的意图一直没生效 —— 现已修正。）
         this.renderTextureBackground(context);
         if (!isOpenSlider) {
             // 228,27,11,11
@@ -1083,7 +1085,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         if (minecraftClient.player != null) {
             RenderEntity(context, BPosX + 50, BPosY + 100, 30, BPosX + 50 - mouseX, BPosY + 100 - mouseY, minecraftClient.player);
         }
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @Override
@@ -1523,7 +1525,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // 自定义背景纹理完全遮挡，不需要暗色渐变
     }
 }

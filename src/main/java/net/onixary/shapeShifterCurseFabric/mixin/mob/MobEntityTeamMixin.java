@@ -24,10 +24,10 @@ public abstract class MobEntityTeamMixin {
         if (other instanceof Player player) {
             if(self instanceof LivingEntity livingEntity) {
                 // 双重判断 提升其他Mod的兼容性 (没有就加Illager_Tag)
-                if ((livingEntity.getType().is(ModTags.Illager_Tag)) && PowerHolderComponent.hasPower(player, PillagerFriendlyPower.class)) {
+                if ((livingEntity.is(ModTags.Illager_Tag)) && PowerHolderComponent.hasPower(player, PillagerFriendlyPower.class)) {
                     cir.setReturnValue(true);
                 }
-                if ((livingEntity instanceof Witch || livingEntity.getType().is(ModTags.Witch_Tag)) && PowerHolderComponent.hasPower(player, WitchFriendlyPower.class)) {
+                if ((livingEntity instanceof Witch || livingEntity.is(ModTags.Witch_Tag)) && PowerHolderComponent.hasPower(player, WitchFriendlyPower.class)) {
                     cir.setReturnValue(true);
                 }
 

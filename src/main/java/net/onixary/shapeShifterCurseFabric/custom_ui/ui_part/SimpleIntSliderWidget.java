@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -41,7 +41,7 @@ public class SimpleIntSliderWidget extends AbstractSliderButton {
     }
 
     @Override
-    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // RenderSystem.enableBlend()/defaultBlendFunc()/enableDepthTest() 已移除，RenderPipeline 自带渲染状态
         int textureY = this.active ? (this.isHovered() ? 1 : 0) : 2;
         int color = ARGB.white(this.alpha);
@@ -54,8 +54,8 @@ public class SimpleIntSliderWidget extends AbstractSliderButton {
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, sliderX, this.getY(), 0, textureY * 20 + 40,
                 8, this.getHeight(), 8, this.getHeight(), 200, 60, color);
 
-        this.renderScrollingStringOverContents(
-                context.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE),
+        this.extractScrollingStringOverContents(
+                context.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE),
                 this.getMessage(), 2);
     }
 

@@ -48,7 +48,7 @@ public class EatEntityPower extends Power {
         if (foodComponent != null && player.canEat(foodComponent.canAlwaysEat())) {
             player.getFoodData().eat(foodComponent.nutrition(), foodComponent.saturation());
             // 1.21.11 降级：FoodProperties record 不再含 effects 列表（移到 ConsumableListener，无公开 API），无法应用食物附带的药水效果
-            world.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, world.random.nextFloat() * 0.1F + 0.9F);
+            world.playSound((Player)null, player.getX(), player.getY(), player.getZ(), SoundEvents.PLAYER_BURP, SoundSource.PLAYERS, 0.5F, world.getRandom().nextFloat() * 0.1F + 0.9F);
             targetEntity.discard();
             return true;
         }

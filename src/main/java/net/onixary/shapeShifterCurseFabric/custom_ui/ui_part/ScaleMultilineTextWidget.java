@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.network.chat.Component;
 import org.joml.Matrix3x2fStack;
@@ -39,7 +39,7 @@ public class ScaleMultilineTextWidget extends MultiLineTextWidget {
     }
 
     @Override
-    public void renderWidget(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // 1.21.11 文字渲染走 GuiTextRenderState（延迟提交），字形缩放只能由保存的 2D pose 决定：
         // 在 widget 原点处缩放 GUI pose Scale 倍，使 vanilla MultiLineTextWidget 文字真正缩小 Scale 倍显示。
         Matrix3x2fStack pose = context.pose();
@@ -47,7 +47,7 @@ public class ScaleMultilineTextWidget extends MultiLineTextWidget {
         pose.translate(this.getX(), this.getY());
         pose.scale(this.Scale, this.Scale);
         pose.translate(-this.getX(), -this.getY());
-        super.renderWidget(context, mouseX, mouseY, delta);
+        super.extractWidgetRenderState(context, mouseX, mouseY, delta);
         pose.popMatrix();
     }
 }

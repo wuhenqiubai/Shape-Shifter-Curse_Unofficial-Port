@@ -30,7 +30,6 @@ import net.onixary.shapeShifterCurseFabric.minion.IMinion;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
 
 import java.util.UUID;
 
@@ -40,7 +39,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     public AnubisWolfMinionEntity(EntityType<? extends AnubisWolfMinionEntity> entityType, Level world) {
         super(entityType, world);
         this.setPathfindingMalus(PathType.POWDER_SNOW, -1.0F);
-        this.setPathfindingMalus(PathType.DANGER_POWDER_SNOW, -1.0F);
+        this.setPathfindingMalus(PathType.ON_TOP_OF_POWDER_SNOW, -1.0F);
     }
 
     @Override

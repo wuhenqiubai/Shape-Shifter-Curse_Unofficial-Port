@@ -73,7 +73,9 @@ public class SummonMinionWolfNearbyAction {
                 if (!(player.level() instanceof ServerLevel serverWorld)) {
                     return;
                 }
-                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_STEP, player.getSoundSource(), 1.0f, 1.5f);
+                // 26.1: SoundEvents.WOLF_STEP 变成 Holder.Reference<SoundEvent>，
+                // 而 Level 的 BlockPos 重载只收裸 SoundEvent（收 Holder 的是 double 坐标重载），故取 .value()。
+                player.level().playSound(null, player.blockPosition(), SoundEvents.WOLF_STEP.value(), player.getSoundSource(), 1.0f, 1.5f);
                 var packet = new net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket(
                         ParticleTypes.SOUL_FIRE_FLAME, true, false,
                         player.blockPosition().getX() + 0.5, player.blockPosition().getY() + 0.5, player.blockPosition().getZ() + 0.5,

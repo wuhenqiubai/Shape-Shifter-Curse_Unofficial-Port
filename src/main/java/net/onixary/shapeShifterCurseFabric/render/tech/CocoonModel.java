@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.base.GeoRenderState;
 import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 public class CocoonModel extends GeoModel<EmptyAnimatable> {
     @Override

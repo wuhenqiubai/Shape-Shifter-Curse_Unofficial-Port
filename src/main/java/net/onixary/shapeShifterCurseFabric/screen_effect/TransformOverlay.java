@@ -2,8 +2,8 @@ package net.onixary.shapeShifterCurseFabric.screen_effect;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.client.gui.GuiGraphics;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -45,11 +45,20 @@ public final class TransformOverlay {
             return;
         }
         hudRegistered = true;
-        HudRenderCallback.EVENT.register((guiGraphics, deltaTracker) -> this.renderHud(guiGraphics));
+        // 26.1: HudElementRegistry 不再是事件容器（EVENT 字段已移除），改为按 Identifier 注册的 HUD 层注册表。
+        // 回调接口 HudElement.extractRenderState(GuiGraphicsExtractor, DeltaTracker) 是 @FunctionalInterface，
+        // lambda 形状不变（本类 renderHud 本就接收 GuiGraphicsExtractor）。
+        // 用 addLast：不继承任何 render condition，语义最接近旧的 HudRenderCallback（始终渲染）。
+        // 若希望此覆盖层随 F1/hideGui 一起隐藏，改用
+        //   HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, id, cb)
+        // （attach* 会继承锚点层的 render condition）。
+        HudElementRegistry.addLast(
+                Identifier.fromNamespaceAndPath(MOD_ID, "transform_overlay"),
+                (guiGraphics, deltaTracker) -> this.renderHud(guiGraphics));
     }
 
     @Environment(EnvType.CLIENT)
-    private void renderHud(GuiGraphics guiGraphics) {
+    private void renderHud(GuiGraphicsExtractor guiGraphics) {
         if (!enableOverlay) {
             // 1.21.11 恢复黑屏渐变（无 shader，iris 兼容）：退出时每帧衰减至透明后停止，
             // 避免 setEnableOverlay(false) 后黑屏瞬变消失

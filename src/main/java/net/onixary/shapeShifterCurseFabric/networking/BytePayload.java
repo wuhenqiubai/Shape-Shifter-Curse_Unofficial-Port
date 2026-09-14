@@ -54,14 +54,14 @@ public record BytePayload(Type<BytePayload> id, FriendlyByteBuf data) implements
     /** Shorthand: register S2C (idempotent) */
     public static void registerS2C(Identifier identifier) {
         if (REGISTERED_S2C.add(identifier)) {
-            PayloadTypeRegistry.playS2C().register(id(identifier), codecFor(id(identifier)));
+            PayloadTypeRegistry.clientboundPlay().register(id(identifier), codecFor(id(identifier)));
         }
     }
 
     /** Shorthand: register C2S (idempotent) */
     public static void registerC2S(Identifier identifier) {
         if (REGISTERED_C2S.add(identifier)) {
-            PayloadTypeRegistry.playC2S().register(id(identifier), codecFor(id(identifier)));
+            PayloadTypeRegistry.serverboundPlay().register(id(identifier), codecFor(id(identifier)));
         }
     }
 

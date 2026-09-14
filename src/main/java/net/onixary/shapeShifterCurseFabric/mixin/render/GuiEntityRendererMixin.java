@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin.render;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.gui.render.pip.GuiEntityRenderer;
-import net.minecraft.client.gui.render.state.pip.GuiEntityRenderState;
+import net.minecraft.client.renderer.state.gui.pip.GuiEntityRenderState;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * 1.21.11 GUI 玩家模型预览走 Pictures-in-Picture（PIP）：InventoryScreen.renderEntityInInventoryFollowsMouse
+ * 1.21.11 GUI 玩家模型预览走 Pictures-in-Picture（PIP）：InventoryScreen.extractEntityInInventoryFollowsMouse
  * 提交 GuiEntityRenderState，实际渲染延迟到 {@link GuiEntityRenderer#renderToTexture}（内部
  * entityRenderDispatcher.submit 同步执行 LivingEntityRenderer.submit → FormRenderFeature.submit → processAnimation）。
  * 在 renderToTexture 期间置位 ClientUtils.isOpenInventoryScreen，使：

@@ -5,7 +5,7 @@ import io.github.apace100.apoli.ApoliClient;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
@@ -65,7 +65,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static void onRequestAuthFile() {
 		if (requestAuthCount != 0) {
 			if (Minecraft.getInstance().player != null) {
-				Minecraft.getInstance().player.displayClientMessage(Component.translatable("message.shapeShifterCurseFabric.authing", requestAuthCount + 1), false);
+				Minecraft.getInstance().player.sendSystemMessage(Component.translatable("message.shapeShifterCurseFabric.authing", requestAuthCount + 1));
 			}
 		}
 		requestAuthCount++;
@@ -282,7 +282,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);
-		KeyBindingHelper.registerKeyBinding(makeSound);
+		KeyMappingHelper.registerKeyMapping(makeSound);
 
 		// 4个技能按键基本够用了 一般Mod的常用技能一般也是4个 后续如果还要加按键 可以做成轮盘(应该可以虚拟触发按键 反正只用触发Apoli的就行)等压缩按键形式 然后这些按键可以当做快捷触发键使用
 		// 绑定顺序
@@ -310,14 +310,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_4", useActiveSkill4PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_5", useActiveSkill5PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_6", useActiveSkill6PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill1PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill2PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill3PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill4PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill5PowerKeybind);
-		KeyBindingHelper.registerKeyBinding(useActiveSkill6PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill1PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill2PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill3PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill4PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill5PowerKeybind);
+		KeyMappingHelper.registerKeyMapping(useActiveSkill6PowerKeybind);
 
-		KeyBindingHelper.registerKeyBinding(openTestUIKeybind);
+		KeyMappingHelper.registerKeyMapping(openTestUIKeybind);
 
 		ClientTickEvents.END_CLIENT_TICK.register((client) -> {
 			if (client.player == null) {
@@ -326,12 +326,12 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			if (AdditionalPowers.TOGGLE_CLIP_AT_LEDGE.isActive(client.player)) {
 				if (!isBlockingClipAtLedge) {
 					isBlockingClipAtLedge = true;
-					client.player.displayClientMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.off"), true);
+					client.player.sendOverlayMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.off"));
 				}
 			} else {
 				if (isBlockingClipAtLedge) {
 					isBlockingClipAtLedge = false;
-					client.player.displayClientMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.on"), true);
+					client.player.sendOverlayMessage(Component.translatable("message.shape-shifter-curse.clip_at_ledge.on"));
 				}
 			}
 			if (openTestUIKeybind.isDown()) {

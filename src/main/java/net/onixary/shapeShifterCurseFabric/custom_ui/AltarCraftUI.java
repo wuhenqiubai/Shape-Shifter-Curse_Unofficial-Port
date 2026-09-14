@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -29,23 +29,30 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
 
     protected void init() {
         super.init();
-    }
-
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 26.1: 原先在 render() 里每帧算，现在挪到 init()（resize 时框架会重调 init）
         baseX = width / 2 - WIDTH / 2;
         baseY = height / 2 - HEIGHT / 2;
-        this.renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
-        this.renderTooltip(context, mouseX, mouseY);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        // 26.1: Screen#render 已改名为 extractRenderState（原名不再存在，继续写 render 不构成覆写 = 静默死代码）。
+        // 背景由框架经 extractBackground 自动调用、tooltip 由 AbstractContainerScreen#extractRenderState
+        // 自动调用，故原先手动的 renderBackground/renderTooltip 两行一并删除，否则会重复提交。
+        super.extractRenderState(context, mouseX, mouseY, delta);
         this.drawBar(context);
     }
 
     @Override
-    protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float a) {
+        // 26.1: AbstractContainerScreen#renderBg 被删除，改由覆写 Screen#extractBackground 实现。
+        // ⚠ 两处变化：① 可见性必须是 public（Screen 里是 public，旧的 renderBg 是 protected，不能收窄）
+        //            ② 参数顺序变了 —— delta 从第 2 位挪到第 4 位（旧 renderBg(context, delta, mouseX, mouseY)）
+        super.extractBackground(context, mouseX, mouseY, a);
         context.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, baseX, baseY, 0, 0, WIDTH, HEIGHT, WIDTH, HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
     }
 
-    public void drawBar(GuiGraphics context) {
+    public void drawBar(GuiGraphicsExtractor context) {
         AltarCraftUIHandler uiHandler = this.getMenu();
         int maxProgress = uiHandler.getMaxProgress();
         if (maxProgress > 0) {

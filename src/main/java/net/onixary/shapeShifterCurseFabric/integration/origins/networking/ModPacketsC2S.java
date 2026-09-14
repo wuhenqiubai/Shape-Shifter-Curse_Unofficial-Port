@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.networking;
 
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
@@ -162,7 +162,7 @@ public class ModPacketsC2S {
             return;
         }
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeIdentifier(layer.getIdentifier());
         buf.writeIdentifier(origin.getIdentifier());
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.CONFIRM_ORIGIN), buf));

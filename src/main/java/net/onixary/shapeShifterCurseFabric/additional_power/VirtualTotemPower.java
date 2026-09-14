@@ -132,7 +132,7 @@ public class VirtualTotemPower extends CooldownPower {
                 ShapeShifterCurseFabric.identifier("virtual_totem"),
                 new SerializableData()
                         .add("virtual_totem_type", SerializableDataTypes.IDENTIFIER, ShapeShifterCurseFabric.identifier("default"))
-                        .add("totem_stack", SerializableDataTypes.ITEM_STACK, new ItemStack(Items.TOTEM_OF_UNDYING, 1))
+                        .add("totem_stack", SerializableDataTypes.ITEM_STACK)
                         .add("entity_actions", ApoliDataTypes.ENTITY_ACTIONS, null)
                         .add("totem_health", SerializableDataTypes.INT, 1)  // 默认1
                         .add("totem_status_effects", SerializableDataTypes.STATUS_EFFECT_INSTANCES, null)

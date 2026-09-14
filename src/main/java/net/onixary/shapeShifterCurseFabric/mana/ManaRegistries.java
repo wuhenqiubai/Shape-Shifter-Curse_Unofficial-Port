@@ -20,11 +20,11 @@ public class ManaRegistries {
     public static final ManaHandler EMPTY_MANA_HANDLER = new ManaHandler().setImmutable();
     public static final ManaHandler DEBUG_MANA_HANDLER = new ManaHandler()
             // 所有Hook执行时间不保证在同一Tick
-            // 1.21.11 起 Entity 不再实现 CommandSource：sendSystemMessage 只剩 ServerPlayer 有，
-            // 客户端侧（LocalPlayer）要用 displayClientMessage(msg, false) 代替；服务端回调只会
-            // 在 !isClient 时被分派，故此处强转 ServerPlayer 是安全的。
-            .setOnClientManaFull((component, player) -> player.displayClientMessage(Component.literal("[Client] 魔力值已满!").withStyle(ChatFormatting.GREEN), false))
-            .setOnClientManaEmpty((component, player) -> player.displayClientMessage(Component.literal("[Client] 魔力值已空!").withStyle(ChatFormatting.RED), false))
+            // 26.1：sendSystemMessage(Component) 在 Player 基类上（空实现），LocalPlayer / ServerPlayer 各自覆写为
+            // 聊天栏，故客户端回调无需再走 1.21.11 那套 displayClientMessage(msg, false)。
+            // 服务端回调只会 在 !isClient 时被分派，故此处强转 ServerPlayer 仍然安全。
+            .setOnClientManaFull((component, player) -> player.sendSystemMessage(Component.literal("[Client] 魔力值已满!").withStyle(ChatFormatting.GREEN)))
+            .setOnClientManaEmpty((component, player) -> player.sendSystemMessage(Component.literal("[Client] 魔力值已空!").withStyle(ChatFormatting.RED)))
             .setOnServerManaFull((component, player) -> ((ServerPlayer) player).sendSystemMessage(Component.literal("[Server] 魔力值已满!").withStyle(ChatFormatting.GREEN)))
             .setOnServerManaEmpty((component, player) -> ((ServerPlayer) player).sendSystemMessage(Component.literal("[Server] 魔力值已空!").withStyle(ChatFormatting.RED)))
             .setImmutable();

@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.render.tech;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.Power;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -62,7 +62,7 @@ public class ItemStorePowerRender {
         timer++;
     }
 
-    private static void renderSlot(GuiGraphics context, float tickDelta, itemStorePowerRenderInterface power) {
+    private static void renderSlot(GuiGraphicsExtractor context, float tickDelta, itemStorePowerRenderInterface power) {
         Tuple<Integer, Integer> SlotBegin = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.itemStorePowerPosType, ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetX - (NowCol * 20), ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetY - (NowRow * 20));
         int SlotX = power.getSlot() % SlotPerRow;
         int SlotY = power.getSlot() / SlotPerRow;
@@ -84,14 +84,14 @@ public class ItemStorePowerRender {
             context.pose().scale(1.0f / h, (h + 1.0f) / 2.0f);
             context.pose().translate(-(SlotXFinal + 8), -(SlotYFinal + 12));
         }
-        context.renderItem(mc.player, stack, SlotXFinal, SlotYFinal, power.getSlot());
+        context.item(mc.player, stack, SlotXFinal, SlotYFinal, power.getSlot());
         if (g > 0.0f) {
             context.pose().popMatrix();
         }
-        context.renderItemDecorations(mc.font, stack, SlotXFinal, SlotYFinal);
+        context.itemDecorations(mc.font, stack, SlotXFinal, SlotYFinal);
     }
 
-    public static void render(GuiGraphics context, float tickDelta) {
+    public static void render(GuiGraphicsExtractor context, float tickDelta) {
         timerTick();
         if (!mc.options.hideGui) {
             // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态

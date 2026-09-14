@@ -1,5 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.animation.state.BoneSnapshot;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.model.GeoModel;
+import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.GeoRenderState;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -14,11 +19,6 @@ import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
-import software.bernie.geckolib.animation.state.BoneSnapshot;
-import software.bernie.geckolib.cache.model.GeoBone;
-import software.bernie.geckolib.model.GeoModel;
-import software.bernie.geckolib.renderer.base.BoneSnapshots;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 import java.util.*;
 

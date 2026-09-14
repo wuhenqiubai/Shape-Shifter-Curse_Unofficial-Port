@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -153,7 +153,7 @@ public class PatronFormSelectScreen extends Screen {
         super.onClose();
     }
 
-    private void renderTexture(GuiGraphics context) {
+    private void renderTexture(GuiGraphicsExtractor context) {
         // 最小 UI 420x227 翻页按钮 [80,207 20x20] [320,207 20x20] 按钮
         int TexturePosX = width / 2 - 210;
         int TexturePosY = height / 2 - 112;
@@ -162,9 +162,9 @@ public class PatronFormSelectScreen extends Screen {
 
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.renderTexture(context);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @Override

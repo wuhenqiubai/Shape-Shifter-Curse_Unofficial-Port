@@ -5,7 +5,6 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
@@ -13,6 +12,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
@@ -24,14 +24,14 @@ import java.util.Optional;
 
 public class AltarShapedRecipe extends AltarRecipe {
     public final ShapedRecipePattern pattern;
-    public final ItemStack output;
+    public final ItemStackTemplate output;
     public final @Nullable Ingredient catalyst;
     public final int recipeTime;
     public final int fuelCostPerTick;
     public final @Nullable Identifier requireAdvancement;
     private @Nullable PlacementInfo placementInfo;
 
-    public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
+    public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStackTemplate output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.pattern = pattern;
         this.output = output;
         this.catalyst = catalyst;
@@ -126,8 +126,8 @@ public class AltarShapedRecipe extends AltarRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
-        return this.output.copy();
+    public @NotNull ItemStack assemble(RecipeInput input) {
+        return this.output.create();
     }
 
     @Override
@@ -135,11 +135,11 @@ public class AltarShapedRecipe extends AltarRecipe {
         return RecipeSerializerRegister.Altar_SHAPED_RECIPE;
     }
 
-    public static class Serializer implements RecipeSerializer<AltarShapedRecipe> {
-        private static final MapCodec<AltarShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
+    public static class Serializer {
+        public static final MapCodec<AltarShapedRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 ShapedRecipePattern.MAP_CODEC.forGetter(r -> r.pattern),
-                ItemStack.STRICT_CODEC.fieldOf("result").forGetter(r -> r.output),
+                ItemStackTemplate.CODEC.fieldOf("result").forGetter(r -> r.output),
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
@@ -148,19 +148,10 @@ public class AltarShapedRecipe extends AltarRecipe {
                 new AltarShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapedRecipe> STREAM_CODEC = StreamCodec.of(
+        public static final StreamCodec<RegistryFriendlyByteBuf, AltarShapedRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork, Serializer::fromNetwork
         );
 
-        @Override
-        public @NotNull MapCodec<AltarShapedRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, AltarShapedRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
 
         private static AltarShapedRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             Ingredient catalyst = null;
@@ -172,7 +163,7 @@ public class AltarShapedRecipe extends AltarRecipe {
                 requireAdvancement = Identifier.STREAM_CODEC.decode(buf);
             }
             ShapedRecipePattern pattern = ShapedRecipePattern.STREAM_CODEC.decode(buf);
-            ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
+            ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
             return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement);
@@ -192,7 +183,7 @@ public class AltarShapedRecipe extends AltarRecipe {
                 buf.writeBoolean(false);
             }
             ShapedRecipePattern.STREAM_CODEC.encode(buf, r.pattern);
-            ItemStack.STREAM_CODEC.encode(buf, r.output);
+            ItemStackTemplate.STREAM_CODEC.encode(buf, r.output);
             buf.writeVarInt(r.recipeTime);
             buf.writeVarInt(r.fuelCostPerTick);
         }

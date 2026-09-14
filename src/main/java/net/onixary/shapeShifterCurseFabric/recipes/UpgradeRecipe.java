@@ -13,15 +13,25 @@ import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.function.Function;
-import java.util.function.Predicate;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX {
+
+    // 26.1: Recipe#group() 由 default 变抽象，必须实现。SSC 的升级配方不分组，沿用旧 default 的 ""。
+    @Override
+    public String group() {
+        return "";
+    }
+
+    // 26.1: Recipe#showNotification() 同样由 default(true) 变为抽象，沿用旧默认行为。
+    @Override
+    public boolean showNotification() {
+        return true;
+    }
+
     public final Identifier id;
     public final Predicate<ItemStack> template;
     public final Predicate<ItemStack> base;
@@ -74,8 +84,11 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
         return this.template.test(input.template()) && this.base.test(input.base()) && this.addition.test(input.addition());
     }
 
+    // 26.1: Recipe#assemble 收敛为单参 assemble(T input)（旧的 assemble(T, HolderLookup.Provider) 已移除）；
+    // 且形参类型须是接口的 T —— SmithingRecipe 的 T 是 SmithingRecipeInput（record，有 template/base/addition），
+    // 用裸 RecipeInput 会同时触发「找不到 base()」和「名称冲突」两个错误。
     @Override
-    public @NotNull ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider lookup) {
+    public @NotNull ItemStack assemble(SmithingRecipeInput input) {
         ItemStack itemStack = input.base();
         if (this.base.test(itemStack)) {
             ItemStack outputStack = itemStack.copy();

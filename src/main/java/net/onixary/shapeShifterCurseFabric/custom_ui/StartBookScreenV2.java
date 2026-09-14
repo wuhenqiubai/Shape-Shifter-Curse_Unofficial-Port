@@ -3,11 +3,11 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -73,21 +73,21 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
         ).size(ButtonSizeX, ButtonSizeY).pos(ButtonPosX, ButtonPosY).build());
     }
 
-    private void RenderBook(GuiGraphics context) {
+    private void RenderBook(GuiGraphicsExtractor context) {
         int BookPosX = width / 2 - BookSizeX / 2;
         int BookPosY = height / 2 - BookSizeY / 2;
         context.blit(RenderPipelines.GUI_TEXTURED, StartBook_TexID, BookPosX, BookPosY, 0, 0, BookSizeX, BookSizeY, BookSizeX, BookSizeY, BookSizeX, BookSizeY, -1);
     }
 
     @Override
-    public void renderBackground(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractBackground(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // No blur — book texture serves as the background
     }
 
     @Override
-    public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.RenderBook(context);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @Override

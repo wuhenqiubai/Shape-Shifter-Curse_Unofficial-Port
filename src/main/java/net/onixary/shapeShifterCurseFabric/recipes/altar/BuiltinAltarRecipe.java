@@ -123,9 +123,15 @@ public class BuiltinAltarRecipe extends AltarRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
-        if (recipeInput instanceof AltarBlockEntity altarBlockEntity) {
-            return this.recipeConfig.craft.apply(altarBlockEntity, provider);
+    public @NotNull ItemStack assemble(RecipeInput input) {
+        // 26.1: Recipe#assemble 收敛为单参（旧的 (T, HolderLookup.Provider) 已移除），
+        // 原先由形参传入的 provider 改从方块实体所在世界的 registryAccess 取
+        // （与 AltarBlockEntity 内既有的 world.registryAccess() 用法一致，同样带 null 检查）。
+        if (input instanceof AltarBlockEntity altarBlockEntity) {
+            Level world = altarBlockEntity.getLevel();
+            if (world != null) {
+                return this.recipeConfig.craft.apply(altarBlockEntity, world.registryAccess());
+            }
         }
         return ItemStack.EMPTY;
     }
@@ -185,26 +191,17 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return RecipeSerializerRegister.BUILTIN_Altar_RECIPE;
     }
 
-    public static class Serializer implements RecipeSerializer<BuiltinAltarRecipe> {
+    public static class Serializer {
         /** JSON：只存 recipe_config_id，decode 时从 BARecipeConfigMap 查运行时配置。 */
-        private static final MapCodec<BuiltinAltarRecipe> CODEC = RecordCodecBuilder.mapCodec(
+        public static final MapCodec<BuiltinAltarRecipe> CODEC = RecordCodecBuilder.mapCodec(
             instance -> instance.group(
                 Identifier.CODEC.fieldOf("recipe_config_id").forGetter(r -> r.configId)
             ).apply(instance, BuiltinAltarRecipe::fromConfigId)
         );
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, BuiltinAltarRecipe> STREAM_CODEC =
+        public static final StreamCodec<RegistryFriendlyByteBuf, BuiltinAltarRecipe> STREAM_CODEC =
             StreamCodec.of(Serializer::toNetwork, Serializer::fromNetwork);
 
-        @Override
-        public @NotNull MapCodec<BuiltinAltarRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, BuiltinAltarRecipe> streamCodec() {
-            return STREAM_CODEC;
-        }
 
         private static BuiltinAltarRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             Identifier configId = buf.readIdentifier();

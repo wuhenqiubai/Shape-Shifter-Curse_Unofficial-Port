@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -99,7 +99,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         );
     }
 
-    private void RenderBook(GuiGraphics context) {
+    private void RenderBook(GuiGraphicsExtractor context) {
         int FinalBookSizeX = BookSizeX;
         int FinalBookSizeY = BookSizeY;
         if (ShapeShifterCurseFabric.clientConfig.newStartBookForBiggerScreen) {
@@ -132,19 +132,19 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
     }
 
     @Override
-    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // No blur — book texture serves as the background
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.RenderBook(context);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         renderInstinctsBottomTexture(context);
     }
 
     /** 扩展点：INSTINCTS 列底贴图（宽随列宽稍缩小、高按原始宽高比、锚定列区底部 in-book y=160）。 */
-    private void renderInstinctsBottomTexture(GuiGraphics context) {
+    private void renderInstinctsBottomTexture(GuiGraphicsExtractor context) {
         CodexInstinctColumnHooks.Provider provider = CodexInstinctColumnHooks.provider();
         if (provider == null || currentPlayer == null) {
             return;

@@ -1,5 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.cache.model.BakedGeoModel;
+import com.geckolib.cache.model.GeoBone;
+import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -16,7 +21,7 @@ import net.minecraft.client.renderer.entity.state.AvatarRenderState;
 import net.minecraft.client.renderer.entity.state.EntityRenderState;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
@@ -29,11 +34,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
-import software.bernie.geckolib.cache.model.BakedGeoModel;
-import software.bernie.geckolib.cache.model.GeoBone;
-import software.bernie.geckolib.renderer.base.BoneSnapshots;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
-import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -82,7 +82,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
 
         boolean hasOutline = Minecraft.getInstance().shouldEntityAppearGlowing(player);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getLevelRenderState().cameraRenderState;
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
         float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         float limbAngle = avatarRenderState.walkAnimationPos;
         float limbDistance = avatarRenderState.walkAnimationSpeed;
@@ -229,7 +229,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             Identifier emissiveTexture = formModel.getEmissiveTextureResource(slim);
             if (overlayTexture != null) {
                 RenderType l = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
-                        ? RenderTypes.entityCutoutNoCullZOffset(overlayTexture)
+                        ? RenderTypes.entityCutoutZOffset(overlayTexture)
                         : RenderTypes.entityCutout(overlayTexture);
                 submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor, null);
             }
@@ -276,7 +276,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
     public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(((PlayerModel) playerEntityRenderer.getModel()).rightArm);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getLevelRenderState().cameraRenderState;
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
         float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         boolean slim = isSlim(player);
         for (FormRenderer formRenderer : formRendererList) {
@@ -309,7 +309,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             Identifier OverlayTextureID = formModel.getOverlayTextureResource(slim);
             if (OverlayTextureID != null) {
                 RenderType OverlayLayer = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
-                        ? RenderTypes.entityCutoutNoCullZOffset(OverlayTextureID)
+                        ? RenderTypes.entityCutoutZOffset(OverlayTextureID)
                         : RenderTypes.entityCutout(OverlayTextureID);
                 float animProgress = player.hurtTime > 0 ? (float) player.hurtTime - partialTick : 0;
                 int OverlayInt = OverlayTexture.pack(OverlayTexture.u(animProgress), OverlayTexture.v(player.hurtTime > 0 || player.deathTime > 0));
@@ -326,7 +326,10 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
-        formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, (renderPassInfo, snapshots) -> {
+        // GeckoLib 5.5.1: performRenderPass 的第 5 参由单个 BoneUpdater 变成了
+        // List<RenderPassInfo.BoneUpdater<R>>，所以裸 lambda 会报「List 不是函数接口」——
+        // 包一层 List.of(...) 即可，lambda 体与元素接口签名（run(RenderPassInfo, BoneSnapshots)）都没变。
+        formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, List.of((renderPassInfo, snapshots) -> {
             FormModel formModel = formRenderer.realModel;
             formModel.beginRenderPass(snapshots);
             try {
@@ -337,7 +340,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             } finally {
                 formModel.endRenderPass();
             }
-        });
+        }));
     }
 
     // 隐藏模型中除指定手臂骨骼子树以外的所有骨骼（等价于 renderRecursively(armBone) 语义）

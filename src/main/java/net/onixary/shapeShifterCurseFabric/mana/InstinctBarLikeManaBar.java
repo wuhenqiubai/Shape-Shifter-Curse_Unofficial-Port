@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.mana;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,14 +25,14 @@ public class InstinctBarLikeManaBar implements IManaRender{
     }
 
     @Override
-    public void render(GuiGraphics context, float tickDelta) {
+    public void render(GuiGraphicsExtractor context, float tickDelta) {
         if (!mc.options.hideGui) {
             Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.instinctBarPosType, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetY);
             this.renderBar(context, tickDelta, pos.getA(), pos.getB());
         }
     }
 
-    private void renderBar(GuiGraphics context, float tickDelta, int x, int y) {
+    private void renderBar(GuiGraphicsExtractor context, float tickDelta, int x, int y) {
         double mana = ManaUtils.getPlayerMana(mc.player);
         double maxMana = ManaUtils.getPlayerMaxMana(mc.player);
         double manaRegen = ManaUtils.getPlayerManaRegen(mc.player);
@@ -52,6 +52,6 @@ public class InstinctBarLikeManaBar implements IManaRender{
         }
         Component manaText = Component.literal(manaString.toString());
         int manaTextWidth = mc.font.width(manaText);
-        context.drawString(mc.font, manaText, x + (80 - manaTextWidth) / 2, y - 2, 0xFFFFFF, false);
+        context.text(mc.font, manaText, x + (80 - manaTextWidth) / 2, y - 2, 0xFFFFFF, false);
     }
 }

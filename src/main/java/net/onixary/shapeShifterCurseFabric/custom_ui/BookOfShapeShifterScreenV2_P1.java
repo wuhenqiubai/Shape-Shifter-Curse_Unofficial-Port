@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
@@ -110,7 +110,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         );
     }
 
-    private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
+    private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         float f = (float)Math.atan((double)(mouseX / 40.0F));
         float g = (float)Math.atan((double)(mouseY / 40.0F));
         Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
@@ -133,7 +133,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         int y1 = y - size;
         int x2 = x + size;
         int y2 = y + size;
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x1, y1, x2, y2, size, 0.0625f, mouseX, mouseY, entity);
+        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x1, y1, x2, y2, size, 0.0625f, mouseX, mouseY, entity);
 
         entity.yBodyRot = h;
         entity.yBodyRotO = m;
@@ -143,7 +143,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         entity.yHeadRot = l;
     }
 
-    private void RenderBook(GuiGraphics context) {
+    private void RenderBook(GuiGraphicsExtractor context) {
         int FinalBookSizeX = BookSizeX;
         int FinalBookSizeY = BookSizeY;
         if (ShapeShifterCurseFabric.clientConfig.newStartBookForBiggerScreen) {
@@ -176,12 +176,12 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
     }
 
 	@Override
-	public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 		// No blur — book texture serves as the background
 	}
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int BookScale = 1;
         int FinalBookSizeX = BookSizeX;
         int FinalBookSizeY = BookSizeY;
@@ -193,7 +193,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
         this.RenderBook(context);
-	    super.render(context, mouseX, mouseY, delta);
+	    super.extractRenderState(context, mouseX, mouseY, delta);
         // 实体渲染原点为实体中心脚下
         // Size -> (70, 66) Pos -> (35, 15)
         int PlayerX = BookPosX + 70 * BookScale;
@@ -203,7 +203,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         // Size -> (8, 8), Pos -> (115, 92)
         context.blit(RenderPipelines.GUI_TEXTURED, cursed_moon_icon_texID, BookPosX + 115 * BookScale, BookPosY + 92 * BookScale,
                 CursedMoonClient.isCursedMoon ? 8 : 0, 0, 8 * BookScale, 8 * BookScale, 8, 8, 16, 8, -1);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @Override

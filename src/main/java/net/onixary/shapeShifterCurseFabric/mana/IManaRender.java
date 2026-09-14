@@ -1,10 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.mana;
 
-import net.minecraft.client.gui.GuiGraphics;
+
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 
 public interface IManaRender {
     default boolean OverrideInstinctBar() {
         return false;
     }
-    void render(GuiGraphics context, float tickDelta);
+    void render(GuiGraphicsExtractor context, float tickDelta);
 }

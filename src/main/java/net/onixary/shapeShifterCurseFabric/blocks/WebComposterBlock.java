@@ -155,7 +155,7 @@ public class WebComposterBlock extends Block implements WorldlyContainerHolder {
 
     public static void emptyFullComposter(Entity user, BlockState state, Level world, BlockPos pos) {
         if (!world.isClientSide()) {
-            Vec3 vec3d = Vec3.atLowerCornerWithOffset(pos, 0.5F, 1.01, 0.5F).offsetRandom(world.random, 0.7F);
+            Vec3 vec3d = Vec3.atLowerCornerWithOffset(pos, 0.5F, 1.01, 0.5F).offsetRandom(world.getRandom(), 0.7F);
 	        ItemEntity itemEntity = new ItemEntity(world, vec3d.x(), vec3d.y(), vec3d.z(), new ItemStack(ResultItem, state.getValue(COCOON_COUNT)));
             itemEntity.setDefaultPickUpDelay();
             world.addFreshEntity(itemEntity);

@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -278,7 +278,7 @@ public class ModPacketsS2C {
     }
 
     public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(sendExtraData);
         if (sendExtraData) {
             buf.writeBoolean(keepOriginalSkin);
@@ -305,7 +305,7 @@ public class ModPacketsS2C {
 
     // 临时先放这里，以后再整理
     public static void sendUpdateCustomSetting(boolean ForceUpdate) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         boolean autoSyncConfig = ShapeShifterCurseFabric.playerCustomConfig.auto_sync_config;
         if (!ForceUpdate && !autoSyncConfig) {
             return;
@@ -318,7 +318,7 @@ public class ModPacketsS2C {
         if (!ForceUpdate && !autoSyncColorConfig) {
             return;
         }
-        buf = PacketByteBufs.create();
+        buf = FriendlyByteBufs.create();
         buf.writeBoolean(false);
         int AGBRInt = 0;
         AGBRInt = FormTextureUtils.ARGB2ABGR(ShapeShifterCurseFabric.playerCustomConfig.primaryColor);
@@ -390,7 +390,7 @@ public class ModPacketsS2C {
     }
 
     public static void sendPowerAnimationDataToServer(@Nullable Identifier animationId, int animationCount, int animationLength) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         if (animationId != null) {
             buf.writeBoolean(true);
             buf.writeIdentifier(animationId);
@@ -404,7 +404,7 @@ public class ModPacketsS2C {
     }
 
     public static void sendRequestPlayerAnimationData(UUID targetPlayerUUID) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(targetPlayerUUID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA),  buf));
     }
@@ -437,13 +437,13 @@ public class ModPacketsS2C {
     }
 
     public static void sendSetPatronForm(Identifier formID) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeIdentifier(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM),  buf));
     }
 
     public static void sendSetForm(Identifier formID, UUID target, boolean immediate) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(target);
         buf.writeIdentifier(formID);
         buf.writeBoolean(immediate);
@@ -578,7 +578,7 @@ public class ModPacketsS2C {
                     case "enable_default_color" -> {
                         ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor = !ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor;
                         if (ctx.client().player != null) {
-                            ctx.client().player.displayClientMessage(Component.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor), true);
+                            ctx.client().player.sendOverlayMessage(Component.translatable("message.shape-shifter-curse.enable_default_color", ShapeShifterCurseFabricClient.formColorData.enableDefaultFormColor));
                         }
                     }
                 }
@@ -591,7 +591,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Custom Form Color Settings For %s:\n|".formatted(formID));
                         ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
+                            ctx.client().player.sendSystemMessage(Component.literal(stringBuilder.toString()));
                         }
                     }
                     case "global" -> {
@@ -599,7 +599,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Custom Global Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.customSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
+                            ctx.client().player.sendSystemMessage(Component.literal(stringBuilder.toString()));
                         }
                     }
                     case "form_default" -> {
@@ -607,7 +607,7 @@ public class ModPacketsS2C {
                         stringBuilder.append("All Default Form Color Settings:\n|");
                         ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.forEach((k, v) -> stringBuilder.append(" %s |".formatted(k)));
                         if (ctx.client().player != null) {
-                            ctx.client().player.displayClientMessage(Component.literal(stringBuilder.toString()), false);
+                            ctx.client().player.sendSystemMessage(Component.literal(stringBuilder.toString()));
                         }
                     }
                 }
@@ -619,7 +619,7 @@ public class ModPacketsS2C {
         if (authFile == null) {
             return;
         }
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeByteArray(authFile.getRaw());
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
     }
@@ -647,7 +647,7 @@ public class ModPacketsS2C {
         if (perkTreeID == null || perkID == null) {
             return;
         }
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeIdentifier(perkTreeID);
         buf.writeIdentifier(perkID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ADD_PERK), buf));

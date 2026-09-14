@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.animation.state.BoneSnapshot;
+import com.geckolib.cache.model.GeoBone;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -34,8 +36,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import software.bernie.geckolib.animation.state.BoneSnapshot;
-import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.*;
 import java.util.function.Predicate;

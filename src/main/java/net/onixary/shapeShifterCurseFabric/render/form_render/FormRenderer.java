@@ -1,5 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.constant.dataticket.DataTicket;
+import com.geckolib.renderer.GeoObjectRenderer;
+import com.geckolib.renderer.base.BoneSnapshots;
+import com.geckolib.renderer.base.GeoRenderState;
+import com.geckolib.renderer.base.RenderPassInfo;
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
@@ -7,11 +12,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
-import software.bernie.geckolib.constant.dataticket.DataTicket;
-import software.bernie.geckolib.renderer.GeoObjectRenderer;
-import software.bernie.geckolib.renderer.base.BoneSnapshots;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
-import software.bernie.geckolib.renderer.base.RenderPassInfo;
 
 public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRenderState.Impl> {
     public FormAnimatable realAnimatable = null;

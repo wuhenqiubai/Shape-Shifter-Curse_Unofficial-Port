@@ -12,12 +12,16 @@ import io.github.apace100.apoli.power.ConditionedAttributePower;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permission;
 import net.minecraft.server.permissions.PermissionLevel;
+import net.minecraft.world.clock.ServerClockManager;
+import net.minecraft.world.clock.WorldClock;
+import net.minecraft.world.clock.WorldClocks;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -393,7 +397,7 @@ public class ShapeShifterCurseCommand {
             String message = newSetting
                     ? "Successfully set to use your original skin!"
                     : "Successfully set to use built-in skin!";
-            player.displayClientMessage(Component.literal(message), false);
+            player.sendSystemMessage(Component.literal(message));
 
             return 1;
         } catch (Exception e) {
@@ -430,7 +434,7 @@ public class ShapeShifterCurseCommand {
             message += "Primary Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getPrimaryGreyReverse() + "\n";
             message += "Accent 1 Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getAccent1GreyReverse() + "\n";
             message += "Accent 2 Grey Reverse: " + RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor().getAccent2GreyReverse() + "\n";
-            player.displayClientMessage(Component.literal(message), false);
+            player.sendSystemMessage(Component.literal(message));
             return 1;
         }
         catch (Exception e) {
@@ -505,7 +509,7 @@ public class ShapeShifterCurseCommand {
                 message.append("Expire Time: ").append(LocalDateTime.ofInstant(Instant.ofEpochSecond(expireTime), ZoneId.systemDefault()).format(formatter)).append("\n");
             }
             // message.append("\n");
-            player.displayClientMessage(Component.literal(message.toString()), false);
+            player.sendSystemMessage(Component.literal(message.toString()));
         } catch (Exception e) {
             // 处理其他可能的错误
             commandContext.getSource().sendFailure(Component.literal("Error when log player patron info: " + e.getMessage()));
@@ -558,17 +562,27 @@ public class ShapeShifterCurseCommand {
     //     return availableForms;
     // }
 
+    // 26.1：原版删除了 LevelData.DayTime，世界时间改由 world_clocks 注册表管理
+    // （datafixer DayTimeToClockFix 把 DayTime 原样搬进 minecraft:overworld 时钟的 total_ticks，
+    //   月相/昼夜等改由 Timelines.MOON / OVERWORLD_DAY 基于该时钟推导）。
+    // 故 getDayTime/setDayTime 一律换成 Level#getOverworldClockTime / ServerClockManager#setTotalTicks。
+    private static Holder<WorldClock> overworldClock(ServerLevel world) {
+        return world.registryAccess().getOrThrow(WorldClocks.OVERWORLD);
+    }
+
     private static int setWorldTime(CommandContext<CommandSourceStack> commandContext) {
         ServerLevel world = commandContext.getSource().getLevel();
-        world.setDayTime(IntegerArgumentType.getInteger(commandContext, "time"));
-        commandContext.getSource().sendSuccess(() -> Component.literal("World time set to " + commandContext.getSource().getLevel().getDayTime()), false);
+        ServerClockManager clockManager = commandContext.getSource().getServer().clockManager();
+        clockManager.setTotalTicks(overworldClock(world), IntegerArgumentType.getInteger(commandContext, "time"));
+        commandContext.getSource().sendSuccess(() -> Component.literal("World time set to " + world.getOverworldClockTime()), false);
         return 1;
     }
 
     private static int addWorldTime(CommandContext<CommandSourceStack> commandContext) {
         ServerLevel world = commandContext.getSource().getLevel();
-        long TargetTime = world.getDayTime() + IntegerArgumentType.getInteger(commandContext, "time");
-        world.setDayTime(TargetTime);
+        ServerClockManager clockManager = commandContext.getSource().getServer().clockManager();
+        long TargetTime = world.getOverworldClockTime() + IntegerArgumentType.getInteger(commandContext, "time");
+        clockManager.setTotalTicks(overworldClock(world), TargetTime);
         commandContext.getSource().sendSuccess(() -> Component.literal("World time set to " + TargetTime), false);
         return 1;
     }
@@ -777,7 +791,7 @@ public class ShapeShifterCurseCommand {
         text = FormColorData.appendCopyableText(text, Data);
         switch (type) {
             case "local" -> {
-                player.displayClientMessage(text, false);
+                player.sendSystemMessage(text);
             }
             case "server" -> {
                 Objects.requireNonNull(player.level().getServer()).getPlayerList().broadcastSystemMessage(text, false);

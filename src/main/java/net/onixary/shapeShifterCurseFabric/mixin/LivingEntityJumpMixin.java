@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,7 +33,7 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
         if (entity instanceof Player player) {
             JumpEventCondition.setJumping(player, true);
             if (player.level().isClientSide()) {
-                FriendlyByteBuf buf = PacketByteBufs.create();
+                FriendlyByteBuf buf = FriendlyByteBufs.create();
                 buf.writeUUID(player.getUUID());
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID), buf));
             }

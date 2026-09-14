@@ -46,12 +46,14 @@ public class ShortestArcFadeModifier extends AbstractFadeModifier {
 		return FadeType.FADE_IN;
 	}
 
+	// PAL 1.2.6: IAnimation#get3DTransform(PlayerAnimBone) 返回 void（原地修改）——
+	// 旧版是 PlayerAnimBone，所以此处不能再返回 bone。
 	@Override
-	public PlayerAnimBone get3DTransform(@NotNull PlayerAnimBone bone) {
+	public void get3DTransform(@NotNull PlayerAnimBone bone) {
 		if (calculateProgress(tickDelta, bone.getName()) > 1) {
 			IAnimation anim = getAnim();
 			if (anim != null) anim.get3DTransform(bone);
-			return bone;
+			return;
 		}
 
 		PlayerAnimBone copy2 = new PlayerAnimBone(bone.getName());
@@ -66,12 +68,11 @@ public class ShortestArcFadeModifier extends AbstractFadeModifier {
 		}
 
 		// 最短弧：把"新姿态 copy2"的旋转逐个 unwrap 到靠近"旧姿态 bone"，使 LINEAR 混合走短路。
-		copy2.rotX = unwrapToward(copy2.rotX, bone.rotX);
-		copy2.rotY = unwrapToward(copy2.rotY, bone.rotY);
-		copy2.rotZ = unwrapToward(copy2.rotZ, bone.rotZ);
+		copy2.rotation.x = unwrapToward(copy2.rotation.x, bone.rotation.x);
+		copy2.rotation.y = unwrapToward(copy2.rotation.y, bone.rotation.y);
+		copy2.rotation.z = unwrapToward(copy2.rotation.z, bone.rotation.z);
 
 		bone.scale(1 - a).add(copy2.scale(a));
-		return bone;
 	}
 
 	/** 把 {@code value} 折算为离 {@code ref} 最近的等价角（弧度），保证 |value-ref| ≤ π。 */

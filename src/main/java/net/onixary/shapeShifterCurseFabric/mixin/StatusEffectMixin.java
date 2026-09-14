@@ -32,7 +32,7 @@ public class StatusEffectMixin {
             if (PowerList.isEmpty()) {
                 return false;
             }
-            if (entity != null && entity.getType().is(EntityTypeTags.UNDEAD)) {
+            if (entity != null && entity.is(EntityTypeTags.UNDEAD)) {
                 EffectValue = -6;
             }
             FinalValue = (float) (EffectValue << amplifier);
@@ -51,7 +51,7 @@ public class StatusEffectMixin {
                 return false;
             }
             EffectValue = -4;
-            if (entity.getType().is(EntityTypeTags.UNDEAD)) {
+            if (entity.is(EntityTypeTags.UNDEAD)) {
                 EffectValue = 6;
             }
             FinalValue = (float) (EffectValue << amplifier);

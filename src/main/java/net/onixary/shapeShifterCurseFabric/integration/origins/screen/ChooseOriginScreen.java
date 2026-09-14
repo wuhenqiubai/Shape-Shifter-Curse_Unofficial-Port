@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
@@ -147,11 +147,11 @@ public class ChooseOriginScreen extends OriginDisplayScreen {
 	}
 
 	@Override
-	public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+	public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
 		if(maxSelection == 0) {
 			openNextLayerScreen();
 			return;
 		}
-		super.render(context, mouseX, mouseY, delta);
+		super.extractRenderState(context, mouseX, mouseY, delta);
 	}
 }

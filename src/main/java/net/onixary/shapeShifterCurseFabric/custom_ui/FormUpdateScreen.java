@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -147,19 +147,18 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
     }
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         nodeWindowX = this.width / 2 - nodeWindowWidth / 2;
         nodeWindowY = this.height / 2 - nodeWindowHeight / 2;
         cameraCenter = new Vector2i(nodeWindowX + nodeWindowWidth / 2, nodeWindowY + nodeWindowHeight / 2);
         nodeCenter = new Vector2i( -nodeWindowWidth / 2, 0);
         context.fill(nodeWindowX, nodeWindowY, nodeWindowX + nodeWindowWidth, nodeWindowY + nodeWindowHeight, 0xFF000000);
         this.drawAllNode(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     // Utils
-
-    public void drawConnectLine(GuiGraphics context, PerkTree.PerkNode perkNode) {
+    public void drawConnectLine(GuiGraphicsExtractor context, PerkTree.PerkNode perkNode) {
         Identifier depend = perkNode.dependentPerkID();
         if (depend == null) return;
         PerkTree.PerkNode dependNodeMetaData = perkTree.getNode(depend);
@@ -186,7 +185,7 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
     }
 
     // playerGainedPerk 由调用方获取 毕竟drawNode调用频繁
-    public void drawNode(GuiGraphics context, PerkTree.PerkNode perkNode, @Nullable List<Identifier> playerGainedPerk, int mouseX, int mouseY, float delta) {
+    public void drawNode(GuiGraphicsExtractor context, PerkTree.PerkNode perkNode, @Nullable List<Identifier> playerGainedPerk, int mouseX, int mouseY, float delta) {
         this.drawConnectLine(context, perkNode);
         Identifier icon = RegPerks.getPerkIcon(perkNode.perkID());
         if (icon == null) {
@@ -210,7 +209,7 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
         context.blit(icon, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY, 0, 0, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight);
     }
 
-    public void drawAllNode(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void drawAllNode(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (this.minecraft == null) return;
         context.enableScissor(nodeWindowX, nodeWindowY, nodeWindowX + nodeWindowWidth, nodeWindowY + nodeWindowHeight);
         // 1.21.11: GUI 的 2D 变换栈是 Matrix3x2fStack（PoseStack 只用于 3D 渲染）
@@ -296,11 +295,12 @@ public class FormUpdateScreen extends Screen implements WidgetEXUtils.IWidgetEX 
     }
 
     public void onNodeSelect() {
-        // 1.21.11: Entity 不再实现 CommandSource，客户端 LocalPlayer 没有 sendSystemMessage，要用 displayClientMessage
+        // 26.1: sendSystemMessage 回到了 Player 基类（基类为空实现，LocalPlayer/ServerPlayer 各自覆写为聊天栏），
+        // 1.21.11 时期因为 Entity 不再实现 CommandSource 而被迫使用的 displayClientMessage 已被删除。
         try {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Node Selected: " + this.nowSelectNode.perkID().toString()), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Node Selected: " + this.nowSelectNode.perkID().toString()));
         } catch (Exception e) {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("No Node Selected"), false);
+            Minecraft.getInstance().player.sendSystemMessage(Component.literal("No Node Selected"));
         }
         if (this.nowSelectNode != null) {
             this.PerkNameWidget.setMessage(RegPerks.getPerkName(this.nowSelectNode.perkID()));

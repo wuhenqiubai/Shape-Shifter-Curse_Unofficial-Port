@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 import io.github.apace100.apoli.power.PowerType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.gui.screens.inventory.tooltip.DefaultTooltipPositioner;
@@ -79,23 +79,25 @@ public class OriginDisplayScreen extends Screen {
         return layer;
     }
 
-    // renderBackground override removed — method became non-overrideable in 1.21
+    // 26.1: 背景由框架经 Screen#extractBackground 自动调用（原 renderBackground 已改名）。
+    // 本屏不覆写它，故会显示原版 blur/panorama 背景；若要像书籍/换色屏那样抑制，
+    // 覆写空的 extractBackground 即可。
 
     @Override
-    public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         renderedBadges.clear();
         this.time += delta;
-        // 1.21.11: renderWithTooltipAndSubtitles 已自动调 renderBackground（blur），
-        // 这里再手动调会 "Can only blur once per frame" 崩溃
+        // 26.1: 背景/提示由框架自动提交（extractRenderStateWithTooltipAndSubtitles → extractBackground），
+        // 这里不再手动调，否则会重复提交
         this.renderOriginWindow(context, mouseX, mouseY);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
         if(origin != null) {
             renderScrollbar(context, mouseX, mouseY);
             renderBadgeTooltip(context, mouseX, mouseY);
         }
     }
 
-    private void renderScrollbar(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderScrollbar(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         if(!canScroll()) {
             return;
         }
@@ -163,7 +165,7 @@ public class OriginDisplayScreen extends Screen {
         return super.mouseDragged(mouseButtonEvent, d, e);
     }
 
-    private void renderBadgeTooltip(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderBadgeTooltip(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         for(RenderedBadge rb : renderedBadges) {
             if(mouseX >= rb.x &&
                mouseX < rb.x + 9 &&
@@ -171,7 +173,7 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                context.renderTooltip(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+                context.tooltip(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
             }
         }
     }
@@ -180,7 +182,7 @@ public class OriginDisplayScreen extends Screen {
         return Component.nullToEmpty("Origins");
     }
 
-    private void renderOriginWindow(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderOriginWindow(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
         renderWindowBackground(context, 16, 0);
         if(origin != null) {
@@ -192,11 +194,11 @@ public class OriginDisplayScreen extends Screen {
             renderOriginName(context);
             this.renderOriginImpact(context, mouseX, mouseY);
             Component title = getTitleText();
-            context.drawCenteredString(this.font, title.getString(), width / 2, guiTop - 15, 0xFFFFFF);
+            context.centeredText(this.font, title.getString(), width / 2, guiTop - 15, 0xFFFFFF);
         }
     }
 
-    private void renderOriginImpact(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderOriginImpact(GuiGraphicsExtractor context, int mouseX, int mouseY) {
         Impact impact = getCurrentOrigin().getImpact();
         int impactValue = impact.getImpactValue();
         int wOffset = impactValue * 8;
@@ -210,18 +212,21 @@ public class OriginDisplayScreen extends Screen {
         if(mouseX >= guiLeft + 128 && mouseX <= guiLeft + 158
             && mouseY >= guiTop + 19 && mouseY <= guiTop + 27) {
             MutableComponent ttc = Component.translatable(Origins.MODID + ".gui.impact.impact").append(": ").append(impact.getTextComponent());
-            context.renderTooltip(this.font, List.of(new net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip(ttc.getVisualOrderText())), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+            // 26.1: setTooltipForNextFrame(Font, List<ClientTooltipComponent>, ...) 重载被删除，
+            // 但 GuiGraphicsExtractor#tooltip(font, List<ClientTooltipComponent>, x, y, positioner, style)
+            // 与旧签名完全一致（就是原 renderTooltip），且本类 L174 已在用同一写法，故直接换名。
+            context.tooltip(this.font, List.of(new net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip(ttc.getVisualOrderText())), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
         }
     }
 
-    private void renderOriginName(GuiGraphics context) {
+    private void renderOriginName(GuiGraphicsExtractor context) {
         FormattedText originName = font.substrByWidth(getCurrentOrigin().getName(), windowWidth - 36);
-        context.drawString(font, originName.getString(), guiLeft + 39, guiTop + 19, 0xFFFFFF);
+        context.text(font, originName.getString(), guiLeft + 39, guiTop + 19, 0xFFFFFF);
         ItemStack is = getCurrentOrigin().getDisplayItem();
-        context.renderItem(is, guiLeft + 15, guiTop + 15);
+        context.item(is, guiLeft + 15, guiTop + 15);
     }
 
-    private void renderWindowBackground(GuiGraphics context, int offsetYStart, int offsetYEnd) {
+    private void renderWindowBackground(GuiGraphicsExtractor context, int offsetYStart, int offsetYEnd) {
         int border = 13;
         int endX = guiLeft + windowWidth - border;
         int endY = guiTop + windowHeight - border;
@@ -234,7 +239,7 @@ public class OriginDisplayScreen extends Screen {
 
     // mouseScrolled signature changed in 1.21 (4 params: x, y, horizontal, vertical) */
 
-    private void renderOriginContent(GuiGraphics context, int mouseX, int mouseY) {
+    private void renderOriginContent(GuiGraphicsExtractor context, int mouseX, int mouseY) {
 
         int textWidth = windowWidth - 48;
         // Without this code, the text may not cover the whole width of the window
@@ -256,7 +261,7 @@ public class OriginDisplayScreen extends Screen {
         List<FormattedCharSequence> descLines = font.split(orgDesc, textWidth);
         for(FormattedCharSequence line : descLines) {
             if(y >= startY - 18 && y <= endY + 12) {
-                context.drawString(font, line, x + 2, y - 6, 0xCCCCCC, false);
+                context.text(font, line, x + 2, y - 6, 0xCCCCCC, false);
             }
             y += 12;
         }
@@ -266,7 +271,7 @@ public class OriginDisplayScreen extends Screen {
             for(FormattedCharSequence line : drawLines) {
                 y += 12;
                 if(y >= startY - 24 && y <= endY + 12) {
-                    context.drawString(font, line, x + 2, y, 0xCCCCCC, false);
+                    context.text(font, line, x + 2, y, 0xCCCCCC, false);
                 }
             }
             y += 14;
@@ -279,7 +284,7 @@ public class OriginDisplayScreen extends Screen {
                 Component desc = p.getDescription();
                 List<FormattedCharSequence> drawLines = font.split(desc, textWidth);
                 if(y >= startY - 24 && y <= endY + 12) {
-                    context.drawString(font, name, x, y, 0xFFFFFF, false);
+                    context.text(font, name, x, y, 0xFFFFFF, false);
                     int tw = font.width(name);
                     List<Badge> badges = BadgeManager.getPowerBadges(p.getIdentifier());
                     int xStart = x + tw + 4;
@@ -294,7 +299,7 @@ public class OriginDisplayScreen extends Screen {
                 for(FormattedCharSequence line : drawLines) {
                     y += 12;
                     if(y >= startY - 24 && y <= endY + 12) {
-                        context.drawString(font, line, x + 2, y, 0xCCCCCC, false);
+                        context.text(font, line, x + 2, y, 0xCCCCCC, false);
                     }
                 }
 

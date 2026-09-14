@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import com.google.gson.JsonObject;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -31,14 +31,14 @@ import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.UPDATE_P
 public class ModPacketsS2CServer {
 
     public static void sendCursedMoonData(ServerPlayer player, boolean isCursedMoon) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(isCursedMoon);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), buf));
     }
 
     // 发送形态变化同步包
     public static void sendFormChange(ServerPlayer player, Identifier newFormID) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeIdentifier(newFormID);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), buf));
     }
@@ -54,13 +54,13 @@ public class ModPacketsS2CServer {
 
     // 发送变身状态同步包
     public static void sendTransformState(ServerPlayer player, boolean isTransforming, Identifier fromForm, Identifier toForm) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(player.getUUID());
         buf.writeBoolean(isTransforming);
         buf.writeUtf(fromForm == null ? "" : fromForm.toString());
         buf.writeUtf(toForm== null ? "" : toForm.toString());
         for (ServerPlayer p : player.level().players()) {
-            FriendlyByteBuf copy = PacketByteBufs.copy(buf);
+            FriendlyByteBuf copy = FriendlyByteBufs.copy(buf);
             ServerPlayNetworking.send(p, new BytePayload(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), copy));
         }
     }
@@ -68,7 +68,7 @@ public class ModPacketsS2CServer {
     // 发送蝙蝠吸附状态同步包
     public static void sendBatAttachState(ServerPlayer player, boolean isAttached,
                                           int attachType, BlockPos attachedPos, Direction attachedSide) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(isAttached);
         buf.writeInt(attachType); // AttachType枚举的ordinal值
 
@@ -107,7 +107,7 @@ public class ModPacketsS2CServer {
     public static void sendOtherPlayerBatAttachState(ServerPlayer receiver, java.util.UUID targetPlayerUuid,
                                                      boolean isAttached, int attachType,
                                                      BlockPos attachedPos, Direction attachedSide) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(targetPlayerUuid);
         buf.writeBoolean(isAttached);
         buf.writeInt(attachType);
@@ -131,13 +131,13 @@ public class ModPacketsS2CServer {
 
     // 发送强制潜行状态同步包
     public static void sendForceSneakState(ServerPlayer player, boolean shouldForceSneak) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(shouldForceSneak);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SYNC_FORCE_SNEAK_STATE), buf));
     }
 
     private static void sendRemoveDynamicFormExcept(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(RegPlayerForms.dynamicPlayerForms.size());
         for (Identifier formId : RegPlayerForms.dynamicPlayerForms) {
             buf.writeUtf(formId.toString());
@@ -147,7 +147,7 @@ public class ModPacketsS2CServer {
 
     // 发送动态Form同步包 旧的最大32K 本来以为挺多的，结果发现单个就快4K
     public static void sendUpdateDynamicForm(ServerPlayer player, JsonObject forms) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(forms.size()); // 发送动态Form数量
         for (String formName : forms.keySet()) {
             buf.writeUtf(formName);
@@ -173,7 +173,7 @@ public class ModPacketsS2CServer {
 
     // 我暂时没找到玩家进入服务去时的Hook，所以暂时由服务器询问来代替
     public static void sendPlayerLogin(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.LOGIN_PACKET), buf));
     }
 
@@ -208,7 +208,7 @@ public class ModPacketsS2CServer {
         HashMap<UUID, Integer> patronLevels = PatronUtils.PatronLevels;
         int PairCount = patronLevels.size();
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            FriendlyByteBuf buf = PacketByteBufs.create();
+            FriendlyByteBuf buf = FriendlyByteBufs.create();
             buf.writeInt(PairCount);
             for (Map.Entry<UUID, Integer> entry : patronLevels.entrySet()) {
                 buf.writeUUID(entry.getKey());
@@ -219,12 +219,12 @@ public class ModPacketsS2CServer {
     }
 
     public static void OpenPatronFormSelectMenu(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_PATRON_FORM_SELECT_MENU), buf));
     }
 
     public static void OpenFormSelectMenu(ServerPlayer player, Player target) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUtf(target.getScoreboardName());
         buf.writeUUID(target.getUUID());
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), buf));
@@ -242,7 +242,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendPowerAnimationDataToClient(ServerPlayer player, UUID PlayerUUID, @Nullable Identifier animationId, int animationCount, int animationLength) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(PlayerUUID);
         if (animationId != null) {
             buf.writeBoolean(true);
@@ -262,20 +262,20 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendNoJumpTick(ServerPlayer player, int tick) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(tick);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), buf));
     }
 
     public static void sendNoMoveTick(ServerPlayer player, int tick) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(tick);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), buf));
     }
 
 
     public static void sendOpenFCSMenu(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), buf));
     }
 
@@ -306,7 +306,7 @@ public class ModPacketsS2CServer {
         //     arg2 -> message_type [raw, command]
         //     arg3 -> encode_type [base64, hex]
 
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUtf(commandType);
         buf.writeIdentifier(formID);
         buf.writeUtf(arg1);
@@ -317,7 +317,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void requestPatronAuthFile(ServerPlayer player, boolean forceReReadFile) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeUUID(player.getUUID());
         buf.writeBoolean(forceReReadFile);
         ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
@@ -354,13 +354,13 @@ public class ModPacketsS2CServer {
             ShapeShifterCurseFabric.LOGGER.error("newKey is null");
             return;
         }
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeByteArray(newKey.getRaw());
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), buf));
     }
 
     public static void sendSetSuperUserLevel(ServerPlayer player, int level) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(level);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), buf));
     }

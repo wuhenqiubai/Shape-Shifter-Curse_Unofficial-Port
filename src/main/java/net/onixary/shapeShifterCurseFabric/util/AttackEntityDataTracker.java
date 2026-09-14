@@ -55,7 +55,7 @@ public class AttackEntityDataTracker {
             lastAttackWitchTimeMap.put(player.getUUID(), world.getGameTime());
         }
         if (target instanceof LivingEntity livingEntity) {
-            if (livingEntity.getType().is(ModTags.Illager_Tag)) {
+            if (livingEntity.is(ModTags.Illager_Tag)) {
                 lastAttackPillagerTimeMap.put(player.getUUID(), world.getGameTime());
             }
         }

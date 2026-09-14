@@ -14,3 +14,4 @@ accessible method net/minecraft/world/inventory/SmithingMenu shrinkStackInSlot (
 accessible field net/minecraft/world/level/levelgen/structure/Structure$StructureSettings spawnOverrides Ljava/util/Map;
 accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetType Ljava/lang/Class;
 accessible method net/minecraft/world/entity/animal/feline/Ocelot isTrusting ()Z
+accessible method net/minecraft/world/entity/animal/axolotl/AxolotlAi getActivities ()Ljava/util/List;

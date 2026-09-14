@@ -18,7 +18,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 import net.onixary.shapeShifterCurseFabric.integration.origins.data.OriginsDataTypes;
@@ -34,7 +33,7 @@ public class Origin {
 
     public static final SerializableData DATA = new SerializableData()
         .add("powers", SerializableDataTypes.IDENTIFIERS, Lists.newArrayList())
-        .add("icon", CompatibilityDataTypes.ITEM_OR_ITEM_STACK, new ItemStack(Items.AIR))
+        .add("icon", CompatibilityDataTypes.ITEM_OR_ITEM_STACK, ItemStack.EMPTY)
         .add("unchoosable", SerializableDataTypes.BOOLEAN, false)
         .add("order", SerializableDataTypes.INT, Integer.MAX_VALUE)
         .add("impact", OriginsDataTypes.IMPACT, Impact.NONE)
@@ -46,7 +45,7 @@ public class Origin {
     public static final Origin EMPTY;
 
     static {
-        EMPTY = register(new Origin(Identifier.fromNamespaceAndPath(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
+        EMPTY = register(new Origin(Identifier.fromNamespaceAndPath(Origins.MODID, "empty"), ItemStack.EMPTY, Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
     }
 
     public static void init() {

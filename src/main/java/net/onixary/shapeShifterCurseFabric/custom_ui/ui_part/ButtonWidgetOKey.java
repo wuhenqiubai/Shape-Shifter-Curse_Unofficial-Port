@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.input.MouseButtonInfo;
 import net.minecraft.network.chat.Component;
@@ -32,8 +32,8 @@ public class ButtonWidgetOKey extends Button {
     }
 
     @Override
-    protected void renderContents(@NonNull GuiGraphics guiGraphics, int i, int j, float f) {
-        this.renderDefaultSprite(guiGraphics);
-        this.renderDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE));
+    protected void extractContents(@NonNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
+        this.extractDefaultSprite(guiGraphics);
+        this.extractDefaultLabel(guiGraphics.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE));
     }
 }

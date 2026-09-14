@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -23,7 +23,7 @@ public class InstinctBarRenderer {
 
     private static final Minecraft mc = Minecraft.getInstance();
 
-    public void render(GuiGraphics context, float tickDelta) {
+    public void render(GuiGraphicsExtractor context, float tickDelta) {
         if (Minecraft.getInstance().player == null) return;
         Player player = Minecraft.getInstance().player;
         IForm curForm = FormUtils.getPlayerForm(player);
@@ -54,7 +54,7 @@ public class InstinctBarRenderer {
         }
     }
 
-    private void renderInstinctBar(GuiGraphics context, float tickDelta, int x, int y, Player player) {
+    private void renderInstinctBar(GuiGraphicsExtractor context, float tickDelta, int x, int y, Player player) {
         float instinctValue = InstinctUtils.getNowInstinct();
         float currentInstinct = Math.max(0.0f, Math.min(instinctValue, StaticParams.INSTINCT_MAX));
         float instinctProportion;

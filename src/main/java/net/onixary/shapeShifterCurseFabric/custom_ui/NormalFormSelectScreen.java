@@ -1,11 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -154,7 +154,7 @@ public class NormalFormSelectScreen extends Screen {
         super.onClose();
     }
 
-    public void renderBackgroundTexture(GuiGraphics context) {
+    public void renderBackgroundTexture(GuiGraphicsExtractor context) {
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
         int bgY = (this.height - BG_HEIGHT) / 2;
@@ -163,10 +163,10 @@ public class NormalFormSelectScreen extends Screen {
 
 
     @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         this.renderBackgroundTexture(context);
         //this.renderTexture(context);
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
     @Override

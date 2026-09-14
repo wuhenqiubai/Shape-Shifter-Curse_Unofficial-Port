@@ -15,6 +15,7 @@ import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.ItemLike;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
@@ -81,7 +82,8 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(net.minecraft.world.item.crafting.SmithingRecipeInput input, net.minecraft.core.HolderLookup.Provider lookup) {
+    public @NotNull ItemStack assemble(SmithingRecipeInput input) {
+        // 26.1: assemble 收敛为单参（旧的 (T, HolderLookup.Provider) 已移除）
 	    ItemStack coreStack = input.template();
         if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
 	        ItemStack itemStack = input.base();
@@ -94,7 +96,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
             }
             return ItemStack.EMPTY;
         }
-	    return super.assemble(input, lookup);
+	    return super.assemble(input);
     }
 
     @Override
@@ -128,27 +130,18 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         }
     }
 
-    public static class Serializer implements RecipeSerializer<MorphScaleUpgradeRecipe> {
+    public static class Serializer {
 
-        private static final MapCodec<MorphScaleUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        public static final MapCodec<MorphScaleUpgradeRecipe> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Ingredient.CODEC.fieldOf("template").forGetter(r -> r.template),
             Ingredient.CODEC.fieldOf("addition").forGetter(r -> r.addition)
         ).apply(instance, (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.parse("morph_scale_upgrade"), template, addition)));
 
-        private static final StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = StreamCodec.composite(
+        public static final StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> PACKET_CODEC = StreamCodec.composite(
             Ingredient.CONTENTS_STREAM_CODEC, r -> r.template,
             Ingredient.CONTENTS_STREAM_CODEC, r -> r.addition,
             (template, addition) -> new MorphScaleUpgradeRecipe(Identifier.parse("morph_scale_upgrade"), template, addition)
         );
 
-        @Override
-        public @NotNull MapCodec<MorphScaleUpgradeRecipe> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public @NotNull StreamCodec<RegistryFriendlyByteBuf, MorphScaleUpgradeRecipe> streamCodec() {
-            return PACKET_CODEC;
-        }
     }
 }

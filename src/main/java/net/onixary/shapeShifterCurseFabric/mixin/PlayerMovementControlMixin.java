@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -46,7 +46,7 @@ public class PlayerMovementControlMixin implements IMoveController {
             // 1.21.11 中 jumpFromGround 已上移到 LivingEntity（Player 不再覆写），此处无法再拦截 Player 的跳跃。
             // 改在 travel 内检测跳跃输入：吸附状态下按住跳跃键即向服务器请求脱离吸附（服务器侧幂等，重复发送安全）。
             if (player.isJumping() && player.level().isClientSide()) {
-                FriendlyByteBuf buf = PacketByteBufs.create();
+                FriendlyByteBuf buf = FriendlyByteBufs.create();
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID), buf));
             }
 
@@ -135,7 +135,7 @@ public class PlayerMovementControlMixin implements IMoveController {
         if (attachPower != null) {
 
             if (player.level().isClientSide()) {
-                FriendlyByteBuf buf = PacketByteBufs.create();
+                FriendlyByteBuf buf = FriendlyByteBufs.create();
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
             }
 
@@ -168,7 +168,7 @@ public class PlayerMovementControlMixin implements IMoveController {
 
             // 发送网络包到服务器
             if (player.level().isClientSide()) {
-                FriendlyByteBuf buf = PacketByteBufs.create();
+                FriendlyByteBuf buf = FriendlyByteBufs.create();
                 buf.writeUUID(player.getUUID());
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.SPRINTING_TO_SNEAKING_EVENT_ID),  buf));
             }

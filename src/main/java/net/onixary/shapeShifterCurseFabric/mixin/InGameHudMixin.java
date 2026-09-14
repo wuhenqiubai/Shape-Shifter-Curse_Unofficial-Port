@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.onixary.shapeShifterCurseFabric.mana.IManaRender;
 import net.onixary.shapeShifterCurseFabric.mana.ManaComponent;
 import net.onixary.shapeShifterCurseFabric.mana.ManaRegistriesClient;
@@ -18,8 +18,8 @@ public class InGameHudMixin {
     @Unique
     private final InstinctBarRenderer instinctBarRenderer = new InstinctBarRenderer();
 
-    @Inject(method = "render", at = @At("RETURN"))
-    private void onRenderHud(GuiGraphics context, net.minecraft.client.DeltaTracker tickCounter, CallbackInfo ci) {
+    @Inject(method = "extractRenderState", at = @At("RETURN"))
+    private void onRenderHud(GuiGraphicsExtractor context, net.minecraft.client.DeltaTracker tickCounter, CallbackInfo ci) {
         float tickDelta = tickCounter.getGameTimeDeltaPartialTick(false);
         // 在InGameHud.render()方法返回前，调用你的渲染逻辑
         // 这确保了它在渲染完物品栏之后执行

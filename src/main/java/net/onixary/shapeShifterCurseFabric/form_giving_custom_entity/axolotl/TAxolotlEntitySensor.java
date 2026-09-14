@@ -33,15 +33,18 @@ public class TAxolotlEntitySensor extends AxolotlAttackablesSensor {
     }
 
     private boolean canHunt(LivingEntity axolotl, LivingEntity target) {
-        return !axolotl.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN) && target.getType().is(EntityTypeTags.AXOLOTL_HUNT_TARGETS);
+        return !axolotl.getBrain().hasMemoryValue(MemoryModuleType.HAS_HUNTING_COOLDOWN) && target.is(EntityTypeTags.AXOLOTL_HUNT_TARGETS);
     }
 
     private boolean isAlwaysHostileTo(LivingEntity axolotl) {
-        return axolotl.getType().is(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES) || (axolotl instanceof Player player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player));
+        return axolotl.is(EntityTypeTags.AXOLOTL_ALWAYS_HOSTILES) || (axolotl instanceof Player player && RegPlayerForms.ORIGINAL_SHIFTER.isPlayerForm(player));
     }
 
+    // 26.1: NearestVisibleLivingEntitySensor#getMemory() 改名为 getMemoryToSet()（isMatchingEntity 签名未变）。
+    // 顺带注意：该基类 26.1 的 requires() 变成 Set.of(getMemoryToSet(), NEAREST_VISIBLE_LIVING_ENTITIES)，
+    // 比 1.21.11 多声明了一个依赖记忆，属原版行为变化，无需在子类处理。
     @Override
-    protected @NotNull MemoryModuleType<LivingEntity> getMemory() {
+    protected @NotNull MemoryModuleType<LivingEntity> getMemoryToSet() {
         return MemoryModuleType.NEAREST_ATTACKABLE;
     }
 }

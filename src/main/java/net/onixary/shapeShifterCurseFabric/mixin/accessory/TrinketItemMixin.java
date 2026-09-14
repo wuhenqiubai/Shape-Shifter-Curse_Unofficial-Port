@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin.accessory;
 
-import dev.emi.trinkets.api.SlotReference;
-import dev.emi.trinkets.api.SlotType;
-import dev.emi.trinkets.api.TrinketInventory;
-import dev.emi.trinkets.api.TrinketsApi;
+import eu.pb4.trinkets.api.SlotType;
+import eu.pb4.trinkets.api.TrinketInventory;
+import eu.pb4.trinkets.api.TrinketSlotAccess;
+import eu.pb4.trinkets.api.TrinketsApi;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -60,7 +60,7 @@ public class TrinketItemMixin {
     private final String pluginID = "trinkets";
 
     @Unique
-    public void onEquip(ItemStack stack, SlotReference slot, Player player) {
+    public void onEquip(ItemStack stack, TrinketSlotAccess slot, Player player) {
         Identifier ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerEquip(player, ItemID, pluginID);
@@ -68,7 +68,7 @@ public class TrinketItemMixin {
     }
 
     @Unique
-    public void onUnequip(ItemStack stack, SlotReference slot, Player player) {
+    public void onUnequip(ItemStack stack, TrinketSlotAccess slot, Player player) {
         Identifier ItemID = BuiltInRegistries.ITEM.getKey(stack.getItem());
         if (AccessoryUtils.CanAutoExecute(ItemID, pluginID)) {
             AccessoryUtils.onPlayerUnEquip(player, ItemID, pluginID);
@@ -80,14 +80,14 @@ public class TrinketItemMixin {
         if ((Object)this instanceof Player player) {
             if (!player.isRemoved()) {
                 Map<String, ItemStack> newlyEquippedTrinkets = new HashMap<>();
-	            TrinketsApi.getTrinketComponent(player).ifPresent((trinkets) -> trinkets.forEach((ref, stack) -> {
+	            TrinketsApi.getAttachment(player).forEach((ref, stack) -> {
 		            TrinketInventory inventory = ref.inventory();
-		            SlotType slotType = inventory.getSlotType();
+		            SlotType slotType = inventory.slotType();
 		            int index = ref.index();
 		            ItemStack oldStack = this.getOldStack(slotType, index);
 		            ItemStack newStack = inventory.getItem(index);
 		            ItemStack newStackCopy = newStack.copy();
-		            String newRef = slotType.getGroup() + "/" + slotType.getName() + "/" + index;
+		            String newRef = slotType.group() + "/" + slotType.name() + "/" + index;
 		            if (!ItemStack.matches(newStack, oldStack)) {
 			            this.onUnequip(oldStack, ref, player);
 			            this.onEquip(newStack, ref, player);
@@ -98,7 +98,7 @@ public class TrinketItemMixin {
 		            } else {
 			            newlyEquippedTrinkets.put(newRef, newStackCopy);
 		            }
-	            }));
+	            });
                 this.lastEquippedTrinkets.clear();
                 this.lastEquippedTrinkets.putAll(newlyEquippedTrinkets);
             }
@@ -107,6 +107,6 @@ public class TrinketItemMixin {
 
     @Unique
     private ItemStack getOldStack(SlotType type, int index) {
-        return this.lastEquippedTrinkets.getOrDefault(type.getGroup() + "/" + type.getName() + "/" + index, ItemStack.EMPTY);
+        return this.lastEquippedTrinkets.getOrDefault(type.group() + "/" + type.name() + "/" + index, ItemStack.EMPTY);
     }
 }

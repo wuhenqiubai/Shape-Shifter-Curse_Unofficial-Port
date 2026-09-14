@@ -38,7 +38,10 @@ public class CursedMoon {
     }
 
     public static boolean isNight(Level world) {
-        long timeDayMoon = world.getDayTime() % 24000;
+        // 26.1：LevelData.DayTime 已删除，改为 world_clocks 注册表；
+        // getOverworldClockTime() 就是原 getDayTime() 的等价物（datafixer DayTimeToClockFix 原样搬迁），
+        // 客户端侧走 ClientClockManager，双端可用。判定阈值保持 SSC 自己的 12000/23000 不变。
+        long timeDayMoon = world.getOverworldClockTime() % 24000;
         return timeDayMoon > 12000L && timeDayMoon < 23000L;
     }
 
@@ -130,7 +133,7 @@ public class CursedMoon {
     public static void serverTick(MinecraftServer minecraftServer) {
         Level world = minecraftServer.getLevel(Level.OVERWORLD);
         if (world.isClientSide()) return;
-        long timeOfDay = world.getDayTime();
+        long timeOfDay = world.getOverworldClockTime();
         long nowDay = timeOfDay / 24000;
         long dayTime = timeOfDay % 24000;
         if (nowDay != day) {
@@ -180,9 +183,12 @@ public class CursedMoon {
         if (daysToSkip == 0) daysToSkip = 8; // 如果已经是诅咒月相，跳到下一个
 
         // 调整世界时间到目标月相
-        long currentTime = world.getDayTime();
+        // 26.1：Timelines.MOON 建在 overworld 时钟上（周期 24000*8）驱动 EnvironmentAttributes.MOON_PHASE，
+        // 所以推进 overworld 时钟 total_ticks 依旧会换月相，跳天逻辑语义不变。
+        long currentTime = world.getOverworldClockTime();
         long newTime = currentTime + (daysToSkip * 24000L);
-        world.setDayTime(newTime);
+        world.getServer().clockManager().setTotalTicks(
+                world.registryAccess().getOrThrow(net.minecraft.world.clock.WorldClocks.OVERWORLD), newTime);
 
         ShapeShifterCurseFabric.LOGGER.info("CursedMoon manually triggered! Skipped " + daysToSkip + " days to reach moon phase " + targetPhase);
 

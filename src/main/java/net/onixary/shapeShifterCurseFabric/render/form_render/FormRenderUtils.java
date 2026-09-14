@@ -1,9 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import com.geckolib.animation.state.BoneSnapshot;
+import com.geckolib.cache.model.GeoBone;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import net.fabricmc.fabric.api.client.rendering.v1.world.WorldRenderEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.ModelPart;
@@ -19,8 +21,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
-import software.bernie.geckolib.animation.state.BoneSnapshot;
-import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.*;
 import java.util.function.Predicate;
@@ -156,8 +156,8 @@ public class FormRenderUtils {
     }
 
     public static void onClientInit() {
-        WorldRenderEvents.END_MAIN.register(context -> isRenderingInWorld = false);
-        WorldRenderEvents.START_MAIN.register(context -> isRenderingInWorld = true);
+        LevelRenderEvents.END_MAIN.register(context -> isRenderingInWorld = false);
+        LevelRenderEvents.START_MAIN.register(context -> isRenderingInWorld = true);
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FormModelResourceReloadListener());
     }
 

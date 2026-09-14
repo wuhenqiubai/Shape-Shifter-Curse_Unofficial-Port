@@ -41,7 +41,7 @@ public class OriginUpgradeMixin {
                             component.sync();
                             String announcement = upgrade.get().getAnnouncement();
 	                        if (announcement != null && !announcement.isEmpty()) {
-		                        player.displayClientMessage(Component.translatable(announcement).withStyle(ChatFormatting.GOLD), false);
+		                        player.sendSystemMessage(Component.translatable(announcement).withStyle(ChatFormatting.GOLD));
 	                        }
                         }
                     } catch(IllegalArgumentException e) {

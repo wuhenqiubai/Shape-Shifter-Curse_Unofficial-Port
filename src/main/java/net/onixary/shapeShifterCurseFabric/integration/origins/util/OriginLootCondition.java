@@ -6,7 +6,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
@@ -24,7 +23,9 @@ public class OriginLootCondition implements LootItemCondition {
         Identifier.CODEC.optionalFieldOf("layer").forGetter(OriginLootCondition::getLayer)
     ).apply(instance, OriginLootCondition::new));
 
-    public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
+    // 26.1: LootItemConditionType record 被删除 —— BuiltInRegistries.LOOT_CONDITION_TYPE
+    // 现在直接持有 MapCodec，接口也从 getType() 改为 codec()。
+    // 不再需要 TYPE 常量；注册见本类下方的 register()。
 
     private final Identifier origin;
     private final Optional<Identifier> layer;
@@ -35,8 +36,8 @@ public class OriginLootCondition implements LootItemCondition {
     }
 
     @Override
-    public @NotNull LootItemConditionType getType() {
-        return TYPE;
+    public @NotNull MapCodec<OriginLootCondition> codec() {
+        return CODEC;
     }
 
     @Override

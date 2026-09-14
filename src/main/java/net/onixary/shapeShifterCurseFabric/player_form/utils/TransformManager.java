@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
 import dev.tr7zw.firstperson.FirstPersonModelCore;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.player.LocalPlayer;
@@ -238,7 +238,7 @@ public class TransformManager {
         if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT && player instanceof LocalPlayer) {
             executeClientFirstPersonReset();
         } else if (player instanceof ServerPlayer serverPlayerEntity) {
-            FriendlyByteBuf buf = PacketByteBufs.create();
+            FriendlyByteBuf buf = FriendlyByteBufs.create();
             ServerPlayNetworking.send(serverPlayerEntity, new BytePayload(BytePayload.id(ModPackets.RESET_FIRST_PERSON),  buf));
         }
     }

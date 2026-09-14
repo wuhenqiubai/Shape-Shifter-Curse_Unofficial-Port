@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
+import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -88,8 +89,18 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
         }
     }
 
+    // 26.1: Mob#brainProvider() 已被移除（memory 不再由实体声明，改由 Brain 依 sensors/activities
+    // 自动注册，见 Brain.java 的 provider 构造），且 Brain.provider 的 2 参形式从
+    // (memoryTypes, sensorTypes) 变成了 (sensorTypes, activities)。
+    // 按原版 Axolotl 的同构写法（Axolotl.java:76-78 + :523）：静态 BRAIN_PROVIDER + 覆写 makeBrain。
+    // AxolotlAi.getActivities() 是异包 protected static，已由 shape-shifter-curse.accesswidener 打开。
+    // SENSORS 原样保留 —— 其中含自定义的 TAxolotlEntitySensor.T_AXOLOTL_ENTITY_SENSOR，行为不变。
+    private static final Brain.Provider<Axolotl> BRAIN_PROVIDER = Brain.provider(
+            SENSORS,
+            var0 -> AxolotlAi.getActivities());
+
     @Override
-    protected Brain.@NotNull Provider<Axolotl> brainProvider() {
-        return Brain.provider(MEMORY_TYPES, SENSORS);
+    protected Brain<Axolotl> makeBrain(Brain.Packed packedBrain) {
+        return BRAIN_PROVIDER.makeBrain(this, packedBrain);
     }
 }

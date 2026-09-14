@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mana;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -24,7 +24,7 @@ public class WebResourceBar implements IManaRender {
         return false;
     }
 
-    public void render(GuiGraphics context, float tickDelta) {
+    public void render(GuiGraphicsExtractor context, float tickDelta) {
         if (!mc.options.hideGui) {
             Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
             this.renderBar(context, tickDelta, pos.getA(), pos.getB());
@@ -57,7 +57,7 @@ public class WebResourceBar implements IManaRender {
         return RTier;
     }
 
-    private void renderBar(GuiGraphics context, float tickDelta, int x, int y) {
+    private void renderBar(GuiGraphicsExtractor context, float tickDelta, int x, int y) {
         if (mc.player == null) {
             return;
         }
@@ -70,7 +70,7 @@ public class WebResourceBar implements IManaRender {
         context.blit(RenderPipelines.GUI_TEXTURED, BarTexID, x, y, 0, 5, manaWidth, 5, manaWidth, 5, 80, 18, -1);
 
         Component manaText = Component.literal((int) mana + "/" + (int) maxMana);
-        context.drawString(mc.font, manaText, x + 10, y - 8, manaRegen == 0 ? 0xFF7F7F7F : 0xFF00CFFF, false);
+        context.text(mc.font, manaText, x + 10, y - 8, manaRegen == 0 ? 0xFF7F7F7F : 0xFF00CFFF, false);
 
         int chargeLevel = this.getChargeLevel();
         context.blit(RenderPipelines.GUI_TEXTURED, BarTexID, x, y - 8, chargeLevel * 8, 10, 8, 8, 8, 8, 80, 18, -1);

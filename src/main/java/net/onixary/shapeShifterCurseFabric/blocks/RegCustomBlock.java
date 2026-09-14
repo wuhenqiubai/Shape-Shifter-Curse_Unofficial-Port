@@ -1,9 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
-import net.fabricmc.fabric.api.client.rendering.v1.BlockRenderLayerMap;
 import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
@@ -37,10 +35,13 @@ public final class RegCustomBlock {
 
 
     public static void ClientInit() {
-        BlockRenderLayerMap.putBlock(TEMP_WEB_BRIDGE, ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(WEB_COMPOSTER, ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(DEW_COVERED_COBWEB, ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(Altar_BLOCK, ChunkSectionLayer.CUTOUT);
+        // 26.1 起无需手工声明方块渲染层：BakedQuad.MaterialInfo.of(...) 会用
+        // ChunkSectionLayer.byTransparency(该 quad 所用 sprite 的透明度) 自动推导
+        // （有中间 alpha → TRANSLUCENT；有全透明像素 → CUTOUT；全不透明 → SOLID），
+        // Fabric 也据此删掉了 BlockRenderLayerMap。
+        // 本模组这几张贴图都是二值 alpha（只有 0/255），自动推导结果正是原先手工指定的 CUTOUT；
+        // web_composter 的 compost/ready 两张全不透明图还会各自得到 SOLID，比原来整块强制 CUTOUT 更准。
+        // 方法保留为空以免改动调用方（ShapeShifterCurseFabricClient）。
     }
 
     private static Block registerWithOutItem(String path, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties props) {

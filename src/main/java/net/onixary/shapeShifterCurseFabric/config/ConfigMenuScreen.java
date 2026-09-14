@@ -2,8 +2,11 @@ package net.onixary.shapeShifterCurseFabric.config;
 
 import io.github.apace100.apoli.util.ApoliConfigClient;
 import me.shedaniel.autoconfig.AutoConfig;
+// 26.1：Cloth Config 把客户端 GUI 相关 API 从 AutoConfig 拆到了 AutoConfigClient
+// （AutoConfig 现在只剩 register/getConfigHolder，getConfigScreen/getGuiRegistry 都搬家了）
+import me.shedaniel.autoconfig.AutoConfigClient;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
@@ -34,13 +37,13 @@ public class ConfigMenuScreen extends Screen {
 
         // 添加按钮
         // 玩家自定义配置
-        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-custom.title"), AutoConfig.getConfigScreen(PlayerCustomConfig.class, this));
+        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-custom.title"), AutoConfigClient.getConfigScreen(PlayerCustomConfig.class, this));
         Config_BTN_Y_Pos += Config_BTN_Size_Y + Config_BTN_Interval;
         // 客户端配置
-        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-client.title"), AutoConfig.getConfigScreen(ClientConfig.class, this));
+        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-client.title"), AutoConfigClient.getConfigScreen(ClientConfig.class, this));
         Config_BTN_Y_Pos += Config_BTN_Size_Y + Config_BTN_Interval;
         // 双端配置
-        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-common.title"), AutoConfig.getConfigScreen(CommonConfig.class, this));
+        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.shape-shifter-curse-common.title"), AutoConfigClient.getConfigScreen(CommonConfig.class, this));
         Config_BTN_Y_Pos += Config_BTN_Size_Y + Config_BTN_Interval;
 
         // 自定义形态颜色新 UI V2
@@ -52,7 +55,7 @@ public class ConfigMenuScreen extends Screen {
         Config_BTN_Y_Pos += Config_BTN_Size_Y + Config_BTN_Interval;
 
         // 被吞进去的Apoli配置 **** 提取起源模组时记得删除这项 ****
-        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.power_config.title"), AutoConfig.getConfigScreen(ApoliConfigClient.class, this));
+        AddButton(Config_BTN_X_Pos, Config_BTN_Y_Pos, Config_BTN_Size_X, Config_BTN_Size_Y, Component.translatable("text.autoconfig.power_config.title"), AutoConfigClient.getConfigScreen(ApoliConfigClient.class, this));
         Config_BTN_Y_Pos += Config_BTN_Size_Y + Config_BTN_Interval;
 
         // **** 在这里添加配置 ****
@@ -89,9 +92,11 @@ public class ConfigMenuScreen extends Screen {
         Minecraft.getInstance().setScreen(parent);
     }
 
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 1.21.11: Screen.render 已自动调用 renderBackground（内部 blur），
-        // 这里再手动调会 "Can only blur once per frame" 崩溃，只需 super.render
-        super.render(context, mouseX, mouseY, delta);
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        // 26.1: Screen#render 已改名为 extractRenderState。
+        // ⚠ 原名不存在了 —— 继续写 render(...) 编译能过但**不构成覆写**，是个永不执行的死方法。
+        // 背景由框架经 extractBackground 自动调用，这里只管 super（会遍历 renderables）。
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 }

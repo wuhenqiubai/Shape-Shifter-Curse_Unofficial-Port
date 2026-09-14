@@ -1,14 +1,14 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
+import com.geckolib.constant.DataTickets;
+import com.geckolib.renderer.GeoObjectRenderer;
+import com.geckolib.renderer.base.GeoRenderState;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
-import software.bernie.geckolib.constant.DataTickets;
-import software.bernie.geckolib.renderer.GeoObjectRenderer;
-import software.bernie.geckolib.renderer.base.GeoRenderState;
 
 import java.util.ArrayList;
 
@@ -41,7 +41,7 @@ public class EntityOverlayRenderSystem {
                 GeoRenderState.Impl rs = cocoonRenderer.createRenderState(EmptyAnimatable, null);
                 cocoonRenderer.fillRenderState(EmptyAnimatable, null, rs, tickDelta);
                 rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
-                cocoonRenderer.performRenderPass(rs, matrices, Minecraft.getInstance().gameRenderer.getSubmitNodeStorage(), Minecraft.getInstance().gameRenderer.getLevelRenderState().cameraRenderState, null);
+                cocoonRenderer.performRenderPass(rs, matrices, Minecraft.getInstance().gameRenderer.getSubmitNodeStorage(), Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState, null);
                 matrices.popPose();
             }
         });

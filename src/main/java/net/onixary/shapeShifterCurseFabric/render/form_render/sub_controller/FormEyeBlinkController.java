@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render.sub_controller;
 
+import com.geckolib.cache.model.GeoBone;
 import com.google.gson.JsonObject;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
@@ -9,7 +10,6 @@ import net.onixary.shapeShifterCurseFabric.config.ClientConfig;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
 import net.onixary.shapeShifterCurseFabric.util.util.CachedDataMap;
 import net.onixary.shapeShifterCurseFabric.util.util.ICachedDataMap;
-import software.bernie.geckolib.cache.model.GeoBone;
 
 import java.util.Random;
 import java.util.UUID;

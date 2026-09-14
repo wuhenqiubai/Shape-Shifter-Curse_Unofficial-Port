@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.MultiLineTextWidget;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -182,7 +182,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public void renderWidget(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int i = this.getX();
         int j = this.getY();
         if (this.enableScrollableIconRender) {
@@ -211,7 +211,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
         int lineY = j;
         for (FormattedCharSequence line : lines) {
             int lineX = this.centered ? i + (this.MaxWidth + this.modMaxWidth - font.width(line)) / 2 : i;
-            context.drawString(font, line, lineX, lineY, l, this.shadow);
+            context.text(font, line, lineX, lineY, l, this.shadow);
             lineY += k;
         }
         pose.popMatrix();

@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.screen;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
@@ -47,12 +47,12 @@ public class WaitForNextLayerScreen extends Screen {
     }
 
     @Override
-    public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
+    public void extractRenderState(@NonNull GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if(maxSelection == 0) {
             openSelection();
             return;
         }
-        super.render(context, mouseX, mouseY, delta);
+        super.extractRenderState(context, mouseX, mouseY, delta);
     }
 
 }

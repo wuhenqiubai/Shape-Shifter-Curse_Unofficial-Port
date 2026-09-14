@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
@@ -24,9 +24,9 @@ public class ColorStringWidget extends StringWidget {
     }
 
     @Override
-    public void renderWidget(@NonNull GuiGraphics guiGraphics, int i, int j, float f) {
+    public void extractWidgetRenderState(@NonNull GuiGraphicsExtractor guiGraphics, int i, int j, float f) {
         // 与 StringWidget.visitLines 的垂直居中一致：文字顶 = y + (height - 9) / 2
         int y = this.getY() + (this.getHeight() - 9) / 2;
-        guiGraphics.drawString(this.getFont(), this.getMessage().getVisualOrderText(), this.getX(), y, this.color);
+        guiGraphics.text(this.getFont(), this.getMessage().getVisualOrderText(), this.getX(), y, this.color);
     }
 }

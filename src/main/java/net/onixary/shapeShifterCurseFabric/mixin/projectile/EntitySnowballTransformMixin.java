@@ -82,7 +82,7 @@ public abstract class EntitySnowballTransformMixin {
     }
 
     // 在流体更新方法中检测
-    @Inject(method = "updateInWaterStateAndDoFluidPushing", at = @At("HEAD"))
+    @Inject(method = "updateFluidInteraction", at = @At("HEAD"))
     private void onEnterWater(CallbackInfoReturnable<Boolean> cir) {
         // 检查当前实体是否为雪球
         if (!((Object) this instanceof Snowball snowball)) {

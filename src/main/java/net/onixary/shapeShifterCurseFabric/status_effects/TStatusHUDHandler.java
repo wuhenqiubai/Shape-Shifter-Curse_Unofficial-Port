@@ -13,7 +13,7 @@ public class TStatusHUDHandler {
         // 在原版效果列表下方添加描述
         ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
             if (screen instanceof InventoryScreen) {
-                ScreenEvents.afterRender(screen).register((_screen, context, mouseX, mouseY, delta) -> {
+                ScreenEvents.afterExtract(screen).register((_screen, context, mouseX, mouseY, delta) -> {
                     if (Minecraft.getInstance().player == null) return;
 
                     // 原版状态栏的起始坐标（需根据版本调整）
@@ -32,7 +32,7 @@ public class TStatusHUDHandler {
                             // 计算 Y 坐标（每个效果间隔 20 像素）
                             int y = baseY + (index * (int)(20 / 0.5));
 
-                            context.drawString(
+                            context.text(
                                     client.font,
                                     description,
                                     (int)(baseX / 0.5f),

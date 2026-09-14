@@ -151,13 +151,9 @@ dependencies {
 
     api ("curse.maven:pehkuirebuilt-1639070:8730684")
 
-    api("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+    implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
     include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
-    api("org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}") {
-        exclude(group: "net.fabricmc.fabric-api")
-    }
+    implementation "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}"
     include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}"
 
     api("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
@@ -212,7 +208,8 @@ tasks.withType(JavaCompile).configureEach {
         it.options.release.set(targetJavaVersion)
     }
     options.deprecation = false
-    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal"]
+    // -Xmaxerrs 提高 javac 报错上限（默认为 100）。
+    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
 }
 
 java {
