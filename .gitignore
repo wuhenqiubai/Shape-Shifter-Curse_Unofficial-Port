@@ -139,7 +139,7 @@ build_*.txt
 /.gitnexus/
 
 # Build/dependency artifacts
-/libs/
+/libs/maven_local/
 /io/
 /net/
 /assets/
