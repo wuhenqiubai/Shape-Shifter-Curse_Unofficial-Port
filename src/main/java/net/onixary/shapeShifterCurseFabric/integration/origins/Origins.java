@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.PowerType;
-import io.github.apace100.apoli.power.PowerTypes;
 import io.github.apace100.calio.resource.OrderedResourceListenerInitializer;
 import io.github.apace100.calio.resource.OrderedResourceListenerManager;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -16,6 +15,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
@@ -114,23 +114,43 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 
 	@Override
 	public void registerResourceListeners(OrderedResourceListenerManager manager) {
+		// 26.1: Apoli 已把 apoli:powers 迁到 Fabric v1 ResourceLoader（见 libs/apoli 的 Apoli.java），
+		// Calio 的 OrderedResourceListenerManager 里**不再有** apoli:powers 这个 id。
+		// 原先用 .before(powerData)/.after(powerData) 声明跨系统的排序依赖，会被 Calio 的
+		// `dependencies.removeIf(id -> !registrations.containsKey(id))` 静默丢弃 ——
+		// 后果是 OriginManager 先于 PowerTypes 执行，此刻 PowerTypeRegistry 还是空表，
+		// 于是每个 origin 的每个 power 都报 "contained unregistered power"（实测 738 条）。
+		//
+		// 所以这些 listener 也一并改走 v1，用 addListenerOrdering 声明顺序。
+		// 方法签名保留 —— fabric.mod.json 的 calio:ordered-resource-listener entrypoint 仍会调用它，
+		// 只是形参 manager 不再使用（与上游 Origins-Legacy 的改法一致）。
+		//
+		// 顺序（沿用原先 .before/.after 的语义）：
+		//   tagLoader → powers → origins → origin_layers
+		//   badgeLoader → powers
+		ResourceLoader loader = ResourceLoader.get(PackType.SERVER_DATA);
 		Identifier powerData = Apoli.identifier("powers");
 		Identifier originData = Origins.identifier("origins");
 
 		// Ensure origins namespace tags are registered before power loading
 		OriginsTagLoader tagLoader = new OriginsTagLoader();
-		manager.register(PackType.SERVER_DATA, tagLoader).before(powerData).complete();
-		PowerTypes.DEPENDENCIES.add(tagLoader.getFabricId());
+		loader.registerReloadListener(tagLoader.getFabricId(), tagLoader);
+		loader.addListenerOrdering(tagLoader.getFabricId(), powerData);
 
-		// 1.21.11: 用 registerWithRegistries 传入 HolderLookup.Provider（Origin 解析 icon 的 ItemStack 需要非 null registry）
-		manager.registerWithRegistries(originData, OriginManager::new).after(powerData).complete();
-		manager.register(PackType.SERVER_DATA, new OriginLayers()).after(originData).complete();
+		// OriginManager 现在自己从 ResourceLoader.REGISTRY_LOOKUP_KEY 取 HolderLookup.Provider
+		// （见其 prepareSharedState），不再需要 Calio 的 registerWithRegistries 注入。
+		loader.registerReloadListener(originData, new OriginManager());
+		loader.addListenerOrdering(powerData, originData);
+
+		OriginLayers originLayers = new OriginLayers();
+		loader.registerReloadListener(originLayers.getFabricId(), originLayers);
+		loader.addListenerOrdering(originData, originLayers.getFabricId());
 
 		BadgeManager.init();
 
 		IdentifiableResourceReloadListener badgeLoader = BadgeManager.REGISTRY.getLoader();
-		manager.register(PackType.SERVER_DATA, badgeLoader).before(powerData).complete();
-		PowerTypes.DEPENDENCIES.add(badgeLoader.getFabricId());
+		loader.registerReloadListener(badgeLoader.getFabricId(), badgeLoader);
+		loader.addListenerOrdering(badgeLoader.getFabricId(), powerData);
 	}
 
 	@Config(name = Origins.MODID + "_server")
