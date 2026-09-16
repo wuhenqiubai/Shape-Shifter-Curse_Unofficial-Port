@@ -1,6 +1,8 @@
 [submodule "libs/apoli"]
 	path = libs/apoli
 	url = https://github.com/wuhenqiubai/Apoli-Legacy.git
+	branch = versions/26.1
 [submodule "libs/calio"]
 	path = libs/calio
 	url = https://github.com/wuhenqiubai/Calio-Legacy.git
+	branch = versions/26.1
