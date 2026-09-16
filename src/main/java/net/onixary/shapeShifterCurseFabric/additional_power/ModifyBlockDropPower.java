@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -50,7 +51,7 @@ public class ModifyBlockDropPower extends Power {
                 new SerializableData()
                         .add("block_condition", ApoliDataTypes.BLOCK_CONDITION, null)
                         .add("chance", SerializableDataTypes.FLOAT, 0.0f)
-                        .add("target_item_stack_list", SerializableDataTypes.ITEM_STACKS, null),
+                        .add("target_item_stack_list", CompatibilityDataTypes.ITEM_OR_ITEM_STACK_LIST, null),
                 data -> (powerType, entity) -> new ModifyBlockDropPower(powerType, entity, data)
         ).allowCondition();
     }

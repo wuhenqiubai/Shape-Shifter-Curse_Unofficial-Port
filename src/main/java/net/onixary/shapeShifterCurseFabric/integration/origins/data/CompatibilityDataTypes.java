@@ -7,6 +7,8 @@ import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.List;
+
 public final class CompatibilityDataTypes {
 
     // Calio 1.11.4: SerializableDataTypes.ITEM_STACK 的类型由 SerializableDataType<ItemStack>
@@ -28,4 +30,13 @@ public final class CompatibilityDataTypes {
             return new ItemStack(item);
         }
     );
+
+    /**
+     * {@link #ITEM_OR_ITEM_STACK} 的列表版 —— 对应 Calio 的 {@code SerializableDataTypes.ITEM_STACKS}
+     * （其元素同样已是 LazyItemStack），这里把每个元素解包回 ItemStack。
+     * <p>
+     * ⚠ 必须声明在上面那个单数版**之后** —— 静态初始化器里引用后声明的静态字段是「非法前向引用」，编译不过。
+     */
+    public static final SerializableDataType<List<ItemStack>> ITEM_OR_ITEM_STACK_LIST =
+        SerializableDataType.list(ITEM_OR_ITEM_STACK);
 }

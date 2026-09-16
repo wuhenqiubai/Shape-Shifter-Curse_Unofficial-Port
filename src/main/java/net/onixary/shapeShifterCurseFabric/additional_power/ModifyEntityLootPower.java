@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 
 public class ModifyEntityLootPower extends Power {
     private final ConditionFactory<ItemStack>.Instance FromItemCondition;
@@ -48,7 +49,7 @@ public class ModifyEntityLootPower extends Power {
                         .add("from_item_condition", ApoliDataTypes.ITEM_CONDITION, null)
                         .add("chance", SerializableDataTypes.FLOAT, 0.0f)
                         .add("target_item", SerializableDataTypes.ITEM, null)  // 保留除了物品的所有数据
-                        .add("target_item_stack", SerializableDataTypes.ITEM_STACK, null),  // 直接修改掉落物品
+                        .add("target_item_stack", CompatibilityDataTypes.ITEM_OR_ITEM_STACK, null),  // 直接修改掉落物品
                 data -> (powerType, entity) -> new ModifyEntityLootPower(powerType, entity, data)
         ).allowCondition();
     }

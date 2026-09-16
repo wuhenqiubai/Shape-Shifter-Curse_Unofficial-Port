@@ -22,6 +22,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 import net.onixary.shapeShifterCurseFabric.render.tech.ItemStorePowerRender;
 import org.jetbrains.annotations.Nullable;
 
@@ -186,7 +187,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
                 ShapeShifterCurseFabric.identifier("gain_store_power_item"),
                 new SerializableData()
                         .add("id", SerializableDataTypes.IDENTIFIER, null)
-                        .add("item", SerializableDataTypes.ITEM_STACK, null)
+                        .add("item", CompatibilityDataTypes.ITEM_OR_ITEM_STACK, null)
                         .add("if_no_power_drop", SerializableDataTypes.BOOLEAN, true),
                 (data, entity) -> {
                     ItemStorePower itemStorePower = findPower(entity, data.get("id"));

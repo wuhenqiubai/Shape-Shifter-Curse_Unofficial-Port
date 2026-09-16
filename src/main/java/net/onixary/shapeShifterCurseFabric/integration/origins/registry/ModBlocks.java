@@ -30,4 +30,17 @@ public class ModBlocks {
         }
         return block;
     }
+
+    /**
+     * 仅用于**触发本类的静态初始化** —— 方块是在静态字段里调 registerBlock(...) 注册的，
+     * 而 JVM 只在类被首次主动引用时才跑 {@code <clinit>}。必须由某个入口显式调用本方法，
+     * 否则方块根本不会注册（表现为数据包 tag 报 "missing following references: origins:temporary_cobweb"）。
+     * <p>
+     * ⚠ 26.1 之前这个副作用是"顺带"发生的：{@code OriginsClient} 里有一行
+     * {@code BlockRenderLayerMap.putBlock(ModBlocks.TEMPORARY_COBWEB, ...)} 引用了它。
+     * 26.1 删除 BlockRenderLayerMap 时那行被移除，静态初始化就此失效 —— 故现在改为显式调用。
+     */
+    public static void register() {
+        // 空实现：调用本身即触发 <clinit>
+    }
 }

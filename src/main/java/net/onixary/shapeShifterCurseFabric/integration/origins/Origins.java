@@ -77,7 +77,11 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		OriginsPowerTypes.register();
 		OriginsEntityConditions.register();
 
-		// ModBlocks 静态初始化已注册（1.21.11 Block 需 setId）
+		// 26.1: BlockRenderLayerMap 被删除后，OriginsClient 里那行
+		// `BlockRenderLayerMap.putBlock(ModBlocks.TEMPORARY_COBWEB, ...)` 一并移除，
+		// 而它同时是 ModBlocks 类初始化的唯一触发点 —— 失去它方块就不会注册（tag 报 missing reference）。
+		// 故这里显式调用（空方法，仅触发 <clinit>）。
+		ModBlocks.register();
 		ModItems.register();
 		ModTags.register();
 		ModPacketsC2S.register();

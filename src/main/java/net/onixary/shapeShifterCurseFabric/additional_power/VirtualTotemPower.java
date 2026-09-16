@@ -22,6 +22,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.integration.origins.data.CompatibilityDataTypes;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -132,7 +133,7 @@ public class VirtualTotemPower extends CooldownPower {
                 ShapeShifterCurseFabric.identifier("virtual_totem"),
                 new SerializableData()
                         .add("virtual_totem_type", SerializableDataTypes.IDENTIFIER, ShapeShifterCurseFabric.identifier("default"))
-                        .add("totem_stack", SerializableDataTypes.ITEM_STACK)
+                        .add("totem_stack", CompatibilityDataTypes.ITEM_OR_ITEM_STACK)
                         .add("entity_actions", ApoliDataTypes.ENTITY_ACTIONS, null)
                         .add("totem_health", SerializableDataTypes.INT, 1)  // 默认1
                         .add("totem_status_effects", SerializableDataTypes.STATUS_EFFECT_INSTANCES, null)

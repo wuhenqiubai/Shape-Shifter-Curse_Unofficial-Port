@@ -3,9 +3,7 @@
   "ingredients": [
     "shape-shifter-curse:untreated_moondust"
   ],
-  "catalyst": {
-    "item": "minecraft:diamond"
-  },
+  "catalyst": "minecraft:diamond",
   "result": {
     "id": "shape-shifter-curse:untreated_moondust",
     "count": 2
