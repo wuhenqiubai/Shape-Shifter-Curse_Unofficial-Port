@@ -158,4 +158,9 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
         return ISubForm.super.getFormLayer();
     }
+
+    @Override
+    public ResourceLocation getPerkTreeID() {
+        return this.getMasterForm().getPerkTreeID();
+    }
 }

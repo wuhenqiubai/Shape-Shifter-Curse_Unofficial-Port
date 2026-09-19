@@ -9,7 +9,6 @@
     "ConduitOnLandMixin",
     "LikeWaterMixin",
     "LoginMixin",
-    "ModifyTypeTagMixin",
     "NoCobwebSlowdownMixin",
     "OriginUpgradeMixin",
     "ScareCreepersMixin",

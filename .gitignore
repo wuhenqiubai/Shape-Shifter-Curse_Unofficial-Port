@@ -139,9 +139,18 @@ build_*.txt
 /.gitnexus/
 
 # Build/dependency artifacts
-/libs/
 /io/
 /net/
+
+# 并入的子项目（Apoli-Legacy / Calio-Legacy / BOM）的构建产物 —— 它们的源码要入库，产物不要
+/apoli/build/
+/apoli/.gradle/
+/apoli/run/
+/calio/build/
+/calio/.gradle/
+/calio/run/
+/bom/build/
+/bom/.gradle/
 /assets/
 /data/
 /META-INF/MANIFEST.MF

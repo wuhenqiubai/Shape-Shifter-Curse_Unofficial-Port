@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "id": "calio-legacy",
+  "version": "${version}",
+  "provides": [
+    "calio"
+  ],
+  "name": "Calio: Legacy",
+  "description": "A simple library mod, mainly adds a serializable data system. Unofficial forward port beginning from 1.20.1.",
+  "authors": [
+    "Apace",
+    "BluSpring"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": "https://github.com/BluSpring/calio-legacy"
+  },
+
+  "license": "MIT",
+  "icon": "assets/calio/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.apace100.calio.Calio",
+      "io.github.apace100.calio.resource.OrderedResourceListener"
+    ],
+    "client": [
+      "io.github.apace100.calio.CalioClient"
+    ]
+  },
+  "mixins": [
+    "calio.mixins.json"
+  ],
+  "custom": {
+    "modmenu": {
+      "badges": ["library"]
+    }
+  },
+
+  "accessWidener": "calio.accesswidener",
+
+  "depends": {
+    "fabricloader": ">=0.16.7",
+    "fabric-api": "*",
+    "minecraft": ">=1.21.1",
+    "java": ">=21"
+  }
+}

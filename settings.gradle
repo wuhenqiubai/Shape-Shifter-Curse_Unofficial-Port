@@ -23,5 +23,18 @@ pluginManagement {
             url = 'https://maven.fabricmc.net/'
         }
     }
+    // loom 版本在此统一钉死，各子项目只写 `id 'fabric-loom'`（不带版本）。
+    // 同一个构建里 loom 只能有一个版本在 classpath 上，带版本会直接构建失败。
+    plugins {
+        id 'fabric-loom' version '1.17.19'
+    }
 }
+
+// Apoli-Legacy / Calio-Legacy 的源码已并入本仓库（原为两个独立仓库），
+// 作为子项目与 SSCU 一起编译 —— 布局参照 FabricAPI（模块顶层平级）。
+// 它们的 settings.gradle(.kts) 在本构建里不生效，只有这一份 settings 管全局。
+include 'apoli'
+include 'calio'
+include 'bom'
+
 rootProject.name = "Shape-Shifter-Curse_Unofficial-Port"

@@ -23,4 +23,9 @@ public interface IPerk {
     }
 
     default void onLoad(Player player, IForm form) { }
+
+    // 非动态数据 仅在开UI时同步
+    default int getXpCost() {
+        return 0;
+    }
 }

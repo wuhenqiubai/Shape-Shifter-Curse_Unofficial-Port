@@ -1,10 +1,20 @@
 plugins {
-    id 'fabric-loom' version '1.17.19'
+    // 版本在 settings.gradle 的 pluginManagement.plugins 里统一钉死（loom 只能有一个版本在 classpath 上）
+    id 'fabric-loom'
     id 'maven-publish'
 }
 
 version = "${project.mod_version}${project.special_build_version}+${minecraft_version}"
 group = project.maven_group
+
+// Apoli / Calio 的源码已并入本仓库（见 settings.gradle）。monorepo 下各模块自持版本号没有意义，
+// 这里统一成 SSCU 的 group + version —— 发布坐标因此是
+// net.wuhenqiubai:{shape-shifter-curse-unofficial, Apoli-Legacy, Calio-Legacy}:<同一个版本>。
+// ⚠ 子项目自己的 build 脚本里不能再写 version/group，否则会覆盖这里。
+subprojects {
+    version = rootProject.version
+    group = rootProject.group
+}
 
 // 从Github Action 环境获取构建Channel和BuildVersion
 def channel = System.getenv('channel')
@@ -15,7 +25,7 @@ if (channel == null || build_version == null) {
 }
 
 base {
-    archivesName = "${project.archives_base_name}"
+    archivesName = project.archives_base_name
 }
 
 loom {
@@ -66,8 +76,7 @@ repositories {
         }
 
     }
-
-    // (Neo)ForgeMaven
+    // CurseMaven
     exclusiveContent {
         forRepository {
             maven {
@@ -77,11 +86,6 @@ repositories {
         filter {
             includeGroup "curse.maven"
         }
-    }
-
-    maven {
-        name = "QuiltMC"
-        url = "https://maven.quiltmc.org/repository/release"
     }
     maven {
         name = "Ladysnake Mods"
@@ -142,33 +146,12 @@ repositories {
             includeGroup("software.bernie.geckolib")
         }
     }
-    maven {
-        name = 'Fabric-Hangbing_Proxy'
-        url = "https://repository.hanbings.io/proxy"
-    }
-    maven {
-        name = 'Fabric-BMCL'
-        url = 'https://bmclapi2.bangbang93.com/maven/'
-    }
-    maven {
-        name = 'Fabric-Meta'
-        url = 'https://meta.fabricmc.net/'
-    }
-    maven {
-        name = 'Fabric-Meta-BMCL'
-        url = 'https://bmclapi2.bangbang93.com/fabric-meta'
-    }
-    maven {
-        name = 'Fabric'
-        url = 'https://maven.fabricmc.net/'
-    }
 }
 
 dependencies {
 
     //要更改版本，请查看 gradle.properties 文件
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    // mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     mappings loom.officialMojangMappings()
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
@@ -189,11 +172,13 @@ dependencies {
     // satin shader 1.21.11没有
 //    modImplementation "org.ladysnake:satin:${satin_version}"
 
-    // 使用BluSpring大佬的Apoli-Legacy，减少移植难度
-    modImplementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
-    include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
-//    modImplementation "io.github.apace100:Calio-Legacy:${project.calio_version}"
-//    include "io.github.apace100:Calio-Legacy:${project.calio_version}"
+    // Apoli-Legacy（本仓库子项目，源码已并入；Calio 由它自己传递进来）
+    // ⚠ 同级 loom 项目必须用 `configuration: "namedElements"`（未 remap 的 dev 产物），
+    //   用 `modApi project(":apoli")` 会让 loom 去读 :apoli 的 remap 产物 build/libs/*.jar，
+    //   而那个文件在配置期还不存在 → "Failed to setup Minecraft ... NoSuchFileException"。
+    //   用 api（而非 modApi）也是为了让它以 compile 作用域进发布元数据，Addon 才能只声明 SSCU 传递拿到 Apoli。
+    api project(path: ":apoli", configuration: "namedElements")
+    include project(":apoli")
 
     // Pehkui-Rebuilt 3.8.5+1.21.11
     modApi ("curse.maven:pehkuirebuilt-1639070:8670127")
@@ -236,7 +221,7 @@ dependencies {
     modCompileOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
     // modRuntimeOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
 
-    // modCompileOnly "curse.maven:biomes-o-plenty-220318:6364066"
+     modCompileOnly "maven.modrinth:biomes-o-plenty:fhyqphwv"
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
      modImplementation "maven.modrinth:jei:HWSzfi9w" //JEI 19.44.0.401 for Fabric 1.21.1
@@ -268,16 +253,12 @@ processResources {
 
 def targetJavaVersion = 21
 tasks.withType(JavaCompile).configureEach {
-    // ensure that the encoding is set to UTF-8, no matter what the system default is
-    // this fixes some edge cases with special characters not displaying correctly
-    // see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
-    // If Javadoc is generated, this must be specified in that task too.
     it.options.encoding = "UTF-8"
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
         it.options.release.set(targetJavaVersion)
     }
     options.deprecation = false
-    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal"]
+    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
 }
 
 java {
@@ -291,9 +272,25 @@ java {
     withSourcesJar()
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+
+// 代码为 MIT，模型/贴图/动画等资源为 CC BY-NC 4.0，两份协议都要随产物分发
+def licenseFiles = [
+        "LICENSE.txt"              : "LICENSE_${project.base.archivesName.get()}.txt",
+        "LICENSE-CC-BY-NC-4.0.txt" : "LICENSE-CC-BY-NC-4.0_${project.base.archivesName.get()}.txt",
+        "LICENSING.md"             : "LICENSING_${project.base.archivesName.get()}.md",
+        "THIRD-PARTY-NOTICES.md"   : "THIRD-PARTY-NOTICES_${project.base.archivesName.get()}.md",
+]
+
+// 同时覆盖 dev 产物与 remap 后的产物（jar / sourcesJar / remapJar / remapSourcesJar）
+// duplicatesStrategy 说明：remapJar/remapSourcesJar 会继承 jar/sourcesJar 的输出，而后者已经带上这 4 个
+// 协议文件，所以这里再加一次必然重名。Gradle 9 默认对重复条目直接报错（BUILD FAILED），设成 EXCLUDE
+// 让先到的那份生效 —— 两边取自同一个源文件，内容完全相同，无副作用。
+tasks.matching { it.name in ["jar", "sourcesJar", "remapJar", "remapSourcesJar"] }.configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    licenseFiles.each { source, target ->
+        from(source) {
+            rename { target }
+        }
     }
 }
 

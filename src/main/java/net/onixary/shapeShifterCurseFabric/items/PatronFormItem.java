@@ -26,7 +26,7 @@ public class PatronFormItem extends Item {
             return super.use(world, user, hand);
         }
         if (!world.isClientSide()) {
-            ModPacketsS2CServer.OpenPatronFormSelectMenu(((ServerPlayer) user));
+            ModPacketsS2CServer.OpenOldPatronFormSelectMenu(((ServerPlayer) user));
         }
         return super.use(world, user, hand);
     }

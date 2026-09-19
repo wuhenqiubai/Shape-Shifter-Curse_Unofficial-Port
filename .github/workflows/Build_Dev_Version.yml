@@ -42,4 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4.3.3
         with:
           name: "${{ steps.properties.outputs.archives_base_name }}-${{ steps.properties.outputs.mod_version }}${{ steps.properties.outputs.special_build_version }}-${{ env.channel }}.${{ env.build_version }}"
-          path: build/libs/${{ steps.properties.outputs.archives_base_name }}-${{ steps.properties.outputs.mod_version }}${{ steps.properties.outputs.special_build_version }}.jar
+          # 路径必须与 build.gradle 的 version 拼法一致：
+          #   version = "${mod_version}${special_build_version}+${minecraft_version}"
+          # 少写末尾的 +minecraft_version 会让这里匹配不到任何文件，upload-artifact 直接报错。
+          path: build/libs/${{ steps.properties.outputs.archives_base_name }}-${{ steps.properties.outputs.mod_version }}${{ steps.properties.outputs.special_build_version }}+${{ steps.properties.outputs.minecraft_version }}.jar

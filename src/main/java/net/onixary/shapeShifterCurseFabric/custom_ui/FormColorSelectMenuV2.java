@@ -1244,4 +1244,15 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public boolean keepOriginalSkin() {
         return this.keepCustomSkin;
     }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+            return true;
+        } else if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+            this.onClose();
+            return true;
+        }
+        return false;
+    }
 }

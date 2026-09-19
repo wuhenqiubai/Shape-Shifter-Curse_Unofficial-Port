@@ -10,7 +10,7 @@ import net.onixary.shapeShifterCurseFabric.util.ModTags;
 
 public class IsMorphScaleItemCondition {
     public static final String IsMorphScaleArmorTagName = "MorphScaleItem";
-    public static final String IsMorphScaleFoodTagName = "MorphScaleFood";  // TODO 得改一下名称 我想不出名字了
+    public static final String IsMorphScaleFoodTagName = "MorphScaleFood";
 
     public static boolean MSI_condition(SerializableData.Instance data, ItemStack itemStack) {
         if (itemStack.is(ModTags.MorphScaleItem_Tag)) {

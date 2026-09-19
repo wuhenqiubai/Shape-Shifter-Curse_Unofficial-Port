@@ -1,0 +1,46 @@
+// 聚合 BOM —— 布局与做法参照 FabricAPI 的 fabric-api-bom（java-platform + constraints）。
+//
+// 作用：本仓库现在是 monorepo，SSCU / Apoli-Legacy / Calio-Legacy 三个模块共用同一个 group + version
+// （由根 build.gradle 的 subprojects {} 统一设置）。消费者只要
+//     modImplementation platform("net.wuhenqiubai:shape-shifter-curse-bom:<version>")
+//     modImplementation "net.wuhenqiubai:shape-shifter-curse-unofficial:<version>"
+// 就能一次把三个模块的版本对齐，不必各自写版本号。
+//
+// ⚠ 注意 BOM 只统一「版本」，不能让消费者凭空拿到 Apoli 的 API ——
+//    那要靠 SSCU 的发布元数据里 Apoli 是 compile(api) 依赖（build.gradle 里用的是 modApi project(":apoli")），
+//    以及 Apoli 的坐标本身可被解析（本地开发走 publishToMavenLocal）。
+plugins {
+    id 'java-platform'
+    id 'maven-publish'
+}
+
+// group / version 由根 build.gradle 的 subprojects {} 统一，此处不再重复声明
+
+dependencies {
+    constraints {
+        // 把本构建里除 BOM 自己以外的所有项目都收进约束（根项目 ":"=SSCU 本体、:apoli、:calio）
+        for (proj in rootProject.allprojects) {
+            if (proj == project) {
+                continue
+            }
+            api(project(proj.path))
+        }
+    }
+}
+
+publishing {
+    publications {
+        create('mavenJava', MavenPublication) {
+            artifactId = 'shape-shifter-curse-bom'
+            from components['javaPlatform']
+        }
+    }
+    // 与 SSCU 的 publishing 一样不配远程仓库，只走 publishToMavenLocal
+    repositories {}
+}
+
+// BOM 的约束是靠 Gradle module metadata(.module) 传给消费者的，这里显式打开以免将来被别处关掉。
+// （本仓库目前没有任何地方改过这个开关，属防御性写法；fabric-api-bom 里也有同一条。）
+tasks.withType(GenerateModuleMetadata).configureEach {
+    enabled = true
+}

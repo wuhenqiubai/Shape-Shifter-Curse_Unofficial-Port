@@ -10,24 +10,18 @@
 > 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
 > 在发布稳定版本后会偶尔发布我的小巧思。
 
->
-> **基于上游commit**: [986c0cc](https://github.com/onixary/shape-shifter-curse-fabric/commits/master/)
-> 
-## 已知问题
-
-- 目前大部分已知问题在 [#Issue10](https://github.com/wuhenqiubai/Shape-Shifter-Curse_Unofficial-Port/issues/10) 中有说明。
-
   ---
 
   | MC版本 | 更新状态 | 备注 |
   |---|---|---|
-  | <1.21 | 无计划 | 不计划降级更新 |
-  | 1.21.1FC | 活跃 | 正式版本，跟随官方版本更新 |
-  | 1.21.1Connector | 活跃 | 更新速度慢于FC版，未发现恶性bug时不主动更新 |
-  | 1.21.5FC | 计划中 | 正在开发Pehkui |
-  | 1.21.7FC | 计划中 | 同上 |
-  | 1.21.11FC | 活跃 | 主动跟进1.21.1FC版本更新 |
-  | 26.x | 计划中 | 观望社区再决策 |
+  | <1.21 | 无计划 | 无降级计划 |
+  | 1.21.1FC/Connector | 活跃 | 正式版本，跟随官方版本更新 |
+  | 1.21.2 ~ 1.21.10 | 无计划 | 无支持计划 |
+  | 1.21.11FC | 活跃 | 跟随1.21.1分支更新 |
+  | 26.1FC | 活跃 | 跟随1.21.11分支更新 |
+  | 26.2 | 计划中 | 在26.1发布后作计划 |
+
+  **关于SSCU NeoForge** ： 观望SSC官方的双端计划动向，暂时仅对信雅互联做兼容。
 
 ---
 
@@ -48,3 +42,12 @@
 | [Claude Code](https://claude.com/product/claude-code)                       | 代码辅助 |
 | [onixary](https://github.com/onixary)         | 原作者                 |
 | [xu233333](https://github.com/xu233333)       | 原作者                 |
+
+## 授权
+
+- 源代码：[MIT 许可证](LICENSE.txt)
+- 媒体资源（3D 模型、贴图、动画、音效、字体、翻译文本）：
+  [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt)，仅限非商业用途
+- 第三方代码与资源：遵循其原始授权，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+
+各许可证的具体适用范围见 [LICENSING.md](LICENSING.md)。

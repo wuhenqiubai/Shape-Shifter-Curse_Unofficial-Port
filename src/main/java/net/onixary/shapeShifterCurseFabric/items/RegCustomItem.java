@@ -87,6 +87,14 @@ public class RegCustomItem {
     public static final Item WEB_PROJECTILE = register("web_projectile", Item::new);
     public static final Item SILK_DEW = register("silk_dew", SilkDew::new);
 
+    public static final Item RIPPLE_MIRROR = register("ripple_mirror", new RippleMirror(new Item.Properties()));
+
+    public static ItemStack buildPotion(Item PotionItem, Potion potion) {
+        ItemStack potionStack = new ItemStack(PotionItem);
+        potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
+        return potionStack;
+    }
+
     public static final CreativeModeTab SSC_GROUP = new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
             .icon(() -> new ItemStack(ICON_CURSED_MOON))
             .title(Component.translatable("itemGroup.shape_shifter_curse.sscitems"))
@@ -135,6 +143,7 @@ public class RegCustomItem {
                 entries.accept(AUXILIARY_AXE);
                 entries.accept(SELECT_FORM_ITEM);
                 entries.accept(SILK_DEW);
+                entries.accept(RIPPLE_MIRROR);
                 // 方块物品注册
                 entries.accept(MOONDUST_CRYSTAL_GRIT);
                 entries.accept(WEB_COMPOSTER);

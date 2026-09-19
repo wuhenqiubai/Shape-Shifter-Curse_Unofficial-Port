@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "id": "apoli-legacy",
+  "version": "${version}",
+  "provides": [
+    "apoli"
+  ],
+  "name": "Apoli: Legacy",
+  "description": "A library mod which allows entities to be imbued with data-driven powers. Unofficial forward port beginning from 1.20.1.",
+  "authors": [
+    "Apace",
+    "BluSpring"
+  ],
+  "contact": {
+    "homepage": "",
+    "sources": "https://github.com/BluSpring/apoli-legacy"
+  },
+
+  "license": "MIT",
+  "icon": "assets/apoli/icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "io.github.apace100.apoli.Apoli"
+    ],
+    "client": [
+      "io.github.apace100.apoli.ApoliClient"
+    ],
+    "server": [
+      "io.github.apace100.apoli.ApoliServer"
+    ],
+    "cardinal-components-entity": [
+      "io.github.apace100.apoli.Apoli"
+    ],
+    "modmenu": [
+      "io.github.apace100.apoli.integration.ModMenuIntegration"
+    ],
+    "calio:ordered-resource-listener": [
+      "io.github.apace100.apoli.Apoli"
+    ]
+  },
+  "mixins": [
+    "apoli.mixins.json"
+  ],
+  "custom": {
+    "cardinal-components": [
+      "apoli:powers"
+    ],
+    "modmenu": {
+      "badges": ["library"]
+    },
+    "lithium:options": {
+      "mixin.entity.collisions.suffocation": false
+    }
+  },
+
+  "accessWidener": "apoli.accesswidener",
+
+  "depends": {
+    "java": ">=21",
+    "fabricloader": ">=0.16.7",
+    "fabric-api": ">=0.116.1",
+    "minecraft": ">=1.21.1",
+    "calio-legacy": ">=1.11.0",
+    "cloth-config": ">=15.0.127"
+  }
+}

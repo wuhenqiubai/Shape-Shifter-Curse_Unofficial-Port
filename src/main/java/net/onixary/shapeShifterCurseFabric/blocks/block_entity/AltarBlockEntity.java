@@ -45,7 +45,11 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     // data slot 网络用 16-bit(short) 传输，值域 [-32768,32767]；而 fuelTime 可累积到 102400 超上限，
     // 超过 32767 会被 writeShort 截断成负值 → 客户端燃料条"消失-重涨"。
     // 按原作者建议：用 2 个 short 无损拆分传输 fuelTime —— slot 2=低16位, slot 3=高16位，
-    // 客户端 getNowFuel() 拼回完整 int。getCount()/size() 相应从 3 增到 4。
+    // 客户端 getNowFuel() 拼回完整 int。getCount() 相应从 3 增到 4。
+    // ⚠ 这里不要写 `public int size()`：1.21 Mojmap 的 ContainerData 只有 get/set/getCount，
+    //   `size()` 是 1.20.1 Yarn 时代的遗留（已无调用方）。它会让匿名类同时存在 `size` 和
+    //   `method_17389`(=getCount)，下游用 Yarn 映射的模组（Addon）把 jar 从 intermediary remap 回
+    //   yarn 时两者都叫 size → tiny-remapper "Unfixable conflicts"，整个包 remap 失败。
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
@@ -110,10 +114,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
 
             }
 
-            public int size() {
-                return 4;
-            }
-
             public int getCount() {
                 return 4;
             }
@@ -121,12 +121,12 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     @Override
-    protected Component getDefaultName() {
+    protected @NotNull Component getDefaultName() {
         return Component.translatable("block.shape-shifter-curse.altar");
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
+    protected @NotNull AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
         return new AltarCraftUIHandler(RegMenuType.AltarCraftUI, syncId, playerInventory, this, ContainerLevelAccess.NULL, this.propertyDelegate);
     }
 

@@ -161,7 +161,7 @@ public class PlayerEventHandler {
         关闭自动保存有原版保存机制保存(CCA将数据塞进玩家NBT 原版再把玩家NBT保存)
         ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
             for (ServerWorld world : server.getWorlds()) {
-                if (world.getRegistryKey() == World.OVERWORLD) {
+                if (world.dimension() == World.OVERWORLD) {
                     ShapeShifterCurseFabric.LOGGER.info("Cursed moon data saved by server stop");
                     // 保存所有玩家状态
                     for (ServerPlayerEntity player : world.getPlayers()) {

@@ -51,18 +51,6 @@ public class OriginsPowerTypes {
 		                data.get("entity_action_chosen"),
                     data.getBoolean("execute_chosen_when_orb")))
             .allowCondition());
-
-	    // apoli:modify_type_tag — makes entity be considered in the specified entity type tag
-	    // Replacement for the removed apoli:entity_group power type
-	    // 1.21.1: 改用 Legacy 原生 apoli:entity_group（数据已切换为 aquatic/arthropod 枚举值），此注册保留但不再使用
-	    // register(new PowerFactory<>(Apoli.identifier("modify_type_tag"),
-	    //         new SerializableData()
-	    //                 .add("tag", SerializableDataTypes.ENTITY_TAG),
-	    //         data ->
-	    //                 (type, entity) -> {
-	    //                     TagKey<EntityType<?>> tag = data.get("tag");
-	    //                     return new ModifyTypeTagPower(type, entity, tag);
-	    //                 }).allowCondition());
     }
 
     private static void register(PowerFactory<?> serializer) {

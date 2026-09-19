@@ -43,9 +43,15 @@ public class ModPackets {
 
     public static final Identifier ACTIVE_VIRTUAL_TOTEM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "active_virtual_totem");
 
+    // 新版（1.21.11 侧原有；1.21.1 侧改名为下面的 OLD_*，但 1.21.11 的 ModPacketsS2C/S2CServer 仍在用这三个，故保留）
     public static final Identifier UPDATE_PATRON_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_patron_level");
     public static final Identifier OPEN_PATRON_FORM_SELECT_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_patron_form_select_menu");
     public static final Identifier SET_PATRON_FORM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_patron_form");
+
+    // 老版
+    public static final Identifier OLD_UPDATE_PATRON_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_update_patron_level");
+    public static final Identifier OLD_OPEN_PATRON_FORM_SELECT_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_open_patron_form_select_menu");
+    public static final Identifier OLD_SET_PATRON_FORM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_set_patron_form");
 
     // S2C 结构: UUID-玩家UUID Boolean-是否启用动画, (仅在启用动画时包含)Identifier-动画ID, Int-动画次数. Int-动画时长
     public static final Identifier UPDATE_POWER_ANIM_DATA_TO_CLIENT = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_power_anim_data_to_client");
@@ -68,5 +74,14 @@ public class ModPackets {
     public static final Identifier MELT_AUTH_SUB_KEY = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "melt_auth_sub_key");
 
     public static final Identifier SET_SUPER_USER_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_super_user_level");
+
     public static final Identifier ADD_PERK = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "add_perk");
+    public static final Identifier REQUEST_PERK_AVAILABILITY = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_perk_availability");
+    public static final Identifier SYNC_PERK_AVAILABILITY = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "sync_perk_availability");
+    public static final Identifier REQUEST_PERK_DATA = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_perk_data");
+    public static final Identifier SYNC_PERK_DATA = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "sync_perk_data");
+    public static final Identifier OPEN_FORM_UPGRADE_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_upgrade_menu");
+
+    public static final Identifier OPEN_SELECT_SUB_FORM_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_select_sub_form_menu");
+    public static final Identifier REQUEST_SET_SUB_FORM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_set_sub_form");
 }

@@ -20,11 +20,9 @@ import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
 import net.onixary.shapeShifterCurseFabric.client.ClientPlayerStateManager;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
-import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenu;
-import net.onixary.shapeShifterCurseFabric.custom_ui.FormColorSelectMenuV2;
-import net.onixary.shapeShifterCurseFabric.custom_ui.NormalFormSelectScreen;
-import net.onixary.shapeShifterCurseFabric.custom_ui.PatronFormSelectScreen;
+import net.onixary.shapeShifterCurseFabric.custom_ui.*;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
+import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimController;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
@@ -66,8 +64,8 @@ public class ModPacketsS2C {
         BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
         BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
         BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
-        BytePayload.registerS2C(ModPackets.UPDATE_PATRON_LEVEL);
-        BytePayload.registerS2C(ModPackets.OPEN_PATRON_FORM_SELECT_MENU);
+        BytePayload.registerS2C(ModPackets.OLD_UPDATE_PATRON_LEVEL);
+        BytePayload.registerS2C(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU);
         BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
         BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
         BytePayload.registerS2C(ModPackets.SET_NO_MOVE_TICK);
@@ -76,6 +74,10 @@ public class ModPacketsS2C {
         BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
         BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
         BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
+        BytePayload.registerS2C(ModPackets.SYNC_PERK_AVAILABILITY);
+        BytePayload.registerS2C(ModPackets.SYNC_PERK_DATA);
+        BytePayload.registerS2C(ModPackets.OPEN_FORM_UPGRADE_MENU);
+        BytePayload.registerS2C(ModPackets.OPEN_SELECT_SUB_FORM_MENU);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), ModPacketsS2C::receiveCursedMoonData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), ModPacketsS2C::receiveFormChange);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), ModPacketsS2C::receiveTransformState);
@@ -88,8 +90,8 @@ public class ModPacketsS2C {
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.LOGIN_PACKET), ModPacketsS2C::onPlayerConnectServer);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.ACTIVE_VIRTUAL_TOTEM), ModPacketsS2C::receiveActiveVirtualTotem);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT), ModPacketsS2C::receivePowerAnimationData);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_PATRON_LEVEL), ModPacketsS2C::receiveUpdatePatronLevel);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_PATRON_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenPatronFormSelectMenu);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OLD_UPDATE_PATRON_LEVEL), ModPacketsS2C::receiveOldUpdatePatronLevel);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU), ModPacketsS2C::receiveOldOpenPatronFormSelectMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenFormSelectMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), ModPacketsS2C::receiveSetNoJumpTick);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), ModPacketsS2C::receiveSetNoMoveTick);
@@ -98,13 +100,17 @@ public class ModPacketsS2C {
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), ModPacketsS2C::receiveRequestPatronAuthFile);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), ModPacketsS2C::receiveNewSubKey);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), ModPacketsS2C::receiveSetSuperUserLevel);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_PERK_AVAILABILITY), ModPacketsS2C::receivePerkAvailability);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_PERK_DATA), ModPacketsS2C::receivePerkData);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_UPGRADE_MENU), ModPacketsS2C::receiveOpenFormUpgradeMenu);
+        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_SELECT_SUB_FORM_MENU), ModPacketsS2C::receiveOpenSelectSubFormMenu);
     }
 
     /* 重构后不需要了 仅用于参考旧实现逻辑
     public static void handleSyncEffectAttachment(
 		MinecraftClient client,
 		ClientPlayNetworkHandler handler,
-		PacketByteBuf buf,
+		FriendlyByteBuf buf,
 		PacketSender sender
 	) {
         // 从数据包读取NBT
@@ -409,7 +415,7 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA),  buf));
     }
 
-    public static void receiveUpdatePatronLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
+    public static void receiveOldUpdatePatronLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
         int PairCount = payload.data().readInt();
         HashMap<UUID, Integer> map = new HashMap<>();
         for (int i = 0; i < PairCount; i++) {
@@ -420,9 +426,9 @@ public class ModPacketsS2C {
         ctx.client().execute(() -> PatronUtils.ApplyPatronLevel(map));
     }
 
-    public static void receiveOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+    public static void receiveOldOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
         ctx.client().execute(() -> {
-            Screen screen = new PatronFormSelectScreen(Component.literal("PatronFromSelectScreen"), ctx.client().player);
+            Screen screen = new OldPatronFormSelectScreen(Component.literal("PatronFromSelectScreen"), ctx.player());
             ctx.client().setScreen(screen);
         });
     }
@@ -440,6 +446,10 @@ public class ModPacketsS2C {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM),  buf));
+    public static void sendOldSetPatronForm(Identifier formID) {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeIdentifier(formID);
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(OLD_SET_PATRON_FORM), buf));
     }
 
     public static void sendSetForm(Identifier formID, UUID target, boolean immediate) {
@@ -651,5 +661,71 @@ public class ModPacketsS2C {
         buf.writeIdentifier(perkTreeID);
         buf.writeIdentifier(perkID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ADD_PERK), buf));
+    }
+
+    public static void sendRequestPerkAvailability() {
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_AVAILABILITY), PacketByteBufs.create()));
+    }
+
+    public static void sendRequestPerkData() {
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_DATA), PacketByteBufs.create()));
+    }
+
+    public static void receivePerkAvailability(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        boolean fullUpdate = payload.data().readBoolean();
+        int updateCount = payload.data().readInt();
+        HashMap<Identifier, Boolean> perkAvailability = new HashMap<>();
+        for (int i = 0; i < updateCount; i++) {
+            Identifier perkID = payload.data().readIdentifier();
+            boolean available = payload.data().readBoolean();
+            perkAvailability.put(perkID, available);
+        }
+        ctx.client().execute(() -> {
+            if (fullUpdate) {
+                FormUpgradeScreen.perkAvailableMap.clear();
+            }
+            FormUpgradeScreen.perkAvailableMap.putAll(perkAvailability);
+        });
+    }
+
+    public static void receivePerkData(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        boolean fullUpdate = payload.data().readBoolean();
+        int updateCount = payload.data().readInt();
+        HashMap<Identifier, Integer> perkXpCostMap = new HashMap<>();
+        for (int i = 0; i < updateCount; i++) {
+            Identifier perkID = payload.data().readIdentifier();
+            perkXpCostMap.put(perkID, payload.data().readInt());
+        }
+        ctx.client().execute(() -> {
+            if (fullUpdate) {
+                FormUpgradeScreen.perkXpCostMap.clear();
+            }
+            FormUpgradeScreen.perkXpCostMap.putAll(perkXpCostMap);
+        });
+    }
+
+    public static void receiveOpenFormUpgradeMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        int tier = payload.data().readInt();
+        ctx.client().execute(() -> {
+            FormUpgradeScreen screen = new FormUpgradeScreen(tier, Component.literal(""), PerkUtils.getPlayerNowPerkTree(ctx.player()));
+            ctx.client().setScreen(screen);
+        });
+    }
+
+
+    public static void receiveOpenSelectSubFormMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
+        ctx.client().execute(() -> {
+            SubFormSelectScreen screen = new SubFormSelectScreen(Component.literal(""));
+            ctx.client().setScreen(screen);
+        });
+    }
+
+    public static void sendSetSubForm(Identifier formID) {
+        if (formID == null) {
+            return;
+        }
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        buf.writeIdentifier(formID);
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_SET_SUB_FORM), buf));
     }
 }
