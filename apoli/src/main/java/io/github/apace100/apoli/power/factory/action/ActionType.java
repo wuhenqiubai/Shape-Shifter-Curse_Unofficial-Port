@@ -7,7 +7,7 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 
 import java.util.Optional;
@@ -27,8 +27,8 @@ public class ActionType<T> {
     }
 
     public ActionFactory<T>.Instance read(RegistryFriendlyByteBuf buf) {
-        ResourceLocation type = buf.readResourceLocation();
-        ActionFactory<T> actionFactory = actionFactoryRegistry.get(type);
+        Identifier type = buf.readIdentifier();
+        ActionFactory<T> actionFactory = actionFactoryRegistry.getValue(type);
         if(actionFactory == null) {
             throw new JsonSyntaxException(actionTypeName + " \"" + type + "\" was not registered.");
         }
@@ -42,7 +42,7 @@ public class ActionType<T> {
                 throw new JsonSyntaxException(actionTypeName + " json requires \"type\" identifier.");
             }
             String typeIdentifier = GsonHelper.getAsString(obj, "type");
-            ResourceLocation type = ResourceLocation.tryParse(typeIdentifier);
+            Identifier type = Identifier.tryParse(typeIdentifier);
             Optional<ActionFactory<T>> optionalAction = actionFactoryRegistry.getOptional(type);
             if(!optionalAction.isPresent()) {
                 if(NamespaceAlias.hasAlias(type)) {

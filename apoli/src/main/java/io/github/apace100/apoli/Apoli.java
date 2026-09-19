@@ -1,5 +1,6 @@
 package io.github.apace100.apoli;
 
+import de.dafuqs.additionalentityattributes.AdditionalEntityAttributes;
 import io.github.apace100.apoli.command.PowerCommand;
 import io.github.apace100.apoli.command.ResourceCommand;
 import io.github.apace100.apoli.component.PowerHolderComponent;
@@ -28,17 +29,21 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
 import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer;
 import org.ladysnake.cca.api.v3.entity.RespawnCopyStrategy;
+
+import java.util.List;
 
 public class Apoli implements ModInitializer, EntityComponentInitializer, OrderedResourceListenerInitializer {
 
@@ -112,21 +117,57 @@ public class Apoli implements ModInitializer, EntityComponentInitializer, Ordere
 		BlockActions.register();
 		BiEntityActions.register();
 
-		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(Apoli.identifier("global_powers"), GlobalPowerSetLoader::new);
+		ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new GlobalPowerSetLoader());
 		ResourceConditions.register(ApoliResourceConditions.ANY_NAMESPACE_LOADED);
 		ResourceConditions.register(ApoliResourceConditions.ALL_NAMESPACES_LOADED);
 
 		Registry.register(BuiltInRegistries.TRIGGER_TYPES, Apoli.identifier("gained_power"), GainedPowerCriterion.INSTANCE);
 
 		LOGGER.info("Apoli " + VERSION + " has initialized. Ready to power up your game!");
+
+		// Legacy: Updating the world can sometimes encounter chunk bans caused by Additional Entity Attributes. Which is weird, considering it should be getting datafixed automatically.
+		var genericAttributes = List.of(
+			AdditionalEntityAttributes.CRITICAL_BONUS_DAMAGE,
+			AdditionalEntityAttributes.WATER_SPEED,
+			AdditionalEntityAttributes.LAVA_SPEED,
+			AdditionalEntityAttributes.WIDTH,
+			AdditionalEntityAttributes.HEIGHT,
+			AdditionalEntityAttributes.HITBOX_SCALE,
+			AdditionalEntityAttributes.HITBOX_WIDTH,
+			AdditionalEntityAttributes.HITBOX_HEIGHT,
+			AdditionalEntityAttributes.MODEL_SCALE,
+			AdditionalEntityAttributes.MODEL_HEIGHT,
+			AdditionalEntityAttributes.MODEL_WIDTH,
+			AdditionalEntityAttributes.MOB_DETECTION_RANGE,
+			AdditionalEntityAttributes.MAGIC_PROTECTION
+		);
+
+		var playerAttributes = List.of(
+			AdditionalEntityAttributes.WATER_VISIBILITY,
+			AdditionalEntityAttributes.LAVA_VISIBILITY,
+			AdditionalEntityAttributes.BONUS_LOOT_COUNT_ROLLS,
+			AdditionalEntityAttributes.BONUS_RARE_LOOT_ROLLS,
+			AdditionalEntityAttributes.DROPPED_EXPERIENCE,
+			AdditionalEntityAttributes.COLLECTION_RANGE
+		);
+
+		for (Holder<Attribute> attribute : genericAttributes) {
+			var id = attribute.unwrapKey().orElseThrow().identifier();
+			BuiltInRegistries.ATTRIBUTE.addAlias(id.withPrefix("generic."), id);
+		}
+
+		for (Holder<Attribute> attribute : playerAttributes) {
+			var id = attribute.unwrapKey().orElseThrow().identifier();
+			BuiltInRegistries.ATTRIBUTE.addAlias(id.withPrefix("player."), id);
+		}
 	}
 
-	public static ResourceLocation identifier(String path) {
-		return ResourceLocation.fromNamespaceAndPath(MODID, path);
+	public static Identifier identifier(String path) {
+		return Identifier.fromNamespaceAndPath(MODID, path);
 	}
 
-	public static ResourceLocation legacy(String path) {
-		return ResourceLocation.fromNamespaceAndPath(LEGACY_MODID, path);
+	public static Identifier legacy(String path) {
+		return Identifier.fromNamespaceAndPath(LEGACY_MODID, path);
 	}
 
 	@Override

@@ -6,7 +6,7 @@ import org.spongepowered.asm.mixin.Mixin;
 @Mixin(RecipeManager.class)
 public abstract class RecipeManagerMixin {
 
-    //@Shadow protected abstract <C extends Container, T extends Recipe<C>> Map<ResourceLocation, Recipe<C>> getAllOfType(RecipeType<T> type);
+    //@Shadow protected abstract <C extends Container, T extends Recipe<C>> Map<Identifier, Recipe<C>> getAllOfType(RecipeType<T> type);
 
     //@Inject(method = "getFirstMatch", at = @At("HEAD"), cancellable = true)
     //private void prioritizeModifiedRecipes(RecipeType<Recipe<Container>> type, Container inventory, Level world, CallbackInfoReturnable<Optional<Recipe<Container>>> cir) {

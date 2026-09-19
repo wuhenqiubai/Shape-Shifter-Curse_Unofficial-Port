@@ -7,7 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 
@@ -16,11 +16,11 @@ import java.util.List;
 
 public final class StackPowerUtil {
 
-    public static void addPower(ItemStack stack, EquipmentSlot slot, ResourceLocation powerId) {
+    public static void addPower(ItemStack stack, EquipmentSlot slot, Identifier powerId) {
         addPower(stack, slot, powerId, false, false);
     }
 
-    public static void addPower(ItemStack stack, EquipmentSlot slot, ResourceLocation powerId, boolean isHidden, boolean isNegative) {
+    public static void addPower(ItemStack stack, EquipmentSlot slot, Identifier powerId, boolean isHidden, boolean isNegative) {
         StackPower stackPower = new StackPower();
         stackPower.slot = slot;
         stackPower.powerId = powerId;
@@ -36,7 +36,7 @@ public final class StackPowerUtil {
         stack.set(StackPowerComponent.TYPE, new StackPowerComponent(powers));
     }
 
-    public static void removePower(ItemStack stack, EquipmentSlot slot, ResourceLocation powerId) {
+    public static void removePower(ItemStack stack, EquipmentSlot slot, Identifier powerId) {
         if (stack.has(StackPowerComponent.TYPE)) {
             var powers = new ArrayList<>(stack.getOrDefault(StackPowerComponent.TYPE, new StackPowerComponent(List.of())).powers());
             powers.removeIf(power -> power.powerId.equals(powerId) && power.slot.equals(slot));
@@ -55,7 +55,7 @@ public final class StackPowerUtil {
                 EquipmentSlot.CODEC
                     .fieldOf("Slot")
                     .forGetter(power -> power.slot),
-                ResourceLocation.CODEC
+                Identifier.CODEC
                     .fieldOf("Power")
                     .forGetter(power -> power.powerId),
                 Codec.BOOL
@@ -69,20 +69,20 @@ public final class StackPowerUtil {
         );
 
         public static final StreamCodec<FriendlyByteBuf, StackPower> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.fromCodec(EquipmentSlot.CODEC), power -> power.slot,
-            ResourceLocation.STREAM_CODEC, power -> power.powerId,
+            EquipmentSlot.STREAM_CODEC, power -> power.slot,
+            Identifier.STREAM_CODEC, power -> power.powerId,
             ByteBufCodecs.BOOL, power -> power.isHidden,
             ByteBufCodecs.BOOL, power -> power.isNegative,
             StackPower::new
         );
 
         public EquipmentSlot slot;
-        public ResourceLocation powerId;
+        public Identifier powerId;
         public boolean isHidden;
         public boolean isNegative;
 
         public StackPower() {}
-        public StackPower(EquipmentSlot slot, ResourceLocation powerId, boolean isHidden, boolean isNegative) {
+        public StackPower(EquipmentSlot slot, Identifier powerId, boolean isHidden, boolean isNegative) {
             this.slot = slot;
             this.powerId = powerId;
             this.isHidden = isHidden;
@@ -100,10 +100,10 @@ public final class StackPowerUtil {
 
         public static StackPower fromNbt(CompoundTag nbt) {
             StackPower stackPower = new StackPower();
-            stackPower.slot = EquipmentSlot.byName(nbt.getString("Slot"));
-            stackPower.powerId = ResourceLocation.parse(nbt.getString("Power"));
-            stackPower.isHidden = nbt.contains("Hidden") && nbt.getBoolean("Hidden");
-            stackPower.isNegative = nbt.contains("Negative") && nbt.getBoolean("Negative");
+            stackPower.slot = EquipmentSlot.byName(nbt.getString("Slot").get());
+            stackPower.powerId = Identifier.parse(nbt.getString("Power").get());
+            stackPower.isHidden = nbt.contains("Hidden") && nbt.getBoolean("Hidden").orElseThrow();
+            stackPower.isNegative = nbt.contains("Negative") && nbt.getBoolean("Negative").orElseThrow();
             return stackPower;
         }
     }

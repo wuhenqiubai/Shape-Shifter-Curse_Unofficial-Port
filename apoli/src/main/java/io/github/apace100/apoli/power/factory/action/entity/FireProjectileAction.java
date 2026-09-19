@@ -12,8 +12,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -23,7 +23,7 @@ public class FireProjectileAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
 
-        if (entity.level().isClientSide) return;
+        if (entity.level().isClientSide()) return;
 
         ServerLevel serverWorld = (ServerLevel) entity.level();
         int count = data.get("count");

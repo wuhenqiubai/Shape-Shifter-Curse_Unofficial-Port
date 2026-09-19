@@ -52,32 +52,12 @@ import static net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX.begi
 public class ModPacketsS2C {
 
     public static void register() {
-        BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
-        BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
-        BytePayload.registerS2C(ModPackets.SYNC_TRANSFORM_STATE);
-        BytePayload.registerS2C(ModPackets.SYNC_BAT_ATTACH_STATE);
-        BytePayload.registerS2C(ModPackets.RESET_FIRST_PERSON);
-        BytePayload.registerS2C(ModPackets.SYNC_OTHER_PLAYER_BAT_ATTACH_STATE);
-        BytePayload.registerS2C(ModPackets.SYNC_FORCE_SNEAK_STATE);
-        BytePayload.registerS2C(ModPackets.UPDATE_DYNAMIC_FORM);
-        BytePayload.registerS2C(ModPackets.REMOVE_DYNAMIC_FORM_EXCEPT);
-        BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
-        BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
-        BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
-        BytePayload.registerS2C(ModPackets.OLD_UPDATE_PATRON_LEVEL);
-        BytePayload.registerS2C(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU);
-        BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
-        BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
-        BytePayload.registerS2C(ModPackets.SET_NO_MOVE_TICK);
-        BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
-        BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
-        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
-        BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
-        BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
-        BytePayload.registerS2C(ModPackets.SYNC_PERK_AVAILABILITY);
-        BytePayload.registerS2C(ModPackets.SYNC_PERK_DATA);
-        BytePayload.registerS2C(ModPackets.OPEN_FORM_UPGRADE_MENU);
-        BytePayload.registerS2C(ModPackets.OPEN_SELECT_SUB_FORM_MENU);
+        // S2C payload 类型的注册清单**只有一份**，在 ModPacketsS2CServer#registerServerS2C() 里。
+        // 这里刻意不再复制一份 —— 两份清单真的漂移过：合并 1.21.1 主线带过来的 4 个 perk / 子形态包
+        // 只加在了本类的清单里，服务端那份没跟上，于是服务端一 send 就抛
+        // IllegalArgumentException("Unknown payload type: ...") 崩服（与 issue #21 同一类漏注册）。
+        // 该方法幂等，且 common 入口（ShapeShifterCurseFabric#onInitialize）已先行调用过，此处只是兜底。
+        ModPacketsS2CServer.registerServerS2C();
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), ModPacketsS2C::receiveCursedMoonData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), ModPacketsS2C::receiveFormChange);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_TRANSFORM_STATE), ModPacketsS2C::receiveTransformState);
@@ -442,10 +422,6 @@ public class ModPacketsS2C {
         });
     }
 
-    public static void sendSetPatronForm(Identifier formID) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeIdentifier(formID);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(SET_PATRON_FORM),  buf));
     public static void sendOldSetPatronForm(Identifier formID) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeIdentifier(formID);

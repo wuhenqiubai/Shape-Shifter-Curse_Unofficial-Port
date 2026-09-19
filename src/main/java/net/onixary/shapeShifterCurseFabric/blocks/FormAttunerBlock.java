@@ -84,7 +84,7 @@ public class FormAttunerBlock extends BaseEntityBlock implements BeaconBeamBlock
     // Yarn onUse → Mojmap useWithoutItem（1.21 起这个方法不再收 InteractionHand）
     @Override
     protected @NotNull InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
-        if (world.isClientSide) {
+        if (world.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {
             this.openScreen(world, pos, (ServerPlayer) player);

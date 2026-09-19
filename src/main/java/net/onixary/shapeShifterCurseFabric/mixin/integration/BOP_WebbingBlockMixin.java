@@ -4,6 +4,7 @@ import biomesoplenty.block.WebbingBlock;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -31,7 +32,7 @@ import java.util.List;
 @Mixin(WebbingBlock.class)
 public class BOP_WebbingBlockMixin {
     @Inject(method = "entityInside", at = @At("HEAD"), cancellable = true)
-    private void ssc$entityInside(BlockState blockState, Level level, BlockPos blockPos, Entity entity, CallbackInfo ci) {
+    private void ssc$entityInside(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean b, CallbackInfo ci) {
         if (entity instanceof Player player) {
             List<SlowdownPercentPower> slowdownPower = PowerHolderComponent.getPowers(player, SlowdownPercentPower.class);
             float slowdownPercent = 1.0f;

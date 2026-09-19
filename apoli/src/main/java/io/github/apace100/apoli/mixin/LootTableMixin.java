@@ -1,14 +1,13 @@
 package io.github.apace100.apoli.mixin;
 
-import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.IdentifiedLootTable;
 import io.github.apace100.apoli.access.ReplacingLootContext;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ReplaceLootTablePower;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.piglin.Piglin;
@@ -34,18 +33,18 @@ import java.util.function.Consumer;
 public class LootTableMixin implements IdentifiedLootTable {
 
     @Unique
-    private ResourceLocation apoli$id;
+    private Identifier apoli$id;
     @Unique
     private HolderGetter.Provider apoli$lootManager;
 
     @Override
-    public void apoli$setId(ResourceLocation id, HolderGetter.Provider lootManager) {
+    public void setId(Identifier id, HolderGetter.Provider lootManager) {
         apoli$id = id;
         apoli$lootManager = lootManager;
     }
 
     @Override
-    public ResourceLocation apoli$getId() {
+    public Identifier getId() {
         return apoli$id;
     }
 
@@ -54,25 +53,16 @@ public class LootTableMixin implements IdentifiedLootTable {
         if(((ReplacingLootContext)context).isReplaced((LootTable)(Object)this)) {
             return;
         }
-
-        if (apoli$id == null)
-            return;
-
-        HolderGetter.Provider provider = apoli$lootManager;
-
-        if (provider == null)
-            provider = Apoli.server.registryAccess().asGetterLookup();
-
-        if(context.hasParam(LootContextParams.THIS_ENTITY)) {
+        if(context.hasParameter(LootContextParams.THIS_ENTITY)) {
             var type = ((ReplacingLootContext)context).getType();
-            Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+            Entity entity = context.getOptionalParameter(LootContextParams.THIS_ENTITY);
             if(type == LootContextParamSets.FISHING) {
                 if(entity instanceof FishingHook bobber) {
                     entity = bobber.getPlayerOwner();
                 }
             } else if(type == LootContextParamSets.ENTITY) {
-                if(context.hasParam(LootContextParams.DIRECT_ATTACKING_ENTITY)) { // TODO: this used to be KILLER_ENTITY
-                    entity = context.getParamOrNull(LootContextParams.DIRECT_ATTACKING_ENTITY);
+                if(context.hasParameter(LootContextParams.DIRECT_ATTACKING_ENTITY)) { // TODO: this used to be KILLER_ENTITY
+                    entity = context.getOptionalParameter(LootContextParams.DIRECT_ATTACKING_ENTITY);
                 }
             } else if(type == LootContextParamSets.PIGLIN_BARTER) {
                 if(entity instanceof Piglin piglin) {
@@ -93,8 +83,8 @@ public class LootTableMixin implements IdentifiedLootTable {
             ReplaceLootTablePower.addToStack((LootTable)(Object)this);
             LootTable replacement = null;
             for (ReplaceLootTablePower power : powers) {
-                ResourceLocation id = power.getReplacement(apoli$id);
-                replacement = provider.lookupOrThrow(Registries.LOOT_TABLE).getOrThrow(ResourceKey.create(Registries.LOOT_TABLE, id)).value();
+                Identifier id = power.getReplacement(apoli$id);
+                replacement = apoli$lootManager.getOrThrow(ResourceKey.create(Registries.LOOT_TABLE, id)).value();
                 ReplaceLootTablePower.addToStack(replacement);
             }
             ((ReplacingLootContext)context).setReplaced((LootTable)(Object)this);

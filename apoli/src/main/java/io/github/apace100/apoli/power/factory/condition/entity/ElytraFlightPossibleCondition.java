@@ -9,7 +9,6 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ElytraItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
@@ -22,7 +21,7 @@ public class ElytraFlightPossibleCondition {
         boolean ability = true;
         if(data.getBoolean("check_ability")) {
             ItemStack equippedChestItem = livingEntity.getItemBySlot(EquipmentSlot.CHEST);
-            ability = equippedChestItem.is(Items.ELYTRA) && ElytraItem.isFlyEnabled(equippedChestItem);
+            ability = equippedChestItem.is(Items.ELYTRA) && LivingEntity.canGlideUsing(equippedChestItem, EquipmentSlot.CHEST);
             if (!ability && EntityElytraEvents.CUSTOM.invoker().useCustomElytra(livingEntity, false)) {
                 ability = true;
             }

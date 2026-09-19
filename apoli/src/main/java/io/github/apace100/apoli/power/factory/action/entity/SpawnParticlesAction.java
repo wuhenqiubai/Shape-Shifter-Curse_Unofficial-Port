@@ -11,7 +11,7 @@ import net.minecraft.world.phys.Vec3;
 public class SpawnParticlesAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
-        if(entity.level().isClientSide) {
+        if(entity.level().isClientSide()) {
             return;
         }
         ServerLevel serverWorld = (ServerLevel) entity.level();

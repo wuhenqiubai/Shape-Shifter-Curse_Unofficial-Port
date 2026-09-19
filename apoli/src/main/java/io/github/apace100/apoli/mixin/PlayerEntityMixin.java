@@ -1,17 +1,13 @@
 package io.github.apace100.apoli.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
-import io.github.apace100.apoli.access.ModifiableFoodEntity;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.networking.PlayerDismountPacket;
 import io.github.apace100.apoli.power.*;
-import io.github.apace100.apoli.util.ApoliSharedMixinValues;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -24,8 +20,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.food.FoodData;
-import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -39,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(Player.class)
@@ -95,7 +88,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
                 }
                 if(ar.consumesAction() && !result.consumesAction()) {
                     result = ar;
-                } else if(ar.shouldSwing() && !result.shouldSwing()) {
+                } else if((ar instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) && (!(result instanceof InteractionResult.Success success1 && success1.swingSource() != InteractionResult.SwingSource.NONE))) {
                     result = ar;
                 }
             }
@@ -104,7 +97,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
             } else {
                 apoli$CachedPriorityZeroResult = InteractionResult.PASS;
                 if(result != InteractionResult.PASS) {
-                    if(result.shouldSwing()) {
+                    if(result instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) {
                         this.swing(hand);
                     }
                     cir.setReturnValue(result);
@@ -114,8 +107,8 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         }
     }
 
-    @Inject(method = "hurt", at = @At(value = "RETURN", ordinal = 3), cancellable = true)
-    private void allowDamageIfModifyingPowersExist(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+    @Inject(method = "hurtServer", at = @At(value = "RETURN", ordinal = 3), cancellable = true)
+    private void allowDamageIfModifyingPowersExist(ServerLevel level, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 
         boolean hasModifyingPower = false;
 
@@ -125,7 +118,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         }
 
         hasModifyingPower |= PowerHolderComponent.hasPower(this, ModifyDamageTakenPower.class, mdtp -> mdtp.doesApply(source, amount));
-        if (hasModifyingPower) cir.setReturnValue(super.hurt(source, amount));
+        if (hasModifyingPower) cir.setReturnValue(super.hurtServer(level, source, amount));
 
     }
 
@@ -155,7 +148,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
                     }
                     if(ar.consumesAction() && !result.consumesAction()) {
                         result = ar;
-                    } else if(ar.shouldSwing() && !result.shouldSwing()) {
+                    } else if((ar instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) && (!(result instanceof InteractionResult.Success success1 &&  success1.swingSource() != InteractionResult.SwingSource.NONE))) {
                         result = ar;
                     }
                 }
@@ -165,11 +158,11 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
                 }
             }
         }
-        if(custom.shouldSwing()) {
+        if((custom instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE)) {
             this.swing(hand);
         }
         if(original.consumesAction() && !custom.consumesAction()) {
-        } else if(original.shouldSwing() && !custom.shouldSwing()) {
+        } else if((original instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) && (!(custom instanceof InteractionResult.Success success1 && success1.swingSource() != InteractionResult.SwingSource.NONE))) {
         } else {
             cir.setReturnValue(custom);
         }
@@ -177,7 +170,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
 
     @Inject(method = "removeVehicle", at = @At("HEAD"))
     private void sendPlayerDismountPacket(CallbackInfo ci) {
-        if(!level().isClientSide && getVehicle() instanceof Player) {
+        if(!level().isClientSide() && getVehicle() instanceof Player) {
             ServerPlayNetworking.send((ServerPlayer) getVehicle(), new PlayerDismountPacket(getId()));
         }
     }
@@ -239,17 +232,4 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
         });
     }
 
-    @WrapOperation(method = "eat", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/food/FoodData;eat(Lnet/minecraft/world/food/FoodProperties;)V"))
-    private void apoli$storeSharedStack(FoodData instance, FoodProperties foodProperties, Operation<Void> original, @Local(argsOnly = true) ItemStack stack) {
-        List<ModifyFoodPower> mfps = PowerHolderComponent.getPowers(this, ModifyFoodPower.class);
-        mfps = mfps.stream().filter(mfp -> mfp.doesApply(stack)).toList();
-
-        ApoliSharedMixinValues.CURRENT_STACK.set(stack);
-        ((ModifiableFoodEntity) this).setOriginalFoodStack(stack);
-        ((ModifiableFoodEntity) this).setCurrentModifyFoodPowers(mfps);
-        original.call(instance, foodProperties);
-        ApoliSharedMixinValues.CURRENT_STACK.remove();
-        ((ModifiableFoodEntity) this).setOriginalFoodStack(null);
-        ((ModifiableFoodEntity) this).setCurrentModifyFoodPowers(new ArrayList<>());
-    }
 }

@@ -3,7 +3,7 @@ package io.github.apace100.apoli.integration;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * This callback is fired for each power that is loaded. It contains the ID of the power that is being read, as well as
@@ -20,5 +20,5 @@ public interface PrePowerLoadCallback {
         }
     );
 
-    void onPrePowerLoad(ResourceLocation identifier, JsonObject json);
+    void onPrePowerLoad(Identifier identifier, JsonObject json);
 }

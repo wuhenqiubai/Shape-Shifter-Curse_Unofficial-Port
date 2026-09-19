@@ -4,6 +4,7 @@
     "package": "io.github.apace100.calio.mixin",
     "compatibilityLevel": "JAVA_16",
     "mixins": [
+        "DontOverwriteAttrModsMixin",
         "RegistrySyncMixin",
         "ReloadableServerResourcesMixin",
         "WeightedListEntryAccessor",

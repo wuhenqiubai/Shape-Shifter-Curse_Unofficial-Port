@@ -6,8 +6,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -79,9 +79,9 @@ public class DataDumper {
         JsonObject json = new JsonObject();
         for (IForm form : RegPlayerForms.playerForms.values()) {
             JsonObject formJson = new JsonObject();
-            HashMap<ResourceLocation, HashMap<ResourceLocation, Float>> speedMap = new HashMap<>();
+            HashMap<Identifier, HashMap<Identifier, Float>> speedMap = new HashMap<>();
             for (Map.Entry<ResourceKey<AnimRegistry.AnimState>, AnimRegistry.AnimState> stateEntry : AnimRegistry.animStateRegistry.entrySet()) {
-                ResourceLocation id = stateEntry.getKey().location();
+                Identifier id = stateEntry.getKey().identifier();
                 AbstractAnimStateController controller = form.getAnimStateController(ClientUtils.getPlayer(), new AnimSystem.AnimSystemData(ClientUtils.getPlayer()), id);
                 if (controller != null) {
                     if (!controller.isRegistered(ClientUtils.getPlayer(), new AnimSystem.AnimSystemData(ClientUtils.getPlayer()))) {
@@ -89,15 +89,15 @@ public class DataDumper {
                     }
                     List<AnimationHolder> animations = controller.getAllAnimations();
                     for (AnimationHolder animation : animations) {
-                        HashMap<ResourceLocation, Float> speeds = speedMap.computeIfAbsent(animation.animationID, k -> new HashMap<>());
+                        HashMap<Identifier, Float> speeds = speedMap.computeIfAbsent(animation.animationID, k -> new HashMap<>());
                         float speed = animation.getSpeed();
                         speeds.put(id, speed);
                     }
                 }
             }
-            for (Map.Entry<ResourceLocation, HashMap<ResourceLocation, Float>> entry : speedMap.entrySet()) {
+            for (Map.Entry<Identifier, HashMap<Identifier, Float>> entry : speedMap.entrySet()) {
                 JsonObject speeds = new JsonObject();
-                for (Map.Entry<ResourceLocation, Float> speedEntry : entry.getValue().entrySet()) {
+                for (Map.Entry<Identifier, Float> speedEntry : entry.getValue().entrySet()) {
                     speeds.addProperty(speedEntry.getKey().toString(), speedEntry.getValue());
                 }
                 formJson.add(entry.getKey().toString(), speeds);

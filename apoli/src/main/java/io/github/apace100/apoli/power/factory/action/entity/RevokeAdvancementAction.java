@@ -6,7 +6,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 
@@ -14,9 +14,9 @@ public class RevokeAdvancementAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
         if (entity instanceof ServerPlayer player) {
-            ResourceLocation id = data.getId("advancement");
-            if (player.getServer() != null) {
-                AdvancementHolder adv = player.getServer().getAdvancements().get(id);
+            Identifier id = data.getId("advancement");
+            if (player.level().getServer() != null) {
+                AdvancementHolder adv = player.level().getServer().getAdvancements().get(id);
                 revoke(player, adv);
             }
         }

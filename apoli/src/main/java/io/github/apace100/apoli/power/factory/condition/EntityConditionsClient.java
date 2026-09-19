@@ -16,7 +16,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientAdvancements;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -58,9 +58,9 @@ public final class EntityConditionsClient {
         }));
         register(new ConditionFactory<>(Apoli.identifier("advancement"), new SerializableData()
             .add("advancement", SerializableDataTypes.IDENTIFIER), (data, entity) -> {
-            ResourceLocation id = data.getId("advancement");
+            Identifier id = data.getId("advancement");
             if(entity instanceof ServerPlayer) {
-                AdvancementHolder advancement = entity.getServer().getAdvancements().get(id);
+                AdvancementHolder advancement = entity.level().getServer().getAdvancements().get(id);
                 if(advancement == null) {
                     Apoli.LOGGER.warn("Advancement \"" + id + "\" did not exist, but was referenced in an \"origins:advancement\" condition.");
                 } else {

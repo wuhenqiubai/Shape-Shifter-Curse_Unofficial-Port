@@ -1,9 +1,10 @@
 package io.github.apace100.apoli.power;
 
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class VariableIntPower extends Power {
 
@@ -50,12 +51,22 @@ public class VariableIntPower extends Power {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
+    public void toValue(ValueOutput output) {
+        output.putInt("CurrentValue", currentValue);
+    }
+
+    @Override
+    public void fromValue(ValueInput input) {
+        currentValue = input.getIntOr("CurrentValue", 0);
+    }
+
+    @Override
+    public Tag toTag() {
         return IntTag.valueOf(currentValue);
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        currentValue = ((IntTag)tag).getAsInt();
+    public void fromTag(Tag input) {
+        currentValue = ((IntTag) input).intValue();
     }
 }

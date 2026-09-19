@@ -4,25 +4,25 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 public class PowerType<T extends Power> {
 
-    private ResourceLocation identifier;
+    private Identifier identifier;
     private PowerFactory<T>.Instance factory;
     private boolean isHidden = false;
 
     private String nameTranslationKey;
     private String descriptionTranslationKey;
 
-    public PowerType(ResourceLocation id, PowerFactory<T>.Instance factory) {
+    public PowerType(Identifier id, PowerFactory<T>.Instance factory) {
         this.identifier = id;
         this.factory = factory;
     }
 
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return identifier;
     }
 
@@ -103,7 +103,7 @@ public class PowerType<T extends Power> {
         if(!(obj instanceof PowerType)) {
             return false;
         }
-        ResourceLocation id = ((PowerType)obj).getIdentifier();
+        Identifier id = ((PowerType)obj).getIdentifier();
         return identifier.equals(id);
     }
 }

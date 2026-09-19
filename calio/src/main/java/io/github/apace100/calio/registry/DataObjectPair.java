@@ -1,7 +1,7 @@
 package io.github.apace100.calio.registry;
 
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record DataObjectPair(ResourceLocation factory, SerializableData.Instance data) {
+public record DataObjectPair(Identifier factory, SerializableData.Instance data) {
 }

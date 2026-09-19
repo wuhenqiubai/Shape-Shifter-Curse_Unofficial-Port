@@ -3,7 +3,7 @@ package io.github.apace100.apoli.power;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.LinkedList;
@@ -26,7 +26,7 @@ public class ValueModifyingPower extends Power {
         return modifiers;
     }
 
-    public static PowerFactory createValueModifyingFactory(BiFunction<PowerType, LivingEntity, ValueModifyingPower> powerConstructor, ResourceLocation identifier) {
+    public static PowerFactory createValueModifyingFactory(BiFunction<PowerType, LivingEntity, ValueModifyingPower> powerConstructor, Identifier identifier) {
         return new PowerFactory<>(identifier,
             new SerializableData()
                 .add("modifier", Modifier.DATA_TYPE, null)

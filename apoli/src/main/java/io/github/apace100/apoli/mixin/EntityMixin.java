@@ -17,15 +17,20 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -71,13 +76,13 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
         }
     }
 
-    @Inject(method = "checkFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;fallOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
+    @Inject(method = "checkFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;fallOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;D)V"))
     private void invokeActionOnLand(CallbackInfo ci) {
         List<ActionOnLandPower> powers = PowerHolderComponent.getPowers((Entity)(Object)this, ActionOnLandPower.class);
         powers.forEach(ActionOnLandPower::executeAction);
     }
 
-    @Inject(at = @At("HEAD"), method = "isInvulnerableTo", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "isInvulnerableToBase", cancellable = true)
     private void makeOriginInvulnerable(DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         if((Object)this instanceof LivingEntity) {
             PowerHolderComponent component = PowerHolderComponent.KEY.get(this);
@@ -94,7 +99,7 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
         }
     }
 
-    @WrapWithCondition(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;setRemainingFireTicks(I)V"))
+    @WrapWithCondition(method = "applyEffectsFromBlocks(Ljava/util/List;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;setRemainingFireTicks(I)V"))
     private boolean preventExtinguishingFromSwimming(Entity instance, int remainingFireTicks) {
         return !(PowerHolderComponent.hasPower(instance, SwimmingPower.class) && instance.isSwimming() && !(getFluidHeight(FluidTags.WATER) > 0));
     }
@@ -116,13 +121,9 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
         }
     }
 
-    // NeoForge/Connector 兼容：主版注入点也改用 isInWall HEAD（@Redirect(method_30022) 依赖 isInWall 的 lambda，NeoForge 重编译编号变化失效）
-    @Inject(method = "isInWall", at = @At("HEAD"), cancellable = true)
-    private void preventPhasingSuffocation(CallbackInfoReturnable<Boolean> cir) {
-        PowerHolderComponent component = PowerHolderComponent.KEY.get(this);
-        if (component.getPowers(PhasingPower.class).stream().anyMatch(PhasingPower::isActive)) {
-            cir.setReturnValue(false);
-        }
+    @Redirect(method = "method_30022", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/state/BlockState;getCollisionShape(Lnet/minecraft/world/level/BlockGetter;Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/phys/shapes/VoxelShape;"))
+    private VoxelShape preventPhasingSuffocation(BlockState state, BlockGetter world, BlockPos pos) {
+        return state.getCollisionShape(world, pos, CollisionContext.of((Entity)(Object)this));
     }
 
     private boolean isMoving;

@@ -78,7 +78,7 @@ public class ActiveCooldownPower extends CooldownPower implements Active {
                         data.getInt("cooldown"),
                         (HudRender) data.get("hud_render"),
                         e -> {
-                            if (!e.level().isClientSide && e instanceof Player) {
+                            if (!e.level().isClientSide() && e instanceof Player) {
                                 Player p = (Player) e;
                                 p.push(0, data.getFloat("speed"), 0);
                                 p.hurtMarked = true;

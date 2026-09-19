@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import io.github.apace100.apoli.power.PowerType;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 /**
  * This callback is fired for each power that is loaded. It contains the ID of the power that is being read, as well as
@@ -21,5 +21,5 @@ public interface PostPowerLoadCallback {
         }
     );
 
-    void onPostPowerLoad(ResourceLocation powerId, ResourceLocation factoryId, boolean isSubPower, JsonObject json, PowerType<?> powerType);
+    void onPostPowerLoad(Identifier powerId, Identifier factoryId, boolean isSubPower, JsonObject json, PowerType<?> powerType);
 }

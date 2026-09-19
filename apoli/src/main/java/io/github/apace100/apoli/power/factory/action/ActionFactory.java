@@ -6,18 +6,18 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class ActionFactory<T> implements Factory {
 
-    private final ResourceLocation identifier;
+    private final Identifier identifier;
     protected SerializableData data;
     private final BiConsumer<SerializableData.Instance, T> effect;
 
-    public ActionFactory(ResourceLocation identifier, SerializableData data, BiConsumer<SerializableData.Instance, T> effect) {
+    public ActionFactory(Identifier identifier, SerializableData data, BiConsumer<SerializableData.Instance, T> effect) {
         this.identifier = identifier;
         this.effect = effect;
         this.data = data;
@@ -33,7 +33,7 @@ public class ActionFactory<T> implements Factory {
         }
 
         public void write(RegistryFriendlyByteBuf buf) {
-            buf.writeResourceLocation(identifier);
+            buf.writeIdentifier(identifier);
             data.write(buf, dataInstance);
         }
 
@@ -44,7 +44,7 @@ public class ActionFactory<T> implements Factory {
     }
 
     @Override
-    public ResourceLocation getSerializerId() {
+    public Identifier getSerializerId() {
         return identifier;
     }
 

@@ -31,7 +31,7 @@ import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -131,6 +131,28 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<InventoryUtil.ProcessMode> PROCESS_MODE = SerializableDataType.enumValue(InventoryUtil.ProcessMode.class);
 
+    // [移植 b16c645+5d428c4] 1.21.1+ 的 AttributeModifier 用 ResourceLocation id，AttributeInstance.modifierById 按 id 去重。
+    // 未命名 modifier 共享默认 id "apoli:unnamed"，会导致多个 power 的 modifier 互相 add/remove 冲突
+    // （典型：axolotl_3 的 sprinting_speed +0.65 被 ground_speed_down 的 removeMods 误移除 → 疾跑速度失效）。
+    // 为每个 modifier 分配唯一 id；显式 name 也转成 apoli:<path>_<idx> 避免与其它同 name 的冲突。
+    private static final AtomicInteger UNNAMED_MODIFIER_COUNTER = new AtomicInteger();
+
+    private static Identifier toUniqueModifierId(String name) {
+        int idx = UNNAMED_MODIFIER_COUNTER.getAndIncrement();
+        if ("apoli:unnamed".equals(name)) {
+            return Identifier.fromNamespaceAndPath("apoli", "unnamed_" + idx);
+        }
+        try {
+            Identifier base = SerializableDataTypes.convertNameToLocation(name);
+            if (base != null) {
+                return Identifier.fromNamespaceAndPath("apoli", base.getPath() + "_" + idx);
+            }
+        } catch (Exception e) {
+            // 非法 name（convertNameToLocation 失败），退回纯 counter id
+        }
+        return Identifier.fromNamespaceAndPath("apoli", "modifier_" + idx);
+    }
+
     public static final SerializableDataType<AttributedEntityAttributeModifier> ATTRIBUTED_ATTRIBUTE_MODIFIER = SerializableDataType.compound(
         AttributedEntityAttributeModifier.class,
         new SerializableData()
@@ -154,28 +176,6 @@ public class ApoliDataTypes {
 
     public static final SerializableDataType<List<AttributedEntityAttributeModifier>> ATTRIBUTED_ATTRIBUTE_MODIFIERS =
         SerializableDataType.list(ATTRIBUTED_ATTRIBUTE_MODIFIER);
-
-    // 1.21.1+ 的 AttributeModifier 用 ResourceLocation id，AttributeInstance.modifierById 按 id 去重。
-    // 未命名 modifier 共享默认 id "apoli:unnamed"，会导致多个 power 的 modifier 互相 add/remove 冲突
-    // （典型：axolotl_3 的 sprinting_speed +0.65 被 ground_speed_down 的 removeMods 误移除 → 疾跑速度失效）。
-    // 对未命名 modifier 分配唯一 id，保证每个实例独立；显式 name 仍用 convertNameToLocation。
-    private static final AtomicInteger UNNAMED_MODIFIER_COUNTER = new AtomicInteger();
-
-    private static ResourceLocation toUniqueModifierId(String name) {
-        int idx = UNNAMED_MODIFIER_COUNTER.getAndIncrement();
-        if ("apoli:unnamed".equals(name)) {
-            return ResourceLocation.fromNamespaceAndPath("apoli", "unnamed_" + idx);
-        }
-        try {
-            ResourceLocation base = SerializableDataTypes.convertNameToLocation(name);
-            if (base != null) {
-                return ResourceLocation.fromNamespaceAndPath("apoli", base.getPath() + "_" + idx);
-            }
-        } catch (Exception e) {
-            // 非法 name（convertNameToLocation 失败），退回纯 counter id
-        }
-        return ResourceLocation.fromNamespaceAndPath("apoli", "modifier_" + idx);
-    }
 
     public static final SerializableDataType<Tuple<Integer, ItemStack>> POSITIONED_ITEM_STACK = SerializableDataType.compound(ClassUtil.castClass(Tuple.class),
         new SerializableData()
@@ -247,15 +247,17 @@ public class ApoliDataTypes {
             SerializableData()
             .add("should_render", SerializableDataTypes.BOOLEAN, true)
             .add("bar_index", SerializableDataTypes.INT, 0)
-            .add("sprite_location", SerializableDataTypes.IDENTIFIER, ResourceLocation.fromNamespaceAndPath("origins", "textures/gui/resource_bar.png"))
+            .add("sprite_location", SerializableDataTypes.IDENTIFIER, Identifier.fromNamespaceAndPath("origins", "textures/gui/resource_bar.png"))
             .add("condition", ENTITY_CONDITION, null)
-            .add("inverted", SerializableDataTypes.BOOLEAN, false),
+            .add("inverted", SerializableDataTypes.BOOLEAN, false)
+            .add("order", SerializableDataTypes.INT, 0),
         (dataInst) -> new HudRender(
             dataInst.getBoolean("should_render"),
             dataInst.getInt("bar_index"),
             dataInst.getId("sprite_location"),
             dataInst.get("condition"),
-            dataInst.getBoolean("inverted")),
+            dataInst.getBoolean("inverted"),
+            dataInst.getInt("order")),
         (data, inst) -> {
             SerializableData.Instance dataInst = data.new Instance();
             dataInst.set("should_render", inst.shouldRender());
@@ -263,6 +265,7 @@ public class ApoliDataTypes {
             dataInst.set("sprite_location", inst.getSpriteLocation());
             dataInst.set("condition", inst.getCondition());
             dataInst.set("inverted", inst.isInverted());
+            dataInst.set("order", inst.getOrder());
             return dataInst;
         });
 

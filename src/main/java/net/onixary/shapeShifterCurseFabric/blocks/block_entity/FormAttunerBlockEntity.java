@@ -7,7 +7,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeaconBeamBlock;
@@ -55,13 +55,14 @@ public class FormAttunerBlockEntity extends BlockEntity {
             BlockState blockState = world.getBlockState(blockPos);
             Block block = blockState.getBlock();
             if (block instanceof BeaconBeamBlock) {
-                // 1.21.1 Mojmap：DyeColor 的颜色分量取法由 Yarn 的 getColorComponents()（float[]）
-                // 改为 getTextureDiffuseColor()（ARGB int），这里拆成 0..1 的分量给 BeamSegment。
+                // DyeColor 的颜色分量取法：Yarn 的 getColorComponents()（float[]）→ Mojmap 的
+                // getTextureDiffuseColor()（ARGB int），这里拆成 0..1 的分量给 BeamSegment。
+                // 1.21.11：拆分量用的工具类由 FastColor.ARGB32 改名为 ARGB（方法名不变）。
                 int argb = ((BeaconBeamBlock)block).getColor().getTextureDiffuseColor();
                 float[] fs = new float[]{
-                    FastColor.ARGB32.red(argb) / 255.0F,
-                    FastColor.ARGB32.green(argb) / 255.0F,
-                    FastColor.ARGB32.blue(argb) / 255.0F
+                    ARGB.red(argb) / 255.0F,
+                    ARGB.green(argb) / 255.0F,
+                    ARGB.blue(argb) / 255.0F
                 };
                 if (blockEntity.beams.size() <= 1) {
                     beamSegment = new BeamSegment(fs);
@@ -75,7 +76,8 @@ public class FormAttunerBlockEntity extends BlockEntity {
                     }
                 }
             } else {
-                if (beamSegment == null || blockState.getLightBlock(world, blockPos) >= 15 && !blockState.is(Blocks.BEDROCK)) {
+                // 1.21.11：BlockStateBase.getLightBlock 不再收 (Level, BlockPos)，改为无参
+                if (beamSegment == null || blockState.getLightBlock() >= 15 && !blockState.is(Blocks.BEDROCK)) {
                     blockEntity.beams.clear();
                     blockEntity.minY = l;
                     break;
@@ -99,10 +101,10 @@ public class FormAttunerBlockEntity extends BlockEntity {
             }
         }
         if (blockEntity.minY >= l) {
-            blockEntity.minY = world.getMinBuildHeight() - 1;
+            blockEntity.minY = world.getMinY() - 1;
             boolean bl = m > 0;
             blockEntity.beamSegments = blockEntity.beams;
-            if (!world.isClientSide) {
+            if (!world.isClientSide()) {
                 boolean bl2 = blockEntity.level > 0;
                 if (!bl && bl2) {
                     playSound(world, pos, SoundEvents.BEACON_ACTIVATE);
@@ -124,7 +126,7 @@ public class FormAttunerBlockEntity extends BlockEntity {
         int i = 0;
         for(int j = 1; j <= MAX_LEVEL; i = j++) {
             int k = y - j;
-            if (k < world.getMinBuildHeight()) {
+            if (k < world.getMinY()) {
                 break;
             }
             boolean bl = true;
@@ -161,7 +163,7 @@ public class FormAttunerBlockEntity extends BlockEntity {
     @Override
     public void setLevel(Level world) {
         super.setLevel(world);
-        this.minY = world.getMinBuildHeight() - 1;
+        this.minY = world.getMinY() - 1;
     }
 
     public static class BeamSegment {

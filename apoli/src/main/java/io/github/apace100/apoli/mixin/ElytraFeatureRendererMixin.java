@@ -1,43 +1,58 @@
 package io.github.apace100.apoli.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ElytraFlightPower;
-import net.minecraft.client.renderer.entity.layers.ElytraLayer;
-import net.minecraft.resources.ResourceLocation;
+import io.github.apace100.apoli.util.ApoliLivingEntityRenderState;
+import net.minecraft.client.renderer.entity.layers.WingsLayer;
+import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
+import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.item.equipment.Equippable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-@Mixin(ElytraLayer.class)
+@Mixin(WingsLayer.class)
 public class ElytraFeatureRendererMixin {
-    @Unique
-    private LivingEntity livingEntity;
+    @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;get(Lnet/minecraft/core/component/DataComponentType;)Ljava/lang/Object;"))
+    private Object modifyEquippedStackToElytra(Object original, @Local(argsOnly = true) HumanoidRenderState renderState) {
+        if (!renderState.isInvisible) {
+            for (ElytraFlightPower power : PowerHolderComponent.getPowers(renderState, ElytraFlightPower.class)) {
+                if (power.shouldRenderElytra()) {
+                    var cached = ((ApoliLivingEntityRenderState) renderState).apoli$getCachedEquippable();
 
-    // NeoForge/Connector 兼容：主版注入点也改用 getItemBySlot（NeoForge 下 is(ELYTRA) 被替换为 shouldRender() 字段比较而失效）
-    @WrapOperation(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getItemBySlot(Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack modifyEquippedStackToElytra(LivingEntity instance, EquipmentSlot slot, Operation<ItemStack> original, @Local(argsOnly = true) LivingEntity livingEntity) {
-        this.livingEntity = livingEntity;
-        if(PowerHolderComponent.getPowers(livingEntity, ElytraFlightPower.class).stream().anyMatch(ElytraFlightPower::shouldRenderElytra) && !livingEntity.isInvisible()) {
-            return new ItemStack(Items.ELYTRA);
-        }
-        return original.call(instance, slot);
-    }
+                    if (cached == null || (cached.assetId().isPresent() && !cached.assetId().orElseThrow().equals(EquipmentAssets.ELYTRA))) {
+                        var equippable = Equippable.builder(EquipmentSlot.CHEST)
+                            .setEquipSound(SoundEvents.ARMOR_EQUIP_ELYTRA)
+                            .setAsset(EquipmentAssets.ELYTRA)
+                            .setDamageOnHurt(false)
+                            .build();
 
-    @ModifyArg(method = "render(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;ILnet/minecraft/world/entity/LivingEntity;FFFFFF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/RenderType;armorCutoutNoCull(Lnet/minecraft/resources/ResourceLocation;)Lnet/minecraft/client/renderer/RenderType;"))
-    private ResourceLocation setTexture(ResourceLocation identifier) {
-        for (ElytraFlightPower power : PowerHolderComponent.getPowers(this.livingEntity, ElytraFlightPower.class)) {
-            if (power.getTextureLocation() != null) {
-                return power.getTextureLocation();
+                        ((ApoliLivingEntityRenderState) renderState).apoli$setCachedEquippable(equippable);
+                        return equippable;
+                    } else {
+                        return cached;
+                    }
+                }
             }
         }
-        return identifier;
+
+        return original;
+    }
+
+    @ModifyExpressionValue(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/layers/WingsLayer;getPlayerElytraTexture(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)Lnet/minecraft/resources/Identifier;"))
+    private Identifier modifyEntityElytraTextureToPower(Identifier original, @Local(argsOnly = true) HumanoidRenderState renderState) {
+        if (!renderState.isInvisible) {
+            for (ElytraFlightPower power : PowerHolderComponent.getPowers(renderState, ElytraFlightPower.class)) {
+                if (power.shouldRenderElytra() && power.getTextureLocation() != null) {
+                    return power.getTextureLocation();
+                }
+            }
+        }
+
+        return original;
     }
 }

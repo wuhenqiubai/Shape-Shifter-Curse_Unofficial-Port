@@ -19,20 +19,20 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.ladysnake.pal.PlayerAbility;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
@@ -43,12 +43,13 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.entity.vehicle.boat.Boat;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
@@ -99,7 +100,7 @@ public class EntityConditions {
             ((Comparison)data.get("comparison")).compare(entity.level().getDayTime() % 24000L, data.getInt("compare_to"))));
         register(new ConditionFactory<>(Apoli.identifier("fall_flying"), new SerializableData(), (data, entity) -> entity instanceof LivingEntity && ((LivingEntity) entity).isFallFlying()));
         register(new ConditionFactory<>(Apoli.identifier("exposed_to_sun"), new SerializableData(), (data, entity) -> {
-            if (entity.level().isDay() && !((EntityAccessor) entity).callIsInRain()) {
+            if (entity.level().isBrightOutside() && !((EntityAccessor) entity).callIsInRain()) {
                 float f = entity.getLightLevelDependentMagicValue();
                 BlockPos blockPos = entity.getVehicle() instanceof Boat ? (BlockPos.containing(entity.getX(), (double) Math.round(entity.getY()), entity.getZ())).above() : BlockPos.containing(entity.getX(), (double) Math.round(entity.getY()), entity.getZ());
                 return f > 0.5F && entity.level().canSeeSky(blockPos);
@@ -113,9 +114,6 @@ public class EntityConditions {
             BlockPos blockPos = entity.getVehicle() instanceof Boat ? (BlockPos.containing(entity.getX(), (double) Math.round(entity.getY()), entity.getZ())).above() : BlockPos.containing(entity.getX(), (double) Math.round(entity.getY()), entity.getZ());
             return entity.level().canSeeSky(blockPos);
         }));
-        // isShiftKeyDown() 是 shared flag（getSharedFlag(1)），服务端通过 PRESS/RELEASE_SHIFT_KEY 包同步，空中也保持，
-        // 是稳定的「玩家按住潜行键」判断。不要用 isCrouching()（hasPose(CROUCHING)）：姿态在跳跃/空中会变化，
-        // 导致依赖 apoli:sneaking 的 modifier（潜行加速等）频繁 add/remove，出现松开潜行突进、悬停等机制 bug。
         register(new ConditionFactory<>(Apoli.identifier("sneaking"), new SerializableData(), (data, entity) -> entity.isShiftKeyDown()));
         register(new ConditionFactory<>(Apoli.identifier("sprinting"), new SerializableData(), (data, entity) -> entity.isSprinting()));
         register(new ConditionFactory<>(Apoli.identifier("power_active"), new SerializableData().add("power", ApoliDataTypes.POWER_TYPE),
@@ -128,7 +126,7 @@ public class EntityConditions {
             .add("max_duration", SerializableDataTypes.INT, Integer.MAX_VALUE),
             (data, entity) -> {
                 MobEffect effect = data.get("effect");
-                var effectHolder = entity.registryAccess().lookupOrThrow(Registries.MOB_EFFECT).getOrThrow(BuiltInRegistries.MOB_EFFECT.getResourceKey(effect).orElseThrow());
+                var effectHolder = entity.registryAccess().lookupOrThrow(Registries.MOB_EFFECT).wrapAsHolder(effect);
                 if(entity instanceof LivingEntity living) {
                     if (living.hasEffect(effectHolder)) {
                         MobEffectInstance instance = living.getEffect(effectHolder);
@@ -270,13 +268,14 @@ public class EntityConditions {
             .add("condition", ApoliDataTypes.BIOME_CONDITION, null),
             (data, entity) -> {
                 Holder<Biome> biomeEntry = entity.level().getBiome(entity.blockPosition());
+                Biome biome = biomeEntry.value();
                 ConditionFactory<Holder<Biome>>.Instance condition = data.get("condition");
                 if(data.isPresent("biome") || data.isPresent("biomes")) {
-                    ResourceLocation biomeId = biomeEntry.unwrapKey().orElseThrow().location();
+                    Identifier biomeId = entity.level().registryAccess().lookupOrThrow(Registries.BIOME).getKey(biome);
                     if(data.isPresent("biome") && biomeId.equals(data.getId("biome"))) {
                         return condition == null || condition.test(biomeEntry);
                     }
-                    if(data.isPresent("biomes") && ((List<ResourceLocation>)data.get("biomes")).contains(biomeId)) {
+                    if(data.isPresent("biomes") && ((List<Identifier>)data.get("biomes")).contains(biomeId)) {
                         return condition == null || condition.test(biomeEntry);
                     }
                     return false;
@@ -294,17 +293,20 @@ public class EntityConditions {
             (data, entity) -> {
                 MinecraftServer server = entity.level().getServer();
                 if(server != null) {
-                    boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
+                    // [移植 b7a79a9] source 恒用实体（ServerPlayer.commandSource()），避免 CommandSource.NULL 使 /say 等命令失效。
                     CommandSourceStack source = new CommandSourceStack(
-                        entity,
+                        entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
                         entity.position(),
                         entity.getRotationVector(),
                         entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
-                        Apoli.config.executeCommand.permissionLevel,
+                        Apoli.config.executeCommand.getPermissionHandler(),
                         entity.getName().getString(),
                         entity.getDisplayName(),
                         server,
                         entity);
+                    if(!Apoli.config.executeCommand.showOutput) {
+                        source = source.withSuppressedOutput();
+                    }
                     int output = 0;
                     try {
                         output = server.getCommands().getDispatcher().execute(data.getString("command").replaceFirst("/", ""), source);
@@ -320,7 +322,7 @@ public class EntityConditions {
             (data, entity) -> {
                 MinecraftServer server = entity.level().getServer();
                 if (server != null) {
-                    LootItemCondition lootCondition = server.reloadableRegistries().lookup().lookupOrThrow(Registries.PREDICATE).getOrThrow(ResourceKey.create(Registries.PREDICATE, (ResourceLocation) data.get("predicate"))).value();
+                    LootItemCondition lootCondition = server.reloadableRegistries().lookup().lookupOrThrow(Registries.PREDICATE).getOrThrow(ResourceKey.create(Registries.PREDICATE, (Identifier) data.get("predicate"))).value();
                     if (lootCondition != null) {
                         LootParams lootContextParameterSet = new LootParams.Builder((ServerLevel) entity.level())
                                 .withParameter(LootContextParams.ORIGIN, entity.position())
@@ -374,7 +376,7 @@ public class EntityConditions {
                 return comparison.compare(count, compareTo);}));
         register(new ConditionFactory<>(Apoli.identifier("entity_group"), new SerializableData()
             .add("group", SerializableDataTypes.ENTITY_GROUP),
-            (data, entity) -> entity instanceof LivingEntity && entity.getType().is((TagKey<EntityType<?>>) data.get("group"))));
+            (data, entity) -> entity instanceof LivingEntity && ((List<TagKey<EntityType<?>>>) data.get("group")).stream().allMatch(tag -> entity.getType().is(tag))));
         register(new ConditionFactory<>(Apoli.identifier("in_tag"), new SerializableData()
             .add("tag", SerializableDataTypes.ENTITY_TAG),
             (data, entity) -> entity.getType().builtInRegistryHolder().is((TagKey<EntityType<?>>) data.get("tag"))));
@@ -520,9 +522,9 @@ public class EntityConditions {
         register(new ConditionFactory<>(Apoli.identifier("nbt"), new SerializableData()
             .add("nbt", SerializableDataTypes.NBT),
             (data, entity) -> {
-                CompoundTag nbt = new CompoundTag();
-                entity.saveWithoutId(nbt);
-                return NbtUtils.compareNbt(data.get("nbt"), nbt, true);
+                var output = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, entity.registryAccess());
+                entity.saveWithoutId(output);
+                return NbtUtils.compareNbt(data.get("nbt"), output.buildResult(), true);
             }));
         register(new ConditionFactory<>(Apoli.identifier("exists"), new SerializableData(), (data, entity) -> entity != null));
         register(new ConditionFactory<>(Apoli.identifier("creative_flying"), new SerializableData(),
@@ -537,7 +539,7 @@ public class EntityConditions {
         register(new ConditionFactory<>(Apoli.identifier("ability"), new SerializableData()
             .add("ability", ApoliDataTypes.PLAYER_ABILITY),
             (data, entity) -> {
-                if(entity instanceof Player && !entity.level().isClientSide) {
+                if(entity instanceof Player && !entity.level().isClientSide()) {
                     return ((PlayerAbility) data.get("ability")).isEnabledFor((Player) entity);
                 }
                 return false;

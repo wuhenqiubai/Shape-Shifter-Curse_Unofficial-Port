@@ -12,7 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 
@@ -45,13 +45,13 @@ public class BiomeConditions {
         register(new ConditionFactory<>(Apoli.identifier("category"), new SerializableData() // Deprecated
             .add("category", SerializableDataTypes.STRING),
             (data, biome) -> {
-                ResourceLocation tagId = Apoli.identifier("category/" + data.getString("category"));
+                Identifier tagId = Apoli.identifier("category/" + data.getString("category"));
                 TagKey<Biome> biomeTag = TagKey.create(Registries.BIOME, tagId);
                 return biome.is(biomeTag);
             }));
         register(new ConditionFactory<>(Apoli.identifier("precipitation"), new SerializableData()
             .add("precipitation", SerializableDataType.enumValue(Biome.Precipitation.class)),
-            (data, biome) -> biome.value().getPrecipitationAt(new BlockPos(0, 64, 0)).equals(data.get("precipitation"))));
+            (data, biome) -> biome.value().getPrecipitationAt(new BlockPos(0, 64, 0), 63).equals(data.get("precipitation"))));
         register(new ConditionFactory<>(Apoli.identifier("in_tag"), new SerializableData()
             .add("tag", SerializableDataTypes.BIOME_TAG),
             (data, biome) -> {

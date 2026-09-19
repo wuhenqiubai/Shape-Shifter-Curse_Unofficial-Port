@@ -3,6 +3,7 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
+import io.github.apace100.apoli.access.EndRespawningEntity;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.networking.PowerListPacket;
 import io.github.apace100.apoli.power.ModifyPlayerSpawnPower;
@@ -17,7 +18,7 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.vehicle.DismountHelper;
-import net.minecraft.world.level.portal.DimensionTransition;
+import net.minecraft.world.level.portal.TeleportTransition;
 import net.minecraft.world.phys.Vec3;
 import org.ladysnake.cca.api.v3.component.ComponentProvider;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,14 +49,14 @@ public abstract class LoginMixin {
 	}
 
 	// TODO O-L: is this broken?
-	/*@WrapOperation(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;setRespawnPosition(Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/core/BlockPos;FZZ)V"))
-	private void preventEndExitSpawnPointSetting(ServerPlayer playerEntity, ResourceKey<Level> dimension, BlockPos position, float angle, boolean forced, boolean sendMessage, Operation<Void> original) {
-		EndRespawningEntity ere = (EndRespawningEntity) playerEntity;
+	@WrapOperation(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;copyRespawnPosition(Lnet/minecraft/server/level/ServerPlayer;)V"))
+	private void preventEndExitSpawnPointSetting(ServerPlayer newPlayer, ServerPlayer oldPlayer, Operation<Void> original) {
+		EndRespawningEntity ere = (EndRespawningEntity) oldPlayer;
 		// Prevent setting the spawn point if the player has a "fake" respawn point
 		if(ere.hasRealRespawnPoint()) {
-			original.call(playerEntity, dimension, position, angle, forced, sendMessage);
+			original.call(newPlayer, oldPlayer);
 		}
-	}*/
+	}
 
 	@Inject(method = "remove", at = @At("HEAD"))
 	private void invokeOnRemovedCallback(ServerPlayer player, CallbackInfo ci) {
@@ -63,12 +64,17 @@ public abstract class LoginMixin {
 		component.getPowers().forEach(Power::onRemoved);
 	}
 
-	@WrapOperation(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;findRespawnPositionAndUseSpawnBlock(ZLnet/minecraft/world/level/portal/DimensionTransition$PostDimensionTransition;)Lnet/minecraft/world/level/portal/DimensionTransition;"))
-	private DimensionTransition retryObstructedSpawnpointIfFailed(ServerPlayer instance, boolean keepInventory, DimensionTransition.PostDimensionTransition postDimensionTransition, Operation<DimensionTransition> operation) {
-		DimensionTransition original = operation.call(instance, keepInventory, postDimensionTransition);
+	@WrapOperation(method = "respawn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;findRespawnPositionAndUseSpawnBlock(ZLnet/minecraft/world/level/portal/TeleportTransition$PostTeleportTransition;)Lnet/minecraft/world/level/portal/TeleportTransition;"))
+	private TeleportTransition retryObstructedSpawnpointIfFailed(ServerPlayer instance, boolean useCharge, TeleportTransition.PostTeleportTransition postTeleportTransition, Operation<TeleportTransition> operation) {
+		TeleportTransition original = operation.call(instance, useCharge, postTeleportTransition);
 		if(original.missingRespawnBlock()) {
 			if(PowerHolderComponent.hasPower(instance, ModifyPlayerSpawnPower.class)) {
-				return new DimensionTransition(instance.serverLevel(), DismountHelper.findSafeDismountLocation(EntityType.PLAYER, original.newLevel(), BlockPos.containing(original.pos()), keepInventory), Vec3.ZERO, original.yRot(), original.xRot(), postDimensionTransition);
+				Vec3 pos = DismountHelper.findSafeDismountLocation(EntityType.PLAYER, original.newLevel(), BlockPos.containing(original.position()), useCharge);
+				if (pos == null) {
+					pos = original.position();
+				}
+
+				return new TeleportTransition(original.newLevel(), pos, Vec3.ZERO, original.yRot(), original.xRot(), postTeleportTransition);
 			}
 		}
 		return original;

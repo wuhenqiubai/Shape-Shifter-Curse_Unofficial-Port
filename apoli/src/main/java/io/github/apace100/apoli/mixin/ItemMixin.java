@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Mixin(Item.class)
 public class ItemMixin {
 
-    @Inject(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/InteractionResultHolder;pass(Ljava/lang/Object;)Lnet/minecraft/world/InteractionResultHolder;"), cancellable = true)
+    @Inject(method = "use", at = @At(value = "FIELD", target = "Lnet/minecraft/world/InteractionResult;PASS:Lnet/minecraft/world/InteractionResult$Pass;"), cancellable = true)
     private void tryItemAlwaysEdible(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         ItemStack itemStack = user.getItemInHand(hand);
         if (PowerHolderComponent.KEY.get(user).getPowers(ModifyFoodPower.class).stream()

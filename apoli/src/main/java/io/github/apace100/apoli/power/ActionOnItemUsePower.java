@@ -64,7 +64,7 @@ public class ActionOnItemUsePower extends Power implements Prioritized<ActionOnI
     }
 
     public static void executeActions(Entity user, ItemStack useStack, ItemStack checkStack, TriggerType triggerType, PriorityPhase phase) {
-        if(user.level().isClientSide) {
+        if(user.level().isClientSide()) {
             return;
         }
         ActionOnItemUsePower.CallInstance<ActionOnItemUsePower> callInstance = new ActionOnItemUsePower.CallInstance<>();

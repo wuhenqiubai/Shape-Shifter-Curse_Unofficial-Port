@@ -14,8 +14,8 @@ import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.fabric.impl.resource.conditions.ResourceConditionsImpl;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.util.GsonHelper;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,7 +65,7 @@ public class ApoliResourceConditions {
 		}
 
 		@Override
-		public boolean test(HolderLookup.@Nullable Provider provider) {
+		public boolean test(RegistryOps.@Nullable RegistryInfoLookup registryInfo) {
 			for (String namespace : namespaces) {
 				if (PowerTypes.LOADED_NAMESPACES.contains(namespace) != and) {
 					return !and;
@@ -93,7 +93,7 @@ public class ApoliResourceConditions {
 
 	}
 
-	public static boolean test(ResourceLocation id, JsonObject jsonObject) {
+	public static boolean test(Identifier id, JsonObject jsonObject) {
 
 		try {
 			JsonArray conditions = GsonHelper.getAsJsonArray(jsonObject, ResourceConditions.CONDITIONS_KEY, null);
@@ -104,7 +104,7 @@ public class ApoliResourceConditions {
 
 				for (JsonElement condition : conditions) {
 					var json = condition.getAsJsonObject();
-					var conditionId = ResourceLocation.parse(json.get("condition").getAsString());
+					var conditionId = Identifier.parse(json.get("condition").getAsString());
 					parsedConditions.add(ResourceConditions.getConditionType(conditionId).codec().codec().decode(JsonOps.INSTANCE, json).getOrThrow().getFirst());
 				}
 

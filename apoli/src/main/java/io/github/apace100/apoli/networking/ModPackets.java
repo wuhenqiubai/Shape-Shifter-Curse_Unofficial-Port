@@ -3,11 +3,11 @@ package io.github.apace100.apoli.networking;
 import io.github.apace100.apoli.Apoli;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 public class ModPackets {
 
-    public static final ResourceLocation HANDSHAKE = Apoli.identifier("handshake");
+    public static final Identifier HANDSHAKE = Apoli.identifier("handshake");
 
     public static final CustomPacketPayload.Type<UseActivePowersPacket> USE_ACTIVE_POWERS = new CustomPacketPayload.Type<>(Apoli.identifier("use_active_powers")); // C -> S
     public static final CustomPacketPayload.Type<PowerListPacket> POWER_LIST = new CustomPacketPayload.Type<>(Apoli.identifier("power_list")); // S -> C

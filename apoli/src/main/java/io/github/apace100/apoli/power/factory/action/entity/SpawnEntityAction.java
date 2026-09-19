@@ -18,7 +18,7 @@ public class SpawnEntityAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
 
-        if (entity.level().isClientSide) return;
+        if (entity.level().isClientSide()) return;
 
         ServerLevel serverWorld = (ServerLevel) entity.level();
         EntityType<?> entityType = data.get("entity_type");

@@ -15,7 +15,7 @@ public abstract class CustomNonItalicNameMixin {
 
     @Mixin(ItemStack.class)
     public abstract static class ModifyItalicDisplayItem {
-        @ModifyExpressionValue(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;has(Lnet/minecraft/core/component/DataComponentType;)Z", ordinal = 0))
+        @ModifyExpressionValue(method = "getStyledHoverName", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;has(Lnet/minecraft/core/component/DataComponentType;)Z"))
         private boolean hasCustomNameWhichIsItalic(boolean original) {
             return original && !Calio.hasNonItalicName((ItemStack) (Object) this);
         }

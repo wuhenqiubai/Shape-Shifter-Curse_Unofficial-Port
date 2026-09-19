@@ -38,8 +38,10 @@ public final class RegCustomBlock {
     public static final Block Altar_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
     public static final BlockEntityType<AltarBlockEntity> Altar_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, Altar_BLOCK).build());
 
-    public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", new FormAttunerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(4.0F, 10.0F).sound(SoundType.GLASS).noOcclusion()));
-    public static final BlockEntityType<FormAttunerBlockEntity> FORM_ATTUNER_BLOCK_ENTITY = registerBlockEntity("form_attuner_block_entity", BlockEntityType.Builder.of(FormAttunerBlockEntity::new, FORM_ATTUNER_BLOCK).build(null));
+    // register 收的是 (path, 工厂, 属性) 三参形式（与上面几个方块一致）；BlockEntityType.Builder 在 1.21.11 已不是公开入口，
+    // 统一改用 FabricBlockEntityTypeBuilder（与 Altar 一致）。
+    public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", FormAttunerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(4.0F, 10.0F).sound(SoundType.GLASS).noOcclusion());
+    public static final BlockEntityType<FormAttunerBlockEntity> FORM_ATTUNER_BLOCK_ENTITY = registerBlockEntity("form_attuner_block_entity", FabricBlockEntityTypeBuilder.create(FormAttunerBlockEntity::new, FORM_ATTUNER_BLOCK).build());
 
     public static void ClientInit() {
         // transparent透明模式不写Z，会出现自排序问题遮挡自己，只需要镂空的模型应该使用getCutout

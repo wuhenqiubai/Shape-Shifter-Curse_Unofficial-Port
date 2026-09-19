@@ -3,8 +3,9 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
@@ -21,20 +22,20 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID
 public class SubFormSelectScreen extends Screen {
     private static final int BG_WIDTH = 470;
     private static final int BG_HEIGHT = 247;
-    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/normal_form_select_menu.png");
+    private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/normal_form_select_menu.png");
 
-    private List<ResourceLocation> availableForms;
+    private List<Identifier> availableForms;
     private int nowPage = 0;
     private static final int pageSize = 16;
-    private final List<ResourceLocation> buttonForms = new ArrayList<>();
+    private final List<Identifier> buttonForms = new ArrayList<>();
     private final List<Button> buttonWidgetList = new ArrayList<>();
 
     public SubFormSelectScreen(Component title) {
         super(title);
     }
 
-    private List<ResourceLocation> getAvailableForms() {
-        List<ResourceLocation> availableForms = new ArrayList<>();
+    private List<Identifier> getAvailableForms() {
+        List<Identifier> availableForms = new ArrayList<>();
         IForm playerForm = FormUtils.getPlayerForm(this.minecraft.player);
         IForm nowForm = playerForm;
         if (playerForm instanceof ISubForm subForm && subForm.isSubForm()) {
@@ -51,7 +52,7 @@ public class SubFormSelectScreen extends Screen {
         return availableForms;
     }
 
-    private void SendSetForm(ResourceLocation formID) {
+    private void SendSetForm(Identifier formID) {
         ModPacketsS2C.sendSetSubForm(formID);
     }
 
@@ -175,10 +176,10 @@ public class SubFormSelectScreen extends Screen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) {
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
             return true;
-        } else if (this.minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        } else if (this.minecraft.options.keyInventory.matches(keyEvent)) {
             this.onClose();
             return true;
         }

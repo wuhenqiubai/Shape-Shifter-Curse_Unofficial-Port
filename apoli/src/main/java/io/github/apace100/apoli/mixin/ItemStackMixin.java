@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.ActionOnItemUsePower;
 import io.github.apace100.apoli.power.PreventItemUsePower;
 import net.minecraft.core.component.PatchedDataComponentMap;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -81,13 +81,13 @@ public abstract class ItemStackMixin implements MutableItemStack, EntityLinkedIt
     }
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void callActionOnUseInstantBefore(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+    private void callActionOnUseInstantBefore(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         if(user != null) {
             PowerHolderComponent component = PowerHolderComponent.KEY.get(user);
             ItemStack stackInHand = user.getItemInHand(hand);
             for(PreventItemUsePower piup : component.getPowers(PreventItemUsePower.class)) {
                 if(piup.doesPrevent(stackInHand)) {
-                    cir.setReturnValue(InteractionResultHolder.fail(stackInHand));
+                    cir.setReturnValue(InteractionResult.FAIL);
                     return;
                 }
             }
@@ -103,11 +103,11 @@ public abstract class ItemStackMixin implements MutableItemStack, EntityLinkedIt
     }
 
     @Inject(method = "use", at = @At("RETURN"))
-    private void callActionOnUseInstantAfter(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir) {
+    private void callActionOnUseInstantAfter(Level world, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
         var stack = (ItemStack) (Object) this;
         if(user != null) {
-            InteractionResultHolder<ItemStack> ar = cir.getReturnValue();
-            if(!ar.getResult().consumesAction()) {
+            InteractionResult ar = cir.getReturnValue();
+            if(!ar.consumesAction()) {
                 return;
             }
             if(getUseDuration(user) == 0) {

@@ -1,7 +1,7 @@
 package io.github.apace100.apoli.power;
 
 import io.github.apace100.apoli.integration.PowerClearCallback;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,14 +11,14 @@ import java.util.stream.Stream;
 
 public class PowerTypeRegistry {
 
-    private static final HashMap<ResourceLocation, PowerType<?>> idToPower = new HashMap<>();
-    private static final Set<ResourceLocation> disabledPowers = new HashSet<>();
+    private static final HashMap<Identifier, PowerType<?>> idToPower = new HashMap<>();
+    private static final Set<Identifier> disabledPowers = new HashSet<>();
 
-    public static Map<ResourceLocation, PowerType<?>> get() {
+    public static Map<Identifier, PowerType<?>> get() {
         return idToPower;
     }
 
-    public static PowerType register(ResourceLocation id, PowerType powerType) {
+    public static PowerType register(Identifier id, PowerType powerType) {
         if(idToPower.containsKey(id)) {
             throw new IllegalArgumentException("Duplicate power type id tried to register: '" + id.toString() + "'");
         }
@@ -27,7 +27,7 @@ public class PowerTypeRegistry {
         return powerType;
     }
 
-    protected static PowerType update(ResourceLocation id, PowerType powerType) {
+    protected static PowerType update(Identifier id, PowerType powerType) {
         if(idToPower.containsKey(id)) {
             PowerType old = idToPower.get(id);
             idToPower.remove(id);
@@ -35,16 +35,16 @@ public class PowerTypeRegistry {
         return register(id, powerType);
     }
 
-    protected static void disable(ResourceLocation id) {
+    protected static void disable(Identifier id) {
         remove(id);
         disabledPowers.add(id);
     }
 
-    protected static void remove(ResourceLocation id) {
+    protected static void remove(Identifier id) {
         idToPower.remove(id);
     }
 
-    public static boolean isDisabled(ResourceLocation id) {
+    public static boolean isDisabled(Identifier id) {
         return disabledPowers.contains(id);
     }
 
@@ -52,11 +52,11 @@ public class PowerTypeRegistry {
         return idToPower.size();
     }
 
-    public static Stream<ResourceLocation> identifiers() {
+    public static Stream<Identifier> identifiers() {
         return idToPower.keySet().stream();
     }
 
-    public static Iterable<Map.Entry<ResourceLocation, PowerType<?>>> entries() {
+    public static Iterable<Map.Entry<Identifier, PowerType<?>>> entries() {
         return idToPower.entrySet();
     }
 
@@ -64,7 +64,7 @@ public class PowerTypeRegistry {
         return idToPower.values();
     }
 
-    public static PowerType get(ResourceLocation id) {
+    public static PowerType get(Identifier id) {
         if(!idToPower.containsKey(id)) {
             throw new IllegalArgumentException("Could not get power type from id '" + id.toString() + "', as it was not registered!");
         }
@@ -72,11 +72,11 @@ public class PowerTypeRegistry {
         return powerType;
     }
 
-    public static ResourceLocation getId(PowerType<?> powerType) {
+    public static Identifier getId(PowerType<?> powerType) {
         return powerType.getIdentifier();
     }
 
-    public static boolean contains(ResourceLocation id) {
+    public static boolean contains(Identifier id) {
         return idToPower.containsKey(id);
     }
 

@@ -11,18 +11,22 @@ import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.apoli.util.ResourceOperation;
 import io.github.apace100.apoli.util.Space;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -100,7 +104,7 @@ public class EntityActions {
             .add("effect", SerializableDataTypes.STATUS_EFFECT_INSTANCE, null)
             .add("effects", SerializableDataTypes.STATUS_EFFECT_INSTANCES, null),
             (data, entity) -> {
-                if(entity instanceof LivingEntity le && !entity.level().isClientSide) {
+                if(entity instanceof LivingEntity le && !entity.level().isClientSide()) {
                     if(data.isPresent("effect")) {
                         MobEffectInstance effect = data.get("effect");
                         le.addEffect(new MobEffectInstance(effect));
@@ -111,7 +115,7 @@ public class EntityActions {
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("clear_effect"), new SerializableData()
-            .add("effect", SerializableDataTypes.STATUS_EFFECT, null),
+            .add("effect", SerializableDataType.holder(BuiltInRegistries.MOB_EFFECT), null),
             (data, entity) -> {
                 if(entity instanceof LivingEntity le) {
                     if(data.isPresent("effect")) {
@@ -134,7 +138,7 @@ public class EntityActions {
             .add("set", SerializableDataTypes.BOOLEAN, false),
             (data, entity) -> {
                 if (entity instanceof Player
-                    && (entity.level().isClientSide ?
+                    && (entity.level().isClientSide() ?
                     !data.getBoolean("client") : !data.getBoolean("server")))
                     return;
                 Space space = data.get("space");
@@ -181,7 +185,7 @@ public class EntityActions {
                 if(data.isPresent("effects")) {
                     effects.addAll(data.get("effects"));
                 }
-                areaEffectCloudEntity.setParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, FastColor.ARGB32.opaque(PotionContents.getColorOptional(effects).orElse(-13083194))));
+                areaEffectCloudEntity.setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, ARGB.opaque(PotionContents.getColorOptional(effects).orElse(PotionContents.BASE_POTION_COLOR))));
                 effects.forEach(areaEffectCloudEntity::addEffect);
 
                 entity.level().addFreshEntity(areaEffectCloudEntity);
@@ -191,48 +195,37 @@ public class EntityActions {
         register(new ActionFactory<>(Apoli.identifier("execute_command"), new SerializableData()
             .add("command", SerializableDataTypes.STRING),
             (data, entity) -> {
-                // 只有实体位于服务端维度（ServerLevel）才执行：particle 等命令需要 source.getLevel()，
+                // [移植 b7a79a9] 只有实体位于服务端维度（ServerLevel）才执行：particle 等命令需要 source.getLevel()，
                 // 客户端/非服务端租 level 非 ServerLevel → source.getLevel()=null → NPE。
-                // 服务端线程那条（level=ServerLevel）负责执行；craft 已改用 item_on_item 的 result 字段，不经过 execute_command。
                 if(!(entity.level() instanceof ServerLevel)) {
                     return;
                 }
                 MinecraftServer server = entity.level().getServer();
-                // 无条件 CALLED 日志(warn 级)：进入 lambda 即打印，用于确认 execute_command 是否真的被调用、是否拿到了 server。
-                Apoli.LOGGER.warn("[ShapeShifterCurse] execute_command CALLED: cmd={} | entity={} | server={}",
-                        data.getString("command"), entity.getName().getString(), server != null);
                 if(server != null) {
-                    // 修复：source 总是用实体，避免 CommandSource.NULL 抑制 /say 输出及使 /give @s 等命令失效。
+                    // 修复：source 总是用实体（ServerPlayer.commandSource()），避免 CommandSource.NULL 抑制 /say 输出及使 /give @s 等命令失效。
                     CommandSourceStack source = new CommandSourceStack(
-                        entity,
+                        entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource()
+                            : CommandSource.NULL,
                         entity.position(),
                         entity.getRotationVector(),
-                        entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
-                        Apoli.config.executeCommand.permissionLevel,
+                        (ServerLevel)entity.level(),
+                        Apoli.config.executeCommand.getPermissionHandler(),
                         entity.getName().getString(),
                         entity.getDisplayName(),
                         server,
                         entity);
                     // showOutput=false（默认）时抑制命令反馈广播（/give 聊天提示等），但保留命令执行效果。
-                    // 用 withSuppressedOutput 仅静默输出，而非 CommandSource.NULL（那会连命令效果一起杀掉）。
                     if(!Apoli.config.executeCommand.showOutput) {
                         source = source.withSuppressedOutput();
                     }
                     try {
-                        // dispatcher.execute 不剥前导 /（聊天栏的 / 由 MC 剥离后才传入），带 / 会在 position 0 报"未知命令"，
-                        // 这里手动剥掉前导空白与 /。
+                        // dispatcher.execute 不剥前导 /（聊天栏的 / 由 MC 剥离后才传入），带 / 会在 position 0 报"未知命令"，这里手动剥掉。
                         String execCommand = data.getString("command").trim();
                         if(execCommand.startsWith("/")) {
                             execCommand = execCommand.substring(1);
                         }
-                        // 用 dispatcher.execute（返回 int + 抛 CommandSyntaxException），可判断结果并非静默记录失败
                         int result = server.getCommands().getDispatcher().execute(execCommand, source);
-                        // 无条件日志：确认 execute_command 是否走到、命令原文、返回结果（warn 级避免被日志配置过滤）
-                        Apoli.LOGGER.warn("[ShapeShifterCurse] execute_command EXEC: cmd={} | result={} | entity={}",
-                                data.getString("command"), result, entity.getName().getString());
                     } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-                        Apoli.LOGGER.warn("[ShapeShifterCurse] execute_command ERROR: cmd={} | entity={} | {}",
-                                data.getString("command"), entity.getName().getString(), e.getMessage());
                     }
                 }
             }));

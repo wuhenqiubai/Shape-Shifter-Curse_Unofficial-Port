@@ -1,20 +1,24 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.*;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
+import io.github.apace100.calio.util.UpgradeUtils;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.ItemStackWithSlot;
 import net.minecraft.world.SimpleMenuProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -22,8 +26,11 @@ import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class InventoryPower extends Power implements Active, Container {
 
@@ -84,21 +91,62 @@ public class InventoryPower extends Power implements Active, Container {
         if(!isActive()) {
             return;
         }
-        if(!entity.level().isClientSide && entity instanceof Player playerEntity) {
+        if(!entity.level().isClientSide() && entity instanceof Player playerEntity) {
             playerEntity.openMenu(new SimpleMenuProvider(containerScreen, containerTitle));
         }
     }
 
     @Override
-    public CompoundTag toTag(HolderLookup.Provider provider) {
-        CompoundTag tag = new CompoundTag();
-        ContainerHelper.saveAllItems(tag, container, provider);
-        return tag;
+    public void toValue(ValueOutput output) {
+        ContainerHelper.saveAllItems(output, container, true);
     }
 
+    private static final Codec<ItemStackWithSlot> DATA_FIXED_ITEM_STACK_WITH_SLOT_CODEC = RecordCodecBuilder.create(instance ->
+        instance.group(
+            ExtraCodecs.UNSIGNED_BYTE.fieldOf("Slot")
+                .orElse(0)
+                .forGetter(ItemStackWithSlot::slot),
+            Codec.mapEither(ItemStack.MAP_CODEC,
+                MapCodec.of(ItemStack.MAP_CODEC, new MapDecoder<>() {
+                    @Override
+                    public <T> Stream<T> keys(DynamicOps<T> ops) {
+                        return ItemStack.MAP_CODEC.keys(ops);
+                    }
+
+                    @Override
+                    public <T> DataResult<ItemStack> decode(DynamicOps<T> ops, MapLike<T> input) {
+                        try {
+                            Dynamic<T> dynamic = new Dynamic<>(ops);
+                            input.entries().forEach(pair -> {
+                                dynamic.set(ops.getStringValue(pair.getFirst()).getOrThrow(), new Dynamic<>(ops, pair.getSecond()));
+                            });
+
+                            Dynamic<T> upgraded = UpgradeUtils.upgradeStack(dynamic);
+                            return upgraded.decode(ItemStack.MAP_CODEC.decoder()).map(Pair::getFirst);
+                        } catch (Exception e) {
+                            return DataResult.error(() -> "Failed to decode with data fixer: " + e.getMessage());
+                        }
+                    }
+
+                    @Override
+                    public <T> KeyCompressor<T> compressor(DynamicOps<T> ops) {
+                        return ItemStack.MAP_CODEC.compressor(ops);
+                    }
+                })
+            )
+                .xmap(Either::unwrap, Either::left)
+                .forGetter(ItemStackWithSlot::stack)
+        )
+            .apply(instance, ItemStackWithSlot::new)
+    );
+
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        ContainerHelper.loadAllItems((CompoundTag)tag, container, provider);
+    public void fromValue(ValueInput input) {
+        for (ItemStackWithSlot itemStackWithSlot : input.listOrEmpty("Items", DATA_FIXED_ITEM_STACK_WITH_SLOT_CODEC)) {
+            if (itemStackWithSlot.isValidInContainer(container.size())) {
+                container.set(itemStackWithSlot.slot(), itemStackWithSlot.stack());
+            }
+        }
     }
 
     @Override

@@ -7,7 +7,6 @@ import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.nbt.Tag;
@@ -15,12 +14,16 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.AbstractHurtingProjectile;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.Optional;
@@ -67,25 +70,38 @@ public class FireProjectilePower extends ActiveCooldownPower {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
-        CompoundTag nbt = new CompoundTag();
+    public void toValue(ValueOutput nbt) {
         nbt.putLong("LastUseTime", lastUseTime);
         nbt.putInt("ShotProjectiles", shotProjectiles);
         nbt.putBoolean("FinishedStartDelay", finishedStartDelay);
         nbt.putBoolean("IsFiringProjectiles", isFiringProjectiles);
-        return nbt;
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        if(tag instanceof LongTag) {
-            lastUseTime = ((LongTag)tag).getAsLong();
+    public void fromValue(ValueInput input) {
+        lastUseTime = input.getLong("LastUseTime").orElseThrow();
+        shotProjectiles = input.getInt("ShotProjectiles").orElseThrow();
+        finishedStartDelay = input.getBooleanOr("FinishedStartDelay", false);
+        isFiringProjectiles = input.getBooleanOr("IsFiringProjectiles", false);
+    }
+
+    @Override
+    public Tag toTag() {
+        var output = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
+        this.toValue(output);
+        return output.buildResult();
+    }
+
+    @Override
+    public void fromTag(Tag input) {
+        if(input instanceof LongTag) {
+            lastUseTime = ((LongTag) input).value();
         }
         else {
-            lastUseTime = ((CompoundTag)tag).getLong("LastUseTime");
-            shotProjectiles = ((CompoundTag)tag).getInt("ShotProjectiles");
-            finishedStartDelay = ((CompoundTag)tag).getBoolean("FinishedStartDelay");
-            isFiringProjectiles = ((CompoundTag)tag).getBoolean("IsFiringProjectiles");
+            lastUseTime = ((CompoundTag) input).getLong("LastUseTime").orElseThrow();
+            shotProjectiles = ((CompoundTag) input).getInt("ShotProjectiles").orElseThrow();
+            finishedStartDelay = ((CompoundTag) input).getBoolean("FinishedStartDelay").orElseThrow();
+            isFiringProjectiles = ((CompoundTag) input).getBoolean("IsFiringProjectiles").orElseThrow();
         }
     }
 
@@ -94,14 +110,14 @@ public class FireProjectilePower extends ActiveCooldownPower {
             if(!finishedStartDelay && startDelay == 0) {
                 finishedStartDelay = true;
             }
-            if(!finishedStartDelay && (entity.getCommandSenderWorld().getGameTime() - lastUseTime) % startDelay == 0) {
+            if(!finishedStartDelay && (entity.level().getGameTime() - lastUseTime) % startDelay == 0) {
                 finishedStartDelay = true;
                 shotProjectiles += 1;
                 if(shotProjectiles <= projectileCount) {
                     if(soundEvent != null) {
                         entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / (entity.getRandom().nextFloat() * 0.4F + 0.8F));
                     }
-                    if(!entity.level().isClientSide) {
+                    if(!entity.level().isClientSide()) {
                         fireProjectile();
                     }
                 }
@@ -115,7 +131,7 @@ public class FireProjectilePower extends ActiveCooldownPower {
                 if(soundEvent != null) {
                     entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / (entity.getRandom().nextFloat() * 0.4F + 0.8F));
                 }
-                if(!entity.level().isClientSide) {
+                if(!entity.level().isClientSide()) {
                     for(; shotProjectiles < projectileCount; shotProjectiles++) {
                         fireProjectile();
                     }
@@ -124,13 +140,13 @@ public class FireProjectilePower extends ActiveCooldownPower {
                 finishedStartDelay = false;
                 isFiringProjectiles = false;
             }
-            else if (finishedStartDelay && (entity.getCommandSenderWorld().getGameTime() - lastUseTime) % interval == 0) {
+            else if (finishedStartDelay && (entity.level().getGameTime() - lastUseTime) % interval == 0) {
                 shotProjectiles += 1;
                 if(shotProjectiles <= projectileCount) {
                     if(soundEvent != null) {
                         entity.level().playSound(null, entity.getX(), entity.getY(), entity.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / (entity.getRandom().nextFloat() * 0.4F + 0.8F));
                     }
-                    if(!entity.level().isClientSide) {
+                    if(!entity.level().isClientSide()) {
                         fireProjectile();
                     }
                 }
@@ -145,7 +161,7 @@ public class FireProjectilePower extends ActiveCooldownPower {
 
     private void fireProjectile() {
 
-        if (entityType == null || entity.level().isClientSide) return;
+        if (entityType == null || entity.level().isClientSide()) return;
 
         ServerLevel serverWorld = (ServerLevel) entity.level();
         float yaw = entity.getYRot();

@@ -4,7 +4,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -23,7 +23,7 @@ import java.util.*;
  * data pack. This allows overriding and merging several data files into one, similar to how tags work. There is no
  * guarantee on the order of the resulting list, so make sure to include some kind of "priority" system.
  */
-public abstract class MultiJsonDataLoader extends SimplePreparableReloadListener<Map<ResourceLocation, List<JsonElement>>> {
+public abstract class MultiJsonDataLoader extends SimplePreparableReloadListener<Map<Identifier, List<JsonElement>>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private static final int FILE_SUFFIX_LENGTH = ".json".length();
     private final Gson gson;
@@ -34,17 +34,17 @@ public abstract class MultiJsonDataLoader extends SimplePreparableReloadListener
         this.dataType = dataType;
     }
 
-    protected Map<ResourceLocation, List<JsonElement>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
-        Map<ResourceLocation, List<JsonElement>> map = Maps.newHashMap();
+    protected Map<Identifier, List<JsonElement>> prepare(ResourceManager resourceManager, ProfilerFiller profiler) {
+        Map<Identifier, List<JsonElement>> map = Maps.newHashMap();
         int i = this.dataType.length() + 1;
-        Iterator<Map.Entry<ResourceLocation, Resource>> var5 = resourceManager.listResources(this.dataType, (id) -> {
+        Iterator<Map.Entry<Identifier, Resource>> var5 = resourceManager.listResources(this.dataType, (id) -> {
             return id.getPath().endsWith(".json");
         }).entrySet().iterator();
         Set<String> resourcesHandled = new HashSet<>();
         while(var5.hasNext()) {
-            ResourceLocation identifier = var5.next().getKey();
+            Identifier identifier = var5.next().getKey();
             String string = identifier.getPath();
-            ResourceLocation identifier2 = ResourceLocation.fromNamespaceAndPath(identifier.getNamespace(), string.substring(i, string.length() - FILE_SUFFIX_LENGTH));
+            Identifier identifier2 = Identifier.fromNamespaceAndPath(identifier.getNamespace(), string.substring(i, string.length() - FILE_SUFFIX_LENGTH));
             resourcesHandled.clear();
             resourceManager.getResourceStack(identifier).forEach(resource -> {
                 if(!resourcesHandled.contains(resource.sourcePackId())) {

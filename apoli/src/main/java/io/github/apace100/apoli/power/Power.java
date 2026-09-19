@@ -2,12 +2,13 @@ package io.github.apace100.apoli.power;
 
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -80,11 +81,19 @@ public class Power {
         return conditions.stream().allMatch(condition -> condition.test(entity));
     }
 
-    public Tag toTag(HolderLookup.Provider provider) {
+    public void toValue(ValueOutput output) {
+
+    }
+
+    public void fromValue(ValueInput input) {
+
+    }
+
+    public Tag toTag() {
         return new CompoundTag();
     }
 
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
+    public void fromTag(Tag input) {
 
     }
 
@@ -92,7 +101,7 @@ public class Power {
         return type;
     }
 
-    public static PowerFactory createSimpleFactory(BiFunction<PowerType, LivingEntity, Power> powerConstructor, ResourceLocation identifier) {
+    public static PowerFactory createSimpleFactory(BiFunction<PowerType, LivingEntity, Power> powerConstructor, Identifier identifier) {
         return new PowerFactory<>(identifier,
             new SerializableData(), data -> powerConstructor::apply).allowCondition();
     }

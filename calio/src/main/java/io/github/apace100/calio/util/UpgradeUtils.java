@@ -1,5 +1,6 @@
 package io.github.apace100.calio.util;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Dynamic;
@@ -21,7 +22,7 @@ public class UpgradeUtils {
         return upgradeStack(new Dynamic<>(NbtOps.INSTANCE, tag)).getValue();
     }
 
-    private static <T> Dynamic<T> upgradeStack(Dynamic<T> dynamic) {
+    public static <T> Dynamic<T> upgradeStack(Dynamic<T> dynamic) {
         var fixer = DataFixers.getDataFixer();
 
         // Map "item" -> "id"
@@ -32,7 +33,7 @@ public class UpgradeUtils {
     }
 
     public static JsonObject upgradeRecipe(JsonObject json) {
-        /*if (json.has("ingredients")) {
+        if (json.has("ingredients")) {
             var ingredients = json.get("ingredients");
 
             if (ingredients.isJsonArray()) {
@@ -68,7 +69,7 @@ public class UpgradeUtils {
                 json.remove("ingredients");
                 json.add("ingredients", newArray);
             }
-        }*/
+        }
 
         if (json.has("result") && json.get("result").isJsonObject()) {
             var result = json.getAsJsonObject("result");

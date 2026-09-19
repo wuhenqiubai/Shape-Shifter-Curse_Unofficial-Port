@@ -6,6 +6,7 @@ import io.github.apace100.apoli.power.PhasingPower;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.ScreenEffectRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,10 +19,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class InGameOverlayRendererMixin {
 
     @Inject(method = "renderTex", at = @At("HEAD"), cancellable = true)
-    private static void preventInWallOverlayRendering(TextureAtlasSprite texture, PoseStack poseStack, CallbackInfo ci) {
+    private static void preventInWallOverlayRendering(TextureAtlasSprite texture, PoseStack poseStack, MultiBufferSource bufferSource, CallbackInfo ci) {
         Minecraft minecraftClient = Minecraft.getInstance();
-        if(minecraftClient.cameraEntity != null) {
-            if(PowerHolderComponent.getPowers(minecraftClient.cameraEntity, PhasingPower.class).size() > 0) {
+        if(minecraftClient.getCameraEntity() != null) {
+            if(PowerHolderComponent.getPowers(minecraftClient.getCameraEntity(), PhasingPower.class).size() > 0) {
                 ci.cancel();
             }
         }

@@ -2,9 +2,11 @@ package io.github.apace100.apoli.mixin;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.RestrictArmorPower;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+import net.minecraft.client.Minecraft;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -20,9 +22,10 @@ public abstract class PlayerScreenHandlerMixin extends Slot {
         super(inventory, index, x, y);
     }
 
+    @Environment(EnvType.CLIENT)
     @Inject(method = "mayPlace", at = @At("HEAD"), cancellable = true)
     private void preventArmorInsertion(ItemStack stack, CallbackInfoReturnable<Boolean> info) {
-        Player player = ((Inventory)container).player;
+        Player player = Minecraft.getInstance().player;
         PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
         EquipmentSlot slot = player.getEquipmentSlotForItem(stack);
         if(component.getPowers(RestrictArmorPower.class).stream().anyMatch(rap -> !rap.canEquip(stack, slot))) {

@@ -17,7 +17,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GlobalPowerSet implements Comparable<GlobalPowerSet>, DataObject<GlobalPowerSet> {
@@ -27,8 +29,8 @@ public class GlobalPowerSet implements Comparable<GlobalPowerSet>, DataObject<Gl
                     .optionalFieldOf("order", 0)
                     .forGetter(GlobalPowerSet::getOrder),
                 TagLike.codec(BuiltInRegistries.ENTITY_TYPE)
-                    .optionalFieldOf("entity_types", null)
-                    .forGetter(set -> set.entityTypes),
+                    .optionalFieldOf("entity_types")
+                    .forGetter(set -> Optional.ofNullable(set.entityTypes)),
                 PowerTypeReference.CODEC.listOf()
                     .fieldOf("powers")
                     .forGetter(GlobalPowerSet::getPowerTypes)
@@ -45,10 +47,14 @@ public class GlobalPowerSet implements Comparable<GlobalPowerSet>, DataObject<Gl
 
     private final List<PowerType<?>> powerTypes;
 
+    public GlobalPowerSet(int order, Optional<TagLike<EntityType<?>>> entityTypes, List<PowerType<?>> powerTypes) {
+        this(order, entityTypes.orElse(null), powerTypes);
+    }
+
     public GlobalPowerSet(int order, TagLike<EntityType<?>> entityTypes, List<PowerType<?>> powerTypes) {
         this.order = order;
         this.entityTypes = entityTypes;
-        this.powerTypes = powerTypes;
+        this.powerTypes = new ArrayList<>(powerTypes);
     }
 
     public boolean doesApply(EntityType<?> entityType) {
@@ -102,7 +108,7 @@ public class GlobalPowerSet implements Comparable<GlobalPowerSet>, DataObject<Gl
 
         @Override
         public GlobalPowerSet fromData(SerializableData.Instance instance) {
-            return new GlobalPowerSet(instance.getInt("order"), instance.get("entity_types"), instance.get("powers"));
+            return new GlobalPowerSet(instance.getInt("order"), (TagLike<EntityType<?>>) instance.get("entity_types"), instance.get("powers"));
         }
 
         @Override

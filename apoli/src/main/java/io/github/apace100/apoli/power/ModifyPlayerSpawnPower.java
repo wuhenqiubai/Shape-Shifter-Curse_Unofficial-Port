@@ -7,8 +7,8 @@ import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,7 +16,6 @@ import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Tuple;
-import net.minecraft.util.Unit;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -25,17 +24,19 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
+import net.minecraft.world.level.storage.LevelData;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ModifyPlayerSpawnPower extends Power {
 
     public final ResourceKey<Level> dimension;
     public final float dimensionDistanceMultiplier;
-    public final ResourceLocation biomeId;
+    public final Identifier biomeId;
     public final SpawnStrategy spawnStrategy;
     public final ResourceKey<Structure> structure;
     public final SoundEvent spawnSound;
@@ -44,16 +45,16 @@ public class ModifyPlayerSpawnPower extends Power {
 
         CENTER((blockPos, center, multiplier) -> new BlockPos(0, center, 0)),
         DEFAULT(
-            (blockPos, center, multiplier) -> {
+                (blockPos, center, multiplier) -> {
 
-                BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
+                    BlockPos.MutableBlockPos mut = new BlockPos.MutableBlockPos();
 
-                if (multiplier != 0) mut.set(blockPos.getX() * multiplier, blockPos.getY(), blockPos.getZ() * multiplier);
-                else mut.set(blockPos);
+                    if (multiplier != 0) mut.set(blockPos.getX() * multiplier, blockPos.getY(), blockPos.getZ() * multiplier);
+                    else mut.set(blockPos);
 
-                return mut;
+                    return mut;
 
-            }
+                }
         );
 
         final TriFunction<BlockPos, Integer, Float, BlockPos> strategyApplier;
@@ -67,7 +68,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
     }
 
-    public ModifyPlayerSpawnPower(PowerType<?> type, LivingEntity entity, ResourceKey<Level> dimension, float dimensionDistanceMultiplier, ResourceLocation biomeId, SpawnStrategy spawnStrategy, ResourceKey<Structure> structure, SoundEvent spawnSound) {
+    public ModifyPlayerSpawnPower(PowerType<?> type, LivingEntity entity, ResourceKey<Level> dimension, float dimensionDistanceMultiplier, Identifier biomeId, SpawnStrategy spawnStrategy, ResourceKey<Structure> structure, SoundEvent spawnSound) {
         super(type, entity);
         this.dimension = dimension;
         this.dimensionDistanceMultiplier = dimensionDistanceMultiplier;
@@ -80,18 +81,18 @@ public class ModifyPlayerSpawnPower extends Power {
     @Override
     public void onRemoved() {
 
-        if (entity.level().isClientSide || !(entity instanceof Player playerEntity)) return;
+        if (entity.level().isClientSide() || !(entity instanceof Player playerEntity)) return;
 
         ServerPlayer serverPlayerEntity = (ServerPlayer) playerEntity;
-        if (serverPlayerEntity.hasDisconnected() || serverPlayerEntity.getRespawnPosition() == null || !serverPlayerEntity.isRespawnForced()) return;
+        if (serverPlayerEntity.hasDisconnected() || serverPlayerEntity.getRespawnConfig() == null || !serverPlayerEntity.getRespawnConfig().forced()) return;
 
-        serverPlayerEntity.setRespawnPosition(Level.OVERWORLD, null, 0F, false, false);
+        serverPlayerEntity.setRespawnPosition(new ServerPlayer.RespawnConfig(new LevelData.RespawnData(GlobalPos.of(Level.OVERWORLD, BlockPos.ZERO), 0f, 0f), false), false);
 
     }
 
     public void teleportToModifiedSpawn() {
 
-        if (entity.level().isClientSide || !(entity instanceof Player playerEntity)) return;
+        if (entity.level().isClientSide() || !(entity instanceof Player playerEntity)) return;
 
         ServerPlayer serverPlayerEntity = (ServerPlayer) playerEntity;
         Tuple<ServerLevel, BlockPos> newSpawn = getSpawn(false);
@@ -102,20 +103,20 @@ public class ModifyPlayerSpawnPower extends Power {
 
         Vec3 tpPos = DismountHelper.findSafeDismountLocation(playerEntity.getType(), newSpawn.getA(), newSpawn.getB(), true);
         if (tpPos == null) {
-            serverPlayerEntity.teleportTo(newSpawnDimension, newSpawnPos.getX(), newSpawnPos.getY(), newSpawnPos.getZ(), entity.getXRot(), entity.getYRot());
+            serverPlayerEntity.teleportTo(newSpawnDimension, newSpawnPos.getX(), newSpawnPos.getY(), newSpawnPos.getZ(), Set.of(), entity.getXRot(), entity.getYRot(), false);
             Apoli.LOGGER.warn("Power {} could not find a suitable spawnpoint for {}! Teleporting to the desired location directly...", this.getType().getIdentifier(), entity.getScoreboardName());
         }
 
-        else serverPlayerEntity.teleportTo(newSpawnDimension, tpPos.x, tpPos.y, tpPos.z, entity.getXRot(), entity.getYRot());
+        else serverPlayerEntity.teleportTo(newSpawnDimension, tpPos.x, tpPos.y, tpPos.z, Set.of(), entity.getXRot(), entity.getYRot(), false);
 
     }
 
     public Tuple<ServerLevel, BlockPos> getSpawn(boolean isSpawnObstructed) {
 
-        if (entity.level().isClientSide || !(entity instanceof Player playerEntity)) return null;
+        if (entity.level().isClientSide() || !(entity instanceof Player playerEntity)) return null;
 
         ServerPlayer serverPlayerEntity = (ServerPlayer) playerEntity;
-        MinecraftServer server = serverPlayerEntity.getServer();
+        MinecraftServer server = serverPlayerEntity.level().getServer();
         if (server == null) return null;
 
         ServerLevel overworldDimension = server.getLevel(Level.OVERWORLD);
@@ -123,7 +124,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
         ServerLevel targetDimension = server.getLevel(dimension);
         if (targetDimension == null) {
-            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at dimension \"{}\" as it's not registered! Falling back to default spawnpoint...", this.getType().getIdentifier(), entity.getScoreboardName(), dimension.location());
+            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at dimension \"{}\" as it's not registered! Falling back to default spawnpoint...", this.getType().getIdentifier(), entity.getScoreboardName(), dimension.identifier());
             return null;
         }
 
@@ -132,7 +133,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
         AtomicReference<Vec3> modifiedSpawnPos = new AtomicReference<>();
 
-        BlockPos regularSpawnBlockPos = overworldDimension.getSharedSpawnPos();
+        BlockPos regularSpawnBlockPos = overworldDimension.getRespawnData().pos();
         BlockPos.MutableBlockPos modifiedSpawnBlockPos = new BlockPos.MutableBlockPos();
         BlockPos.MutableBlockPos dimensionSpawnPos = spawnStrategy.apply(regularSpawnBlockPos, center, dimensionDistanceMultiplier).mutable();
 
@@ -143,7 +144,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
         Vec3 msp = modifiedSpawnPos.get();
         modifiedSpawnBlockPos.set(msp.x, msp.y, msp.z);
-        targetDimension.getChunkSource().addRegionTicket(TicketType.START, new ChunkPos(modifiedSpawnBlockPos), 11, Unit.INSTANCE);
+        targetDimension.getChunkSource().addTicketWithRadius(TicketType.PLAYER_SPAWN, new ChunkPos(modifiedSpawnBlockPos), 11);
 
         return new Tuple<>(targetDimension, modifiedSpawnBlockPos);
 
@@ -153,23 +154,23 @@ public class ModifyPlayerSpawnPower extends Power {
 
         if (biomeId == null) return Optional.empty();
 
-        Optional<Biome> targetBiome = targetDimension.registryAccess().registryOrThrow(Registries.BIOME).getOptional(biomeId);
+        Optional<Biome> targetBiome = targetDimension.registryAccess().lookupOrThrow(Registries.BIOME).getOptional(biomeId);
         if (targetBiome.isEmpty()) {
-            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at biome \"{}\" as it's not registered in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), biomeId, dimension.location());
+            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at biome \"{}\" as it's not registered in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), biomeId, dimension.identifier());
             return Optional.empty();
         }
 
         com.mojang.datafixers.util.Pair<BlockPos, Holder<Biome>> targetBiomePos = targetDimension.findClosestBiome3d(
-            biome -> biome.value() == targetBiome.get(),
-            originPos,
-            6400,
-            8,
-            8
+                biome -> biome.value() == targetBiome.get(),
+                originPos,
+                6400,
+                8,
+                8
         );
 
         if (targetBiomePos != null) return Optional.of(targetBiomePos.getFirst());
         else {
-            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at biome \"{}\" as it couldn't be found in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), biomeId, dimension.location());
+            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at biome \"{}\" as it couldn't be found in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), biomeId, dimension.identifier());
             return Optional.empty();
         }
 
@@ -177,29 +178,29 @@ public class ModifyPlayerSpawnPower extends Power {
 
     private Optional<Tuple<BlockPos, Structure>> getStructurePos(Level world, ResourceKey<Structure> structure, TagKey<Structure> structureTag, ResourceKey<Level> dimension) {
 
-        Registry<Structure> structureRegistry = world.registryAccess().registryOrThrow(Registries.STRUCTURE);
+        Registry<Structure> structureRegistry = world.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         HolderSet<Structure> structureRegistryEntryList = null;
         String structureTagOrName = "";
 
         if (structure != null) {
 
-            var entry = structureRegistry.getHolder(structure);
+            var entry = structureRegistry.get(structure);
             if (entry.isPresent()) structureRegistryEntryList = HolderSet.direct(entry.get());
 
-            structureTagOrName = structure.location().toString();
+            structureTagOrName = structure.identifier().toString();
 
         }
 
         if (structureRegistryEntryList == null) {
 
-            var entryList = structureRegistry.getTag(structureTag);
+            var entryList = structureRegistry.get(structureTag);
             if (entryList.isPresent()) structureRegistryEntryList = entryList.get();
 
             structureTagOrName = "#" + structureTag.location().toString();
 
         }
 
-        MinecraftServer server = entity.getServer();
+        MinecraftServer server = entity.level().getServer();
         if (server == null) return Optional.empty();
 
         ServerLevel serverWorld = server.getLevel(dimension);
@@ -207,18 +208,18 @@ public class ModifyPlayerSpawnPower extends Power {
 
         BlockPos center = new BlockPos(0, 70, 0);
         com.mojang.datafixers.util.Pair<BlockPos, Holder<Structure>> structurePos = serverWorld
-            .getChunkSource()
-            .getGenerator()
-            .findNearestMapStructure(
-                serverWorld,
-                structureRegistryEntryList,
-                center,
-                100,
-                false
-            );
+                .getChunkSource()
+                .getGenerator()
+                .findNearestMapStructure(
+                        serverWorld,
+                        structureRegistryEntryList,
+                        center,
+                        100,
+                        false
+                );
 
         if (structurePos == null) {
-            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at structure \"{}\" as it couldn't be found in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), structureTagOrName, dimension.location());
+            Apoli.LOGGER.warn("Power {} could not set {}'s spawnpoint at structure \"{}\" as it couldn't be found in dimension \"{}\".", this.getType().getIdentifier(), entity.getScoreboardName(), structureTagOrName, dimension.identifier());
             return Optional.empty();
         }
 
@@ -272,8 +273,8 @@ public class ModifyPlayerSpawnPower extends Power {
         int downOffset = 0;
 
         //  The min and max Y values of the target dimension
-        int maxY = targetDimension.getLogicalHeight();
         int minY = targetDimension.dimensionTypeRegistration().value().minY();
+        int maxY = minY + targetDimension.getLogicalHeight();
 
         while (upOffset < maxY || downOffset > minY) {
 
@@ -314,8 +315,8 @@ public class ModifyPlayerSpawnPower extends Power {
             }
 
             //  Increment/decrement the up/down offsets until it's no longer less/greater than the max/min Y
-            if (upOffset < maxY) upOffset++;
-            if (downOffset > minY) downOffset--;
+            if (center + upOffset < maxY) upOffset++;
+            if (center + downOffset > minY) downOffset--;
 
         }
 
@@ -325,25 +326,26 @@ public class ModifyPlayerSpawnPower extends Power {
 
     public static PowerFactory createFactory() {
         return new PowerFactory<>(
-            Apoli.identifier("modify_player_spawn"),
-            new SerializableData()
-                .add("dimension", SerializableDataTypes.DIMENSION)
-                .add("dimension_distance_multiplier", SerializableDataTypes.FLOAT, 0F)
-                .add("biome", SerializableDataTypes.IDENTIFIER, null)
-                .add("spawn_strategy", SerializableDataType.enumValue(SpawnStrategy.class), SpawnStrategy.DEFAULT)
-                .add("structure", SerializableDataType.registryKey(Registries.STRUCTURE), null)
-                .add("respawn_sound", SerializableDataTypes.SOUND_EVENT, null),
-            data -> (powerType, livingEntity) -> new ModifyPlayerSpawnPower(
-                powerType,
-                livingEntity,
-                data.get("dimension"),
-                data.get("dimension_distance_multiplier"),
-                data.get("biome"),
-                data.get("spawn_strategy"),
-                data.get("structure"),
-                data.get("respawn_sound")
-            )
+                Apoli.identifier("modify_player_spawn"),
+                new SerializableData()
+                        .add("dimension", SerializableDataTypes.DIMENSION)
+                        .add("dimension_distance_multiplier", SerializableDataTypes.FLOAT, 0F)
+                        .add("biome", SerializableDataTypes.IDENTIFIER, null)
+                        .add("spawn_strategy", SerializableDataType.enumValue(SpawnStrategy.class), SpawnStrategy.DEFAULT)
+                        .add("structure", SerializableDataType.registryKey(Registries.STRUCTURE), null)
+                        .add("respawn_sound", SerializableDataTypes.SOUND_EVENT, null),
+                data -> (powerType, livingEntity) -> new ModifyPlayerSpawnPower(
+                        powerType,
+                        livingEntity,
+                        data.get("dimension"),
+                        data.get("dimension_distance_multiplier"),
+                        data.get("biome"),
+                        data.get("spawn_strategy"),
+                        data.get("structure"),
+                        data.get("respawn_sound")
+                )
         ).allowCondition();
     }
 
 }
+

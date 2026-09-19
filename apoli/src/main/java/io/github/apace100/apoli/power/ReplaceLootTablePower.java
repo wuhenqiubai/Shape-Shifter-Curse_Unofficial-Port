@@ -13,7 +13,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,13 +31,13 @@ import java.util.function.Predicate;
 
 public class ReplaceLootTablePower extends Power {
 
-    public static final ResourceLocation REPLACED_TABLE_UTIL_ID = ResourceLocation.fromNamespaceAndPath(Apoli.MODID, "replaced_loot_table");
-    public static ResourceLocation LAST_REPLACED_TABLE_ID;
+    public static final Identifier REPLACED_TABLE_UTIL_ID = Identifier.fromNamespaceAndPath(Apoli.MODID, "replaced_loot_table");
+    public static Identifier LAST_REPLACED_TABLE_ID;
 
     private static Stack<LootTable> REPLACEMENT_STACK = new Stack<>();
     private static Stack<LootTable> BACKTRACK_STACK = new Stack<>();
 
-    private final Map<String, ResourceLocation> replacements;
+    private final Map<String, Identifier> replacements;
 
     private final int priority;
 
@@ -45,7 +45,7 @@ public class ReplaceLootTablePower extends Power {
     private final Predicate<Tuple<Entity, Entity>> biEntityCondition;
     private final Predicate<BlockInWorld> blockCondition;
 
-    public ReplaceLootTablePower(PowerType<?> type, LivingEntity entity, Map<String, ResourceLocation> replacements, int priority, Predicate<ItemStack> itemCondition, Predicate<Tuple<Entity, Entity>> biEntityCondition, Predicate<BlockInWorld> blockCondition) {
+    public ReplaceLootTablePower(PowerType<?> type, LivingEntity entity, Map<String, Identifier> replacements, int priority, Predicate<ItemStack> itemCondition, Predicate<Tuple<Entity, Entity>> biEntityCondition, Predicate<BlockInWorld> blockCondition) {
         super(type, entity);
         this.replacements = replacements;
         this.priority = priority;
@@ -54,7 +54,7 @@ public class ReplaceLootTablePower extends Power {
         this.blockCondition = blockCondition;
     }
 
-    public boolean hasReplacement(ResourceLocation id) {
+    public boolean hasReplacement(Identifier id) {
         String idString = id.toString();
         if(replacements.containsKey(idString)) {
             return true;
@@ -64,16 +64,16 @@ public class ReplaceLootTablePower extends Power {
 
     public boolean doesApply(LootContext lootContext) {
         if(biEntityCondition != null
-            && !biEntityCondition.test(new Tuple<>(entity, lootContext.getParamOrNull(LootContextParams.THIS_ENTITY)))) {
+            && !biEntityCondition.test(new Tuple<>(entity, lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)))) {
             return false;
         }
         if(itemCondition != null
-            && lootContext.hasParam(LootContextParams.TOOL)
-            && !itemCondition.test(lootContext.getParamOrNull(LootContextParams.TOOL))) {
+            && lootContext.hasParameter(LootContextParams.TOOL)
+            && !itemCondition.test(lootContext.getOptionalParameter(LootContextParams.TOOL))) {
             return false;
         }
-        if(blockCondition != null && lootContext.hasParam(LootContextParams.ORIGIN)) {
-            BlockPos blockPos = BlockPos.containing(lootContext.getParamOrNull(LootContextParams.ORIGIN));
+        if(blockCondition != null && lootContext.hasParameter(LootContextParams.ORIGIN)) {
+            BlockPos blockPos = BlockPos.containing(lootContext.getOptionalParameter(LootContextParams.ORIGIN));
             BlockInWorld cbp = new BlockInWorld(lootContext.getLevel(), blockPos, true);
             if(!blockCondition.test(cbp)) {
                 return false;
@@ -82,7 +82,7 @@ public class ReplaceLootTablePower extends Power {
         return true;
     }
 
-    public ResourceLocation getReplacement(ResourceLocation id) {
+    public Identifier getReplacement(Identifier id) {
         String idString = id.toString();
         if(replacements.containsKey(idString)) {
             return replacements.get(idString);
@@ -140,7 +140,7 @@ public class ReplaceLootTablePower extends Power {
         int count = 0;
         while(!REPLACEMENT_STACK.isEmpty()) {
             LootTable t = pop();
-            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).apoli$getId());
+            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).getId());
             if(!REPLACEMENT_STACK.isEmpty()) {
                 stringBuilder.append(", ");
             }
@@ -153,7 +153,7 @@ public class ReplaceLootTablePower extends Power {
         }
         while(BACKTRACK_STACK.size() > 0) {
             LootTable t = restore();
-            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).apoli$getId());
+            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).getId());
             if(!BACKTRACK_STACK.isEmpty()) {
                 stringBuilder.append(", ");
             }
@@ -169,7 +169,7 @@ public class ReplaceLootTablePower extends Power {
 
     public static PowerFactory createFactory() {
         return new PowerFactory<>(
-            ResourceLocation.fromNamespaceAndPath(Apoli.MODID, "replace_loot_table"),
+            Identifier.fromNamespaceAndPath(Apoli.MODID, "replace_loot_table"),
             new SerializableData()
                 .add("replace", REPLACEMENTS_DATA_TYPE)
                 .add("priority", SerializableDataTypes.INT, 0)
@@ -184,41 +184,41 @@ public class ReplaceLootTablePower extends Power {
             .allowCondition();
     }
 
-    private static final SerializableDataType<Map<String, ResourceLocation>> REPLACEMENTS_DATA_TYPE = new SerializableDataType<>(ClassUtil.castClass(Map.class),
+    private static final SerializableDataType<Map<String, Identifier>> REPLACEMENTS_DATA_TYPE = new SerializableDataType<>(ClassUtil.castClass(Map.class),
         (packetByteBuf, stringIdentifierMap) -> {
             packetByteBuf.writeInt(stringIdentifierMap.size());
             stringIdentifierMap.forEach(((s, identifier) -> {
                 packetByteBuf.writeUtf(s);
-                packetByteBuf.writeResourceLocation(identifier);
+                packetByteBuf.writeIdentifier(identifier);
             }));
         },
         packetByteBuf -> {
             int count = packetByteBuf.readInt();
-            Map<String, ResourceLocation> map = new LinkedHashMap<>();
+            Map<String, Identifier> map = new LinkedHashMap<>();
             for(int i = 0;i < count; i++) {
                 String s = packetByteBuf.readUtf();
-                ResourceLocation id = packetByteBuf.readResourceLocation();
+                Identifier id = packetByteBuf.readIdentifier();
                 map.put(s, id);
             }
             return map;
         }, jsonElement -> {
-        if(jsonElement.isJsonObject()) {
-            JsonObject jo = jsonElement.getAsJsonObject();
-            Map<String, ResourceLocation> map = new LinkedHashMap<>();
-            for(String s : jo.keySet()) {
-                JsonElement ele = jo.get(s);
-                if(!ele.isJsonPrimitive()) {
-                    continue;
+            if(jsonElement.isJsonObject()) {
+                JsonObject jo = jsonElement.getAsJsonObject();
+                Map<String, Identifier> map = new LinkedHashMap<>();
+                for(String s : jo.keySet()) {
+                    JsonElement ele = jo.get(s);
+                    if(!ele.isJsonPrimitive()) {
+                        continue;
+                    }
+                    JsonPrimitive jp = ele.getAsJsonPrimitive();
+                    if(!jp.isString()) {
+                        continue;
+                    }
+                    Identifier id = Identifier.parse(jp.getAsString());
+                    map.put(s, id);
                 }
-                JsonPrimitive jp = ele.getAsJsonPrimitive();
-                if(!jp.isString()) {
-                    continue;
-                }
-                ResourceLocation id = ResourceLocation.parse(jp.getAsString());
-                map.put(s, id);
+                return map;
             }
-            return map;
-        }
-        throw new JsonParseException("Expected a JSON object");
-    });
+            throw new JsonParseException("Expected a JSON object");
+        });
 }

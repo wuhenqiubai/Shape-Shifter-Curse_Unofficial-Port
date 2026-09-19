@@ -4,17 +4,17 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 public class OverrideHudTexturePower extends Power {
-    private final ResourceLocation statusBarTexture;
-    public OverrideHudTexturePower(PowerType<?> type, LivingEntity entity, ResourceLocation statusBarTexture) {
+    private final Identifier statusBarTexture;
+    public OverrideHudTexturePower(PowerType<?> type, LivingEntity entity, Identifier statusBarTexture) {
         super(type, entity);
         this.statusBarTexture = statusBarTexture;
     }
 
-    public ResourceLocation getStatusBarTexture() {
+    public Identifier getStatusBarTexture() {
         return statusBarTexture;
     }
 

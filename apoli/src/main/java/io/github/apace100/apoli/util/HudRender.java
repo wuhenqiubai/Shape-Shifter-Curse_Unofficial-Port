@@ -2,7 +2,7 @@ package io.github.apace100.apoli.util;
 
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 
@@ -12,19 +12,25 @@ public class HudRender {
 
     private final boolean shouldRender;
     private final int barIndex;
-    private final ResourceLocation spriteLocation;
+    private final Identifier spriteLocation;
     private final ConditionFactory<LivingEntity>.Instance playerCondition;
     private final boolean inverted;
+    private final int order;
 
-    public HudRender(boolean shouldRender, int barIndex, ResourceLocation spriteLocation, ConditionFactory<LivingEntity>.Instance condition, boolean inverted) {
+    public HudRender(boolean shouldRender, int barIndex, Identifier spriteLocation, ConditionFactory<LivingEntity>.Instance condition, boolean inverted) {
+        this(shouldRender, barIndex, spriteLocation, condition, inverted, 0);
+    }
+
+    public HudRender(boolean shouldRender, int barIndex, Identifier spriteLocation, ConditionFactory<LivingEntity>.Instance condition, boolean inverted, int order) {
         this.shouldRender = shouldRender;
         this.barIndex = barIndex;
         this.spriteLocation = spriteLocation;
         this.playerCondition = condition;
         this.inverted = inverted;
+        this.order = order;
     }
 
-    public ResourceLocation getSpriteLocation() {
+    public Identifier getSpriteLocation() {
         return spriteLocation;
     }
 
@@ -34,6 +40,10 @@ public class HudRender {
 
     public boolean isInverted() {
         return inverted;
+    }
+
+    public int getOrder() {
+        return order;
     }
 
     public boolean shouldRender() {

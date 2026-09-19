@@ -6,15 +6,15 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.fabric.api.entity.event.v1.EntityElytraEvents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
 
 public class ElytraFlightPower extends Power {
 
     private final boolean renderElytra;
-    private final ResourceLocation textureLocation;
+    private final Identifier textureLocation;
 
-    public ElytraFlightPower(PowerType<?> type, LivingEntity entity, boolean renderElytra, ResourceLocation textureLocation) {
+    public ElytraFlightPower(PowerType<?> type, LivingEntity entity, boolean renderElytra, Identifier textureLocation) {
         super(type, entity);
         this.renderElytra = renderElytra;
         this.textureLocation = textureLocation;
@@ -24,7 +24,7 @@ public class ElytraFlightPower extends Power {
         return renderElytra;
     }
 
-    public ResourceLocation getTextureLocation() {
+    public Identifier getTextureLocation() {
         return textureLocation;
     }
 

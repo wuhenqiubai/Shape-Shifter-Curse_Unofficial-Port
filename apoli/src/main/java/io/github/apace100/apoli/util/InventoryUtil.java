@@ -67,7 +67,7 @@ public class InventoryUtil {
             for (int slot : slots) {
 
                 SlotAccess stackReference = entity.getSlot(slot);
-                if (stackReference == SlotAccess.NULL) {
+                if (stackReference == null) {
                     continue;
                 }
 
@@ -117,7 +117,7 @@ public class InventoryUtil {
             for(int slot : slots) {
 
                 SlotAccess stackReference = entity.getSlot(slot);
-                if (stackReference == SlotAccess.NULL) continue;
+                if (stackReference == null) continue;
 
                 ItemStack itemStack = stackReference.get();
                 if (itemStack.isEmpty()) continue;
@@ -189,7 +189,7 @@ public class InventoryUtil {
             slot -> {
 
                 SlotAccess stackReference = entity.getSlot(slot);
-                if (stackReference == SlotAccess.NULL) return;
+                if (stackReference == null) return;
 
                 ItemStack itemStack = stackReference.get();
                 if (!(itemCondition == null || itemCondition.test(itemStack))) return;
@@ -250,7 +250,7 @@ public class InventoryUtil {
             slot -> {
 
                 SlotAccess stackReference = entity.getSlot(slot);
-                if (stackReference == SlotAccess.NULL) return;
+                if (stackReference == null) return;
 
                 ItemStack itemStack = stackReference.get();
                 if (itemStack.isEmpty()) return;
@@ -317,7 +317,7 @@ public class InventoryUtil {
     public static void throwItem(Entity thrower, ItemStack itemStack, boolean throwRandomly, boolean retainOwnership) {
 
         if (itemStack.isEmpty()) return;
-        if (thrower instanceof Player playerEntity && playerEntity.level().isClientSide) playerEntity.swing(InteractionHand.MAIN_HAND);
+        if (thrower instanceof Player playerEntity && playerEntity.level().isClientSide()) playerEntity.swing(InteractionHand.MAIN_HAND);
 
         double yOffset = thrower.getEyeY() - 0.30000001192092896D;
         ItemEntity itemEntity = new ItemEntity(thrower.level(), thrower.getX(), yOffset, thrower.getZ(), itemStack);
@@ -356,7 +356,7 @@ public class InventoryUtil {
     public static void forEachStack(Entity entity, Consumer<ItemStack> itemStackConsumer) {
         SlotRanges.allNames().flatMapToInt(s -> SlotRanges.nameToIds(s).slots().intStream()).distinct().forEach(slot -> {
             SlotAccess stackReference = entity.getSlot(slot);
-            if (stackReference != SlotAccess.NULL) {
+            if (stackReference != null) {
                 ItemStack itemStack = stackReference.get();
                 if (!itemStack.isEmpty()) {
                     itemStackConsumer.accept(itemStack);
@@ -382,7 +382,7 @@ public class InventoryUtil {
 
     private static void deduplicateSlots(Entity entity, Set<Integer> slots) {
         if(entity instanceof Player player) {
-            int selectedSlot = player.getInventory().selected;
+            int selectedSlot = player.getInventory().getSelectedSlot();
             Integer hotbarSlot = SlotRanges.nameToIds("hotbar." + selectedSlot).slots().getInt(0);
             if(slots.contains(hotbarSlot)) {
                 Integer mainHandSlot = SlotRanges.nameToIds("weapon.mainhand").slots().getInt(0);

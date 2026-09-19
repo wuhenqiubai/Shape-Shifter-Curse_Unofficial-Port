@@ -9,7 +9,7 @@ import io.github.apace100.apoli.registry.ApoliRegistries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 public record PowerListPacket(
-    Map<ResourceLocation, PowerType<?>> factories
+    Map<Identifier, PowerType<?>> factories
 ) implements CustomPacketPayload {
     public static final StreamCodec<RegistryFriendlyByteBuf, PowerListPacket> CODEC = StreamCodec.composite(
         StreamCodec.of((buf, packet) -> {
@@ -26,14 +26,14 @@ public record PowerListPacket(
                 var factory = type.getFactory();
 
                 if (factory != null) {
-                    buf.writeResourceLocation(key);
+                    buf.writeIdentifier(key);
                     factory.write(buf);
 
                     if (type instanceof MultiplePowerType<?> multiplePowerType) {
                         buf.writeBoolean(true);
-                        ImmutableList<ResourceLocation> subPowers = multiplePowerType.getSubPowers();
+                        ImmutableList<Identifier> subPowers = multiplePowerType.getSubPowers();
                         buf.writeVarInt(subPowers.size());
-                        subPowers.forEach(buf::writeResourceLocation);
+                        subPowers.forEach(buf::writeIdentifier);
                     } else {
                         buf.writeBoolean(false);
                     }
@@ -45,21 +45,21 @@ public record PowerListPacket(
             });
         }, (buf) -> {
             var powerCount = buf.readVarInt();
-            var factories = new HashMap<ResourceLocation, PowerType<?>>();
+            var factories = new HashMap<Identifier, PowerType<?>>();
 
             for (int i = 0; i < powerCount; i++) {
-                ResourceLocation powerId = buf.readResourceLocation();
-                ResourceLocation factoryId = buf.readResourceLocation();
+                Identifier powerId = buf.readIdentifier();
+                Identifier factoryId = buf.readIdentifier();
                 try {
-                    PowerFactory<?> factory = ApoliRegistries.POWER_FACTORY.get(factoryId);
+                    PowerFactory<?> factory = ApoliRegistries.POWER_FACTORY.getValue(factoryId);
                     PowerFactory<?>.Instance factoryInstance = factory.read(buf);
                     PowerType<?> type;
                     if (buf.readBoolean()) {
                         type = new MultiplePowerType<>(powerId, factoryInstance);
                         int subPowerCount = buf.readVarInt();
-                        List<ResourceLocation> subPowers = new ArrayList<>(subPowerCount);
+                        List<Identifier> subPowers = new ArrayList<>(subPowerCount);
                         for(int j = 0; j < subPowerCount; j++) {
-                            subPowers.add(buf.readResourceLocation());
+                            subPowers.add(buf.readIdentifier());
                         }
                         ((MultiplePowerType<?>) type).setSubPowers(subPowers);
                     } else {

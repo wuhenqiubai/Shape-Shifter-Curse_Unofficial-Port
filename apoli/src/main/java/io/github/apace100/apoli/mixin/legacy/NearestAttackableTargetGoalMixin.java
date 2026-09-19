@@ -30,6 +30,8 @@ public abstract class NearestAttackableTargetGoalMixin extends TargetGoal {
         if (this.target != null) {
             Mob self = this.mob;
             List<ModifyBehaviorPower> powers = PowerHolderComponent.getPowers(this.target, ModifyBehaviorPower.class);
+            if (powers.isEmpty()) return;
+
             powers.removeIf(power -> !power.doesApply(self));
 
             if (!powers.isEmpty()) {

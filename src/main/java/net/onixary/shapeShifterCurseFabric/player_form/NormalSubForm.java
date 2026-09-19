@@ -160,7 +160,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public ResourceLocation getPerkTreeID() {
+    public Identifier getPerkTreeID() {
         return this.getMasterForm().getPerkTreeID();
     }
 }

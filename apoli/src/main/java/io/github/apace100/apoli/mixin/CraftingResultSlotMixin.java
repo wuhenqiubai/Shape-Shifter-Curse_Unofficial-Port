@@ -23,11 +23,11 @@ public class CraftingResultSlotMixin {
 
     @Shadow @Final private CraftingContainer craftSlots;
 
-    @Inject(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/item/crafting/RecipeInput;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
+    @Inject(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultSlot;getRemainingItems(Lnet/minecraft/world/item/crafting/CraftingInput;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
     private void testOnTakeItem(Player player, ItemStack stack, CallbackInfo ci) {
         if (craftSlots instanceof TransientCraftingContainer craftingInventory)
         {
-            if (!player.level().isClientSide)
+            if (!player.level().isClientSide())
             {
                 PowerCraftingInventory pci = (PowerCraftingInventory) craftingInventory;
                 if (pci.getPower() instanceof ModifyCraftingPower mcp)

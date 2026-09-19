@@ -4,6 +4,8 @@ import net.minecraft.resources.Identifier;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 public class ModPackets {
+    public static final Identifier CHANNEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "main");
+
     public static final Identifier VALIDATE_START_BOOK_BUTTON = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "validate_start_book_button");
 
     // 新增服务端到客户端的附件同步包
@@ -42,11 +44,6 @@ public class ModPackets {
     public static final Identifier UPDATE_CUSTOM_COLOR = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_custom_color");
 
     public static final Identifier ACTIVE_VIRTUAL_TOTEM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "active_virtual_totem");
-
-    // 新版（1.21.11 侧原有；1.21.1 侧改名为下面的 OLD_*，但 1.21.11 的 ModPacketsS2C/S2CServer 仍在用这三个，故保留）
-    public static final Identifier UPDATE_PATRON_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_patron_level");
-    public static final Identifier OPEN_PATRON_FORM_SELECT_MENU = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_patron_form_select_menu");
-    public static final Identifier SET_PATRON_FORM = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_patron_form");
 
     // 老版
     public static final Identifier OLD_UPDATE_PATRON_LEVEL = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_update_patron_level");

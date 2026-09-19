@@ -17,13 +17,12 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Equipable;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.component.Tool;
@@ -52,7 +51,7 @@ public class ItemConditions {
                 condition -> condition.test(stack)
             )));
         register(new ConditionFactory<>(Apoli.identifier("food"), new SerializableData(),
-            (data, stack) -> stack.has(DataComponents.FOOD)));
+            (data, stack) -> stack.has(DataComponents.CONSUMABLE) && stack.has(DataComponents.FOOD)));
         register(new ConditionFactory<>(Apoli.identifier("ingredient"), new SerializableData()
             .add("ingredient", SerializableDataTypes.INGREDIENT),
             (data, stack) -> ((Ingredient)data.get("ingredient")).test(stack)));
@@ -61,10 +60,6 @@ public class ItemConditions {
             .add("compare_to", SerializableDataTypes.INT),
             (data, stack) -> {
                 double armor = 0;
-                if(stack.getItem() instanceof ArmorItem) {
-                    ArmorItem item = (ArmorItem)stack.getItem();
-                    armor = item.getDefense();
-                }
                 if(stack.has(DataComponents.ATTRIBUTE_MODIFIERS)) {
                     var modifiers = stack.get(DataComponents.ATTRIBUTE_MODIFIERS);
                     for (ItemAttributeModifiers.Entry entry : modifiers.modifiers()) {
@@ -106,7 +101,7 @@ public class ItemConditions {
             }));
         register(EnchantmentCondition.getFactory());
         register(new ConditionFactory<>(Apoli.identifier("meat"), new SerializableData(),
-            (data, stack) -> stack.has(DataComponents.FOOD) && stack.is(ItemTags.MEAT)));
+            (data, stack) -> stack.has(DataComponents.CONSUMABLE) && stack.is(ItemTags.MEAT)));
         register(new ConditionFactory<>(Apoli.identifier("nbt"), new SerializableData()
             .add("nbt", SerializableDataTypes.NBT), (data, stack) -> {
             if (stack.isEmpty())
@@ -124,7 +119,7 @@ public class ItemConditions {
             return convertedStack.getComponentsPatch().equals(stack.getComponentsPatch());
         }));
         register(new ConditionFactory<>(Apoli.identifier("fireproof"), new SerializableData(),
-            (data, stack) -> stack.has(DataComponents.FIRE_RESISTANT)));
+            (data, stack) -> stack.has(DataComponents.DAMAGE_RESISTANT) && stack.get(DataComponents.DAMAGE_RESISTANT).types().equals(DamageTypeTags.IS_FIRE)));
         register(new ConditionFactory<>(Apoli.identifier("enchantable"), new SerializableData(),
             (data, stack) -> !stack.isEnchantable()));
         register(new ConditionFactory<>(Apoli.identifier("power_count"), new SerializableData()
@@ -147,7 +142,7 @@ public class ItemConditions {
             .add("slot", SerializableDataTypes.EQUIPMENT_SLOT, null)
             .add("power", SerializableDataTypes.IDENTIFIER),
             (data, stack) -> {
-                ResourceLocation power = data.getId("power");
+                Identifier power = data.getId("power");
                 if(data.isPresent("slot")) {
                     return StackPowerUtil.getPowers(stack, data.get("slot")).stream().anyMatch(p -> p.powerId.equals(power));
                 } else {
@@ -179,9 +174,10 @@ public class ItemConditions {
         register(new ConditionFactory<>(Apoli.identifier("is_equippable"), new SerializableData()
             .add("equipment_slot", SerializableDataTypes.EQUIPMENT_SLOT),
             (data, stack) -> {
-                if (!(stack.getItem() instanceof Equipable equipable))
+                if (!stack.has(DataComponents.EQUIPPABLE))
                     return false;
-                return equipable.getEquipmentSlot() == data.get("equipment_slot");
+                var equippable = stack.get(DataComponents.EQUIPPABLE);
+                return equippable.slot() == data.get("equipment_slot");
             }));
 
         // Apoli: Legacy implementations
@@ -198,7 +194,7 @@ public class ItemConditions {
                     var value = entry.getValue();
 
                     var stackValue = stack.get(type);
-                    if (stackValue != null && value.isPresent() && !stackValue.equals(value.orElseThrow()))
+                    if (stackValue != null && value.isPresent() && stackValue != value.orElseThrow())
                         return false;
 
                     if (stackValue == null && value.isPresent())

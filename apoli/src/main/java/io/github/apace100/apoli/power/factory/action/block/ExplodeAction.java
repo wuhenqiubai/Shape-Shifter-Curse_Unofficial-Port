@@ -8,18 +8,20 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.ExplosionDamageCalculator;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.Optional;
@@ -28,7 +30,7 @@ import java.util.function.Predicate;
 public class ExplodeAction {
 
     public static void action(SerializableData.Instance data, Triple<Level, BlockPos, Direction> block) {
-        if(block.getLeft().isClientSide) {
+        if(block.getLeft().isClientSide()) {
             return;
         }
 
@@ -50,16 +52,25 @@ public class ExplodeAction {
                 data.get("destruction_type"));
         } else {
             explode(block.getLeft(),null, block.getLeft().damageSources().explosion(null), null,
-                block.getMiddle().getX() + 0.5, block.getMiddle().getY() + 0.5, block.getMiddle().getZ() + 0.5,
-                data.getFloat("power"), data.getBoolean("create_fire"),
-                data.get("destruction_type"));
+                    block.getMiddle().getX() + 0.5, block.getMiddle().getY() + 0.5, block.getMiddle().getZ() + 0.5,
+                    data.getFloat("power"), data.getBoolean("create_fire"),
+                    data.get("destruction_type"));
         }
     }
 
     private static void explode(Level world, Entity entity, DamageSource damageSource, ExplosionDamageCalculator behavior, double x, double y, double z, float power, boolean createFire, Explosion.BlockInteraction destructionType) {
-        Explosion explosion = new Explosion(world, entity, damageSource, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.GENERIC_EXPLODE);
-        explosion.explode();
-        explosion.finalizeExplosion(true);
+        Vec3 pos = new Vec3(x, y, z);
+        ServerExplosion explosion = new ServerExplosion((ServerLevel) world, entity, damageSource, behavior, pos, power, createFire, destructionType);
+        int blockCount = explosion.explode();
+
+        ParticleOptions particleOptions = explosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER;
+
+        for (ServerPlayer serverPlayer : ((ServerLevel) world).players()) {
+            if (serverPlayer.distanceToSqr(pos) < 4096.0) {
+                Optional<Vec3> optional = Optional.ofNullable(explosion.getHitPlayers().get(serverPlayer));
+                serverPlayer.connection.send(new ClientboundExplodePacket(pos, power, blockCount, optional, particleOptions, SoundEvents.GENERIC_EXPLODE, Level.DEFAULT_EXPLOSION_BLOCK_PARTICLES));
+            }
+        }
     }
 
     private static ExplosionDamageCalculator getExplosionBehaviour(Level world, Predicate<BlockInWorld> indestructiblePredicate) {

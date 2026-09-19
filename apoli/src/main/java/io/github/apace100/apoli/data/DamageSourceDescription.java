@@ -7,8 +7,8 @@ import io.github.apace100.apoli.access.NameMutableDamageSource;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.damagesource.DamageSource;
@@ -99,14 +99,14 @@ public class DamageSourceDescription {
     }
 
     private void findBestMatchingDamageType(DamageSources damageSources) {
-        Optional<? extends Holder<DamageType>> bestMatchingDamageType = damageSources.damageTypes.holders()
+        Optional<? extends Holder<DamageType>> bestMatchingDamageType = damageSources.damageTypes.listElements()
                 .max(Comparator.comparingInt(this::getTagMatches));
         if(bestMatchingDamageType.isPresent()) {
             Holder<DamageType> bestMatch = bestMatchingDamageType.get();
             int bestMatchTagCount = getTagMatches(bestMatch);
             if(bestMatchTagCount < TAG_COUNT) {
                 Apoli.LOGGER.warn("Could not find a perfect damage type for legacy damage source field, best match: {} out of {} tags with damage type \"{}\". Consider creating your own custom damage type.",
-                        bestMatchTagCount, TAG_COUNT, bestMatch.unwrapKey().map(ResourceKey::location).map(ResourceLocation::toString).orElse("<unknown>"));
+                        bestMatchTagCount, TAG_COUNT, bestMatch.unwrapKey().map(ResourceKey::identifier).map(Identifier::toString).orElse("<unknown>"));
             }
             damageType = bestMatch.unwrapKey().orElseThrow();
         } else {

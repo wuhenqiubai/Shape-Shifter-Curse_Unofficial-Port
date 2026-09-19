@@ -9,8 +9,8 @@ import io.github.apace100.apoli.power.KeepInventoryPower;
 import io.github.apace100.apoli.power.ModifyPlayerSpawnPower;
 import io.github.apace100.apoli.power.PreventSleepPower;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -23,6 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelData;
+import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -40,40 +42,33 @@ import java.util.Optional;
 public abstract class ServerPlayerEntityMixin extends Player implements ContainerListener, EndRespawningEntity {
 
     @Shadow
-    private ResourceKey<Level> respawnDimension;
-
-    @Shadow
-    private BlockPos respawnPosition;
-
-    @Shadow
     @Final
     public MinecraftServer server;
 
     @Shadow
     public ServerGamePacketListenerImpl connection;
 
-    public ServerPlayerEntityMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
-        super(world, pos, yaw, gameProfile);
+    public ServerPlayerEntityMixin(Level level, GameProfile gameProfile) {
+        super(level, gameProfile);
     }
 
     @Shadow
     public abstract void displayClientMessage(Component message, boolean actionBar);
 
-    @Shadow private boolean respawnForced;
+    @Shadow @Nullable private ServerPlayer.@Nullable RespawnConfig respawnConfig;
 
     @Shadow
-    private static Optional findRespawnAndUseSpawnBlock(ServerLevel level, BlockPos pos, float angle, boolean forced, boolean keepInventory) {
-        throw new IllegalStateException();
-    };
+    protected static Optional findRespawnAndUseSpawnBlock(ServerLevel level, ServerPlayer.RespawnConfig respawnConfig, boolean useCharge) {
+        throw new AssertionError();
+    }
 
     // FRESH_AIR
-    // NeoForge/Connector 兼容：主版注入点也改用 HEAD（setRespawnPosition 在 NeoForge 下被包进 supplier lambda 而失效）
-    @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "startSleepInBed", at = @At(value = "INVOKE",target = "Lnet/minecraft/server/level/ServerPlayer;setRespawnPosition(Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;Z)V"), cancellable = true)
     public void preventAvianSleep(BlockPos pos, CallbackInfoReturnable<Either<BedSleepingProblem, Unit>> info) {
         PowerHolderComponent.getPowers(this, PreventSleepPower.class).forEach(p -> {
                 if(p.doesPrevent(level(), pos)) {
                     if(p.doesAllowSpawnPoint()) {
-                        ((ServerPlayer)(Object)this).setRespawnPosition(this.level().dimension(), pos, this.getYRot(), false, true);
+                        ((ServerPlayer)(Object)this).setRespawnPosition(new ServerPlayer.RespawnConfig(new LevelData.RespawnData(GlobalPos.of(this.level().dimension(), pos), this.getYRot(), this.getXRot()), false), true);
                     }
                     info.setReturnValue(Either.left(null));
                     this.displayClientMessage(Component.translatable(p.getMessage()), true);
@@ -82,31 +77,19 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         );
     }
 
-    @Inject(at = @At("HEAD"), method = "getRespawnDimension", cancellable = true)
-    private void modifySpawnPointDimension(CallbackInfoReturnable<ResourceKey<Level>> info) {
-        if (!this.origins_isEndRespawning && (respawnPosition == null || hasObstructedSpawn()) && PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).size() > 0) {
+    @Inject(at = @At("RETURN"), method = "getRespawnConfig", cancellable = true)
+    private void modifySpawnPointConfig(CallbackInfoReturnable<ServerPlayer.RespawnConfig> info) {
+        if (!this.origins_isEndRespawning && PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).size() > 0) {
             ModifyPlayerSpawnPower power = PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).get(0);
-            info.setReturnValue(power.dimension);
-        }
-    }
 
-    @Inject(at = @At("HEAD"), method = "getRespawnPosition", cancellable = true)
-    private void modifyPlayerSpawnPosition(CallbackInfoReturnable<BlockPos> info) {
-        if(!this.origins_isEndRespawning && PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).size() > 0) {
-            if(respawnPosition == null) {
-                info.setReturnValue(findPlayerSpawn());
-            } else if(hasObstructedSpawn()) {
-                connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
-                info.setReturnValue(findPlayerSpawn());
+            BlockPos spawnPos = findPlayerSpawn();
+
+            if (respawnConfig == null) {
+                info.setReturnValue(new ServerPlayer.RespawnConfig(new LevelData.RespawnData(GlobalPos.of(power.dimension, spawnPos), 0f, 0f), true));
+            } else if (hasObstructedSpawn(respawnConfig.respawnData().dimension())) {
+//                connection.send(new ClientboundGameEventPacket(ClientboundGameEventPacket.NO_RESPAWN_BLOCK_AVAILABLE, 0.0F));
+                info.setReturnValue(new ServerPlayer.RespawnConfig(new LevelData.RespawnData(GlobalPos.of(power.dimension, spawnPos), 0f, 0f), true));
             }
-        }
-    }
-
-
-    @Inject(at = @At("HEAD"), method = "isRespawnForced", cancellable = true)
-    private void modifySpawnPointSet(CallbackInfoReturnable<Boolean> info) {
-        if(!this.origins_isEndRespawning && (respawnPosition == null || hasObstructedSpawn()) && PowerHolderComponent.hasPower(this, ModifyPlayerSpawnPower.class)) {
-            info.setReturnValue(true);
         }
     }
 
@@ -117,37 +100,38 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         }
     }
 
-    private boolean hasObstructedSpawn() {
-        ServerLevel world = server.getLevel(respawnDimension);
-        if(respawnPosition != null && world != null) {
-            Optional optional = findRespawnAndUseSpawnBlock(world, respawnPosition, 0f, respawnForced, true);
-            return !optional.isPresent();
+    @Unique
+    private boolean hasObstructedSpawn(ResourceKey<Level> dimension) {
+        ServerLevel world = server.getLevel(dimension);
+        if(respawnConfig != null && world != null) {
+            return findRespawnAndUseSpawnBlock(world, respawnConfig, false).isEmpty();
         }
         return false;
     }
 
+    @Unique
     private BlockPos findPlayerSpawn() {
         ModifyPlayerSpawnPower power = PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).get(0);
         Tuple<ServerLevel, BlockPos> spawn = power.getSpawn(true);
         if(spawn != null) {
             return spawn.getB();
         }
-        return null;
+        return BlockPos.ZERO;
     }
 
     @Unique
     private ItemStack apoli$stackBeforeDrop;
 
-    @Inject(method = "drop(Z)Z", at = @At("HEAD"))
-    private void cacheItemStackBeforeDropping(boolean entireStack, CallbackInfoReturnable<Boolean> cir) {
-        apoli$stackBeforeDrop = this.getInventory().getSelected().copy();
+    @Inject(method = "drop(Z)V", at = @At("HEAD"))
+    private void cacheItemStackBeforeDropping(boolean entireStack, CallbackInfo ci) {
+        apoli$stackBeforeDrop = this.getInventory().getSelectedItem().copy();
     }
 
-    @Inject(method = "drop(Z)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;findSlot(Lnet/minecraft/world/Container;I)Ljava/util/OptionalInt;"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void checkItemUsageStopping(boolean entireStack, CallbackInfoReturnable<Boolean> cir, Inventory playerInventory, ItemStack itemStack) {
-        if(this.isUsingItem() && !ItemStack.isSameItem(apoli$stackBeforeDrop, this.getInventory().getSelected())) {
+    @Inject(method = "drop(Z)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;findSlot(Lnet/minecraft/world/Container;I)Ljava/util/OptionalInt;"), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void checkItemUsageStopping(boolean entireStack, CallbackInfo ci, Inventory playerInventory, ItemStack itemStack) {
+        if(this.isUsingItem() && !ItemStack.isSameItem(apoli$stackBeforeDrop, this.getInventory().getSelectedItem())) {
             ActionOnItemUsePower.executeActions(this, itemStack, apoli$stackBeforeDrop,
-                ActionOnItemUsePower.TriggerType.STOP, ActionOnItemUsePower.PriorityPhase.ALL);
+                    ActionOnItemUsePower.TriggerType.STOP, ActionOnItemUsePower.PriorityPhase.ALL);
         }
     }
 
@@ -166,6 +150,6 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
 
     @Override
     public boolean hasRealRespawnPoint() {
-        return respawnPosition != null && !hasObstructedSpawn();
+        return respawnConfig != null && !hasObstructedSpawn(respawnConfig.respawnData().dimension());
     }
 }

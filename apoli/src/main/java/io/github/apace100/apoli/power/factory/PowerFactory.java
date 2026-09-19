@@ -8,7 +8,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -17,12 +17,12 @@ import java.util.function.Function;
 
 public class PowerFactory<P extends Power> implements Factory {
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private boolean hasConditions = false;
     protected SerializableData data;
     protected Function<SerializableData.Instance, BiFunction<PowerType<P>, LivingEntity, P>> factoryConstructor;
 
-    public PowerFactory(ResourceLocation id, SerializableData data, Function<SerializableData.Instance, BiFunction<PowerType<P>, LivingEntity, P>> factoryConstructor) {
+    public PowerFactory(Identifier id, SerializableData data, Function<SerializableData.Instance, BiFunction<PowerType<P>, LivingEntity, P>> factoryConstructor) {
         this.id = id;
         this.data = data;
         this.factoryConstructor = factoryConstructor;
@@ -37,7 +37,7 @@ public class PowerFactory<P extends Power> implements Factory {
     }
 
     @Override
-    public ResourceLocation getSerializerId() {
+    public Identifier getSerializerId() {
         return id;
     }
 
@@ -55,7 +55,7 @@ public class PowerFactory<P extends Power> implements Factory {
         }
 
         public void write(RegistryFriendlyByteBuf buf) {
-            buf.writeResourceLocation(id);
+            buf.writeIdentifier(id);
             data.write(buf, dataInstance);
         }
 

@@ -1,11 +1,11 @@
 package io.github.apace100.apoli.access;
 
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.util.context.ContextKeySet;
 
 public interface ReplacingLootContextParameterSet {
 
-    void setType(LootContextParamSet type);
+    void setType(ContextKeySet type);
 
-    LootContextParamSet getType();
+    ContextKeySet getType();
 
 }

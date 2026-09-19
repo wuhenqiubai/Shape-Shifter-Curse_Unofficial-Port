@@ -2,6 +2,7 @@ package io.github.apace100.apoli.power.factory;
 
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.*;
+import io.github.apace100.apoli.power.legacy.ApplyComponentsPower;
 import io.github.apace100.apoli.power.legacy.ModifyBehaviorPower;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableData;
@@ -126,6 +127,7 @@ public class PowerFactories {
 
         // Origins: Legacy
         register(ModifyBehaviorPower::createFactory);
+        register(ApplyComponentsPower::createFactory);
     }
 
     private static void register(PowerFactory<?> powerFactory) {

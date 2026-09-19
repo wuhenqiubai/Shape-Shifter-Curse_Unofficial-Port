@@ -6,18 +6,18 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
 public class ConditionFactory<T> implements Factory {
 
-    private final ResourceLocation identifier;
+    private final Identifier identifier;
     protected SerializableData data;
     private final BiFunction<SerializableData.Instance, T, Boolean> condition;
 
-    public ConditionFactory(ResourceLocation identifier, SerializableData data, BiFunction<SerializableData.Instance, T, Boolean> condition) {
+    public ConditionFactory(Identifier identifier, SerializableData data, BiFunction<SerializableData.Instance, T, Boolean> condition) {
         this.identifier = identifier;
         this.condition = condition;
         this.data = data;
@@ -42,21 +42,17 @@ public class ConditionFactory<T> implements Factory {
         }
 
         public boolean isFulfilled(T t) {
-            try {
-                return condition.apply(dataInstance, t);
-            } catch (Throwable e) {
-                throw new RuntimeException("Failed to run condition on " + identifier + "!", e);
-            }
+            return condition.apply(dataInstance, t);
         }
 
         public void write(RegistryFriendlyByteBuf buf) {
-            buf.writeResourceLocation(identifier);
+            buf.writeIdentifier(identifier);
             data.write(buf, dataInstance);
         }
     }
 
     @Override
-    public ResourceLocation getSerializerId() {
+    public Identifier getSerializerId() {
         return identifier;
     }
 

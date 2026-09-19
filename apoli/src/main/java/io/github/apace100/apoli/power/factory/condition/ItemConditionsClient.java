@@ -8,8 +8,7 @@ import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.SingleRecipeInput;
+import net.minecraft.world.item.crafting.RecipePropertySet;
 import net.minecraft.world.level.Level;
 
 @Environment(EnvType.CLIENT)
@@ -23,13 +22,7 @@ public class ItemConditionsClient {
                 if(world == null) {
                     return false;
                 }
-                var optional = world.getRecipeManager()
-                    .getRecipeFor(
-                        RecipeType.SMELTING,
-                        new SingleRecipeInput(stack),
-                        world
-                    );
-                return optional.isPresent();
+                return world.recipeAccess().propertySet(RecipePropertySet.FURNACE_INPUT).test(stack);
             }));
     }
 

@@ -13,7 +13,7 @@ public record UseActivePowersPacket(
     List<PowerType<?>> powers
 ) implements CustomPacketPayload {
     public static final StreamCodec<FriendlyByteBuf, UseActivePowersPacket> CODEC = StreamCodec.composite(
-        ByteBufCodecs.<FriendlyByteBuf, PowerType<?>>list().apply(StreamCodec.of((buf, power) -> buf.writeResourceLocation(power.getIdentifier()), (buf) -> PowerTypeRegistry.get(buf.readResourceLocation()))), UseActivePowersPacket::powers,
+        ByteBufCodecs.<FriendlyByteBuf, PowerType<?>>list().apply(StreamCodec.of((buf, power) -> buf.writeIdentifier(power.getIdentifier()), (buf) -> PowerTypeRegistry.get(buf.readIdentifier()))), UseActivePowersPacket::powers,
         UseActivePowersPacket::new
     );
 

@@ -23,14 +23,14 @@ public class BonemealAction {
         boolean spawnEffects = data.getBoolean("effects");
 
         if (BoneMealItem.growCrop(ItemStack.EMPTY, world, blockPos)) {
-            if (spawnEffects && !world.isClientSide) {
+            if (spawnEffects && !world.isClientSide()) {
                 world.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, blockPos, 0);
             }
         } else {
             BlockState blockState = world.getBlockState(blockPos);
             boolean bl = blockState.isFaceSturdy(world, blockPos, side);
             if (bl && BoneMealItem.growWaterPlant(ItemStack.EMPTY, world, blockPos2, side)) {
-                if (spawnEffects && !world.isClientSide) {
+                if (spawnEffects && !world.isClientSide()) {
                     world.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, blockPos2, 0);
                 }
             }

@@ -7,10 +7,7 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.MiscUtil;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.damagesource.DamageSource;
@@ -21,6 +18,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.Map;
 
@@ -106,7 +105,7 @@ public class DamageOverTimePower extends Power {
         if(protectingEnchantment == null) {
             return 0;
         } else {
-            Map<EquipmentSlot, ItemStack> enchantedItems = this.entity.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(protectingEnchantment).value().getSlotItems(entity);
+            Map<EquipmentSlot, ItemStack> enchantedItems = this.entity.registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getValue(protectingEnchantment).getSlotItems(entity);
             Iterable<ItemStack> iterable = enchantedItems.values();
             int i = 0;
             int items = 0;
@@ -121,19 +120,15 @@ public class DamageOverTimePower extends Power {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
-        CompoundTag nbt = new CompoundTag();
+    public void toValue(ValueOutput nbt) {
         nbt.putInt("InDamage", inDamageTicks);
         nbt.putInt("OutDamage", outOfDamageTicks);
-        return nbt;
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        if(tag instanceof CompoundTag nbt) {
-            inDamageTicks = nbt.getInt("InDamage");
-            outOfDamageTicks = nbt.getInt("OutDamage");
-        }
+    public void fromValue(ValueInput input) {
+        inDamageTicks = input.getIntOr("InDamage", 0);
+        outOfDamageTicks = input.getIntOr("OutDamage", 0);
     }
 
     public static PowerFactory createFactory() {

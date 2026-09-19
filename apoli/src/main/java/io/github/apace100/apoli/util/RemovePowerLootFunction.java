@@ -2,7 +2,7 @@ package io.github.apace100.apoli.util;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -19,7 +19,7 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
                 EquipmentSlot.CODEC
                     .fieldOf("slot")
                     .forGetter(e -> e.slot),
-                ResourceLocation.CODEC
+                Identifier.CODEC
                     .fieldOf("power")
                     .forGetter(e -> e.powerId)
             ))
@@ -29,9 +29,9 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
     public static final LootItemFunctionType<RemovePowerLootFunction> TYPE = new LootItemFunctionType<>(CODEC);
 
     private final EquipmentSlot slot;
-    private final ResourceLocation powerId;
+    private final Identifier powerId;
 
-    private RemovePowerLootFunction(List<LootItemCondition> conditions, EquipmentSlot slot, ResourceLocation powerId) {
+    private RemovePowerLootFunction(List<LootItemCondition> conditions, EquipmentSlot slot, Identifier powerId) {
         super(conditions);
         this.slot = slot;
         this.powerId = powerId;
@@ -46,7 +46,7 @@ public class RemovePowerLootFunction extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction.Builder<?> builder(EquipmentSlot slot, ResourceLocation powerId) {
+    public static net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction.Builder<?> builder(EquipmentSlot slot, Identifier powerId) {
         return simpleBuilder((conditions) -> new RemovePowerLootFunction(conditions, slot, powerId));
     }
 

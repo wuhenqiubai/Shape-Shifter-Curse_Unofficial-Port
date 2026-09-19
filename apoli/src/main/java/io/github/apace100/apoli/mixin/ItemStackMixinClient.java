@@ -19,25 +19,28 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.component.TooltipDisplay;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 @Environment(EnvType.CLIENT)
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixinClient implements DataComponentHolder {
 
-    @Shadow public abstract UseAnim getUseAnimation();
+    @Shadow public abstract ItemUseAnimation getUseAnimation();
 
     @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", ordinal = 0, shift = At.Shift.AFTER))
     private void addUnusableTooltip(Item.TooltipContext tooltipContext, @Nullable Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> list) {
@@ -80,26 +83,26 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
         }
     }
 
-    @Inject(method = "getTooltipLines", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getKey(Ljava/lang/Object;)Lnet/minecraft/resources/ResourceLocation;", shift = At.Shift.AFTER))
-    private void addEquipmentPowerTooltips(Item.TooltipContext tooltipContext, Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir, @Local List<Component> list) {
+    @Inject(method = "addDetailsToTooltip", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/DefaultedRegistry;getKey(Ljava/lang/Object;)Lnet/minecraft/resources/Identifier;", shift = At.Shift.AFTER))
+    private void addEquipmentPowerTooltips(Item.TooltipContext context, TooltipDisplay tooltipDisplay, @Nullable Player player, TooltipFlag tooltipFlag, Consumer<Component> tooltipAdder, CallbackInfo ci, @Local(argsOnly = true) Consumer<Component> list) {
         for(EquipmentSlot slot : EquipmentSlot.values()) {
             List<StackPowerUtil.StackPower> powers = StackPowerUtil.getPowers((ItemStack)(Object)this, slot)
                     .stream()
                     .filter(sp -> !sp.isHidden)
                     .toList();
             if(powers.size() > 0) {
-                list.add(Component.empty());
-                list.add((Component.translatable("item.modifiers." + slot.getName())).withStyle(ChatFormatting.GRAY));
+                list.accept(Component.empty());
+                list.accept((Component.translatable("item.modifiers." + slot.getName())).withStyle(ChatFormatting.GRAY));
                 powers.forEach(sp -> {
 
                     if(PowerTypeRegistry.contains(sp.powerId)) {
                         PowerType<?> powerType = PowerTypeRegistry.get(sp.powerId);
-                        list.add(
+                        list.accept(
                                 Component.literal(" ")
                                         .append(powerType.getName())
                                         .withStyle(sp.isNegative ? ChatFormatting.RED : ChatFormatting.BLUE));
                         if(tooltipFlag.isAdvanced()) {
-                            list.add(
+                            list.accept(
                                     Component.literal("  ")
                                             .append(powerType.getDescription())
                                             .withStyle(ChatFormatting.GRAY));
@@ -115,7 +118,7 @@ public abstract class ItemStackMixinClient implements DataComponentHolder {
                     var components = new ArrayList<Component>();
                     t.addToTooltip(components);
                     for (Component component : components) {
-                        list.add(component);
+                        list.accept(component);
                     }
                 });
     }

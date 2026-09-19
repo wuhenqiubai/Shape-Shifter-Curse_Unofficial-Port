@@ -221,7 +221,7 @@ dependencies {
     modCompileOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
     // modRuntimeOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
 
-     modCompileOnly "maven.modrinth:biomes-o-plenty:fhyqphwv"
+     modCompileOnly "maven.modrinth:biomes-o-plenty:wfaWqpie"
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
      modImplementation "maven.modrinth:jei:HWSzfi9w" //JEI 19.44.0.401 for Fabric 1.21.1

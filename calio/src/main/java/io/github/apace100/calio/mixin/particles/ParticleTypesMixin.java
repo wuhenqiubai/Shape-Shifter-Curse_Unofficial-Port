@@ -11,7 +11,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.*;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.joml.Vector3f;
@@ -26,9 +26,9 @@ public class ParticleTypesMixin {
             return original;
 
         switch (id) {
-            case "block", "block_marker", "falling_dust" -> factory.calio$addLegacyParticleOptionFactory((data, provider) -> {
+            case "block", "block_marker", "falling_dust" -> factory.calio$addLegacyParticleOptionFactory(data -> {
                 try {
-                    return new BlockParticleOption((ParticleType<BlockParticleOption>) original, BlockStateParser.parseForBlock(provider.lookupOrThrow(Registries.BLOCK), data, false).blockState());
+                    return new BlockParticleOption((ParticleType<BlockParticleOption>) original, BlockStateParser.parseForBlock(BuiltInRegistries.BLOCK, data, false).blockState());
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -41,7 +41,7 @@ public class ParticleTypesMixin {
                     reader.expect(' ');
                     var scale = reader.readFloat();
 
-                    return new DustParticleOptions(rgb, scale);
+                    return new DustParticleOptions(ARGB.colorFromFloat(1f, rgb.x, rgb.y, rgb.z), scale);
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
                 }
@@ -56,7 +56,7 @@ public class ParticleTypesMixin {
                     reader.expect(' ');
                     var scale = reader.readFloat();
 
-                    return new DustColorTransitionOptions(rgb, rgb2, scale);
+                    return new DustColorTransitionOptions(ARGB.colorFromFloat(1f, rgb.x, rgb.y, rgb.z), ARGB.colorFromFloat(1f, rgb2.x, rgb2.y, rgb2.z), scale);
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
                 }

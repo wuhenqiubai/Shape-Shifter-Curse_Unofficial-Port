@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import io.github.apace100.apoli.Apoli;
@@ -11,14 +12,20 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 
-public class OverlayPower extends Power {
+import java.util.OptionalInt;
 
-    private final ResourceLocation texture;
+import static io.github.apace100.apoli.power.OverlayPowerPipelines.NAUSEA_PIPELINE;
+import static io.github.apace100.apoli.power.OverlayPowerPipelines.OVERLAY_PIPELINE;
+
+public class OverlayPower extends Power {
+    private final Identifier texture;
     private final float strength;
     private final float red;
     private final float green;
@@ -36,7 +43,7 @@ public class OverlayPower extends Power {
         BELOW_HUD, ABOVE_HUD
     }
 
-    public OverlayPower(PowerType<?> type, LivingEntity entity, ResourceLocation texture, float strength, float red, float green, float blue, DrawMode drawMode, DrawPhase drawPhase, boolean hideWithHud, boolean visibleInThirdPerson) {
+    public OverlayPower(PowerType<?> type, LivingEntity entity, Identifier texture, float strength, float red, float green, float blue, DrawMode drawMode, DrawPhase drawPhase, boolean hideWithHud, boolean visibleInThirdPerson) {
         super(type, entity);
         this.texture = texture;
         this.strength = strength;
@@ -62,7 +69,7 @@ public class OverlayPower extends Power {
     }
 
     @Environment(EnvType.CLIENT)
-    public void render() {
+    public void render(GuiGraphics guiGraphics) {
         Minecraft client = Minecraft.getInstance();
         int i = client.getWindow().getGuiScaledWidth();
         int j = client.getWindow().getGuiScaledHeight();
@@ -94,32 +101,46 @@ public class OverlayPower extends Power {
                 break;
         }
 
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
-        RenderSystem.enableBlend();
-        switch (drawMode) {
-            case NAUSEA:
-                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ONE);
-                break;
-            case TEXTURE: default:
-                RenderSystem.defaultBlendFunc();
-                break;
-        }
-        RenderSystem.setShaderColor(g, h, k, a);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderTexture(0, texture);
+        var renderTarget = client.getMainRenderTarget();
+        var encoder = RenderSystem.getDevice().createCommandEncoder();
+
+        guiGraphics.blit(RenderPipelines.GUI_NAUSEA_OVERLAY, texture, 0, 0, 0f, 0f, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight(), client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight(), ARGB.colorFromFloat(a, g, h, k));
         Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferBuilder.addVertex(m, n + l, -90.0f).setUv(0.0F, 1.0F);
-        bufferBuilder.addVertex(m + e, n + l, -90.0f).setUv(1.0F, 1.0F);
-        bufferBuilder.addVertex(m + e, n, -90.0f).setUv(1.0F, 0.0F);
-        bufferBuilder.addVertex(m, n, -90.0f).setUv(0.0F, 0.0F);
-        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
-        RenderSystem.depthMask(true);
-        RenderSystem.enableDepthTest();
+        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
+        bufferBuilder.addVertex(m, n + l, -90.0f).setUv(0.0F, 1.0F).setColor(g, h, k, a);
+        bufferBuilder.addVertex(m + e, n + l, -90.0f).setUv(1.0F, 1.0F).setColor(g, h, k, a);
+        bufferBuilder.addVertex(m + e, n, -90.0f).setUv(1.0F, 0.0F).setColor(g, h, k, a);
+        bufferBuilder.addVertex(m, n, -90.0f).setUv(0.0F, 0.0F).setColor(g, h, k, a);
+
+        try (MeshData meshData = bufferBuilder.buildOrThrow()) {
+            var vertexBuffer = DefaultVertexFormat.POSITION_TEX.uploadImmediateVertexBuffer(meshData.vertexBuffer());
+            GpuBuffer indexBuffer = null;
+            VertexFormat.IndexType indexType = null;
+            if (meshData.indexBuffer() != null) {
+                indexBuffer = DefaultVertexFormat.POSITION_TEX.uploadImmediateIndexBuffer(meshData.indexBuffer());
+                indexType = meshData.drawState().indexType();
+            }
+
+            var clientTexture = client.getTextureManager().getTexture(texture);
+            var gpuTextureView = clientTexture.getTextureView();
+            var gpuSampler = clientTexture.getSampler();
+
+            try (RenderPass pass = encoder.createRenderPass(() -> "Immediate draw for Overlay Power", renderTarget.getColorTextureView(), OptionalInt.empty())) {
+                pass.bindTexture("Sampler0", gpuTextureView, gpuSampler);
+                pass.setVertexBuffer(0, vertexBuffer);
+
+                if (indexBuffer != null)
+                    pass.setIndexBuffer(indexBuffer, indexType);
+
+                if (drawMode == DrawMode.NAUSEA) {
+                    pass.setPipeline(NAUSEA_PIPELINE);
+                } else {
+                    pass.setPipeline(OVERLAY_PIPELINE);
+                }
+
+                pass.draw(0, meshData.drawState().vertexCount());
+            }
+        }
     }
 
     public static PowerFactory createFactory() {

@@ -7,9 +7,7 @@ import io.github.apace100.apoli.util.Shape;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -110,7 +108,7 @@ public class DistanceFromCoordinatesConditionRegistry {
                 world = (Level)worldView;
         } else {
             pos = entity.position();
-            world = entity.getCommandSenderWorld();
+            world = entity.level();
         }
         double currentDimensionCoordinateScale = world.dimensionType().coordinateScale();
 
@@ -131,13 +129,7 @@ public class DistanceFromCoordinatesConditionRegistry {
             case "world_spawn":
                 if (setResultOnWrongDimension && world.dimension() != Level.OVERWORLD)
                     return resultOnWrongDimension;
-                BlockPos spawnPos;
-                if (world instanceof ClientLevel)
-                    spawnPos = ((ClientLevel)world).getSharedSpawnPos();
-                else if (world instanceof ServerLevel)
-                    spawnPos = ((ServerLevel)world).getSharedSpawnPos();
-                else
-                    return warnCouldNotGetObject("world with spawn position", block != null ? "block" : "entity", compareOutOfBounds(data.get("comparison")));
+                BlockPos spawnPos = world.getRespawnData().pos();
                 x = spawnPos.getX();
                 y = spawnPos.getY();
                 z = spawnPos.getZ();

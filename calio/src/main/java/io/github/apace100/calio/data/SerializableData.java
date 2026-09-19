@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 import java.util.HashMap;
@@ -170,8 +170,8 @@ public class SerializableData {
             return (String)get(name);
         }
 
-        public ResourceLocation getId(String name) {
-            return (ResourceLocation)get(name);
+        public Identifier getId(String name) {
+            return (Identifier)get(name);
         }
 
         public AttributeModifier getModifier(String name) {

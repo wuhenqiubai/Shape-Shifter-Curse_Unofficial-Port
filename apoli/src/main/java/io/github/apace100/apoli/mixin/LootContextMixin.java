@@ -1,9 +1,9 @@
 package io.github.apace100.apoli.mixin;
 
 import io.github.apace100.apoli.access.ReplacingLootContext;
+import net.minecraft.util.context.ContextKeySet;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
@@ -14,18 +14,18 @@ import java.util.Set;
 public class LootContextMixin implements ReplacingLootContext {
 
     @Unique
-    private LootContextParamSet apoli$lootContextType;
+    private ContextKeySet apoli$lootContextType;
 
     @Unique
     private final Set<LootTable> apoli$replacedTables = new HashSet<>();
 
     @Override
-    public void setType(LootContextParamSet type) {
+    public void setType(ContextKeySet type) {
         apoli$lootContextType = type;
     }
 
     @Override
-    public LootContextParamSet getType() {
+    public ContextKeySet getType() {
         return apoli$lootContextType;
     }
 

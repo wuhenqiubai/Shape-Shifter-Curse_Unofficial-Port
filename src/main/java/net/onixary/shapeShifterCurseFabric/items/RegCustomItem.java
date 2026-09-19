@@ -21,9 +21,9 @@ import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
-import java.util.function.Function;
 
 public class RegCustomItem {
     private RegCustomItem(){}
@@ -87,7 +87,7 @@ public class RegCustomItem {
     public static final Item WEB_PROJECTILE = register("web_projectile", Item::new);
     public static final Item SILK_DEW = register("silk_dew", SilkDew::new);
 
-    public static final Item RIPPLE_MIRROR = register("ripple_mirror", new RippleMirror(new Item.Properties()));
+    public static final Item RIPPLE_MIRROR = register("ripple_mirror", RippleMirror::new);
 
     public static ItemStack buildPotion(Item PotionItem, Potion potion) {
         ItemStack potionStack = new ItemStack(PotionItem);
@@ -184,12 +184,6 @@ public class RegCustomItem {
             potionStacks.add(buildPotion(Items.TIPPED_ARROW, potion));
         }
         return potionStacks;
-    }
-
-    public static ItemStack buildPotion(Item PotionItem, Potion potion) {
-        ItemStack potionStack = new ItemStack(PotionItem);
-        potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
-        return potionStack;
     }
 
     public static <T extends Item> T register(String path, Function<Item.Properties, T> factory) {

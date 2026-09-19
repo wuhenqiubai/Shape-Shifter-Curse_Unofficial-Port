@@ -71,17 +71,28 @@ public class BlockActions {
                 MinecraftServer server = block.getLeft().getServer();
                 if(server != null) {
                     String blockName = block.getLeft().getBlockState(block.getMiddle()).getBlock().getDescriptionId();
+                    // [移植 b7a79a9] source 恒用 server，避免 CommandSource.NULL 抑制 /say 输出及使 /give 等命令失效。
                     CommandSourceStack source = new CommandSourceStack(
                         server,
                         new Vec3(block.getMiddle().getX() + 0.5, block.getMiddle().getY() + 0.5, block.getMiddle().getZ() + 0.5),
                         new Vec2(0, 0),
                         (ServerLevel)block.getLeft(),
-                        Apoli.config.executeCommand.permissionLevel,
+                        Apoli.config.executeCommand.getPermissionHandler(),
                         blockName,
                         Component.translatable(blockName),
                         server,
                         null);
-                    server.getCommands().performPrefixedCommand(source, data.getString("command"));
+                    if(!Apoli.config.executeCommand.showOutput) {
+                        source = source.withSuppressedOutput();
+                    }
+                    try {
+                        String execCommand = data.getString("command").trim();
+                        if(execCommand.startsWith("/")) {
+                            execCommand = execCommand.substring(1);
+                        }
+                        server.getCommands().getDispatcher().execute(execCommand, source);
+                    } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+                    }
                 }
             }));
         register(BonemealAction.getFactory());

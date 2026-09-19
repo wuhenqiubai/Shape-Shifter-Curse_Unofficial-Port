@@ -7,7 +7,7 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 
 import java.util.Optional;
@@ -27,8 +27,8 @@ public class ConditionType<T> {
     }
 
     public ConditionFactory<T>.Instance read(RegistryFriendlyByteBuf buf) {
-        ResourceLocation type = ResourceLocation.tryParse(buf.readUtf(32767));
-        ConditionFactory<T> conditionFactory = conditionRegistry.get(type);
+        Identifier type = Identifier.tryParse(buf.readUtf(32767));
+        ConditionFactory<T> conditionFactory = conditionRegistry.getValue(type);
         return conditionFactory.read(buf);
     }
 
@@ -39,7 +39,7 @@ public class ConditionType<T> {
                 throw new JsonSyntaxException(conditionTypeName + " json requires \"type\" identifier.");
             }
             String typeIdentifier = GsonHelper.getAsString(obj, "type");
-            ResourceLocation type = ResourceLocation.tryParse(typeIdentifier);
+            Identifier type = Identifier.tryParse(typeIdentifier);
             Optional<ConditionFactory<T>> optionalCondition = conditionRegistry.getOptional(type);
             if(!optionalCondition.isPresent()) {
                 if(NamespaceAlias.hasAlias(type)) {

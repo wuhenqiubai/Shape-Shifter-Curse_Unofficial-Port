@@ -4,10 +4,10 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.PowerType;
-import net.minecraft.advancements.critereon.ContextAwarePredicate;
-import net.minecraft.advancements.critereon.EntityPredicate;
-import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.advancements.criterion.ContextAwarePredicate;
+import net.minecraft.advancements.criterion.EntityPredicate;
+import net.minecraft.advancements.criterion.SimpleCriterionTrigger;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.Optional;
@@ -16,7 +16,7 @@ public class GainedPowerCriterion extends SimpleCriterionTrigger<GainedPowerCrit
 
     public static GainedPowerCriterion INSTANCE = new GainedPowerCriterion();
 
-    private static final ResourceLocation ID = Apoli.identifier("gained_power");
+    private static final Identifier ID = Apoli.identifier("gained_power");
 
     public void trigger(ServerPlayer player, PowerType type) {
         this.trigger(player, (conditions -> conditions.matches(type)));
@@ -32,16 +32,16 @@ public class GainedPowerCriterion extends SimpleCriterionTrigger<GainedPowerCrit
             instance.group(
                     EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player")
                         .forGetter(Conditions::player),
-                    ResourceLocation.CODEC.fieldOf("power")
+                    Identifier.CODEC.fieldOf("power")
                         .forGetter(c -> c.powerId)
                 )
                 .apply(instance, Conditions::new)
         );
 
         private final Optional<ContextAwarePredicate> player;
-        private final ResourceLocation powerId;
+        private final Identifier powerId;
 
-        public Conditions(Optional<ContextAwarePredicate> player, ResourceLocation powerId) {
+        public Conditions(Optional<ContextAwarePredicate> player, Identifier powerId) {
             this.player = player;
             this.powerId = powerId;
         }

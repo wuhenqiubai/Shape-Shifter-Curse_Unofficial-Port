@@ -7,6 +7,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -104,18 +105,27 @@ public class RaycastAction {
             Vec3 direction = target.subtract(origin).normalize();
             double length = origin.distanceTo(target);
             for(double current = 0; current < length; current += step) {
-                boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
                 CommandSourceStack source = new CommandSourceStack(
-                    entity,
+                    entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
                     origin.add(direction.scale(current)),
                     entity.getRotationVector(),
                     entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
-                    Apoli.config.executeCommand.permissionLevel,
+                    Apoli.config.executeCommand.getPermissionHandler(),
                     entity.getName().getString(),
                     entity.getDisplayName(),
                     entity.level().getServer(),
                     entity);
-                server.getCommands().performPrefixedCommand(source, command);
+                if(!Apoli.config.executeCommand.showOutput) {
+                    source = source.withSuppressedOutput();
+                }
+                String execCommand = command.trim();
+                if(execCommand.startsWith("/")) {
+                    execCommand = execCommand.substring(1);
+                }
+                try {
+                    server.getCommands().getDispatcher().execute(execCommand, source);
+                } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+                }
             }
         }
     }
@@ -123,18 +133,27 @@ public class RaycastAction {
     private static void executeCommandAtHit(Entity entity, Vec3 hitPosition, String command) {
         MinecraftServer server = entity.level().getServer();
         if(server != null) {
-            boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
             CommandSourceStack source = new CommandSourceStack(
-                entity,
+                entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
                 hitPosition,
                 entity.getRotationVector(),
                 entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
-                Apoli.config.executeCommand.permissionLevel,
+                Apoli.config.executeCommand.getPermissionHandler(),
                 entity.getName().getString(),
                 entity.getDisplayName(),
                 entity.level().getServer(),
                 entity);
-            server.getCommands().performPrefixedCommand(source, command);
+            if(!Apoli.config.executeCommand.showOutput) {
+                source = source.withSuppressedOutput();
+            }
+            String execCommand = command.trim();
+            if(execCommand.startsWith("/")) {
+                execCommand = execCommand.substring(1);
+            }
+            try {
+                server.getCommands().getDispatcher().execute(execCommand, source);
+            } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
+            }
         }
     }
 

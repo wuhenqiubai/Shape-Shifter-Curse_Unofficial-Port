@@ -5,11 +5,12 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.function.Consumer;
 
@@ -58,13 +59,23 @@ public class ActionOverTimePower extends Power {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
+    public void toValue(ValueOutput output) {
+        output.putBoolean("WasActive", wasActive);
+    }
+
+    @Override
+    public void fromValue(ValueInput input) {
+        wasActive = input.getBooleanOr("WasActive", false);
+    }
+
+    @Override
+    public Tag toTag() {
         return ByteTag.valueOf(wasActive);
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        wasActive = tag.equals(ByteTag.ONE);
+    public void fromTag(Tag input) {
+        wasActive = input.equals(ByteTag.ONE);
     }
 
     public static PowerFactory createFactory() {

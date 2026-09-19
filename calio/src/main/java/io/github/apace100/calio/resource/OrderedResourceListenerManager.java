@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ public class OrderedResourceListenerManager {
         return new OrderedResourceListener.Registration(inst, resourceReloadListener);
     }
 
-    public OrderedResourceListener.Registration registerWithRegistries(ResourceLocation id, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> reloadListener) {
+    public OrderedResourceListener.Registration registerWithRegistries(Identifier id, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> reloadListener) {
         return new OrderedResourceListener.Registration(id, registryBasedInstance, reloadListener);
     }
 
@@ -54,8 +54,8 @@ public class OrderedResourceListenerManager {
     }
 
     static class Instance {
-        private final HashMap<ResourceLocation, OrderedResourceListener.Registration> registrations = new HashMap<>();
-        private final HashMap<Integer, List<ResourceLocation>> sortedMap = new HashMap<>();
+        private final HashMap<Identifier, OrderedResourceListener.Registration> registrations = new HashMap<>();
+        private final HashMap<Integer, List<Identifier>> sortedMap = new HashMap<>();
         private int maxIndex = 0;
 
         private final Consumer<IdentifiableResourceReloadListener> registrationMethod;
@@ -77,13 +77,13 @@ public class OrderedResourceListenerManager {
 
         void finish() {
             prepareSetsAndSort();
-            List<ResourceLocation> sortedList = new LinkedList<>();
-            List<ResourceLocation> nextListeners;
+            List<Identifier> sortedList = new LinkedList<>();
+            List<Identifier> nextListeners;
             while(!(nextListeners = copy(getRegistrations(0))).isEmpty()) {
                 sortedList.addAll(nextListeners);
                 sortedMap.remove(0);
                 for(int i = 1; i <= maxIndex; i++) {
-                    for(ResourceLocation regId : copy(getRegistrations(i))) {
+                    for(Identifier regId : copy(getRegistrations(i))) {
                         OrderedResourceListener.Registration registration = registrations.get(regId);
                         int before = registration.dependencies.size();
                         nextListeners.forEach(registration.dependencies::remove);
@@ -96,7 +96,7 @@ public class OrderedResourceListenerManager {
                 for(int i = 0; i <= maxIndex; i++) {
                     if(!getRegistrations(i).isEmpty()) {
                         errorBuilder.append("\t").append(i).append(" dependencies:");
-                        for(ResourceLocation id : getRegistrations(i)) {
+                        for(Identifier id : getRegistrations(i)) {
                             OrderedResourceListener.Registration registration = registrations.get(id);
                             errorBuilder.append("\t\t").append(registration.toString());
                             if (registration.resourceReloadListener != null)
@@ -108,7 +108,7 @@ public class OrderedResourceListenerManager {
                 }
                 throw new RuntimeException(errorBuilder.toString());
             } else {
-                for(ResourceLocation id : sortedList) {
+                for(Identifier id : sortedList) {
                     OrderedResourceListener.Registration registration = registrations.get(id);
                     if (registration.resourceReloadListener != null)
                         registrationMethod.accept(registration.resourceReloadListener);
@@ -132,7 +132,7 @@ public class OrderedResourceListenerManager {
 
         private void sortIntoMap(OrderedResourceListener.Registration registration) {
             int index = registration.dependencies.size();
-            List<ResourceLocation> list = sortedMap.computeIfAbsent(index, i -> new LinkedList<>());
+            List<Identifier> list = sortedMap.computeIfAbsent(index, i -> new LinkedList<>());
             list.add(registration.id);
             if(index > maxIndex) {
                 maxIndex = index;
@@ -144,16 +144,16 @@ public class OrderedResourceListenerManager {
             if(index == indexBefore) {
                 return;
             }
-            List<ResourceLocation> regs = getRegistrations(indexBefore);
+            List<Identifier> regs = getRegistrations(indexBefore);
             regs.remove(registration.id);
             if(regs.isEmpty()) {
                 sortedMap.remove(indexBefore);
             }
-            List<ResourceLocation> list = sortedMap.computeIfAbsent(index, i -> new LinkedList<>());
+            List<Identifier> list = sortedMap.computeIfAbsent(index, i -> new LinkedList<>());
             list.add(registration.id);
         }
 
-        private List<ResourceLocation> getRegistrations(int index) {
+        private List<Identifier> getRegistrations(int index) {
             return sortedMap.getOrDefault(index, new LinkedList<>());
         }
     }

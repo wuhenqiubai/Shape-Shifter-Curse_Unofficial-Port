@@ -6,7 +6,7 @@ import com.google.gson.JsonSyntaxException;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -46,7 +46,7 @@ public class SerializationHelper {
         if(jsonElement.isJsonObject()) {
             JsonObject json = jsonElement.getAsJsonObject();
             String effect = GsonHelper.getAsString(json, "effect");
-            var effectOptional = BuiltInRegistries.MOB_EFFECT.getHolder(ResourceLocation.tryParse(effect));
+            var effectOptional = BuiltInRegistries.MOB_EFFECT.get(Identifier.tryParse(effect));
             if(!effectOptional.isPresent()) {
                 throw new JsonSyntaxException("Error reading status effect: could not find status effect with id: " + effect);
             }
@@ -62,17 +62,17 @@ public class SerializationHelper {
     }
 
     public static MobEffectInstance readStatusEffect(FriendlyByteBuf buf) {
-        ResourceLocation effect = buf.readResourceLocation();
+        Identifier effect = buf.readIdentifier();
         int duration = buf.readInt();
         int amplifier = buf.readInt();
         boolean ambient = buf.readBoolean();
         boolean showParticles = buf.readBoolean();
         boolean showIcon = buf.readBoolean();
-        return new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.getHolder(effect).orElseThrow(), duration, amplifier, ambient, showParticles, showIcon);
+        return new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.get(effect).orElseThrow(), duration, amplifier, ambient, showParticles, showIcon);
     }
 
     public static void writeStatusEffect(FriendlyByteBuf buf, MobEffectInstance statusEffectInstance) {
-        buf.writeResourceLocation(BuiltInRegistries.MOB_EFFECT.getKey(statusEffectInstance.getEffect().value()));
+        buf.writeIdentifier(BuiltInRegistries.MOB_EFFECT.getKey(statusEffectInstance.getEffect().value()));
         buf.writeInt(statusEffectInstance.getDuration());
         buf.writeInt(statusEffectInstance.getAmplifier());
         buf.writeBoolean(statusEffectInstance.isAmbient());

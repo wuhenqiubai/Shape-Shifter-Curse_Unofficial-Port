@@ -42,12 +42,12 @@ public class AttributePower extends Power {
 
     @Override
     public void onAdded() {
-        if(!entity.level().isClientSide) {
+        if(!entity.level().isClientSide()) {
             float previousMaxHealth = entity.getMaxHealth();
             float previousHealthPercent = entity.getHealth() / previousMaxHealth;
             modifiers.forEach(mod -> {
                 if(entity.getAttributes().hasAttribute(mod.getAttributeHolder())) {
-                    entity.getAttribute(mod.getAttributeHolder()).addOrUpdateTransientModifier(mod.getModifier());
+                    entity.getAttribute(mod.getAttributeHolder()).addTransientModifier(mod.getModifier());
                 }
             });
             float afterMaxHealth = entity.getMaxHealth();
@@ -59,7 +59,7 @@ public class AttributePower extends Power {
 
     @Override
     public void onRemoved() {
-        if(!entity.level().isClientSide) {
+        if(!entity.level().isClientSide()) {
             float previousMaxHealth = entity.getMaxHealth();
             float previousHealthPercent = entity.getHealth() / previousMaxHealth;
             modifiers.forEach(mod -> {

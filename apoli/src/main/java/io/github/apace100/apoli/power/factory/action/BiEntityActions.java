@@ -52,8 +52,8 @@ public class BiEntityActions {
 
         register(new ActionFactory<>(Apoli.identifier("mount"), new SerializableData(),
             (data, entities) -> {
-                entities.getA().startRiding(entities.getB(), true);
-                if(!entities.getA().level().isClientSide && entities.getB() instanceof Player) {
+                entities.getA().startRiding(entities.getB(), true, true);
+                if(!entities.getA().level().isClientSide() && entities.getB() instanceof Player) {
                     ServerPlayNetworking.send((ServerPlayer) entities.getB(), new PlayerMountPacket(entities.getA().getId(), entities.getB().getId()));
                 }
             }));
@@ -81,7 +81,7 @@ public class BiEntityActions {
             (data, entities) -> {
                 Entity actor = entities.getA(), target = entities.getB();
                 if (target instanceof Player
-                    && (target.level().isClientSide ?
+                    && (target.level().isClientSide() ?
                         !data.getBoolean("client") : !data.getBoolean("server")))
                     return;
                 Vector3f vec = new Vector3f(data.getFloat("x"), data.getFloat("y"), data.getFloat("z"));

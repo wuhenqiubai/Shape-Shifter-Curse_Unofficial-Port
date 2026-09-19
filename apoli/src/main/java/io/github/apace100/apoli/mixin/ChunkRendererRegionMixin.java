@@ -6,7 +6,7 @@ import io.github.apace100.apoli.power.ModifyFluidRenderPower;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.chunk.RenderChunkRegion;
+import net.minecraft.client.renderer.chunk.RenderSectionRegion;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FluidState;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Environment(EnvType.CLIENT)
-@Mixin(RenderChunkRegion.class)
+@Mixin(RenderSectionRegion.class)
 public class ChunkRendererRegionMixin {
 
     @Inject(method = "getBlockState", at = @At("HEAD"), cancellable = true)

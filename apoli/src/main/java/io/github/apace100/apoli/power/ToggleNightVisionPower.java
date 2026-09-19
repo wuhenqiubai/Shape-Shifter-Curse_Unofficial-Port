@@ -7,10 +7,11 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class ToggleNightVisionPower extends NightVisionPower implements Active {
     private boolean isActive;
@@ -35,14 +36,24 @@ public class ToggleNightVisionPower extends NightVisionPower implements Active {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
+    public void toValue(ValueOutput output) {
+        output.putBoolean("Active", isActive);
+    }
+
+    @Override
+    public void fromValue(ValueInput input) {
+        isActive = input.getBooleanOr("Active", false);
+    }
+
+    @Override
+    public Tag toTag() {
         return ByteTag.valueOf(isActive);
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        if(tag instanceof ByteTag) {
-            isActive = ((ByteTag)tag).getAsByte() > 0;
+    public void fromTag(Tag input) {
+        if(input instanceof ByteTag) {
+            isActive = ((ByteTag) input).value() > 0;
         }
     }
 

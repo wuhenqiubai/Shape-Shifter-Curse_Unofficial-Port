@@ -6,6 +6,7 @@ import io.github.apace100.apoli.power.PreventBlockSelectionPower;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.InsideBlockEffectApplier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -66,7 +67,7 @@ public abstract class AbstractBlockStateMixin {
     }
 
     @Inject(method = "entityInside", at = @At("HEAD"), cancellable = true)
-    private void preventCollisionWhenPhasing(Level level, BlockPos pos, Entity entity, CallbackInfo ci) {
+    private void preventCollisionWhenPhasing(Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier applier, boolean intersects, CallbackInfo ci) {
         for (PhasingPower phasingPower : PowerHolderComponent.getPowers(entity, PhasingPower.class)) {
             if(phasingPower.doesApply(pos)) {
                 ci.cancel();

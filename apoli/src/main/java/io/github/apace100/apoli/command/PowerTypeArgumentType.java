@@ -10,22 +10,22 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PowerTypeArgumentType implements ArgumentType<ResourceLocation> {
+public class PowerTypeArgumentType implements ArgumentType<Identifier> {
 
     public static PowerTypeArgumentType power() {
         return new PowerTypeArgumentType();
     }
     
-    public ResourceLocation parse(StringReader reader) throws CommandSyntaxException {
-        return ResourceLocation.read(reader);
+    public Identifier parse(StringReader reader) throws CommandSyntaxException {
+        return Identifier.read(reader);
     }
 
     public static PowerType<?> getPower(CommandContext<CommandSourceStack> context, String argumentName) {
-        return PowerTypeRegistry.get(context.getArgument(argumentName, ResourceLocation.class));
+        return PowerTypeRegistry.get(context.getArgument(argumentName, Identifier.class));
     }
 
     @Override

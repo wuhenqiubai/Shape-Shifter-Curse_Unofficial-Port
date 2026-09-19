@@ -7,7 +7,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,7 +24,7 @@ import java.util.function.Predicate;
 
 public class ModifyCraftingPower extends ValueModifyingPower {
 
-    private final ResourceLocation recipeIdentifier;
+    private final Identifier recipeIdentifier;
     private final Predicate<ItemStack> itemCondition;
 
     private final ItemStack newStack;
@@ -33,7 +33,7 @@ public class ModifyCraftingPower extends ValueModifyingPower {
     private final Consumer<Entity> entityAction;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
-    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, ResourceLocation recipeIdentifier, Predicate<ItemStack> itemCondition, ItemStack newStack, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
+    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, Identifier recipeIdentifier, Predicate<ItemStack> itemCondition, ItemStack newStack, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
         super(type, entity);
         this.recipeIdentifier = recipeIdentifier;
         this.itemCondition = itemCondition;
@@ -46,7 +46,7 @@ public class ModifyCraftingPower extends ValueModifyingPower {
 
     public boolean doesApply(CraftingInput inventory, RecipeHolder<CraftingRecipe> recipe) {
         if(recipeIdentifier != null) {
-            if(!recipe.id().equals(recipeIdentifier)) {
+            if(!recipe.id().identifier().equals(recipeIdentifier)) {
                 return false;
             }
         }

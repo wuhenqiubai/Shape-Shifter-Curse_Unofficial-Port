@@ -5,14 +5,14 @@ import com.mojang.serialization.Codec;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 
 import java.util.*;
 
 public class TagLike<T> {
     public static <T> Codec<TagLike<T>> codec(Registry<T> registry) {
-        Codec<Entry<T>> either = Codec.either(TagKey.hashedCodec(registry.key()), ResourceLocation.CODEC)
+        Codec<Entry<T>> either = Codec.either(TagKey.hashedCodec(registry.key()), Identifier.CODEC)
             .xmap(
                 e ->
                     e.map(TagEntry::new, IdEntry::new),
@@ -41,7 +41,7 @@ public class TagLike<T> {
 
     private interface Entry<T> {}
     private record TagEntry<T>(TagKey<T> tag) implements Entry<T> {}
-    private record IdEntry<T>(ResourceLocation id) implements Entry<T> {}
+    private record IdEntry<T>(Identifier id) implements Entry<T> {}
 
     private final Registry<T> registry;
     private final List<TagKey<T>> tags = new LinkedList<>();
@@ -63,12 +63,12 @@ public class TagLike<T> {
         this.registry = registry;
     }
 
-    public void addTag(ResourceLocation id) {
+    public void addTag(Identifier id) {
         addTag(TagKey.create(registry.key(), id));
     }
 
-    public void add(ResourceLocation id) {
-        add(registry.get(id));
+    public void add(Identifier id) {
+        add(registry.getValue(id));
     }
 
     public void addTag(TagKey<T> tagKey) {
@@ -107,12 +107,12 @@ public class TagLike<T> {
         tags.clear();
         int count = buf.readVarInt();
         for(int i = 0; i < count; i++) {
-            tags.add(TagKey.create(registry.key(), ResourceLocation.parse(buf.readUtf())));
+            tags.add(TagKey.create(registry.key(), Identifier.parse(buf.readUtf())));
         }
         items.clear();
         count = buf.readVarInt();
         for(int i = 0; i < count; i++) {
-            T t = registry.get(ResourceLocation.parse(buf.readUtf()));
+            T t = registry.getValue(Identifier.parse(buf.readUtf()));
             items.add(t);
         }
     }

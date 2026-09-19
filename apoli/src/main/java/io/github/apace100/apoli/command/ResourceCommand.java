@@ -14,6 +14,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ObjectiveArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.scores.ScoreAccess;
@@ -27,7 +28,7 @@ public class ResourceCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(
-            literal("resource").requires(cs -> cs.hasPermission(2))
+            literal("resource").requires(cs -> cs.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                 .then(literal("has")
                     .then(argument("target", EntityArgument.entity())
                         .then(argument("power", PowerTypeArgumentType.power())

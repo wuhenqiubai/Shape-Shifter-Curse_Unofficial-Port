@@ -2,6 +2,7 @@ package io.github.apace100.apoli.mixin.legacy;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.legacy.ModifyBehaviorPower;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import org.spongepowered.asm.mixin.Final;
@@ -20,9 +21,11 @@ public abstract class TargetingConditionsMixin {
     private boolean isCombat;
 
     @Inject(method = "test", at = @At("HEAD"), cancellable = true)
-    private void origins_legacy$avoidCombatTargetingIfPassive(LivingEntity attacker, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
+    private void origins_legacy$avoidCombatTargetingIfPassive(ServerLevel level, LivingEntity attacker, LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
         if (this.isCombat && attacker != null && target != null && attacker != target) {
             List<ModifyBehaviorPower> powers = PowerHolderComponent.getPowers(target, ModifyBehaviorPower.class);
+            if (powers.isEmpty()) return;
+
             powers.removeIf(power -> !power.doesApply(attacker));
 
             if (!powers.isEmpty()) {

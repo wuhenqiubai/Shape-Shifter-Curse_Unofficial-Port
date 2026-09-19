@@ -4,7 +4,7 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,11 +38,11 @@ public class OrderedResourceListener implements ModInitializer {
     public static class Registration {
 
         private final OrderedResourceListenerManager.Instance manager;
-        final ResourceLocation id;
+        final Identifier id;
         final IdentifiableResourceReloadListener resourceReloadListener;
         final Function<HolderLookup.Provider, IdentifiableResourceReloadListener> reloadListenerProvider;
-        final Set<ResourceLocation> dependencies = new HashSet<>();
-        final Set<ResourceLocation> dependants = new HashSet<>();
+        final Set<Identifier> dependencies = new HashSet<>();
+        final Set<Identifier> dependants = new HashSet<>();
         private boolean isCompleted;
 
         Registration(OrderedResourceListenerManager.Instance manager, IdentifiableResourceReloadListener listener) {
@@ -52,7 +52,7 @@ public class OrderedResourceListener implements ModInitializer {
             this.reloadListenerProvider = null;
         }
 
-        Registration(ResourceLocation id, OrderedResourceListenerManager.Instance manager, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerProvider) {
+        Registration(Identifier id, OrderedResourceListenerManager.Instance manager, Function<HolderLookup.Provider, IdentifiableResourceReloadListener> listenerProvider) {
             this.id = id;
             this.manager = manager;
             this.resourceReloadListener = null;
@@ -60,10 +60,10 @@ public class OrderedResourceListener implements ModInitializer {
         }
 
         public Registration after(String identifier) {
-            return after(ResourceLocation.parse(identifier));
+            return after(Identifier.parse(identifier));
         }
 
-        public Registration after(ResourceLocation identifier) {
+        public Registration after(Identifier identifier) {
             if(isCompleted) {
                 throw new IllegalStateException(
                     "Can't add a resource reload listener registration dependency after it was completed.");
@@ -73,10 +73,10 @@ public class OrderedResourceListener implements ModInitializer {
         }
 
         public Registration before(String identifier) {
-            return before(ResourceLocation.parse(identifier));
+            return before(Identifier.parse(identifier));
         }
 
-        public Registration before(ResourceLocation identifier) {
+        public Registration before(Identifier identifier) {
             if(isCompleted) {
                 throw new IllegalStateException(
                     "Can't add a resource reload listener registration dependant after it was completed.");
@@ -95,7 +95,7 @@ public class OrderedResourceListener implements ModInitializer {
             StringBuilder builder = new StringBuilder(id.toString());
             builder.append("{depends_on=[");
             boolean first = true;
-            for (ResourceLocation afterId : dependencies) {
+            for (Identifier afterId : dependencies) {
                 builder.append(afterId);
                 if(!first) {
                     builder.append(',');

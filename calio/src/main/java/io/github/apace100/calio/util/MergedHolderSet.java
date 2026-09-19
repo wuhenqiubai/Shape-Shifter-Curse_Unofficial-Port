@@ -3,12 +3,12 @@ package io.github.apace100.calio.util;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Streams;
 import com.mojang.datafixers.util.Either;
-import net.minecraft.Util;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderOwner;
 import net.minecraft.core.HolderSet;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -35,6 +35,20 @@ public class MergedHolderSet<T> implements HolderSet<T> {
         }
 
         return current;
+    }
+
+    @Override
+    public boolean isBound() {
+        var isBound = true;
+
+        for (HolderSet<T> set : holderSets) {
+            if (!set.isBound()) {
+                isBound = false;
+                break;
+            }
+        }
+
+        return isBound;
     }
 
     @Override

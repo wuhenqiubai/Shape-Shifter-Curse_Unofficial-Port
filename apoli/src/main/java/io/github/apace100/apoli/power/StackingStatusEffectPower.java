@@ -4,11 +4,12 @@ import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 import java.util.List;
 
@@ -61,13 +62,23 @@ public class StackingStatusEffectPower extends StatusEffectPower {
     }
 
     @Override
-    public Tag toTag(HolderLookup.Provider provider) {
+    public void toValue(ValueOutput output) {
+        output.putInt("CurrentStack", currentStack);
+    }
+
+    @Override
+    public void fromValue(ValueInput input) {
+        currentStack = input.getIntOr("CurrentStack", 0);
+    }
+
+    @Override
+    public Tag toTag() {
         return IntTag.valueOf(currentStack);
     }
 
     @Override
-    public void fromTag(Tag tag, HolderLookup.Provider provider) {
-        currentStack = ((IntTag)tag).getAsInt();
+    public void fromTag(Tag input) {
+        currentStack = ((IntTag) input).value();
     }
 
     public static PowerFactory createFactory() {

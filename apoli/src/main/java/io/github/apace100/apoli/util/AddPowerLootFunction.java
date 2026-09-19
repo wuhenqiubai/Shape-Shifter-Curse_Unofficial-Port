@@ -3,7 +3,7 @@ package io.github.apace100.apoli.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -20,7 +20,7 @@ public class AddPowerLootFunction extends LootItemConditionalFunction {
                 EquipmentSlot.CODEC
                     .fieldOf("slot")
                     .forGetter(e -> e.slot),
-                ResourceLocation.CODEC
+                Identifier.CODEC
                     .fieldOf("power")
                     .forGetter(e -> e.powerId),
                 Codec.BOOL
@@ -36,11 +36,11 @@ public class AddPowerLootFunction extends LootItemConditionalFunction {
     public static final LootItemFunctionType<AddPowerLootFunction> TYPE = new LootItemFunctionType<>(CODEC);
 
     private final EquipmentSlot slot;
-    private final ResourceLocation powerId;
+    private final Identifier powerId;
     private final boolean hidden;
     private final boolean negative;
 
-    private AddPowerLootFunction(List<LootItemCondition> conditions, EquipmentSlot slot, ResourceLocation powerId, boolean hidden, boolean negative) {
+    private AddPowerLootFunction(List<LootItemCondition> conditions, EquipmentSlot slot, Identifier powerId, boolean hidden, boolean negative) {
         super(conditions);
         this.slot = slot;
         this.powerId = powerId;
@@ -57,7 +57,7 @@ public class AddPowerLootFunction extends LootItemConditionalFunction {
         return stack;
     }
 
-    public static LootItemConditionalFunction.Builder<?> builder(EquipmentSlot slot, ResourceLocation powerId, boolean hidden, boolean negative) {
+    public static LootItemConditionalFunction.Builder<?> builder(EquipmentSlot slot, Identifier powerId, boolean hidden, boolean negative) {
         return simpleBuilder((conditions) -> new AddPowerLootFunction(conditions, slot, powerId, hidden, negative));
     }
 }

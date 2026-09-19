@@ -17,6 +17,9 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -24,7 +27,7 @@ public final class MiscUtil {
 
     public static Optional<Entity> getEntityWithPassengers(Level world, EntityType<?> entityType, @Nullable CompoundTag entityNbt, Vec3 pos, float yaw, float pitch) {
 
-        if (world.isClientSide) return Optional.empty();
+        if (world.isClientSide()) return Optional.empty();
         ServerLevel serverWorld = (ServerLevel) world;
 
         CompoundTag entityToSpawnNbt = new CompoundTag();
@@ -34,8 +37,9 @@ public final class MiscUtil {
         Entity entityToSpawn = EntityType.loadEntityRecursive(
             entityToSpawnNbt,
             serverWorld,
+            EntitySpawnReason.COMMAND,
             entity -> {
-                entity.absMoveTo(pos.x, pos.y, pos.z, yaw, pitch);
+                entity.snapTo(pos.x, pos.y, pos.z, yaw, pitch);
                 return entity;
             }
         );
@@ -44,7 +48,7 @@ public final class MiscUtil {
         if (entityNbt == null && entityToSpawn instanceof Mob mobToSpawn) mobToSpawn.finalizeSpawn(
             serverWorld,
             serverWorld.getCurrentDifficultyAt(BlockPos.containing(pos)),
-            MobSpawnType.COMMAND,
+            EntitySpawnReason.COMMAND,
             null
         );
         return Optional.of(entityToSpawn);
@@ -113,5 +117,16 @@ public final class MiscUtil {
             throw new JsonSyntaxException("Either a legacy damage source or an ID of a damage type must be specified");
         }
         return damageSourceDescription == null ? damageSources.source(damageType, source, attacker) : damageSourceDescription.create(damageSources, source, attacker);
+    }
+
+    public static <K, V> Collection<K> getKeysForValue(Map<K, V> map, V value) {
+        var set = new HashSet<K>();
+        map.forEach((k, v) -> {
+            if (value.equals(v)) {
+                set.add(k);
+            }
+        });
+
+        return set;
     }
 }
