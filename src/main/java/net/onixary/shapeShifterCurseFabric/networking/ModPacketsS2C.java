@@ -2,7 +2,6 @@ package net.onixary.shapeShifterCurseFabric.networking;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,10 +30,6 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IJumpController;
 import net.onixary.shapeShifterCurseFabric.util.Interface.IMoveController;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
-import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
-import net.onixary.shapeShifterCurseFabric.util.Verify.AuthFile;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -71,16 +66,13 @@ public class ModPacketsS2C {
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.LOGIN_PACKET), ModPacketsS2C::onPlayerConnectServer);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.ACTIVE_VIRTUAL_TOTEM), ModPacketsS2C::receiveActiveVirtualTotem);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT), ModPacketsS2C::receivePowerAnimationData);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OLD_UPDATE_PATRON_LEVEL), ModPacketsS2C::receiveOldUpdatePatronLevel);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU), ModPacketsS2C::receiveOldOpenPatronFormSelectMenu);
+        // 已移除 OLD_UPDATE_PATRON_LEVEL / OLD_OPEN_PATRON_FORM_SELECT_MENU 的接收器（随 Patreon 验证一并删除）
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_SELECT_MENU), ModPacketsS2C::receiveOpenFormSelectMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_JUMP_TICK), ModPacketsS2C::receiveSetNoJumpTick);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_NO_MOVE_TICK), ModPacketsS2C::receiveSetNoMoveTick);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_COLOR_SELECT_MENU), ModPacketsS2C::receiveOpenFCSMenu);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MODIFY_FCD_DATA), ModPacketsS2C::receiveModifyFCDData);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), ModPacketsS2C::receiveRequestPatronAuthFile);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), ModPacketsS2C::receiveNewSubKey);
-        ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), ModPacketsS2C::receiveSetSuperUserLevel);
+        // 已移除 REQUEST_PATRON_AUTH_FILE / MELT_AUTH_SUB_KEY / SET_SUPER_USER_LEVEL 的接收器（随 Patreon 验证一并删除）
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_PERK_AVAILABILITY), ModPacketsS2C::receivePerkAvailability);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_PERK_DATA), ModPacketsS2C::receivePerkData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.OPEN_FORM_UPGRADE_MENU), ModPacketsS2C::receiveOpenFormUpgradeMenu);
@@ -396,23 +388,7 @@ public class ModPacketsS2C {
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_POWER_ANIM_DATA),  buf));
     }
 
-    public static void receiveOldUpdatePatronLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        int PairCount = payload.data().readInt();
-        HashMap<UUID, Integer> map = new HashMap<>();
-        for (int i = 0; i < PairCount; i++) {
-            UUID uuid = payload.data().readUUID();
-            int level = payload.data().readInt();
-            map.put(uuid, level);
-        }
-        ctx.client().execute(() -> PatronUtils.ApplyPatronLevel(map));
-    }
-
-    public static void receiveOldOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        ctx.client().execute(() -> {
-            Screen screen = new OldPatronFormSelectScreen(Component.literal("PatronFromSelectScreen"), ctx.player());
-            ctx.client().setScreen(screen);
-        });
-    }
+    // 已删除 receiveOldUpdatePatronLevel / receiveOldOpenPatronFormSelectMenu（随 Patreon 验证一并删除）
 
     public static void receiveOpenFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
         String targetName = payload.data().readUtf();
@@ -423,11 +399,7 @@ public class ModPacketsS2C {
         });
     }
 
-    public static void sendOldSetPatronForm(ResourceLocation formID) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeResourceLocation(formID);
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(OLD_SET_PATRON_FORM), buf));
-    }
+    // 已删除 sendOldSetPatronForm（随 Patreon 验证一并删除）
 
     public static void sendSetForm(ResourceLocation formID, UUID target, boolean immediate) {
         FriendlyByteBuf buf = PacketByteBufs.create();
@@ -602,33 +574,7 @@ public class ModPacketsS2C {
         }
     }
 
-    public static void sendPatronAuthFile(@Nullable AuthFile authFile) {
-        if (authFile == null) {
-            return;
-        }
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeByteArray(authFile.getRaw());
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.UPLOAD_PATRON_AUTH_FILE), buf));
-    }
-
-    private static void receiveRequestPatronAuthFile(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        UUID playerID = payload.data().readUUID();
-        boolean forceReReadFile = payload.data().readBoolean();
-        ctx.client().execute(() -> {
-            ShapeShifterCurseFabricClient.onRequestAuthFile();
-            AuthClient.requestAuthFile(playerID, forceReReadFile);
-        });
-    }
-
-    private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        FriendlyByteBuf keyBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
-        ctx.client().execute(() -> AuthClient.loadServerKey(keyBuf));
-    }
-
-    private static void receiveSetSuperUserLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        int level = payload.data().readInt();
-        ctx.client().execute(() -> SuperUserUtils.setClientSULevel(level));
-    }
+    // 已删除 sendPatronAuthFile / receiveRequestPatronAuthFile / receiveNewSubKey / receiveSetSuperUserLevel（随 Patreon 验证一并删除）
 
     public static void sendAddPerk(ResourceLocation perkTreeID, ResourceLocation perkID) {
         if (perkTreeID == null || perkID == null) {

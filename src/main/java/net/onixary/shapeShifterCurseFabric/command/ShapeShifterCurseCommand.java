@@ -36,14 +36,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import net.onixary.shapeShifterCurseFabric.util.SuperUserUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.DebuggerUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -167,11 +160,6 @@ public class ShapeShifterCurseCommand {
                                                 .executes(ShapeShifterCurseCommand::clearPlayerManaData)
                                         )
                                 )
-                                .then(literal("su")
-                                        .then(argument("level", IntegerArgumentType.integer(-1, 4))
-                                                .executes(ShapeShifterCurseCommand::SU_Command)
-                                        )
-                                )
                                 .then(literal("set_form")
                                         .then(argument("target", EntityArgument.player())
                                                 .then(argument("form", new FormArgumentType(FormArgumentType.ALL_FORM_ARG))
@@ -179,13 +167,8 @@ public class ShapeShifterCurseCommand {
                                                 )
                                         )
                                 )
-                                .then(literal("reupload_auth_file")
-                                        .executes(ShapeShifterCurseCommand::requestNewAuthData)
-                                )
                         )
-                        .then(literal("patron_info").requires(cs -> cs.hasPermission(0))
-                                .executes(ShapeShifterCurseCommand::logPatronInfo)
-                        )
+                        // 已删除 su / reupload_auth_file / patron_info 子命令（随 Patreon 验证一并删除）
                         .then(literal("form_color").requires(cs -> cs.hasPermission(0))
                                 .then(literal("menu").executes(ShapeShifterCurseCommand::FC_Menu))
                                 .then(literal("save")
@@ -486,75 +469,7 @@ public class ShapeShifterCurseCommand {
         }
     }
 
-    private static int logPatronInfo(CommandContext<CommandSourceStack> commandContext) {
-        try {
-            ServerPlayer player = commandContext.getSource().getPlayer();
-            if (player == null) {
-                commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
-                return 0;
-            }
-            PatronDataSegment patronDataSegment = PatronDataSegment.getPatronDataSegment(player);
-            StringBuilder message = new StringBuilder("Patron Info:\n");
-            message.append("UUID: ").append(player.getUUID()).append("\n");
-            message.append("Patron Level: ").append(patronDataSegment != null ? patronDataSegment.getLevel() : 0).append("\n");
-            if (patronDataSegment != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                long expireTime = patronDataSegment.getExpireTime();
-                message.append("Expire Time: ").append(LocalDateTime.ofInstant(Instant.ofEpochSecond(expireTime), ZoneId.systemDefault()).format(formatter)).append("\n");
-            }
-            // message.append("\n");
-            player.displayClientMessage(Component.literal(message.toString()), false);
-        } catch (Exception e) {
-            // 处理其他可能的错误
-            commandContext.getSource().sendFailure(Component.literal("Error when log player patron info: " + e.getMessage()));
-            ShapeShifterCurseFabric.LOGGER.error("Error when log player patron info: ", e);
-        }
-        return 1;
-    }
-
-    // private static int logPatronInfo(CommandContext<CommandSourceStack> commandContext) {
-    //     if (!PatronUtils.EnablePatronFeature) {
-    //         commandContext.getSource().sendFailure(Component.literal("Patron feature is disabled!"));
-    //         return 0;
-    //     }
-    //     try {
-    //         ServerPlayer player = commandContext.getSource().getPlayer();
-    //         if (player == null) {
-    //             commandContext.getSource().sendFailure(Component.literal("Must be a player!"));
-    //             return 0;
-    //         }
-    //         StringBuilder message = new StringBuilder("Patron Info:\n");
-    //         message.append("UUID: ").append(player.getUuid()).append("\n");
-    //         message.append("Patron Level: ").append(PatronUtils.PatronLevels.getOrDefault(player.getUuid(), 0)).append("\n");
-    //         message.append("Available FormID: ");
-    //         for (Identifier formID : getAvailableForms(player)) {
-    //             message.append(formID.toString()).append(" ");
-    //         }
-    //         message.append("\n");
-    //         player.sendMessage(Component.literal(message.toString()), false);
-    //     } catch (Exception e) {
-    //         // 处理其他可能的错误
-    //         commandContext.getSource().sendFailure(Component.literal("Error when log player patron info: " + e.getMessage()));
-    //         ShapeShifterCurseFabric.LOGGER.error("Error when log player patron info: ", e);
-    //     }
-    //     return 1;
-    // }
-//
-    // // 仅用于logPatronInfo 使用
-    // private static List<Identifier> getAvailableForms(ServerPlayer player) {
-    //     List<Identifier> availableForms = new ArrayList<>();
-    //     for (Identifier formID : RegPlayerForms.dynamicPlayerForms) {
-    //         IForm form = RegPlayerForms.getPlayerForm(formID);
-    //         if (form instanceof DynamicForm pfd) {
-    //             if (pfd.IsPatronForm && pfd.IsPlayerCanUse(player)) {
-    //                 if (!availableForms.contains(formID)) {
-    //                     availableForms.add(formID);
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     return availableForms;
-    // }
+    // 已删除 logPatronInfo 子命令实现及注释掉的旧实现（随 Patreon 验证一并删除）
 
     private static int setWorldTime(CommandContext<CommandSourceStack> commandContext) {
         ServerLevel world = commandContext.getSource().getLevel();
@@ -573,7 +488,9 @@ public class ShapeShifterCurseCommand {
 
     private static int devCommand(CommandContext<CommandSourceStack> commandContext) {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(2)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -600,7 +517,9 @@ public class ShapeShifterCurseCommand {
 
     private static int clearPlayerFormData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(2)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -613,7 +532,9 @@ public class ShapeShifterCurseCommand {
 
     private static int clearPlayerSkinData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(2)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -626,7 +547,9 @@ public class ShapeShifterCurseCommand {
 
     private static int clearPlayerMinionData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(2)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -639,7 +562,9 @@ public class ShapeShifterCurseCommand {
 
     private static int clearPlayerManaData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 1)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(2)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -796,31 +721,13 @@ public class ShapeShifterCurseCommand {
         return 0;
     }
 
-    private static int SU_Command(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        // 需要开启配置后才能使用 毕竟如果还允许权限2 那么就能实现提权了
-        ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 2)) {
-            commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
-            return 0;
-        }
-        if (player == null) {
-            return 0;
-        }
-        int level = commandContext.getArgument("level", Integer.class);
-        try {
-            SuperUserUtils.setSULevel(player, level);
-            player.getServer().getPlayerList().sendPlayerPermissionLevel(player);
-            player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
-        } catch (Exception e) {
-            player.createCommandSourceStack().sendFailure(Component.literal("Error to set SU level"));
-            return 0;
-        }
-        return 1;
-    }
+    // 已删除 SU_Command 实现（随 SuperUser / Patreon 验证一并删除）
 
     private static int setDebugForm(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer player = commandContext.getSource().getPlayer();
-        if (!DebuggerUtils.canExecute(commandContext, player, 3)) {
+        // 原 DebuggerUtils.canExecute 已随 Patreon 验证删除；它当时对 requireLevel=1 的实际门槛是 OP 权限 2 级
+        // （hasPermission(2) 或 enableDebugCommand 配置），这里统一用权限 2 —— 与同文件其它子命令一致
+        if (!commandContext.getSource().hasPermission(3)) {
             commandContext.getSource().sendFailure(Component.literal("Has No Permission!"));
             return 0;
         }
@@ -845,17 +752,5 @@ public class ShapeShifterCurseCommand {
         return 1;
     }
 
-    private static int requestNewAuthData(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
-        ServerPlayer player = commandContext.getSource().getPlayer();
-        if (player == null) {
-            return 0;
-        }
-        try {
-            ModPacketsS2CServer.requestPatronAuthFile(player, true);
-        } catch (Exception e) {
-            player.createCommandSourceStack().sendFailure(Component.literal("Error to request auth file"));
-            return 0;
-        }
-        return 1;
-    }
+    // 已删除 requestNewAuthData 实现（随 Patreon 验证一并删除）
 }

@@ -21,7 +21,8 @@ public class RegPlayerForms {
 
     public static HashMap<ResourceLocation, List<ResourceLocation>> subFormMap = new HashMap<>();
 
-    public static String PatronNameSpace = "ssc-patron";  // 在更新数据包时保留
+    // 注：原先的 PatronNameSpace("ssc-patron") 豁免标记已随 Patreon 验证系统一并移除 ——
+    // 该命名空间的形态数据原本由已删除的 PatronUtils 联网分发，移除后不可能再有形态使用它。
 
     // Builtin PlayerForms
     // Original
@@ -134,9 +135,6 @@ public class RegPlayerForms {
                 if (id.equals(exceptID)) {
                     continue;
                 }
-                if (id.getNamespace().equals(PatronNameSpace)) {
-                    continue;
-                }
                 NeedRemove.add(id);
             }
         }
@@ -217,15 +215,11 @@ public class RegPlayerForms {
 
     public static void ClearAllDynamicPlayerForms() {
         for (ResourceLocation id : dynamicPlayerForms) {
-            if (!id.getNamespace().equals(PatronNameSpace)) {
-                removeDynamicPlayerForm(id, false);
-            }
+            removeDynamicPlayerForm(id, false);
         }
         dynamicPlayerForms.clear();
         for (ResourceLocation id : dynamicPlayerFormGroups) {
-            if (!id.getNamespace().equals(PatronNameSpace)) {
-                removeDynamicPlayerFormGroup(id, false);
-            }
+            removeDynamicPlayerFormGroup(id, false);
         }
         dynamicPlayerFormGroups.clear();
     }

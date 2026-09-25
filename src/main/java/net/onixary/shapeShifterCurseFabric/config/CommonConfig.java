@@ -75,33 +75,8 @@ public class CommonConfig implements ConfigData {
     @Comment("Witch Can Throw Potion To Pre-Book Player Default: false")
     public boolean witchPotionForPreBook = false;
 
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Enable Patron Form System. Default: true")
-    public boolean enablePatronFormSystem = true;
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Data Pack Version Url. Default: ")
-    public String DataPackVersionUrl = "http://localhost:1234/data_version.txt";  // 数据包版本存储URL
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Data Pack Download Url. Default: ")
-    public String DataPackUrl = "http://localhost:1234/data.zip";  // 数据包下载URL
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Resource Pack Version Url. Default: ")
-    public String ResourcePackVersionUrl = "http://localhost:1234/resource_version.txt";  // 资源包版本存储URL
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Resource Pack Download Url. Default: ")
-    public String ResourcePackUrl = "http://localhost:1234/resource.zip";  // 资源包下载URL
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Patron Data Url. Default: ")
-    public String PatronDataUrl = "http://localhost:1234/patron_data.json";  // 捐助者数据存储URL
-
-    @ConfigEntry.Category("Patron")
-    @Comment("[Obsolete] Check Update Interval (Seconds). Default: 86400 (1 Day)")
-    public int CheckUpdateInterval = 60 * 60 * 24;
+    // 原 "Patron" 配置分类（enablePatronFormSystem / 各 [Obsolete] 的 data|resource pack 下载 URL /
+    // PatronDataUrl / CheckUpdateInterval）已随 Patreon 验证与赞助者内容分发系统一并移除。
 
     // 开发用
     // @ConfigEntry.Category("InDevelopment")

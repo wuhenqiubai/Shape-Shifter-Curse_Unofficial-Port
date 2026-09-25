@@ -43,10 +43,8 @@ public class ModPackets {
 
     public static final ResourceLocation ACTIVE_VIRTUAL_TOTEM = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "active_virtual_totem");
 
-    // 老版
-    public static final ResourceLocation OLD_UPDATE_PATRON_LEVEL = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_update_patron_level");
-    public static final ResourceLocation OLD_OPEN_PATRON_FORM_SELECT_MENU = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_open_patron_form_select_menu");
-    public static final ResourceLocation OLD_SET_PATRON_FORM = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "old_set_patron_form");
+    // 老版 Patron 相关包 ID（OLD_UPDATE_PATRON_LEVEL / OLD_OPEN_PATRON_FORM_SELECT_MENU /
+    // OLD_SET_PATRON_FORM）已随 Patreon 验证系统一并移除。
 
     // S2C 结构: UUID-玩家UUID Boolean-是否启用动画, (仅在启用动画时包含)ResourceLocation-动画ID, Int-动画次数. Int-动画时长
     public static final ResourceLocation UPDATE_POWER_ANIM_DATA_TO_CLIENT = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_power_anim_data_to_client");
@@ -64,11 +62,8 @@ public class ModPackets {
     public static final ResourceLocation OPEN_FORM_COLOR_SELECT_MENU = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "open_form_color_select_menu");
     public static final ResourceLocation MODIFY_FCD_DATA = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "modify_fcd_data");
 
-    public static final ResourceLocation REQUEST_PATRON_AUTH_FILE = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_patron_auth_file");
-    public static final ResourceLocation UPLOAD_PATRON_AUTH_FILE = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "upload_patron_auth_file");
-    public static final ResourceLocation MELT_AUTH_SUB_KEY = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "melt_auth_sub_key");
-
-    public static final ResourceLocation SET_SUPER_USER_LEVEL = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "set_super_user_level");
+    // Patron 授权相关的包 ID（REQUEST_PATRON_AUTH_FILE / UPLOAD_PATRON_AUTH_FILE /
+    // MELT_AUTH_SUB_KEY / SET_SUPER_USER_LEVEL）已随验证系统一并移除。
 
     public static final ResourceLocation ADD_PERK = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "add_perk");
     public static final ResourceLocation REQUEST_PERK_AVAILABILITY = ResourceLocation.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "request_perk_availability");

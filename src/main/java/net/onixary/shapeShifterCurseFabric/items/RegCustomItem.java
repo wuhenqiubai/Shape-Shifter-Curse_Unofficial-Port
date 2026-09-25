@@ -16,7 +16,6 @@ import net.onixary.shapeShifterCurseFabric.items.armors.MorphScaleArmor;
 import net.onixary.shapeShifterCurseFabric.items.armors.NetheriteMorphScaleArmor;
 import net.onixary.shapeShifterCurseFabric.items.tools.*;
 import net.onixary.shapeShifterCurseFabric.items.trinkets.*;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -76,7 +75,6 @@ public class RegCustomItem {
     // 减少非蜘蛛玩家食用的中毒量，做到实在没东西吃的时候也能硬着头皮吃的感觉
     public static final Item SPIDER_FLUID_COCOON = register("spider_fluid_cocoon", new SpiderFluidCocoon(new Item.Properties()));
 
-    public static final Item PATRON_FORM_ITEM = register("patron_form_item", new PatronFormItem(new Item.Properties()));
     public static final Item SELECT_FORM_ITEM = register("select_form_item", new SelectFormItem(new Item.Properties()));
 
     public static final Item CUSTOM_TRINKET = register("custom_trinket", new CustomTrinket(new Item.Properties()));
@@ -162,9 +160,6 @@ public class RegCustomItem {
                         RegCustomPotions.CUSTOM_STATUE_FORM_POTION,
                         RegCustomPotions.FEED_POTION
                 ));
-                if (PatronUtils.EnablePatronFeature) {
-                    entries.accept(PATRON_FORM_ITEM);
-                }
             })
             .build();
 
@@ -194,9 +189,6 @@ public class RegCustomItem {
         /*
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.TOOLS).register(entries -> {
             entries.add(BOOK_OF_SHAPE_SHIFTER);
-            if (PatronUtils.EnablePatronFeature) {
-                entries.add(PATRON_FORM_ITEM);
-            }
         });
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.INGREDIENTS).register(entries -> {
             entries.add(UNTREATED_MOONDUST);

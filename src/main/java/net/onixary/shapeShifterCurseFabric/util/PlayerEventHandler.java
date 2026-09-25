@@ -20,7 +20,6 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.NeedCheckUsableForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.status_effects.transformative_effects.TransformativeStatusInstance;
@@ -48,12 +47,7 @@ public class PlayerEventHandler {
                     ShapeShifterCurseFabric.LOGGER.error("Error sending update dynamic form: ", e);
                 }
                 try {
-                    IForm form = FormUtils.getPlayerForm(player);
-                    if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
-                        FormUtils.applyFallback(player);
-                    } else {
-                        FormUtils._loadForm(player, form);
-                    }
+                    FormUtils._loadForm(player, FormUtils.getPlayerForm(player));
                 } catch (Exception e) {
                     ShapeShifterCurseFabric.LOGGER.error("Error loading player form: ", e);
                     FormUtils.applyFallback(player);
@@ -124,12 +118,7 @@ public class PlayerEventHandler {
         //load event
         ServerWorldEvents.LOAD.register((server, world) -> {
             for (ServerPlayer player : world.players()) {
-                IForm form = FormUtils.getPlayerForm(player);
-                if (form instanceof NeedCheckUsableForm ncuf && !ncuf.IsPlayerCanUse(player)) {
-                    FormUtils.applyFallback(player);
-                } else {
-                    FormUtils._loadForm(player, form);
-                }
+                FormUtils._loadForm(player, FormUtils.getPlayerForm(player));
 
                 /* 重构后不需要了 仅用于参考旧实现逻辑
                 // load attachment

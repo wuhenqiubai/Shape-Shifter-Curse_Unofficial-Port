@@ -19,17 +19,14 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimState
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.NeedCheckUsableForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
-    public static final UUID PublicUUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
+public class DynamicForm implements IForm, ISubForm {
 
     public @NotNull ResourceLocation formID;
     public Set<String> formFlag;
@@ -48,10 +45,6 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     private AbstractAnimStateController defaultAnimStateController = AnimUtils.EMPTY_CONTROLLER;
     private Map<ResourceLocation, AnimUtils.AnimationHolderData> powerAnimBuilderMap = new HashMap<>();
     private Map<ResourceLocation, AnimationHolder> powerAnimMap = new HashMap<>();
-
-    public boolean IsPatronForm = false;  // 可以使用特殊物品直接变形
-    public int RequirePatronLevel = 0;  // 需要的赞助等级
-    public List<UUID> PlayerUUIDs = new ArrayList<>();
 
     public List<ResourceLocation> ExtraPower = new LinkedList<>();
     public HashMap<ResourceLocation, JsonObject> ExtraPowerData = new LinkedHashMap<>();
@@ -243,17 +236,6 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
         String IDStr = _Gson_GetString(formData, "render_layer", null);
         this.layerRenderOverwrite = IDStr == null ? null : new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.tryParse(IDStr));
         this.loadExtraPower(formData);
-        this.IsPatronForm = _Gson_GetBoolean(formData, "IsPatronForm", false);
-        this.PlayerUUIDs.clear();
-        if (formData.has("PlayerUUID")) {
-            for (JsonElement uuidJson : formData.get("PlayerUUID").getAsJsonArray()) {
-                UUID uuid = UUID.fromString(uuidJson.getAsString());
-                if (uuid != null) {
-                    this.PlayerUUIDs.add(uuid);
-                }
-            }
-        }
-        this.RequirePatronLevel = _Gson_GetInt(formData, "RequirePatronLevel", 0);
         if (formData.has("fallback")) {
             this.fallbackFormID = ResourceLocation.tryParse(formData.get("fallback").getAsString());
         }
@@ -372,14 +354,6 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
                 this.RemovedPower.add(ResourceLocation.tryParse(powerElement.getAsString()));
             }
         }
-    }
-
-    @Override
-    public boolean IsPlayerCanUse(Player player) {
-        if (this.PlayerUUIDs.contains(player.getUUID())) {
-            return true;
-        }
-        return (this.PlayerUUIDs.isEmpty() || this.PlayerUUIDs.contains(PublicUUID)) && (PatronUtils.PatronLevels.getOrDefault(player.getUUID(), 0) >= this.RequirePatronLevel);
     }
 
     @Override

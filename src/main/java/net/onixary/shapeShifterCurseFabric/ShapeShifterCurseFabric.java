@@ -76,13 +76,9 @@ import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManag
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.DefaultAccessory;
 import net.onixary.shapeShifterCurseFabric.util.*;
-import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -249,14 +245,11 @@ public class ShapeShifterCurseFabric implements ModInitializer {
 
         ManaRegistries.register();
         DefaultAccessory.init();
-        AuthServer.init();
         RegMenuType.init();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 获取主世界作为默认世界
             ServerLevel overworld = server.overworld();
-            // 更新Patron状态
-            PatronUtils.OnServerLoad(server);
             TransformManager.onServerInit();
             InstinctUtils.onServerInit();
             AccessoryUtils.onStartServer();
@@ -272,7 +265,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
                 FormUtils._loadForm(player, component.getFallbackForm());
             }
         }));
-        initLocalDataStorage();
 
         // Reg origins content
 
@@ -362,20 +354,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         //LOGGER.info(CONFIG.keepOriginalSkin() ? "Original skin will be kept." : "Override skin");
 
         LOGGER.info("Shape Shifter Curse loaded, Channel: {}, Channel Version: {}, IsConnectorVersion: {}", SSCCustomDataReader.Channel, SSCCustomDataReader.ChannelVersion, IS_CONNECTOR_VERSION);
-    }
-
-    private void initLocalDataStorage() {
-        if (!PatronUtils.EnablePatronFeature) {
-            return;
-        }
-        File dataFolder = MOD_LOCAL_DATA_STORAGE.toFile();
-        if (!dataFolder.isDirectory()) {
-            try {
-                Files.createDirectories(dataFolder.toPath());
-            } catch (IOException e) {
-                LOGGER.error("Failed to create local data storage folder", e);
-            }
-        }
     }
 
     private void onPlayerEndSleeping(LivingEntity entity) {

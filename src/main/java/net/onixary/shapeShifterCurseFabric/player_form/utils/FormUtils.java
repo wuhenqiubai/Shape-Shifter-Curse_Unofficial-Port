@@ -23,7 +23,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.ITransformReason;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -348,14 +347,18 @@ public class FormUtils {
         FormUtils._loadForm(player, component.getFallbackForm());
     }
 
+    /**
+     * 形态是否可用。
+     *
+     * <p>Patreon 赞助者验证已移除（CurseForge 合规要求：所有形态对所有玩家开放），
+     * 原先的 {@code IPatronForm → PatronDataSegment.isPatronFormCanUse} 分支连同接口一并删除。
+     * 保留 {@link IFormWithCondition} 分支不变 —— 它与赞助无关，且移除会改变既有行为。
+     * 本仓库当前没有任何类实现 IFormWithCondition，所以此方法实际恒返回 true。
+     */
     public static boolean isFormCanUse(@Nullable Player player, @Nullable IForm form) {
-        boolean canUse = true;
         if (form instanceof IFormWithCondition iFormWithCondition) {
-            canUse &= iFormWithCondition.checkCanUse(player);
+            return iFormWithCondition.checkCanUse(player);
         }
-        if (form instanceof IPatronForm iPatronForm) {
-            canUse &= PatronDataSegment.isPatronFormCanUse(player, iPatronForm);
-        }
-        return canUse;
+        return true;
     }
 }

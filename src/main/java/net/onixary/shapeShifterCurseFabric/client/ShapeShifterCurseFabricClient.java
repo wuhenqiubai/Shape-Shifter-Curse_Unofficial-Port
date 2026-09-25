@@ -7,7 +7,6 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
@@ -47,10 +46,7 @@ import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
 import net.onixary.shapeShifterCurseFabric.render.render_layer.FurGradientRenderLayer;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.TickManager;
-import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
-import net.onixary.shapeShifterCurseFabric.util.test.NetWorkTest;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -65,17 +61,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	//public static final EntityModelLayer T_OCELOT_LAYER = new EntityModelLayer(Identifier.of(MOD_ID, "t_ocelot"), "main");
 
 	public static final FormColorData formColorData = new FormColorData();
-
-	private static int requestAuthCount = 0;
-
-	public static void onRequestAuthFile() {
-		if (requestAuthCount != 0) {
-            if (Minecraft.getInstance().player != null) {
-				Minecraft.getInstance().player.sendSystemMessage(Component.translatable("message.shapeShifterCurseFabric.authing", requestAuthCount + 1));
-            }
-        }
-		requestAuthCount++;
-	}
 
 	public static Minecraft getClient() {
 		return Minecraft.getInstance();
@@ -276,7 +261,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			PowerHolderComponent.KEY.get(clientPlayer).getPowers().stream().filter(p -> p instanceof LevitatePower).forEach(p -> ((LevitatePower) p).clientTick(clientPlayer));
 			CustomEdiblePower.OnClientTick(clientPlayer);
 		});
-		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> requestAuthCount = 0);
 
 		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, "category." + MOD_ID);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);
@@ -337,8 +321,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		});
 
 		RegCustomBlock.ClientInit();
-		PatronUtils.OnClientInit();
-		AuthClient.init();
 		RegMenuScreen.init();
 
 		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);

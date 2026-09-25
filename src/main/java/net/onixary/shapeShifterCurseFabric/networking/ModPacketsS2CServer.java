@@ -7,20 +7,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.VirtualTotemPower;
 import net.onixary.shapeShifterCurseFabric.perk.IPerk;
 import net.onixary.shapeShifterCurseFabric.perk.PerkTree;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
-import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.KeySegment;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -178,51 +173,7 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.LOGIN_PACKET), buf));
     }
 
-    // 仅在获取到 Patron 数据后调用 玩家登录由 updateDynamicForm 负责
-    public static void updatePatronForms(ServerPlayer player, List<ResourceLocation> patronForms) {
-        int MaxFormPerPacket = 63;
-        HashMap<ResourceLocation, DynamicForm> forms = new HashMap<>();
-        for (ResourceLocation formId : patronForms) {
-            IForm form = RegPlayerForms.getPlayerForm(formId);
-            if (form instanceof DynamicForm pfd) {
-                forms.put(formId, pfd);
-            }
-        }
-        int NowPacket = 0;
-        int RemainPacket = forms.size();
-        JsonObject jsonForms = new JsonObject();
-        for (ResourceLocation formId : forms.keySet()) {
-            jsonForms.add(formId.toString(), forms.get(formId).toJson());
-            NowPacket ++;
-            RemainPacket --;
-            if (NowPacket % MaxFormPerPacket == 0) {
-                sendUpdateDynamicForm(player, jsonForms);
-                jsonForms = new JsonObject();
-            }
-        }
-        if (RemainPacket > 0) {
-            sendUpdateDynamicForm(player, jsonForms);
-        }
-    }
-
-    public static void updateOldPatronLevel(MinecraftServer server) {
-        HashMap<UUID, Integer> patronLevels = PatronUtils.PatronLevels;
-        int PairCount = patronLevels.size();
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            FriendlyByteBuf buf = PacketByteBufs.create();
-            buf.writeInt(PairCount);
-            for (Map.Entry<UUID, Integer> entry : patronLevels.entrySet()) {
-                buf.writeUUID(entry.getKey());
-                buf.writeInt(entry.getValue());
-            }
-            ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OLD_UPDATE_PATRON_LEVEL), buf));
-        }
-    }
-
-    public static void OpenOldPatronFormSelectMenu(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU), buf));
-    }
+    // 已删除 updatePatronForms / updateOldPatronLevel / OpenOldPatronFormSelectMenu（随 Patreon 验证一并删除）
 
     public static void OpenFormSelectMenu(ServerPlayer player, Player target) {
         FriendlyByteBuf buf = PacketByteBufs.create();
@@ -317,28 +268,7 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MODIFY_FCD_DATA), buf));
     }
 
-    public static void requestPatronAuthFile(ServerPlayer player, boolean forceReReadFile) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeUUID(player.getUUID());
-        buf.writeBoolean(forceReReadFile);
-        ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
-    }
-
-    public static void sendNewSubKey(ServerPlayer player, KeySegment newKey) {
-        if (newKey == null) {
-            ShapeShifterCurseFabric.LOGGER.error("newKey is null");
-            return;
-        }
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeByteArray(newKey.getRaw());
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.MELT_AUTH_SUB_KEY), buf));
-    }
-
-    public static void sendSetSuperUserLevel(ServerPlayer player, int level) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
-        buf.writeInt(level);
-        ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.SET_SUPER_USER_LEVEL), buf));
-    }
+    // 已删除 requestPatronAuthFile / sendNewSubKey / sendSetSuperUserLevel（随 Patreon 验证一并删除）
 
     // 服务端也要注册 S2C payload 类型（fabric networking：发送端必须注册 playS2C，否则 id 未知会回退 DiscardedPayload codec、
     // 把 BytePayload 强转 DiscardedPayload 抛 ClassCastException，玩家进服即崩 -- issue #21）。
@@ -356,16 +286,12 @@ public class ModPacketsS2CServer {
         BytePayload.registerS2C(ModPackets.LOGIN_PACKET);
         BytePayload.registerS2C(ModPackets.ACTIVE_VIRTUAL_TOTEM);
         BytePayload.registerS2C(ModPackets.UPDATE_POWER_ANIM_DATA_TO_CLIENT);
-        BytePayload.registerS2C(ModPackets.OLD_UPDATE_PATRON_LEVEL);
-        BytePayload.registerS2C(ModPackets.OLD_OPEN_PATRON_FORM_SELECT_MENU);
         BytePayload.registerS2C(ModPackets.OPEN_FORM_SELECT_MENU);
         BytePayload.registerS2C(ModPackets.SET_NO_JUMP_TICK);
         BytePayload.registerS2C(ModPackets.SET_NO_MOVE_TICK);
         BytePayload.registerS2C(ModPackets.OPEN_FORM_COLOR_SELECT_MENU);
         BytePayload.registerS2C(ModPackets.MODIFY_FCD_DATA);
-        BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
-        BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
-        BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
+        // 已移除 MELT_AUTH_SUB_KEY / REQUEST_PATRON_AUTH_FILE / SET_SUPER_USER_LEVEL 的 S2C payload 注册（随 Patreon 验证一并删除）
         // 以下 4 个由本类 send（sendPerkAvailability / sendPerkData / sendOpenFormUpgradeMenu /
         // sendOpenSelectSubFormMenu），此前只写在客户端 ModPacketsS2C#register 的清单里 ——
         // 服务端编码时查不到 payload type，会抛 IllegalArgumentException("Unknown payload type: ...")，

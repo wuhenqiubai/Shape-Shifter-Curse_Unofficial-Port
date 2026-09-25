@@ -11,15 +11,11 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.*;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateControllerDP.*;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.ModifyCapeRender;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
-
-public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, ModifyCapeRender {
+public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRender {
     public Form_Bat3_Sub_Avali(ResourceLocation formID) {
         super(formID, RegPlayerForms.BAT_3);
         this.removePower(ShapeShifterCurseFabric.identifier("form_bat_3_sky_speed"));
@@ -44,14 +40,6 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements IPatronForm, M
     @Override
     public @Nullable Tuple<ResourceLocation, ResourceLocation> getRenderLayerOverride() {
         return new Tuple<>(ResourceLocation.fromNamespaceAndPath("origins", "origin"), ResourceLocation.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
-    }
-
-    @Override
-    public boolean checkCanUse(@Nullable Player player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
-        if (patronData == null || player == null) {
-            return false;
-        }
-        return patronData.getLevel() >= 5;
     }
 
     // 以下暂时沿用 bat_3 的披风渲染参数

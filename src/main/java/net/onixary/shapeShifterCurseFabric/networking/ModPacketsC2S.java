@@ -1,7 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,7 +18,6 @@ import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.IPlayerAnimController;
-import net.onixary.shapeShifterCurseFabric.player_form.DynamicForm;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.ISubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -28,7 +26,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinCompone
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
 
 import java.util.UUID;
 
@@ -89,11 +86,7 @@ public class ModPacketsC2S {
                 ModPacketsC2S::onUpdatePlayerCustomColor
         );
 
-        ServerPlayNetworking.registerGlobalReceiver(
-                BytePayload.id(OLD_SET_PATRON_FORM),
-                ModPacketsC2S::receiveSetPatronForm
-        );
-
+        // 已移除 OLD_SET_PATRON_FORM 与 UPLOAD_PATRON_AUTH_FILE 的接收器注册（随 Patreon 验证一并删除）
         ServerPlayNetworking.registerGlobalReceiver(
                 BytePayload.id(SET_FORM),
                 ModPacketsC2S::receiveSetForm
@@ -107,11 +100,6 @@ public class ModPacketsC2S {
         ServerPlayNetworking.registerGlobalReceiver(
                 BytePayload.id(REQUEST_POWER_ANIM_DATA),
                 ModPacketsC2S::onRequestPowerAnimationData
-        );
-
-        ServerPlayNetworking.registerGlobalReceiver(
-                BytePayload.id(UPLOAD_PATRON_AUTH_FILE),
-                ModPacketsC2S::receivePatronAuthFile
         );
 
         ServerPlayNetworking.registerGlobalReceiver(
@@ -240,23 +228,7 @@ public class ModPacketsC2S {
         }
     }
 
-    private static void receiveSetPatronForm(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        FriendlyByteBuf buf = payload.data();
-        ServerPlayer player = ctx.player();
-        IForm form = RegPlayerForms.getPlayerForm(ResourceLocation.tryParse(buf.readUtf()));
-        if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUUID())) {
-            TransformManager.startTransform(player, form, null);
-        }
-    }
-
-    private static void receivePatronAuthFile(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        byte[] data = payload.data().readByteArray();
-        if (data != null) {
-            ctx.server().execute(() -> {
-                AuthServer.loadPatronAuthFile(ctx.player(), new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
-            });
-        }
-    }
+    // 已删除 receiveSetPatronForm / receivePatronAuthFile（随 Patreon 验证一并删除）
 
     private static void receiveAddPerk(BytePayload payload, ServerPlayNetworking.Context ctx) {
         ResourceLocation perkTreeId = payload.data().readResourceLocation();
@@ -333,11 +305,9 @@ public class ModPacketsC2S {
         BytePayload.registerC2S(SPRINTING_TO_SNEAKING_EVENT_ID);
         BytePayload.registerC2S(UPDATE_CUSTOM_SETTING);
         BytePayload.registerC2S(UPDATE_CUSTOM_COLOR);
-        BytePayload.registerC2S(OLD_SET_PATRON_FORM);
         BytePayload.registerC2S(SET_FORM);
         BytePayload.registerC2S(UPDATE_POWER_ANIM_DATA_TO_SERVER);
         BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
-        BytePayload.registerC2S(ModPackets.UPLOAD_PATRON_AUTH_FILE);
         BytePayload.registerC2S(ModPackets.ADD_PERK);
         BytePayload.registerC2S(REQUEST_PERK_AVAILABILITY);
         BytePayload.registerC2S(REQUEST_PERK_DATA);
