@@ -78,9 +78,9 @@ public class RegPlayerForms {
     public static IForm FERAL_CAT_SP = registerPlayerForm(new Form_FeralCatSP(ShapeShifterCurseFabric.identifier("feral_cat_sp")).formFlag(NoInstinct, NoCursedMoonEffect, SpecialForm).bodyType(PlayerFormBodyType.FERAL).applyScale(0.55f, 0.6f));
     public static IFormGroup FERAL_CAT_FORM = registerPlayerFormGroup(new NormalGroup(ShapeShifterCurseFabric.identifier("feral_cat_form")).registerForm(1, 1, FERAL_CAT_SP));
 
-    // SubForms
-    public static IForm SNOW_FOX_3_SUB_MARBLED_POLECAT = registerPlayerForm(new Form_SnowFox3_Sub_MarbledPolecat(ShapeShifterCurseFabric.identifier("snow_fox_3_sub_marbled_polecat")));
-    public static IForm BAT_3_SUB_AVALI = registerPlayerForm(new Form_Bat3_Sub_Avali(ShapeShifterCurseFabric.identifier("bat_3_sub_avali")).applyScaleFunc(NORMAL_SCALE_FUNC_BUILDER.apply(0.65f, 1.0f)));
+    // TODO: onixary的意见，删除 SubForms 的注册
+    // public static IForm avali
+    // public static IForm marbled_polecat
 
     static {
         // TODO 发布前一定一定得记得删
