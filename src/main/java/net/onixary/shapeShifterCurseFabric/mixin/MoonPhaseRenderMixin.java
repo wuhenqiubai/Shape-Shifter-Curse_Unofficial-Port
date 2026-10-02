@@ -27,7 +27,7 @@ public class MoonPhaseRenderMixin {
 		return CursedMoonClient.isCursedMoon ? CURSED_MOON_PHASES : Vanilla_MOON_PHASES;
 	}
 
-	// TODO: 1.21.11 天空渲染已重构，注入点无法映射，旧逻辑暂时禁用：
+	// TODO(1.21.11 未迁移): 天空渲染已重构，注入点无法映射，旧逻辑暂时禁用：
 	// 1. LevelRenderer.renderSky() 已移除，天空渲染移入 SkyRenderer（renderSunMoonAndStars/renderMoon）；
 	// 2. 月亮相位改为构造时从 celestials 图集烘焙 GpuBuffer（SkyRenderer.buildMoonPhases），
 	//    RenderSystem.setShaderTexture 已删除，无法再用 @ModifyArg 替换 moon_phases.png。

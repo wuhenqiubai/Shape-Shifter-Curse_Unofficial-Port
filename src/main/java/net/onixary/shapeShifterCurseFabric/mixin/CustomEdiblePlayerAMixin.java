@@ -40,9 +40,11 @@ public class CustomEdiblePlayerAMixin {
         return original;
     }
 
-    // TODO: 1.21.11 LivingEntity.triggerItemUseEffects 已被移除（粒子/声音逻辑迁入 Consumable.emitParticlesAndSounds，
-    //  由 Consumable 记录的 animation 字段驱动，不再调用 ItemStack.getUseAnimation()）。
-    //  自定义可食用物的 EAT 动画现由 CustomEdibleItemMixin.getUseAnimation 覆盖处理，此注入点暂时禁用。
+    // [已解决，勿再当作待办] triggerItemUseEffects 在 1.21.11 已移除（粒子/声音逻辑迁入
+    //  Consumable.emitParticlesAndSounds，由 Consumable 记录的 animation 字段驱动，
+    //  不再调用 ItemStack.getUseAnimation()）。
+    //  自定义可食用物的 EAT 动画已改由 CustomEdibleItemMixin.getUseAnimation 覆盖处理。
+    //  下列旧注入保留作参考。
     // @ModifyExpressionValue(method = "triggerItemUseEffects", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseAnimation()Lnet/minecraft/world/item/ItemUseAnimation;"))
     // private ItemUseAnimation spawnConsumptionEffects$getUseAction(ItemUseAnimation original, ItemStack stack, int particleCount) {
     //     if ((Object)this instanceof Player playerEntity) {

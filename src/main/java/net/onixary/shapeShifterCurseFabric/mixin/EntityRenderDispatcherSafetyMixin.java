@@ -11,6 +11,6 @@ import org.spongepowered.asm.mixin.Mixin;
  */
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRenderDispatcherSafetyMixin {
-    // TODO: 1.21.11 渲染流程重构，此防护 mixin 的注入目标已失效，暂禁用。
+    // TODO(1.21.11 未迁移): 渲染流程重构，此防护 mixin 的注入目标已失效，暂禁用。
     // 如需保留 null-renderer 防护，应改为注入 EntityRenderDispatcher.submit(...) 流程。
 }

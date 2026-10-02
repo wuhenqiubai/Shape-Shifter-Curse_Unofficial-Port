@@ -38,10 +38,10 @@ public class PotionEntityMixin {
         }
     }
 
-    // TODO: 1.21.11 makeAreaOfEffectCloud 已不存在，AreaEffectCloud 的创建移到 ThrownLingeringPotion.onHitAsPotion，
-    // 本 mixin 目标是 AbstractThrownPotion，无法注入子类 ThrownLingeringPotion 的方法，暂时禁用。
-    // 恢复该功能需要新增 ThrownLingeringPotion mixin（在 onHitAsPotion 的 addFreshEntity 处注入），
-    // 或让 AreaEffectCloudEntityMixin 从 CUSTOM_DATA 组件读取 targetForm。
+    // [已迁移，勿再当作待办] makeAreaOfEffectCloud 在 1.21.11 已不存在，AreaEffectCloud 的创建移到
+    // ThrownLingeringPotion.onHitAsPotion。本 mixin 目标是 AbstractThrownPotion，注入不到子类方法，
+    // 该功能已由 ThrownLingeringPotionMixin（@Mixin(ThrownLingeringPotion.class)，注入 onHitAsPotion）承担。
+    // 下列旧实现保留作参考。
     // @Inject(method = "makeAreaOfEffectCloud", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
     // public void applyLingeringPotion(PotionContents potion, CallbackInfo ci, @Local AreaEffectCloud areaEffectCloudEntity) {
     //     AbstractThrownPotion realThis = ((AbstractThrownPotion) (Object) this);

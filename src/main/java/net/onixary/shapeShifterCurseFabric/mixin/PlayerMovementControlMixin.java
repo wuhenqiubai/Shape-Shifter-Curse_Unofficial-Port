@@ -75,11 +75,11 @@ public class PlayerMovementControlMixin implements IMoveController {
 			    .findFirst().ifPresent(attachPower -> cir.setReturnValue(0.0f));
     }
 
-    // TODO(1.21.11): Player 不再覆写 jumpFromGround —— 该方法已上移到 LivingEntity（LivingEntity.tick 的 "jump" 阶段调用）。
-    // @Mixin(Player.class) 无法再解析该注入点，需要迁移到 LivingEntity 级 mixin（如 LivingEntityJumpMixin）的
-    // LivingEntity.jumpFromGround() 注入，并在 handler 内用 instanceof Player 过滤非玩家实体。
-    // 迁移前暂时禁用：吸附状态下的跳跃脱离改由 preventTravelWhenAttached 内通过 player.isJumping() 检测；
-    // jump_event 条件与 JUMP_EVENT 包、ActionOnJumpPower 的触发在迁移前暂不可用。
+    // [已迁移，勿再当作待办] jumpFromGround 上移至 LivingEntity 后，@Mixin(Player.class) 解析不到该注入点。
+    // jump_event 条件 / JUMP_EVENT 包 / ActionOnJumpPower 的触发已迁至 LivingEntityJumpMixin
+    // （@Mixin(LivingEntity.class) 注入 LivingEntity.jumpFromGround，并在 handler 内 instanceof Player 过滤）。
+    // 吸附状态下的跳跃脱离另由 preventTravelWhenAttached 通过 player.isJumping() 检测。
+    // 下列旧实现保留作参考。
     // @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)
     // private void handleJump(CallbackInfo ci) {
     //     Player player = (Player) (Object) this;

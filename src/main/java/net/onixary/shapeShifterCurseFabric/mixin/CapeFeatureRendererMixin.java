@@ -74,7 +74,7 @@ public class CapeFeatureRendererMixin {
         }
     }
 
-    // TODO: 1.21.11 CapeLayer.submit 中无 Axis.rotationDegrees 调用，
+    // TODO(1.21.11 未迁移): CapeLayer.submit 中无 Axis.rotationDegrees 调用，
     // modifyXRotationAngle（钳制披风 X 旋转角度）逻辑暂不可用，待迁移到 PlayerCapeModel.setupAnim
 
     // helper func
