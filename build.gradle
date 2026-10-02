@@ -1,6 +1,6 @@
 plugins {
     // 版本在 settings.gradle 的 pluginManagement.plugins 里统一钉死（loom 只能有一个版本在 classpath 上）
-    id 'fabric-loom'
+    id 'net.fabricmc.fabric-loom-remap'
     id 'maven-publish'
 }
 
@@ -43,18 +43,6 @@ base {
 }
 
 loom {
-    runs {
-        client {
-            programArgs([
-                    "--username", "Dev",
-                    "--uuid", "12345678-1234-1234-1234-123456789012"
-            ])
-            runDir "run/client"
-        }
-        server {
-            runDir "run/server"
-        }
-    }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
     mixin {
         // NeoForge/Connector 兼容：legacy Mixin AP 按 mixins.json 的 refmap 字段生成 refmap，
@@ -126,6 +114,11 @@ repositories {
     }
     maven {
         url = "https://jitpack.io"
+    }
+    // PlayerAnimator（可选依赖）
+    maven {
+        name = "KosmX's maven"
+        url = "https://maven.kosmx.dev/"
     }
 
     //ModMenu
@@ -213,6 +206,9 @@ dependencies {
     modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
     // Player Animation Library
     modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
+
+    // PlayerAnimator
+    modCompileOnly "dev.kosmx.player-anim:player-animation-lib-fabric:${project.player_anim}"
 
     // Trinkets
     modCompileOnly "maven.modrinth:trinkets-updated:${project.trinkets_version}"

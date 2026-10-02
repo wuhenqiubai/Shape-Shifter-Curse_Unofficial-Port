@@ -23,7 +23,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.ITransformReason;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -149,7 +148,7 @@ public class FormUtils {
                 }
                 component.setOrigin(layer, TechnicalFormOrigin);
                 component.setOrigin(layer, origin);
-                component.sync();
+                // component.sync();
             }
         }
         applyExtraPower(player, layerData);
@@ -212,6 +211,24 @@ public class FormUtils {
         }
     }
 
+    // 这个函数性能占用比较大 不要频繁调用
+    public static void reApplyPower(Player player) {
+        PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
+        IForm form = playerFormComponent.nowForm;
+        form.applyScale(player);
+        Tuple<ResourceLocation, ResourceLocation> layerPair = form.getFormLayer();
+        applyLayer(player, layerPair);
+        form.afterApplyLayer(player);
+        playerFormComponent.nowPerkTree = form.getPerkTreeID();
+        PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
+        TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        form.onApplyPowerEnd(player);
+        AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);
+        ModComponents.ORIGIN.get(player).sync();
+        // 应该不会有人修改IForm里的数据吧 虽然理论可行 但我是反对这种写法的
+        // TransformManager.sendClientFirstPersonReset(player);
+    }
+
     public static void _loadForm(Player player, IForm form) {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm oldForm = playerFormComponent.nowForm;
@@ -242,6 +259,8 @@ public class FormUtils {
                 ShapeShifterCurseFabric.LOGGER.error("Failed to send form change notification: ", e);
             }
         }
+        ModComponents.ORIGIN.get(player).sync();
+
     }
 
     public static void _setForm(Player player, IForm form) {
@@ -332,9 +351,6 @@ public class FormUtils {
         boolean canUse = true;
         if (form instanceof IFormWithCondition iFormWithCondition) {
             canUse &= iFormWithCondition.checkCanUse(player);
-        }
-        if (form instanceof IPatronForm iPatronForm) {
-            canUse &= PatronDataSegment.isPatronFormCanUse(player, iPatronForm);
         }
         return canUse;
     }

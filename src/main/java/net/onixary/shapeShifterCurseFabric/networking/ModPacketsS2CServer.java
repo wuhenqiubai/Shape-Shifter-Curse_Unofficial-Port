@@ -348,11 +348,6 @@ public class ModPacketsS2CServer {
         BytePayload.registerS2C(ModPackets.MELT_AUTH_SUB_KEY);
         BytePayload.registerS2C(ModPackets.REQUEST_PATRON_AUTH_FILE);
         BytePayload.registerS2C(ModPackets.SET_SUPER_USER_LEVEL);
-        // 以下 4 个由服务端 send（见本类 sendPerkData / sendPerkAvailability / openFormUpgradeMenu /
-        // openSelectSubFormMenu），此前只在客户端 ModPacketsS2C#register 里注册过 ——
-        // 服务端编码时查不到 payload type，原版 CustomPayload 编码路径会抛
-        // IllegalArgumentException("Unknown payload type: ...")，即「一发就崩服」。
-        // 与 issue #21 是同一类漏注册。（这两处注册清单必须保持一致）
         BytePayload.registerS2C(ModPackets.SYNC_PERK_AVAILABILITY);
         BytePayload.registerS2C(ModPackets.SYNC_PERK_DATA);
         BytePayload.registerS2C(ModPackets.OPEN_FORM_UPGRADE_MENU);

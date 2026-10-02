@@ -8,11 +8,13 @@ import com.zigythebird.playeranimcore.animation.layered.modifier.SpeedModifier;
 import com.zigythebird.playeranimcore.easing.EasingType;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.ShortestArcFadeModifier;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
+import net.onixary.shapeShifterCurseFabric.player_animator.PlayerAnimatorCompat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,6 +35,13 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void shape_shifter_curse$init(ClientLevel level, GameProfile profile, CallbackInfo info) {
+        // PlayerAnimator 路径：把 SSCU 的层挂到 PA 的 stack 上（优先级 1），
+        // 这样第三方动作 mod 用更高优先级就能与形态动画按层混合，而不是互相覆盖。
+        if (PlayerAnimatorCompat.available()) {
+            ssc$paContainer = PlayerAnimatorCompat.createLayer((AbstractClientPlayer) (Object) this);
+            return;
+        }
+        // ↓↓↓ 以下为 PAL 路径 ↓↓↓
         controller = new PlayerAnimationController((AbstractClientPlayer) (Object) this,
                 (c, state, setter) -> null);
         PlayerAnimationAccess.getPlayerAnimManager((AbstractClientPlayer) (Object) this).addAnimLayer(1, controller);
@@ -84,6 +93,12 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
 
     @Inject(method = "tick", at = @At("TAIL"))
     void tick(CallbackInfo ci) {
+        // PlayerAnimator 路径：形态动画跑在 PA 的 stack 上，逻辑见 ssc$paTick
+        if (PlayerAnimatorCompat.available()) {
+            ssc$paTick();
+            return;
+        }
+        // ↓↓↓ 以下为 PAL 路径 ↓↓↓
         // 必须放在触发动画之前，见 ssc$ensureExtraBonesRegistered 的说明
         ssc$ensureExtraBonesRegistered();
         animToPlay = this.animSystem.getAnimation();
@@ -136,5 +151,66 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
         modified = true;
         controller.addModifierBefore(new SpeedModifier(speed));
         controller.replaceAnimationWithFade(new ShortestArcFadeModifier(fade, easing), anim, true);
+    }
+
+    // ==================================================================
+    // PlayerAnimator 路径（仅当 PlayerAnimatorCompat.available() 时启用）
+    // 播放逻辑照搬 SSCU 迁移到 PAL 之前的版本（commit 24786162^，当时是 PA 2.0.4 + 1.21.1）。
+    // ==================================================================
+
+    /**
+     * PA 侧的动画层容器（实际类型 {@code ModifierLayer<IAnimation>}）。
+     * <p>
+     * 必须声明成 {@link Object} 而不是 PA 的 {@code ModifierLayer}：字段类型会写进类文件，
+     * 有可能在类加载/验证阶段就被解析，而 PlayerAnimator 是可选依赖。
+     * 完整说明见 {@link PlayerAnimatorCompat} 的类注释「类加载安全」。
+     */
+    @Unique
+    Object ssc$paContainer = null;
+
+    /**
+     * PA 容器里当前是否已经存在 modifier。
+     * <p>
+     * 必须跨 tick 记住：PA 的 {@code ModifierLayer.removeModifier(int)} 是裸的 {@code List.remove}，
+     * <b>容器为空时会越界抛异常</b>。而首播时容器本来就是空的。
+     */
+    @Unique
+    boolean ssc$paModified = false;
+
+    /** 当前已下发给 PA 的动画 ID，作用等同于 PAL 路径的 {@code currentAnimation} 去重。 */
+    @Unique
+    ResourceLocation ssc$paCurrentAnimationID = null;
+
+    @Unique
+    private void ssc$paTick() {
+        // 与 PAL 路径一致：getAnimation() 必须每 tick 调一次，否则 NPPA（power animation）计时会出错。
+        // PA 路径不需要 ssc$ensureExtraBonesRegistered —— PA 按动画里的原始骨骼名直查，无需注册。
+        animToPlay = this.animSystem.getAnimation();
+        if (ssc$paContainer == null) {
+            return;
+        }
+        // 取 ResourceLocation 而不是 AnimationHolder#getAnimation()：后者返回的是 PAL 的 Animation 对象，
+        // PA 路径下不该碰它。animationID 由 AnimationHolder(ResourceLocation, ...) 构造时写入，
+        // 而实际参与播放的 holder 全都是走那个构造的（只有 EMPTY 哨兵不是，它本来就不播）。
+        ResourceLocation animID = animToPlay == null ? null : animToPlay.animationID;
+        if (animID == null) {
+            // 只在「从有到无」时下发一次 stop，避免每 tick 重复 setAnimation(null)
+            if (ssc$paCurrentAnimationID != null) {
+                ssc$paCurrentAnimationID = null;
+                PlayerAnimatorCompat.stop(ssc$paContainer);
+            }
+            return;
+        }
+        if (animID.equals(ssc$paCurrentAnimationID)) {
+            return;
+        }
+        ssc$paCurrentAnimationID = animID;
+        if (animToPlay.isSkipFade()) {
+            // 硬切。PAL 路径的 skipFade 分支同样不处理速度（走 triggerAnimation），此处保持一致。
+            ssc$paModified = PlayerAnimatorCompat.playImmediate(ssc$paContainer, animID, ssc$paModified);
+        } else {
+            ssc$paModified = PlayerAnimatorCompat.play(ssc$paContainer, animID,
+                    animToPlay.getSpeed(), animToPlay.getFade(), ssc$paModified);
+        }
     }
 }

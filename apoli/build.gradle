@@ -1,6 +1,6 @@
 plugins {
 	// 版本由根 settings.gradle 的 pluginManagement.plugins 统一提供
-	id 'fabric-loom'
+	id 'net.fabricmc.fabric-loom-remap'
 	id 'maven-publish'
 }
 

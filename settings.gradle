@@ -26,7 +26,7 @@ pluginManagement {
     // loom 版本在此统一钉死，各子项目只写 `id 'fabric-loom'`（不带版本）。
     // 同一个构建里 loom 只能有一个版本在 classpath 上，带版本会直接构建失败。
     plugins {
-        id 'fabric-loom' version '1.17.19'
+        id 'net.fabricmc.fabric-loom-remap' version '1.17.19'
     }
 }
 

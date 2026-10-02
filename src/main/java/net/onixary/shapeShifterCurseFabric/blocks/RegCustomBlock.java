@@ -27,19 +27,14 @@ public final class RegCustomBlock {
     // 用 ofFullCopy 而非 of()：前者会连 gravel 的掉落物/爆炸抗性等一并继承，后者只给一份空白属性。
     // （合并上游时这行被改成了 of(Blocks.GRAVEL) —— 那是个不存在的重载 —— 后又降级成 of()，属性全丢。）
     public static final Block MOONDUST_CRYSTAL_GRIT = register("moondust_crystal_grit", Block::new, BlockBehaviour.Properties.ofFullCopy(Blocks.GRAVEL).mapColor(MapColor.COLOR_PURPLE).strength(0.6f, 0.6f).sound(SoundType.GRAVEL));
-    // TODO TEMP_WEB_BRIDGE 仅在测试时有物品 发布时记得用 registerWithOutItem
     public static final Block TEMP_WEB_BRIDGE = register("temp_web_bridge", TempWebBridgeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(4.0f).randomTicks().noCollision().dynamicShape().noLootTable().isRedstoneConductor(Blocks::never).ignitedByLava().sound(SoundType.WOOL));
 
     public static final Block WEB_COMPOSTER = register("web_composter", WebComposterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion());
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", DewCoveredCobwebBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollision().noOcclusion());
 
-    // 合并 1.21.1：取「altar」改名（原 alter），但 API 保持 1.21.11 侧
-    // （register 是工厂签名、FabricBlockEntityTypeBuilder、ChunkSectionLayer.CUTOUT）
-    public static final Block Altar_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
-    public static final BlockEntityType<AltarBlockEntity> Altar_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, Altar_BLOCK).build());
+    public static final Block ALTER_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
+    public static final BlockEntityType<AltarBlockEntity> ALTER_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, ALTER_BLOCK).build(null));
 
-    // register 收的是 (path, 工厂, 属性) 三参形式（与上面几个方块一致）；BlockEntityType.Builder 在 1.21.11 已不是公开入口，
-    // 统一改用 FabricBlockEntityTypeBuilder（与 Altar 一致）。
     public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", FormAttunerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(4.0F, 10.0F).sound(SoundType.GLASS).noOcclusion());
     public static final BlockEntityType<FormAttunerBlockEntity> FORM_ATTUNER_BLOCK_ENTITY = registerBlockEntity("form_attuner_block_entity", FabricBlockEntityTypeBuilder.create(FormAttunerBlockEntity::new, FORM_ATTUNER_BLOCK).build());
 
@@ -48,7 +43,7 @@ public final class RegCustomBlock {
         BlockRenderLayerMap.putBlock(TEMP_WEB_BRIDGE, ChunkSectionLayer.CUTOUT);
         BlockRenderLayerMap.putBlock(WEB_COMPOSTER, ChunkSectionLayer.CUTOUT);
         BlockRenderLayerMap.putBlock(DEW_COVERED_COBWEB, ChunkSectionLayer.CUTOUT);
-        BlockRenderLayerMap.putBlock(Altar_BLOCK, ChunkSectionLayer.CUTOUT);
+        BlockRenderLayerMap.putBlock(ALTER_BLOCK, ChunkSectionLayer.CUTOUT);
         BlockRenderLayerMap.putBlock(FORM_ATTUNER_BLOCK, ChunkSectionLayer.CUTOUT);
     }
 

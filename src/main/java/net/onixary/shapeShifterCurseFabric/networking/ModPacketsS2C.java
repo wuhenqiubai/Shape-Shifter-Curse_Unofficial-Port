@@ -52,11 +52,6 @@ import static net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX.begi
 public class ModPacketsS2C {
 
     public static void register() {
-        // S2C payload 类型的注册清单**只有一份**，在 ModPacketsS2CServer#registerServerS2C() 里。
-        // 这里刻意不再复制一份 —— 两份清单真的漂移过：合并 1.21.1 主线带过来的 4 个 perk / 子形态包
-        // 只加在了本类的清单里，服务端那份没跟上，于是服务端一 send 就抛
-        // IllegalArgumentException("Unknown payload type: ...") 崩服（与 issue #21 同一类漏注册）。
-        // 该方法幂等，且 common 入口（ShapeShifterCurseFabric#onInitialize）已先行调用过，此处只是兜底。
         ModPacketsS2CServer.registerServerS2C();
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_CURSED_MOON_DATA), ModPacketsS2C::receiveCursedMoonData);
         ClientPlayNetworking.registerGlobalReceiver(BytePayload.id(ModPackets.SYNC_FORM_CHANGE), ModPacketsS2C::receiveFormChange);
@@ -620,8 +615,10 @@ public class ModPacketsS2C {
     }
 
     private static void receiveNewSubKey(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        FriendlyByteBuf keyBuf = new FriendlyByteBuf(Unpooled.wrappedBuffer(payload.data().readByteArray()));
-        ctx.client().execute(() -> AuthClient.loadServerKey(keyBuf));
+        // PacketByteBuf keyBuf = new PacketByteBuf(Unpooled.wrappedBuffer(buf.readByteArray()));
+        // client.execute(() -> {
+        //     AuthClient.loadServerKey(keyBuf);
+        // });
     }
 
     private static void receiveSetSuperUserLevel(BytePayload payload, ClientPlayNetworking.Context ctx) {

@@ -80,9 +80,9 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     public AltarBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(RegCustomBlock.Altar_BLOCK_ENTITY, blockPos, blockState);
+        super(RegCustomBlock.ALTER_BLOCK_ENTITY, blockPos, blockState);
         this.inventory = NonNullList.withSize(12, ItemStack.EMPTY);
-        this.matchGetter = RecipeManager.createCheck(RecipeUtils.Altar_RECIPE);
+        this.matchGetter = RecipeManager.createCheck(RecipeUtils.ALTER_RECIPE);
         this.propertyDelegate = new ContainerData() {
             public int get(int index) {
                 switch (index) {
@@ -143,6 +143,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
         return switch (slot) {
             case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> true;
+            case 9 -> false;
             case 10 -> canFuel(stack);
             case 11 -> false;
             default -> false;
@@ -298,10 +299,10 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             return false;
         }
         ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
-        if (output.isEmpty() || this.inventory.get(10).isEmpty()) {
+        if (output.isEmpty() || this.inventory.get(11).isEmpty()) {
             return true;
         }
-        ItemStack outputSlot = this.inventory.get(10);
+        ItemStack outputSlot = this.inventory.get(11);
         if (!ItemStack.isSameItemSameComponents(output, outputSlot)) {
             return false;
         }
@@ -314,9 +315,9 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     private boolean craftRecipe(RegistryAccess registryManager) {
         if (canCraftRecipe(registryManager)) {
             ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
-            ItemStack outputSlot = this.inventory.get(10);
+            ItemStack outputSlot = this.inventory.get(11);
             if (outputSlot.isEmpty()) {
-                this.inventory.set(10, output.copy());
+                this.inventory.set(11, output.copy());
             } else if (ItemStack.isSameItemSameComponents(output, outputSlot)) {
                 outputSlot.grow(output.getCount());
             } else {

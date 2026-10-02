@@ -259,6 +259,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         ManaRegistries.register();
         DefaultAccessory.init();
         AuthServer.init();
+        RegMenuType.init();
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             // 获取主世界作为默认世界
@@ -329,6 +330,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
             return InteractionResult.PASS;
         });
         */
+
+
 
         /// Debug instinct: unregister this to see instinct debug info
         //InstinctDebugHUD.register();

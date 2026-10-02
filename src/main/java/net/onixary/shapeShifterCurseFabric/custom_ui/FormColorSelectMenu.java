@@ -36,7 +36,8 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jspecify.annotations.NonNull;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.*;
 
@@ -1033,11 +1034,30 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
-        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
-        // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
-        // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在背景框内的位置由 y 参数补偿。
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        float f = (float)Math.atan((double)(mouseX / 40.0F));
+        float g = (float)Math.atan((double)(mouseY / 40.0F));
+        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
+        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
+        quaternionf.mul(quaternionf2);
+        float h = entity.yBodyRot;
+        float i = entity.getYRot();
+        float j = entity.getXRot();
+        float k = entity.yHeadRotO;
+        float l = entity.yHeadRot;
+        float m = entity.yBodyRotO;
+        entity.yBodyRot = 180.0F + f * 20.0F;
+        entity.yBodyRotO = entity.yBodyRot;
+        entity.setYRot(180.0F + f * 40.0F);
+        entity.setXRot(-g * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x, y, size, new Vector3f(), quaternionf, quaternionf2, entity);
+        entity.yBodyRot = h;
+        entity.yBodyRotO = m;
+        entity.setYRot(i);
+        entity.setXRot(j);
+        entity.yHeadRotO = k;
+        entity.yHeadRot = l;
     }
 
     private static int timer = 0;

@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Tuple;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager.RootKeyManager;
+// import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -61,6 +63,8 @@ import java.util.function.Function;
 //          给每个玩家检查内存中是否有有效认证文件Object 如果没有 触发回调中的还原
 //          检查forgive组是否有失效密钥 如果有失效 对当前存储的AuthFile进行检查 如果有AuthFile失效 触发回调中的还原
 
+
+// 赞助者子形态功能被废除了 不过感觉验证系统还有点用(比如OTA系统之类的) 先不彻底删除吧
 
 public final class AuthUtils {
     // 密钥处理部分
@@ -310,8 +314,8 @@ public final class AuthUtils {
     }
 
     static {
-        registerDataReader((type, version) -> type == 1 && version == 0, PatronDataSegment::new);
-        registerDataReader((type, version) -> type == 2 && version == 0, DebuggerDataSegment::new);
+        // registerDataReader((type, version) -> type == 1 && version == 0, PatronDataSegment::new);
+        if (!ShapeShifterCurseFabric.commonConfig.disableAllDebug) registerDataReader((type, version) -> type == 2 && version == 0, DebuggerDataSegment::new);
     }
 
     public static void init() { }

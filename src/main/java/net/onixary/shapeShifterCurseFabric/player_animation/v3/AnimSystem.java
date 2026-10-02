@@ -7,6 +7,7 @@ import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.TransformType;
 import com.zigythebird.playeranimcore.loading.UniversalAnimLoader;
 import com.zigythebird.playeranimcore.math.Vec3f;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -19,6 +20,7 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM.FSMUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController.TransformingController;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,6 +70,7 @@ public class AnimSystem {
         public Vec3 fakeVelocity = Vec3.ZERO;
         public double fallDistanceTemp;
         public double fallDistance = 0;
+        public boolean isFlying = false;
         public CompoundTag customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
 
         public AnimSystemData(Player player) {
@@ -155,6 +158,7 @@ public class AnimSystem {
         }
         this.data.fallDistance = this.data.fallDistanceTemp - nowPos.y;
         this.data.ContinueIdleStayTickCounter = FSMUtils.IsIdleStayCondition(this.player, this.data) ? this.data.ContinueIdleStayTickCounter + 1 : 0;
+        this.data.isFlying = this.player.getAbilities().flying || PlayerFormComponent.COMPONENT.get(player).isFlying;
         this.NPPA_Tick();
     }
 

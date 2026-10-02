@@ -13,7 +13,7 @@
   ],
   "contact": {
     "homepage": "",
-    "sources": "https://git.devos.one/BluSpring/apoli-legacy"
+    "sources": "https://github.com/BluSpring/apoli-legacy"
   },
 
   "license": "MIT",
@@ -51,8 +51,7 @@
       "badges": ["library"]
     },
     "lithium:options": {
-      "mixin.entity.collisions.suffocation": false,
-      "mixin.collections.attributes": false
+      "mixin.entity.collisions.suffocation": false
     }
   },
 
