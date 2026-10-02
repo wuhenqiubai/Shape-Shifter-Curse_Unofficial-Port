@@ -52,7 +52,10 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
         }
     }
 
-    @ModifyReturnValue(method = "getJumpPower", at = @At("RETURN"))
+    // ⚠ 必须带完整描述符：LivingEntity 上 getJumpPower 有无参与带参两个重载
+    // （getJumpPower() / getJumpPower(float)），只写方法名会被 IDEA 判为 ambiguous，
+    // 运行时也可能匹配到错误目标。这里要的是无参版本。
+    @ModifyReturnValue(method = "getJumpPower()F", at = @At("RETURN"))
     private float modifyJumpVelocity(float originalVelocity) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
@@ -74,7 +77,7 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 .orElse(originalVelocity);
     }
 
-    @Inject(method = "getJumpPower", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getJumpPower()F", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
         if (this.noJumpTick > 0) {
             cir.setReturnValue(0.0F);
