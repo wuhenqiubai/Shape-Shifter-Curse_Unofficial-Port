@@ -2,6 +2,7 @@
   "required": true,
   "minVersion": "0.8",
   "package": "io.github.apace100.apoli.mixin",
+  "plugin": "io.github.apace100.apoli.ApoliMixinPlugin",
   "compatibilityLevel": "JAVA_16",
   "mixins": [
     "AbstractBlockMixin",
@@ -49,16 +50,20 @@
     "ServerPlayerInteractionManagerAccessor",
     "ServerPlayerInteractionManagerMixin",
     "ServerPlayNetworkHandlerMixin",
-    "ServerWorldMixin",
     "StatusEffectInstanceMixin",
     "WeightedListEntryAccessor",
+    "integration.connector.PhantomSpawnerMixin",
+    "integration.connector.PlayerEntityMixin",
+    "integration.connector.ServerPlayerInteractionManagerMixin",
     "legacy.MobMixin",
     "legacy.NearestAttackableTargetGoalMixin",
     "legacy.TargetingConditionsMixin",
-    "legacy.apply_components.ItemStackMixin"
+    "legacy.apply_components.ItemStackMixin",
+    "powers.prevent_game_event.GameEventDispatcherMixin"
   ],
   "client": [
     "BackgroundRendererMixin",
+    "CameraMixin",
     "CapeFeatureRendererMixin",
     "ChunkRendererRegionMixin",
     "ClientAdvancementManagerAccessor",
@@ -76,15 +81,18 @@
     "InGameOverlayRendererMixin",
     "ItemStackMixinClient",
     "JumpableVehicleBarRendererMixin",
-    "LightmapTextureManagerMixin",
     "LivingEntityRendererMixin",
     "LivingEntityRenderStateInject",
     "LocatorBarRendererMixin",
     "MinecraftClientMixin",
     "PlayerEntityRendererMixin",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "powers.night_vision.LightmapRenderStateExtractorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
+  },
+  "mixinextras": {
+    "minVersion": "0.5.3"
   }
 }

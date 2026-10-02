@@ -12,7 +12,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientLoginNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
 import net.minecraft.nbt.CompoundTag;
@@ -93,7 +93,7 @@ public class ModPacketsS2C {
 
     @Environment(EnvType.CLIENT)
     private static CompletableFuture<FriendlyByteBuf> handleHandshake(Minecraft client, ClientHandshakePacketListenerImpl handler, FriendlyByteBuf receivedBuf, Consumer<ChannelFutureListener> callbacksConsumer) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(Apoli.SEMVER.length);
         for(int i = 0; i < Apoli.SEMVER.length; i++) {
             buf.writeInt(Apoli.SEMVER[i]);
@@ -165,8 +165,8 @@ public class ModPacketsS2C {
             PowerType<?> powerType = PowerTypeRegistry.get(powerId);
             PowerHolderComponent.KEY.maybeGet(entity).ifPresentOrElse(phc -> {
                 Power power = phc.getPower(powerType);
-                // [移植 3a8e22a] 单机（integrated server）或客户端实体未挂载该 power 时，phc.getPower 可能返回 null。
-                // 防御：跳过而非 NPE 刷屏（等下次真实挂载后再同步）。
+                // 1.21.1 侧同款修复（提交 3a8e22a）：单机（integrated server）或客户端实体尚未挂载该 power 时，
+                // phc.getPower 会返回 null。防御：跳过而非 NPE 刷屏（等下次真实挂载后再同步）。
                 if (power == null) {
                     Apoli.LOGGER.warn("Received sync packet for power type not held by entity: " + powerId);
                     return;

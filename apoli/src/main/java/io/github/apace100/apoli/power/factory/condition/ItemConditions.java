@@ -194,7 +194,7 @@ public class ItemConditions {
                     var value = entry.getValue();
 
                     var stackValue = stack.get(type);
-                    if (stackValue != null && value.isPresent() && stackValue != value.orElseThrow())
+                    if (stackValue != null && value.isPresent() && !stackValue.equals(value.orElseThrow()))
                         return false;
 
                     if (stackValue == null && value.isPresent())

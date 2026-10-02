@@ -1,6 +1,6 @@
 plugins {
     // 版本在 settings.gradle 的 pluginManagement.plugins 里统一钉死（loom 只能有一个版本在 classpath 上）
-    id 'net.fabricmc.fabric-loom-remap'
+    id 'net.fabricmc.fabric-loom'
     id 'maven-publish'
 }
 
@@ -157,14 +157,13 @@ dependencies {
     implementation "com.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
 
     // Apoli-Legacy（本仓库子项目，源码已并入；Calio 由它自己传递进来）
-    // ⚠ 同级 loom 项目必须用 `configuration: "namedElements"`（未 remap 的 dev 产物），
-    //   用 `modApi project(":apoli")` 会让 loom 去读 :apoli 的 remap 产物 build/libs/*.jar，
-    //   而那个文件在配置期还不存在 → "Failed to setup Minecraft ... NoSuchFileException"。
-    //   用 api（而非 modApi）也是为了让它以 compile 作用域进发布元数据，Addon 才能只声明 SSCU 传递拿到 Apoli。
-    api project(path: ":apoli", configuration: "namedElements")
+    // 26.1 起用 net.fabricmc.fabric-loom（不 remap），同级项目直接 project(":apoli") 即可，
+    // 不再需要 remap 时代的 `configuration: "namedElements"`。
+    //   用 api（而非 modApi）是为了让它以 compile 作用域进发布元数据，Addon 才能只声明 SSCU 传递拿到 Apoli。
+    api project(":apoli")
     include project(":apoli")
 
-    modImplementation "maven.modrinth:pehkui-rebuilt:${project.pehkui_version}-fabric"
+    implementation "maven.modrinth:pehkui-rebuilt:${project.pehkui_version}-fabric"
 
     implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
     include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"

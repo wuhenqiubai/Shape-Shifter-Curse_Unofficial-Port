@@ -17,7 +17,7 @@ public class HolderAction {
         if(worldAndStack.getB().isEmpty()) {
             return;
         }
-        Entity holder = ((EntityLinkedItemStack)worldAndStack.getB()).getEntity();
+        Entity holder = ((EntityLinkedItemStack)worldAndStack.getB()).apoli$getEntity();
         if(holder == null) {
             return;
         }

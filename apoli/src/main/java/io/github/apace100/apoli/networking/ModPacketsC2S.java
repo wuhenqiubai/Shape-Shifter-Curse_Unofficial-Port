@@ -100,6 +100,6 @@ public class ModPacketsC2S {
     }
 
     private static void handshake(ServerLoginPacketListenerImpl serverLoginNetworkHandler, MinecraftServer minecraftServer, LoginPacketSender packetSender, ServerLoginNetworking.LoginSynchronizer loginSynchronizer) {
-        packetSender.sendPacket(ModPackets.HANDSHAKE, PacketByteBufs.empty());
+        packetSender.sendPacket(ModPackets.HANDSHAKE, FriendlyByteBufs.empty());
     }
 }

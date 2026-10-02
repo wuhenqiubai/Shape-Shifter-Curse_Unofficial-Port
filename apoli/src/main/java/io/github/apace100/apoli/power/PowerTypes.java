@@ -9,11 +9,12 @@ import io.github.apace100.apoli.util.ApoliResourceConditions;
 import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.MultiJsonDataLoader;
 import io.github.apace100.calio.data.SerializableData;
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -23,9 +24,11 @@ import java.util.*;
 import java.util.function.BiFunction;
 
 @SuppressWarnings("rawtypes")
-public class PowerTypes extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
+public class PowerTypes extends MultiJsonDataLoader implements PreparableReloadListener {
 
-    public static final Set<Identifier> DEPENDENCIES = new HashSet<>();
+    public static final Set<Identifier> DEPENDENCIES = new HashSet<>(
+
+    );
     public static final Set<String> LOADED_NAMESPACES = new HashSet<>();
 
     private static final Identifier MULTIPLE = Apoli.identifier("multiple");
@@ -37,11 +40,17 @@ public class PowerTypes extends MultiJsonDataLoader implements IdentifiableResou
 
     private static final HashMap<String, AdditionalPowerDataCallback> ADDITIONAL_DATA = new HashMap<>();
 
-    private final HolderLookup.Provider provider;
+    private HolderLookup.Provider provider;
 
-    public PowerTypes(HolderLookup.Provider provider) {
+    public PowerTypes() {
         super(GSON, "powers");
-        this.provider = provider;
+    }
+
+    @Override
+    public void prepareSharedState(SharedState currentReload) {
+        super.prepareSharedState(currentReload);
+
+        this.provider = currentReload.get(ResourceLoader.REGISTRY_LOOKUP_KEY);
     }
 
     @Override
@@ -201,11 +210,6 @@ public class PowerTypes extends MultiJsonDataLoader implements IdentifiableResou
         });
     }
 
-    @Override
-    public Identifier getFabricId() {
-        return Identifier.fromNamespaceAndPath(Apoli.MODID, "powers");
-    }
-
     public static void registerAdditionalData(String data, AdditionalPowerDataCallback callback) {
         if(ADDITIONAL_DATA.containsKey(data)) {
             Apoli.LOGGER.error("Apoli already contains a callback for additional data for the field \"" + data + "\".");
@@ -220,10 +224,5 @@ public class PowerTypes extends MultiJsonDataLoader implements IdentifiableResou
             return Integer.MIN_VALUE;
         }
         return LOADING_PRIORITIES.get(powerId);
-    }
-
-    @Override
-    public Collection<Identifier> getFabricDependencies() {
-        return DEPENDENCIES;
     }
 }

@@ -9,7 +9,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 
 import java.util.Optional;
 
@@ -25,7 +24,6 @@ public class PowerLootCondition implements LootItemCondition {
         )
             .apply(instance, PowerLootCondition::new)
     );
-    public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
     private final Identifier powerId;
     private final Identifier powerSourceId;
 
@@ -34,8 +32,9 @@ public class PowerLootCondition implements LootItemCondition {
         this.powerSourceId = powerSourceId;
     }
 
-    public LootItemConditionType getType() {
-        return TYPE;
+    @Override
+    public MapCodec<? extends LootItemCondition> codec() {
+        return CODEC;
     }
 
     public boolean test(LootContext lootContext) {

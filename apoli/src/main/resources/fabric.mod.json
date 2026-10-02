@@ -13,7 +13,7 @@
   ],
   "contact": {
     "homepage": "",
-    "sources": "https://github.com/BluSpring/apoli-legacy"
+    "sources": "https://git.devos.one/BluSpring/apoli-legacy"
   },
 
   "license": "MIT",
@@ -51,17 +51,18 @@
       "badges": ["library"]
     },
     "lithium:options": {
-      "mixin.entity.collisions.suffocation": false
+      "mixin.entity.collisions.suffocation": false,
+      "mixin.collections.attributes": false
     }
   },
 
   "accessWidener": "apoli.accesswidener",
 
   "depends": {
-    "java": ">=21",
-    "fabricloader": ">=0.16.7",
+    "java": ">=25",
+    "fabricloader": ">=0.14.0",
     "fabric-api": ">=0.124.0",
-    "minecraft": ">=1.21.5",
+    "minecraft": "~26.1",
     "calio-legacy": "*"
   }
 }

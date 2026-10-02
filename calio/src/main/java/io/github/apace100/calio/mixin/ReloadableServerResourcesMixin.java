@@ -25,9 +25,9 @@ public abstract class ReloadableServerResourcesMixin {
     @Unique private final List<IdentifiableResourceReloadListener> calio$registryListeners = new ArrayList<>();
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void calio$initRegistryBasedListeners(LayeredRegistryAccess layeredRegistryAccess, HolderLookup.Provider registries, FeatureFlagSet featureFlagSet, Commands.CommandSelection commandSelection, List list, PermissionSet permissionSet, CallbackInfo ci) {
+    private void calio$initRegistryBasedListeners(LayeredRegistryAccess fullLayers, HolderLookup.Provider loadingContext, FeatureFlagSet enabledFeatures, Commands.CommandSelection commandSelection, List postponedTags, PermissionSet functionCompilationPermissions, List newComponents, CallbackInfo ci) {
         for (Function<HolderLookup.Provider, IdentifiableResourceReloadListener> provider : OrderedResourceListenerManager.getRegistryBasedReloadListenerProviders()) {
-            calio$registryListeners.add(provider.apply(registries));
+            calio$registryListeners.add(provider.apply(loadingContext));
         }
     }
 

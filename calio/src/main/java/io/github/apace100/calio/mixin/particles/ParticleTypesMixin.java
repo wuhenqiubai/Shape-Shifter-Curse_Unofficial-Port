@@ -12,7 +12,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.particles.*;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.ARGB;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.gameevent.BlockPositionSource;
 import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,7 +65,7 @@ public class ParticleTypesMixin {
             case "item" -> factory.calio$addLegacyParticleOptionFactory(data -> {
                 try {
                     var stack = new ItemParser(RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY)).parse(new StringReader(data));
-                    return new ItemParticleOption((ParticleType<ItemParticleOption>) original, new ItemStack(stack.item(), 1, stack.components()));
+                    return new ItemParticleOption((ParticleType<ItemParticleOption>) original, new ItemStackTemplate(stack.item(), 1, stack.components()));
                 } catch (CommandSyntaxException e) {
                     throw new RuntimeException(e);
                 }

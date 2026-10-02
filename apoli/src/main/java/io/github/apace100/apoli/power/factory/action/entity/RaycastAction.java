@@ -105,8 +105,9 @@ public class RaycastAction {
             Vec3 direction = target.subtract(origin).normalize();
             double length = origin.distanceTo(target);
             for(double current = 0; current < length; current += step) {
+                boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
                 CommandSourceStack source = new CommandSourceStack(
-                    entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
+                    Apoli.config.executeCommand.showOutput && validOutput ? entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL : CommandSource.NULL,
                     origin.add(direction.scale(current)),
                     entity.getRotationVector(),
                     entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
@@ -115,17 +116,7 @@ public class RaycastAction {
                     entity.getDisplayName(),
                     entity.level().getServer(),
                     entity);
-                if(!Apoli.config.executeCommand.showOutput) {
-                    source = source.withSuppressedOutput();
-                }
-                String execCommand = command.trim();
-                if(execCommand.startsWith("/")) {
-                    execCommand = execCommand.substring(1);
-                }
-                try {
-                    server.getCommands().getDispatcher().execute(execCommand, source);
-                } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-                }
+                server.getCommands().performPrefixedCommand(source, command);
             }
         }
     }
@@ -133,8 +124,9 @@ public class RaycastAction {
     private static void executeCommandAtHit(Entity entity, Vec3 hitPosition, String command) {
         MinecraftServer server = entity.level().getServer();
         if(server != null) {
+            boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
             CommandSourceStack source = new CommandSourceStack(
-                entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
+                Apoli.config.executeCommand.showOutput && validOutput ? entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL : CommandSource.NULL,
                 hitPosition,
                 entity.getRotationVector(),
                 entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
@@ -143,17 +135,7 @@ public class RaycastAction {
                 entity.getDisplayName(),
                 entity.level().getServer(),
                 entity);
-            if(!Apoli.config.executeCommand.showOutput) {
-                source = source.withSuppressedOutput();
-            }
-            String execCommand = command.trim();
-            if(execCommand.startsWith("/")) {
-                execCommand = execCommand.substring(1);
-            }
-            try {
-                server.getCommands().getDispatcher().execute(execCommand, source);
-            } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-            }
+            server.getCommands().performPrefixedCommand(source, command);
         }
     }
 

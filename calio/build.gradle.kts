@@ -1,6 +1,6 @@
 plugins {
 	// 版本由根 settings.gradle 的 pluginManagement.plugins 统一提供
-	id("net.fabricmc.fabric-loom-remap")
+	id("net.fabricmc.fabric-loom")
 	`maven-publish`
 }
 
@@ -21,12 +21,13 @@ repositories {
 
 dependencies {
 	// To change the versions see the gradle.properties file
+	// 26.1 无混淆：改用 net.fabricmc.fabric-loom（不 remap），不再声明 mappings，
+	// modImplementation 一并退化为标准的 implementation。
 	minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
-	mappings(loom.officialMojangMappings())
-	modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
+	implementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
+	implementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_version")}")
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
@@ -44,10 +45,10 @@ tasks.withType<JavaCompile>().configureEach {
 	options.encoding = "UTF-8"
 
 	// Minecraft 1.17 (21w19a) upwards uses Java 16.
-	options.release = 21
+	options.release = 25
 }
 
-val targetJavaVersion = "21"
+val targetJavaVersion = "25"
 
 java {
 	val javaVersion = JavaVersion.toVersion(targetJavaVersion)

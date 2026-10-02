@@ -6,6 +6,7 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -24,7 +25,7 @@ public class PreventBeingUsedPower extends InteractionPower {
     private final Consumer<Tuple<Entity, Entity>> biEntityAction;
     private final Predicate<Tuple<Entity, Entity>> bientityCondition;
 
-    public PreventBeingUsedPower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Tuple<Level, ItemStack>> heldItemAction, ItemStack itemResult, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Entity, Entity>> biEntityAction, Predicate<Tuple<Entity, Entity>> bientityCondition) {
+    public PreventBeingUsedPower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Tuple<Level, ItemStack>> heldItemAction, LazyItemStack itemResult, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Entity, Entity>> biEntityAction, Predicate<Tuple<Entity, Entity>> bientityCondition) {
         super(type, entity, hands, actionResult, itemCondition, heldItemAction, itemResult, itemAction);
         this.biEntityAction = biEntityAction;
         this.bientityCondition = bientityCondition;
@@ -62,7 +63,7 @@ public class PreventBeingUsedPower extends InteractionPower {
                         InteractionResult.FAIL,
                         (Predicate<ItemStack>)data.get("item_condition"),
                         (Consumer<Tuple<Level, ItemStack>>)data.get("held_item_action"),
-                        (ItemStack)data.get("result_stack"),
+                        (LazyItemStack)data.get("result_stack"),
                         (Consumer<Tuple<Level, ItemStack>>)data.get("result_item_action"),
                         (Consumer<Tuple<Entity, Entity>>) data.get("bientity_action"),
                         (ConditionFactory<Tuple<Entity, Entity>>.Instance)data.get("bientity_condition"));

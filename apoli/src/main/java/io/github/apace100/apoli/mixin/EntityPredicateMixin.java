@@ -7,6 +7,7 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.SetEntityGroupPower;
 import net.minecraft.advancements.criterion.EntityPredicate;
 import net.minecraft.advancements.criterion.EntityTypePredicate;
+import net.minecraft.core.Holder;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -19,9 +20,9 @@ import java.util.List;
 @Mixin(EntityPredicate.class)
 public abstract class EntityPredicateMixin {
     // SetEntityGroupPower
-    @WrapOperation(method = "matches(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/EntityTypePredicate;matches(Lnet/minecraft/world/entity/EntityType;)Z"))
-    private boolean checkMatchesEntityGroup(EntityTypePredicate instance, EntityType<?> entityType, Operation<Boolean> original, @Local(argsOnly = true) Entity entity) {
-        var value = original.call(instance, entityType);
+    @WrapOperation(method = "matches(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/EntityTypePredicate;matches(Lnet/minecraft/core/Holder;)Z"))
+    private boolean checkMatchesEntityGroup(EntityTypePredicate instance, Holder<EntityType<?>> type, Operation<Boolean> original, @Local(argsOnly = true, name = "entity") Entity entity) {
+        var value = original.call(instance, type);
         var entityTypeTag = instance.types().unwrapKey().orElse(null);
 
         if (entityTypeTag == null) {

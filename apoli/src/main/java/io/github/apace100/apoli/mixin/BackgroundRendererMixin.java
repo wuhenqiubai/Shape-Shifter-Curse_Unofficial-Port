@@ -35,15 +35,16 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 public abstract class BackgroundRendererMixin {
 
-    @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hasEffect(Lnet/minecraft/core/Holder;)Z", ordinal = 0), method = "computeFogColor")
+    @WrapOperation(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;hasEffect(Lnet/minecraft/core/Holder;)Z"), method = "computeFogColor")
     private static boolean hasStatusEffectProxy(LivingEntity instance, Holder<MobEffect> effect, Operation<Boolean> original) {
-        if(instance instanceof Player player && effect == MobEffects.NIGHT_VISION && !player.hasEffect(MobEffects.NIGHT_VISION)) {
+        var value = original.call(instance, effect);
+        if(!value && instance instanceof Player player && effect.is(MobEffects.NIGHT_VISION) && !player.hasEffect(MobEffects.NIGHT_VISION)) {
             return PowerHolderComponent.KEY.get(player).getPowers(NightVisionPower.class).stream().anyMatch(NightVisionPower::isActive);
         }
-        return original.call(instance, effect);
+        return value;
     }
 
-    @ModifyExpressionValue(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/FogRenderer;getFogType(Lnet/minecraft/client/Camera;)Lnet/minecraft/world/level/material/FogType;", ordinal = 0))
+    @ModifyExpressionValue(method = "getFogType", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;getFluidInCamera()Lnet/minecraft/world/level/material/FogType;", ordinal = 0))
     private static FogType modifyCameraSubmersionTypeRender(FogType original, @Local(argsOnly = true) Camera camera) {
         if(camera.entity() instanceof LivingEntity) {
             for(ModifyCameraSubmersionTypePower p : PowerHolderComponent.getPowers(camera.entity(), ModifyCameraSubmersionTypePower.class)) {
@@ -79,7 +80,7 @@ public abstract class BackgroundRendererMixin {
         return original;
     }
 
-    @Inject(method = "setupFog", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/GpuDevice;createCommandEncoder()Lcom/mojang/blaze3d/systems/CommandEncoder;", shift = At.Shift.BEFORE))
+    @Inject(method = "setupFog", at = @At("TAIL"))
     private static void modifyFogData(Camera camera, int i, DeltaTracker deltaTracker, float f, ClientLevel clientLevel, CallbackInfoReturnable<Vector4f> cir, @Local FogData fogData, @Local FogType fogType) {
         if(camera.entity() instanceof LivingEntity) {
             List<PhasingPower> phasings = PowerHolderComponent.getPowers(camera.entity(), PhasingPower.class);

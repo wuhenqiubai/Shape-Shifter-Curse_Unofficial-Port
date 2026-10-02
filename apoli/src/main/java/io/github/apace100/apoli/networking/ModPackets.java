@@ -25,14 +25,14 @@ public class ModPackets {
     public static final CustomPacketPayload.Type<SyncStatusEffectPacket> SYNC_STATUS_EFFECT = new CustomPacketPayload.Type<>(Apoli.identifier("sync_status_effect")); // S -> C
 
     public static void init() {
-        PayloadTypeRegistry.playC2S().register(USE_ACTIVE_POWERS, UseActivePowersPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(POWER_LIST, PowerListPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(SYNC_POWER, SyncPowerPacket.CODEC);
-        PayloadTypeRegistry.playC2S().register(PLAYER_LANDED, PlayerLandedPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(PLAYER_MOUNT, PlayerMountPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(PLAYER_DISMOUNT, PlayerDismountPacket.CODEC);
-        PayloadTypeRegistry.playC2S().register(PREVENTED_ENTITY_USE, PreventedEntityUsePacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(SET_ATTACKER, SetAttackerPacket.CODEC);
-        PayloadTypeRegistry.playS2C().register(SYNC_STATUS_EFFECT, SyncStatusEffectPacket.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(USE_ACTIVE_POWERS, UseActivePowersPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(POWER_LIST, PowerListPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SYNC_POWER, SyncPowerPacket.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PLAYER_LANDED, PlayerLandedPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PLAYER_MOUNT, PlayerMountPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(PLAYER_DISMOUNT, PlayerDismountPacket.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(PREVENTED_ENTITY_USE, PreventedEntityUsePacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SET_ATTACKER, SetAttackerPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SYNC_STATUS_EFFECT, SyncStatusEffectPacket.CODEC);
     }
 }

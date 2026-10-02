@@ -38,6 +38,10 @@ public class OverlayableDataComponentMap implements DataComponentMap {
         return this.overlays.contains(patch) || this.replacements.contains(patch);
     }
 
+    public boolean hasOverlays() {
+        return !this.overlays.isEmpty() || !this.replacements.isEmpty();
+    }
+
     public void clearOverlays() {
         this.overlays.clear();
     }
@@ -61,16 +65,16 @@ public class OverlayableDataComponentMap implements DataComponentMap {
     @Override
     public @Nullable <T> T get(DataComponentType<? extends T> type) {
         for (DataComponentPatch overlay : this.replacements) {
-            var component = overlay.get(type);
-            if (component != null && component.isPresent())
-                return component.orElseThrow();
+            var component = overlay.get(this.original, type);
+            if (component != null)
+                return component;
         }
 
         if (!this.original.has(type)) {
             for (DataComponentPatch overlay : this.overlays) {
-                var component = overlay.get(type);
-                if (component != null && component.isPresent())
-                    return component.orElseThrow();
+                var component = overlay.get(this.original, type);
+                if (component != null)
+                    return component;
             }
         }
 

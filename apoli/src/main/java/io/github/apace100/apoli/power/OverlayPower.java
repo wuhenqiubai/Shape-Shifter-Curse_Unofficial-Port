@@ -12,7 +12,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
@@ -69,7 +69,7 @@ public class OverlayPower extends Power {
     }
 
     @Environment(EnvType.CLIENT)
-    public void render(GuiGraphics guiGraphics) {
+    public void render(GuiGraphicsExtractor guiGraphics) {
         Minecraft client = Minecraft.getInstance();
         int i = client.getWindow().getGuiScaledWidth();
         int j = client.getWindow().getGuiScaledHeight();

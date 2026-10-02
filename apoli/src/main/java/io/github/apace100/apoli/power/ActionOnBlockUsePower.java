@@ -5,6 +5,7 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Tuple;
@@ -29,7 +30,7 @@ public class ActionOnBlockUsePower extends ActiveInteractionPower {
     private final EnumSet<Direction> directions;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
-    public ActionOnBlockUsePower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Tuple<Level, ItemStack>> heldItemAction, ItemStack itemResult, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, Predicate<BlockInWorld> blockCondition, EnumSet<Direction> directions, Consumer<Triple<Level, BlockPos, Direction>> blockAction, int priority) {
+    public ActionOnBlockUsePower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Tuple<Level, ItemStack>> heldItemAction, LazyItemStack itemResult, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, Predicate<BlockInWorld> blockCondition, EnumSet<Direction> directions, Consumer<Triple<Level, BlockPos, Direction>> blockAction, int priority) {
         super(type, entity, hands, actionResult, itemCondition, heldItemAction, itemResult, resultItemAction, priority);
         this.entityAction = entityAction;
         this.blockCondition = blockCondition;

@@ -6,6 +6,7 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -20,7 +21,7 @@ import java.util.function.Predicate;
 public class ModifyFoodPower extends Power {
 
     private final Predicate<ItemStack> applicableFood;
-    private final ItemStack replaceStack;
+    private final LazyItemStack replaceStack;
     private final Consumer<Tuple<Level, ItemStack>> consumableAction;
     private final List<Modifier> foodModifiers;
     private final List<Modifier> saturationModifiers;
@@ -28,7 +29,7 @@ public class ModifyFoodPower extends Power {
     private final boolean preventFoodEffects;
     private final boolean makeAlwaysEdible;
 
-    public ModifyFoodPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> applicableFood, ItemStack replaceStack, Consumer<Tuple<Level, ItemStack>> consumableAction, Modifier foodModifier, List<Modifier> foodModifiers, Modifier saturationModifier, List<Modifier> saturationModifiers, Consumer<Entity> entityActionWhenEaten, boolean makeAlwaysEdible, boolean preventFoodEffects) {
+    public ModifyFoodPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> applicableFood, LazyItemStack replaceStack, Consumer<Tuple<Level, ItemStack>> consumableAction, Modifier foodModifier, List<Modifier> foodModifiers, Modifier saturationModifier, List<Modifier> saturationModifiers, Consumer<Entity> entityActionWhenEaten, boolean makeAlwaysEdible, boolean preventFoodEffects) {
 
         super(type, entity);
 
@@ -56,7 +57,7 @@ public class ModifyFoodPower extends Power {
 
     public ItemStack getConsumedItemStack(ItemStack stack) {
 
-        if(replaceStack != null) stack = replaceStack;
+        if(replaceStack != null) stack = replaceStack.getStack();
         ItemStack consumed = stack.copy();
 
         if(consumableAction != null) consumableAction.accept(new Tuple<>(entity.level(), consumed));

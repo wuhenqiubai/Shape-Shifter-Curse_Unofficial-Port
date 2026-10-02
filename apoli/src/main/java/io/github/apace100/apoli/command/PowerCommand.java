@@ -113,14 +113,14 @@ public class PowerCommand {
 				else source.sendSuccess(() -> Component.translatable("commands.apoli.grant.success.multiple", processedLivingTargets.size(), powerType.getName()), true);
 			}
 			else {
-				if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.grant_from_source.success.single", processedLivingTargets.getFirst().getDisplayName(), powerType.getName(), powerSource), true);
-				else source.sendSuccess(() -> Component.translatable("commands.apoli.grant_from_source.success.multiple", processedLivingTargets.size(), powerType.getName(), powerSource), true);
+				if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.grant_from_source.success.single", processedLivingTargets.getFirst().getDisplayName(), powerType.getName(), Component.translationArg(powerSource)), true);
+				else source.sendSuccess(() -> Component.translatable("commands.apoli.grant_from_source.success.multiple", processedLivingTargets.size(), powerType.getName(), Component.translationArg(powerSource)), true);
 			}
 		}
 
 		else if (!livingTargets.isEmpty()) {
-			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.grant.fail.single", livingTargets.getFirst().getDisplayName(), powerType.getName(), powerSource));
-			else source.sendFailure(Component.translatable("commands.apoli.grant.fail.multiple", livingTargets.size(), powerType.getName(), powerSource));
+			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.grant.fail.single", livingTargets.getFirst().getDisplayName(), powerType.getName(), Component.translationArg(powerSource)));
+			else source.sendFailure(Component.translatable("commands.apoli.grant.fail.multiple", livingTargets.size(), powerType.getName(), Component.translationArg(powerSource)));
 		}
 
 		else if (!nonLivingTargets.isEmpty()) {
@@ -167,19 +167,19 @@ public class PowerCommand {
 				else source.sendSuccess(() -> Component.translatable("commands.apoli.revoke.success.multiple", processedLivingTargets.size(), powerType.getName()), true);
 			}
 			else {
-				if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_from_source.success.single", processedLivingTargets.getFirst().getDisplayName(), powerType.getName(), powerSource), true);
+				if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_from_source.success.single", processedLivingTargets.getFirst().getDisplayName(), powerType.getName(), Component.translationArg(powerSource)), true);
 				else source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_from_source.success.multiple", processedLivingTargets.size(), powerType.getName(), powerSource), true);
 			}
 		}
 
 		else if (!livingTargets.isEmpty()) {
-			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke.fail.single", livingTargets.getFirst().getDisplayName(), powerType.getName(), powerSource));
-			else source.sendFailure(Component.translatable("commands.apoli.revoke.fail.multiple", powerType.getName(), powerSource));
+			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke.fail.single", livingTargets.getFirst().getDisplayName(), powerType.getName(), Component.translationArg(powerSource)));
+			else source.sendFailure(Component.translatable("commands.apoli.revoke.fail.multiple", powerType.getName(), Component.translationArg(powerSource)));
 		}
 
 		else if (!nonLivingTargets.isEmpty()) {
-			if (nonLivingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke.invalid_entity", nonLivingTargets.getFirst().getDisplayName(), powerSource));
-			else source.sendFailure(Component.translatable("commands.apoli.revoke.invalid_entities", nonLivingTargets.size(), powerSource));
+			if (nonLivingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke.invalid_entity", nonLivingTargets.getFirst().getDisplayName(), Component.translationArg(powerSource)));
+			else source.sendFailure(Component.translatable("commands.apoli.revoke.invalid_entities", nonLivingTargets.size(), Component.translationArg(powerSource)));
 		}
 
 		return processedLivingTargets.size();
@@ -217,18 +217,18 @@ public class PowerCommand {
 
 		if (!processedLivingTargets.isEmpty()) {
 			final int currentRevokedPowers = revokedPowers;
-			if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_all.success.single", processedLivingTargets.getFirst().getDisplayName(), currentRevokedPowers, powerSource), true);
-			else source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_all.success.multiple", processedLivingTargets.size(), currentRevokedPowers, powerSource), true);
+			if (processedLivingTargets.size() == 1) source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_all.success.single", processedLivingTargets.getFirst().getDisplayName(), currentRevokedPowers, Component.translationArg(powerSource)), true);
+			else source.sendSuccess(() -> Component.translatable("commands.apoli.revoke_all.success.multiple", processedLivingTargets.size(), currentRevokedPowers, Component.translationArg(powerSource)), true);
 		}
 
 		else if (!livingTargets.isEmpty()) {
-			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke_all.fail.single", livingTargets.getFirst().getDisplayName(), powerSource));
-			else source.sendFailure(Component.translatable("commands.apoli.revoke_all.fail.multiple", powerSource));
+			if (livingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke_all.fail.single", livingTargets.getFirst().getDisplayName(), Component.translationArg(powerSource)));
+			else source.sendFailure(Component.translatable("commands.apoli.revoke_all.fail.multiple", Component.translationArg(powerSource)));
 		}
 
 		else if (!nonLivingTargets.isEmpty()) {
-			if (nonLivingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke_all.invalid_entity", nonLivingTargets.getFirst().getDisplayName(), powerSource));
-			else source.sendFailure(Component.translatable("commands.apoli.revoke_all.invalid_entities", nonLivingTargets.size(), powerSource));
+			if (nonLivingTargets.size() == 1) source.sendFailure(Component.translatable("commands.apoli.revoke_all.invalid_entity", nonLivingTargets.getFirst().getDisplayName(), Component.translationArg(powerSource)));
+			else source.sendFailure(Component.translatable("commands.apoli.revoke_all.invalid_entities", nonLivingTargets.size(), Component.translationArg(powerSource)));
 		}
 
 		return processedLivingTargets.size();

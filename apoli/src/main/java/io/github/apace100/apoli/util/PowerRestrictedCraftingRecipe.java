@@ -1,19 +1,23 @@
 package io.github.apace100.apoli.util;
 
 import com.google.common.collect.Lists;
+import com.mojang.serialization.MapCodec;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.mixin.CraftingInventoryAccessor;
 import io.github.apace100.apoli.mixin.CraftingScreenHandlerAccessor;
 import io.github.apace100.apoli.mixin.PlayerScreenHandlerAccessor;
 import io.github.apace100.apoli.power.RecipePower;
-import net.minecraft.core.HolderLookup;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.*;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
 
 import java.util.List;
@@ -21,12 +25,10 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class PowerRestrictedCraftingRecipe extends CustomRecipe {
+    public static final PowerRestrictedCraftingRecipe INSTANCE = new PowerRestrictedCraftingRecipe();
+    public static final RecipeSerializer<PowerRestrictedCraftingRecipe> SERIALIZER = new RecipeSerializer<>(MapCodec.unit(INSTANCE), StreamCodec.unit(INSTANCE));
 
-    public static final RecipeSerializer<? extends CustomRecipe> SERIALIZER = new CustomRecipe.Serializer<>(PowerRestrictedCraftingRecipe::new);
-
-    public PowerRestrictedCraftingRecipe(CraftingBookCategory category) {
-        super(category);
-    }
+    private PowerRestrictedCraftingRecipe() {}
 
     @Override
     public boolean matches(CraftingInput input, Level world) {
@@ -40,7 +42,7 @@ public class PowerRestrictedCraftingRecipe extends CustomRecipe {
     }
 
     @Override
-    public ItemStack assemble(CraftingInput input, HolderLookup.Provider registryManager) {
+    public ItemStack assemble(CraftingInput input) {
         var inventory = ((CraftingInputContainerHolder) input).apoli$getCraftingContainer();
         if (inventory instanceof TransientCraftingContainer craftingInventory)
         {
@@ -51,7 +53,7 @@ public class PowerRestrictedCraftingRecipe extends CustomRecipe {
                 if (optional.isPresent())
                 {
                     Recipe<CraftingInput> recipe = optional.get();
-                    return recipe.assemble(input, registryManager);
+                    return recipe.assemble(input);
                 }
             }
         }

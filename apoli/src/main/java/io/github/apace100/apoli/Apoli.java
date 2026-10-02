@@ -28,6 +28,8 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
+import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -95,10 +97,10 @@ public class Apoli implements ModInitializer, EntityComponentInitializer, Ordere
 		Registry.register(BuiltInRegistries.RECIPE_SERIALIZER, Apoli.identifier("modified"), ModifiedCraftingRecipe.SERIALIZER);
 		Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Apoli.identifier("stack_powers"), StackPowerComponent.TYPE);
 
-		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Apoli.identifier("add_power"), AddPowerLootFunction.TYPE);
-		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Apoli.identifier("remove_power"), RemovePowerLootFunction.TYPE);
+		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Apoli.identifier("add_power"), AddPowerLootFunction.CODEC);
+		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Apoli.identifier("remove_power"), RemovePowerLootFunction.CODEC);
 
-		Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Apoli.identifier("power"), PowerLootCondition.TYPE);
+		Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Apoli.identifier("power"), PowerLootCondition.CODEC);
 
 		ApoliClassData.registerAll();
 
@@ -160,6 +162,10 @@ public class Apoli implements ModInitializer, EntityComponentInitializer, Ordere
 			var id = attribute.unwrapKey().orElseThrow().identifier();
 			BuiltInRegistries.ATTRIBUTE.addAlias(id.withPrefix("player."), id);
 		}
+
+		ResourceLoader loader = ResourceLoader.get(PackType.SERVER_DATA);
+		loader.registerReloadListener(identifier("powers"), new PowerTypes());
+		loader.addListenerOrdering(ResourceReloaderKeys.AFTER_VANILLA, identifier("powers"));
 	}
 
 	public static Identifier identifier(String path) {
@@ -180,6 +186,5 @@ public class Apoli implements ModInitializer, EntityComponentInitializer, Ordere
 
 	@Override
 	public void registerResourceListeners(OrderedResourceListenerManager manager) {
-		manager.registerWithRegistries(identifier("powers"), PowerTypes::new).complete();
 	}
 }

@@ -50,7 +50,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
     private InteractionResult apoli$CachedPriorityZeroResult;
 
     @Inject(method = "interactOn", at = @At("HEAD"), cancellable = true)
-    private void preventEntityInteraction(Entity entity, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void preventEntityInteraction(Entity entity, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
         if(this.isSpectator()) {
             return;
         }
@@ -123,7 +123,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
     }
 
     @Inject(method = "interactOn", at = @At("RETURN"), cancellable = true)
-    private void entityInteractionAfter(Entity entity, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+    private void entityInteractionAfter(Entity entity, InteractionHand hand, Vec3 location, CallbackInfoReturnable<InteractionResult> cir) {
         InteractionResult original = cir.getReturnValue();
         InteractionResult custom = InteractionResult.PASS;
         if(apoli$CachedPriorityZeroResult != InteractionResult.PASS) {

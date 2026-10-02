@@ -8,7 +8,7 @@ import io.github.apace100.apoli.util.HudRender;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.FluidTags;
@@ -23,7 +23,7 @@ public class PowerHudRenderer implements GameHudRender {
 
     @Override
     @Environment(EnvType.CLIENT)
-    public void render(GuiGraphics context, float delta) {
+    public void render(GuiGraphicsExtractor context, float delta) {
         Minecraft client = Minecraft.getInstance();
         PowerHolderComponent component = PowerHolderComponent.KEY.get(client.player);
         int x = client.getWindow().getGuiScaledWidth() / 2 + 20 + ((ApoliConfigClient)Apoli.config).resourcesAndCooldowns.hudOffsetX;

@@ -7,6 +7,7 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -24,13 +25,13 @@ public class ItemOnItemPower extends Power {
     private final Predicate<ItemStack> onItemCondition;
 
     private final int resultFromOnStack;
-    private final ItemStack newStack;
+    private final LazyItemStack newStack;
     private final Consumer<Tuple<Level, ItemStack>> usingItemAction;
     private final Consumer<Tuple<Level, ItemStack>> onItemAction;
     private final Consumer<Tuple<Level, ItemStack>> resultItemAction;
     private final Consumer<Entity> entityAction;
 
-    public ItemOnItemPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> usingItemCondition, Predicate<ItemStack> onItemCondition, ItemStack newStack, Consumer<Tuple<Level, ItemStack>> usingItemAction, Consumer<Tuple<Level, ItemStack>> onItemAction, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, int resultFromOnStack) {
+    public ItemOnItemPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> usingItemCondition, Predicate<ItemStack> onItemCondition, LazyItemStack newStack, Consumer<Tuple<Level, ItemStack>> usingItemAction, Consumer<Tuple<Level, ItemStack>> onItemAction, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, int resultFromOnStack) {
         super(type, entity);
         this.usingItemCondition = usingItemCondition;
         this.onItemCondition = onItemCondition;
@@ -55,7 +56,7 @@ public class ItemOnItemPower extends Power {
     public ItemStack execute(ItemStack using, ItemStack on, Slot slot) {
         ItemStack stack;
         if(newStack != null) {
-            stack = newStack.copy();
+            stack = newStack.getStack().copy();
             if(resultItemAction != null) {
                 resultItemAction.accept(new Tuple<>(entity.level(), stack));
             }
@@ -104,7 +105,7 @@ public class ItemOnItemPower extends Power {
                 (type, player) -> new ItemOnItemPower(type, player,
                     (ConditionFactory<ItemStack>.Instance)data.get("using_item_condition"),
                     (ConditionFactory<ItemStack>.Instance)data.get("on_item_condition"),
-                    (ItemStack)data.get("result"), (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("using_item_action"),
+                    (LazyItemStack)data.get("result"), (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("using_item_action"),
                     (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("on_item_action"),
                     (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("result_item_action"),
                     (ActionFactory<Entity>.Instance)data.get("entity_action"),

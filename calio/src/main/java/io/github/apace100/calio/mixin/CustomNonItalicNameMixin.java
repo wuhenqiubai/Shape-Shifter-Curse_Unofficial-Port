@@ -25,7 +25,7 @@ public abstract class CustomNonItalicNameMixin {
     public abstract static class ModifyItalicDisplayHud {
         @Shadow private ItemStack lastToolHighlight;
 
-        @ModifyExpressionValue(method = "renderSelectedItemName", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;has(Lnet/minecraft/core/component/DataComponentType;)Z"))
+        @ModifyExpressionValue(method = "extractSelectedItemName", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;has(Lnet/minecraft/core/component/DataComponentType;)Z"))
         private boolean hasCustomNameWhichIsItalic(boolean original) {
             return original && !Calio.hasNonItalicName(this.lastToolHighlight);
         }

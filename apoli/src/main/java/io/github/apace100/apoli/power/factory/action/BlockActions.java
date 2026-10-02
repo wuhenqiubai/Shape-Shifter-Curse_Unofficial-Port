@@ -71,7 +71,9 @@ public class BlockActions {
                 MinecraftServer server = block.getLeft().getServer();
                 if(server != null) {
                     String blockName = block.getLeft().getBlockState(block.getMiddle()).getBlock().getDescriptionId();
-                    // [移植 b7a79a9] source 恒用 server，避免 CommandSource.NULL 抑制 /say 输出及使 /give 等命令失效。
+                    // 1.21.1 提交 b7a79a9：source 恒为 server，不再在 showOutput=false 时换成 CommandSource.NULL
+                    //（NULL 会把命令效果一起杀掉）。这里用 withSuppressedOutput 只静默输出。
+                    // 方块上下文没有实体，server 本身就是合法的 CommandSource（26.1 仍然如此）。
                     CommandSourceStack source = new CommandSourceStack(
                         server,
                         new Vec3(block.getMiddle().getX() + 0.5, block.getMiddle().getY() + 0.5, block.getMiddle().getZ() + 0.5),
@@ -85,14 +87,7 @@ public class BlockActions {
                     if(!Apoli.config.executeCommand.showOutput) {
                         source = source.withSuppressedOutput();
                     }
-                    try {
-                        String execCommand = data.getString("command").trim();
-                        if(execCommand.startsWith("/")) {
-                            execCommand = execCommand.substring(1);
-                        }
-                        server.getCommands().getDispatcher().execute(execCommand, source);
-                    } catch (com.mojang.brigadier.exceptions.CommandSyntaxException e) {
-                    }
+                    server.getCommands().performPrefixedCommand(source, data.getString("command"));
                 }
             }));
         register(BonemealAction.getFactory());

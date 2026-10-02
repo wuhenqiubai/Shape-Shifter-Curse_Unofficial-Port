@@ -5,6 +5,7 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
@@ -27,13 +28,13 @@ public class ModifyCraftingPower extends ValueModifyingPower {
     private final Identifier recipeIdentifier;
     private final Predicate<ItemStack> itemCondition;
 
-    private final ItemStack newStack;
+    private final LazyItemStack newStack;
     private final Consumer<Tuple<Level, ItemStack>> itemAction;
     private final Consumer<Tuple<Level, ItemStack>> lateItemAction;
     private final Consumer<Entity> entityAction;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
-    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, Identifier recipeIdentifier, Predicate<ItemStack> itemCondition, ItemStack newStack, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
+    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, Identifier recipeIdentifier, Predicate<ItemStack> itemCondition, LazyItemStack newStack, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
         super(type, entity);
         this.recipeIdentifier = recipeIdentifier;
         this.itemCondition = itemCondition;
@@ -51,7 +52,7 @@ public class ModifyCraftingPower extends ValueModifyingPower {
             }
         }
         if(itemCondition != null) {
-            if(!itemCondition.test(recipe.value().assemble(inventory, entity.level().registryAccess()))) {
+            if(!itemCondition.test(recipe.value().assemble(inventory))) {
                 return false;
             }
         }
@@ -68,9 +69,9 @@ public class ModifyCraftingPower extends ValueModifyingPower {
     public ItemStack getNewResult(CraftingInput input, CraftingRecipe recipe) {
         ItemStack stack;
         if(newStack != null) {
-            stack = newStack.copy();
+            stack = newStack.getStack().copy();
         } else {
-            stack = recipe.assemble(input, entity.level().registryAccess());
+            stack = recipe.assemble(input);
         }
         if(itemAction != null) {
             itemAction.accept(new Tuple<>(entity.level(), stack));

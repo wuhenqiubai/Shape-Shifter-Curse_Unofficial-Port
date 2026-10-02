@@ -52,9 +52,6 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         super(level, gameProfile);
     }
 
-    @Shadow
-    public abstract void displayClientMessage(Component message, boolean actionBar);
-
     @Shadow @Nullable private ServerPlayer.@Nullable RespawnConfig respawnConfig;
 
     @Shadow
@@ -62,8 +59,17 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
         throw new AssertionError();
     }
 
+    @Shadow
+    public abstract void sendSystemMessage(Component message, boolean overlay);
+
     // FRESH_AIR
-    @Inject(method = "startSleepInBed", at = @At(value = "INVOKE",target = "Lnet/minecraft/server/level/ServerPlayer;setRespawnPosition(Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;Z)V"), cancellable = true)
+    // NeoForge/Connector 兼容（1.21.1 提交 ea98804）：原注入点是
+    //   @At(value = "INVOKE", target = "...ServerPlayer;setRespawnPosition(ServerPlayer$RespawnConfig;Z)V")
+    // NeoForge 重新编译后该调用点可能被包进 supplier/lambda，注入点静默失效，
+    // 后果是「禁止睡眠」的 power 在 NeoForge 下失效。
+    // 改为 startSleepInBed HEAD —— 与原来的 INVOKE 默认 shift(BEFORE) 语义一致（都在设置重生点之前），
+    // 且方法名/描述符跨环境稳定。
+    @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
     public void preventAvianSleep(BlockPos pos, CallbackInfoReturnable<Either<BedSleepingProblem, Unit>> info) {
         PowerHolderComponent.getPowers(this, PreventSleepPower.class).forEach(p -> {
                 if(p.doesPrevent(level(), pos)) {
@@ -71,7 +77,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
                         ((ServerPlayer)(Object)this).setRespawnPosition(new ServerPlayer.RespawnConfig(new LevelData.RespawnData(GlobalPos.of(this.level().dimension(), pos), this.getYRot(), this.getXRot()), false), true);
                     }
                     info.setReturnValue(Either.left(null));
-                    this.displayClientMessage(Component.translatable(p.getMessage()), true);
+                    this.sendSystemMessage(Component.translatable(p.getMessage()), true);
                 }
             }
         );

@@ -1,6 +1,6 @@
 plugins {
 	// 版本由根 settings.gradle 的 pluginManagement.plugins 统一提供
-	id 'net.fabricmc.fabric-loom-remap'
+	id 'net.fabricmc.fabric-loom'
 	id 'maven-publish'
 }
 
@@ -87,41 +87,42 @@ dependencies {
 	implementation 'com.demonwav.mcdev:annotations:1.0'
 
 	// To change the versions see the gradle.properties file
+	// 26.1 无混淆：改用 net.fabricmc.fabric-loom（不 remap Minecraft 与 mod），
+	// 因此不再声明 mappings，且 modImplementation / modApi 一律退化为标准的 implementation / api。
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
-	modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}") {
+	api("dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-base:${project.cca_version}"
 
-	modApi("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}") {
+	api("dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
-	modApi "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
+	api "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
 	include "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
 
 	// Calio 已并入本仓库（根 settings.gradle 里 include 'calio'），改为项目引用。
-	// 同级 loom 项目必须用 namedElements（未 remap 的 dev 产物），否则 loom 会去读还不存在的 remap jar。
-	api project(path: ":calio", configuration: "namedElements")
+	// 不 remap 的 loom 下同级项目直接 project(":calio") 即可，不再需要 namedElements。
+	api project(":calio")
 	include project(":calio")
 
-	modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
+	api("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
 		exclude(group: "net.fabricmc.fabric-api")
 	}
 	include "me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}"
 
-	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
-	modApi "maven.modrinth:additionalentityattributes:${project.aea_version}"
+	api "maven.modrinth:additionalentityattributes:${project.aea_version}"
 	include "maven.modrinth:additionalentityattributes:${project.aea_version}"
-//	modApi "com.github.eggohito:AdditionalEntityAttributes:${project.aea_version}"
+//	api "com.github.eggohito:AdditionalEntityAttributes:${project.aea_version}"
 //	include "com.github.eggohito:AdditionalEntityAttributes:${project.aea_version}"
 
 }
@@ -141,7 +142,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
@@ -150,8 +151,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 }
 
 jar {

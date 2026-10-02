@@ -56,9 +56,9 @@ public class ConditionedAttributePower extends Power {
                     if(!instance.hasModifier(mod.getModifier().id())) {
                         instance.addTransientModifier(mod.getModifier());
                     } else {
-                        // [移植 f3bd124] 1.21.1：modifier id 残留/冲突时 addTransientModifier 会抛异常（或 hasModifier 跳过），
-                        // 导致 modifier 永不更新（如同名潜行加速 power 的 0.35 被残留覆盖 → 速度不变）。
-                        // 改用 addOrUpdateTransientModifier（put 替换），保证当前值稳定生效。
+                        // 1.21.1 提交 f3bd124：modifier id 残留/冲突时 hasModifier 会直接跳过，导致 modifier 永不更新
+                        //（典型：同名潜行加速 power 的 0.35 被残留值覆盖 → 速度不随条件变化）。
+                        // 改用 addOrUpdateTransientModifier（put 语义）保证当前值稳定生效。
                         instance.addOrUpdateTransientModifier(mod.getModifier());
                     }
                 }

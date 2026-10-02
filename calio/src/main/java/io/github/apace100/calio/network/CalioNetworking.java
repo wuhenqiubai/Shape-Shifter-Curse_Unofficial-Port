@@ -9,6 +9,6 @@ public class CalioNetworking {
     public static final CustomPacketPayload.Type<SyncDataObjectRegistryPacket<?>> SYNC_DATA_OBJECT_REGISTRY = new CustomPacketPayload.Type<>(Identifier.fromNamespaceAndPath("calio", "sync_data_object_registry"));
 
     public static void init() {
-        PayloadTypeRegistry.playS2C().register(SYNC_DATA_OBJECT_REGISTRY, SyncDataObjectRegistryPacket.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(SYNC_DATA_OBJECT_REGISTRY, SyncDataObjectRegistryPacket.CODEC);
     }
 }

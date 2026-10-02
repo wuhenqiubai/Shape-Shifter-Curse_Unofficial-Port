@@ -183,6 +183,18 @@ public class SerializableDataType<T> {
         });
     }
 
+    public static <T> SerializableDataType<Holder<T>> registryHolder(Registry<T> registry) {
+        return wrap(ClassUtil.castClass(Holder.class), SerializableDataTypes.IDENTIFIER, e -> e.unwrapKey().orElseThrow().identifier(), id -> {
+            Optional<Holder.Reference<T>> optional = registry.get(id);
+            if(optional.isPresent()) {
+                return optional.get();
+            } else {
+                throw new RuntimeException(
+                    "Identifier \"" + id + "\" was not registered in registry \"" + registry.key().identifier() + "\".");
+            }
+        });
+    }
+
     public static <T> SerializableDataType<T> registryWithRemap(Class<T> dataClass, Registry<T> registry, Function<Identifier, T> remap) {
         return wrap(dataClass, SerializableDataTypes.IDENTIFIER, registry::getKey, id -> {
             var remapped = remap.apply(id);

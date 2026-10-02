@@ -93,11 +93,11 @@ public class EntityConditions {
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.FLOAT),
             (data, entity) -> ((Comparison)data.get("comparison")).compare(entity.getLightLevelDependentMagicValue(), data.getFloat("compare_to"))));
-        register(new ConditionFactory<>(Apoli.identifier("daytime"), new SerializableData(), (data, entity) -> entity.level().getDayTime() % 24000L < 13000L));
+        register(new ConditionFactory<>(Apoli.identifier("daytime"), new SerializableData(), (data, entity) -> entity.level().getOverworldClockTime() % 24000L < 13000L));
         register(new ConditionFactory<>(Apoli.identifier("time_of_day"), new SerializableData()
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.INT), (data, entity) ->
-            ((Comparison)data.get("comparison")).compare(entity.level().getDayTime() % 24000L, data.getInt("compare_to"))));
+            ((Comparison)data.get("comparison")).compare(entity.level().getOverworldClockTime() % 24000L, data.getInt("compare_to"))));
         register(new ConditionFactory<>(Apoli.identifier("fall_flying"), new SerializableData(), (data, entity) -> entity instanceof LivingEntity && ((LivingEntity) entity).isFallFlying()));
         register(new ConditionFactory<>(Apoli.identifier("exposed_to_sun"), new SerializableData(), (data, entity) -> {
             if (entity.level().isBrightOutside() && !((EntityAccessor) entity).callIsInRain()) {
@@ -293,9 +293,9 @@ public class EntityConditions {
             (data, entity) -> {
                 MinecraftServer server = entity.level().getServer();
                 if(server != null) {
-                    // [移植 b7a79a9] source 恒用实体（ServerPlayer.commandSource()），避免 CommandSource.NULL 使 /say 等命令失效。
+                    boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
                     CommandSourceStack source = new CommandSourceStack(
-                        entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
+                        Apoli.config.executeCommand.showOutput && validOutput ? entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL : CommandSource.NULL,
                         entity.position(),
                         entity.getRotationVector(),
                         entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
@@ -304,9 +304,6 @@ public class EntityConditions {
                         entity.getDisplayName(),
                         server,
                         entity);
-                    if(!Apoli.config.executeCommand.showOutput) {
-                        source = source.withSuppressedOutput();
-                    }
                     int output = 0;
                     try {
                         output = server.getCommands().getDispatcher().execute(data.getString("command").replaceFirst("/", ""), source);
@@ -376,7 +373,7 @@ public class EntityConditions {
                 return comparison.compare(count, compareTo);}));
         register(new ConditionFactory<>(Apoli.identifier("entity_group"), new SerializableData()
             .add("group", SerializableDataTypes.ENTITY_GROUP),
-            (data, entity) -> entity instanceof LivingEntity && ((List<TagKey<EntityType<?>>>) data.get("group")).stream().allMatch(tag -> entity.getType().is(tag))));
+            (data, entity) -> entity instanceof LivingEntity && ((List<TagKey<EntityType<?>>>) data.get("group")).stream().allMatch(tag -> entity.getType().builtInRegistryHolder().is(tag))));
         register(new ConditionFactory<>(Apoli.identifier("in_tag"), new SerializableData()
             .add("tag", SerializableDataTypes.ENTITY_TAG),
             (data, entity) -> entity.getType().builtInRegistryHolder().is((TagKey<EntityType<?>>) data.get("tag"))));

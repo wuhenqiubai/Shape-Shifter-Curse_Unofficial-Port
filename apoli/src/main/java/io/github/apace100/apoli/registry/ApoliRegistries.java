@@ -38,18 +38,18 @@ public class ApoliRegistries {
     public static final Registry<IModifierOperation> MODIFIER_OPERATION;
 
     static {
-        POWER_FACTORY = FabricRegistryBuilder.createSimple(PowerFactory.class, Apoli.identifier("power_factory")).buildAndRegister();
-        ENTITY_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<Entity>>castClass(ConditionFactory.class), Apoli.identifier("entity_condition")).buildAndRegister();
-        BIENTITY_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<Tuple<Entity, Entity>>>castClass(ConditionFactory.class), Apoli.identifier("bientity_condition")).buildAndRegister();
-        ITEM_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<ItemStack>>castClass(ConditionFactory.class), Apoli.identifier("item_condition")).buildAndRegister();
-        BLOCK_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<BlockInWorld>>castClass(ConditionFactory.class), Apoli.identifier("block_condition")).buildAndRegister();
-        DAMAGE_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<Tuple<DamageSource, Float>>>castClass(ConditionFactory.class), Apoli.identifier("damage_condition")).buildAndRegister();
-        FLUID_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<FluidState>>castClass(ConditionFactory.class), Apoli.identifier("fluid_condition")).buildAndRegister();
-        BIOME_CONDITION = FabricRegistryBuilder.createSimple(ClassUtil.<ConditionFactory<Holder<Biome>>>castClass(ConditionFactory.class), Apoli.identifier("biome_condition")).buildAndRegister();
-        ENTITY_ACTION = FabricRegistryBuilder.createSimple(ClassUtil.<ActionFactory<Entity>>castClass(ActionFactory.class), Apoli.identifier("entity_action")).buildAndRegister();
-        ITEM_ACTION = FabricRegistryBuilder.createSimple(ClassUtil.<ActionFactory<Tuple<Level, ItemStack>>>castClass(ActionFactory.class), Apoli.identifier("item_action")).buildAndRegister();
-        BLOCK_ACTION = FabricRegistryBuilder.createSimple(ClassUtil.<ActionFactory<Triple<Level, BlockPos, Direction>>>castClass(ActionFactory.class), Apoli.identifier("block_action")).buildAndRegister();
-        BIENTITY_ACTION = FabricRegistryBuilder.createSimple(ClassUtil.<ActionFactory<Tuple<Entity, Entity>>>castClass(ActionFactory.class), Apoli.identifier("bientity_action")).buildAndRegister();
-        MODIFIER_OPERATION = FabricRegistryBuilder.createSimple(IModifierOperation.class, Apoli.identifier("modifier_operation")).buildAndRegister();
+        POWER_FACTORY = FabricRegistryBuilder.create(PowerFactory.class, Apoli.identifier("power_factory")).buildAndRegister();
+        ENTITY_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<Entity>>castClass(ConditionFactory.class), Apoli.identifier("entity_condition")).buildAndRegister();
+        BIENTITY_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<Tuple<Entity, Entity>>>castClass(ConditionFactory.class), Apoli.identifier("bientity_condition")).buildAndRegister();
+        ITEM_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<ItemStack>>castClass(ConditionFactory.class), Apoli.identifier("item_condition")).buildAndRegister();
+        BLOCK_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<BlockInWorld>>castClass(ConditionFactory.class), Apoli.identifier("block_condition")).buildAndRegister();
+        DAMAGE_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<Tuple<DamageSource, Float>>>castClass(ConditionFactory.class), Apoli.identifier("damage_condition")).buildAndRegister();
+        FLUID_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<FluidState>>castClass(ConditionFactory.class), Apoli.identifier("fluid_condition")).buildAndRegister();
+        BIOME_CONDITION = FabricRegistryBuilder.create(ClassUtil.<ConditionFactory<Holder<Biome>>>castClass(ConditionFactory.class), Apoli.identifier("biome_condition")).buildAndRegister();
+        ENTITY_ACTION = FabricRegistryBuilder.create(ClassUtil.<ActionFactory<Entity>>castClass(ActionFactory.class), Apoli.identifier("entity_action")).buildAndRegister();
+        ITEM_ACTION = FabricRegistryBuilder.create(ClassUtil.<ActionFactory<Tuple<Level, ItemStack>>>castClass(ActionFactory.class), Apoli.identifier("item_action")).buildAndRegister();
+        BLOCK_ACTION = FabricRegistryBuilder.create(ClassUtil.<ActionFactory<Triple<Level, BlockPos, Direction>>>castClass(ActionFactory.class), Apoli.identifier("block_action")).buildAndRegister();
+        BIENTITY_ACTION = FabricRegistryBuilder.create(ClassUtil.<ActionFactory<Tuple<Entity, Entity>>>castClass(ActionFactory.class), Apoli.identifier("bientity_action")).buildAndRegister();
+        MODIFIER_OPERATION = FabricRegistryBuilder.create(IModifierOperation.class, Apoli.identifier("modifier_operation")).buildAndRegister();
     }
 }

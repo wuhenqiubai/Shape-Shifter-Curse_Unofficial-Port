@@ -144,7 +144,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
         Vec3 msp = modifiedSpawnPos.get();
         modifiedSpawnBlockPos.set(msp.x, msp.y, msp.z);
-        targetDimension.getChunkSource().addTicketWithRadius(TicketType.PLAYER_SPAWN, new ChunkPos(modifiedSpawnBlockPos), 11);
+        targetDimension.getChunkSource().addTicketWithRadius(TicketType.PLAYER_SPAWN, ChunkPos.containing(modifiedSpawnBlockPos), 11);
 
         return new Tuple<>(targetDimension, modifiedSpawnBlockPos);
 
