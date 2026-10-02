@@ -16,6 +16,20 @@ subprojects {
     group = rootProject.group
 }
 
+// 不发布 Gradle Module Metadata(.module)。
+//
+// 原因：JitPack 改写 .module 时拿「仓库名」当 module 名，而本仓库是多构件 monorepo
+// （Apoli-Legacy / Calio-Legacy / shape-shifter-curse-unofficial / shape-shifter-curse-bom），
+// 没有一个等于仓库名 → 四个构件的 .module 组件坐标全都对不上消费者请求的坐标。
+// Gradle 读 .module 优先于 .pom，于是直接报 "inconsistent module metadata found"，
+// 导致 JitPack 上的四个构件对任何消费者都解析不了（POM 的坐标反而是对的，JitPack 改写正确）。
+//
+// ⚠ bom/build.gradle 里不要把这个开关重新打开，否则 bom 在 JitPack 上照样解析不了；
+//   BOM 的约束本来就是靠 POM 的 <dependencyManagement> 传的，不依赖 .module。
+allprojects {
+    tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
+}
+
 // 从Github Action 环境获取构建Channel和BuildVersion
 def channel = System.getenv('channel')
 def build_version = System.getenv('build_version')

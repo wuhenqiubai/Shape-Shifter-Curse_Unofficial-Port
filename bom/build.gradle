@@ -39,8 +39,11 @@ publishing {
     repositories {}
 }
 
-// BOM 的约束是靠 Gradle module metadata(.module) 传给消费者的，这里显式打开以免将来被别处关掉。
-// （本仓库目前没有任何地方改过这个开关，属防御性写法；fabric-api-bom 里也有同一条。）
-tasks.withType(GenerateModuleMetadata).configureEach {
-    enabled = true
-}
+// ⚠ 此处**不要**再把 GenerateModuleMetadata 打开。
+// 根 build.gradle 里全局关掉了 .module 发布，原因是 JitPack 改写 .module 时用「仓库名」当 module 名，
+// 多构件 monorepo 下四个构件的 .module 组件坐标全部对不上请求坐标，消费者一律报
+// "inconsistent module metadata found"。如果这里 enabled = true，bom 会成为唯一带 .module 的构件，
+// 在 JitPack 上照样解析不了。
+//
+// BOM 的约束不受影响：java-platform 本来就会把它们写进 POM 的 <dependencyManagement>
+// （已验证生成的 POM 里四条约束齐全），消费者 platform(...) 走 POM 一样拿得到。
