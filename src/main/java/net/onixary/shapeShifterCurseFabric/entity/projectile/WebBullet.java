@@ -48,8 +48,15 @@ public class WebBullet extends ThrowableItemProjectile {
         this.EnableTopBlockBuild = true;
     }
 
+    // ⚠ 1.21.11 的 ThrowableItemProjectile 把带 owner / 带坐标的构造函数改成了需要
+    // ItemStack 的 4 参 / 6 参版本，迁移时这些构造函数退化成 2 参 super(WEB_BULLET, level)，
+    // 于是原版构造函数里的 setPos 全部丢失 —— 弹射物会留在 Entity 默认位置 (0,0,0)，
+    // 表现为：音效正常（tick 里用 owner 坐标播放）但蛛网弹在原点附近撞上方块、
+    // BuildWebLadder 第一格就不是空气直接 break，整条竖向蛛网建不出来。
+    // 下面手动补回与 1.21.1 各构造函数等价的定位。
     public WebBullet(double d, double e, double f, Level world, int Tier) {
         super(WEB_BULLET, world);
+        this.setPos(d, e, f);
         this.Tier = Tier;
         this.EnableEntangledEffect = true;
         this.EnableTopBlockBuild = true;
@@ -57,6 +64,7 @@ public class WebBullet extends ThrowableItemProjectile {
 
     public WebBullet(@org.jetbrains.annotations.Nullable LivingEntity livingEntity, int Tier) {
         super(WEB_BULLET, livingEntity != null ? livingEntity.level() : null);
+        ssc$setPosFromOwner(livingEntity);
         this.Tier = Tier;
         this.owner = livingEntity;
         this.EnableEntangledEffect = true;
@@ -65,10 +73,18 @@ public class WebBullet extends ThrowableItemProjectile {
 
     public WebBullet(@org.jetbrains.annotations.Nullable LivingEntity livingEntity, int Tier, boolean EnableEntangledEffect, boolean EnableTopBlockBuild) {
         super(WEB_BULLET, livingEntity != null ? livingEntity.level() : null);
+        ssc$setPosFromOwner(livingEntity);
         this.Tier = Tier;
         this.owner = livingEntity;
         this.EnableEntangledEffect = EnableEntangledEffect;
         this.EnableTopBlockBuild = EnableTopBlockBuild;
+    }
+
+    /** 对齐 1.21.11 ThrowableItemProjectile(EntityType, LivingEntity, Level, ItemStack) 的定位。 */
+    private void ssc$setPosFromOwner(@org.jetbrains.annotations.Nullable LivingEntity owner) {
+        if (owner != null) {
+            this.setPos(owner.getX(), owner.getEyeY() - 0.1F, owner.getZ());
+        }
     }
 
     @Override

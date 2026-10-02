@@ -7,7 +7,9 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnJumpPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
+import net.onixary.shapeShifterCurseFabric.additional_power.SneakingJumpClashPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.TripleJumpPower;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
@@ -36,6 +38,16 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 FriendlyByteBuf buf = PacketByteBufs.create();
                 buf.writeUUID(player.getUUID());
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID), buf));
+            } else {
+                // 服务端权威执行，不要再绕 JUMP_EVENT 包。
+                // 1.21.11 里客户端对普通跳跃不再走 jumpFromGround（只有切换飞行能力时才会），
+                // 跳跃改由服务端在处理 ServerboundMovePlayerPacket 时调用 jumpFromGround()
+                // （ServerGamePacketListenerImpl：以 player.onGround() 为真为前提）——
+                // 此刻玩家仍在地面，条件里的 apoli:on_block 能通过。
+                // 若改回「客户端发包、服务端收包后执行」，包到达时跳跃已被应用、玩家已离地，
+                // on_block 必然为假（实测 pass=false, onGround=false），action 永不执行。
+                PowerHolderComponent.getPowers(player, ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
+                PowerHolderComponent.getPowers(player, SneakingJumpClashPower.class).forEach(sneakingJumpClashPower -> sneakingJumpClashPower.jumpTicks = 5);
             }
         }
     }
