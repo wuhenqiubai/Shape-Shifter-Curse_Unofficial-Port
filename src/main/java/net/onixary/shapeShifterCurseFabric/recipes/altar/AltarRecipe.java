@@ -29,9 +29,16 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
         return true;
     }
 
+    // 消耗 0~9 全部槽位：0-8 是输入格，9 是催化剂槽。
+    // ⚠ 原先只扫 0~8，漏掉 slot 9 → 催化剂（钻石 / 下界之星）永不消耗，可无限复用。
+    // 另：必须先判空再 shrink——空格是共享单例 ItemStack.EMPTY，直接 shrink 会把它写成 count=-1
+    //（isEmpty() 因 this == EMPTY 短路才没当场出问题，但 getCount() 已污染）。
     public void consumeInputs(WorldlyContainer inventory) {
-        for (int i = 0; i < 9; i++) {
-            inventory.getItem(i).shrink(1);
+        for (int i = 0; i <= 9; i++) {
+            ItemStack stack = inventory.getItem(i);
+            if (!stack.isEmpty()) {
+                stack.shrink(1);
+            }
         }
     }
 
