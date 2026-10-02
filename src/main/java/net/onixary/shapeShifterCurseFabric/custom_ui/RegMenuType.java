@@ -18,4 +18,6 @@ public class RegMenuType {
         Registry.register(BuiltInRegistries.MENU, id, factory);
         return factory;
     }
+
+    public static void init() {}
 }

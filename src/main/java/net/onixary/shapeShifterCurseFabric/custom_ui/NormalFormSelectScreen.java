@@ -173,4 +173,15 @@ public class NormalFormSelectScreen extends Screen {
     public boolean isPauseScreen() {
         return false;
     }
+
+    @Override
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
+            return true;
+        } else if (this.minecraft.options.keyInventory.matches(keyEvent)) {
+            this.onClose();
+            return true;
+        }
+        return false;
+    }
 }

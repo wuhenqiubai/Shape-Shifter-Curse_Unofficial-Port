@@ -16,13 +16,13 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLaye
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginRegistry;
 import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModComponents;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
+import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.ITransformReason;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,6 +64,7 @@ public class FormUtils {
     public static final FlagData CanHaveTransformEffect = new FlagData("can_have_transform_effect"); // 可以拥有变形效果
     public static final FlagData TransformEffectCanApply = new FlagData("transform_effect_can_apply"); // 可以被变形效果修改形态
     public static final FlagData LockPoseToStand = new FlagData("lock_pose_to_stand"); // 锁定姿态为站立
+    public static final FlagData InitialForm = new FlagData("initial_form"); // 初始阶段Flag
 
     // 在此解释一下为什么要先变TechnicalFormOrigin后变目标Origin 因为形态能力还原依赖于不同Origin切换时的清除旧Power+添加新Power 如果Origin一样 就会导致饰品/子形态/额外能力挂载系统添加/删除的能力无法还原
     public static Origin TechnicalFormOrigin = null;
@@ -147,7 +148,7 @@ public class FormUtils {
                 }
                 component.setOrigin(layer, TechnicalFormOrigin);
                 component.setOrigin(layer, origin);
-                component.sync();
+                // component.sync();
             }
         }
         applyExtraPower(player, layerData);
@@ -210,6 +211,24 @@ public class FormUtils {
         }
     }
 
+    // 这个函数性能占用比较大 不要频繁调用
+    public static void reApplyPower(Player player) {
+        PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
+        IForm form = playerFormComponent.nowForm;
+        form.applyScale(player);
+        Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
+        applyLayer(player, layerPair);
+        form.afterApplyLayer(player);
+        playerFormComponent.nowPerkTree = form.getPerkTreeID();
+        PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
+        TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        form.onApplyPowerEnd(player);
+        AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);
+        ModComponents.ORIGIN.get(player).sync();
+        // 应该不会有人修改IForm里的数据吧 虽然理论可行 但我是反对这种写法的
+        // TransformManager.sendClientFirstPersonReset(player);
+    }
+
     public static void _loadForm(Player player, IForm form) {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm oldForm = playerFormComponent.nowForm;
@@ -225,6 +244,8 @@ public class FormUtils {
         Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
         applyLayer(player, layerPair);
         form.afterApplyLayer(player);
+        playerFormComponent.nowPerkTree = form.getPerkTreeID();
+        PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
         TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
         form.onApplyPowerEnd(player);
         // 停止Power动画 目前就蝙蝠用了
@@ -238,6 +259,8 @@ public class FormUtils {
                 ShapeShifterCurseFabric.LOGGER.error("Failed to send form change notification: ", e);
             }
         }
+        ModComponents.ORIGIN.get(player).sync();
+
     }
 
     public static void _setForm(Player player, IForm form) {
@@ -328,9 +351,6 @@ public class FormUtils {
         boolean canUse = true;
         if (form instanceof IFormWithCondition iFormWithCondition) {
             canUse &= iFormWithCondition.checkCanUse(player);
-        }
-        if (form instanceof IPatronForm iPatronForm) {
-            canUse &= PatronDataSegment.isPatronFormCanUse(player, iPatronForm);
         }
         return canUse;
     }

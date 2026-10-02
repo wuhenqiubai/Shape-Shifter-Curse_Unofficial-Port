@@ -20,5 +20,6 @@ public class ModTags {
     public static final TagKey<Item> Meat_Tag = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("origins", "meat"));
     public static final TagKey<Block> LIKE_SCAFFOLDING_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "like_scaffolding"));
     public static final TagKey<Block> LIKE_COBWEB_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "like_cobweb"));
+    public static final TagKey<Block> CLAW_EFFECTIVE_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "claw_effective"));
     public static final TagKey<EntityType<?>> SPIDER_FLUID_COCOON_BLACKLIST = TagKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "spider_fluid_cocoon_blacklist"));
 }

@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 # Author        : XuHaoNan
-# LICENSE       : All Rights Reserved (XuHaoNan)
+# LICENSE       : All Rights Reserved (ShapeShifterCurse 开发组 - XuHaoNan & Onixary)
 
 from cryptography.hazmat.primitives.asymmetric import ed448
 import typing
@@ -50,7 +50,7 @@ def SelectFile(folderPath: str, fileCondition: typing.Callable[[str], bool]) -> 
 
 def printAuthFileData(fileName: str, authFileBytes: bytes, publicKey: typing.Optional[ed448.Ed448PublicKey] = None):
 	try:
-		Utils.printAuthFileData(fileName, ScriptTypes.AuthFile.load(fileName, authFileBytes, publicKey))
+		Utils.printAuthFileData(fileName, ScriptTypes.AuthFile.loadWithOutVerify(fileName, authFileBytes, publicKey))
 	except Exception as e:
 		print("验证文件读取失败")
 		raise e

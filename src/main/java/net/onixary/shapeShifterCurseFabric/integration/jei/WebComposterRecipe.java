@@ -48,8 +48,7 @@ public class WebComposterRecipe {
                 .filter(WebComposterBlock::canIncrease)
                 .map(itemStack -> {
                     float chance = WebComposterBlock.getIncreaseChance(itemStack);
-                    // JEI 新版把 UID 的返回类型放宽为 Object（getUid），旧的名字是 getUniqueId(String)。
-                    // 这里仍需要 String 作路径片段，故显式转换（默认实现即委托给 String 版，等价）。
+                    // 1.21.11(同26.1): JEI 27 将 getUniqueId(...) 改名为 getUid(...)，且返回 Object
                     String ingredientUid = String.valueOf(ingredientHelper.getUid(itemStack, UidContext.Recipe));
                     String ingredientUidPath = ResourceLocationUtil.sanitizePath(ingredientUid);
                     Identifier recipeUid = ShapeShifterCurseFabric.identifier("jei/web_composting/" + ingredientUidPath);

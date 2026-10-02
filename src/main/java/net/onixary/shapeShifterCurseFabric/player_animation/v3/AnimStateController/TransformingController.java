@@ -10,7 +10,11 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.util.util.DataDumper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -72,5 +76,10 @@ public class TransformingController extends AbstractAnimStateController {
     @Override
     public boolean isEnabled(Player player, AnimSystem.AnimSystemData data) {
         return ShapeShifterCurseFabricClient.isClientTransforming(player.getUUID());
+    }
+
+    @Override
+    public @NotNull List<AnimationHolder> getAllAnimations() {
+        return DataDumper.buildList(anim_on_transform_default, anim_on_transform_normal_to_feral, anim_on_transform_feral_to_normal, anim_on_transform_feral_to_feral);
     }
 }

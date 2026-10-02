@@ -42,3 +42,12 @@
 | [Claude Code](https://claude.com/product/claude-code)                       | 代码辅助 |
 | [onixary](https://github.com/onixary)         | 原作者                 |
 | [xu233333](https://github.com/xu233333)       | 原作者                 |
+
+## 授权
+
+- 源代码：[MIT 许可证](LICENSE.txt)
+- 媒体资源（3D 模型、贴图、动画、音效、字体、翻译文本）：
+  [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt)，仅限非商业用途
+- 第三方代码与资源：遵循其原始授权，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+
+各许可证的具体适用范围见 [LICENSING.md](LICENSING.md)。

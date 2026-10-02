@@ -12,14 +12,12 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
-import net.onixary.shapeShifterCurseFabric.player_form.utils.IPatronForm;
-import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements IPatronForm {
+public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm {
     public Form_SnowFox3_Sub_MarbledPolecat(Identifier formID) {
         super(formID, RegPlayerForms.SNOW_FOX_3);
         this.addPower(ShapeShifterCurseFabric.identifier("sub_form_marbled_polecat_idle_stay_eye_height"));
@@ -30,14 +28,6 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements I
     @Override
     public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
         return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
-    }
-
-    @Override
-    public boolean checkCanUse(@Nullable Player player, @Nullable UUID playerUUID, @Nullable PatronDataSegment patronData) {
-        if (patronData == null || player == null) {
-            return false;
-        }
-        return patronData.getLevel() >= 5;
     }
 
     private static final AnimUtils.AnimationHolderData ANIM_IDLE =
@@ -72,11 +62,6 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm implements I
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("weasel_elytra_fly"));
     public static final AnimUtils.AnimationHolderData ANIM_SLEEP =
             new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("weasel_sleep"));
-
-
-
-
-
 
     public static final AbstractAnimStateController IDLE_CONTROLLER = new IdleStayAnimController(
             new WithSneakAnimController(ANIM_IDLE, ANIM_SNEAK_IDLE),  // 保留原潜行 idle

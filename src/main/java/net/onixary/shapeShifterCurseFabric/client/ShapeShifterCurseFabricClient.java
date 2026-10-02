@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -19,9 +20,10 @@ import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
+import net.onixary.shapeShifterCurseFabric.blocks.block_entity_renderer.FormAttunerBeamRenderer;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
-import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpdateScreen;
+import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpgradeScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.StartBookScreenV2;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
@@ -45,6 +47,7 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.TickManager;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
+import net.onixary.shapeShifterCurseFabric.util.test.NetWorkTest;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -83,7 +86,9 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	}
 	private static final KeyMapping.Category SSC_CATEGORY = KeyMapping.Category.register(
 			Identifier.fromNamespaceAndPath(MOD_ID, "keys"));
-	// TODO: 1.21.11 Satin已移除，需要新方案注册着色器
+	// [未启用，勿再当作待办] fur gradient 整套在 1.21.1/1.21.11 两个分支上都无调用点
+	// （FurColorGradientRenderLayer.getFurLayer 只有定义），从未启用。
+	// 1.21.11 移除 Satin 后要恢复需自定义 core shader，会与光影包（Iris 等）冲突，故不采用着色器方案。
 	// private static ShaderInstance furGradientShader;
 
 	public static KeyMapping makeSound;
@@ -223,7 +228,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		return getClientTransformState(playerUuid).TransformToForm;
 	}
 
-	/* TODO: 1.21.11 已移除Satin
+	/* [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
 	private void registerShaderResource()
 	{
 		CoreShaderRegistrationCallback.EVENT.register(context -> {
@@ -248,7 +253,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
         // 网络包注册自检：防「注册了类型却忘挂 receiver」的静默失效，在客户端启动完成时执行
         NetworkRegistrationSelfCheck.registerClient();
 
-		// TODO: 1.21.11 Satin已移除，需新方案注册着色器
+		// [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
 		// registerShaderResource();
 		// FurGradientRenderLayer.onInitializeClient();
 
@@ -335,7 +340,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 				}
 			}
 			if (openTestUIKeybind.isDown()) {
-				FormUpdateScreen screen = new FormUpdateScreen(Component.literal(""), false, PerkUtils.getPlayerNowPerkTree(client.player));
+				FormUpgradeScreen screen = new FormUpgradeScreen(-1, Component.literal(""), PerkUtils.getPlayerNowPerkTree(client.player));
 				client.setScreen(screen);
 			}
 		});
@@ -344,9 +349,13 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		PatronUtils.OnClientInit();
 		AuthClient.init();
 		RegMenuScreen.init();
+
+		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);
+
+		// NetWorkTest.init();
 	}
 
-	// TODO: 1.21.11 Satin已移除，需新方案注册着色器
+	// [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
 	// public static ShaderInstance getFurGradientShader() {
 	// 	return furGradientShader;
 	// }

@@ -5,7 +5,9 @@ import com.zigythebird.playeranim.animation.AvatarAnimManager;
 import com.zigythebird.playeranimcore.animation.Animation;
 import com.zigythebird.playeranimcore.bones.PlayerAnimBone;
 import com.zigythebird.playeranimcore.enums.TransformType;
+import com.zigythebird.playeranimcore.loading.UniversalAnimLoader;
 import com.zigythebird.playeranimcore.math.Vec3f;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
@@ -18,6 +20,7 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimFSM.FSMUtils;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController.TransformingController;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -25,9 +28,38 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 // 每个玩家的动画系统
 public class AnimSystem {
+
+	/**
+	 * 所有形态 {@code extra_parts_map} 里出现过的「动画侧骨骼名」，**已按 PAL 的规则归一化**（见 {@link #normalizeAnimBoneName}）。
+	 * <p>
+	 * 由 {@code DefaultModelAnimationSystem.loadConfig} 填充，由 {@code PlayerEntityAnimOverrideMixin} 消费
+	 * （在触发动画前逐名注册进 PlayerAnimationController）。
+	 * <p>
+	 * 为什么必须注册：PAL 的 {@code AnimationController.setupNewAnimation} 只会把「控制器注册表里有的名字」
+	 * 放进 {@code activeBones}，而 {@code PlayerAnimationController.registerBones()} 硬编码只注册 11 根 vanilla 骨；
+	 * 未进 {@code activeBones} 的骨骼在 {@code get3DTransformRaw} 里会被**静默返回零值**（不报错、不打日志）。
+	 * 上游用 PlayerAnimator 时按动画原始名直查、无需注册，所以这个坑是换库换出来的。
+	 */
+	public static final Set<String> EXTRA_ANIM_BONES = ConcurrentHashMap.newKeySet();
+
+	/**
+	 * 把骨骼名规范化成 PAL 内部使用的形式。
+	 * <p>
+	 * PAL 加载动画时（{@code AnimationLoader.bakeBoneAnimations}）会用
+	 * {@code UniversalAnimLoader.getCorrectPlayerBoneName} 把每个骨骼 key 转成 snake_case
+	 * （正则 {@code ([A-Z])} → {@code _$1} 后转小写），例如 {@code bipedRightHindLeg} → {@code biped_right_hind_leg}。
+	 * 查询侧必须用同一套规则，否则永远查不到。
+	 * <p>
+	 * 这里直接调 PAL 自己的函数而不是自己写一遍正则，保证与 PAL 内部规则永远一致。
+	 */
+	public static String normalizeAnimBoneName(String name) {
+		return UniversalAnimLoader.getCorrectPlayerBoneName(name);
+	}
 	public static class AnimSystemData {
 		public IForm playerForm;
 		public boolean IsOnGround = true;
@@ -38,6 +70,7 @@ public class AnimSystem {
         public Vec3 fakeVelocity = Vec3.ZERO;
         public double fallDistanceTemp;
         public double fallDistance = 0;
+        public boolean isFlying = false;
         public CompoundTag customData;  // 用于存储其他拓展Mod的数据 在本模组中不使用
 
         public AnimSystemData(Player player) {
@@ -125,6 +158,7 @@ public class AnimSystem {
         }
         this.data.fallDistance = this.data.fallDistanceTemp - nowPos.y;
         this.data.ContinueIdleStayTickCounter = FSMUtils.IsIdleStayCondition(this.player, this.data) ? this.data.ContinueIdleStayTickCounter + 1 : 0;
+        this.data.isFlying = this.player.getAbilities().flying || PlayerFormComponent.COMPONENT.get(player).isFlying;
         this.NPPA_Tick();
     }
 
@@ -221,11 +255,11 @@ public class AnimSystem {
 			return defaultValue;
 		AvatarAnimManager manager = animatedAvatar.playerAnimLib$getAnimManager();
 		if (manager == null || !manager.isActive()) return defaultValue;
-		PlayerAnimBone bone = new PlayerAnimBone(boneName);
-		// PAL 1.2.6: get3DTransform(PlayerAnimBone) 返回 void、原地修改传入的骨。
-		// ⚠ 不要写成 get3DTransform(String)——那是另一个重载，它会自己 new 一个骨并返回，
-		//   传入的名字也会被 toString() 成对象地址，结果是一具空骨。
-		manager.get3DTransform(bone);
+		// 必须用归一化后的名字查询：PAL 内部存储的骨骼名是 snake_case（见 normalizeAnimBoneName）。
+		// 传原始 camelCase（如 extra_parts_map 里的 bipedRightHindLeg）会永远查不到，
+		// 而 PAL 查不到时是**静默返回零值**，表现为「这根骨头完全没有动画」。
+		PlayerAnimBone bone = new PlayerAnimBone(normalizeAnimBoneName(boneName));
+		bone = manager.get3DTransform(bone);
 		return switch (type) {
 			// 注意三个分量取自不同的 Vector3f 字段：位置->position、旋转->rotation、缩放->scale
 			case POSITION -> new Vec3f(bone.position.x, bone.position.y, bone.position.z);

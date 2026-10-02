@@ -34,25 +34,42 @@ public class Form_Axolotl3 extends NormalForm {
     public static final AbstractAnimStateController FLYING_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("axolotl_3_creative_flight")));
     public static final AbstractAnimStateController SLEEP_CONTROLLER = new OneAnimController(ANIM_SLEEP);
     public static final AbstractAnimStateController CRAWL_CONTROLLER = new OneAnimController(new AnimUtils.AnimationHolderData(ShapeShifterCurseFabric.identifier("axolotl_3_idle")));
+    public static final AbstractAnimStateController USE_VANILLA_CONTROLLER = new OneAnimController((AnimUtils.AnimationHolderData) null);
 
     @Override
     public @Nullable AbstractAnimStateController getAnimStateController(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier animStateID) {
         @Nullable AnimStateEnum animStateEnum = AnimStateEnum.getStateEnum(animStateID);
         if (animStateEnum != null) {
-            return switch (animStateEnum) {
-                case ANIM_STATE_SWIM -> SWIM_CONTROLLER;
-                case ANIM_STATE_IDLE -> IDLE_CONTROLLER;
-                case ANIM_STATE_WALK -> WALK_CONTROLLER;
-                case ANIM_STATE_SPRINT -> SPRINT_CONTROLLER;
-                case ANIM_STATE_JUMP -> JUMP_CONTROLLER;
-                case ANIM_STATE_FALL -> FALL_CONTROLLER;
-                case ANIM_STATE_ATTACK -> ATTACK_CONTROLLER;
-                case ANIM_STATE_MINING -> MINING_CONTROLLER;
-                case ANIM_STATE_FLYING -> FLYING_CONTROLLER;
-                case ANIM_STATE_SLEEP -> SLEEP_CONTROLLER;
-                case ANIM_STATE_CRAWL -> CRAWL_CONTROLLER;
-                default -> null;
-            };
+            switch (animStateEnum) {
+                case ANIM_STATE_SWIM:
+                    return SWIM_CONTROLLER;
+                case ANIM_STATE_IDLE:
+                    return IDLE_CONTROLLER;
+                case ANIM_STATE_WALK:
+                    return WALK_CONTROLLER;
+                case ANIM_STATE_SPRINT:
+                    return SPRINT_CONTROLLER;
+                case ANIM_STATE_JUMP:
+                    return JUMP_CONTROLLER;
+                case ANIM_STATE_FALL:
+                    return FALL_CONTROLLER;
+                case ANIM_STATE_ATTACK:
+                    return ATTACK_CONTROLLER;
+                case ANIM_STATE_MINING:
+                    return MINING_CONTROLLER;
+                case ANIM_STATE_FLYING:
+                    return FLYING_CONTROLLER;
+                case ANIM_STATE_SLEEP:
+                    return SLEEP_CONTROLLER;
+                case ANIM_STATE_CRAWL:
+                    return CRAWL_CONTROLLER;
+                case ANIM_STATE_USE_ITEM:
+                    return USE_VANILLA_CONTROLLER;
+                case ANIM_STATE_BLOCK_SHIELD:
+                    return USE_VANILLA_CONTROLLER;
+                default:
+                    return null;
+            }
         }
         return super.getAnimStateController(player, animSystemData, animStateID);
     }

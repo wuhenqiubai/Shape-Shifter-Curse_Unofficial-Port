@@ -7,7 +7,9 @@ import net.fabricmc.fabric.api.networking.v1.FriendlyByteBufs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnJumpPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.JumpEventCondition;
+import net.onixary.shapeShifterCurseFabric.additional_power.SneakingJumpClashPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.TripleJumpPower;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
@@ -36,11 +38,24 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 FriendlyByteBuf buf = FriendlyByteBufs.create();
                 buf.writeUUID(player.getUUID());
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID), buf));
+            } else {
+                // 服务端权威执行，不要再绕 JUMP_EVENT 包。
+                // 1.21.11 里客户端对普通跳跃不再走 jumpFromGround（只有切换飞行能力时才会），
+                // 跳跃改由服务端在处理 ServerboundMovePlayerPacket 时调用 jumpFromGround()
+                // （ServerGamePacketListenerImpl：以 player.onGround() 为真为前提）——
+                // 此刻玩家仍在地面，条件里的 apoli:on_block 能通过。
+                // 若改回「客户端发包、服务端收包后执行」，包到达时跳跃已被应用、玩家已离地，
+                // on_block 必然为假（实测 pass=false, onGround=false），action 永不执行。
+                PowerHolderComponent.getPowers(player, ActionOnJumpPower.class).forEach(ActionOnJumpPower::executeAction);
+                PowerHolderComponent.getPowers(player, SneakingJumpClashPower.class).forEach(sneakingJumpClashPower -> sneakingJumpClashPower.jumpTicks = 5);
             }
         }
     }
 
-    @ModifyReturnValue(method = "getJumpPower", at = @At("RETURN"))
+    // ⚠ 必须带完整描述符：LivingEntity 上 getJumpPower 有无参与带参两个重载
+    // （getJumpPower() / getJumpPower(float)），只写方法名会被 IDEA 判为 ambiguous，
+    // 运行时也可能匹配到错误目标。这里要的是无参版本。
+    @ModifyReturnValue(method = "getJumpPower()F", at = @At("RETURN"))
     private float modifyJumpVelocity(float originalVelocity) {
         LivingEntity entity = (LivingEntity) (Object) this;
 
@@ -62,7 +77,7 @@ public abstract class LivingEntityJumpMixin implements IJumpController {
                 .orElse(originalVelocity);
     }
 
-    @Inject(method = "getJumpPower", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getJumpPower()F", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocity(CallbackInfoReturnable<Float> cir) {
         if (this.noJumpTick > 0) {
             cir.setReturnValue(0.0F);

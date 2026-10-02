@@ -74,8 +74,9 @@ public class CapeFeatureRendererMixin {
         }
     }
 
-    // TODO: 1.21.11 CapeLayer.submit 中无 Axis.rotationDegrees 调用，
-    // modifyXRotationAngle（钳制披风 X 旋转角度）逻辑暂不可用，待迁移到 PlayerCapeModel.setupAnim
+    // [已迁移，勿再当作待办] 1.21.11 的 CapeLayer.submit 中已无 Axis.rotationDegrees 调用
+    // （披风摆动计算整体搬到了 PlayerCapeModel.setupAnim），原 modifyXRotationAngle 无法在此注入。
+    // 钳制逻辑已迁至 PlayerCapeModelMixin.ssc$clampCapeXRotation，语义与 1.21.1 一致。
 
     // helper func
     @Unique

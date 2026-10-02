@@ -28,16 +28,21 @@ public class AnimationHolder {
     @Nullable private EasingType easingType;
     private boolean skipFade;
 
-    public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed) {
+    public @Nullable Identifier animationID;
+
+    public AnimationHolder(@Nullable Identifier animation_id, boolean isEnabled, float speed) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, 5);
+        this.animationID = animation_id;
     }
 
-    public AnimationHolder(Identifier animation_id, boolean isEnabled) {
+    public AnimationHolder(@Nullable Identifier animation_id, boolean isEnabled) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, 1.0f, 2);
+        this.animationID = animation_id;
     }
 
-    public AnimationHolder(Identifier animation_id, boolean isEnabled, float speed, int fade) {
+    public AnimationHolder(@Nullable Identifier animation_id, boolean isEnabled, float speed, int fade) {
         this(PlayerAnimResources.getAnimation(animation_id), isEnabled, speed, fade);
+        this.animationID = animation_id;
     }
 
     public AnimationHolder(@Nullable Animation animation, boolean isEnabled, float speed, int fade) {
@@ -45,6 +50,7 @@ public class AnimationHolder {
         this.animation = animation;
         this.speed = speed;
         this.fade = fade;
+        this.animationID = null;
     }
 
     public AnimationHolder(@Nullable Animation animation, boolean isEnabled) {

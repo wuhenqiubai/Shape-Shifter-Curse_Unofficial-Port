@@ -13,7 +13,6 @@ public final class TransformFX implements ClientTickEvents.EndTick {
     public static final TransformFX INSTANCE = new TransformFX();
     private final Minecraft mc = Minecraft.getInstance();
 
-    // TODO(2026-08-04)：黑屏渐变放弃 post shader（Satin/PostChain 与 iris 兼容极差），改用 TransformOverlay
     // （HudRenderCallback + GuiGraphics 叠加层）实现：进入渐变由 TransformManager 每帧驱动 strength，
     // 退出渐变在 TransformOverlay.renderHud 每帧衰减（setEnableOverlay(false) 后平滑淡出）。
     // TRANSFORM_EFFECT_SHADER_ID 保留仅作记录。

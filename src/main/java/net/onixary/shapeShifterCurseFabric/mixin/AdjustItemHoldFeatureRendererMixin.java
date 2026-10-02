@@ -18,6 +18,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -91,6 +92,7 @@ public abstract class AdjustItemHoldFeatureRendererMixin<S extends ArmedEntityRe
         }
     }
 
+    @Unique
     private boolean shouldHideItem(S armedEntityRenderState) {
         // 1.21.11 渲染状态中无法直接拿到实体，通过 AvatarRenderState 的实体 id 反查
         if (armedEntityRenderState instanceof AvatarRenderState avatarRenderState

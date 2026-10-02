@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
@@ -92,5 +93,16 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         this.onScrollWidget(mouseX, mouseY, verticalAmount);
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
+            return true;
+        } else if (this.minecraft.options.keyInventory.matches(keyEvent)) {
+            this.onClose();
+            return true;
+        }
+        return false;
     }
 }

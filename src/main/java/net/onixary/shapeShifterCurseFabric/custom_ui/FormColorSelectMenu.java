@@ -9,6 +9,7 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.texture.DynamicTexture;
@@ -35,6 +36,8 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -1032,11 +1035,19 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
-        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
-        // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
-        // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在背景框内的位置由 y 参数补偿。
-        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        // 1.21.11: 同 FormUpgradeScreen —— 新签名收「矩形区域 + 鼠标绝对坐标」，
+        // bodyRot/yRot 的鼠标跟随由原版内部完成，且改用 render state 不改写实体自身状态。
+        // 1.21.11: 新签名收「矩形区域 + 鼠标绝对坐标」。该矩形是实体的渲染视口（画中画裁剪区），
+        // 给成 size×size 会把模型裁掉；按原版 InventoryScreen 的比例（49x70 配 size=30）换算：
+        // 半宽 ≈ size*0.817、半高 ≈ size*1.167。
+        // 另外 1.21.1 的 (x,y) 是绘制【原点】（实体自该点向上画，见 renderEntityInInventory 的
+        // pose.translate + vector3f.y=bbHeight/2），而此处的矩形中心是显示基准 → 需上移约半个身高。
+        InventoryScreen.extractEntityInInventoryFollowsMouse(
+                context,
+                x - size * 4 / 5, y - size * 7 / 6 - size / 2,
+                x + size * 4 / 5, y + size * 7 / 6 - size / 2,
+                size, 0.0625F,
+                mouseX, mouseY, entity);
     }
 
     private static int timer = 0;
@@ -1083,7 +1094,8 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         }
         // 20,5,60,120
         if (minecraftClient.player != null) {
-            RenderEntity(context, BPosX + 50, BPosY + 100, 30, BPosX + 50 - mouseX, BPosY + 100 - mouseY, minecraftClient.player);
+            // mouseX/mouseY 改传绝对值：1.21.11 的签名内部自行做「矩形中心 - 鼠标」的换算
+            RenderEntity(context, BPosX + 50, BPosY + 100, 30, mouseX, mouseY, minecraftClient.player);
         }
         super.extractRenderState(context, mouseX, mouseY, delta);
     }
@@ -1522,6 +1534,17 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     @Override
     public boolean keepOriginalSkin() {
         return this.keepOriginalSkin;
+    }
+
+    @Override
+    public boolean keyPressed(KeyEvent keyEvent) {
+        if (super.keyPressed(keyEvent)) {
+            return true;
+        } else if (this.minecraft.options.keyInventory.matches(keyEvent)) {
+            this.onClose();
+            return true;
+        }
+        return false;
     }
 
     @Override

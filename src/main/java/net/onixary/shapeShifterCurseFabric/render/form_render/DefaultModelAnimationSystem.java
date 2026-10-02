@@ -389,6 +389,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             JsonObject extraPartsMap = json.getAsJsonObject("extra_parts_map");
             for (String key : extraPartsMap.keySet()) {
                 this.extraPartsMap.add(new Tuple<>(key, extraPartsMap.get(key).getAsString()));
+                // 顺手把这些「动画侧骨骼名」登记到全局集合，由 PlayerEntityAnimOverrideMixin 注册进 PAL 控制器。
+                // PAL 只认注册过的骨骼名，未注册的在 get3DTransformRaw 里会被静默返回零值 → 该骨骼无动画。
+                // 这里存归一化后的名字，与 AnimSystem 的查询侧保持同一套规则。
+                AnimSystem.EXTRA_ANIM_BONES.add(AnimSystem.normalizeAnimBoneName(key));
             }
         }
         this.leftArmGeoBoneID = "bipedLeftArm";
@@ -483,10 +487,25 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     public void ProcessExtraBone(FormModel m, Player player, String AnimBoneID, String OriginFursBoneID) {
         GeoBone bone =  m.resetBone(OriginFursBoneID);
         Vec3f AnimPosition = AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.POSITION, new Vec3f(0, 0, 0));
-        // GeckoLib 渲染骨骼时仅对 posX 取反 (translateMatrixToBone: translate(-posX, posY, posZ))，posY/posZ 不取反。
-        // 因此存储阶段必须预取反 X 以抵消渲染层翻转；Y/Z 取反则是补偿 vanilla与GeoBone 的轴向差异。
-        // 之前漏掉了 X 的取反，导致所有额外骨骼的左右(X)位移动画在游戏中反向。
-        m.setPositionForBone(OriginFursBoneID, new Vec3(-AnimPosition.x(), -AnimPosition.y(), -AnimPosition.z()));
+        // X/Z 取反，Y 的符号**按后端分派**（见下）。
+        //
+        // 推导用的是两条已核对的「表示法转换」，以 ModelPart 为中间表示复合：
+        //   ① 已观察正常的 vanilla 骨骼路径：GeoBone = -ModelPart 偏移（FormRenderUtils.getPartPosition 的 .reverse()，三轴全负）
+        //   ② PAL 自己的转换 RenderUtil.translatePartToBone：ModelPart 偏移 = (p.x, -p.y, p.z)  （只有 Y 取反）
+        // PAL 下复合得 GeoBone = (-p.x, +p.y, -p.z)。
+        //
+        // **为什么 Y 必须分派**：PlayerAnimator 的位置 Y 相对 PAL 在 Y 上整体反号（上游 1.20.1 用的就是 PA），
+        // 所以两个后端要用相反的系数才能得到同一个 ModelPart 偏移：
+        //   PA  路径 → (-x, -y, -z)   与官方 master 的写法一致
+        //   PAL 路径 → (-x, +y, -z)
+        // 硬编码成任一边，切到另一边时额外骨骼的位移动画就会在 Y（上下）方向整体镜像。
+        // 历史：24786162 迁移到 PAL 后这行是 (-x,-y,-z)，3f42d62d 才为 PAL 补上 Y 的取反 ——
+        // 加回 PA 路径时若忘了分派，就会重现「蜘蛛额外肢体上下动反」。
+        //
+        // 注：Z 保留取反是沿用原实现。另有一条只比较两库 translate 调用的推导会得出「Z 也不该取反」，
+        // 但那个推导假设两库的 translate 处于同一空间（GeckoLib 的 -posX 怪癖说明并非如此），故未采信。
+        // 实测中若发现额外骨骼在前后（Z）方向也镜像，把这里 z 的符号翻过来即可。
+        m.setPositionForBone(OriginFursBoneID, new Vec3(-AnimPosition.x(), AnimPosition.y(), -AnimPosition.z()));
         m.setRotationForBone(OriginFursBoneID, AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.ROTATION, new Vec3f(0, 0, 0)));
         m.invertRotForPart(OriginFursBoneID, false, true, true);
     }
@@ -747,6 +766,12 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         td.tailDragAmount -= (float) (Math.toRadians((player.yBodyRot - player.yBodyRotO)) * 0.55F);
         td.tailDragAmount = Mth.clamp(td.tailDragAmount, -1.6F, 1.6F);
         float verticalSpeed = (float) player.getDeltaMovement().y;
+        // 连动量都没同步好 MC到底都同步了什么
+        if (!player.isLocalPlayer() && player instanceof ICanGetLastPos iCanGetLastPos) {
+            double nowPosY = player.position().y;
+            double prevPosY = iCanGetLastPos.shape_shifter_curse_fabric$getLastPosY();
+            verticalSpeed = (float) (nowPosY - prevPosY);
+        }
         float targetVerticalDrag = Mth.clamp(verticalSpeed * 1.5f, -1.6f, 1.6f);
         td.tailDragAmountVertical *= 0.8F;
         td.tailDragAmountVertical += targetVerticalDrag * 0.15F;

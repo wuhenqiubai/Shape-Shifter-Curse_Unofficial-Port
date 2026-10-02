@@ -7,6 +7,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 
@@ -28,8 +29,8 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
     }
 
     @Override
-    public @NonNull RecipeType<? extends Recipe<RecipeInput>> getType() {
-        return RecipeUtils.Altar_RECIPE;
+    public @NotNull RecipeType<? extends Recipe<RecipeInput>> getType() {
+        return RecipeUtils.ALTER_RECIPE;
     }
 
     public abstract int recipeTime();

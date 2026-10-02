@@ -1,10 +1,34 @@
 plugins {
-    id 'net.fabricmc.fabric-loom' version '1.17.19'
+    // 版本在 settings.gradle 的 pluginManagement.plugins 里统一钉死（loom 只能有一个版本在 classpath 上）
+    id 'net.fabricmc.fabric-loom-remap'
     id 'maven-publish'
 }
 
 version = "${project.mod_version}${project.special_build_version}+${minecraft_version}"
 group = project.maven_group
+
+// Apoli / Calio 的源码已并入本仓库（见 settings.gradle）。monorepo 下各模块自持版本号没有意义，
+// 这里统一成 SSCU 的 group + version —— 发布坐标因此是
+// net.wuhenqiubai:{shape-shifter-curse-unofficial, Apoli-Legacy, Calio-Legacy}:<同一个版本>。
+// ⚠ 子项目自己的 build 脚本里不能再写 version/group，否则会覆盖这里。
+subprojects {
+    version = rootProject.version
+    group = rootProject.group
+}
+
+// 不发布 Gradle Module Metadata(.module)。
+//
+// 原因：JitPack 改写 .module 时拿「仓库名」当 module 名，而本仓库是多构件 monorepo
+// （Apoli-Legacy / Calio-Legacy / shape-shifter-curse-unofficial / shape-shifter-curse-bom），
+// 没有一个等于仓库名 → 四个构件的 .module 组件坐标全都对不上消费者请求的坐标。
+// Gradle 读 .module 优先于 .pom，于是直接报 "inconsistent module metadata found"，
+// 导致 JitPack 上的四个构件对任何消费者都解析不了（POM 的坐标反而是对的，JitPack 改写正确）。
+//
+// ⚠ bom/build.gradle 里不要把这个开关重新打开，否则 bom 在 JitPack 上照样解析不了；
+//   BOM 的约束本来就是靠 POM 的 <dependencyManagement> 传的，不依赖 .module。
+allprojects {
+    tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
+}
 
 // 从Github Action 环境获取构建Channel和BuildVersion
 def channel = System.getenv('channel')
@@ -15,22 +39,10 @@ if (channel == null || build_version == null) {
 }
 
 base {
-    archivesName = "${project.archives_base_name}"
+    archivesName = project.archives_base_name
 }
 
 loom {
-    runs {
-        client {
-            programArgs([
-                    "--username", "Dev",
-                    "--uuid", "12345678-1234-1234-1234-123456789012"
-            ])
-            runDir "run/client"
-        }
-        server {
-            runDir "run/server"
-        }
-    }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
 }
 
@@ -61,8 +73,7 @@ repositories {
         }
 
     }
-
-    // (Neo)ForgeMaven
+    // CurseMaven
     exclusiveContent {
         forRepository {
             maven {
@@ -73,7 +84,6 @@ repositories {
             includeGroup "curse.maven"
         }
     }
-
     maven {
         name = "Ladysnake Mods"
         url = "https://maven.ladysnake.org/releases"
@@ -146,10 +156,15 @@ dependencies {
 
     implementation "com.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
 
-    implementation "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
-    include "io.github.apace100:Apoli-Legacy:${project.apoli_version}"
+    // Apoli-Legacy（本仓库子项目，源码已并入；Calio 由它自己传递进来）
+    // ⚠ 同级 loom 项目必须用 `configuration: "namedElements"`（未 remap 的 dev 产物），
+    //   用 `modApi project(":apoli")` 会让 loom 去读 :apoli 的 remap 产物 build/libs/*.jar，
+    //   而那个文件在配置期还不存在 → "Failed to setup Minecraft ... NoSuchFileException"。
+    //   用 api（而非 modApi）也是为了让它以 compile 作用域进发布元数据，Addon 才能只声明 SSCU 传递拿到 Apoli。
+    api project(path: ":apoli", configuration: "namedElements")
+    include project(":apoli")
 
-    api ("curse.maven:pehkuirebuilt-1639070:8730684")
+    modImplementation "maven.modrinth:pehkui-rebuilt:${project.pehkui_version}-fabric"
 
     implementation "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
     include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
@@ -188,6 +203,10 @@ processResources {
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
+    // Curios 兼容层已改为 src 源码编译（mixin/forge/CurioImpl.java 等），resources 里残留的上游预编译 .class
+    // 会与编译产物在 jar 里重名冲突，打包时排除（源码保存在 src/main/resources 不变，仅不进 jar）。
+    exclude "net/onixary/shapeShifterCurseFabric/mixin/forge/*.class"
+
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
                 "minecraft_version": project.minecraft_version,
@@ -208,7 +227,6 @@ tasks.withType(JavaCompile).configureEach {
         it.options.release.set(targetJavaVersion)
     }
     options.deprecation = false
-    // -Xmaxerrs 提高 javac 报错上限（默认为 100）。
     options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
 }
 
@@ -221,9 +239,25 @@ java {
     withSourcesJar()
 }
 
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}" }
+
+// 代码为 MIT，模型/贴图/动画等资源为 CC BY-NC 4.0，两份协议都要随产物分发
+def licenseFiles = [
+        "LICENSE.txt"              : "LICENSE_${project.base.archivesName.get()}.txt",
+        "LICENSE-CC-BY-NC-4.0.txt" : "LICENSE-CC-BY-NC-4.0_${project.base.archivesName.get()}.txt",
+        "LICENSING.md"             : "LICENSING_${project.base.archivesName.get()}.md",
+        "THIRD-PARTY-NOTICES.md"   : "THIRD-PARTY-NOTICES_${project.base.archivesName.get()}.md",
+]
+
+// 同时覆盖 dev 产物与 remap 后的产物（jar / sourcesJar / remapJar / remapSourcesJar）
+// duplicatesStrategy 说明：remapJar/remapSourcesJar 会继承 jar/sourcesJar 的输出，而后者已经带上这 4 个
+// 协议文件，所以这里再加一次必然重名。Gradle 9 默认对重复条目直接报错（BUILD FAILED），设成 EXCLUDE
+// 让先到的那份生效 —— 两边取自同一个源文件，内容完全相同，无副作用。
+tasks.matching { it.name in ["jar", "sourcesJar", "remapJar", "remapSourcesJar"] }.configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    licenseFiles.each { source, target ->
+        from(source) {
+            rename { target }
+        }
     }
 }
 

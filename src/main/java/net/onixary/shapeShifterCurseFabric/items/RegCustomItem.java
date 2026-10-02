@@ -21,9 +21,9 @@ import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
-import java.util.function.Function;
 
 public class RegCustomItem {
     private RegCustomItem(){}
@@ -87,6 +87,14 @@ public class RegCustomItem {
     public static final Item WEB_PROJECTILE = register("web_projectile", Item::new);
     public static final Item SILK_DEW = register("silk_dew", SilkDew::new);
 
+    public static final Item RIPPLE_MIRROR = register("ripple_mirror", RippleMirror::new);
+
+    public static ItemStack buildPotion(Item PotionItem, Potion potion) {
+        ItemStack potionStack = new ItemStack(PotionItem);
+        potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
+        return potionStack;
+    }
+
     public static final CreativeModeTab SSC_GROUP = new CreativeModeTab.Builder(CreativeModeTab.Row.TOP, 0)
             .icon(() -> new ItemStack(ICON_CURSED_MOON))
             .title(Component.translatable("itemGroup.shape_shifter_curse.sscitems"))
@@ -135,11 +143,12 @@ public class RegCustomItem {
                 entries.accept(AUXILIARY_AXE);
                 entries.accept(SELECT_FORM_ITEM);
                 entries.accept(SILK_DEW);
+                entries.accept(RIPPLE_MIRROR);
                 // 方块物品注册
                 entries.accept(MOONDUST_CRYSTAL_GRIT);
                 entries.accept(WEB_COMPOSTER);
                 entries.accept(DEW_COVERED_COBWEB);
-                entries.accept(Altar_BLOCK);
+                entries.accept(ALTER_BLOCK);
                 entries.acceptAll(buildAllPotions(
                         RegCustomPotions.MOONDUST_POTION,
                         RegCustomPotions.BAT_FORM_POTION,
@@ -175,12 +184,6 @@ public class RegCustomItem {
             potionStacks.add(buildPotion(Items.TIPPED_ARROW, potion));
         }
         return potionStacks;
-    }
-
-    public static ItemStack buildPotion(Item PotionItem, Potion potion) {
-        ItemStack potionStack = new ItemStack(PotionItem);
-        potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
-        return potionStack;
     }
 
     public static <T extends Item> T register(String path, Function<Item.Properties, T> factory) {

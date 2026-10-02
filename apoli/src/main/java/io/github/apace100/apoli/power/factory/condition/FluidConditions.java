@@ -1,0 +1,48 @@
+package io.github.apace100.apoli.power.factory.condition;
+
+import io.github.apace100.apoli.Apoli;
+import io.github.apace100.apoli.data.ApoliDataTypes;
+import io.github.apace100.apoli.registry.ApoliRegistries;
+import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.FluidState;
+
+import java.util.List;
+
+public class FluidConditions {
+
+    @SuppressWarnings("unchecked")
+    public static void register() {
+        register(new ConditionFactory<>(Apoli.identifier("constant"), new SerializableData()
+            .add("value", SerializableDataTypes.BOOLEAN),
+            (data, fluid) -> data.getBoolean("value")));
+        register(new ConditionFactory<>(Apoli.identifier("and"), new SerializableData()
+            .add("conditions", ApoliDataTypes.FLUID_CONDITIONS),
+            (data, fluid) -> ((List<ConditionFactory<FluidState>.Instance>)data.get("conditions")).stream().allMatch(
+                condition -> condition.test(fluid)
+            )));
+        register(new ConditionFactory<>(Apoli.identifier("or"), new SerializableData()
+            .add("conditions", ApoliDataTypes.FLUID_CONDITIONS),
+            (data, fluid) -> ((List<ConditionFactory<FluidState>.Instance>)data.get("conditions")).stream().anyMatch(
+                condition -> condition.test(fluid)
+            )));
+
+        register(new ConditionFactory<>(Apoli.identifier("empty"), new SerializableData(),
+            (data, fluid) -> fluid.isEmpty()));
+        register(new ConditionFactory<>(Apoli.identifier("still"), new SerializableData(),
+            (data, fluid) -> fluid.isSource()));
+        register(new ConditionFactory<>(Apoli.identifier("in_tag"), new SerializableData()
+            .add("tag", SerializableDataTypes.FLUID_TAG),
+            (data, fluid) -> fluid.holder().is((TagKey<Fluid>) data.get("tag"))));
+        register(new ConditionFactory<>(Apoli.identifier("fluid"), new SerializableData()
+            .add("fluid", SerializableDataTypes.FLUID),
+            (data, fluid) -> fluid.getType() == data.get("fluid")));
+    }
+
+    private static void register(ConditionFactory<FluidState> conditionFactory) {
+        Registry.register(ApoliRegistries.FLUID_CONDITION, conditionFactory.getSerializerId(), conditionFactory);
+    }
+}

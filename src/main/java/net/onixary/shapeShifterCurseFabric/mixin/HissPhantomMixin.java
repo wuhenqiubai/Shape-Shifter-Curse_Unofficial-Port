@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Phantom;
+import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.HissPhantomPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -10,6 +11,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.List;
 
 @Mixin(targets = "net.minecraft.world.entity.monster.Phantom$PhantomSweepAttackGoal")
 public class HissPhantomMixin {
@@ -24,11 +27,23 @@ public class HissPhantomMixin {
     @Inject(method = "canContinueToUse", at = @At("RETURN"), cancellable = true)
     private void shouldContinue(CallbackInfoReturnable<Boolean> cir) {
         LivingEntity livingEntity = phantomEntity.getTarget();
-        if (cir.getReturnValueZ()) {
+        if (cir.getReturnValueZ() && livingEntity != null) {
             HissPhantomPower power = PowerHolderComponent.getPowers(livingEntity, HissPhantomPower.class).stream().findFirst().orElse(null);
             if (power != null && power.isActive()) {
                 power.invokeAction(livingEntity, phantomEntity);
                 cir.setReturnValue(false);
+                return;
+            }
+            List<Player> entities = phantomEntity.level().getEntitiesOfClass(Player.class, livingEntity.getBoundingBox().inflate(8.0f));
+            if (!entities.isEmpty()) {
+                for (Player playerEntity : entities) {
+                    HissPhantomPower otherPower = PowerHolderComponent.getPowers(playerEntity, HissPhantomPower.class).stream().findFirst().orElse(null);
+                    if (otherPower != null && otherPower.isActive()) {
+                        otherPower.invokeAction(playerEntity, phantomEntity);
+                        cir.setReturnValue(false);
+                        return;
+                    }
+                }
             }
         }
     }

@@ -45,7 +45,11 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     // data slot 网络用 16-bit(short) 传输，值域 [-32768,32767]；而 fuelTime 可累积到 102400 超上限，
     // 超过 32767 会被 writeShort 截断成负值 → 客户端燃料条"消失-重涨"。
     // 按原作者建议：用 2 个 short 无损拆分传输 fuelTime —— slot 2=低16位, slot 3=高16位，
-    // 客户端 getNowFuel() 拼回完整 int。getCount()/size() 相应从 3 增到 4。
+    // 客户端 getNowFuel() 拼回完整 int。getCount() 相应从 3 增到 4。
+    // ⚠ 这里不要写 `public int size()`：1.21 Mojmap 的 ContainerData 只有 get/set/getCount，
+    //   `size()` 是 1.20.1 Yarn 时代的遗留（已无调用方）。它会让匿名类同时存在 `size` 和
+    //   `method_17389`(=getCount)，下游用 Yarn 映射的模组（Addon）把 jar 从 intermediary remap 回
+    //   yarn 时两者都叫 size → tiny-remapper "Unfixable conflicts"，整个包 remap 失败。
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
@@ -56,8 +60,8 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public final ContainerData propertyDelegate;
 
     public static final int[] TOP = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    public static final int[] SIDE = {9};
-    public static final int[] BOTTOM = {10};
+    public static final int[] SIDE = {10};
+    public static final int[] BOTTOM = {11};
 
     public static final HashMap<Item, Integer> fuelTimeMap = new HashMap<>();
 
@@ -76,9 +80,9 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     public AltarBlockEntity(BlockPos blockPos, BlockState blockState) {
-        super(RegCustomBlock.Altar_BLOCK_ENTITY, blockPos, blockState);
-        this.inventory = NonNullList.withSize(11, ItemStack.EMPTY);
-        this.matchGetter = RecipeManager.createCheck(RecipeUtils.Altar_RECIPE);
+        super(RegCustomBlock.ALTER_BLOCK_ENTITY, blockPos, blockState);
+        this.inventory = NonNullList.withSize(12, ItemStack.EMPTY);
+        this.matchGetter = RecipeManager.createCheck(RecipeUtils.ALTER_RECIPE);
         this.propertyDelegate = new ContainerData() {
             public int get(int index) {
                 switch (index) {
@@ -110,10 +114,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
 
             }
 
-            public int size() {
-                return 4;
-            }
-
             public int getCount() {
                 return 4;
             }
@@ -121,12 +121,12 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     }
 
     @Override
-    protected Component getDefaultName() {
+    protected @NotNull Component getDefaultName() {
         return Component.translatable("block.shape-shifter-curse.altar");
     }
 
     @Override
-    protected AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
+    protected @NotNull AbstractContainerMenu createMenu(int syncId, Inventory playerInventory) {
         return new AltarCraftUIHandler(RegMenuType.AltarCraftUI, syncId, playerInventory, this, ContainerLevelAccess.NULL, this.propertyDelegate);
     }
 
@@ -143,8 +143,9 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
         return switch (slot) {
             case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> true;
-            case 9 -> canFuel(stack);
-            case 10 -> false;
+            case 9 -> false;
+            case 10 -> canFuel(stack);
+            case 11 -> false;
             default -> false;
         };
     }
@@ -297,11 +298,11 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.matches(this.craftInput(), world) || !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
-        ItemStack output = this.nowRecipe.assemble(this.craftInput());
-        if (output.isEmpty() || this.inventory.get(10).isEmpty()) {
+        ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
+        if (output.isEmpty() || this.inventory.get(11).isEmpty()) {
             return true;
         }
-        ItemStack outputSlot = this.inventory.get(10);
+        ItemStack outputSlot = this.inventory.get(11);
         if (!ItemStack.isSameItemSameComponents(output, outputSlot)) {
             return false;
         }
@@ -313,10 +314,10 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     private boolean craftRecipe(RegistryAccess registryManager) {
         if (canCraftRecipe(registryManager)) {
-            ItemStack output = this.nowRecipe.assemble(this.craftInput());
-            ItemStack outputSlot = this.inventory.get(10);
+            ItemStack output = this.nowRecipe.assemble(this.craftInput(), registryManager);
+            ItemStack outputSlot = this.inventory.get(11);
             if (outputSlot.isEmpty()) {
-                this.inventory.set(10, output.copy());
+                this.inventory.set(11, output.copy());
             } else if (ItemStack.isSameItemSameComponents(output, outputSlot)) {
                 outputSlot.grow(output.getCount());
             } else {
@@ -345,7 +346,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             needCheckRecipe = false;
         }
         boolean itemChanged = false;
-        ItemStack fuel = this.inventory.get(9);
+        ItemStack fuel = this.inventory.get(10);
         if (!fuel.isEmpty()) {
             int fuelRealTime = getFuelTime(fuel);
             if (fuelRealTime > 0 && this.fuelTime + fuelRealTime <= maxFuel) {

@@ -7,7 +7,11 @@ import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimState
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateControllerDP;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimUtils;
+import net.onixary.shapeShifterCurseFabric.util.util.DataDumper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class SwimAnimController extends AbstractAnimStateControllerDP {
     private AnimUtils.AnimationHolderData animationHolderData1;
@@ -46,5 +50,10 @@ public class SwimAnimController extends AbstractAnimStateControllerDP {
         this.animationHolderData1 = AnimUtils.readAnimInJson(jsonObject, "anim", null);
         this.animationHolderData2 = AnimUtils.readAnimInJson(jsonObject, "swimAnim", null);
 	    return null;
+    }
+
+    @Override
+    public @NotNull List<AnimationHolder> getAllAnimations() {
+        return DataDumper.buildList(animationHolder1, animationHolder2);
     }
 }

@@ -51,13 +51,6 @@ public class OriginsPowerTypes {
 		                data.get("entity_action_chosen"),
                     data.getBoolean("execute_chosen_when_orb")))
             .allowCondition());
-
-	    // apoli:modify_type_tag —— 曾用于让实体被视作属于某个 entity_type tag（替代被删的 apoli:entity_group）。
-	    // 26.1 移植时确认整条链已死，故连同 ModifyTypeTagPower 一起删除：
-	    //   ① EntityType#is(TagKey) 被移除，检查搬到了 TypedInstance#is（接口 default 方法）——
-	    //      不在 Entity 字节码里，无法再按原方式 @Mixin(Entity.class) 拦截；
-	    //   ② CURRENT_ENTITY 一直没有设置者（其设置者 InTagConditionMixin 早已移除），效果本就不生效；
-	    //   ③ 数据早已切回 Legacy 原生的 apoli:entity_group（aquatic/arthropod 枚举值），且全项目零引用。
     }
 
     private static void register(PowerFactory<?> serializer) {
