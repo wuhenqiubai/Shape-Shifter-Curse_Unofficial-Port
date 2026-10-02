@@ -216,7 +216,7 @@ public class FormUtils {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm form = playerFormComponent.nowForm;
         form.applyScale(player);
-        Tuple<ResourceLocation, ResourceLocation> layerPair = form.getFormLayer();
+        Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
         applyLayer(player, layerPair);
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();

@@ -12,7 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Optional;
 
 public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapelessRecipe> {
-    private static final ResourceLocation TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/altar_craft_ui.png");
+    private static final Identifier TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/altar_craft_ui.png");
 
     private final IDrawable background;
     private final IDrawable arrow;
@@ -78,10 +78,8 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
             builder.addInputSlot(84, 53);
         }
 
-        RegistryAccess drm = Minecraft.getInstance().level != null
-                ? Minecraft.getInstance().level.registryAccess()
-                : RegistryAccess.EMPTY;
-        builder.addOutputSlot(134, 35).addItemStack(recipe.getResultItem(drm));
+        // 1.21.11: Recipe 接口移除了 getResultItem(Provider)，直接用配方自身的 output 字段
+        builder.addOutputSlot(134, 35).addItemStack(recipe.output);
     }
 
     @Override
@@ -94,7 +92,7 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
         }
     }
 
-    private Component getAdvancementName(ResourceLocation id) {
+    private Component getAdvancementName(Identifier id) {
         Minecraft client = Minecraft.getInstance();
         if (client.getConnection() != null) {
             // 1.21.1: Advancement 是 record，display() 返回 Optional<DisplayInfo>；进度未加载时 get(id) 返回 null

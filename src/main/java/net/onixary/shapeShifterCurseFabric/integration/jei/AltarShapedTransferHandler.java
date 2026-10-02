@@ -67,8 +67,14 @@ public class AltarShapedTransferHandler implements IRecipeTransferHandler<AltarC
         // targetSlots 的 stride 是祭坛 GUI 的 3 列；ingredients 的 stride 是 pattern 的紧凑宽度
         for (int row = 0; row < recipe.pattern.height(); row++) {
             for (int col = 0; col < recipe.pattern.width(); col++) {
+                // 1.21.11: ingredients() 返回 List<Optional<Ingredient>>，空位即 empty（Ingredient.EMPTY 已移除）。
+                // 空位不入列表，从而保持 targetSlots 与 ingredients 下标一一对应。
+                Optional<Ingredient> ing = recipe.pattern.ingredients().get(col + row * recipe.pattern.width());
+                if (ing.isEmpty()) {
+                    continue;
+                }
                 targetSlots.add(col + row * 3);
-                ingredients.add(recipe.pattern.ingredients().get(col + row * recipe.pattern.width()));
+                ingredients.add(ing.get());
             }
         }
 

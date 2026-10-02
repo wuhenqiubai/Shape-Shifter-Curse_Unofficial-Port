@@ -214,7 +214,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         if (player.level().isClientSide()) {
             InstinctUtils.fromInstinctUpdate(instinctValue, instinctRate);
             if (tag.contains("isFlying")) {
-                this.isFlying = tag.getBoolean("isFlying");
+                // 1.21.11: CompoundTag.getBoolean 返回 Optional<Boolean>
+                this.isFlying = tag.getBoolean("isFlying").orElse(false);
             }
         } else {
             this.isFlying = player.getAbilities().flying;

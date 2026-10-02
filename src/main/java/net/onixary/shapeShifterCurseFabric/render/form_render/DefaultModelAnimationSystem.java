@@ -21,7 +21,6 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
-import net.onixary.shapeShifterCurseFabric.player_animator.PlayerAnimatorCompat;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.render.form_render.sub_controller.FormEyeBlinkController;
@@ -506,8 +505,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         // 注：Z 保留取反是沿用原实现。另有一条只比较两库 translate 调用的推导会得出「Z 也不该取反」，
         // 但那个推导假设两库的 translate 处于同一空间（GeckoLib 的 -posX 怪癖说明并非如此），故未采信。
         // 实测中若发现额外骨骼在前后（Z）方向也镜像，把这里 z 的符号翻过来即可。
-        double yScale = PlayerAnimatorCompat.available() ? -1.0 : 1.0;
-        m.setPositionForBone(OriginFursBoneID, new Vec3(-AnimPosition.x(), yScale * AnimPosition.y(), -AnimPosition.z()));
+        m.setPositionForBone(OriginFursBoneID, new Vec3(-AnimPosition.x(), AnimPosition.y(), -AnimPosition.z()));
         m.setRotationForBone(OriginFursBoneID, AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.ROTATION, new Vec3f(0, 0, 0)));
         m.invertRotForPart(OriginFursBoneID, false, true, true);
     }

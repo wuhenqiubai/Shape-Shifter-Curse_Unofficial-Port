@@ -48,7 +48,8 @@ public class WebComposterRecipe {
                 .filter(WebComposterBlock::canIncrease)
                 .map(itemStack -> {
                     float chance = WebComposterBlock.getIncreaseChance(itemStack);
-                    String ingredientUid = ingredientHelper.getUniqueId(itemStack, UidContext.Recipe);
+                    // 1.21.11: JEI 27 将 getUniqueId(...) 改名为 getUid(...)，且返回 Object
+                    String ingredientUid = String.valueOf(ingredientHelper.getUid(itemStack, UidContext.Recipe));
                     String ingredientUidPath = ResourceLocationUtil.sanitizePath(ingredientUid);
                     Identifier recipeUid = ShapeShifterCurseFabric.identifier("jei/web_composting/" + ingredientUidPath);
                     return new WebComposterRecipe(itemStack, chance, recipeUid);

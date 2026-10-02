@@ -14,7 +14,7 @@ import java.util.List;
 public abstract class AltarRecipe implements Recipe<RecipeInput> {
 
     @Override
-    public @NotNull RecipeType<?> getType() {
+    public @NotNull RecipeType<? extends Recipe<RecipeInput>> getType() {
         return RecipeUtils.ALTER_RECIPE;
     }
 

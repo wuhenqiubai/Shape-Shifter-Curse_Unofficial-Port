@@ -115,11 +115,6 @@ repositories {
     maven {
         url = "https://jitpack.io"
     }
-    // PlayerAnimator（可选依赖）
-    maven {
-        name = "KosmX's maven"
-        url = "https://maven.kosmx.dev/"
-    }
 
     //ModMenu
     maven {
@@ -166,18 +161,8 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:2.12.1'
 
-    //mappings loom.layered() {
-    //    officialMojangMappings()
-    //    parchment("org.parchmentmc.data:parchment-1.20.1:2023.09.03@zip")
-    //}
-
-    //Common 1.20.1+ Latest Only (unused - replaced by GeckoLib)
-
     //GeckoLib
-    modImplementation "software.bernie.geckolib:geckolib-fabric-${minecraft_version}:${geckolib_version}"
-
-    // satin shader 1.21.11没有
-//    modImplementation "org.ladysnake:satin:${satin_version}"
+    modImplementation "software.bernie.geckolib:geckolib-fabric-${project.minecraft_version}:${project.geckolib_version}"
 
     // Apoli-Legacy（本仓库子项目，源码已并入；Calio 由它自己传递进来）
     // ⚠ 同级 loom 项目必须用 `configuration: "namedElements"`（未 remap 的 dev 产物），
@@ -187,17 +172,16 @@ dependencies {
     api project(path: ":apoli", configuration: "namedElements")
     include project(":apoli")
 
-    // Pehkui-Rebuilt 3.8.5+1.21.11
-    modApi ("curse.maven:pehkuirebuilt-1639070:8670127")
+    modImplementation "maven.modrinth:pehkui-rebuilt:${project.pehkui_version}-fabric"
 
-    modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}") {
+    modApi("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    include "org.ladysnake.cardinal-components-api:cardinal-components-base:${cca_version}"
-    modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}") {
+    include "org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}"
+    modApi("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${cca_version}"
+    include "org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
     modApi("me.shedaniel.cloth:cloth-config-fabric:${project.clothconfig_version}") {
         exclude(group: "net.fabricmc.fabric-api")
@@ -205,37 +189,33 @@ dependencies {
     //  Modmenu
     modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
     // Player Animation Library
-    modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
-
-    // PlayerAnimator
-    modCompileOnly "dev.kosmx.player-anim:player-animation-lib-fabric:${project.player_anim}"
+    modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:${project.pal_version}"
 
     // Trinkets
     modCompileOnly "maven.modrinth:trinkets-updated:${project.trinkets_version}"
 
-    modCompileOnly "maven.modrinth:iris:fDpuVzVr"
-    modCompileOnly "maven.modrinth:better-combat:MLmCv38Y"
-    modCompileOnly "maven.modrinth:first-person-model:EqDE0uC5"
-    modRuntimeOnly "maven.modrinth:first-person-model:EqDE0uC5"
+    modCompileOnly "maven.modrinth:iris:1.10.8+1.21.11-fabric"
+    modCompileOnly "maven.modrinth:better-combat:3.1.0+1.21.11-fabric"
+    modCompileOnly "maven.modrinth:first-person-model:2.7.3-fabric,1.21.11"
+    modRuntimeOnly "maven.modrinth:first-person-model:2.7.3-fabric,1.21.11"
 
     modCompileOnly "squeek.appleskin:appleskin-fabric:mc1.21.11-3.0.8"
     modLocalRuntime "squeek.appleskin:appleskin-fabric:mc1.21.11-3.0.8"
 
-    modCompileOnly "maven.modrinth:vivecraft:aWyVennV"
+    modCompileOnly "maven.modrinth:vivecraft:1.21.11-1.3.15-fabric"
 
 
     // Tough as nails
-    modCompileOnly "maven.modrinth:tough-as-nails:WPscGvLW"
+    modCompileOnly "maven.modrinth:tough-as-nails:21.11.0.4-fabric"
 
     // Presence Footsteps
-    modCompileOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
-    // modRuntimeOnly "maven.modrinth:presence-footsteps:1.11.2+1.21"
+    modCompileOnly "maven.modrinth:presence-footsteps:1.12.4+1.21.11-fabric"
+    // modRuntimeOnly "maven.modrinth:presence-footsteps:1.12.4+1.21.11-fabric"
 
      modCompileOnly "maven.modrinth:biomes-o-plenty:wfaWqpie"
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
-     modImplementation "maven.modrinth:jei:HWSzfi9w" //JEI 19.44.0.401 for Fabric 1.21.1
-//    modImplementation "curse.maven:jei-238222:8622779"
+     modImplementation "maven.modrinth:jei:${project.jei_version}-fabric"
 }
 
 processResources {

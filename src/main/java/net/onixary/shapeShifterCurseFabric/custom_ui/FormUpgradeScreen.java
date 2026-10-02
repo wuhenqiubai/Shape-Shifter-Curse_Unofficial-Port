@@ -183,7 +183,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             }
         }).pos(baseX + PERK_INFO_GAIN_BUTTON_X, baseY + PERK_INFO_GAIN_BUTTON_Y).size(PERK_INFO_GAIN_BUTTON_WIDTH, PERK_INFO_GAIN_BUTTON_HEIGHT).build();
         this.PerkXpCostWidget = new StringWidget(baseX + PERK_INFO_XP_COST_X, baseY + PERK_INFO_XP_COST_Y, PERK_INFO_XP_COST_WIDTH, PERK_INFO_XP_COST_HEIGHT, Component.literal(""), this.font);
-        this.PerkXpCostWidget.alignRight();
+        // 1.21.11: StringWidget 移除了 alignRight()/horizontalAlignment（1.21.1 是靠私有 alignX 字段
+        // 在 renderWidget 内做 x 偏移）。改为在 setPerkXpCostText() 里直接调整 widget 的 x 实现右对齐。
+        this.setPerkXpCostText("");
         this.addRenderableWidget(this.PerkNameWidget);
         this.addRenderableWidget(this.PerkDescWidget);
         this.addRenderableWidget(this.AcquirePerkButton);
@@ -230,36 +232,31 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        float f = (float)Math.atan((double)(mouseX / 40.0F));
-        float g = (float)Math.atan((double)(mouseY / 40.0F));
-        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
-        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
-        quaternionf.mul(quaternionf2);
-        float h = entity.yBodyRot;
-        float i = entity.getYRot();
-        float j = entity.getXRot();
-        float k = entity.yHeadRotO;
-        float l = entity.yHeadRot;
-        float m = entity.yBodyRotO;
-        entity.yBodyRot = 180.0F + f * 20.0F;
-        entity.yBodyRotO = entity.yBodyRot;
-        entity.setYRot(180.0F + f * 40.0F);
-        entity.setXRot(-g * 20.0F);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x, y, size, new Vector3f(), quaternionf, quaternionf2, entity);
-        entity.yBodyRot = h;
-        entity.yBodyRotO = m;
-        entity.setYRot(i);
-        entity.setXRot(j);
-        entity.yHeadRotO = k;
-        entity.yHeadRot = l;
+        // 1.21.11: renderEntityInInventoryFollowsMouse 改为「矩形区域 + 鼠标绝对坐标」签名，
+        // 内部自行完成 bodyRot/yRot 的鼠标跟随计算，并改用 render state（不再改写实体自身状态）。
+        // 原先手写的 atan / Quaternionf / 实体朝向保存恢复整段随之删除。
+        // 注意 mouseX/mouseY 现在要传【绝对屏幕坐标】（旧签名收的是「中心-鼠标」差值）。
+        InventoryScreen.renderEntityInInventoryFollowsMouse(
+                context,
+                x - size / 2, y - size / 2,
+                x + size / 2, y + size / 2,
+                size, 0.0625F,
+                mouseX, mouseY, entity);
+    }
+
+    // 1.21.11: StringWidget 不再支持内部对齐（alignRight/horizontalAlignment 已移除），
+    // 改为按「基准 x + 区域宽 - 文本宽」手动设置 widget 位置来实现右对齐。
+    private void setPerkXpCostText(String text) {
+        Component component = Component.literal(text);
+        this.PerkXpCostWidget.setMessage(component);
+        this.PerkXpCostWidget.setX(baseX + PERK_INFO_XP_COST_X + PERK_INFO_XP_COST_WIDTH - this.font.width(component));
     }
 
     private void RenderEntityInViewport(GuiGraphics context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         context.enableScissor(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
         try {
-            RenderSystem.clear(GL11.GL_DEPTH_BUFFER_BIT, Minecraft.ON_OSX);
+            // 1.21.11: RenderSystem.clear 已随 GL5 管线移除；原版 InventoryScreen 在 GUI 内渲染实体时
+            // 也不再手动清深度（帧级清屏由 GuiRenderer / GameRenderer 负责），故此处直接去掉。
             RenderEntity(context, x, y, size, mouseX, mouseY, entity);
         } finally {
             context.disableScissor();
@@ -290,7 +287,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
                     FORM_MODEL_REVIEW_WIDTH, FORM_MODEL_REVIEW_HEIGHT,
                     entityX, entityY,
                     entitySize,
-                    entityX - mouseX, entityY - mouseY - entitySize,
+                    mouseX, mouseY,
                     minecraft.player
             );
         }
@@ -417,7 +414,8 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public void drawAllNode(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (this.minecraft == null) return;
         context.enableScissor(nodeWindowX, nodeWindowY, nodeWindowX + PERK_UI_WIDTH, nodeWindowY + PERK_UI_HEIGHT);
-        PoseStack matrixStack = context.pose();
+        // 1.21.11: GuiGraphics.pose() 返回 org.joml.Matrix3x2fStack（原为 PoseStack）
+        Matrix3x2fStack matrixStack = context.pose();
         int firstX = nodeBaseX + nodeCenter.x;
         int firstY = nodeWindowY + LEVEL_ICON_Y;
         for (int tierIndex = 1; tierIndex <= this.MaxPerkLevel; tierIndex++) {
@@ -439,9 +437,11 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         }
         context.disableScissor();
         context.enableScissor(nodeWindowX, nodeWindowY + PERK_UI_VIEW_Y, nodeWindowX + PERK_UI_WIDTH, nodeWindowY + PERK_UI_HEIGHT);
-        matrixStack.pushPose();
-        matrixStack.translate(cameraCenter.x + cameraPosX, cameraCenter.y + cameraPosY, 0);
-        matrixStack.scale(cameraScale, cameraScale, 1.0f);
+        // 1.21.11: Matrix3x2fStack 是 JOML 的 2D 矩阵栈 —— pushPose → pushMatrix，
+        // translate / scale 只收 2 个分量（无 z）。
+        matrixStack.pushMatrix();
+        matrixStack.translate(cameraCenter.x + cameraPosX, cameraCenter.y + cameraPosY);
+        matrixStack.scale(cameraScale, cameraScale);
         PerkTree tree = this.perkTree;
         List<Identifier> playerGainedPerk = PerkUtils.getPlayerPerks(this.minecraft.player, tree.getID());
         Vector2i vMousePos = getVirtualMousePos(mouseX, mouseY);
@@ -555,12 +555,12 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         if (this.nowSelectNode != null) {
             this.PerkNameWidget.setMessage(RegPerks.getPerkName(this.nowSelectNode.perkID));
             this.PerkDescWidget.reloadText(RegPerks.getPerkDescription(this.nowSelectNode.perkID));
-            this.PerkXpCostWidget.setMessage(Component.literal(String.valueOf(perkXpCostMap.getOrDefault(this.nowSelectNode.perkID, 0))));
+            this.setPerkXpCostText(String.valueOf(perkXpCostMap.getOrDefault(this.nowSelectNode.perkID, 0)));
             this.AcquirePerkButton.active = this.isNowPerkCanGain();
         } else {
             this.PerkNameWidget.setMessage(Component.literal(""));
             this.PerkDescWidget.reloadText(Component.literal(""));
-            this.PerkXpCostWidget.setMessage(Component.literal(""));
+            this.setPerkXpCostText("");
             this.AcquirePerkButton.active = false;
         }
         ModPacketsS2C.sendRequestPerkAvailability();

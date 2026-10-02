@@ -79,6 +79,12 @@ public class AbstractClientPlayerEntityMixin implements ICanGetLastPos {
 
     @Unique
     private static PlayerSkin withCustomSkin(PlayerSkin skin) {
-        return new PlayerSkin(CUSTOM_SKIN, skin.textureUrl(), skin.capeTexture(), skin.elytraTexture(), skin.model(), skin.secure());
+        // 1.21.11: PlayerSkin 变为 record，且不再有 textureUrl()/capeTexture()/elytraTexture() 访问器；
+        // 改用 with(Patch) 局部替换 body（只换皮肤贴图，披风/鞘翅/模型沿用原值）。
+        return skin.with(new PlayerSkin.Patch(
+                Optional.of(new ClientAsset.ResourceTexture(CUSTOM_SKIN)),
+                Optional.empty(),
+                Optional.empty(),
+                Optional.empty()));
     }
 }
