@@ -60,8 +60,8 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public final ContainerData propertyDelegate;
 
     public static final int[] TOP = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    public static final int[] SIDE = {9};
-    public static final int[] BOTTOM = {10};
+    public static final int[] SIDE = {10};
+    public static final int[] BOTTOM = {11};
 
     public static final HashMap<Item, Integer> fuelTimeMap = new HashMap<>();
 
@@ -81,7 +81,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     public AltarBlockEntity(BlockPos blockPos, BlockState blockState) {
         super(RegCustomBlock.Altar_BLOCK_ENTITY, blockPos, blockState);
-        this.inventory = NonNullList.withSize(11, ItemStack.EMPTY);
+        this.inventory = NonNullList.withSize(12, ItemStack.EMPTY);
         this.matchGetter = RecipeManager.createCheck(RecipeUtils.Altar_RECIPE);
         this.propertyDelegate = new ContainerData() {
             public int get(int index) {
@@ -143,8 +143,8 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public boolean canPlaceItemThroughFace(int slot, ItemStack stack, @Nullable Direction dir) {
         return switch (slot) {
             case 0, 1, 2, 3, 4, 5, 6, 7, 8 -> true;
-            case 9 -> canFuel(stack);
-            case 10 -> false;
+            case 10 -> canFuel(stack);
+            case 11 -> false;
             default -> false;
         };
     }
@@ -345,7 +345,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             needCheckRecipe = false;
         }
         boolean itemChanged = false;
-        ItemStack fuel = this.inventory.get(9);
+        ItemStack fuel = this.inventory.get(10);
         if (!fuel.isEmpty()) {
             int fuelRealTime = getFuelTime(fuel);
             if (fuelRealTime > 0 && this.fuelTime + fuelRealTime <= maxFuel) {
