@@ -316,22 +316,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
                 onPlayerEndSleeping(entity);
             }
         });
-        /* TODO: ALLOW_SLEEP_TIME无了，到时候找个替代(划掉），写了个mixin替代
-        // allow sleep when status effect is active
-        EntitySleepEvents.ALLOW_SLEEP_TIME.register((entity, world, pos) -> {
-            if (entity instanceof Player) {
-                if (EffectManager.hasTransformativeEffect(entity)) {
-                    return InteractionResult.sidedSuccess(true);
-                }
-                else{
-                    return InteractionResult.PASS;
-                }
-            }
-            return InteractionResult.PASS;
-        });
-        */
-
-
 
         /// Debug instinct: unregister this to see instinct debug info
         //InstinctDebugHUD.register();

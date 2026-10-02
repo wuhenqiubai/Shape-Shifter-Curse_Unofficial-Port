@@ -165,7 +165,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         int x = BookPosX + 220 * BookScale;
         int y = BookPosY + 160 * BookScale - textureHeight;
         // 1.21.11: RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
-        context.blit(texture.id(), x, y, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight);
+        context.blit(RenderPipelines.GUI_TEXTURED, texture.id(), x, y, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight, textureWidth, textureHeight, -1);
     }
 
     @Override

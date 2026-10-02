@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -146,16 +147,19 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
         int bgY = (this.height - BG_HEIGHT) / 2;
-        context.blit(BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, -1);
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         // 1.21.11: 同 FormUpgradeScreen —— 新签名收「矩形区域 + 鼠标绝对坐标」，
         // bodyRot/yRot 的鼠标跟随由原版内部完成，且改用 render state 不改写实体自身状态。
+        // 1.21.11: 矩形是实体的渲染视口（画中画裁剪区），size×size 会裁掉模型。
+        // 按原版 InventoryScreen 比例（49x70 配 size=30）换算：半宽 ≈ size*0.817、半高 ≈ size*1.167。
+        // 1.21.1 的 (x,y) 是绘制原点（实体向上画），此处矩形中心是显示基准 → 上移约半个身高。
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 context,
-                x - size / 2, y - size / 2,
-                x + size / 2, y + size / 2,
+                x - size * 4 / 5, y - size * 7 / 6 - size / 2,
+                x + size * 4 / 5, y + size * 7 / 6 - size / 2,
                 size, 0.0625F,
                 mouseX, mouseY, entity);
     }

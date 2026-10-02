@@ -9,6 +9,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.BypassesLandingEffec
 import net.onixary.shapeShifterCurseFabric.additional_power.BypassesSteppingEffectsPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.ModifyFootstepSoundSpeedPower;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -49,6 +50,7 @@ public class EntityMixin {
         }
     }
 
+    @Unique
     private boolean lastIsSwimming = false;
 
     @Inject(method = "updateSwimming", at = @At("HEAD"))

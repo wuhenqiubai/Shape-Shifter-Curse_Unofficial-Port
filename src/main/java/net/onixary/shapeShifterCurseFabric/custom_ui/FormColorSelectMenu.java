@@ -1037,10 +1037,15 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         // 1.21.11: 同 FormUpgradeScreen —— 新签名收「矩形区域 + 鼠标绝对坐标」，
         // bodyRot/yRot 的鼠标跟随由原版内部完成，且改用 render state 不改写实体自身状态。
+        // 1.21.11: 新签名收「矩形区域 + 鼠标绝对坐标」。该矩形是实体的渲染视口（画中画裁剪区），
+        // 给成 size×size 会把模型裁掉；按原版 InventoryScreen 的比例（49x70 配 size=30）换算：
+        // 半宽 ≈ size*0.817、半高 ≈ size*1.167。
+        // 另外 1.21.1 的 (x,y) 是绘制【原点】（实体自该点向上画，见 renderEntityInInventory 的
+        // pose.translate + vector3f.y=bbHeight/2），而此处的矩形中心是显示基准 → 需上移约半个身高。
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 context,
-                x - size / 2, y - size / 2,
-                x + size / 2, y + size / 2,
+                x - size * 4 / 5, y - size * 7 / 6 - size / 2,
+                x + size * 4 / 5, y + size * 7 / 6 - size / 2,
                 size, 0.0625F,
                 mouseX, mouseY, entity);
     }

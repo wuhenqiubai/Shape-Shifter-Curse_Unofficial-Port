@@ -59,7 +59,10 @@ public final class RegCustomBlock {
         Block block = factory.apply(props.setId(blockKey));
         Registry.register(BuiltInRegistries.BLOCK, blockKey, block);
         ResourceKey<Item> itemKey = ResourceKey.create(BuiltInRegistries.ITEM.key(), ShapeShifterCurseFabric.identifier(path));
-        Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey)));
+        // 1.21.11: BlockItem 不再覆写 getDescriptionId() 转发到方块（1.21.1 有），
+        // 改由 Item.Properties 决定前缀。不显式声明的话方块物品的 key 会变成
+        // "item.<ns>.<id>"，而 lang 里登记的是 "block.<ns>.<id>" → 物品栏显示原始 key。
+        Registry.register(BuiltInRegistries.ITEM, itemKey, new BlockItem(block, new Item.Properties().setId(itemKey).useBlockDescriptionPrefix()));
         return block;
     }
 

@@ -4,6 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
@@ -236,10 +237,13 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         // 内部自行完成 bodyRot/yRot 的鼠标跟随计算，并改用 render state（不再改写实体自身状态）。
         // 原先手写的 atan / Quaternionf / 实体朝向保存恢复整段随之删除。
         // 注意 mouseX/mouseY 现在要传【绝对屏幕坐标】（旧签名收的是「中心-鼠标」差值）。
+        // 1.21.11: 矩形是实体的渲染视口（画中画裁剪区），size×size 会裁掉模型。
+        // 按原版 InventoryScreen 比例（49x70 配 size=30）换算：半宽 ≈ size*0.817、半高 ≈ size*1.167。
+        // 1.21.1 的 (x,y) 是绘制原点（实体向上画），此处矩形中心是显示基准 → 上移约半个身高。
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 context,
-                x - size / 2, y - size / 2,
-                x + size / 2, y + size / 2,
+                x - size * 4 / 5, y - size * 7 / 6 - size / 2,
+                x + size * 4 / 5, y + size * 7 / 6 - size / 2,
                 size, 0.0625F,
                 mouseX, mouseY, entity);
     }
@@ -267,7 +271,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
-        context.blit(TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         nodeWindowX = baseX + PERK_UI_X;
         nodeWindowY = baseY + PERK_UI_Y;
         cameraCenter = new Vector2i(nodeWindowX + PERK_UI_WIDTH / 2, nodeWindowY + PERK_UI_HEIGHT / 2);
@@ -378,22 +382,22 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         int left = virtualNodeX + NodeSelectStartX;
         int top = virtualNodeY + NodeSelectStartY;
         if (playerGainedPerk != null && playerGainedPerk.contains(perkNode.perkID)) {
-            context.blit(LABEL_GAINED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_GAINED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
         } else if (!perkAvailableMap.getOrDefault(perkNode.perkID, true)) {
-            context.blit(LABEL_CAN_NOT_GAIN, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_CAN_NOT_GAIN, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
         }
 
         if (this.nowSelectNode != null) {
             if (perkNode == this.nowSelectNode) {
-                context.blit(LABEL_SELECTED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+                context.blit(RenderPipelines.GUI_TEXTURED, LABEL_SELECTED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
             } else if (this.nowSelectNode.dependentPerkIDs.contains(perkNode.perkID)) {
-                context.blit(LABEL_DEPEND, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+                context.blit(RenderPipelines.GUI_TEXTURED, LABEL_DEPEND, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
             }
         }
         if (mouseX >= left && mouseX < left + NodeSelectRectWidth && mouseY >= top && mouseY < top + NodeSelectRectHeight) {
-            context.blit(LABEL_SELECT, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_SELECT, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
         }
-        context.blit(icon, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY, 0, 0, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight);
+        context.blit(RenderPipelines.GUI_TEXTURED, icon, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY, 0, 0, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight, -1);
         final int PerkNameBoxWidth = 33;
         Component perkNameText = RegPerks.getPerkName(perkNode.perkID);
         int perkNameTextWidth = this.font.width(perkNameText);

@@ -64,7 +64,10 @@ public class AltarBlock extends BaseEntityBlock {
     }
 
 
-    public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    // ⚠ 1.21.11 的 BlockBehaviour.useWithoutItem 是【5 参数、protected】（1.21.1 带 InteractionHand 且为 public）。
+    // 参数签名不符就不会构成 override —— 编译器不报错，但右键会静默走基类默认实现（返回 PASS，表现为毫无反应）。
+    @Override
+    protected @NotNull InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.isClientSide()) {
             return InteractionResult.SUCCESS;
         } else {

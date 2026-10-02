@@ -30,7 +30,7 @@ public abstract class ThrownLingeringPotionMixin {
         if (customData != null) {
             Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(customData.copyTag());
             if (CTPFormID != null && areaEffectCloud instanceof CTPUtils.CTPFormIDHolder holder) {
-                holder.setCTPFormID(CTPFormID);
+                holder.shape_Shifter_Curse_Unofficial_Port$setCTPFormID(CTPFormID);
             }
         }
     }
