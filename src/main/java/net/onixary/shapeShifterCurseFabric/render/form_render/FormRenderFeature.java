@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.geckolib.cache.model.BakedGeoModel;
 import com.geckolib.cache.model.GeoBone;
+import com.geckolib.constant.DataTickets;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
@@ -24,6 +25,7 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -111,7 +113,9 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                     FormRenderer.CHANNEL_NORMAL, player, limbAngle, limbDistance, f, g);
             // fullbright 通道
             if (formModel.getFullBrightTextureResource(slim) != null) {
-                submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, Integer.MAX_VALUE - 1, partialTick,
+                // 哨兵值改用合法的满亮 packed light：Integer.MAX_VALUE-1 本身越界
+                // （packed light 是 block(4bit<<4)|sky(4bit)，最大值 0xFFFF），过去只是没被写进顶点才没出错。
+                submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, LightCoordsUtil.FULL_BRIGHT, partialTick,
                         FormRenderer.CHANNEL_FULLBRIGHT, player, limbAngle, limbDistance, f, g);
             }
             // outline 通道
@@ -147,6 +151,11 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         rs.addGeckolibData(FormRenderer.TICKET_LIMB_DISTANCE, limbDistance);
         rs.addGeckolibData(FormRenderer.TICKET_HEAD_YAW, headYaw);
         rs.addGeckolibData(FormRenderer.TICKET_HEAD_PITCH, headPitch);
+        // ⚠ 必须显式把 packedLight 写进 render state：GL5 的 GeoRenderState#getPackedLight 默认值是
+        //   FULL_BRIGHT，不写就会让整个形态模型恒满亮、与环境光完全脱钩（白天黑夜都一样亮）。
+        //   GL4 时代 light 是 render(...) 的直接实参、没有默认值概念，改成 render state 后极易漏掉这一步。
+        //   可对照茧渲染 render/tech/EntityOverlayRenderSystem（那边写了这一行，所以茧是正常的）。
+        rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, null);
     }
 
@@ -299,7 +308,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, light, partialTick,
                     FormRenderer.CHANNEL_NORMAL, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
             if (formModel.getFullBrightTextureResource(slim) != null) {
-                submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, Integer.MAX_VALUE - 1, partialTick,
+                submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, LightCoordsUtil.FULL_BRIGHT, partialTick,
                         FormRenderer.CHANNEL_FULLBRIGHT, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
             }
 
@@ -326,6 +335,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
+        // 同 submitPass：不写 packedLight 会让第一人称手臂恒满亮（GeoRenderState 默认 FULL_BRIGHT）
+        rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         // GeckoLib 5.5.1: performRenderPass 的第 5 参由单个 BoneUpdater 变成了
         // List<RenderPassInfo.BoneUpdater<R>>，所以裸 lambda 会报「List 不是函数接口」——
         // 包一层 List.of(...) 即可，lambda 体与元素接口签名（run(RenderPassInfo, BoneSnapshots)）都没变。
