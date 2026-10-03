@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -48,6 +49,19 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         if (target instanceof Player player) {
             ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
+    }
+
+    // ⚠ 必须显式覆写 doHurtTarget 才会有触发点：applyDamageEffects 是 Yarn 时代 MobEntity.tryAttack 的钩子名，
+    //   移植到 Mojmap 时 @Override 被去掉后它就成了**没有任何调用者**的死代码（方法本身不报错、也不报未使用）。
+    //   26.1 的近战命中钩子是 Mob#doHurtTarget(ServerLevel, Entity)，照豹猫的写法补上。
+    //   缺了这段 = 蜘蛛攻击玩家时 100% 不给变形效果。
+    @Override
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
+        if (hit) {
+            this.applyDamageEffects(this, target);
+        }
+        return hit;
     }
 
     @Override

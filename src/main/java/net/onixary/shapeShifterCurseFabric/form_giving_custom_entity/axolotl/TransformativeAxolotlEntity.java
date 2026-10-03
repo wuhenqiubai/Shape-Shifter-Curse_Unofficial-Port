@@ -5,6 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
@@ -87,6 +88,19 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
         if (target instanceof Player player) {
             ITMob.applyStatusByChance(this.getStatusChance(), player, this.getStatusEffect());
         }
+    }
+
+    // ⚠ 必须显式覆写 doHurtTarget 才会有触发点：applyDamageEffects 是 Yarn 时代 MobEntity.tryAttack 的钩子名，
+    //   移植到 Mojmap 时 @Override 被去掉后它就成了**没有任何调用者**的死代码。
+    //   原版美西螈走 Brain AI，其 Activity.FIGHT 里的 MeleeAttack 调用的正是 Mob#doHurtTarget(ServerLevel, Entity)，
+    //   所以补上这个覆写即可生效（本类自定义的 TAxolotlEntitySensor 已把开书形态玩家标记为 NEAREST_ATTACKABLE）。
+    @Override
+    public boolean doHurtTarget(ServerLevel serverLevel, Entity target) {
+        boolean hit = super.doHurtTarget(serverLevel, target);
+        if (hit) {
+            this.applyDamageEffects(this, target);
+        }
+        return hit;
     }
 
     // 26.1: Mob#brainProvider() 已被移除（memory 不再由实体声明，改由 Brain 依 sensors/activities
