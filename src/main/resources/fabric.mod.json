@@ -82,6 +82,9 @@
 
   "environment": "*",
   "entrypoints": {
+    "preLaunch": [
+      "net.onixary.shapeShifterCurseFabric.PreLaunchCheck"
+    ],
     "main": [
       "net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric",
       "net.onixary.shapeShifterCurseFabric.integration.origins.Origins"
@@ -157,11 +160,14 @@
   "breaks": {
     "origins": ">0.0.0",
     "enchantedlib": ">0.3.0",
-    "optifabric": "*",
-    "geckolib": "<4.7.0"
+    "optifabric": "*"
   },
   "recommends": {
     "firstperson": "*",
-    "trinkets": ">=3.11.0"
+    "trinkets": "*",
+    "sodium": "*"
+  },
+  "conflicts": {
+    "controlify": "*"
   }
 }
