@@ -93,7 +93,12 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void setOwner(Player player) {
-            super.getOwner();
+        // ⚠ 这里必须是 setOwner，不是 getOwner —— 曾是 `super.getOwner();`（调用了取值方法却丢弃返回值），
+        // 导致 owner 从未写进 DATA_OWNERUUID_ID：首次 tick 时 shouldExist() 取不到 owner 便返回 false，
+        // tick() 随即 setHealth(0.0f)，表现为召唤出来的狼当 tick 就死。
+        // 注意 26.1 的 TamableAnimal.setOwner 收的是 LivingEntity，与本接口的 setOwner(Player) 构成重载，
+        // 所以这里必须显式转调 super，否则接口调用只会命中本方法。
+        super.setOwner(player);
     }
 
     public Identifier getMinionTypeID() {
