@@ -637,11 +637,11 @@ public class ModPacketsS2C {
     }
 
     public static void sendRequestPerkAvailability() {
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_AVAILABILITY), PacketByteBufs.create()));
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_AVAILABILITY), FriendlyByteBufs.create()));
     }
 
     public static void sendRequestPerkData() {
-        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_DATA), PacketByteBufs.create()));
+        ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_PERK_DATA), FriendlyByteBufs.create()));
     }
 
     public static void receivePerkAvailability(BytePayload payload, ClientPlayNetworking.Context ctx) {
@@ -697,7 +697,7 @@ public class ModPacketsS2C {
         if (formID == null) {
             return;
         }
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeIdentifier(formID);
         ClientPlayNetworking.send(new BytePayload(BytePayload.id(REQUEST_SET_SUB_FORM), buf));
     }

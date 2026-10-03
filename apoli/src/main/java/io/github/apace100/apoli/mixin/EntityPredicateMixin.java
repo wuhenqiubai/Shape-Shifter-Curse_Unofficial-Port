@@ -21,7 +21,10 @@ import java.util.List;
 public abstract class EntityPredicateMixin {
     // SetEntityGroupPower
     @WrapOperation(method = "matches(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/EntityTypePredicate;matches(Lnet/minecraft/core/Holder;)Z"))
-    private boolean checkMatchesEntityGroup(EntityTypePredicate instance, Holder<EntityType<?>> type, Operation<Boolean> original, @Local(argsOnly = true, name = "entity") Entity entity) {
+    // ⚠ 26.1 起不能再用 @Local(name = "entity")：26.1 不再有混淆映射，
+    //   按名字定位需要读取字节码里的参数名（LocalVariableTable），官方 jar 不保证提供，
+    //   会以 "Unable to find matching local!" 直接崩在 mixin 阶段。改为按类型定位。
+    private boolean checkMatchesEntityGroup(EntityTypePredicate instance, Holder<EntityType<?>> type, Operation<Boolean> original, @Local(argsOnly = true, type = Entity.class) Entity entity) {
         var value = original.call(instance, type);
         var entityTypeTag = instance.types().unwrapKey().orElse(null);
 

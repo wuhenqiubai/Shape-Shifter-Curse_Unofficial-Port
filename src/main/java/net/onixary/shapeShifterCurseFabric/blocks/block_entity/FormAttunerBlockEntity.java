@@ -77,7 +77,8 @@ public class FormAttunerBlockEntity extends BlockEntity {
                 }
             } else {
                 // 1.21.11：BlockStateBase.getLightBlock 不再收 (Level, BlockPos)，改为无参
-                if (beamSegment == null || blockState.getLightBlock() >= 15 && !blockState.is(Blocks.BEDROCK)) {
+                // 26.1：getLightBlock 改名为 getLightDampening
+                if (beamSegment == null || blockState.getLightDampening() >= 15 && !blockState.is(Blocks.BEDROCK)) {
                     blockEntity.beams.clear();
                     blockEntity.minY = l;
                     break;

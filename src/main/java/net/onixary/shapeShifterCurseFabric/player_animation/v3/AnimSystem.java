@@ -258,8 +258,11 @@ public class AnimSystem {
 		// 必须用归一化后的名字查询：PAL 内部存储的骨骼名是 snake_case（见 normalizeAnimBoneName）。
 		// 传原始 camelCase（如 extra_parts_map 里的 bipedRightHindLeg）会永远查不到，
 		// 而 PAL 查不到时是**静默返回零值**，表现为「这根骨头完全没有动画」。
-		PlayerAnimBone bone = new PlayerAnimBone(normalizeAnimBoneName(boneName));
-		bone = manager.get3DTransform(bone);
+		// 直接传归一化后的骨骼名（String 重载返回 PlayerAnimBone）。
+		// ⚠ 不要写成 String.valueOf(bone)：PlayerAnimBone 没有重写 toString()（只提供了 getName()），
+		// 那会得到 "com.zigythebird...PlayerAnimBone@1b2c3d" 这种身份串而非骨骼名，
+		// PAL 查不到时静默返回零值 → 该骨骼动画恒为 0 且不报错。
+		PlayerAnimBone bone = manager.get3DTransform(normalizeAnimBoneName(boneName));
 		return switch (type) {
 			// 注意三个分量取自不同的 Vector3f 字段：位置->position、旋转->rotation、缩放->scale
 			case POSITION -> new Vec3f(bone.position.x, bone.position.y, bone.position.z);

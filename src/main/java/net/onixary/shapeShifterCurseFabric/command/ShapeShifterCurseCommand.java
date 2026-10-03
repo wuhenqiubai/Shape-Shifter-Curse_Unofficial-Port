@@ -520,7 +520,7 @@ public class ShapeShifterCurseCommand {
             return 0;
         }
         StringBuilder message = new StringBuilder("Patron Feature Are Disable By Developer\n");
-        player.displayClientMessage(Component.literal(message.toString()), false);
+        player.sendSystemMessage(Component.literal(message.toString()));
         return 1;
     }
 

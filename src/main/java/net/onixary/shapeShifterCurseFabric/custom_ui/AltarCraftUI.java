@@ -33,22 +33,16 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
     private int baseY;
 
     public AltarCraftUI(AltarCraftUIHandler handler, Inventory inventory, Component title) {
-        super(handler, inventory, title);
-        // 藏的还挺深 要不是我修槽位偏移我都不知道这个
-        this.imageWidth = WIDTH;
-        this.imageHeight = HEIGHT;
+        // 26.1: imageWidth/imageHeight 变为 protected final，只能经构造函数传入，不能再赋值。
+        super(handler, inventory, title, WIDTH, HEIGHT);
     }
 
     protected void init() {
         super.init();
-        // 26.1: 原先在 render() 里每帧算，现在挪到 init()（resize 时框架会重调 init）
-        baseX = width / 2 - WIDTH / 2;
-        baseY = height / 2 - HEIGHT / 2;
-        this.renderBackground(context, mouseX, mouseY, delta);
-        super.render(context, mouseX, mouseY, delta);
-        this.renderTooltip(context, mouseX, mouseY);
-        this.drawProcess(context);
-        this.drawFuel(context);
+        // 26.1: 原先在 render() 里每帧算，现在挪到 init()（resize 时框架会重调 init）。
+        // AbstractContainerScreen#init 已按 imageWidth/imageHeight 算好 leftPos/topPos，直接取用。
+        baseX = this.leftPos;
+        baseY = this.topPos;
     }
 
     @Override
@@ -58,6 +52,7 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
         // 自动调用，故原先手动的 renderBackground/renderTooltip 两行一并删除，否则会重复提交。
         super.extractRenderState(context, mouseX, mouseY, delta);
         this.drawBar(context);
+        this.drawFuel(context);
     }
 
     @Override
@@ -81,7 +76,7 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
         }
     }
 
-    public void drawFuel(GuiGraphics context) {
+    public void drawFuel(GuiGraphicsExtractor context) {
         AltarCraftUIHandler uiHandler = this.getMenu();
         int maxFuel = AltarBlockEntity.maxFuel;
         if (maxFuel > 0) {

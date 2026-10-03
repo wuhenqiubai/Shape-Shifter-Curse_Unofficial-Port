@@ -88,7 +88,10 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "extractGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
-    private void renderOverlayPowers(DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded, CallbackInfo ci, @Local(name = "graphics") GuiGraphicsExtractor graphics) {
+    // ⚠ 26.1 无混淆映射后不能再用 @Local(name = "..." )：按名字定位要读字节码里的
+    //   LocalVariableTable，官方 jar 不保证提供，会以 "Unable to find matching local!" 崩在 mixin 阶段。
+    //   extractGui(DeltaTracker, boolean, boolean) 不含 GuiGraphicsExtractor 参数，故按类型唯一。
+    private void renderOverlayPowers(DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded, CallbackInfo ci, @Local(type = GuiGraphicsExtractor.class) GuiGraphicsExtractor graphics) {
         boolean hudHidden = this.minecraft.options.hideGui;
         boolean thirdPerson = !minecraft.options.getCameraType().isFirstPerson();
         PowerHolderComponent.withPower(minecraft.getCameraEntity(), OverlayPower.class, p -> {
@@ -187,7 +190,8 @@ public abstract class GameRendererMixin {
 
     // NIGHT VISION
     @ModifyReturnValue(method = "getNightVisionScale", at = @At("RETURN"))
-    private static float adjustNightVisionScale(float value, @Local(argsOnly = true, name = "camera") LivingEntity camera) {
+    // 同上：getNightVisionScale(LivingEntity camera, float a) 只有一个 LivingEntity，按类型唯一。
+    private static float adjustNightVisionScale(float value, @Local(argsOnly = true, type = LivingEntity.class) LivingEntity camera) {
         Optional<Float> nightVisionStrength = PowerHolderComponent.KEY.get(camera).getPowers(NightVisionPower.class).stream().filter(NightVisionPower::isActive).map(NightVisionPower::getStrength).max(Float::compareTo);
         return nightVisionStrength.map(aFloat -> Math.max(aFloat, value)).orElse(value);
     }

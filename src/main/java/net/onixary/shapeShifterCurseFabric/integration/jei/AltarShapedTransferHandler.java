@@ -7,7 +7,7 @@ import mezz.jei.api.recipe.transfer.IRecipeTransferHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -97,12 +97,12 @@ public class AltarShapedTransferHandler implements IRecipeTransferHandler<AltarC
         for (int i = 0; i <= 9; i++) {
             Slot slot = container.getSlot(i);
             if (slot.hasItem()) {
-                im.handleInventoryMouseClick(syncId, i, 0, ClickType.PICKUP, player);
+                im.handleContainerInput(syncId, i, 0, ContainerInput.PICKUP, player);
                 int emptyPlayerSlot = findEmptyPlayerSlot(container);
                 if (emptyPlayerSlot != -1) {
-                    im.handleInventoryMouseClick(syncId, emptyPlayerSlot, 0, ClickType.PICKUP, player);
+                    im.handleContainerInput(syncId, emptyPlayerSlot, 0, ContainerInput.PICKUP, player);
                 } else {
-                    im.handleInventoryMouseClick(syncId, -999, 0, ClickType.PICKUP, player);
+                    im.handleContainerInput(syncId, -999, 0, ContainerInput.PICKUP, player);
                 }
             }
         }
@@ -152,15 +152,15 @@ public class AltarShapedTransferHandler implements IRecipeTransferHandler<AltarC
             int available = stack.getCount();
             int take = Math.min(remaining, available);
 
-            im.handleInventoryMouseClick(syncId, i, 0, ClickType.PICKUP, player);
+            im.handleContainerInput(syncId, i, 0, ContainerInput.PICKUP, player);
 
             if (take == available) {
-                im.handleInventoryMouseClick(syncId, targetSlot, 0, ClickType.PICKUP, player);
+                im.handleContainerInput(syncId, targetSlot, 0, ContainerInput.PICKUP, player);
             } else {
                 for (int j = 0; j < take; j++) {
-                    im.handleInventoryMouseClick(syncId, targetSlot, 1, ClickType.PICKUP, player);
+                    im.handleContainerInput(syncId, targetSlot, 1, ContainerInput.PICKUP, player);
                 }
-                im.handleInventoryMouseClick(syncId, i, 0, ClickType.PICKUP, player);
+                im.handleContainerInput(syncId, i, 0, ContainerInput.PICKUP, player);
             }
 
             remaining -= take;

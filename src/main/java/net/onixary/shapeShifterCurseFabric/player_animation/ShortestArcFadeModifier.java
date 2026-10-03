@@ -162,30 +162,33 @@ public class ShortestArcFadeModifier extends AbstractFadeModifier {
 		// 「上一帧输出」实际会被同一帧内的多次调用互相覆盖，参考点在帧内乱跳，
 		// 反而让这个「离 ref 最近」的换支判定在淡入中途翻转（t=0 选 -170，t=1 选 +192）。
 		// 保持原样：参考点 = 旧姿态（PAL 的 AnimationSnapshot，整轮淡入内是冻结的定值）。
-		float refX = bone.rotX;
-		float refY = bone.rotY;
-		float refZ = bone.rotZ;
+		// PAL 1.2.6（26.1）：骨骼变换字段由扁平的 rotX/rotY/rotZ 改成了 JOML Vector3f，
+		// 统一走 rotation.x/.y/.z。读用 .x 或 .x() 等价，但**写入只能用字段形式**
+		// （.x() 返回 float 值不是可赋值位置；JOML 的 x(float) 是返回 Vector3f 的链式 setter）。
+		float refX = bone.rotation.x;
+		float refY = bone.rotation.y;
+		float refZ = bone.rotation.z;
 
-		float rawNewX = copy2.rotX;
-		float rawNewY = copy2.rotY;
-		float rawNewZ = copy2.rotZ;
+		float rawNewX = copy2.rotation.x;
+		float rawNewY = copy2.rotation.y;
+		float rawNewZ = copy2.rotation.z;
 
 		String boneName = bone.getName();
 		if (boneName == null) {
 			// 理论上不会有匿名骨骼；保险起见退回"各取最近弧"
-			copy2.rotX = unwrapToward(rawNewX, refX);
-			copy2.rotY = unwrapToward(rawNewY, refY);
-			copy2.rotZ = unwrapToward(rawNewZ, refZ);
+			copy2.rotation.x = unwrapToward(rawNewX, refX);
+			copy2.rotation.y = unwrapToward(rawNewY, refY);
+			copy2.rotation.z = unwrapToward(rawNewZ, refZ);
 		} else {
-			copy2.rotX = resolveTarget(nearestArcX, boneName, rawNewX, refX);
-			copy2.rotY = resolveTarget(nearestArcY, boneName, rawNewY, refY);
-			copy2.rotZ = resolveTarget(nearestArcZ, boneName, rawNewZ, refZ);
+			copy2.rotation.x = resolveTarget(nearestArcX, boneName, rawNewX, refX);
+			copy2.rotation.y = resolveTarget(nearestArcY, boneName, rawNewY, refY);
+			copy2.rotation.z = resolveTarget(nearestArcZ, boneName, rawNewZ, refZ);
 		}
 
 		// ⚠ 必须在下一行 scale(a) 之前取：copy2.scale(a) 是**原地**乘法，执行后 copy2 就变成 a×target 了
-		float targetX = copy2.rotX;
-		float targetY = copy2.rotY;
-		float targetZ = copy2.rotZ;
+		float targetX = copy2.rotation.x;
+		float targetY = copy2.rotation.y;
+		float targetZ = copy2.rotation.z;
 
 		bone.scale(1 - a).add(copy2.scale(a));
 
@@ -219,11 +222,9 @@ public class ShortestArcFadeModifier extends AbstractFadeModifier {
 					dbgFadeIndex, animName, bone.getName(),
 					calc(calculateProgress(tickDelta, bone.getName())), calc(a), time, dbgCallCount.get(bone.getName()),
 					deg(refX), deg(rawNewX), deg(targetX), deg(targetX - refX),
-					deg(targetY - refY), deg(targetZ - refZ), deg(bone.rotX));
+					deg(targetY - refY), deg(targetZ - refZ), deg(bone.rotation.x));
 			}
 		}
-
-		return bone;
 	}
 
 	// ===== 调试插桩辅助（随 DEBUG_FADE_LOG 一起保留，默认不产生输出） =====

@@ -371,7 +371,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendPerkAvailability(ServerPlayer player, boolean fullUpdate, HashMap<Identifier, Boolean> perkAvailability) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(fullUpdate);
         buf.writeInt(perkAvailability.size());
         for (Map.Entry<Identifier, Boolean> entry : perkAvailability.entrySet()) {
@@ -386,7 +386,7 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendPerkData(ServerPlayer player, boolean fullUpdate, IPerk... perks) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(fullUpdate);
         buf.writeInt(perks.length);
         for (IPerk perk : perks) {
@@ -406,13 +406,13 @@ public class ModPacketsS2CServer {
     }
 
     public static void sendOpenFormUpgradeMenu(ServerPlayer player, int tier) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeInt(tier);
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_FORM_UPGRADE_MENU), buf));
     }
 
     public static void sendOpenSelectSubFormMenu(ServerPlayer player) {
-        FriendlyByteBuf buf = PacketByteBufs.create();
+        FriendlyByteBuf buf = FriendlyByteBufs.create();
         ServerPlayNetworking.send(player, new BytePayload(BytePayload.id(ModPackets.OPEN_SELECT_SUB_FORM_MENU), buf));
     }
 }

@@ -183,7 +183,6 @@ dependencies {
     compileOnly "maven.modrinth:iris:1.11.4+26.1-fabric"
     compileOnly "maven.modrinth:better-combat:1UMcSrDb"
     compileOnly "maven.modrinth:first-person-model:PBg45FeB"
-    runtimeOnly "maven.modrinth:first-person-model:PBg45FeB"
 
     compileOnly "squeek.appleskin:appleskin-fabric:mc26.1.2-3.0.10"
 
@@ -193,7 +192,12 @@ dependencies {
 
     compileOnly "maven.modrinth:presence-footsteps:1.13.3+26.1"
 
-     implementation "maven.modrinth:jei:zzwHVX9f"
+    compileOnly "maven.modrinth:biomes-o-plenty:26.1.2.0.22-fabric"
+
+    runtimeOnly "maven.modrinth:cardinal-components-api:${project.cca_version}"
+
+    // 官方Maven仓库速度太慢 改为CurseMaven的源
+     implementation "maven.modrinth:jei:${project.jei_version}-fabric"
 }
 
 processResources {

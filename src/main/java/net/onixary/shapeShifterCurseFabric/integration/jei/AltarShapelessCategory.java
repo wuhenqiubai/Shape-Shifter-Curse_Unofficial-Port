@@ -9,7 +9,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.category.AbstractRecipeCategory;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -44,7 +44,7 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
     }
 
     @Override
-    public void draw(@NotNull AltarShapelessRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics drawContext, double mouseX, double mouseY) {
+    public void draw(@NotNull AltarShapelessRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphicsExtractor drawContext, double mouseX, double mouseY) {
         background.draw(drawContext, 0, 0);
         arrow.draw(drawContext, 84, 39);
     }
@@ -79,7 +79,7 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
         }
 
         // 1.21.11: Recipe 接口移除了 getResultItem(Provider)，直接用配方自身的 output 字段
-        builder.addOutputSlot(134, 35).addItemStack(recipe.output);
+        builder.addOutputSlot(134, 35).addItemStack(recipe.output.create());
     }
 
     @Override
