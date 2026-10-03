@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.minion.mobs;
 
-import com.google.common.collect.ImmutableList;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
@@ -9,7 +8,6 @@ import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.entity.state.WolfRenderState;
 import net.minecraft.util.Mth;
-import org.jetbrains.annotations.NotNull;
 
 @Environment(EnvType.CLIENT)
 public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
@@ -69,19 +67,25 @@ public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
         return LayerDefinition.create(modelData, 64, 32);
     }
 
-    protected @NotNull Iterable<ModelPart> headParts() {
-        return ImmutableList.of(this.head);
-    }
+    // ⚠ 26.1 的模型动画只剩一个钩子：Model#setupAnim(S state)（单参）。
+    //   原先拆在两个旧签名里的逻辑全都不会被调用，模型会恒定停在建模默认姿势（表现为「没动画」）：
+    //     - prepareMobModel(state, limbAngle, limbDistance) —— 26.1 已无此方法
+    //     - setupAnim(state, f, g, tailAngle, headYaw, headPitch) —— 5 参版，与 26.1 的单参版只是重载、不算覆写
+    //   两者在此合并为单参覆写；数据一律改从 render state 取
+    //   （walkAnimationPos / walkAnimationSpeed / xRot / yRot 来自 LivingEntityRenderState，
+    //     isAngry / isSitting / tailAngle 来自 WolfRenderState）。
+    //   另：headParts() / bodyParts() 在 26.1 的 Model/EntityModel 中同样已不存在，一并移除。
+    @Override
+    public void setupAnim(WolfRenderState state) {
+        super.setupAnim(state);   // 26.1 基类实现 = resetPose()
 
-    protected @NotNull Iterable<ModelPart> bodyParts() {
-        return ImmutableList.of(this.torso, this.rightHindLeg, this.leftHindLeg, this.rightFrontLeg, this.leftFrontLeg, this.tail, this.neck);
-    }
+        float limbAngle = state.walkAnimationPos;
+        float limbDistance = state.walkAnimationSpeed;
 
-    public void prepareMobModel(WolfRenderState state, float f, float g) {
         if (state.isAngry) {
             this.tail.yRot = 0.0F;
         } else {
-            this.tail.yRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+            this.tail.yRot = Mth.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
         }
 
         if (state.isSitting) {
@@ -109,19 +113,17 @@ public class AnubisWolfMinionEntityModel extends EntityModel<WolfRenderState> {
             this.leftHindLeg.setPos(0.5F, 16.0F, 7.0F);
             this.rightFrontLeg.setPos(-2.5F, 16.0F, -4.0F);
             this.leftFrontLeg.setPos(0.5F, 16.0F, -4.0F);
-            this.rightHindLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
-            this.leftHindLeg.xRot = Mth.cos(f * 0.6662F + (float)Math.PI) * 1.4F * g;
-            this.rightFrontLeg.xRot = Mth.cos(f * 0.6662F + (float)Math.PI) * 1.4F * g;
-            this.leftFrontLeg.xRot = Mth.cos(f * 0.6662F) * 1.4F * g;
+            this.rightHindLeg.xRot = Mth.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
+            this.leftHindLeg.xRot = Mth.cos(limbAngle * 0.6662F + (float)Math.PI) * 1.4F * limbDistance;
+            this.rightFrontLeg.xRot = Mth.cos(limbAngle * 0.6662F + (float)Math.PI) * 1.4F * limbDistance;
+            this.leftFrontLeg.xRot = Mth.cos(limbAngle * 0.6662F) * 1.4F * limbDistance;
         }
 
-        this.neck.zRot = Mth.cos(f * 0.6662F) * 0.08F;
-        this.torso.zRot = Mth.cos(f * 0.6662F) * 0.16F;
-    }
+        this.neck.zRot = Mth.cos(limbAngle * 0.6662F) * 0.08F;
+        this.torso.zRot = Mth.cos(limbAngle * 0.6662F) * 0.16F;
 
-    public void setupAnim(WolfRenderState state, float f, float g, float h, float i, float j) {
-        this.head.xRot = j * ((float)Math.PI / 180F);
-        this.head.yRot = i * ((float)Math.PI / 180F);
-        this.tail.xRot = h;
+        this.head.xRot = state.xRot * ((float)Math.PI / 180F);
+        this.head.yRot = state.yRot * ((float)Math.PI / 180F);
+        this.tail.xRot = state.tailAngle;
     }
 }

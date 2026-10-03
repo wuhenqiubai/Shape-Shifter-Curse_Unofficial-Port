@@ -98,6 +98,14 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
         // tick() 随即 setHealth(0.0f)，表现为召唤出来的狼当 tick 就死。
         // 注意 26.1 的 TamableAnimal.setOwner 收的是 LivingEntity，与本接口的 setOwner(Player) 构成重载，
         // 所以这里必须显式转调 super，否则接口调用只会命中本方法。
+        //
+        // ⚠ 还必须显式置 tame 位：1.20.1 的 TameableEntity#setOwner 会顺带 setTamed(true)，
+        //   而 26.1 的 TamableAnimal#setOwner 只写 owner 引用、不碰 tame。少了这一步 isTame() 恒为 false，
+        //   OwnerHurtByTargetGoal / OwnerHurtTargetGoal 的 canUse() 首句就是 `isTame() && ...`，
+        //   于是狼灵永远不锁「打主人/被主人打」的目标（表现为「不锁敌」）。
+        //   用 setTame(true, false)：includeSideEffects=false，避免 Wolf 把最大生命改成 40 冲掉 minion 属性；
+        //   不要用 super.tame(player)，它还会触发 TAME_ANIMAL 进度。
+        super.setTame(true, false);
         super.setOwner(player);
     }
 
