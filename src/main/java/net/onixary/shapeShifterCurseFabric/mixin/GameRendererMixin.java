@@ -7,6 +7,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.onixary.shapeShifterCurseFabric.additional_power.DisableHurtCameraPower;
@@ -19,10 +20,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Environment(EnvType.CLIENT)
 @Mixin(GameRenderer.class)
 public class GameRendererMixin {
-    // This point is after vanilla's death tilt and before the hurt camera rotations.
+    // ⚠ 26.1: bobHurt 的签名与实现都变了 —— 原为 bobHurt(PoseStack, float)，受伤方向取自
+    //   LivingEntity.getHurtDir()；26.1 改为 bobHurt(CameraRenderState, PoseStack)，方向直接读
+    //   cameraState.entityRenderState.hurtDir 字段，方法体内已无 getHurtDir() 调用。
+    //   照旧写会 "Scanned 0 target(s)" 注入失败（required=true → 加载 GameRenderer 即崩，客户端起不来）。
+    //   改注入 Mth.sin 调用处：死亡倾斜（Z 轴 40°）在其之前已执行、受伤旋转在其之后，
+    //   语义与原注点（"死亡倾斜之后、受伤旋转之前"）等价。Mth.sin 在 bobHurt 内只此一处。
     @Inject(method = "bobHurt", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/LivingEntity;getHurtDir()F"), cancellable = true)
-    private void shape_shifter_curse$disableHurtCamera(PoseStack poseStack, float f, CallbackInfo ci) {
+            target = "Lnet/minecraft/util/Mth;sin(D)F"), cancellable = true)
+    private void shape_shifter_curse$disableHurtCamera(CameraRenderState cameraState, PoseStack poseStack, CallbackInfo ci) {
         if (PowerHolderComponent.hasPower(Minecraft.getInstance().getCameraEntity(), DisableHurtCameraPower.class)) {
             ci.cancel();
         }
