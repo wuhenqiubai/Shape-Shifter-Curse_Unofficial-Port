@@ -1,19 +1,21 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		" S ",
-		"LGP",
-		" M "
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"S": "minecraft:string",
-		"L": "minecraft:lava_bucket",
-		"G": "minecraft:glass",
-		"P": "minecraft:powder_snow_bucket"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:charm_of_reverse_thermometer"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    " S ",
+    "LGP",
+    " M "
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "S": "minecraft:string",
+    "L": "minecraft:lava_bucket",
+    "G": "minecraft:glass",
+    "P": "minecraft:powder_snow_bucket"
+  },
+  "result": {
+    "id": "shape-shifter-curse:charm_of_reverse_thermometer",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

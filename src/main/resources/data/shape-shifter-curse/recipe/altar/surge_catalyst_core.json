@@ -1,0 +1,25 @@
+{
+  "type": "shape-shifter-curse:altar_shaped",
+  "result": {
+    "id": "shape-shifter-curse:surge_catalyst_core",
+    "count": 1
+  },
+  "time": 1200,
+  "moondust_cost": 9,
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": "minecraft:prismarine_crystals",
+    "B": "minecraft:spore_blossom",
+    "C": "minecraft:prismarine_crystals",
+    "D": "minecraft:prismarine_shard",
+    "E": "shape-shifter-curse:glint_prism",
+    "F": "minecraft:nautilus_shell",
+    "G": "minecraft:sponge",
+    "H": "minecraft:sponge",
+    "I": "minecraft:sponge"
+  }
+}

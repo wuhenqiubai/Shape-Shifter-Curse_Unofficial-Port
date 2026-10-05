@@ -19,6 +19,7 @@ import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.Badge;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
+import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeTooltipRenderers;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Impact;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
@@ -332,7 +333,8 @@ public class OriginDisplayScreen extends Screen {
         }
 
         public List<ClientTooltipComponent> getTooltipComponents(Font textRenderer, int widthLimit) {
-            return badge.getTooltipComponents(powerType, widthLimit, OriginDisplayScreen.this.time, textRenderer);
+            // tooltip 构建已移到纯客户端的 BadgeTooltipRenderers（Badge 接口本身不能再带客户端类型的方法签名）
+            return BadgeTooltipRenderers.getTooltipComponents(badge, powerType, widthLimit, OriginDisplayScreen.this.time, textRenderer);
         }
 
     }

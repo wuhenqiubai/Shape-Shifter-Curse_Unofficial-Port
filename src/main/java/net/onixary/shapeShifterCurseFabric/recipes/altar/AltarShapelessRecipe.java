@@ -36,14 +36,23 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     public final @Nullable Identifier requireAdvancement;
 
-    public AltarShapelessRecipe(ItemStackTemplate output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
+    // 1.21.11 侧 input 为 List<Ingredient>（1.21.1 侧是 NonNullList，那边 Recipe 接口还有 getIngredients()）；
+    // 这里保留 1.21.11 的 List，便于沿用 Ingredient.CODEC.listOf(1, 9)。
+    // 26.1 的 ItemStackTemplate 序列化类型 + 1.21.11 的 totalFuelCost（Cost 系统精确燃料预算）并存。
+    public AltarShapelessRecipe(ItemStackTemplate output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement, int totalFuelCost) {
         this.output = output;
         this.input = input;
         this.recipeTime = recipeTime;
         this.catalyst = catalyst;
         this.fuelCostPerTick = fuelCostPerTick;
         this.requireAdvancement = requireAdvancement;
+        // 精确燃料预算（单位 fuel unit，1 个月尘 = 800）；-1 表示未指定，走 legacy 的逐 tick fuel_cost。
+        this.totalFuelCost = totalFuelCost;
     }
+
+    // [1.21.1 修复] 那边覆写了 getIngredients()（Recipe 接口有该方法，StackedContents.canCraft 会读它）。
+    // 1.21.11 的 Recipe 接口已删除 getIngredients()：StackedItemContents.canCraft 改读 placementInfo()，
+    // 本类的 placementInfo() 直接用 this.input 构造，语义等价，故无需该覆写。
 
     @Override
     public int recipeTime() {
@@ -116,7 +125,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     @Override
     public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
-        return RecipeSerializerRegister.Altar_SHAPELESS_RECIPE;
+        return RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE;
     }
 
     public static class Serializer {
@@ -127,15 +136,28 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
-            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement) ->
-                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
+                Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
+                // 数据包用「月尘个数」表达燃料预算，内部换算成 fuel unit（1 个尘 = 800）。
+                // ⚠ 字段缺省值与「显式写了 0」必须区分：0 表示「本配方不耗燃料」（totalFuelCost=0），
+                //   而字段整个缺失才表示「未指定」（totalFuelCost=-1 → 退回逐 tick fuel_cost）。
+                //   所以这里用无默认值的 optionalFieldOf（拿到 Optional），不要写死默认 0。
+                // 1.21.11: Ingredient.CODEC 本身已是 non-empty（1.21.1 的 CODEC_NONEMPTY 在本版本不存在），
+                // 故沿用上面的 Ingredient.CODEC.listOf(1, 9)（1.21.1 侧的 CODEC_NONEMPTY 写法不适用）。
+                Codec.INT.optionalFieldOf("moondust_cost")
+                        .forGetter(r -> r.totalFuelCost >= 0 ? Optional.of(r.totalFuelCost / 800) : Optional.empty())
+            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement, moondustCost) ->
+                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null),
+                        moondustCost.map(integer -> integer * 800).orElse(-1)))
         );
 
         public static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
             Serializer::toNetwork, Serializer::fromNetwork
         );
 
+        // 26.1 侧此处为空：Serializer 不再 implements RecipeSerializer（它成了 record，
+        // 由 RecipeSerializerRegister 用 new RecipeSerializer<>(CODEC, STREAM_CODEC) 直接构造），
+        // 故 codec() / streamCodec() 两个 @Override 消失 —— 1.21.11 在此修的「streamCodec 自引用无限递归」
+        // 在 26.1 的结构下已不可能发生。
 
         private static AltarShapelessRecipe fromNetwork(RegistryFriendlyByteBuf buf) {
             Ingredient catalyst = null;
@@ -150,26 +172,30 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement);
+            // 必须与 toNetwork 的写入顺序严格对应 —— 那边最后还写了 totalFuelCost，
+            // 这里此前漏读，会让后续读到的字节整体错位。
+            int totalFuelCost = buf.readVarInt();
+            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement, totalFuelCost);
         }
 
-        private static void toNetwork(RegistryFriendlyByteBuf buf, AltarShapelessRecipe r) {
-            if (r.catalyst != null) {
-                buf.writeBoolean(true);
-                Ingredient.CONTENTS_STREAM_CODEC.encode(buf, r.catalyst);
+        private static void toNetwork(RegistryFriendlyByteBuf packetByteBuf, AltarShapelessRecipe shapelessRecipe) {
+            if (shapelessRecipe.catalyst != null) {
+                packetByteBuf.writeBoolean(true);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.catalyst);
             } else {
-                buf.writeBoolean(false);
+                packetByteBuf.writeBoolean(false);
             }
-            if (r.requireAdvancement != null) {
-                buf.writeBoolean(true);
-                Identifier.STREAM_CODEC.encode(buf, r.requireAdvancement);
+            if (shapelessRecipe.requireAdvancement != null) {
+                packetByteBuf.writeBoolean(true);
+                Identifier.STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.requireAdvancement);
             } else {
-                buf.writeBoolean(false);
+                packetByteBuf.writeBoolean(false);
             }
-            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(buf, r.input);
-            ItemStackTemplate.STREAM_CODEC.encode(buf, r.output);
-            buf.writeVarInt(r.recipeTime);
-            buf.writeVarInt(r.fuelCostPerTick);
+            Ingredient.CONTENTS_STREAM_CODEC.apply(ByteBufCodecs.list()).encode(packetByteBuf, shapelessRecipe.input);
+            ItemStackTemplate.STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.output);
+            packetByteBuf.writeVarInt(shapelessRecipe.recipeTime);
+            packetByteBuf.writeVarInt(shapelessRecipe.fuelCostPerTick);
+            packetByteBuf.writeVarInt(shapelessRecipe.totalFuelCost);
         }
     }
 }

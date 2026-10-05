@@ -37,6 +37,26 @@ import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.*;
 // This class should only be registered on the server side
 public class ModPacketsC2S {
 
+    /** Called from client initializer: registers C2S payload codecs so the client can send. */
+    public static void registerClient() {
+        BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
+        BytePayload.registerC2S(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
+        BytePayload.registerC2S(JUMP_DETACH_REQUEST_ID);
+        BytePayload.registerC2S(JUMP_EVENT_ID);
+        BytePayload.registerC2S(SPRINTING_TO_SNEAKING_EVENT_ID);
+        BytePayload.registerC2S(UPDATE_CUSTOM_SETTING);
+        BytePayload.registerC2S(UPDATE_CUSTOM_COLOR);
+        BytePayload.registerC2S(OLD_SET_PATRON_FORM);
+        BytePayload.registerC2S(SET_FORM);
+        BytePayload.registerC2S(UPDATE_POWER_ANIM_DATA_TO_SERVER);
+        BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
+        BytePayload.registerC2S(ModPackets.UPLOAD_PATRON_AUTH_FILE);
+        BytePayload.registerC2S(ModPackets.ADD_PERK);
+        BytePayload.registerC2S(REQUEST_PERK_AVAILABILITY);
+        BytePayload.registerC2S(REQUEST_PERK_DATA);
+        BytePayload.registerC2S(REQUEST_SET_SUB_FORM);
+    }
+
     public static void register() {
         // Register C2S payload types before registering handlers
 	    registerClient();
@@ -231,12 +251,15 @@ public class ModPacketsC2S {
         ServerPlayer player = ctx.player();
         UUID target = buf.readUUID();
         Identifier formID = Identifier.tryParse(buf.readUtf());
+        // [移植修复] 上游此处还有第三个字段 immediately（sendSetForm 一直在发），移植时漏读，
+        // 且把上游的 forceTransform 换成了 startTransform —— 后者不清形态历史（clearPlayerFormHistory）。
+        boolean immediately = buf.readBoolean();
         if (target.equals(player.getUUID()) || player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             ServerPlayer targetPlayer = player.level().getServer().getPlayerList().getPlayer(target);
             if (targetPlayer != null) {
                 IForm form = RegPlayerForms.getPlayerForm(formID);
                 if (form != null) {
-                    TransformManager.startTransform(targetPlayer, form, null);
+                    TransformManager.forceTransform(targetPlayer, form, immediately);
                 }
             }
         }
@@ -247,7 +270,9 @@ public class ModPacketsC2S {
         ServerPlayer player = ctx.player();
         IForm form = RegPlayerForms.getPlayerForm(Identifier.tryParse(buf.readUtf()));
         if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUUID())) {
-            TransformManager.startTransform(player, form, null);
+            // [移植修复] 上游用的是 forceTransform(…, false)，移植时被换成 startTransform，
+            // 少了 clearPlayerFormHistory —— 与 receiveSetForm 同一处退化。
+            TransformManager.forceTransform(player, form, false);
         }
     }
 
@@ -324,25 +349,5 @@ public class ModPacketsC2S {
             }
             TransformManager.forceTransform(ctx.player(), form, false);
         });
-    }
-
-    /** Called from client initializer: registers C2S payload codecs so the client can send. */
-    public static void registerClient() {
-        BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
-        BytePayload.registerC2S(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
-        BytePayload.registerC2S(JUMP_DETACH_REQUEST_ID);
-        BytePayload.registerC2S(JUMP_EVENT_ID);
-        BytePayload.registerC2S(SPRINTING_TO_SNEAKING_EVENT_ID);
-        BytePayload.registerC2S(UPDATE_CUSTOM_SETTING);
-        BytePayload.registerC2S(UPDATE_CUSTOM_COLOR);
-        BytePayload.registerC2S(OLD_SET_PATRON_FORM);
-        BytePayload.registerC2S(SET_FORM);
-        BytePayload.registerC2S(UPDATE_POWER_ANIM_DATA_TO_SERVER);
-        BytePayload.registerC2S(REQUEST_POWER_ANIM_DATA);
-        BytePayload.registerC2S(ModPackets.UPLOAD_PATRON_AUTH_FILE);
-        BytePayload.registerC2S(ModPackets.ADD_PERK);
-        BytePayload.registerC2S(REQUEST_PERK_AVAILABILITY);
-        BytePayload.registerC2S(REQUEST_PERK_DATA);
-        BytePayload.registerC2S(REQUEST_SET_SUB_FORM);
     }
 }

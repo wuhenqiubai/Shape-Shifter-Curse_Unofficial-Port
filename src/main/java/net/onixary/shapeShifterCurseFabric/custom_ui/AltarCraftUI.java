@@ -56,6 +56,12 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
     }
 
     @Override
+    protected void extractLabels(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+        // 祭坛布局不显示默认的标题/物品栏标签 —— 对应 1.21.11 侧 renderLabels 的空实现。
+        // 26.1 把 AbstractContainerScreen#renderLabels 改名为 extractLabels，签名换成 GuiGraphicsExtractor。
+    }
+
+    @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float a) {
         // 26.1: AbstractContainerScreen#renderBg 被删除，改由覆写 Screen#extractBackground 实现。
         // ⚠ 两处变化：① 可见性必须是 public（Screen 里是 public，旧的 renderBg 是 protected，不能收窄）

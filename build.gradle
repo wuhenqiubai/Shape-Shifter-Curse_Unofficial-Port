@@ -43,6 +43,29 @@ base {
 }
 
 loom {
+    mods {
+        "shape-shifter-curse" { sourceSet sourceSets.main }
+        "ssc-altar-checks" { sourceSet sourceSets.test }
+    }
+    runs {
+        altarCheck {
+            server()
+            source sourceSets.test
+            vmArg "-Dfabric-api.gametest"
+            vmArg "-Dfabric-api.gametest.report-file=${project.buildDir}/altar-checks.xml"
+            runDir "build/altar-check"
+        }
+        client {
+            programArgs([
+                    "--username", "Dev",
+                    "--uuid", "12345678-1234-1234-1234-123456789012"
+            ])
+            runDir "run/client"
+        }
+        server {
+            runDir "run/server"
+        }
+    }
     accessWidenerPath = file("src/main/resources/shape-shifter-curse.accesswidener")
 }
 
@@ -60,18 +83,15 @@ repositories {
     }
 
     exclusiveContent {
-
         forRepository {
             maven {
                 name = "Modrinth"
                 url = "https://api.modrinth.com/maven"
             }
         }
-
         filter {
             includeGroup "maven.modrinth"
         }
-
     }
     // CurseMaven
     exclusiveContent {
@@ -198,6 +218,8 @@ dependencies {
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
      implementation "maven.modrinth:jei:${project.jei_version}-fabric"
+    // 调用频率有点高 所以直接项目依赖吧（26.1 不 remap，与 better-combat / presence-footsteps 等可选集成一致用 compileOnly）
+    compileOnly "maven.modrinth:carry-on:2.10.0-fabric,26.1.2"
 }
 
 processResources {
@@ -264,7 +286,24 @@ tasks.matching { it.name in ["jar", "sourcesJar", "remapJar", "remapSourcesJar"]
     }
 }
 
+// src/test 下只有 Fabric GameTest（@GameTest，在游戏内跑、由 checkAltarRecipes 驱动），
+// 没有 JUnit 测试。Gradle 9 遇到「有测试源码但扫不到测试」会直接让 :test 失败，
+// 这里显式关掉该校验 —— 不是配置错误，是有意为之。
+tasks.named('test') {
+    failOnNoDiscoveredTests = false
+}
+
 // configure the maven publication
+tasks.register('checkAltarRecipes') {
+    dependsOn 'runAltarCheck'
+}
+
+tasks.register('checkTooltipWrapping', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'net.onixary.shapeShifterCurseFabric.client.ItemTooltipWrappingCheck'
+}
+
 publishing {
     publications {
         create("mavenJava", MavenPublication) {

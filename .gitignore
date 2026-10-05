@@ -187,3 +187,7 @@ build_*.txt
 /.dsh/
 /.zcode/plans/plan-sess_a92b9483-6476-49c6-9101-c989238133c9.md
 /*.log
+
+# SSC Studio recovery files (content.json and generated Java stay versioned)
+.ssc-studio/history/
+*.ssc-*.tmp

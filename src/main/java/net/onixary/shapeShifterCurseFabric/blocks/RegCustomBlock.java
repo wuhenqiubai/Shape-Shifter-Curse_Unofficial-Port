@@ -30,8 +30,10 @@ public final class RegCustomBlock {
     public static final Block WEB_COMPOSTER = register("web_composter", WebComposterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion());
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", DewCoveredCobwebBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollision().noOcclusion());
 
-    public static final Block ALTER_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
-    public static final BlockEntityType<AltarBlockEntity> ALTER_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, ALTER_BLOCK).build(null));
+    // 名称取 1.21.1 侧的 ALTAR_*（全项目其余文件都已用这个名字，ALTER_* 是拼写残留）；
+    // 注册方式保留 1.21.11 侧的 Function + setId 重载（BlockItem 需要 ResourceKey 才能定描述前缀）。
+    public static final Block ALTAR_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
+    public static final BlockEntityType<AltarBlockEntity> ALTAR_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, ALTAR_BLOCK).build(null));
 
     public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", FormAttunerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(4.0F, 10.0F).sound(SoundType.GLASS).noOcclusion());
     public static final BlockEntityType<FormAttunerBlockEntity> FORM_ATTUNER_BLOCK_ENTITY = registerBlockEntity("form_attuner_block_entity", FabricBlockEntityTypeBuilder.create(FormAttunerBlockEntity::new, FORM_ATTUNER_BLOCK).build());

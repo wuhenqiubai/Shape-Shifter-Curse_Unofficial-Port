@@ -114,10 +114,14 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return this.recipeConfig.recipeTime;
     }
 
+    // 拿 BE 必须经由 AltarRecipeInput 的 owner —— AltarBlockEntity 本身刻意没有 implements RecipeInput
+    //（避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义）。
+    // 此前这里直接判 `recipeInput instanceof AltarBlockEntity`，而调用方传的是 craftInput()（AltarRecipeInput），
+    // 于是恒为 false —— 所有内置配方（Apoli/饰品升级）静默失效。
     @Override
     public boolean matches(RecipeInput recipeInput, Level world) {
-        if (recipeInput instanceof AltarBlockEntity altarBlockEntity) {
-            return this.recipeConfig.match.test(altarBlockEntity, world);
+        if (recipeInput instanceof AltarRecipeInput input && input.owner() != null) {
+            return this.recipeConfig.match.test(input.owner(), world);
         }
         return false;
     }
@@ -127,10 +131,13 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         // 26.1: Recipe#assemble 收敛为单参（旧的 (T, HolderLookup.Provider) 已移除），
         // 原先由形参传入的 provider 改从方块实体所在世界的 registryAccess 取
         // （与 AltarBlockEntity 内既有的 world.registryAccess() 用法一致，同样带 null 检查）。
-        if (input instanceof AltarBlockEntity altarBlockEntity) {
-            Level world = altarBlockEntity.getLevel();
+        // ⚠ 取 BE 的判据与上面的 matches 保持一致，必须经 AltarRecipeInput.owner()：
+        //   AltarBlockEntity 本身刻意没有 implements RecipeInput，若照 26.1 侧旧写法判
+        //   `input instanceof AltarBlockEntity` 会恒为 false，所有内置配方静默返回 EMPTY。
+        if (input instanceof AltarRecipeInput altarInput && altarInput.owner() != null) {
+            Level world = altarInput.owner().getLevel();
             if (world != null) {
-                return this.recipeConfig.craft.apply(altarBlockEntity, world.registryAccess());
+                return this.recipeConfig.craft.apply(altarInput.owner(), world.registryAccess());
             }
         }
         return ItemStack.EMPTY;
@@ -187,8 +194,10 @@ public class BuiltinAltarRecipe extends AltarRecipe {
     }
 
     @Override
+    // 1.21.11 的 Recipe.getSerializer() 返回 RecipeSerializer<? extends Recipe<T>>（1.21.1 是 ?）；
+    // 名称取 1.21.1 侧的 BUILTIN_ALTAR_RECIPE（与 RecipeSerializerRegister 里的字段声明一致）。
     public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
-        return RecipeSerializerRegister.BUILTIN_Altar_RECIPE;
+        return RecipeSerializerRegister.BUILTIN_ALTAR_RECIPE;
     }
 
     public static class Serializer {

@@ -1,13 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.badge;
 
-import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.resources.Identifier;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public record SpriteBadge(Identifier spriteId) implements Badge {
 
@@ -20,10 +14,8 @@ public record SpriteBadge(Identifier spriteId) implements Badge {
         return false;
     }
 
-    @Override
-    public List<ClientTooltipComponent> getTooltipComponents(PowerType<?> powerType, int widthLimit, float time, Font textRenderer) {
-        return new ArrayList<>();
-    }
+    // 该 badge 本就没有 tooltip（原 getTooltipComponents 返回空列表）；
+    // 客户端侧由 BadgeTooltipRenderers 同样返回空列表。
 
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {

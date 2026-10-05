@@ -142,7 +142,9 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
+	// 26.1 要求 Java 25（保留本侧）；compilerArgs 来自 1.21.11 的「禁用编译警告」，与 Java 版本无关
 	it.options.release = 25
+	it.options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
 }
 
 java {

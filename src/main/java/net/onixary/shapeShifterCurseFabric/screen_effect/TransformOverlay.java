@@ -1,26 +1,31 @@
 package net.onixary.shapeShifterCurseFabric.screen_effect;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
+/**
+ * 变身叠加层的**状态**部分（纯数据，服务端安全）。
+ *
+ * <p><b>为什么渲染要拆出去</b>：本类原先自带 {@code renderHud(GuiGraphics)}，其方法签名含客户端类
+ * {@code GuiGraphics}。而 {@code ShapeShifterCurseFabric#onInitialize}（main entrypoint，专用服务端同样执行）
+ * 第 247 行会调 {@link #INSTANCE}.{@link #init()}，触发本类的加载 —— JVM 链接期解析方法签名时就会去加载
+ * {@code GuiGraphics}（进而拉起 {@code Screen} 等），报
+ * {@code Cannot load class ... in environment type SERVER} → {@code ExceptionInInitializerError} → 服务端启动失败。</p>
+ *
+ * <p>注意方法体里的客户端调用**不影响**类加载（只在执行到该行时才解析），只有**签名**会。
+ * 因此只需把带客户端签名的方法移出，渲染实现见 {@code TransformOverlayRenderer}（{@code @Environment(CLIENT)}）。</p>
+ */
 public final class TransformOverlay {
     public static final TransformOverlay INSTANCE = new TransformOverlay();
-    private final Identifier nausea_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/nausea_black.png");
-    private final Identifier black_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/black.png");
+    final Identifier nausea_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/nausea_black.png");
+    final Identifier black_texture = Identifier.fromNamespaceAndPath(MOD_ID, "textures/overlay/black.png");
 
-    private boolean enableOverlay = false;
-    private float strength_nausea = 0.0f;
-    private float strength_black = 0.0f;
-
-    private boolean hudRegistered = false;
+    // 渲染器（同包、客户端侧）直接读取这些状态，故为包级可见
+    boolean enableOverlay = false;
+    float strength_nausea = 0.0f;
+    float strength_black = 0.0f;
 
     public void init() {
         enableOverlay = false;
@@ -28,57 +33,10 @@ public final class TransformOverlay {
         strength_black = 0.0f;
     }
 
-    /**
-     * 1.21.11 迁移：原即时渲染 API（RenderSystem.setShader / BufferUploader / Tesselator）已全部移除。
-     * 改为惰性注册 Fabric HudRenderCallback，在 HUD 渲染阶段用 GuiGraphics + RenderPipelines.GUI_TEXTURED 绘制，
-     * 这样叠加层能正确显示在 HUD 之上（而非像旧的 GameRenderer ordinal=0 注入那样渲染在世界之前）。
-     * 此方法保留无参签名以兼容 GameRendererMixin 的调用。
-     */
-    @Environment(EnvType.CLIENT)
-    public void render() {
-        ensureHudRegistered();
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void ensureHudRegistered() {
-        if (hudRegistered) {
-            return;
-        }
-        hudRegistered = true;
-        // 26.1: HudElementRegistry 不再是事件容器（EVENT 字段已移除），改为按 Identifier 注册的 HUD 层注册表。
-        // 回调接口 HudElement.extractRenderState(GuiGraphicsExtractor, DeltaTracker) 是 @FunctionalInterface，
-        // lambda 形状不变（本类 renderHud 本就接收 GuiGraphicsExtractor）。
-        // 用 addLast：不继承任何 render condition，语义最接近旧的 HudRenderCallback（始终渲染）。
-        // 若希望此覆盖层随 F1/hideGui 一起隐藏，改用
-        //   HudElementRegistry.attachElementAfter(VanillaHudElements.SUBTITLES, id, cb)
-        // （attach* 会继承锚点层的 render condition）。
-        HudElementRegistry.addLast(
-                Identifier.fromNamespaceAndPath(MOD_ID, "transform_overlay"),
-                (guiGraphics, deltaTracker) -> this.renderHud(guiGraphics));
-    }
-
-    @Environment(EnvType.CLIENT)
-    private void renderHud(GuiGraphicsExtractor guiGraphics) {
-        if (!enableOverlay) {
-            // 1.21.11 恢复黑屏渐变（无 shader，iris 兼容）：退出时每帧衰减至透明后停止，
-            // 避免 setEnableOverlay(false) 后黑屏瞬变消失
-            if (strength_black <= 0.01f && strength_nausea <= 0.01f) {
-                return;
-            }
-            strength_black *= 0.85f;
-            strength_nausea *= 0.85f;
-        } else if (strength_black <= 0.01f && strength_nausea <= 0.01f) {
-            return;
-        }
-        int width = guiGraphics.guiWidth();
-        int height = guiGraphics.guiHeight();
-        if (strength_nausea > 0.0f) {
-            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, nausea_texture, 0, 0, 0.0F, 0.0F, width, height, width, height, ARGB.white(strength_nausea));
-        }
-        if (strength_black > 0.0f) {
-            guiGraphics.blit(RenderPipelines.GUI_TEXTURED, black_texture, 0, 0, 0.0F, 0.0F, width, height, width, height, ARGB.white(strength_black));
-        }
-    }
+    // 渲染方法（render / ensureHudRegistered / renderHud）连同 hudRegistered 字段已由 1.21.11 侧
+    // 整体移入 TransformOverlayRenderer —— GameRendererMixin 现在直接调 TransformOverlayRenderer.render()，
+    // 本类只保留状态（也正是本类注释里说的「把带客户端签名的方法移出」）。
+    // 若把 26.1 侧的旧实现留着，会引用 1.21.11 已删除的 hudRegistered 字段与 ARGB import，编译失败。
 
     public void setEnableOverlay(boolean enableOverlay) {
         this.enableOverlay = enableOverlay;

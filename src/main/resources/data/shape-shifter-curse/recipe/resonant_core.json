@@ -1,17 +1,19 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"BAB",
-		"AMA",
-		"BAB"
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"A": "minecraft:amethyst_shard",
-		"B": "minecraft:amethyst_block"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:resonant_core"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "BAB",
+    "AMA",
+    "BAB"
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "A": "minecraft:amethyst_shard",
+    "B": "minecraft:amethyst_block"
+  },
+  "result": {
+    "id": "shape-shifter-curse:resonant_core",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

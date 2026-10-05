@@ -1,0 +1,25 @@
+{
+  "type": "shape-shifter-curse:altar_shaped",
+  "result": {
+    "id": "shape-shifter-curse:frost_catalyst_core",
+    "count": 1
+  },
+  "time": 1200,
+  "moondust_cost": 9,
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": "minecraft:spruce_leaves",
+    "B": "minecraft:spruce_leaves",
+    "C": "minecraft:spruce_leaves",
+    "D": "minecraft:powder_snow_bucket",
+    "E": "shape-shifter-curse:glint_prism",
+    "F": "minecraft:emerald",
+    "G": "minecraft:packed_ice",
+    "H": "minecraft:packed_ice",
+    "I": "minecraft:packed_ice"
+  }
+}
