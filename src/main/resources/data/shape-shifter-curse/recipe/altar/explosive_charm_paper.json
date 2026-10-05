@@ -1,0 +1,14 @@
+{
+  "type": "shape-shifter-curse:altar_shapeless",
+  "ingredients": [
+    "shape-shifter-curse:fire_charm_paper",
+    "minecraft:soul_sand"
+  ],
+  "result": {
+    "id": "shape-shifter-curse:explosive_charm_paper",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 0,
+  "catalyst": "shape-shifter-curse:foxfire_catalyst_core"
+}

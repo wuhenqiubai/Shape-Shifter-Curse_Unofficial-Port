@@ -1,16 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.badge;
 
-import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip;
-import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.FormattedCharSequence;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public record TooltipBadge(Identifier spriteId, Component text) implements Badge {
 
@@ -23,22 +15,8 @@ public record TooltipBadge(Identifier spriteId, Component text) implements Badge
         return true;
     }
 
-    public static void addLines(List<ClientTooltipComponent> tooltips, Component text, Font textRenderer, int widthLimit) {
-        if(textRenderer.width(text) > widthLimit) {
-            for(FormattedCharSequence orderedText : textRenderer.split(text, widthLimit)) {
-                tooltips.add(new ClientTextTooltip(orderedText));
-            }
-        } else {
-            tooltips.add(new ClientTextTooltip(text.getVisualOrderText()));
-        }
-    }
-
-    @Override
-    public List<ClientTooltipComponent> getTooltipComponents(PowerType<?> powerType, int widthLimit, float time, Font textRenderer) {
-        List<ClientTooltipComponent> tooltips = new LinkedList<>();
-        addLines(tooltips, text, textRenderer, widthLimit);
-        return tooltips;
-    }
+    // tooltip 构建（原 static addLines / getTooltipComponents，签名含 Font 等客户端类）
+    // 已移到纯客户端的 BadgeTooltipRenderers。
 
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {

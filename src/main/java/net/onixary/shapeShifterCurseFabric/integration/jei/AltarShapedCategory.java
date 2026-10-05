@@ -32,7 +32,7 @@ public class AltarShapedCategory extends AbstractRecipeCategory<AltarShapedRecip
     public AltarShapedCategory(IGuiHelper guiHelper) {
         super(SSC_JEI_Plugin.ALTAR_SHAPED,
                 Component.translatable("gui.shape_shifter_curse.category.altar_shaped"),
-                guiHelper.createDrawableItemLike(RegCustomBlock.ALTER_BLOCK),
+                guiHelper.createDrawableItemLike(RegCustomBlock.ALTAR_BLOCK),
                 174, 79);
         this.background = guiHelper.createDrawable(TEXTURE, 0, 0, 174, 79);
         this.arrow = guiHelper.createDrawable(TEXTURE, 174, 0, 43, 9);
@@ -73,8 +73,8 @@ public class AltarShapedCategory extends AbstractRecipeCategory<AltarShapedRecip
             builder.addInputSlot(97, 22);
         }
 
-        if (recipe.fuelUsage() > 0) {
-            builder.addInputSlot(84, 53).addItemStack(new ItemStack(RegCustomItem.UNTREATED_MOONDUST));
+        if (recipe.totalFuelUsage() > 0) {
+            builder.addInputSlot(84, 53).addItemStack(new ItemStack(RegCustomItem.UNTREATED_MOONDUST, Math.max(1, (recipe.totalFuelUsage() + 799) / 800)));
         } else {
             builder.addInputSlot(84, 53);
         }
@@ -87,6 +87,8 @@ public class AltarShapedCategory extends AbstractRecipeCategory<AltarShapedRecip
     public void getTooltip(@NotNull ITooltipBuilder tooltip, @NotNull AltarShapedRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
         if (mouseX >= 84 && mouseX <= 127 && mouseY >= 39 && mouseY <= 48) {
             tooltip.add(Component.translatable("gui.shape_shifter_curse.jei.altar.recipe_id", recipe.getSerializer().toString()));
+            tooltip.add(Component.translatable("gui.shape_shifter_curse.jei.altar.time", recipe.recipeTime() / 20.0));
+            tooltip.add(Component.translatable("gui.shape_shifter_curse.jei.altar.moondust", recipe.totalFuelUsage() / 800.0));
             if (recipe.requireAdvancement != null) {
                 tooltip.add(Component.translatable("gui.shape_shifter_curse.jei.altar.requires_advancement", getAdvancementName(recipe.requireAdvancement)));
             }

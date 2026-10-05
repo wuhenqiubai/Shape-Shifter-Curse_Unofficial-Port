@@ -1,19 +1,21 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"LLL",
-		" M ",
-		"BCI"
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"L": "minecraft:leather",
-		"B": "minecraft:water_bucket",
-		"I": "minecraft:soul_sand",
-		"C": "minecraft:conduit"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:fountain_belt"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "LLL",
+    " M ",
+    "BCI"
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "L": "minecraft:leather",
+    "B": "minecraft:water_bucket",
+    "I": "minecraft:soul_sand",
+    "C": "minecraft:conduit"
+  },
+  "result": {
+    "id": "shape-shifter-curse:fountain_belt",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

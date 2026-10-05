@@ -3,6 +3,8 @@ package net.onixary.shapeShifterCurseFabric.perk;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 
 // Server Side
 public interface IPerk {
@@ -25,7 +27,7 @@ public interface IPerk {
     default void onLoad(Player player, IForm form) { }
 
     // 非动态数据 仅在开UI时同步
-    default int getXpCost() {
-        return 0;
+    default ICost getCost() {
+        return new BaseCost();
     }
 }

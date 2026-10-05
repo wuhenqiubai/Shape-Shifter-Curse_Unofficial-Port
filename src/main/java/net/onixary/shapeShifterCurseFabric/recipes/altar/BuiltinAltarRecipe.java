@@ -114,18 +114,22 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return this.recipeConfig.recipeTime;
     }
 
+    // 拿 BE 必须经由 AltarRecipeInput 的 owner —— AltarBlockEntity 本身刻意没有 implements RecipeInput
+    //（避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义）。
+    // 此前这里直接判 `recipeInput instanceof AltarBlockEntity`，而调用方传的是 craftInput()（AltarRecipeInput），
+    // 于是恒为 false —— 所有内置配方（Apoli/饰品升级）静默失效。
     @Override
     public boolean matches(RecipeInput recipeInput, Level world) {
-        if (recipeInput instanceof AltarBlockEntity altarBlockEntity) {
-            return this.recipeConfig.match.test(altarBlockEntity, world);
+        if (recipeInput instanceof AltarRecipeInput input && input.owner() != null) {
+            return this.recipeConfig.match.test(input.owner(), world);
         }
         return false;
     }
 
     @Override
     public @NotNull ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
-        if (recipeInput instanceof AltarBlockEntity altarBlockEntity) {
-            return this.recipeConfig.craft.apply(altarBlockEntity, provider);
+        if (recipeInput instanceof AltarRecipeInput input && input.owner() != null) {
+            return this.recipeConfig.craft.apply(input.owner(), provider);
         }
         return ItemStack.EMPTY;
     }
@@ -181,8 +185,10 @@ public class BuiltinAltarRecipe extends AltarRecipe {
     }
 
     @Override
+    // 1.21.11 的 Recipe.getSerializer() 返回 RecipeSerializer<? extends Recipe<T>>（1.21.1 是 ?）；
+    // 名称取 1.21.1 侧的 BUILTIN_ALTAR_RECIPE（与 RecipeSerializerRegister 里的字段声明一致）。
     public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
-        return RecipeSerializerRegister.BUILTIN_Altar_RECIPE;
+        return RecipeSerializerRegister.BUILTIN_ALTAR_RECIPE;
     }
 
     public static class Serializer implements RecipeSerializer<BuiltinAltarRecipe> {

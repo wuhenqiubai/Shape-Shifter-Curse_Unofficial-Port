@@ -5,6 +5,8 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -21,7 +23,7 @@ public class NormalPerk implements IPerk, IPerkClient {
     public BiConsumer<Player, IForm> onGainFunc = null;
     public BiPredicate<Player, IForm> canGainCondition = null;
 
-    public int xpCost = 0;
+    public ICost cost = new BaseCost();
 
     public @Nullable Identifier Icon = null;
     public @Nullable Component Name = null;
@@ -95,12 +97,12 @@ public class NormalPerk implements IPerk, IPerkClient {
     }
 
     @Override
-    public int getXpCost() {
-        return xpCost;
+    public ICost getCost() {
+        return cost;
     }
 
-    public NormalPerk XpCost(int xpCost) {
-        this.xpCost = xpCost;
+    public NormalPerk cost(ICost cost) {
+        this.cost = cost;
         return this;
     }
 

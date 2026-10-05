@@ -1,18 +1,20 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"LLL",
-		"BMI",
-		"   "
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"L": "minecraft:leather",
-		"B": "minecraft:blaze_powder",
-		"I": "minecraft:iron_nugget"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:collar_of_tension"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "LLL",
+    "BMI",
+    "   "
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "L": "minecraft:leather",
+    "B": "minecraft:blaze_powder",
+    "I": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "shape-shifter-curse:collar_of_tension",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

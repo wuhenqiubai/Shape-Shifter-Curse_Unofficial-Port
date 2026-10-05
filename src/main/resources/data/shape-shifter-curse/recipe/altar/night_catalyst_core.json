@@ -1,0 +1,25 @@
+{
+  "type": "shape-shifter-curse:altar_shaped",
+  "result": {
+    "id": "shape-shifter-curse:night_catalyst_core",
+    "count": 1
+  },
+  "time": 1200,
+  "moondust_cost": 9,
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": "minecraft:polished_basalt",
+    "B": "minecraft:soul_sand",
+    "C": "minecraft:polished_basalt",
+    "D": "minecraft:weeping_vines",
+    "E": "shape-shifter-curse:glint_prism",
+    "F": "minecraft:twisting_vines",
+    "G": "minecraft:pointed_dripstone",
+    "H": "minecraft:pointed_dripstone",
+    "I": "minecraft:pointed_dripstone"
+  }
+}

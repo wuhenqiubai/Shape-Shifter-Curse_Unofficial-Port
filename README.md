@@ -3,12 +3,12 @@
 # 本Mod将于2026/8/22开始进入随机停更状态，因为我的在校时间长，缺少时间进行开发，但仍然欢迎PR和提交Issue。
 # This mod will be randomly suspended starting August 22, 2026, due to my long hours at school and lack of time for development. However, pull requests and issue submissions are still welcome.
 
-## **幻形者诅咒（Shape Shifter Curse Mod）** 的 **非官方移植版本**
+## **幻形者诅咒非官方版 (Shape-Shifter-Curse_Unofficial-Port)**
 - 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
 - 原作者：[onixary](https://github.com/onixary)
-- 许可证：MIT License（遵循原项目协议，保留所有版权声明）
+- 许可证：MIT License & CC-BY-NC-4.0（遵循原项目协议，保留所有版权声明）
 > 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
-> 在发布稳定版本后会偶尔发布我的小巧思。
+> 因为频繁合并上游commit，并同步进行bugfix，所以比官方提早发布内容，但并不代表这是官方的想法。
 
   ---
 

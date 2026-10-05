@@ -1,0 +1,25 @@
+{
+  "type": "shape-shifter-curse:altar_shaped",
+  "result": {
+    "id": "shape-shifter-curse:dune_catalyst_core",
+    "count": 1
+  },
+  "time": 1200,
+  "moondust_cost": 9,
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": "shape-shifter-curse:ectoplasm_rag",
+    "B": "shape-shifter-curse:ectoplasm_rag",
+    "C": "shape-shifter-curse:ectoplasm_rag",
+    "D": "minecraft:dune_armor_trim_smithing_template",
+    "E": "shape-shifter-curse:glint_prism",
+    "F": "minecraft:rabbit_hide",
+    "G": "minecraft:red_sand",
+    "H": "minecraft:red_sand",
+    "I": "minecraft:red_sand"
+  }
+}

@@ -21,6 +21,12 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.perk.PerkTree;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
+import net.onixary.shapeShifterCurseFabric.util.util.BaseSprite;
+import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.CostTypeIcons;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.IFUSDrawableCostType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix3x2fStack;
@@ -37,9 +43,25 @@ import java.util.Objects;
 // 标记 UNTESTED 代表这个函数没测试 测试完了就删(估计最后得有一堆没测试函数 还是标一下大概率炸的函数吧)
 
 public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX {
+    // 合并 1.21.1：级别图标（levelSprites）与 452 宽的贴图（新增段位图标 + 431 处的分隔竖线）
+    // 属于 1.21.1 的新功能，予以保留；类型沿用 1.21.11 的 Identifier。
     public static final Identifier TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/shape_shifter_tuner_ui.png");
-    public static final int TEXTURE_WIDTH = 420;
+    public static final HashMap<Integer, ISprite> levelSprites = new HashMap<>();
+    public static final int TEXTURE_WIDTH = 452;
     public static final int TEXTURE_HEIGHT = 190;
+
+    static {
+        levelSprites.put(1, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 0, 11, 11));
+        levelSprites.put(2, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 11, 11, 11));
+        levelSprites.put(3, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 22, 11, 11));
+        levelSprites.put(4, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 33, 11, 11));
+        levelSprites.put(5, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 44, 11, 11));
+        levelSprites.put(6, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 55, 11, 11));
+        levelSprites.put(7, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 66, 11, 11));
+        levelSprites.put(8, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 77, 11, 11));
+        levelSprites.put(9, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 88, 11, 11));
+        levelSprites.put(10, new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 420, 99, 11, 11));
+    }
 
     public static final int BACKGROUND_WIDTH = 420;
     public static final int BACKGROUND_HEIGHT = 190;
@@ -75,15 +97,15 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public static final int PERK_INFO_DESC_WIDTH = 91;
     public static final int PERK_INFO_DESC_HEIGHT = 115;
 
-    public static final int PERK_INFO_XP_ICON_X = 316;
-    public static final int PERK_INFO_XP_ICON_Y = 145;
-    public static final int PERK_INFO_XP_ICON_WIDTH = 16;
-    public static final int PERK_INFO_XP_ICON_HEIGHT = 17;
+    public static final int PERK_INFO_COST_ICON_X = 315;
+    public static final int PERK_INFO_COST_ICON_Y = 144;
+    public static final int PERK_INFO_COST_ICON_WIDTH = 18;
+    public static final int PERK_INFO_COST_ICON_HEIGHT = 18;
 
-    public static final int PERK_INFO_XP_COST_X = 334;
-    public static final int PERK_INFO_XP_COST_Y = 145;
-    public static final int PERK_INFO_XP_COST_WIDTH = 73;
-    public static final int PERK_INFO_XP_COST_HEIGHT = 17;
+    public static final int PERK_INFO_COST_AMOUNT_X = 334;
+    public static final int PERK_INFO_COST_AMOUNT_Y = 145;
+    public static final int PERK_INFO_COST_AMOUNT_WIDTH = 73;
+    public static final int PERK_INFO_COST_AMOUNT_HEIGHT = 17;
 
     public static final int PERK_INFO_GAIN_BUTTON_X = 316;
     public static final int PERK_INFO_GAIN_BUTTON_Y = 164;
@@ -100,7 +122,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public static final Identifier LABEL_DEPEND = ShapeShifterCurseFabric.identifier("textures/perk/system/depend.png");
 
     public static final HashMap<Identifier, Boolean> perkAvailableMap = new HashMap<>();  // 仅客户端数据 仅影响渲染 仅代表服务器获取这个表时无法获取这个Perk
-    public static final HashMap<Identifier, Integer> perkXpCostMap = new HashMap<>();  // 仅客户端数据 实际消耗由服务器决定
+    // 合并 1.21.1：消耗从「固定经验值」升级为通用 ICost（XP / 物品等），类型沿用 1.21.11 的 Identifier
+    public static final HashMap<Identifier, ICost> perkCostMap = new HashMap<>();  // 仅客户端数据 实际消耗由服务器决定
+    public static final ICost EMPTY_COST = new BaseCost();
 
     public int tier = -1;
     public @NotNull PerkTree perkTree;
@@ -140,7 +164,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public StringWidget PerkNameWidget;
     public ScaleScrollTextWidget PerkDescWidget;
     public Button AcquirePerkButton;
-    public StringWidget PerkXpCostWidget;
+    public StringWidget PerkCostAmountWidget;
 
     public int MaxPerkLevel = 0;
 
@@ -183,14 +207,15 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
                 ModPacketsS2C.sendRequestPerkAvailability();
             }
         }).pos(baseX + PERK_INFO_GAIN_BUTTON_X, baseY + PERK_INFO_GAIN_BUTTON_Y).size(PERK_INFO_GAIN_BUTTON_WIDTH, PERK_INFO_GAIN_BUTTON_HEIGHT).build();
-        this.PerkXpCostWidget = new StringWidget(baseX + PERK_INFO_XP_COST_X, baseY + PERK_INFO_XP_COST_Y, PERK_INFO_XP_COST_WIDTH, PERK_INFO_XP_COST_HEIGHT, Component.literal(""), this.font);
+        // 合并 1.21.1：消耗数值控件改为 PerkCostAmountWidget（COST_AMOUNT 版坐标）
+        this.PerkCostAmountWidget = new StringWidget(baseX + PERK_INFO_COST_AMOUNT_X, baseY + PERK_INFO_COST_AMOUNT_Y, PERK_INFO_COST_AMOUNT_WIDTH, PERK_INFO_COST_AMOUNT_HEIGHT, Component.literal(""), this.font);
         // 1.21.11: StringWidget 移除了 alignRight()/horizontalAlignment（1.21.1 是靠私有 alignX 字段
-        // 在 renderWidget 内做 x 偏移）。改为在 setPerkXpCostText() 里直接调整 widget 的 x 实现右对齐。
-        this.setPerkXpCostText("");
+        // 在 renderWidget 内做 x 偏移）。改为在 setPerkCostAmountText() 里直接调整 widget 的 x 实现右对齐。
+        this.setPerkCostAmountText(Component.literal(""));
         this.addRenderableWidget(this.PerkNameWidget);
         this.addRenderableWidget(this.PerkDescWidget);
         this.addRenderableWidget(this.AcquirePerkButton);
-        this.addRenderableWidget(this.PerkXpCostWidget);
+        this.addRenderableWidget(this.PerkCostAmountWidget);
         super.init();
     }
 
@@ -250,10 +275,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
 
     // 1.21.11: StringWidget 不再支持内部对齐（alignRight/horizontalAlignment 已移除），
     // 改为按「基准 x + 区域宽 - 文本宽」手动设置 widget 位置来实现右对齐。
-    private void setPerkXpCostText(String text) {
-        Component component = Component.literal(text);
-        this.PerkXpCostWidget.setMessage(component);
-        this.PerkXpCostWidget.setX(baseX + PERK_INFO_XP_COST_X + PERK_INFO_XP_COST_WIDTH - this.font.width(component));
+    private void setPerkCostAmountText(Component component) {
+        this.PerkCostAmountWidget.setMessage(component);
+        this.PerkCostAmountWidget.setX(baseX + PERK_INFO_COST_AMOUNT_X + PERK_INFO_COST_AMOUNT_WIDTH - this.font.width(component));
     }
 
     private void RenderEntityInViewport(GuiGraphics context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -276,7 +300,12 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         nodeWindowY = baseY + PERK_UI_Y;
         cameraCenter = new Vector2i(nodeWindowX + PERK_UI_WIDTH / 2, nodeWindowY + PERK_UI_HEIGHT / 2);
         nodeCenter = new Vector2i( -PERK_UI_WIDTH / 2, 0);
-        context.fill(baseX + PERK_UI_ICON_X, baseY + PERK_UI_ICON_Y, baseX + PERK_UI_ICON_X + PERK_UI_ICON_WIDTH, baseY + PERK_UI_ICON_Y + PERK_UI_ICON_HEIGHT, 0xFFFFFFFF);
+        super.render(context, mouseX, mouseY, delta);
+        // 1.21.11: RenderSystem.enableBlend()/defaultBlendFunc()/setShaderColor()/disableBlend() 已随 GL5 管线移除，
+        // RenderPipeline（此处为 RenderPipelines.GUI_TEXTURED）自带混合与颜色状态，无需手动开关。
+        // 1.21.11: blit 必须带 RenderPipeline，且区域尺寸(fileUV)与贴图总尺寸分开传，
+        // 末尾 -1 为着色。1.21.1 的 blit(TEXTURE, x, y, u, v, w, h, texW, texH) 已不存在。
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX + PERK_UI_ICON_X, baseY + PERK_UI_ICON_Y, 434, 0, PERK_UI_ICON_WIDTH, PERK_UI_ICON_HEIGHT, PERK_UI_ICON_WIDTH, PERK_UI_ICON_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         this.drawAllNode(context, mouseX, mouseY, delta);
 
         if (minecraft.player != null) {
@@ -296,7 +325,17 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             );
         }
 
-        super.render(context, mouseX, mouseY, delta);
+        if (this.nowSelectNode != null) {
+            ICost nowCost = perkCostMap.getOrDefault(this.nowSelectNode.perkID, EMPTY_COST);
+            if (nowCost.getType() instanceof IFUSDrawableCostType<?> fusDrawable) {
+                int rx = baseX + PERK_INFO_COST_ICON_X;
+                int ry = baseY + PERK_INFO_COST_ICON_Y;
+                // 图标绘制改走纯客户端的 CostTypeIcons —— IFUSDrawableCostType 不能再带
+                // GuiGraphics 签名的方法，否则实现类在专用服务端加载时就会拉起客户端类。
+                CostTypeIcons.drawIcon(nowCost.getType(), context, nowCost, minecraft.player, rx, ry, 0);
+                CostTypeIcons.drawOnHover(nowCost.getType(), context, nowCost, minecraft.player, rx, ry, 0, mouseX - rx, mouseY - ry);
+            }
+        }
     }
 
     @Override
@@ -427,18 +466,26 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             float iconCenterScreenX =
                     cameraCenter.x + cameraPosX + cameraScale * (localLineX + 1.0f);
             int lineLeftX = Math.round(iconCenterScreenX - 0.5f);
-            context.fill(
-                    lineLeftX, nodeWindowY,
-                    lineLeftX + 1, nodeWindowY + PERK_UI_HEIGHT,
-                    LineColor
-            );
+            // context.fill(
+            //         lineLeftX, nodeWindowY,
+            //         lineLeftX + 1, nodeWindowY + PERK_UI_HEIGHT,
+            //         LineColor
+            // );
+            // 1.21.11: 同上，9 参 blit 已移除，改为带 RenderPipeline 的 13 参重载
+            context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, lineLeftX - 1, nodeWindowY, 431, 0, 3, PERK_UI_HEIGHT, 3, PERK_UI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
             int screenIconX = lineLeftX - (LEVEL_ICON_WIDTH - 1) / 2;
-            context.fill(
-                    screenIconX, firstY,
-                    screenIconX + LEVEL_ICON_WIDTH, firstY + LEVEL_ICON_HEIGHT,
-                    LineColor
-            );
+            ISprite icon = levelSprites.get(tierIndex);
+            if (icon != null) {
+                icon.draw(context, screenIconX, firstY);
+            } else {
+                context.fill(
+                        screenIconX, firstY,
+                        screenIconX + LEVEL_ICON_WIDTH, firstY + LEVEL_ICON_HEIGHT,
+                        LineColor
+                );
+            }
         }
+        // 1.21.11: RenderSystem.disableBlend() 已移除，混合状态由 RenderPipeline 承载
         context.disableScissor();
         context.enableScissor(nodeWindowX, nodeWindowY + PERK_UI_VIEW_Y, nodeWindowX + PERK_UI_WIDTH, nodeWindowY + PERK_UI_HEIGHT);
         // 1.21.11: Matrix3x2fStack 是 JOML 的 2D 矩阵栈 —— pushPose → pushMatrix，
@@ -541,8 +588,8 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             if (playerGainedPerk == null) return false;
             for (Identifier dependentPerkID : this.nowSelectNode.dependentPerkIDs) if (!playerGainedPerk.contains(dependentPerkID)) return false;
         }
-        int requireXp = this.minecraft.player.getAbilities().instabuild ? 0 : perkXpCostMap.getOrDefault(this.nowSelectNode.perkID, 0);
-        if (this.minecraft.player.totalExperience < requireXp) {
+        ICost cost = perkCostMap.get(this.nowSelectNode.perkID);
+        if (cost != null && !cost.getType().canPay_CLIENT(cost, minecraft.player)) {
             return false;
         }
         return true;
@@ -559,12 +606,18 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         if (this.nowSelectNode != null) {
             this.PerkNameWidget.setMessage(RegPerks.getPerkName(this.nowSelectNode.perkID));
             this.PerkDescWidget.reloadText(RegPerks.getPerkDescription(this.nowSelectNode.perkID));
-            this.setPerkXpCostText(String.valueOf(perkXpCostMap.getOrDefault(this.nowSelectNode.perkID, 0)));
+            ICost cost = perkCostMap.get(this.nowSelectNode.perkID);
+            if (cost != null && cost.getType() instanceof IFUSDrawableCostType<?> ifusDrawableCostType) {
+                // 1.21.11: 用带手动右对齐的 setPerkCostAmountText（StringWidget.alignRight 已移除）
+                this.setPerkCostAmountText(ifusDrawableCostType.getAmountText(cost, minecraft.player));
+            } else {
+                this.setPerkCostAmountText(Component.literal(""));
+            }
             this.AcquirePerkButton.active = this.isNowPerkCanGain();
         } else {
             this.PerkNameWidget.setMessage(Component.literal(""));
             this.PerkDescWidget.reloadText(Component.literal(""));
-            this.setPerkXpCostText("");
+            this.setPerkCostAmountText(Component.literal(""));
             this.AcquirePerkButton.active = false;
         }
         ModPacketsS2C.sendRequestPerkAvailability();

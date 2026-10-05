@@ -1,0 +1,25 @@
+{
+  "type": "shape-shifter-curse:altar_shaped",
+  "result": {
+    "id": "shape-shifter-curse:web_catalyst_core",
+    "count": 1
+  },
+  "time": 1200,
+  "moondust_cost": 9,
+  "pattern": [
+    "ABC",
+    "DEF",
+    "GHI"
+  ],
+  "key": {
+    "A": "minecraft:string",
+    "B": "minecraft:string",
+    "C": "minecraft:string",
+    "D": "minecraft:eye_armor_trim_smithing_template",
+    "E": "shape-shifter-curse:glint_prism",
+    "F": "shape-shifter-curse:dew_covered_cobweb",
+    "G": "minecraft:smooth_basalt",
+    "H": "minecraft:smooth_basalt",
+    "I": "minecraft:smooth_basalt"
+  }
+}

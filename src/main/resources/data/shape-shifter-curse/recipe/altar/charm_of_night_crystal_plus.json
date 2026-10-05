@@ -1,0 +1,13 @@
+{
+  "type": "shape-shifter-curse:altar_shapeless",
+  "ingredients": [
+    "shape-shifter-curse:charm_of_night_crystal"
+  ],
+  "result": {
+    "id": "shape-shifter-curse:charm_of_night_crystal_plus",
+    "count": 1
+  },
+  "time": 600,
+  "moondust_cost": 16,
+  "catalyst": "shape-shifter-curse:night_catalyst_core"
+}

@@ -131,25 +131,25 @@ public class WebBullet extends ThrowableItemProjectile {
         }
     }
 
-    private boolean isExtraHandVenomSpindleEquipped(Player player) {
-        /*
-         Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(player);
-         if (component.isEmpty()) {
-             return false;
-         }
-         Map<String, TrinketInventory> groupInv = component.get().getInventory().get("hand");
-         if (groupInv == null) {
-             return false;
-         }
-         TrinketInventory inv = groupInv.get("extra_hand");
-         if (inv == null) {
-             return false;
-         }
-         return inv.getStack(0).isOf(RegCustomItem.VENOM_SPINDLE);
-        */
+    private boolean isExtraHandVenomSpindleEquipped(Player player, Item item) {
+        // Optional<TrinketComponent> component = TrinketsApi.getTrinketComponent(player);
+        // if (component.isEmpty()) {
+        //     return false;
+        // }
+        // Map<String, TrinketInventory> groupInv = component.get().getInventory().get("hand");
+        // if (groupInv == null) {
+        //     return false;
+        // }
+        // TrinketInventory inv = groupInv.get("extra_hand");
+        // if (inv == null) {
+        //     return false;
+        // }
+        // return inv.getStack(0).isOf(RegCustomItem.VENOM_SPINDLE);
         return TrinketsConditionAction.CheckEquipped(
                 player, "auto", "hand", "extra_hand", 0,
-                stack -> stack.is(RegCustomItem.VENOM_SPINDLE),
+                (stack) -> {
+                    return stack.is(item);
+                },
                 false
         );
     }
@@ -202,7 +202,8 @@ public class WebBullet extends ThrowableItemProjectile {
         // 检测 owner 的 extra_hand 槽位是否装备了箭毒纺锤，并根据tier形态施加效果
         if (this.owner instanceof Player player && entity instanceof LivingEntity target) {
             //ShapeShifterCurseFabric.LOGGER.info("Check hit living entity " + entity.getName().getString());
-            if (isExtraHandVenomSpindleEquipped(player)) {
+            boolean upgradedSpindle = isExtraHandVenomSpindleEquipped(player, RegCustomItem.VENOM_SPINDLE_PLUS);
+            if (upgradedSpindle || isExtraHandVenomSpindleEquipped(player, RegCustomItem.VENOM_SPINDLE)) {
                 switch (Tier) {
                     case 1 -> {
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 1));
@@ -219,6 +220,14 @@ public class WebBullet extends ThrowableItemProjectile {
                         target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 2));
                         target.hurt(this.damageSources().thrown(this, this.owner), 8.0F);
                     }
+                }
+                if (upgradedSpindle) {
+                    int duration = switch (Tier) {
+                        case 2 -> Tier2BuffTime;
+                        case 3 -> Tier3BuffTime;
+                        default -> Tier1BuffTime;
+                    };
+                    EntangledEffectUtils.applyEntangledEffect(this.getOwner(), target, duration);
                 }
             }
             else {

@@ -31,6 +31,7 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
 import software.bernie.geckolib.cache.model.BakedGeoModel;
 import software.bernie.geckolib.cache.model.GeoBone;
+import software.bernie.geckolib.constant.DataTickets;
 import software.bernie.geckolib.renderer.base.BoneSnapshots;
 import software.bernie.geckolib.renderer.base.GeoRenderState;
 import software.bernie.geckolib.renderer.base.RenderPassInfo;
@@ -141,6 +142,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                             float limbAngle, float limbDistance, float headYaw, float headPitch) {
         GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
+        // GL5：手工构建 render state 时不会自动写入光照（默认 FULL_BRIGHT），必须显式补，否则模型恒亮。
+        rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
         rs.addGeckolibData(FormRenderer.TICKET_LIMB_ANGLE, limbAngle);
@@ -180,6 +183,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         boolean leftPantsHidden = !player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
         boolean rightLegHidden = false;
         boolean rightPantsHidden = !player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
+        // 1.21.11：player_animator 兼容层（PlayerAnimatorCompat / FirstPersonArms）已随 1.21.11 分支删除，
+        // 该兼容层驱动的 BetterCombat 第一人称裁剪在此版本无对应实现，故不移植该段。
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             hatHidden |= formModel.Hidden_Hat;
@@ -324,6 +329,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                                       String armBoneName, @Nullable GeoBone armGeoBone, ModelPart arm, ModelPart sleeve, AvatarRenderer renderer) {
         GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
+        // GL5：手工构建 render state 时不会自动写入光照（默认 FULL_BRIGHT），必须显式补，否则手臂恒亮。
+        rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
         formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, (renderPassInfo, snapshots) -> {

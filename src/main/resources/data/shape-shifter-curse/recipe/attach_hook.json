@@ -1,18 +1,20 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"NIC",
-		"NIM",
-		"   "
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"C": "minecraft:copper_ingot",
-		"I": "minecraft:iron_ingot",
-		"N": "minecraft:iron_nugget"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:attach_hook"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "NIC",
+    "NIM",
+    "   "
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "C": "minecraft:copper_ingot",
+    "I": "minecraft:iron_ingot",
+    "N": "minecraft:iron_nugget"
+  },
+  "result": {
+    "id": "shape-shifter-curse:attach_hook",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

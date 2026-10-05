@@ -1,0 +1,14 @@
+{
+  "type": "shape-shifter-curse:altar_shapeless",
+  "ingredients": [
+    "shape-shifter-curse:bottled_snowfall",
+    "minecraft:end_crystal"
+  ],
+  "result": {
+    "id": "shape-shifter-curse:bottled_snowfall_plus",
+    "count": 1
+  },
+  "time": 600,
+  "moondust_cost": 16,
+  "catalyst": "shape-shifter-curse:frost_catalyst_core"
+}

@@ -7,8 +7,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnJumpPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.BatBlockAttachPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.SlowdownPercentPower;
+import net.onixary.shapeShifterCurseFabric.additional_power.SneakingJumpClashPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.SprintingStateTracker;
 import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.networking.ModPackets;
@@ -78,6 +80,8 @@ public class PlayerMovementControlMixin implements IMoveController {
     // [已迁移，勿再当作待办] jumpFromGround 上移至 LivingEntity 后，@Mixin(Player.class) 解析不到该注入点。
     // jump_event 条件 / JUMP_EVENT 包 / ActionOnJumpPower 的触发已迁至 LivingEntityJumpMixin
     // （@Mixin(LivingEntity.class) 注入 LivingEntity.jumpFromGround，并在 handler 内 instanceof Player 过滤）。
+    // 其中「服务端权威执行 ActionOnJumpPower / SneakingJumpClashPower、不依赖 C2S 包往返」的修复
+    // 也一并保留在 LivingEntityJumpMixin（见其 else 分支）。
     // 吸附状态下的跳跃脱离另由 preventTravelWhenAttached 通过 player.isJumping() 检测。
     // 下列旧实现保留作参考。
     // @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)

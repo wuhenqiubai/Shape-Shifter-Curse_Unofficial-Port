@@ -1,19 +1,21 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"  C",
-		"MPI",
-		"NN "
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"P": "minecraft:packed_ice",
-		"I": "minecraft:iron_ingot",
-		"N": "minecraft:iron_nugget",
-		"C": "minecraft:copper_ingot"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:frost_pawglove"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "  C",
+    "MPI",
+    "NN "
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "P": "minecraft:packed_ice",
+    "I": "minecraft:iron_ingot",
+    "N": "minecraft:iron_nugget",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "shape-shifter-curse:frost_pawglove",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }

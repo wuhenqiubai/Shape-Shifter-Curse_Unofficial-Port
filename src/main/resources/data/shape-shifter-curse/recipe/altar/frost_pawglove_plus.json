@@ -1,0 +1,13 @@
+{
+  "type": "shape-shifter-curse:altar_shapeless",
+  "ingredients": [
+    "shape-shifter-curse:frost_pawglove"
+  ],
+  "result": {
+    "id": "shape-shifter-curse:frost_pawglove_plus",
+    "count": 1
+  },
+  "time": 600,
+  "moondust_cost": 16,
+  "catalyst": "shape-shifter-curse:frost_catalyst_core"
+}

@@ -1,19 +1,21 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": [
-		"TMT",
-		"ESE",
-		"WSW"
-	],
-	"key": {
-		"M": "shape-shifter-curse:moondust_crystal_shard",
-		"T": "minecraft:string",
-		"E": "minecraft:spider_eye",
-		"W": "minecraft:cobweb",
-		"S": "minecraft:stick"
-	},
-	"result": {
-		"count": 1,
-		"id": "shape-shifter-curse:venom_spindle"
-	}
+  "type": "shape-shifter-curse:altar_shaped",
+  "pattern": [
+    "TMT",
+    "ESE",
+    "WSW"
+  ],
+  "key": {
+    "M": "shape-shifter-curse:moondust_crystal_shard",
+    "T": "minecraft:string",
+    "E": "minecraft:spider_eye",
+    "W": "minecraft:cobweb",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "shape-shifter-curse:venom_spindle",
+    "count": 1
+  },
+  "time": 100,
+  "moondust_cost": 5
 }
