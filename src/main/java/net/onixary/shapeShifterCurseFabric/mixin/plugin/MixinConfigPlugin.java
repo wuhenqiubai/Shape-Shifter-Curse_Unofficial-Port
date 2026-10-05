@@ -24,6 +24,7 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
     static {
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.PlayerEntityRendererFallFlyingMixin", new MixinRequiredMods(new String[]{}, new String[]{"vivecraft"}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.AppleSkin", new MixinRequiredMods(new String[]{"appleskin"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.PresenceFootstepsStepSpeedMixin", new MixinRequiredMods(new String[]{"presencefootsteps"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.ToughAsNailsDrinkInWorldPacketMixin", new MixinRequiredMods(new String[]{"toughasnails"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.ToughAsNailsTemperatureHelperImplMixin", new MixinRequiredMods(new String[]{"toughasnails"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.ToughAsNailsThirstHandlerMixin", new MixinRequiredMods(new String[]{"toughasnails"}, new String[]{}));
@@ -31,7 +32,6 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketImpl", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketItemMixin", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketSlotMixin", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
-        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioItemImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioUtilsImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.BOP_WebbingBlockMixin", new MixinRequiredMods(new String[]{"biomesoplenty"}, new String[]{}));
