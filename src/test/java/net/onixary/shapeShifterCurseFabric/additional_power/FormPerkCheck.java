@@ -4,25 +4,26 @@ import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import io.github.apace100.apoli.power.Active;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.test.GameTest;
-import net.minecraft.test.TestContext;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.gametest.framework.GameTest;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.perk.NormalPerk;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.ItemCost;
 
 public class FormPerkCheck {
-    private static Identifier id(String path) { return new Identifier("shape-shifter-curse", path); }
-    private static final Identifier SOURCE = id("perk_check");
+    private static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("shape-shifter-curse", path); }
+    private static final ResourceLocation SOURCE = id("perk_check");
 
-    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void pounceMovementAndHit(TestContext context) {
         var player = context.createMockSurvivalPlayer();
-        player.setPosition(context.getAbsolute(new net.minecraft.util.math.Vec3d(0.5, 1, 0.5)));
-        var target = context.spawnEntity(EntityType.ZOMBIE, new net.minecraft.util.math.BlockPos(0, 1, 5));
+        player.setPosition(context.getAbsolute(new Vec3(0.5, 1, 0.5)));
+        var target = context.spawnEntity(EntityType.ZOMBIE, new BlockPos(0, 1, 5));
         var holder = PowerHolderComponent.KEY.get(player);
         var type = PowerTypeRegistry.get(id("perks/ocelot_long_pounce_flight"));
         holder.addPower(type, SOURCE);
@@ -35,15 +36,15 @@ public class FormPerkCheck {
         }
         context.assertTrue(target.getHealth() < 11, "Pounce reaches target and deals damage");
         context.assertTrue(player.getHungerManager().getFoodLevel() == 16, "Pounce rewards food once");
-        player.setPosition(context.getAbsolute(new net.minecraft.util.math.Vec3d(0.5, 1, 0.5)));
-        context.setBlockState(new net.minecraft.util.math.BlockPos(0, 1, 2), net.minecraft.block.Blocks.STONE);
-        context.setBlockState(new net.minecraft.util.math.BlockPos(0, 2, 2), net.minecraft.block.Blocks.STONE);
+        player.setPosition(context.getAbsolute(new Vec3(0.5, 1, 0.5)));
+        context.setBlockState(new BlockPos(0, 1, 2), Blocks.STONE);
+        context.setBlockState(new BlockPos(0, 2, 2), Blocks.STONE);
         pounce.start(target); pounce.tick(); pounce.tick();
         context.assertTrue(player.getVelocity().lengthSquared() == 0, "Wall cancels pounce movement");
         context.complete();
     }
 
-    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void raycastPreviewAndRelease(TestContext context) {
         var player = context.createMockSurvivalPlayer();
         player.setPosition(context.getAbsolute(new net.minecraft.util.math.Vec3d(0.5, 1, 0.5)));

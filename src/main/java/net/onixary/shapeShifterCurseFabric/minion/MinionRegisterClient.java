@@ -5,6 +5,7 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntityModel;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntityRenderer;
@@ -14,8 +15,8 @@ public class MinionRegisterClient {
     public static final ModelLayerLocation WOLF_MINION_LAYER = new ModelLayerLocation(AnubisWolfMinionEntity.MinionID, "main");
 
     public static void registerClient() {
-        EntityRendererRegistry.register(net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent.MANA_RESERVOIR, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
-        EntityRendererRegistry.register(net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent.POTION_CHARM_ARROW, net.minecraft.client.render.entity.FlyingItemEntityRenderer::new);
+        EntityRendererRegistry.register(net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent.MANA_RESERVOIR, ThrownItemRenderer::new);
+        EntityRendererRegistry.register(net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent.POTION_CHARM_ARROW, ThrownItemRenderer::new);
         EntityRendererRegistry.register(MinionRegister.ANUBIS_WOLF_MINION, AnubisWolfMinionEntityRenderer::new);
         EntityModelLayerRegistry.registerModelLayer(WOLF_MINION_LAYER, AnubisWolfMinionEntityModel::getTexturedModelData);
     }

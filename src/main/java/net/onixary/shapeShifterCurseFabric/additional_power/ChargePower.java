@@ -146,7 +146,7 @@ public class ChargePower extends Power implements Active {
     }
 
     public void fire(boolean AddTick) {
-        if (!isCharging || entity.getWorld().isClient) return;
+        if (!isCharging || entity.level().isClientSide) return;
         this.isCharging = false;
         if (this.ChargeTime > 0) {
             for (ChargeTier chargeTier : ChargeTierList) {
@@ -164,7 +164,7 @@ public class ChargePower extends Power implements Active {
 
     @Override
     public void tick() {
-        if (entity.getWorld().isClient) return;
+        if (entity.level().isClientSide) return;
         if (!isActive() || !entity.isAlive()) {
             cancelCharge();
             return;
@@ -185,7 +185,7 @@ public class ChargePower extends Power implements Active {
 
     @Override
     public void onUse() {
-        if (entity.getWorld().isClient || !isActive() || nowCooldown > 0) {
+        if (entity.level().isClientSide || !isActive() || nowCooldown > 0) {
             return;
         }
         if (!isCharging) {
@@ -201,7 +201,7 @@ public class ChargePower extends Power implements Active {
 
     private void cancelCharge() {
         if (!isCharging) return;
-        if (isCharging && endAction != null && !entity.getWorld().isClient) endAction.accept(entity);
+        if (isCharging && endAction != null && !entity.level().isClientSide) endAction.accept(entity);
         isCharging = false;
         nowTier = 0;
         ChargeTime = 0;
@@ -236,7 +236,7 @@ public class ChargePower extends Power implements Active {
 
     public void fromTag(Tag tag) {
         this.renderTier = ((CompoundTag) tag).getInt("renderTier");
-        if (entity.getWorld().isClient) this.isCharging = ((CompoundTag) tag).getBoolean("charging");
+        if (entity.level().isClientSide) this.isCharging = ((CompoundTag) tag).getBoolean("charging");
     }
 
     public static PowerFactory<?> createFactory() {

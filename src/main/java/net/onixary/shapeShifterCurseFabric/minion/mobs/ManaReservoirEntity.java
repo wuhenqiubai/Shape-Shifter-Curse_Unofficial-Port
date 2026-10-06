@@ -1,41 +1,43 @@
 package net.onixary.shapeShifterCurseFabric.minion.mobs;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.PassiveEntity;
-import net.minecraft.entity.FlyingItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.projectile.ItemSupplier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import net.onixary.shapeShifterCurseFabric.minion.MinionBase;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import org.jetbrains.annotations.NotNull;
 
-public class ManaReservoirEntity extends MinionBase implements FlyingItemEntity {
-    public ManaReservoirEntity(EntityType<? extends ManaReservoirEntity> type, World world) {
+public class ManaReservoirEntity extends MinionBase implements ItemSupplier {
+    public ManaReservoirEntity(EntityType<? extends ManaReservoirEntity> type, Level world) {
         super(type, world);
         minionTypeID = ShapeShifterCurseFabric.identifier("mana_reservoir");
         setNoGravity(true);
     }
-    public static DefaultAttributeContainer.Builder attributes() {
-        return MobEntity.createMobAttributes().add(EntityAttributes.GENERIC_MAX_HEALTH, 10)
-                .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, 0);
+    public static AttributeSupplier.Builder attributes() {
+        return Mob.createMobAttributes().add(Attributes.MAX_HEALTH, 10)
+                .add(Attributes.MOVEMENT_SPEED, 0);
     }
-    @Override protected void initGoals() {}
-    @Override public PassiveEntity createChild(ServerWorld world, PassiveEntity mate) { return null; }
-    @Override public boolean isBreedingItem(ItemStack stack) { return false; }
-    @Override public ItemStack getStack() { return new ItemStack(Items.AMETHYST_SHARD); }
-    @Override public void tick() {
+    @Override protected void registerGoals() {}
+    @Override public AgeableMob getBreedOffspring(ServerLevel world, AgeableMob mate) { return null; }
+    @Override public boolean isFood(ItemStack stack) { return false; }
+    @Override public @NotNull ItemStack getItem() { return new ItemStack(Items.AMETHYST_SHARD); }
+    @Override
+    public void tick() {
         setNoGravity(true);
         super.tick();
-        if (!(getWorld() instanceof ServerWorld world) || !isAlive() || age % 20 != 0) return;
-        for (var player : world.getPlayers()) {
+        if (!(level() instanceof ServerLevel world) || !isAlive() || age % 20 != 0) return;
+        for (var player : world.players()) {
             var form = FormUtils.getPlayerForm(player).getFormID();
-            if (player.isAlive() && !player.isSpectator() && squaredDistanceTo(player) <= 16
+            if (player.isAlive() && !player.isSpectator() && distanceToSqr(player) <= 16
                     && (form.equals(ShapeShifterCurseFabric.identifier("familiar_fox_2"))
                     || form.equals(ShapeShifterCurseFabric.identifier("familiar_fox_3")))) {
                 ManaUtils.gainPlayerMana(player, 5);

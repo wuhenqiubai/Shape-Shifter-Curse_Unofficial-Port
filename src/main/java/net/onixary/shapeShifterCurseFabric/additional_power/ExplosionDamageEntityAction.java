@@ -30,7 +30,7 @@ public class ExplosionDamageEntityAction {
         // 参数 power -> 威力 entity_condition -> 实体条件
         // 额外加入可选的EntityAction以及是否对实体应用爆炸伤害的设置
         // entity_action -> 额外的实体action; explosion_damage_entity -> 爆炸是否伤害实体
-        if (entity.getWorld().isClient) return;
+        if (entity.level().isClientSide) return;
         int Power = data.getInt("power");
         float DamageMultiplier = data.getFloat("damage_multiplier");
         float baseDamage = data.getFloat("base_damage");
@@ -44,7 +44,7 @@ public class ExplosionDamageEntityAction {
                                   int power,
                                   ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition,
                                   ActionFactory<Entity>.Instance entityAction,
-                                  ActionFactory<Pair<Entity, Entity>>.Instance bientityAction,
+                                  ActionFactory<Tuple<Entity, Entity>>.Instance bientityAction,
                                   boolean explosion_damage_entity,
                                   float baseDamage,
                                   float damageMultiplier
@@ -98,7 +98,7 @@ public class ExplosionDamageEntityAction {
                             entityAction.accept(target_entity);
                         }
                         if (bientityAction != null) bientityAction.accept(new Tuple<>(entity, target_entity));
-                        target_entity.velocityModified = true;
+                        target_entity.hurtMarked = true;
                     }
                 }
             }

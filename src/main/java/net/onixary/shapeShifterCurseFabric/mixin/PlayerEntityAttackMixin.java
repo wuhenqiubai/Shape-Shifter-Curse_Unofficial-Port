@@ -1,7 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.AlwaysSweepingPower;
@@ -18,16 +21,15 @@ import net.onixary.shapeShifterCurseFabric.additional_power.ActionOnCombatHitPow
 public abstract class PlayerEntityAttackMixin {
 
     @WrapOperation(method = "attack", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"))
-    private boolean ssc$successfulPrimaryHit(Entity target, DamageSource source, float amount,
-                                             Operation<Boolean> original, @Local(ordinal = 2) boolean critical) {
-        float before = ActionOnCombatHitPower.health(target);
-        boolean success = original.call(target, source, amount + ActionOnCombatHitPower.meleeBonus((PlayerEntity) (Object) this, target));
+            target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
+    private boolean ssc$successfulPrimaryHit(Entity instance, DamageSource damageSource, float f, Operation<Boolean> original, @Local(ordinal = 2) boolean critical) {
+        float before = ActionOnCombatHitPower.health(instance);
+        boolean success = original.call(instance, damageSource, f + ActionOnCombatHitPower.meleeBonus((Player) (Object) this, instance));
         if (success) {
-            float dealt = before - ActionOnCombatHitPower.health(target);
-            PlayerEntity player = (PlayerEntity) (Object) this;
-            ActionOnCombatHitPower.fire(player, target, "melee", dealt);
-            if (critical) ActionOnCombatHitPower.fire(player, target, "critical", dealt);
+            float dealt = before - ActionOnCombatHitPower.health(instance);
+            Player player = (Player) (Object) this;
+            ActionOnCombatHitPower.fire(player, instance, "melee", dealt);
+            if (critical) ActionOnCombatHitPower.fire(player, instance, "critical", dealt);
         }
         return success;
     }
@@ -55,7 +57,7 @@ public abstract class PlayerEntityAttackMixin {
 
     // 直接改暴击的常量岂不是兼容性更好 对了 之前的版本会导致攻击附魔暴击伤害计算错误
     // 修改常量容易出现量子态(你观测(打断点 打日志(这个不是100%))就能生效 不观测就不生效) 而且日志里的值是正确的 但就是没生效(可能和常量优化有关系) 调了快1个小时了
-    // @ModifyExpressionValue(method = "attack(Lnet/minecraft/entity/Entity;)V", at = @At(value = "CONSTANT", args = {"floatValue=1.5F"}))
+    // @ModifyExpressionValue(method = "attack(Lnet/minecraf/entity/Entity;)V", at = @At(value = "CONSTANT", args = {"floatValue=1.5F"}))
     @ModifyVariable(method = "attack(Lnet/minecraft/world/entity/Entity;)V", ordinal = 0, at = @At(value = "STORE", ordinal = 2))
     private float modifyCritMultiplier(float critMultiplier, @Local(ordinal = 0, argsOnly = true) Entity target) {
         Player player = (Player) (Object) this;

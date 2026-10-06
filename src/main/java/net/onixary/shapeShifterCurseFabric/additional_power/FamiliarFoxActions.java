@@ -4,17 +4,18 @@ import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.projectile.SmallFireballEntity;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Pair;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.core.Registry;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
@@ -23,17 +24,18 @@ import java.util.function.Predicate;
 
 public final class FamiliarFoxActions {
     public static void register() {
-        net.minecraft.registry.Registry.register(io.github.apace100.apoli.registry.ApoliRegistries.ENTITY_CONDITION,
+        Registry.register(io.github.apace100.apoli.registry.ApoliRegistries.ENTITY_CONDITION,
                 ShapeShifterCurseFabric.identifier("blocking"), new io.github.apace100.apoli.power.factory.condition.ConditionFactory<Entity>(
                         ShapeShifterCurseFabric.identifier("blocking"), new SerializableData(),
                         (data, entity) -> entity instanceof LivingEntity living && living.isBlocking()));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(
                 ShapeShifterCurseFabric.identifier("fireball_at_target"), new SerializableData(), (data, pair) -> {
-            if (!(pair.getLeft() instanceof LivingEntity actor) || !(actor.getWorld() instanceof ServerWorld world)) return;
-            Vec3d direction = pair.getRight().getBoundingBox().getCenter().subtract(actor.getEyePos()).normalize();
-            var fireball = new SmallFireballEntity(world, actor, direction.x, direction.y, direction.z);
-            fireball.setPosition(actor.getEyePos().add(direction.multiply(0.6)));
-            world.spawnEntity(fireball);
+            if (!(pair.getA() instanceof LivingEntity actor) || !(actor.level() instanceof ServerLevel world)) return;
+            Vec3 direction = pair.getB().getBoundingBox().getCenter().subtract(actor.getEyePosition()).normalize();
+            // SmallFireball 的第 3 参是 Vec3（不是三个 double）；Vec3 标量缩放用 scale，不是 multiply
+            var fireball = new SmallFireball(world, actor, direction);
+            fireball.setPos(actor.getEyePosition().add(direction.scale(0.6)));
+            world.addFreshEntity(fireball);
         }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("surface_area"),
                 new SerializableData().add("distance", SerializableDataTypes.DOUBLE, 20.0)
@@ -43,47 +45,47 @@ public final class FamiliarFoxActions {
                         .add("bientity_action", ApoliDataTypes.BIENTITY_ACTION, null), FamiliarFoxActions::surfaceArea));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("summon_mana_reservoir"),
                 new SerializableData().add("food_cost", SerializableDataTypes.INT, 6), (data, entity) -> {
-            if (!(entity instanceof ServerPlayerEntity player) || !(player instanceof IPlayerEntityMinion minions)) return;
+            if (!(entity instanceof ServerPlayer player) || !(player instanceof IPlayerEntityMinion minions)) return;
             int cost = data.getInt("food_cost");
-            if (player.getHungerManager().getFoodLevel() < cost
+            if (player.getFoodData().getFoodLevel() < cost
                     || minions.shape_shifter_curse$getMinionsCount(ShapeShifterCurseFabric.identifier("mana_reservoir")) >= 1) return;
-            var reservoir = FamiliarFoxContent.MANA_RESERVOIR.create(player.getServerWorld());
+            var reservoir = FamiliarFoxContent.MANA_RESERVOIR.create(player.serverLevel());
             if (reservoir == null) return;
-            Vec3d position = player.getEyePos().add(player.getRotationVec(1).multiply(1.5));
-            reservoir.setPosition(position);
-            if (!player.getWorld().isSpaceEmpty(reservoir, reservoir.getBoundingBox())) return;
+            Vec3 position = player.getEyePosition().add(player.getViewVector(1).scale(1.5));
+            reservoir.setPos(position);
+            if (!player.level().noCollision(reservoir, reservoir.getBoundingBox())) return;
             reservoir.setOwner(player);
-            if (player.getServerWorld().spawnEntity(reservoir)) {
+            if (player.serverLevel().addFreshEntity(reservoir)) {
                 reservoir.InitMinion(player);
-                player.getHungerManager().setFoodLevel(player.getHungerManager().getFoodLevel() - cost);
-                player.getHungerManager().setSaturationLevel(Math.min(player.getHungerManager().getSaturationLevel(), player.getHungerManager().getFoodLevel()));
+                player.getFoodData().setFoodLevel(player.getFoodData().getFoodLevel() - cost);
+                player.getFoodData().setSaturation(Math.min(player.getFoodData().getSaturationLevel(), player.getFoodData().getFoodLevel()));
             }
         }));
     }
 
     private static void surfaceArea(SerializableData.Instance data, Entity actor) {
-        if (!(actor.getWorld() instanceof ServerWorld world)) return;
-        Vec3d eye = actor.getEyePos();
-        var hit = world.raycast(new RaycastContext(eye, eye.add(actor.getRotationVec(1).multiply(data.getDouble("distance"))),
-                RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, actor));
+        if (!(actor.level() instanceof ServerLevel world)) return;
+        Vec3 eye = actor.getEyePosition();
+        var hit = world.clip(new ClipContext(eye, eye.add(actor.getViewVector(1).scale(data.getDouble("distance"))),
+                ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, actor));
         if (hit.getType() != HitResult.Type.BLOCK) return;
-        Vec3d center = hit.getPos().add(Vec3d.of(hit.getSide().getVector()).multiply(0.05));
+        Vec3 center = hit.getLocation().add(Vec3.atLowerCornerOf(hit.getDirection().getNormal()).scale(0.05));
         if (data.getBoolean("preview")) {
-            world.spawnParticles(ParticleTypes.FLAME, center.x, center.y, center.z, 2, 0.08, 0.08, 0.08, 0);
+            world.sendParticles(ParticleTypes.FLAME, center.x, center.y, center.z, 2, 0.08, 0.08, 0.08, 0);
             return;
         }
         double radius = data.getDouble("radius");
         if (radius <= 0) return;
-        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
-        Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
-        for (var target : world.getEntitiesByClass(LivingEntity.class, new Box(center, center).expand(radius),
-                target -> target != actor && target.isAlive() && !target.isSpectator() && target.squaredDistanceTo(center) <= radius * radius)) {
-            var pair = new Pair<Entity, Entity>(actor, target);
+        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
+        Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
+        for (var target : world.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius),
+                target -> target != actor && target.isAlive() && !target.isSpectator() && target.distanceToSqr(center) <= radius * radius)) {
+            var pair = new Tuple<Entity, Entity>(actor, target);
             if (action != null && (condition == null || condition.test(pair))) action.accept(pair);
         }
         for (int i = 0; i < 64; i++) {
             double angle = i * Math.PI * 2 / 64;
-            world.spawnParticles(ParticleTypes.FLAME, center.x + Math.cos(angle) * radius, center.y,
+            world.sendParticles(ParticleTypes.FLAME, center.x + Math.cos(angle) * radius, center.y,
                     center.z + Math.sin(angle) * radius, 1, 0, 0.05, 0, 0.01);
         }
     }

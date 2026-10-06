@@ -8,27 +8,27 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.mob.HostileEntity;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.entity.projectile.ProjectileUtil;
-import net.minecraft.item.ArrowItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.registry.Registry;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Pair;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.RaycastContext;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.monster.Monster;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.ProjectileUtil;
+import net.minecraft.world.item.ArrowItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.level.ClipContext;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Consumer;
@@ -38,17 +38,17 @@ import java.util.function.Predicate;
 public final class PerkActions {
     private PerkActions() {}
 
-    public static void setVelocity(Entity entity, Vec3d velocity) {
-        entity.setVelocity(velocity);
-        entity.velocityModified = true;
-        if (entity instanceof ServerPlayerEntity player) player.networkHandler.sendPacket(new EntityVelocityUpdateS2CPacket(entity));
+    public static void setVelocity(Entity entity, Vec3 velocity) {
+        entity.setDeltaMovement(velocity);
+        entity.hurtMarked = true;
+        if (entity instanceof ServerPlayer player) player.connection.send(new ClientboundSetEntityMotionPacket(entity));
     }
 
     public static boolean isEnemy(Entity actor, Entity target) {
         if (!(target instanceof LivingEntity) || target.isSpectator()
-                || actor == target || actor.isTeammate(target)) return false;
-        if (target instanceof TameableEntity pet && actor.getUuid().equals(pet.getOwnerUuid())) return false;
-        return target instanceof HostileEntity || target instanceof MobEntity mob && mob.getTarget() == actor;
+                || actor == target || actor.isAlliedTo(target)) return false;
+        if (target instanceof TamableAnimal pet && actor.getUUID().equals(pet.getOwnerUUID())) return false;
+        return target instanceof Monster || target instanceof Mob mob && mob.getTarget() == actor;
     }
 
     public static void registerConditions() {
@@ -59,63 +59,65 @@ public final class PerkActions {
                     return power instanceof ChargePower charge && charge.isCharging();
                 }));
         Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("enemy"),
-                new ConditionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("enemy"),
-                        new SerializableData(), (data, pair) -> isEnemy(pair.getLeft(), pair.getRight())));
+                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("enemy"),
+                        new SerializableData(), (data, pair) -> isEnemy(pair.getA(), pair.getB())));
         Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("raycast_target"),
-                new ConditionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("raycast_target"),
+                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("raycast_target"),
                         new SerializableData().add("distance", SerializableDataTypes.DOUBLE, 10.0), (data, pair) -> {
-                    Entity actor = pair.getLeft();
-                    Vec3d from = actor.getEyePos();
-                    Vec3d to = from.add(actor.getRotationVec(1).multiply(data.getDouble("distance")));
-                    var block = actor.getWorld().raycast(new RaycastContext(from, to, RaycastContext.ShapeType.COLLIDER,
-                            RaycastContext.FluidHandling.NONE, actor));
-                    double max = block.getType() == HitResult.Type.MISS ? from.squaredDistanceTo(to) : from.squaredDistanceTo(block.getPos());
-                    var hit = ProjectileUtil.raycast(actor, from, to, actor.getBoundingBox().stretch(to.subtract(from)).expand(1),
+                    Entity actor = pair.getA();
+                    Vec3 from = actor.getEyePosition();
+                    Vec3 to = from.add(actor.getViewVector(1).scale(data.getDouble("distance")));
+                    var block = actor.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
+                            ClipContext.Fluid.NONE, actor));
+                    double max = block.getType() == HitResult.Type.MISS ? from.distanceToSqr(to) : from.distanceToSqr(block.getLocation());
+                    var hit = ProjectileUtil.getEntityHitResult(actor, from, to, actor.getBoundingBox().expandTowards(to.subtract(from)).inflate(1),
                             e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator(), max);
-                    return hit != null && hit.getEntity() == pair.getRight();
+                    return hit != null && hit.getEntity() == pair.getB();
                 }));
     }
 
     public static void registerActions() {
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("change_food"),
                 new SerializableData().add("amount", SerializableDataTypes.INT), (data, entity) -> {
-            if (entity instanceof PlayerEntity player && !entity.getWorld().isClient) {
-                var hunger = player.getHungerManager();
+            if (entity instanceof Player player && !entity.level().isClientSide) {
+                var hunger = player.getFoodData();
                 hunger.setFoodLevel(Math.max(0, Math.min(20, hunger.getFoodLevel() + data.getInt("amount"))));
-                hunger.setSaturationLevel(Math.min(hunger.getSaturationLevel(), hunger.getFoodLevel()));
+                hunger.setSaturation(Math.min(hunger.getSaturationLevel(), hunger.getFoodLevel()));
             }
         }));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("damage_on_success"),
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("damage_on_success"),
                 new SerializableData().add("amount", SerializableDataTypes.FLOAT)
                         .add("bientity_action", ApoliDataTypes.BIENTITY_ACTION, null), (data, pair) -> {
-            if (!(pair.getLeft() instanceof LivingEntity actor) || actor.getWorld().isClient) return;
-            var source = actor instanceof PlayerEntity player ? actor.getDamageSources().playerAttack(player) : actor.getDamageSources().mobAttack(actor);
-            if (pair.getRight().damage(source, data.getFloat("amount"))) {
-                Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
+            if (!(pair.getA() instanceof LivingEntity actor) || actor.level().isClientSide) return;
+            var source = actor instanceof Player player ? actor.damageSources().playerAttack(player) : actor.damageSources().mobAttack(actor);
+            if (pair.getB().hurt(source, data.getFloat("amount"))) {
+                Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
                 if (action != null) action.accept(pair);
             }
         }));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("start_target_pounce"),
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("start_target_pounce"),
                 new SerializableData().add("power", SerializableDataTypes.IDENTIFIER), (data, pair) -> {
-            if (pair.getLeft().getWorld().isClient || !(pair.getRight() instanceof LivingEntity target)) return;
+            if (pair.getA().level().isClientSide || !(pair.getB() instanceof LivingEntity target)) return;
             var type = PowerTypeRegistry.get(data.getId("power"));
-            var power = PowerHolderComponent.KEY.get(pair.getLeft()).getPower(type);
+            var power = PowerHolderComponent.KEY.get(pair.getA()).getPower(type);
             if (power instanceof TargetPouncePower pounce) pounce.start(target);
         }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("fire_held_arrow"),
                 new SerializableData().add("speed", SerializableDataTypes.FLOAT, 3f)
                         .add("cooldown", SerializableDataTypes.INT, 20), (data, entity) -> {
-            if (!(entity instanceof PlayerEntity player) || player.getWorld().isClient) return;
-            ItemStack stack = player.getMainHandStack();
-            if (!(stack.getItem() instanceof ArrowItem item) || (player.getItemCooldownManager().isCoolingDown(item) || player.getItemCooldownManager().isCoolingDown(Items.ARROW))) return;
-            PersistentProjectileEntity arrow = item.createArrow(player.getWorld(), stack, player);
-            arrow.setVelocity(player, player.getPitch(), player.getYaw(), 0, data.getFloat("speed"), 0);
-            arrow.setCritical(true);
-            arrow.pickupType = player.isCreative() ? PersistentProjectileEntity.PickupPermission.CREATIVE_ONLY : PersistentProjectileEntity.PickupPermission.ALLOWED;
-            if (player.getWorld().spawnEntity(arrow)) {
-                if (!player.isCreative()) stack.decrement(1);
-                player.getItemCooldownManager().set(item, data.getInt("cooldown"));
-                player.getItemCooldownManager().set(Items.ARROW, data.getInt("cooldown"));
+            if (!(entity instanceof Player player) || player.level().isClientSide) return;
+            ItemStack stack = player.getMainHandItem();
+            if (!(stack.getItem() instanceof ArrowItem item) || (player.getCooldowns().isOnCooldown(item) || player.getCooldowns().isOnCooldown(Items.ARROW))) return;
+            // 1.21 起 createArrow 多一个「发射源 stack」参数（可为 null / EMPTY）
+            AbstractArrow arrow = item.createArrow(player.level(), stack, player, ItemStack.EMPTY);
+            // 按 pitch/yaw 发射用 shootFromRotation；setDeltaMovement 只能直接设速度向量
+            arrow.shootFromRotation(player, player.getXRot(), player.getYRot(), 0, data.getFloat("speed"), 0);
+            arrow.setCritArrow(true);
+            arrow.pickup = player.isCreative() ? AbstractArrow.Pickup.CREATIVE_ONLY : AbstractArrow.Pickup.ALLOWED;
+            if (player.level().addFreshEntity(arrow)) {
+                if (!player.isCreative()) stack.shrink(1);
+                player.getCooldowns().addCooldown(item, data.getInt("cooldown"));
+                player.getCooldowns().addCooldown(Items.ARROW, data.getInt("cooldown"));
             }
         }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("oriented_box"),
@@ -129,31 +131,31 @@ public final class PerkActions {
     }
 
     private static void boxAction(SerializableData.Instance data, Entity actor) {
-        if (!(actor.getWorld() instanceof ServerWorld world)) return;
+        if (!(actor.level() instanceof ServerLevel world)) return;
         double width = data.getDouble("width"), length = data.getDouble("length"), height = data.getDouble("height");
         if (width <= 0 || length <= 0 || height <= 0) return;
-        Vec3d forward = new Vec3d(-Math.sin(Math.toRadians(actor.getYaw())), 0, Math.cos(Math.toRadians(actor.getYaw())));
-        Vec3d right = new Vec3d(forward.z, 0, -forward.x);
+        Vec3 forward = new Vec3(-Math.sin(Math.toRadians(actor.getYRot())), 0, Math.cos(Math.toRadians(actor.getYRot())));
+        Vec3 right = new Vec3(forward.z, 0, -forward.x);
         double offset = data.getBoolean("centered") ? 0 : length / 2;
-        Vec3d center = actor.getPos().add(forward.multiply(offset)).add(0, height / 2, 0);
-        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
-        Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
-        for (LivingEntity target : world.getEntitiesByClass(LivingEntity.class, new Box(center, center).expand(width + length, height, width + length),
+        Vec3 center = actor.position().add(forward.scale(offset)).add(0, height / 2, 0);
+        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
+        Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
+        for (LivingEntity target : world.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(width + length, height, width + length),
                 e -> e != actor && e.isAlive() && !e.isSpectator())) {
-            Box bounds = target.getBoundingBox();
-            Vec3d relative = bounds.getCenter().subtract(center);
+            AABB bounds = target.getBoundingBox();
+            Vec3 relative = bounds.getCenter().subtract(center);
             double rx = (bounds.maxX - bounds.minX) / 2, rz = (bounds.maxZ - bounds.minZ) / 2;
-            if (Math.abs(relative.dotProduct(right)) > width / 2 + Math.abs(right.x) * rx + Math.abs(right.z) * rz
-                    || Math.abs(relative.dotProduct(forward)) > length / 2 + Math.abs(forward.x) * rx + Math.abs(forward.z) * rz
+            if (Math.abs(relative.dot(right)) > width / 2 + Math.abs(right.x) * rx + Math.abs(right.z) * rz
+                    || Math.abs(relative.dot(forward)) > length / 2 + Math.abs(forward.x) * rx + Math.abs(forward.z) * rz
                     || Math.abs(relative.y) > height / 2 + (bounds.maxY - bounds.minY) / 2) continue;
-            Pair<Entity, Entity> pair = new Pair<>(actor, target);
+            Tuple<Entity, Entity> pair = new Tuple<>(actor, target);
             if (condition == null || condition.test(pair)) action.accept(pair);
         }
         if (data.getBoolean("particles")) {
             for (double z = -length / 2; z <= length / 2; z += 0.5) {
                 for (double x = -width / 2; x <= width / 2; x += 0.5) {
-                    Vec3d pos = center.add(forward.multiply(z)).add(right.multiply(x));
-                    world.spawnParticles(ParticleTypes.CLOUD, pos.x, pos.y, pos.z, 1, 0, height / 4, 0, 0.03);
+                    Vec3 pos = center.add(forward.scale(z)).add(right.scale(x));
+                    world.sendParticles(ParticleTypes.CLOUD, pos.x, pos.y, pos.z, 1, 0, height / 4, 0, 0.03);
                 }
             }
         }

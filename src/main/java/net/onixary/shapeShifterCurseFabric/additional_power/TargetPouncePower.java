@@ -6,10 +6,10 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.function.Consumer;
@@ -18,9 +18,9 @@ import java.util.function.Consumer;
 public class TargetPouncePower extends Power {
     private final double speed;
     private final int duration;
-    private final Consumer<Pair<Entity, Entity>> hitAction;
+    private final Consumer<Tuple<Entity, Entity>> hitAction;
     private LivingEntity target;
-    private Vec3d direction;
+    private Vec3 direction;
     private int remaining;
 
     public TargetPouncePower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
@@ -32,7 +32,7 @@ public class TargetPouncePower extends Power {
     }
 
     public void start(LivingEntity target) {
-        if (!isActive() || entity.getWorld().isClient || !target.isAlive()) return;
+        if (!isActive() || entity.level().isClientSide || !target.isAlive()) return;
         this.target = target;
         // Snapshot the direction: a straight pounce, not a homing projectile.
         direction = target.getBoundingBox().getCenter().subtract(entity.getBoundingBox().getCenter()).normalize();
@@ -41,26 +41,26 @@ public class TargetPouncePower extends Power {
 
     @Override
     public void tick() {
-        if (entity.getWorld().isClient || target == null) return;
+        if (entity.level().isClientSide || target == null) return;
         if (!isActive() || !entity.isAlive() || !target.isAlive() || target.isRemoved()
-                || target.getWorld() != entity.getWorld() || remaining-- <= 0) {
+                || target.level() != entity.level() || remaining-- <= 0) {
             stop();
             return;
         }
-        if (entity.getBoundingBox().expand(0.3).intersects(target.getBoundingBox())) {
+        if (entity.getBoundingBox().inflate(0.3).intersects(target.getBoundingBox())) {
             LivingEntity hit = target;
             stop();
-            hitAction.accept(new Pair<>(entity, hit));
+            hitAction.accept(new Tuple<>(entity, hit));
             return;
         }
         double distance = entity.getBoundingBox().getCenter().distanceTo(target.getBoundingBox().getCenter());
-        Vec3d step = direction.multiply(Math.min(speed, Math.max(0.1, distance - 0.3)));
-        var sweptBox = entity.getBoundingBox().stretch(step);
-        if (!entity.getWorld().getWorldBorder().contains(sweptBox)) {
+        Vec3 step = direction.scale(Math.min(speed, Math.max(0.1, distance - 0.3)));
+        var sweptBox = entity.getBoundingBox().expandTowards(step);
+        if (!entity.level().getWorldBorder().isWithinBounds(sweptBox)) {
             stop();
             return;
         }
-        for (var collision : entity.getWorld().getBlockCollisions(entity, sweptBox)) {
+        for (var collision : entity.level().getBlockCollisions(entity, sweptBox)) {
             if (!collision.isEmpty()) {
                 stop();
                 return;
@@ -71,7 +71,7 @@ public class TargetPouncePower extends Power {
     }
 
     private void stop() {
-        if (target != null) PerkActions.setVelocity(entity, Vec3d.ZERO);
+        if (target != null) PerkActions.setVelocity(entity, Vec3.ZERO);
         target = null;
         remaining = 0;
     }
