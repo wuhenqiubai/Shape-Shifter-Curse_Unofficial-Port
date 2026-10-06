@@ -11,6 +11,8 @@ import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.entity.PotionCharmArrowEntity;
+import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +26,7 @@ public class PotionCharmItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
         if (!world.isClientSide) {
-            var arrow = new PotionCharmArrowEntity(FamiliarFoxContent.POTION_CHARM_ARROW, world);
+            var arrow = new PotionCharmArrowEntity(RegCustomEntity.POTION_CHARM_ARROW, world);
             arrow.setOwner(player);
             arrow.setPos(player.getX(), player.getEyeY() - 0.1, player.getZ());
             // Yarn 的 PotionUtil.setPotion(stack, potion) 对应这里的静态工厂 createItemStack（直接建好带药水的物品栈）

@@ -303,7 +303,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         if (!nowRecipe.matches(this.craftInput(), world) || !nowRecipe.InputsCountEnough(this)) {
             return false;
         }
-        ItemStack output = this.nowRecipe.getResultItem(registryManager);
+        ItemStack output = this.nowRecipe.craft(this, registryManager);
         if (output.isEmpty() || this.inventory.get(11).isEmpty()) {
             return true;
         }
@@ -319,7 +319,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
 
     private boolean craftRecipe(RegistryAccess registryManager) {
         if (canCraftRecipe(registryManager)) {
-            ItemStack output = this.nowRecipe.getResultItem(registryManager);
+            ItemStack output = this.nowRecipe.craft(this, registryManager);
             ItemStack outputSlot = this.inventory.get(11);
             if (outputSlot.isEmpty()) {
                 this.inventory.set(11, output.copy());

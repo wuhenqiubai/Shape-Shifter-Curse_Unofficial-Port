@@ -17,8 +17,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.level.ClipContext;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
-import net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
+import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
+
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -49,7 +50,7 @@ public final class FamiliarFoxActions {
             int cost = data.getInt("food_cost");
             if (player.getFoodData().getFoodLevel() < cost
                     || minions.shape_shifter_curse$getMinionsCount(ShapeShifterCurseFabric.identifier("mana_reservoir")) >= 1) return;
-            var reservoir = FamiliarFoxContent.MANA_RESERVOIR.create(player.serverLevel());
+            var reservoir = MinionRegister.MANA_RESERVOIR.create(player.serverLevel());
             if (reservoir == null) return;
             Vec3 position = player.getEyePosition().add(player.getViewVector(1).scale(1.5));
             reservoir.setPos(position);

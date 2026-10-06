@@ -25,8 +25,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity;
 import net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent;
+import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
+import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
 import net.onixary.shapeShifterCurseFabric.perk.NormalPerk;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
@@ -147,14 +150,14 @@ public class FamiliarFoxPerkCheck {
         player.getInventory().setItem(0, ingredient);
         context.assertTrue(craft.doesApply(paper, ingredient), "Paper accepts healing ingredient");
         var result = craft.execute(paper, ingredient, new Slot(player.getInventory(), 0, 0, 0));
-        context.assertTrue(player.getInventory().countItem(FamiliarFoxContent.HEALING_CHARM) == 1 && paper.getCount() == 1 && ingredient.getCount() == 1, "Craft consumes one of each ingredient");
+        context.assertTrue(player.getInventory().countItem(RegCustomItem.HEALING_CHARM) == 1 && paper.getCount() == 1 && ingredient.getCount() == 1, "Craft consumes one of each ingredient");
         context.assertTrue(ManaUtils.getPlayerMana(player) == 45, "Craft costs five mana");
-        result = new ItemStack(FamiliarFoxContent.HEALING_CHARM);
+        result = new ItemStack(RegCustomItem.HEALING_CHARM);
         player.setItemInHand(InteractionHand.MAIN_HAND, result);
         context.assertTrue(!result.use(context.getLevel(), player, InteractionHand.MAIN_HAND).getResult().consumesAction(), "Other forms cannot use charm");
         FormUtils.setForm(player, RegPlayerForms.FAMILIAR_FOX_3);
         result.use(context.getLevel(), player, InteractionHand.MAIN_HAND);
-        var arrows = context.getLevel().getEntities(FamiliarFoxContent.POTION_CHARM_ARROW, player.getBoundingBox().inflate(3), e -> e.getOwner() == player);
+        var arrows = context.getLevel().getEntities(RegCustomEntity.POTION_CHARM_ARROW, player.getBoundingBox().inflate(3), e -> e.getOwner() == player);
         context.assertTrue(arrows.size() == 1, "Fox launches one charm arrow");
         context.assertTrue(arrows.get(0).pickup == AbstractArrow.Pickup.DISALLOWED, "Charm cannot be recovered");
         // ⚠ 1.21.1 起 AbstractArrow 把拾取栈存为 "item" 键（ItemStack 的组件格式），
@@ -174,7 +177,7 @@ public class FamiliarFoxPerkCheck {
         player.setYRot(0); player.setXRot(0); player.getFoodData().setFoodLevel(10);
         var summon = add(player, "reservoir"); summon.fromTag(LongTag.valueOf(-1000), context.getLevel().registryAccess());
         ((Active) summon).onUse();
-        var entities = context.getLevel().getEntities(FamiliarFoxContent.MANA_RESERVOIR, player.getBoundingBox().inflate(4), e -> true);
+        var entities = context.getLevel().getEntities(MinionRegister.MANA_RESERVOIR, player.getBoundingBox().inflate(4), e -> true);
         context.assertTrue(entities.size() == 1, "One reservoir spawned");
         context.assertTrue(player.getFoodData().getFoodLevel() == 4, "Summon costs six food");
         var reservoir = entities.get(0);

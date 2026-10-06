@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class XPCostType implements IFUSDrawableCostType<XPCostType> {
     private static final ResourceLocation id = ShapeShifterCurseFabric.identifier("xp");
     public static final ResourceLocation TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/shape_shifter_tuner_ui.png");
-    public static final int TEXTURE_WIDTH = 452;
+    public static final int TEXTURE_WIDTH = 454;
     public static final int TEXTURE_HEIGHT = 190;
     private static final ISprite xpIconSprite = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 17, 18, 18);
 

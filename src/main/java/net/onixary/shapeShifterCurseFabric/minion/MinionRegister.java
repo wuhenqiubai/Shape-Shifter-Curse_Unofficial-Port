@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,7 +12,9 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity;
+import net.onixary.shapeShifterCurseFabric.minion.mobs.ManaReservoirEntity;
 import net.onixary.shapeShifterCurseFabric.util.EntityAttributeRegister;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,9 +27,17 @@ public class MinionRegister {
                     .dimensions(EntityDimensions.fixed(0.5f, 0.5f))
                     .build()
     );
+    public static final EntityType<ManaReservoirEntity> MANA_RESERVOIR = Registry.register(
+            Registries.ENTITY_TYPE,
+            ShapeShifterCurseFabric.identifier("mana_reservoir"),
+            FabricEntityTypeBuilder
+                    .create(MobCategory.MISC, ManaReservoirEntity::new)
+                    .dimensions(EntityDimensions.fixed(0.6f, 0.6f))
+                    .build());
 
     public static void register() {
         EntityAttributeRegister.register(ANUBIS_WOLF_MINION, AnubisWolfMinionEntity::createWolfMinionAttributes);
+        EntityAttributeRegister.register(MANA_RESERVOIR, AnubisWolfMinionEntity::createWolfMinionAttributes);
     }
 
 

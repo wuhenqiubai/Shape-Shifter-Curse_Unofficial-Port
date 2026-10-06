@@ -110,6 +110,11 @@ public class RegCustomItem {
 
     public static final Item RIPPLE_MIRROR = register("ripple_mirror", new RippleMirror(new Item.Properties()));
 
+    public static final Item HEALING_CHARM = register("healing_charm_paper", new PotionCharmItem(Potions.STRONG_HEALING));
+    public static final Item HARMING_CHARM = register("harming_charm_paper", new PotionCharmItem(Potions.STRONG_HARMING));
+    public static final Item POISON_CHARM = register("poison_charm_paper", new PotionCharmItem(Potions.STRONG_POISON));
+
+
     public static ItemStack buildPotion(Item PotionItem, Potion potion) {
         ItemStack potionStack = new ItemStack(PotionItem);
         potionStack.set(DataComponents.POTION_CONTENTS, new PotionContents(BuiltInRegistries.POTION.wrapAsHolder(potion)));
@@ -186,6 +191,9 @@ public class RegCustomItem {
                 entries.accept(SELECT_FORM_ITEM);
                 entries.accept(SILK_DEW);
                 entries.accept(RIPPLE_MIRROR);
+                entries.accept(HEALING_CHARM);
+                entries.accept(HARMING_CHARM);
+                entries.accept(POISON_CHARM);
                 // 方块物品注册
                 entries.accept(MOONDUST_CRYSTAL_GRIT);
                 entries.accept(WEB_COMPOSTER);
