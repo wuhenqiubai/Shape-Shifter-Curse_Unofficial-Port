@@ -111,7 +111,10 @@ public class SneakingJumpClashPower extends Power {
             }
 
             // 触发伤害
-            target.hurt(player.damageSources().playerAttack(player), damage);
+            float before = ActionOnCombatHitPower.health(target);
+            if (target.hurt(player.damageSources().playerAttack(player), damage)) {
+                ActionOnCombatHitPower.fire(player, target, "pounce", before - ActionOnCombatHitPower.health(target));
+            }
             return true; // 发现碰撞，返回true
         }
         

@@ -117,7 +117,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
         if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
             iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
-        this.tame(null);
+        this.setOwnerUuid(null);
         super.die(source);
     }
 }

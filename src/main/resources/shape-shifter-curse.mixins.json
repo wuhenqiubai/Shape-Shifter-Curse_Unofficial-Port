@@ -6,6 +6,7 @@
   "plugin": "net.onixary.shapeShifterCurseFabric.mixin.plugin.MixinConfigPlugin",
   "refmap": "shape-shifter-curse-unofficial-refmap.json",
   "mixins": [
+    "PerkShieldBlockMixin",
     "AreaEffectCloudEntityMixin",
     "ArmorSlotMixin",
     "ArrowEntityMixin",
