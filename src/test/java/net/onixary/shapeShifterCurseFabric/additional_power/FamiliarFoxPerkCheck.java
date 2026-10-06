@@ -12,8 +12,11 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.nbt.LongTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.gametest.framework.GameTest;
@@ -154,8 +157,12 @@ public class FamiliarFoxPerkCheck {
         var arrows = context.getLevel().getEntities(FamiliarFoxContent.POTION_CHARM_ARROW, player.getBoundingBox().inflate(3), e -> e.getOwner() == player);
         context.assertTrue(arrows.size() == 1, "Fox launches one charm arrow");
         context.assertTrue(arrows.get(0).pickup == AbstractArrow.Pickup.DISALLOWED, "Charm cannot be recovered");
+        // ⚠ 1.21.1 起 AbstractArrow 把拾取栈存为 "item" 键（ItemStack 的组件格式），
+        // 不再是 1.20 时代的 "Potion" 字符串键。断言含义不变，只是换读取方式。
         var nbt = new CompoundTag(); arrows.get(0).addAdditionalSaveData(nbt);
-        context.assertTrue(nbt.getString("Potion").equals("minecraft:strong_healing"), "Strong potion payload retained");
+        ItemStack stored = ItemStack.parseOptional(context.getLevel().registryAccess(), nbt.getCompound("item"));
+        PotionContents charmPotion = stored.get(DataComponents.POTION_CONTENTS);
+        context.assertTrue(charmPotion != null && charmPotion.is(Potions.STRONG_HEALING), "Strong potion payload retained");
         player.discard();
         context.succeed();
     }
