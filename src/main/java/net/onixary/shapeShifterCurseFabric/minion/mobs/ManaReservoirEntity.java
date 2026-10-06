@@ -34,7 +34,9 @@ public class ManaReservoirEntity extends MinionBase implements ItemSupplier {
     public void tick() {
         setNoGravity(true);
         super.tick();
-        if (!(level() instanceof ServerLevel world) || !isAlive() || age % 20 != 0) return;
+        // ⚠ 上游 Yarn 写的是 `age`，那里的 `Entity.age` 是 **tick 计数器**，对应 Mojmap `Entity.tickCount`。
+        //   不要误映射成同名的 `AgeableMob.age`（那是幼年成长龄，`aiStep` 每 tick 自减，用来做周期判定会错）。
+        if (!(level() instanceof ServerLevel world) || !isAlive() || tickCount % 20 != 0) return;
         for (var player : world.players()) {
             var form = FormUtils.getPlayerForm(player).getFormID();
             if (player.isAlive() && !player.isSpectator() && distanceToSqr(player) <= 16

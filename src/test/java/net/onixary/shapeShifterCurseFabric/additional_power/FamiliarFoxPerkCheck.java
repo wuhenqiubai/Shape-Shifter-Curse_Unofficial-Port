@@ -178,10 +178,13 @@ public class FamiliarFoxPerkCheck {
         context.assertTrue(entities.size() == 1, "One reservoir spawned");
         context.assertTrue(player.getFoodData().getFoodLevel() == 4, "Summon costs six food");
         var reservoir = entities.get(0);
-        reservoir.setAge(20); reservoir.tick();
-        context.assertTrue(reservoir.getHealth() == 8 && ManaUtils.getPlayerMana(player) == 55, "Pulse gives mana and loses health: age=" + reservoir.getAge() + ", hp=" + reservoir.getHealth() + ", mana=" + ManaUtils.getPlayerMana(player));
+        // ⚠ 上游 Yarn 写的是 `reservoir.age = 20`（`Entity.age` = tick 计数器）→ Mojmap 是 `tickCount`。
+        //   这里手动置 20 而非累加：`tickCount` 由 `ServerLevel.tickNonPassenger` 自增，直接调 `entity.tick()`
+        //   不会推进它，所以每次都要重设为 20 才能落进 `% 20 == 0` 的脉冲分支。
+        reservoir.tickCount = 20; reservoir.tick();
+        context.assertTrue(reservoir.getHealth() == 8 && ManaUtils.getPlayerMana(player) == 55, "Pulse gives mana and loses health: age=" + reservoir.tickCount + ", hp=" + reservoir.getHealth() + ", mana=" + ManaUtils.getPlayerMana(player));
         player.setPos(player.position().add(10, 0, 0));
-        for (int i = 0; i < 4; i++) { reservoir.setAge(20); reservoir.tick(); }
+        for (int i = 0; i < 4; i++) { reservoir.tickCount = 20; reservoir.tick(); }
         context.assertTrue(!reservoir.isAlive(), "Empty pulses still expire after five ticks of service");
         context.assertTrue(ManaUtils.getPlayerMana(player) == 55, "Out of range players receive no mana");
         player.discard();
