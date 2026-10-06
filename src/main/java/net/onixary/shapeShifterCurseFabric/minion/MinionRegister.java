@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,7 +27,8 @@ public class MinionRegister {
                     .build()
     );
     public static final EntityType<ManaReservoirEntity> MANA_RESERVOIR = Registry.register(
-            Registries.ENTITY_TYPE,
+            // ⚠ 同 RegCustomEntity：注册要用 BuiltInRegistries，Registries.* 只是 ResourceKey
+            BuiltInRegistries.ENTITY_TYPE,
             ShapeShifterCurseFabric.identifier("mana_reservoir"),
             FabricEntityTypeBuilder
                     .create(MobCategory.MISC, ManaReservoirEntity::new)

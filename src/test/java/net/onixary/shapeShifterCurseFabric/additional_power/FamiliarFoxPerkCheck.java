@@ -26,7 +26,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.entity.RegCustomEntity;
-import net.onixary.shapeShifterCurseFabric.items.FamiliarFoxContent;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;

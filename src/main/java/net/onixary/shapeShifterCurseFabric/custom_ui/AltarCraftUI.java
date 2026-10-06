@@ -51,7 +51,7 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
         super.render(context, mouseX, mouseY, delta);
         this.drawProcess(context);
         this.drawFuel(context);
-        this.drawMouseoverTooltip(context, mouseX, mouseY);
+        this.renderTooltip(context, mouseX, mouseY);
     }
 
     @Override

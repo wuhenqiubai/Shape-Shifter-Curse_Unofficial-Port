@@ -16,9 +16,10 @@ public class RegCustomEntity {
             FabricEntityTypeBuilder.<WebBullet>create(MobCategory.MISC, WebBullet::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).trackRangeChunks(10).trackedUpdateRate(1).build()
     );
     public static final EntityType<PotionCharmArrowEntity> POTION_CHARM_ARROW = Registry.register(
-            Registries.ENTITY_TYPE,
+            // ⚠ Registries.ENTITY_TYPE 只是 ResourceKey，注册要 BuiltInRegistries.ENTITY_TYPE（上游是 Yarn 写法）
+            BuiltInRegistries.ENTITY_TYPE,
             ShapeShifterCurseFabric.identifier("potion_charm_arrow"),
-            FabricEntityTypeBuilder.create(SpawnGroup.MISC, PotionCharmArrowEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).trackRangeBlocks(64).trackedUpdateRate(1).build());
+            FabricEntityTypeBuilder.create(MobCategory.MISC, PotionCharmArrowEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).trackRangeBlocks(64).trackedUpdateRate(1).build());
 
     public static void init() {
     }
