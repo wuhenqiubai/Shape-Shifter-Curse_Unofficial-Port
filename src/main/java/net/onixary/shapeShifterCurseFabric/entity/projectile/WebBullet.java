@@ -32,6 +32,7 @@ public class WebBullet extends ThrowableItemProjectile {
     public int Tier = 1;
     public boolean EnableEntangledEffect = true;
     public boolean EnableTopBlockBuild = true;
+    public boolean EnableVenomSpindle = true;
     private boolean launched = false;
 
     public static final WebBridgeAction.WebLadderConfig ladderConfigTier1 = new WebBridgeAction.WebLadderConfig(10, 14, 8, false, 0.0f);
@@ -153,11 +154,19 @@ public class WebBullet extends ThrowableItemProjectile {
     public void addAdditionalSaveData(CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("web_projectile", true);
+        nbt.putInt("Tier", Tier);
+        nbt.putBoolean("EnableEntangledEffect", EnableEntangledEffect);
+        nbt.putBoolean("EnableTopBlockBuild", EnableTopBlockBuild);
+        nbt.putBoolean("EnableVenomSpindle", EnableVenomSpindle);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
+        if (nbt.contains("Tier")) Tier = Math.max(1, Math.min(3, nbt.getInt("Tier")));
+        if (nbt.contains("EnableEntangledEffect")) EnableEntangledEffect = nbt.getBoolean("EnableEntangledEffect");
+        if (nbt.contains("EnableTopBlockBuild")) EnableTopBlockBuild = nbt.getBoolean("EnableTopBlockBuild");
+        if (nbt.contains("EnableVenomSpindle")) EnableVenomSpindle = nbt.getBoolean("EnableVenomSpindle");
     }
 
     @Override
@@ -185,25 +194,25 @@ public class WebBullet extends ThrowableItemProjectile {
         //ShapeShifterCurseFabric.LOGGER.info("Hit entity " + entity.getName().getString());
 
         // 检测 owner 的 extra_hand 槽位是否装备了箭毒纺锤，并根据tier形态施加效果
-        if (this.owner instanceof Player player && entity instanceof LivingEntity target) {
+        if (this.getOwner() instanceof Player player && entity instanceof LivingEntity target) {
             //ShapeShifterCurseFabric.LOGGER.info("Check hit living entity " + entity.getName().getString());
             boolean upgradedSpindle = isExtraHandVenomSpindleEquipped(player, RegCustomItem.VENOM_SPINDLE_PLUS);
-            if (upgradedSpindle || isExtraHandVenomSpindleEquipped(player, RegCustomItem.VENOM_SPINDLE)) {
+            if (EnableVenomSpindle && (upgradedSpindle || isExtraHandVenomSpindleEquipped(player, RegCustomItem.VENOM_SPINDLE))) {
                 switch (Tier) {
                     case 1 -> {
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 80, 1));
                         target.addEffect(new MobEffectInstance(MobEffects.POISON, 20, 2));
-                        target.hurt(this.damageSources().thrown(this, this.owner), 5.0F);
+                        target.hurt(this.damageSources().thrown(this, this.getOwner()), 5.0F);
                     }
                     case 2 -> {
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 120, 2));
                         target.addEffect(new MobEffectInstance(MobEffects.POISON, 60, 2));
-                        target.hurt(this.damageSources().thrown(this, this.owner), 6.0F);
+                        target.hurt(this.damageSources().thrown(this, this.getOwner()), 6.0F);
                     }
                     case 3 -> {
                         target.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, 160, 3));
                         target.addEffect(new MobEffectInstance(MobEffects.POISON, 100, 2));
-                        target.hurt(this.damageSources().thrown(this, this.owner), 8.0F);
+                        target.hurt(this.damageSources().thrown(this, this.getOwner()), 8.0F);
                     }
                 }
                 if (upgradedSpindle) {

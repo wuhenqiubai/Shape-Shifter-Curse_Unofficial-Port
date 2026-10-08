@@ -38,6 +38,8 @@ public class EnchantmentHelperMixin {
             cir.setReturnValue(getLootingLevel(entity, cir.getReturnValue()));
         } else if (enchantment.is(Enchantments.SOUL_SPEED)) {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
+        } else if (enchantment == Enchantments.FROST_WALKER && entity.hasStatusEffect(net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects.FROST_CLAW)) {
+            cir.setReturnValue(Math.max(1, cir.getReturnValue()));
         }
     }
     // 移植说明：1.20 上游在这里还挂了 hasSoulSpeed / getPossibleEntries 两处注入，这两个方法在 1.21 已移除。

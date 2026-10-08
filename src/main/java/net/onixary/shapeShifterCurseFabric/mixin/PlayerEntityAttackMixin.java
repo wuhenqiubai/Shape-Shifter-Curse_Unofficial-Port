@@ -30,6 +30,7 @@ public abstract class PlayerEntityAttackMixin {
             Player player = (Player) (Object) this;
             ActionOnCombatHitPower.fire(player, instance, "melee", dealt);
             if (critical) ActionOnCombatHitPower.fire(player, instance, "critical", dealt);
+            else ActionOnCombatHitPower.fire(player, instance, "non_critical_melee", dealt);
         }
         return success;
     }
@@ -69,18 +70,10 @@ public abstract class PlayerEntityAttackMixin {
             power.executeAction();
         }
         if (!fallingAttackPowers.isEmpty()) {
-            float minFall = 1.0f;
-            float maxFall = 2.0f;
-            float minMultiplier = 1.0f;
-            float maxMultiplier = 2.0f;
-            float fallMultiplier;
-            if (player.fallDistance <= minFall) {
-                fallMultiplier = minMultiplier;
-            } else if (player.fallDistance >= maxFall) {
-                fallMultiplier = maxMultiplier;
-            } else {
-                float progress = (player.fallDistance - minFall) / (maxFall - minFall);
-                fallMultiplier = minMultiplier + (maxMultiplier - minMultiplier) * progress;
+            // Multiple instances still apply the bonus once, using the strongest active power.
+            float fallMultiplier = 1.0f;
+            for (EnhancedFallingAttackPower power : fallingAttackPowers) {
+                fallMultiplier = Math.max(fallMultiplier, power.getFallMultiplier(player.fallDistance));
             }
             finalMultiplier *= fallMultiplier;
             for (EnhancedFallingAttackPower power : fallingAttackPowers) {

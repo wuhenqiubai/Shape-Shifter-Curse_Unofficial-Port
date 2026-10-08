@@ -10,6 +10,8 @@
     "ArmorSlotMixin",
     "ArrowEntityMixin",
     "BlockDropMixin",
+    "FrostMovementMixin",
+    "FrostFallDamageMixin",
     "BreathingUnderWaterMixin",
     "BrewingRecipeRegistryMixin",
     "CancelEntityStepSoundMixin",

@@ -52,6 +52,19 @@ public final class PerkActions {
     }
 
     public static void registerConditions() {
+        Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("in_oriented_box"),
+                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("in_oriented_box"),
+                        new SerializableData().add("width", SerializableDataTypes.DOUBLE, 4.0)
+                                .add("length", SerializableDataTypes.DOUBLE, 7.0)
+                                .add("height", SerializableDataTypes.DOUBLE, 3.0)
+                                .add("centered", SerializableDataTypes.BOOLEAN, false),
+                        (data, pair) -> inBox(data, pair.getA(), pair.getB())));
+        Registry.register(ApoliRegistries.ENTITY_CONDITION, ShapeShifterCurseFabric.identifier("airborne"),
+                new ConditionFactory<Entity>(ShapeShifterCurseFabric.identifier("airborne"), new SerializableData(),
+                        (data, entity) -> entity instanceof LivingEntity living && FrostDivePower.airborne(living)));
+        Registry.register(ApoliRegistries.ENTITY_CONDITION, ShapeShifterCurseFabric.identifier("diving"),
+                new ConditionFactory<Entity>(ShapeShifterCurseFabric.identifier("diving"), new SerializableData(),
+                        (data, entity) -> FrostDivePower.isDiving(entity)));
         Registry.register(ApoliRegistries.ENTITY_CONDITION, ShapeShifterCurseFabric.identifier("charging"),
                 new ConditionFactory<Entity>(ShapeShifterCurseFabric.identifier("charging"),
                         new SerializableData().add("power", SerializableDataTypes.IDENTIFIER), (data, entity) -> {
@@ -77,6 +90,22 @@ public final class PerkActions {
     }
 
     public static void registerActions() {
+        AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("recall_wolf_minions"),
+                new SerializableData(), (data, entity) -> {
+            if (!(entity instanceof ServerPlayer player)
+                    || !(player instanceof net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion owner)) return;
+            var id = net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity.MinionID;
+            var minions = owner.shape_shifter_curse$getMinionsByMinionID(id);
+            if (minions == null) return;
+            for (var uuid : java.util.List.copyOf(minions)) {
+                for (var world : player.getServer().getLevel()) {
+                    if (world.getEntity(uuid) instanceof net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity wolf
+                            && player.getUUID().equals(wolf.getOwnerUUID()) && wolf.isAlive()) wolf.kill();
+                }
+            }
+            // Unloaded wolves are retired by shouldExist when their chunk returns.
+            owner.shape_shifter_curse$clearMinions(id);
+        }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("change_food"),
                 new SerializableData().add("amount", SerializableDataTypes.INT), (data, entity) -> {
             if (entity instanceof Player player && !entity.level().isClientSide) {
@@ -144,12 +173,7 @@ public final class PerkActions {
         Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
         for (LivingEntity target : world.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(width + length, height, width + length),
                 e -> e != actor && e.isAlive() && !e.isSpectator())) {
-            AABB bounds = target.getBoundingBox();
-            Vec3 relative = bounds.getCenter().subtract(center);
-            double rx = (bounds.maxX - bounds.minX) / 2, rz = (bounds.maxZ - bounds.minZ) / 2;
-            if (Math.abs(relative.dot(right)) > width / 2 + Math.abs(right.x) * rx + Math.abs(right.z) * rz
-                    || Math.abs(relative.dot(forward)) > length / 2 + Math.abs(forward.x) * rx + Math.abs(forward.z) * rz
-                    || Math.abs(relative.y) > height / 2 + (bounds.maxY - bounds.minY) / 2) continue;
+            if (!inBox(data, actor, target)) continue;
             Tuple<Entity, Entity> pair = new Tuple<>(actor, target);
             if (condition == null || condition.test(pair)) action.accept(pair);
         }
@@ -161,5 +185,20 @@ public final class PerkActions {
                 }
             }
         }
+    }
+
+    private static boolean inBox(SerializableData.Instance data, Entity actor, Entity target) {
+        if (actor == null || target == null || actor == target || !target.isAlive() || target.isSpectator()) return false;
+        double width = data.getDouble("width"), length = data.getDouble("length"), height = data.getDouble("height");
+        if (width <= 0 || length <= 0 || height <= 0) return false;
+        Vec3 forward = new Vec3(-Math.sin(Math.toRadians(actor.getYRot())), 0, Math.cos(Math.toRadians(actor.getYRot())));
+        Vec3 right = new Vec3(forward.z, 0, -forward.x);
+        Vec3 center = actor.position().add(forward.multiply(data.getBoolean("centered") ? 0 : length / 2)).add(0, height / 2, 0);
+        AABB bounds = target.getBoundingBox();
+        Vec3 relative = bounds.getCenter().subtract(center);
+        double rx = (bounds.maxX - bounds.minX) / 2, rz = (bounds.maxZ - bounds.minZ) / 2;
+        return Math.abs(relative.dot(right)) <= width / 2 + Math.abs(right.x) * rx + Math.abs(right.z) * rz
+                && Math.abs(relative.dot(forward)) <= length / 2 + Math.abs(forward.x) * rx + Math.abs(forward.z) * rz
+                && Math.abs(relative.y) <= height / 2 + (bounds.maxY - bounds.minY) / 2;
     }
 }

@@ -56,6 +56,7 @@ public class ShapeShifterCurseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
         dispatcher.register(
                 literal("shape_shifter_curse")
+                        .then(PerkCommand.builder())
                         .then(literal("set_form").requires(cs -> cs.hasPermission(2))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))

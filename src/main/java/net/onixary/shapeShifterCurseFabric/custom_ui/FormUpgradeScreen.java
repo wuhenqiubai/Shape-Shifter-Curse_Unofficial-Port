@@ -566,7 +566,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             for (ResourceLocation dependentPerkID : this.nowSelectNode.dependentPerkIDs) if (!playerGainedPerk.contains(dependentPerkID)) return false;
         }
         ICost cost = perkCostMap.get(this.nowSelectNode.perkID);
-        if (cost != null && !cost.getType().canPay_CLIENT(cost, minecraft.player)) {
+        if (!PerkUtils.isFreeUnlock(minecraft.player) && cost != null && !cost.getType().canPay_CLIENT(cost, minecraft.player)) {
             return false;
         }
         return true;

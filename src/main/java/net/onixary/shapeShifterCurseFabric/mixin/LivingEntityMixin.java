@@ -140,7 +140,7 @@ public abstract class LivingEntityMixin {
             float mobMaxHp = mob.getMaxHealth();
             int lootCount = (Mth.ceil(mobMaxHp / 4.0f));
             RandomSource random = player.getRandom();
-            if (random.nextInt(100) < 40) {
+            if (random.nextInt(100) < CocoonLootChancePower.getChance(player)) {
                 int finalCount = random.nextInt(lootCount);
                 // 钳制最少掉落 1 个
                 finalCount = Math.max(finalCount, 1);

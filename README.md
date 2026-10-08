@@ -6,7 +6,7 @@
 ## **幻形者诅咒非官方版 (Shape-Shifter-Curse_Unofficial-Port)**
 - 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
 - 原作者：[onixary](https://github.com/onixary)
-- 许可证：MIT License & CC-BY-NC-4.0（遵循原项目协议，保留所有版权声明）
+- 许可证：翻原作者仓库去吧，反正遵循原项目协议，保留所有版权声明。
 > 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
 > 因为频繁合并上游commit，并同步进行bugfix，所以比官方提早发布内容，但并不代表这是官方的想法。
 
@@ -21,7 +21,12 @@
   | 26.1FC | 活跃 | 跟随1.21.11分支更新 |
   | 26.2 | 计划中 | 在26.1发布后作计划 |
 
-  **关于SSCU NeoForge** ： 观望SSC官方的双端计划动向，暂时仅对信雅互联做兼容。
+- Source code: [MIT License](LICENSE.txt)
+- Media assets (3D models, textures, animations, sounds, fonts, translations):
+  [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt) - non-commercial use only
+- Avali sub-form assets (the models and the geo models, textures and animations
+  exported from them): [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
+- Third-party code and assets: their upstream licenses, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
 ---
 
@@ -48,6 +53,8 @@
 - 源代码：[MIT 许可证](LICENSE.txt)
 - 媒体资源（3D 模型、贴图、动画、音效、字体、翻译文本）：
   [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt)，仅限非商业用途
+- avali 子形态资源（模型及由它导出的 geo 模型、贴图、动画）：
+  [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
 - 第三方代码与资源：遵循其原始授权，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
 各许可证的具体适用范围见 [LICENSING.md](LICENSING.md)。

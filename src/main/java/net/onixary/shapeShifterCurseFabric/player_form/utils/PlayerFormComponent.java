@@ -1,10 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.utils;
 
 import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -18,10 +15,7 @@ import org.ladysnake.cca.api.v3.component.ComponentKey;
 import org.ladysnake.cca.api.v3.component.ComponentRegistry;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class PlayerFormComponent implements AutoSyncedComponent {
@@ -48,6 +42,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     public ResourceLocation nowPerkTree = RegPerks.EMPTY_PERK_TREE;
     public HashMap<ResourceLocation, List<ResourceLocation>> formPerkMap = new HashMap<>();
+    // TODO 之后改成玩家全局的吧 这样写感觉不太行
+    public final Set<ResourceLocation> freePerkForms = new HashSet<>();
 
     // 仅用于(客户端)和(服务器端判断是否需要同步)
     public boolean isFlying;
@@ -88,6 +84,11 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     @Override
     public void readFromNbt(CompoundTag tag, HolderLookup.Provider registryLookup) {
+        freePerkForms.clear();
+        for (Tag entry : tag.getList("free_perk_forms", Tag.TAG_STRING)) {
+            ResourceLocation form = ResourceLocation.tryParse(entry.getAsString());
+            if (form != null) freePerkForms.add(form);
+        }
         if (tag.contains("no_form_id") && tag.getBoolean("no_form_id")) {
             nowFormID = null;
             nowForm = RegPlayerForms.ORIGINAL_BEFORE_ENABLE;
@@ -200,6 +201,9 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     @Override
     public void writeToNbt(CompoundTag tag, HolderLookup.Provider registryLookup) {
+        CollectionTag freeForms = new CollectionTag();
+        for (ResourceLocation form : freePerkForms) freeForms.add(StringTag.valueOf(form.toString()));
+        tag.put("free_perk_forms", freeForms);
         if (nowFormID != null) {
             tag.putString("nowFormID", nowFormID.toString());
         } else {
@@ -251,6 +255,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     }
 
     public void clear() {
+        freePerkForms.clear();
         this.nowForm = InitialFormUtils.getInitialForm(this.player);
         this.nowFormID = nowForm.getFormID();
         formHistory.clear();

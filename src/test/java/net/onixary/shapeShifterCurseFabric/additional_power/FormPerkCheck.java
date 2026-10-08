@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.additional_power;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
+import io.github.apace100.apoli.power.EntityGlowPower;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import io.github.apace100.apoli.power.Active;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -11,6 +12,7 @@ import net.minecraft.nbt.LongTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
@@ -19,13 +21,75 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.perk.NormalPerk;
+import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalForm;
+import net.onixary.shapeShifterCurseFabric.player_form.NormalSubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.ItemCost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.RegCostType;
 
 public class FormPerkCheck {
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void collectWaterReleaseAndLandPropulsion(GameTestHelper c) {
+        var p=c.makeMockPlayer(GameType.SURVIVAL);
+        p.setPos(c.absoluteVec(new Vec3(.5,1,.5)));p.setYRot(0);
+        var holder=PowerHolderComponent.KEY.get(p);
+        var chargeType=PowerTypeRegistry.get(id("perks/axolotl_collect_water_charge"));
+        var glowType=PowerTypeRegistry.get(id("perks/axolotl_collect_water_glow"));
+        holder.addPower(chargeType,SOURCE);holder.addPower(glowType,SOURCE);
+        var charge=(ChargePower)holder.getPower(chargeType);
+        var glow=(EntityGlowPower)holder.getPower(glowType);
+        var a=c.spawn(EntityType.ZOMBIE,new BlockPos(8,1,0));
+        var b=c.spawn(EntityType.ZOMBIE,new BlockPos(-2,1,0));
+        var far=c.spawn(EntityType.ZOMBIE,new BlockPos(11,1,0));
+        var friend=c.spawn(EntityType.COW,new BlockPos(0,1,2));
+        // Isolate the enlarged area from entities and walls in neighbouring GameTests.
+        for (var entity : new Entity[]{p,a,b,far,friend}) entity.setPos(entity.position().add(0,100,0));
+        p.setAirSupply(100);charge.onUse();charge.onUse();
+        c.assertTrue(glow.isActive() && glow.doesApply(a) && glow.doesApply(b),"Hold previews enemies on both sides");
+        c.assertTrue(!glow.doesApply(far) && !glow.doesApply(friend),"Preview excludes distant and friendly targets");
+        c.assertTrue(a.getHealth()==20 && p.getAirSupply()==100,"Holding neither attacks nor refunds");
+        charge.fire(false);
+        c.assertTrue(a.getHealth()<20 && b.getHealth()<20 && far.getHealth()==20 && friend.getHealth()==10,"Release matches preview targets");
+        c.assertTrue(a.getDeltaMovement().x>0 && b.getDeltaMovement().x<0 && a.getDeltaMovement().y>0,"Launches outward and upward");
+        c.assertTrue(p.getAirSupply()==160 && charge.nowCooldown==600 && !glow.isActive(),"Thirty moisture per hit and thirty second cooldown");
+        charge.onUse();c.assertTrue(!charge.isCharging(),"Cooldown blocks restart");
+        var jumpType=PowerTypeRegistry.get(id("perks/axolotl_propulsion_efficiency"));holder.addPower(jumpType,SOURCE);
+        var jump=(ActionOnJumpPower)holder.getPower(jumpType);
+        p.setPos(c.absoluteVec(new Vec3(.5,1,.5)));
+        c.setBlock(new BlockPos(0,0,0),Blocks.STONE);
+        p.setOnGround(true);p.setSprinting(true);p.setDeltaMovement(0,0,0);jump.executeAction();
+        c.assertTrue(p.getAirSupply()==159 && p.getDeltaMovement().z>.29,"Land sprint jump costs one moisture and pushes forward");
+        p.setSprinting(false);jump.executeAction();c.assertTrue(p.getAirSupply()==159,"Ordinary jump does not spend moisture");
+        var perk=(NormalPerk)RegPerks.getPerk(id("axolotl_propulsion_efficiency"));
+        c.assertTrue(perk.powerRemove.contains(id("form_axolotl_3_sprinting_jump")) && !perk.powerRemove.contains(id("form_axolotl_2_water_spurt")),"Replaces land propulsion only");
+        a.discard();b.discard();far.discard();friend.discard();c.succeed();
+    }
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void independentSubformPerkTree(GameTestHelper c) {
+        var parent = new NormalForm(id("test_parent"))
+                .perkTree(id("parent_tree"));
+        var child = new NormalSubForm(id("test_child"), parent);
+        c.assertTrue(child.getPerkTreeID().equals(RegPerks.EMPTY_PERK_TREE), "Unconfigured subform does not inherit parent tree");
+        child.perkTree(id("child_tree"));
+        c.assertTrue(child.getPerkTreeID().equals(id("child_tree")) && parent.getPerkTreeID().equals(id("parent_tree")), "Subform owns its configured tree");
+
+        var player = c.makeMockServerPlayerInLevel();
+        var tree = RegPlayerForms.SNOW_FOX_3.getPerkTreeID();
+        PerkUtils.__addPerk(player, tree, id("snow_fox_revenge"));
+        FormUtils.setForm(player, RegPlayerForms.SNOW_FOX_3);
+        var power = PowerTypeRegistry.get(id("perks/snow_fox_revenge_melee"));
+        c.assertTrue(PowerHolderComponent.KEY.get(player).hasPower(power), "Master perk applies on master form");
+        FormUtils.setForm(player, RegPlayerForms.SNOW_FOX_3_SUB_MARBLED_POLECAT);
+        c.assertTrue(PerkUtils.getPlayerNowPerkTreeID(player).equals(id("marbled_polecat_perk_tree")), "Subform selects its own tree");
+        c.assertTrue(!PowerHolderComponent.KEY.get(player).hasPower(power), "Master perk power is removed on subform transition");
+        FormUtils.setForm(player, RegPlayerForms.SNOW_FOX_3);
+        c.assertTrue(PowerHolderComponent.KEY.get(player).hasPower(power), "Master unlocks are preserved when returning");
+        player.discard(); c.succeed();
+    }
     private static ResourceLocation id(String path) { return ResourceLocation.fromNamespaceAndPath("shape-shifter-curse", path); }
     private static final ResourceLocation SOURCE = id("perk_check");
 
@@ -71,7 +135,9 @@ public class FormPerkCheck {
         context.assertTrue(glow.isActive() && glow.doesApply(near), "Preview chooses nearest living target");
         context.assertTrue(!glow.doesApply(far), "Near target occludes far target");
         charge.fire(false);
-        context.assertTrue(near.getDeltaMovement().z < -1 && near.getDeltaMovement().y > 0, "Apoli release pulls preview target upward");
+        context.assertTrue(Math.abs(near.getDeltaMovement().z + 1.5) < 0.001 && Math.abs(near.getDeltaMovement().y - 0.9) < 0.001, "Apoli release uses configured pull and upward velocity");
+        context.assertTrue(near.hasEffect(MobEffects.SLOW_FALLING) && near.getEffect(MobEffects.SLOW_FALLING).getDuration() == 100, "Pulled target receives five seconds of slow falling");
+        context.assertTrue(!far.hasEffect(MobEffects.SLOW_FALLING) && !player.hasEffect(MobEffects.SLOW_FALLING), "Slow falling only applies to the selected target");
         context.assertTrue(far.getDeltaMovement().lengthSqr() == 0, "Release only affects first target");
         context.assertTrue(!glow.isActive(), "Release clears glow condition");
         context.setBlock(new BlockPos(0, 2, 2), Blocks.STONE);
@@ -124,7 +190,7 @@ public class FormPerkCheck {
             }
         }
         context.assertTrue(nodes == 26 && prisms == 8, "26 perks and 8 prism purchases");
-        context.assertTrue(RegPlayerForms.BAT_3_SUB_AVALI.getPerkTreeID().equals(id("bat_3_perk_tree")), "Avali inherits bat tree");
+        context.assertTrue(RegPlayerForms.BAT_3_SUB_AVALI.getPerkTreeID().equals(id("avali_perk_tree")), "Avali has its independent tree");
         var buyer = context.makeMockPlayer(GameType.SURVIVAL);
         buyer.giveExperiencePoints(200);
         var cost = new BaseCost(
