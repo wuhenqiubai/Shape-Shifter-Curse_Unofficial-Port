@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
+import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import org.jetbrains.annotations.Nullable;
@@ -25,7 +26,7 @@ public class NormalPerk implements IPerk, IPerkClient {
 
     public ICost cost = new BaseCost();
 
-    public @Nullable ResourceLocation Icon = null;
+    public @Nullable ISprite Icon = null;
     public @Nullable Component Name = null;
     public @Nullable Component Desc = null;
 
@@ -111,7 +112,7 @@ public class NormalPerk implements IPerk, IPerkClient {
         return this;
     }
 
-    public NormalPerk setIcon(ResourceLocation icon) {
+    public NormalPerk setIcon(ISprite icon) {
         this.Icon = icon;
         return this;
     }
@@ -127,7 +128,7 @@ public class NormalPerk implements IPerk, IPerkClient {
     }
 
     @Override
-    public @Nullable ResourceLocation getIcon() {
+    public @Nullable ISprite getIcon() {
         if (Icon != null) {
             return Icon;
         }

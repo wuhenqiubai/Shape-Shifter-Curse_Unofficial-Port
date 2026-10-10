@@ -30,9 +30,13 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidgetEX, FormTextureUtils.TempFormModelProcessor {
+    private static final int MENU_WIDTH = 420;
+    private static final int MENU_HEIGHT = 227;
+    private static final ResourceLocation MENU_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu.png");
+
     private static final int BG_WIDTH = 420;
     private static final int BG_HEIGHT = 227;
-    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu.png");
+    private static final ResourceLocation BG_TEXTURE = ResourceLocation.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu_bg.png");
 
     private List<ResourceLocation> availableForms;
     private int nowFormIndex = 0;
@@ -43,6 +47,15 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     private Button selectFormButton;
     private Button prevFormButton;
     private Button nextFormButton;
+
+    public static void openSubFormSelectScreen() {
+        Minecraft client = Minecraft.getInstance();
+        if (getAvailableForms(client).isEmpty()) {
+            client.setScreen(new SubFormSelectScreen_NoForm(Component.empty()));
+        } else {
+            client.setScreen(new SubFormSelectScreen(Component.empty()));
+        }
+    }
 
     public SubFormSelectScreen(Component title) {
         super(title);
@@ -55,9 +68,9 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         }
     }
 
-    private List<ResourceLocation> getAvailableForms() {
+    public static List<ResourceLocation> getAvailableForms(Minecraft client) {
         List<ResourceLocation> availableForms = new ArrayList<>();
-        IForm playerForm = FormUtils.getPlayerForm(this.minecraft.player);
+        IForm playerForm = FormUtils.getPlayerForm(client.player);
         IForm nowForm = playerForm;
         if (playerForm instanceof ISubForm subForm && subForm.isSubForm()) {
             playerForm = subForm.getMasterForm();
@@ -68,7 +81,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         List<IForm> subForms = RegPlayerForms.getSubForms(playerForm);
         subForms.add(playerForm);
         subForms.removeIf(form -> form.isEquals(nowForm));
-        subForms.removeIf(form -> !(FormUtils.isFormCanUse(this.minecraft.player, form)));
+        subForms.removeIf(form -> !(FormUtils.isFormCanUse(client.player, form)));
         availableForms.addAll(subForms.stream().map(IForm::getFormID).toList());
         return availableForms;
     }
@@ -79,9 +92,9 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     @Override
     public void init() {
-        availableForms = getAvailableForms();
-        int baseX = (this.width - BG_WIDTH) / 2;
-        int baseY = (this.height - BG_HEIGHT) / 2;
+        availableForms = getAvailableForms(minecraft);
+        int baseX = (this.width - MENU_WIDTH) / 2;
+        int baseY = (this.height - MENU_HEIGHT) / 2;
         // 152 32 116 14 - Label
         this.addRenderableWidget(new StringWidget(baseX + 152, baseY + 32, 116, 14, Component.literal("Sub Form Select Menu"), this.font));
         // 393 7 20 20 - Close
@@ -143,9 +156,10 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     public void renderBackgroundTexture(GuiGraphics context) {
         // 计算居中位置，保持固定尺寸
-        int bgX = (this.width - BG_WIDTH) / 2;
-        int bgY = (this.height - BG_HEIGHT) / 2;
-        context.blit(BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+        context.blit(BG_TEXTURE, 0, 0, this.width, this.height, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
+        int bgX = (this.width - MENU_WIDTH) / 2;
+        int bgY = (this.height - MENU_HEIGHT) / 2;
+        context.blit(MENU_TEXTURE, bgX, bgY, 0, 0, MENU_WIDTH, MENU_HEIGHT, MENU_WIDTH, MENU_HEIGHT);
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -188,8 +202,8 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         this.renderBackgroundTexture(context);
-        int baseX = (this.width - BG_WIDTH) / 2;
-        int baseY = (this.height - BG_HEIGHT) / 2;
+        int baseX = (this.width - MENU_WIDTH) / 2;
+        int baseY = (this.height - MENU_HEIGHT) / 2;
         // 120 58 100 133
         if (minecraft.player != null) {
             int viewportX = baseX + 120;

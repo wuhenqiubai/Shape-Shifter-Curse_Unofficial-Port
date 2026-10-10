@@ -699,10 +699,7 @@ public class ModPacketsS2C {
 
 
     public static void receiveOpenSelectSubFormMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        ctx.client().execute(() -> {
-            SubFormSelectScreen screen = new SubFormSelectScreen(Component.literal(""));
-            ctx.client().setScreen(screen);
-        });
+        ctx.client().execute(SubFormSelectScreen::openSubFormSelectScreen);
     }
 
     public static void sendSetSubForm(ResourceLocation formID) {
