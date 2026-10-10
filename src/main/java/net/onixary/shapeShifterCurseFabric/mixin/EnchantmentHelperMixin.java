@@ -39,8 +39,11 @@ public class EnchantmentHelperMixin {
             cir.setReturnValue(getLootingLevel(entity, cir.getReturnValue()));
         } else if (enchantment.is(Enchantments.SOUL_SPEED)) {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
+        // ⚠ `enchantment` 是 Holder<Enchantment>，`Enchantments.FROST_WALKER` 是 ResourceKey —— 用 `==` 比
+        //   是「两个不相关的引用类型比较」，编译能过但**恒为 false**（Yarn 侧是 matchesKey，移植时漏改了）。
+        //   必须跟上面两个分支一样用 `is(...)`，否则霜爪的「虚拟冰霜行者」永远不生效。
         // Yarn hasStatusEffect(MobEffect) → Mojmap hasEffect(Holder<MobEffect>)：自有 effect 需 wrapAsHolder
-        } else if (enchantment == Enchantments.FROST_WALKER
+        } else if (enchantment.is(Enchantments.FROST_WALKER)
                 && entity.hasEffect(net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.FROST_CLAW))) {
             cir.setReturnValue(Math.max(1, cir.getReturnValue()));
         }
