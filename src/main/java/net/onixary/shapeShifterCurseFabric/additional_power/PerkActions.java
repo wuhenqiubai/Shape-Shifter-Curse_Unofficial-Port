@@ -98,7 +98,8 @@ public final class PerkActions {
             var minions = owner.shape_shifter_curse$getMinionsByMinionID(id);
             if (minions == null) return;
             for (var uuid : java.util.List.copyOf(minions)) {
-                for (var world : player.getServer().getLevel()) {
+                // Yarn MinecraftServer.getWorlds() → Mojmap getAllLevels()（getLevel 需要 ResourceKey）
+                for (var world : player.getServer().getAllLevels()) {
                     if (world.getEntity(uuid) instanceof net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity wolf
                             && player.getUUID().equals(wolf.getOwnerUUID()) && wolf.isAlive()) wolf.kill();
                 }
@@ -193,7 +194,7 @@ public final class PerkActions {
         if (width <= 0 || length <= 0 || height <= 0) return false;
         Vec3 forward = new Vec3(-Math.sin(Math.toRadians(actor.getYRot())), 0, Math.cos(Math.toRadians(actor.getYRot())));
         Vec3 right = new Vec3(forward.z, 0, -forward.x);
-        Vec3 center = actor.position().add(forward.multiply(data.getBoolean("centered") ? 0 : length / 2)).add(0, height / 2, 0);
+        Vec3 center = actor.position().add(forward.scale(data.getBoolean("centered") ? 0 : length / 2)).add(0, height / 2, 0);
         AABB bounds = target.getBoundingBox();
         Vec3 relative = bounds.getCenter().subtract(center);
         double rx = (bounds.maxX - bounds.minX) / 2, rz = (bounds.maxZ - bounds.minZ) / 2;

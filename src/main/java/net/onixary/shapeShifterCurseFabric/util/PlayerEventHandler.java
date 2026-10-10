@@ -220,8 +220,10 @@ public class PlayerEventHandler {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
         CompoundTag nbt = new CompoundTag();
-        oldComponent.writeToNbt(nbt);
-        newComponent.readFromNbt(nbt);
+        // 1.20.5 起组件 NBT 读写要带 HolderLookup.Provider（取注册表用于解析引用）
+        var registries = oldPlayer.registryAccess();
+        oldComponent.writeToNbt(nbt, registries);
+        newComponent.readFromNbt(nbt, registries);
     }
 
     private static void handleEntityTeam(ServerLevel world){

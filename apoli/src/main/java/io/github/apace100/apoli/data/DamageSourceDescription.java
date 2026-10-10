@@ -5,6 +5,7 @@ import com.google.common.collect.Multimaps;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.NameMutableDamageSource;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;

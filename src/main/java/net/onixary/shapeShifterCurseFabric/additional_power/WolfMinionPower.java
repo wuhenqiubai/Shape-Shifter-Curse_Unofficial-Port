@@ -7,8 +7,8 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import java.util.function.Consumer;
 
@@ -30,7 +30,7 @@ public class WolfMinionPower extends Power {
     }
 
     public static void onDeath(LivingEntity owner) {
-        if (owner == null || !owner.isAlive() || owner.getWorld().isClient) return;
+        if (owner == null || !owner.isAlive() || owner.level().isClientSide) return;
         for (var power : PowerHolderComponent.getPowers(owner, WolfMinionPower.class)) owner.heal(power.deathHeal);
     }
 

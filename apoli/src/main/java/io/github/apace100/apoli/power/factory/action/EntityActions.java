@@ -115,7 +115,9 @@ public class EntityActions {
             (data, entity) -> {
                 if(entity instanceof LivingEntity le) {
                     if(data.isPresent("effect")) {
-                        le.removeEffect(data.get("effect"));
+                        // 1.21 起 removeEffect 收 Holder<MobEffect>，而 STATUS_EFFECT 数据类型给的是裸 MobEffect。
+                        // 直接传会在运行时炸 ClassCastException（MobEffect cannot be cast to Holder），编译期不报。
+                        le.removeEffect(net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.wrapAsHolder(data.get("effect")));
                     } else {
                         le.removeAllEffects();
                     }

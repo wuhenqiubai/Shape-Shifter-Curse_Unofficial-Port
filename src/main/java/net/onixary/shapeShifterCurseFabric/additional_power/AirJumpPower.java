@@ -7,11 +7,12 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.AbstractNbtNumber;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.nbt.NumericTag;
+import net.minecraft.nbt.IntTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 /** Configurable extra impulses per airborne interval; never invokes LivingEntity.jump(). */
@@ -27,19 +28,19 @@ public class AirJumpPower extends Power implements Active {
     @Override public Key getKey() { return key; }
     @Override public void setKey(Key key) { this.key = key; }
     @Override public void tick() {
-        if (entity.isOnGround()) { used = 0; airTicks = 0; }
+        if (entity.onGround()) { used = 0; airTicks = 0; }
         else airTicks++;
     }
     @Override public void onUse() {
-        if (entity.getWorld().isClient || !isActive() || used >= jumps || airTicks < 2
+        if (entity.level().isClientSide || !isActive() || used >= jumps || airTicks < 2
                 || !FrostDivePower.airborne(entity) || FrostDivePower.isDiving(entity)) return;
         used++;
-        Vec3d velocity = entity.getVelocity();
-        PerkActions.setVelocity(entity, new Vec3d(velocity.x, speed, velocity.z));
+        Vec3 velocity = entity.getDeltaMovement();
+        PerkActions.setVelocity(entity, new Vec3(velocity.x, speed, velocity.z));
     }
-    @Override public NbtElement toTag() { return NbtInt.of(used); }
+    @Override public Tag toTag(HolderLookup.Provider provider) { return IntTag.valueOf(used); }
     // Accept the old boolean byte as a spent single jump.
-    @Override public void fromTag(NbtElement tag) { used = tag instanceof AbstractNbtNumber value ? Math.max(0, value.intValue()) : 0; }
+    @Override public void fromTag(Tag tag, HolderLookup.Provider provider) { used = tag instanceof NumericTag value ? Math.max(0, value.getAsInt()) : 0; }
     public static PowerFactory<?> createFactory() {
         return new PowerFactory<>(ShapeShifterCurseFabric.identifier("air_jump"), new SerializableData()
                 .add("speed", SerializableDataTypes.DOUBLE, 0.6)

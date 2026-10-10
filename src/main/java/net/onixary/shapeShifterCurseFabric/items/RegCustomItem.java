@@ -31,7 +31,11 @@ import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
 public class RegCustomItem {
     private RegCustomItem(){}
 
-    public static final Item GRAPHENE_BLADE = register("graphene_blade", new SwordItem(Tiers.DIAMOND, 4, -2.4f, new Item.Properties().durability(128)));
+    // ⚠ 1.21 起 SwordItem 的「伤害/攻速」不再走构造器参数，改由 Item.Properties.attributes(...) 携带；
+    //   createAttributes(tier, damage, speed) 会把 tier.getAttackDamageBonus() 加进 damage，
+    //   与原版钻石剑（createAttributes(DIAMOND, 3, -2.4F)）同一算式，故此处 4 / -2.4f 数值语义不变。
+    public static final Item GRAPHENE_BLADE = register("graphene_blade", new SwordItem(Tiers.DIAMOND,
+            new Item.Properties().durability(128).attributes(SwordItem.createAttributes(Tiers.DIAMOND, 4, -2.4f))));
     public static final Item COMPOUND_KINETIC_BOW = register("compound_kinetic_bow", new BowItem(new Item.Properties().durability(768)));
 
     //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", new StartBook(new Item.Properties()));
@@ -287,9 +291,9 @@ public class RegCustomItem {
     public static void registerModelPredicates() {
         FabricModelPredicateProviderRegistry.register(
                 COMPOUND_KINETIC_BOW, ResourceLocation.parse("pull"), (stack, world, entity, seed) ->
-                        entity != null && entity.getUseItem() == stack ? (stack.getUseDuration() - entity.getUseItemRemainingTicks()) / 20.0f : 0.0f);
+                        entity != null && entity.getUseItem() == stack ? (stack.getUseDuration(entity) - entity.getUseItemRemainingTicks()) / 20.0f : 0.0f);
         FabricModelPredicateProviderRegistry.register(
-                COMPOUND_KINETIC_BOW, ResourceLocation.parse(("pulling"), (stack, world, entity, seed) ->
+                COMPOUND_KINETIC_BOW, ResourceLocation.parse("pulling"), (stack, world, entity, seed) ->
                         entity != null && entity.isUsingItem() && entity.getUseItem() == stack ? 1.0f : 0.0f);
     }
 }

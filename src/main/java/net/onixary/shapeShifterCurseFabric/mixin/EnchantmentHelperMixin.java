@@ -8,6 +8,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.onixary.shapeShifterCurseFabric.additional_power.LootingPower;
 import net.onixary.shapeShifterCurseFabric.additional_power.SoulSpeedPower;
+import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,7 +39,9 @@ public class EnchantmentHelperMixin {
             cir.setReturnValue(getLootingLevel(entity, cir.getReturnValue()));
         } else if (enchantment.is(Enchantments.SOUL_SPEED)) {
             cir.setReturnValue(getSoulSpeedLevel(entity, cir.getReturnValue()));
-        } else if (enchantment == Enchantments.FROST_WALKER && entity.hasStatusEffect(net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects.FROST_CLAW)) {
+        // Yarn hasStatusEffect(MobEffect) → Mojmap hasEffect(Holder<MobEffect>)：自有 effect 需 wrapAsHolder
+        } else if (enchantment == Enchantments.FROST_WALKER
+                && entity.hasEffect(net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.wrapAsHolder(RegOtherStatusEffects.FROST_CLAW))) {
             cir.setReturnValue(Math.max(1, cir.getReturnValue()));
         }
     }

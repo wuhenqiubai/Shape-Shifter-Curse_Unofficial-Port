@@ -255,8 +255,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     public void die(DamageSource source) {
         // TODO 既然有这个需求 之后整个通用的API
         WolfMinionPower.onDeath(this.getOwner());
-        if (this.getMinionOwnerUUID() != null && this.getWorld().getPlayerByUuid(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
-            iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUuid());
+        if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
+            iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
         // 清除死亡Message
         this.setOwnerUUID(null);

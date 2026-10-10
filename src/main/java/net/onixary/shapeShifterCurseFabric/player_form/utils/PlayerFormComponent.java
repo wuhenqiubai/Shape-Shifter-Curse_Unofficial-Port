@@ -201,7 +201,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     @Override
     public void writeToNbt(CompoundTag tag, HolderLookup.Provider registryLookup) {
-        CollectionTag freeForms = new CollectionTag();
+        // CollectionTag 在 Mojmap 里是抽象基类，可实例化的是 ListTag（Yarn 侧 new NbtList()）
+        CollectionTag freeForms = new ListTag();
         for (ResourceLocation form : freePerkForms) freeForms.add(StringTag.valueOf(form.toString()));
         tag.put("free_perk_forms", freeForms);
         if (nowFormID != null) {

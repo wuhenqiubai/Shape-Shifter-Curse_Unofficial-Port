@@ -1,9 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.util.util;
 
-import net.minecraft.util.Identifier;
+
+import net.minecraft.resources.ResourceLocation;
 
 public class SpriteMap {
-    public final Identifier TextureID;
+    public final ResourceLocation TextureID;
     public final int TextureWidth;
     public final int TextureHeight;
 
@@ -13,11 +14,11 @@ public class SpriteMap {
     public final int SpriteWidth;
     public final int SpriteHeight;
 
-    public SpriteMap(Identifier textureID, int textureWidth, int textureHeight, int spriteWidth, int spriteHeight) {
+    public SpriteMap(ResourceLocation textureID, int textureWidth, int textureHeight, int spriteWidth, int spriteHeight) {
         this(textureID, textureWidth, textureHeight, 0, 0, spriteWidth, spriteHeight);
     }
 
-    public SpriteMap(Identifier textureID, int textureWidth, int textureHeight, int textureUVOffsetX, int textureUVOffsetY, int spriteWidth, int spriteHeight) {
+    public SpriteMap(ResourceLocation textureID, int textureWidth, int textureHeight, int textureUVOffsetX, int textureUVOffsetY, int spriteWidth, int spriteHeight) {
         this.TextureID = textureID;
         this.TextureWidth = textureWidth;
         this.TextureHeight = textureHeight;

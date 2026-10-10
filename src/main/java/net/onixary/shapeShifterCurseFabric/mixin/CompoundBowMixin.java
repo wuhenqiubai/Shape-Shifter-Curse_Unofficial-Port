@@ -1,9 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
-import net.minecraft.item.BowItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -11,10 +11,10 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 @Mixin(BowItem.class)
 public abstract class CompoundBowMixin {
-    @ModifyExpressionValue(method = "onStoppedUsing", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/item/ArrowItem;createArrow(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/projectile/PersistentProjectileEntity;"))
-    private PersistentProjectileEntity ssc$kineticArrow(PersistentProjectileEntity arrow, @Local(argsOnly = true) ItemStack bow) {
-        if (bow.isOf(RegCustomItem.COMPOUND_KINETIC_BOW)) arrow.setDamage(arrow.getDamage() * 1.25);
+    @ModifyExpressionValue(method = "releaseUsing", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/item/ArrowItem;createArrow(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/entity/projectile/AbstractArrow;"))
+    private AbstractArrow ssc$kineticArrow(AbstractArrow arrow, @Local(argsOnly = true) ItemStack bow) {
+        if (bow.is(RegCustomItem.COMPOUND_KINETIC_BOW)) arrow.setBaseDamage(arrow.getBaseDamage() * 1.25);
         return arrow;
     }
 }

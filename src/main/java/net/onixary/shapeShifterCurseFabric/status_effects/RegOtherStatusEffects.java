@@ -18,7 +18,7 @@ public class RegOtherStatusEffects {
     //public static final BaseTransformativeStatusEffect EMPTY_EFFECT = register("empty_effect",new BaseTransformativeStatusEffect(null, StatusEffectCategory.NEUTRAL, 0xFFFFFF, false) );
     public static final ImmobilityEffect IMMOBILITY_EFFECT = register("immobility_effect",new ImmobilityEffect());
     public static final FeedEffect FEED_EFFECT = register("feed_effect", new FeedEffect());
-    public static final StatusEffect FROST_CLAW = register("frost_claw", new FrostClawEffect());
+    public static final MobEffect FROST_CLAW = register("frost_claw", new FrostClawEffect());
 
     // 裹茧1级效果不手动减速，使用减速效果
     public static final MobEffect ENTANGLED_EFFECT = register("entangled_effect", new EntangledEffect(MobEffectCategory.HARMFUL, 0x9F9F9F));
