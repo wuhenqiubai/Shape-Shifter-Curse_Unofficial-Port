@@ -74,7 +74,11 @@ public final class PerkCommand {
                         continue;
                     }
                     IPerk perk = RegPerks.getPerk(node.perkID);
-                    if (perk != null && !perk.canRepeat() && unlocked.containsAll(node.dependents)) {
+                    // ⚠ node.dependents 装的是 IDependent，而 unlocked 是 List<ResourceLocation>。
+                    // `unlocked.containsAll(node.dependents)` 能编译（containsAll 收 Collection<?>）但恒为 false，
+                    // 于是 unlock_all 永远只解锁没有依赖的根节点。改为逐个问 IDependent 是否已满足。
+                    if (perk != null && !perk.canRepeat()
+                            && node.dependents.stream().allMatch(dependent -> dependent.isAllDependentGained(player, unlocked))) {
                         unlocked.add(node.perkID);
                         perk.onGain(player, component.nowForm);
                         changed++;

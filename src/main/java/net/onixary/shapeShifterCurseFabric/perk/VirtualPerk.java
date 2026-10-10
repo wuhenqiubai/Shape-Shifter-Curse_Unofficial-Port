@@ -1,21 +1,21 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
 import org.jetbrains.annotations.Nullable;
 
 public class VirtualPerk implements IPerkClient {
-    public final Identifier perkID;
+    public final ResourceLocation perkID;
     public final ISprite icon;
 
-    public VirtualPerk(Identifier perkID, ISprite icon) {
+    public VirtualPerk(ResourceLocation perkID, ISprite icon) {
         this.perkID = perkID;
         this.icon = icon;
     }
 
     @Override
-    public Identifier getID() {
+    public ResourceLocation getID() {
         return perkID;
     }
 
@@ -25,12 +25,12 @@ public class VirtualPerk implements IPerkClient {
     }
 
     @Override
-    public @Nullable Text getName() {
-        return Text.empty();
+    public @Nullable Component getName() {
+        return Component.empty();
     }
 
     @Override
-    public @Nullable Text getDesc() {
-        return Text.empty();
+    public @Nullable Component getDesc() {
+        return Component.empty();
     }
 }

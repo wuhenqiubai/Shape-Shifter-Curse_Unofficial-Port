@@ -10,17 +10,17 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
 import java.util.List;
@@ -29,9 +29,9 @@ import java.util.List;
 // 目前的有点太强了 得砍一下参数 或增加部分风险
 // 目前加了吸到的生物无法移动 无法近战攻击(要是能攻击那这技能就废了) 吸10tick后再炸 基本能范围清怪 不过我感觉有点太强了 得砍或提升其他技能的强度
 public class WaterExplosionSkillPower extends ActiveCooldownPower {
-    private static final ParticleEffect PULL_PARTICLE = ParticleTypes.RAIN;
+    private static final ParticleOptions PULL_PARTICLE = ParticleTypes.RAIN;
     private static final double PULL_PARTICLE_SPEED = 0.35;  // 坏消息 大部分粒子不吃动量
-    private static final SoundEvent PULL_SOUND = SoundEvents.BLOCK_BUBBLE_COLUMN_WHIRLPOOL_INSIDE;
+    private static final SoundEvent PULL_SOUND = SoundEvents.BUBBLE_COLUMN_WHIRLPOOL_INSIDE;
     private static final int PARTICLE_COUNT = 25;
     private static final int SOUND_INTERVAL = 5;
     private static final float SOUND_VOLUME = 0.6f;
@@ -42,11 +42,11 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
     private final int pullDuration;
     private final boolean verticalPull;
     private final double maxSpeed;
-    private final ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition;
+    private final ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition;
     private final ConditionFactory<Entity>.Instance condition;
     private final ActionFactory<Entity>.Instance onStartAction;
     private final ActionFactory<Entity>.Instance onDoneAction;
-    private final ActionFactory<Pair<Entity, Entity>>.Instance onPullAction;
+    private final ActionFactory<Tuple<Entity, Entity>>.Instance onPullAction;
 
     private int currentTick;
 
@@ -86,38 +86,38 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
     }
 
     private void applyPull() {
-        Vec3d center = entity.getPos();
-        Box box = new Box(
+        Vec3 center = entity.position();
+        AABB box = new AABB(
                 center.x - pullRadius, center.y - pullRadius, center.z - pullRadius,
                 center.x + pullRadius, center.y + pullRadius, center.z + pullRadius
         );
-        List<LivingEntity> targets = entity.getWorld().getEntitiesByClass(LivingEntity.class, box, e -> e != entity);
+        List<LivingEntity> targets = entity.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != entity);
         double radiusSq = pullRadius * pullRadius;
         for (LivingEntity target : targets) {
-            if (target.squaredDistanceTo(center) > radiusSq) continue;
-            if (entityCondition != null && !entityCondition.test(new Pair<>(entity, target))) continue;
-            Vec3d direction = center.subtract(target.getPos());
+            if (target.distanceToSqr(center) > radiusSq) continue;
+            if (entityCondition != null && !entityCondition.test(new Tuple<>(entity, target))) continue;
+            Vec3 direction = center.subtract(target.position());
             if (!verticalPull) {
-                direction = new Vec3d(direction.x, 0.0, direction.z);
+                direction = new Vec3(direction.x, 0.0, direction.z);
             }
-            if (direction.lengthSquared() < 1.0E-6) continue;
-            direction = direction.normalize().multiply(pullStrength);
-            Vec3d newVelocity = target.getVelocity().add(direction);
+            if (direction.lengthSqr() < 1.0E-6) continue;
+            direction = direction.normalize().scale(pullStrength);
+            Vec3 newVelocity = target.getDeltaMovement().add(direction);
             double speed = newVelocity.length();
             if (speed > maxSpeed) {
-                newVelocity = newVelocity.multiply(maxSpeed / speed);
+                newVelocity = newVelocity.scale(maxSpeed / speed);
             }
             if (onPullAction != null) {
-                onPullAction.accept(new Pair<>(entity, target));
+                onPullAction.accept(new Tuple<>(entity, target));
             }
-            target.setVelocity(newVelocity);
-            target.velocityModified = true;
+            target.setDeltaMovement(newVelocity);
+            target.hurtMarked = true;
         }
     }
 
     private void spawnEffects() {
-        if (!(entity.getWorld() instanceof ServerWorld serverWorld)) return;
-        Vec3d center = entity.getPos();
+        if (!(entity.level() instanceof ServerLevel serverWorld)) return;
+        Vec3 center = entity.position();
         for (int i = 0; i < PARTICLE_COUNT; i++) {
             double angle = serverWorld.random.nextDouble() * Math.PI * 2.0;
             double dist = pullRadius * (0.3 + serverWorld.random.nextDouble() * 0.7);
@@ -133,14 +133,14 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
                 vx = -offsetX / len * PULL_PARTICLE_SPEED;
                 vz = -offsetZ / len * PULL_PARTICLE_SPEED;
             }
-            serverWorld.spawnParticles(PULL_PARTICLE, px, py, pz, 1, vx, 0.0, vz, 1.0);
+            serverWorld.sendParticles(PULL_PARTICLE, px, py, pz, 1, vx, 0.0, vz, 1.0);
         }
         if (SOUND_INTERVAL > 0 && (pullDuration - currentTick) % SOUND_INTERVAL == 0) {
             serverWorld.playSound(
                     null,
                     center.x, center.y, center.z,
                     PULL_SOUND,
-                    SoundCategory.PLAYERS,
+                    SoundSource.PLAYERS,
                     SOUND_VOLUME, SOUND_PITCH
             );
         }

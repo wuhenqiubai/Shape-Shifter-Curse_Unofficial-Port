@@ -1,8 +1,8 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
@@ -18,17 +18,17 @@ public class RootDependent implements IDependent {
     }
 
     @Override
-    public boolean isDependentPerk(@NotNull Identifier perk) {
+    public boolean isDependentPerk(@NotNull ResourceLocation perk) {
         return false;
     }
 
     @Override
-    public boolean isAllDependentGained(PlayerEntity player, List<Identifier> playerGainedPerk) {
+    public boolean isAllDependentGained(Player player, List<ResourceLocation> playerGainedPerk) {
         return true;
     }
 
     @Override
-    public void drawDependentLine(DrawContext drawContext, Vector2i nodeCenter, PerkTree tree, PerkTree.PerkNode perkNode) {
+    public void drawDependentLine(GuiGraphics drawContext, Vector2i nodeCenter, PerkTree tree, PerkTree.PerkNode perkNode) {
         int ox = nodeCenter.x;
         int oy = nodeCenter.y;
         int x1 = nodeBaseX + posXPerTier * perkNode.tier + nodeLineDependXOffset;

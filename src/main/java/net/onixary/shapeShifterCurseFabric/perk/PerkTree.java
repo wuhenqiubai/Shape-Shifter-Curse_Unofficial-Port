@@ -82,7 +82,12 @@ public class PerkTree {
     public @NotNull List<PerkNode> getDependentNode(ResourceLocation perkID) {
         PerkNode perkNode = getNode(perkID);
         if (perkNode != null) {
-            return perkNodes.stream().filter(perkNode1 -> perkNode1.dependents.contains(perkID)).toList();
+            // ⚠ dependents 装的是 IDependent（不是 ResourceLocation）。
+            // 直接 `dependents.contains(perkID)` 能编译（contains 收 Object）但恒为 false，
+            // 会让本方法永远返回空表。必须走接口谓词（同 FormUpgradeScreen 的写法）。
+            return perkNodes.stream()
+                    .filter(node -> node.dependents.stream().anyMatch(dependent -> dependent.isDependentPerk(perkID)))
+                    .toList();
         }
         return null;
     }

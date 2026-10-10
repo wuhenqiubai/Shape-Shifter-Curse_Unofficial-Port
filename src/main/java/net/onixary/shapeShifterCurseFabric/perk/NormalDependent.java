@@ -1,23 +1,23 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector2i;
 
 import java.util.List;
 
 public class NormalDependent implements IDependent {
-    public final Identifier[] dependentPerkIDs;
+    public final ResourceLocation[] dependentPerkIDs;
 
-    public NormalDependent(Identifier... dependentPerkIDs) {
-        this.dependentPerkIDs = dependentPerkIDs == null ? new Identifier[0] : dependentPerkIDs;
+    public NormalDependent(ResourceLocation... dependentPerkIDs) {
+        this.dependentPerkIDs = dependentPerkIDs == null ? new ResourceLocation[0] : dependentPerkIDs;
     }
 
     @Override
-    public boolean isDependentPerk(@NotNull Identifier perk) {
-        for (Identifier dependentPerkID : dependentPerkIDs) {
+    public boolean isDependentPerk(@NotNull ResourceLocation perk) {
+        for (ResourceLocation dependentPerkID : dependentPerkIDs) {
             if (dependentPerkID.equals(perk)) {
                 return true;
             }
@@ -26,21 +26,21 @@ public class NormalDependent implements IDependent {
     }
 
     @Override
-    public boolean isAllDependentGained(PlayerEntity player, List<Identifier> playerGainedPerk) {
+    public boolean isAllDependentGained(Player player, List<ResourceLocation> playerGainedPerk) {
         if (this.dependentPerkIDs.length == 0) return true;
         if (playerGainedPerk == null) return false;
-        for (Identifier id : this.dependentPerkIDs) {
+        for (ResourceLocation id : this.dependentPerkIDs) {
             if (!playerGainedPerk.contains(id)) return false;
         }
         return true;
     }
 
     @Override
-    public void drawDependentLine(DrawContext drawContext, Vector2i nodeCenter, PerkTree tree, PerkTree.PerkNode perkNode) {
+    public void drawDependentLine(GuiGraphics drawContext, Vector2i nodeCenter, PerkTree tree, PerkTree.PerkNode perkNode) {
         if (this.dependentPerkIDs.length == 0) return;
         final int ox = nodeCenter.x;
         final int oy = nodeCenter.y;
-        for (Identifier dependPerkID : this.dependentPerkIDs) {
+        for (ResourceLocation dependPerkID : this.dependentPerkIDs) {
             PerkTree.PerkNode dependNodeMetaData = tree.getNode(dependPerkID);
             if (dependNodeMetaData == null) continue;
             int x1 = nodeBaseX + posXPerTier * perkNode.tier + nodeLineDependXOffset;

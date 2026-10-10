@@ -20,6 +20,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
+import net.onixary.shapeShifterCurseFabric.perk.IDependent;
+import net.onixary.shapeShifterCurseFabric.perk.NormalDependent;
 import net.onixary.shapeShifterCurseFabric.perk.NormalPerk;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
@@ -186,7 +188,15 @@ public class FormPerkCheck {
                 }
                 for (var power : perk.powerAdd) context.assertTrue(PowerTypeRegistry.get(power) != null, "Parsed power: " + power);
                 for (var power : perk.powerRemove) context.assertTrue(PowerTypeRegistry.get(power) != null, "Removed power exists: " + power);
-                for (var parent : node.dependents) context.assertTrue(tree.getNode(parent) != null, "Parent exists");
+                // node.dependents 现在是 IDependent（根节点用 RootDependent，没有具体父 perk id）；
+                // 只有 NormalDependent 带 ResourceLocation[]，逐个反查节点是否存在。
+                for (IDependent dependent : node.dependents) {
+                    if (dependent instanceof NormalDependent normalDependent) {
+                        for (ResourceLocation parent : normalDependent.dependentPerkIDs) {
+                            context.assertTrue(tree.getNode(parent) != null, "Parent exists: " + parent);
+                        }
+                    }
+                }
             }
         }
         context.assertTrue(nodes == 26 && prisms == 8, "26 perks and 8 prism purchases");
