@@ -22,10 +22,7 @@ public final class ItemTooltipWrapping {
     private ItemTooltipWrapping() {}
 
     public static void register() {
-        // 1.21.1 起 Fabric 的 ItemTooltipCallback 由 3 参变为 4 参（中间插入 TooltipType）。
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            // ⚠ 用 BuiltInRegistries（Registry<Item>，有 getKey），不是 Registries ——
-            // Registries.ITEM 是 ResourceKey<Registry<Item>>，没有 getId/getKey。
             boolean modItem = BuiltInRegistries.ITEM.getKey(stack.getItem()).getNamespace()
                     .equals(ShapeShifterCurseFabric.MOD_ID);
             StringSplitter handler = Minecraft.getInstance().font.getSplitter();

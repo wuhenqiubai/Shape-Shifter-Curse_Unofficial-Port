@@ -22,7 +22,6 @@ public class CustomTrinket extends AccessoryItem implements TrinketUtils.CustomP
     }
 
     private @NotNull Identifier getAccessoryID(ItemStack stack) {
-        // getNbt() removed in 1.21; use component-based access
         var customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (customData == null) {
             return DEFAULT_IDENTIFIER;

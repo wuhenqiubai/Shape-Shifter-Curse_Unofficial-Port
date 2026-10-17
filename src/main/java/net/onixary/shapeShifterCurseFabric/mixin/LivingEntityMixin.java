@@ -54,7 +54,6 @@ public abstract class LivingEntityMixin {
 
     @Shadow protected abstract void checkFallDamage(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition);
 
-    // 1.21.11: blockUsingShield 已更名为 blockUsingItem(ServerLevel, LivingEntity)
     @Shadow
     protected abstract void blockUsingItem(ServerLevel serverLevel, LivingEntity attacker);
 
@@ -180,8 +179,6 @@ public abstract class LivingEntityMixin {
      * used for damage computation, without affecting the original fall distance value
      * used in form's falling protection powers.
      */
-    // 1.21.11: causeFallDamage(double, float, DamageSource) 内 calculateFallDamage(d, f) 调用点改 fallDistance。
-    // 用 @ModifyArg 而非 @ModifyVariable（double 参数占 2 个 JVM 槽位，HEAD+argsOnly 的 ModifyVariable 对 double 有已知问题）
     @ModifyArg(method = "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"),
             index = 0)
@@ -217,8 +214,6 @@ public abstract class LivingEntityMixin {
     }
 
     // Origins的LikeWaterPower
-    // 1.21.11: travel 重构拆分为 travelInAir / travelInFluid / travelFallFlying，
-    // 原 travel 内的 setDeltaMovement(流体下落调整) 调用现在位于 travelInWater
     @ModifyArg(method = "travelInWater(Lnet/minecraft/world/phys/Vec3;DZD)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"))
     public Vec3 likeWaterMixin(Vec3 movementInput, @Local(ordinal = 0) double d) {
         LivingEntity self = (LivingEntity) (Object) this;
@@ -317,13 +312,11 @@ public abstract class LivingEntityMixin {
     }
 
     @ModifyVariable(method = "causeFallDamage", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    // 1.21.11: causeFallDamage(double fallDistance, float multiplier, DamageSource) 首参改为 double
     private double handleFallDamageA(double fallDistance) {
         float finalV = applyModifier(ModifyFallDamagePower.class, (float) fallDistance, ModifyFallDamagePower::getModifiers_FallDistance);
         return Math.max(0.0D, finalV);
     }
 
-    // 1.21.11: causeFallDamage 内 calculateFallDamage(d, f) 调用点改 multiplier（index=1）
     @ModifyArg(method = "causeFallDamage(DFLnet/minecraft/world/damagesource/DamageSource;)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;calculateFallDamage(DF)I"),
             index = 1)
@@ -350,10 +343,6 @@ public abstract class LivingEntityMixin {
     //     return finalDamage;
     // }
 
-    // 1.21.11: 伤害入口重构为 hurtServer(ServerLevel, DamageSource, float)，
-    // isDamageSourceBlocked 与 hurtCurrentlyUsedShield 均已移除，盾牌格挡逻辑并入 applyItemBlocking(ServerLevel, DamageSource, float)。
-    // 虚拟护盾改为在 applyItemBlocking 头部直接返回全额伤害（视为被完全格挡）：
-    // 既不会真正扣血，也不会走真实盾牌的耐久损耗（原 bypassNextShieldDamage 的目的）。
     @Inject(method = "applyItemBlocking", at = @At("HEAD"), cancellable = true)
     private void blockedByShield(ServerLevel serverLevel, DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
         LivingEntity realThis = (LivingEntity) (Object) this;

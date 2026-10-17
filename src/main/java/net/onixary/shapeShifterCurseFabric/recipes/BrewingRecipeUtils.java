@@ -55,7 +55,6 @@ public class BrewingRecipeUtils {
     }
 
 	public static void onLoadDynamicBrewingRecipesEnd() {
-		// 动态配方存储在独立列表中，不再添加到原版配方注册表
 		ShapeShifterCurseFabric.LOGGER.info("Loaded {} dynamic potion recipes and {} dynamic item recipes",
 				POTION_RECIPES.size(), ITEM_RECIPES.size());
 	}

@@ -14,9 +14,6 @@ public record SpriteBadge(Identifier spriteId) implements Badge {
         return false;
     }
 
-    // 该 badge 本就没有 tooltip（原 getTooltipComponents 返回空列表）；
-    // 客户端侧由 BadgeTooltipRenderers 同样返回空列表。
-
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {
         instance.set("sprite", spriteId);

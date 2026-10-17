@@ -15,10 +15,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
-/**
- * Ensures origins namespace tags are available in Calio's REGISTRY_TAGS
- * before power data is loaded, preventing parse-time tag validation failures.
- */
 public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OriginsTagLoader.class);
@@ -30,8 +26,6 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
 
     @Override
     public void onResourceManagerReload(ResourceManager manager) {
-        // Calio-Legacy 1.11 移除了 REGISTRY_TAGS 缓存机制，改用原版 tag 系统。
-        // 该 listener 仅保留 resource listener 注册顺序（在 power 加载前），无需再手动预注册 tag。
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -43,7 +37,6 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
         for (Identifier path : manager.listResources("tags/" + registryDir,
                 id -> id.getPath().endsWith(".json"))
                 .keySet()) {
-            // path: origin/tags/items/ignore_diet.json
             String ns = path.getNamespace();
             String fileName = path.getPath().substring(path.getPath().lastIndexOf('/') + 1).replace(".json", "");
             TagKey<?> tagKey = TagKey.create((ResourceKey) registryKey, Identifier.fromNamespaceAndPath(ns, fileName));

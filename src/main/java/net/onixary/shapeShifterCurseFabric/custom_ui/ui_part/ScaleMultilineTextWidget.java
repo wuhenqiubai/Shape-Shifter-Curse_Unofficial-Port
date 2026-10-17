@@ -40,8 +40,6 @@ public class ScaleMultilineTextWidget extends MultiLineTextWidget {
 
     @Override
     public void renderWidget(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 1.21.11 文字渲染走 GuiTextRenderState（延迟提交），字形缩放只能由保存的 2D pose 决定：
-        // 在 widget 原点处缩放 GUI pose Scale 倍，使 vanilla MultiLineTextWidget 文字真正缩小 Scale 倍显示。
         Matrix3x2fStack pose = context.pose();
         pose.pushMatrix();
         pose.translate(this.getX(), this.getY());

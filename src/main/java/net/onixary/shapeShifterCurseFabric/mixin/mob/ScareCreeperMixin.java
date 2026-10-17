@@ -29,7 +29,6 @@ public abstract class ScareCreeperMixin {
         Set<WrappedGoal> goals = targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
             if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && atg.targetType == Player.class) {
-                // 1.21.11 selector 是 private 且改为双参 Selector(LivingEntity, ServerLevel)
                 atg.targetConditions.selector((entity, level) ->
                         EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity) && !AdditionalPowers.SCARE_CREEPERS.isActive(entity));
             }

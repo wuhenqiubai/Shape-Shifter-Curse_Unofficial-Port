@@ -48,7 +48,6 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         return Minecraft.getInstance().player;
     }
 
-    // 1.21.11 renderHand 参数：poseStack, submitNodeCollector, i, identifier, modelPart, bl
     @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
     private void shape_shifter_curse$RenderArm_HEAD(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         AbstractClientPlayer player = getRenderHandPlayer();
@@ -59,7 +58,6 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         }
     }
 
-    // 在 vanilla 提交手臂模型前，根据形态设置手臂组件是否显示
     @Inject(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModelPart(Lnet/minecraft/client/model/geom/ModelPart;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IILnet/minecraft/client/renderer/texture/TextureAtlasSprite;)V", shift = At.Shift.BEFORE))
     private void shape_shifter_curse$RenderArm_PartA(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         AbstractClientPlayer player = getRenderHandPlayer();
@@ -73,7 +71,6 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         FormRenderFeature.rFPM_PartA(realThis, player, modelPart, sleeve);
     }
 
-    // vanilla 提交手臂模型后，渲染变身模型的手臂骨骼（单骨骼渲染）
     @Inject(method = "renderHand", at = @At("RETURN"))
     private void shape_shifter_curse$RenderArm_PartB(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int i, Identifier identifier, ModelPart modelPart, boolean bl, CallbackInfo ci) {
         AbstractClientPlayer player = getRenderHandPlayer();
@@ -87,7 +84,6 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         FormRenderFeature.rFPM_PartB(realThis, poseStack, submitNodeCollector, i, player, modelPart, sleeve);
     }
 
-    // 第三人称皮肤（1.21.11 getTextureLocation 接收 AvatarRenderState）
     @Inject(method = "getTextureLocation(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/resources/Identifier;", at = @At("HEAD"), cancellable = true)
     private void shape_shifter_curse$onGetTexture(AvatarRenderState avatarRenderState, CallbackInfoReturnable<Identifier> cir) {
         Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);

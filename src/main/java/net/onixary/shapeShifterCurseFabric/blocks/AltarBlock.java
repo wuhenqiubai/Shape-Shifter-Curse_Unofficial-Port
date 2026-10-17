@@ -30,7 +30,6 @@ import org.jetbrains.annotations.Nullable;
 
 // 渲染先用透明方案吧 BlockEntity类方块由BlockEntity动态渲染
 public class AltarBlock extends BaseEntityBlock {
-    // 1.21.11: DirectionProperty 已并入 EnumProperty<Direction>（BlockStateProperties.HORIZONTAL_FACING 的类型）
     public static final EnumProperty<Direction> FACING = BlockStateProperties.HORIZONTAL_FACING;
 
     protected AltarBlock(Properties settings) {
@@ -64,8 +63,6 @@ public class AltarBlock extends BaseEntityBlock {
     }
 
 
-    // ⚠ 1.21.11 的 BlockBehaviour.useWithoutItem 是【5 参数、protected】（1.21.1 带 InteractionHand 且为 public）。
-    // 参数签名不符就不会构成 override —— 编译器不报错，但右键会静默走基类默认实现（返回 PASS，表现为毫无反应）。
     @Override
     protected @NotNull InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.isClientSide()) {
@@ -89,21 +86,16 @@ public class AltarBlock extends BaseEntityBlock {
         return RenderShape.MODEL;
     }
 
-    // BaseEntityBlock 要求实现抽象的 codec()（用于 Block 的注册/网络同步）
     @Override
     protected @NotNull MapCodec<AltarBlock> codec() {
         return Block.simpleCodec(AltarBlock::new);
     }
 
-    // BaseEntityBlock.createTickerHelper 是本版本上的对应工具（那个本地 checkType 是 1.20.1 yarn 的
-    // BlockWithEntity.checkType 遗骸，两个重载会互相打转，编译不过）
     @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
         return world.isClientSide() ? null : createTickerHelper(type, RegCustomBlock.ALTAR_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> blockEntity.tick(world1, pos, blockState, blockEntity));
     }
 
-    // 1.21.1 侧新增（1.21.11 侧原先缺这段）：破坏祭坛时把内部物品掉出来，否则会静默吞掉。
-    // 1.21.11: BlockBehaviour.onRemove(...) 已被 affectNeighborsAfterRemoval(BlockState, ServerLevel, BlockPos, boolean) 取代。
     @Override
     protected void affectNeighborsAfterRemoval(BlockState state, ServerLevel world, BlockPos pos, boolean moved) {
         BlockEntity blockEntity = world.getBlockEntity(pos);

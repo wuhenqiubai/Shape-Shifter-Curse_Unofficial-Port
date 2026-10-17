@@ -13,9 +13,6 @@ public final class TransformFX implements ClientTickEvents.EndTick {
     public static final TransformFX INSTANCE = new TransformFX();
     private final Minecraft mc = Minecraft.getInstance();
 
-    // （HudRenderCallback + GuiGraphics 叠加层）实现：进入渐变由 TransformManager 每帧驱动 strength，
-    // 退出渐变在 TransformOverlay.renderHud 每帧衰减（setEnableOverlay(false) 后平滑淡出）。
-    // TRANSFORM_EFFECT_SHADER_ID 保留仅作记录。
     private static float transformEffectDuration = 0.0f;
     private static boolean doEffectIn = false;
     private static boolean doEffectOut = false;

@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState, M extends EntityModel<S> & HeadedModel> {
     @Unique private static FormRenderUtils.BoneBipedState headBoneState;
 
-    // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
     @Unique
     private static AbstractClientPlayer getRenderedPlayer(LivingEntityRenderState livingEntityRenderState) {
         if (livingEntityRenderState instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
@@ -53,7 +52,6 @@ public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState,
             return formModel.AnimationSystem instanceof IModifyHead_MAS;
         });
         if (renderer != null) {
-            // AvatarRenderer 原类型下 getModel() 返回原始类型 EntityModel，玩家模型实际是 HumanoidModel，这里转回以便操作头部
             HumanoidModel<?> playerModel = (HumanoidModel<?>) playerEntityRenderer.getModel();
             headBoneState = new FormRenderUtils.BoneBipedState(playerModel.getHead());
             ((IModifyHead_MAS)renderer.realModel.AnimationSystem).modifyHeadPart(player, playerModel, renderer.realModel);

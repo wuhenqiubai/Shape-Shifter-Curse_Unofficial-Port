@@ -24,8 +24,6 @@ public class PlayerClipAtLedgeMixin {
         }
     }
 
-    /** In 1.21.1 adjustMovementForSneaking delegates the space check to isSpaceAroundPlayerEmpty.
-     *  Wrap the World.isSpaceEmpty call inside that method to fix step-height clipping at ledges. */
     @WrapOperation(method = "canFallAtLeast", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;noCollision(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;)Z"))
     private boolean fixStepHeightClipAtLedge(Level world, Entity entity, AABB box, Operation<Boolean> original) {
         Player self = (Player) (Object) this;

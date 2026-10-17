@@ -91,7 +91,6 @@ public class TransformativeEntitySpawning {
         );
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            // 1. 在沙漠神殿添加狼生成
             addStructureSpawn(
                 server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
                     .get(Identifier.fromNamespaceAndPath("minecraft", "desert_pyramid")).map(Holder::value).orElse(null),
@@ -101,7 +100,6 @@ public class TransformativeEntitySpawning {
                         .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 3, 5), 20)
                         .build())
             );
-            // 2. 在废弃矿井添加蜘蛛生成
             for (Holder<Structure> structureEntry : server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
                 .getTagOrEmpty(TagKey.create(Registries.STRUCTURE, Identifier.fromNamespaceAndPath("minecraft", "mineshaft")))) {
                 addStructureSpawn(
@@ -116,7 +114,6 @@ public class TransformativeEntitySpawning {
         });
     }
 
-    // Structure.settings 是 protected final → AW 中已设置 accessible + mutable，可直接赋值
     private static void addStructureSpawn(Structure structure, MobCategory category, StructureSpawnOverride override) {
         if (structure == null) return;
         Map<MobCategory, StructureSpawnOverride> spawns = new HashMap<>(structure.spawnOverrides());

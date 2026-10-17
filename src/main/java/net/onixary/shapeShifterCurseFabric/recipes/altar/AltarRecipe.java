@@ -76,8 +76,6 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
         if (input.is(Items.POWDER_SNOW_BUCKET)) {
             return new ItemStack(Items.BUCKET);
         }
-        // 1.21.11: Item.hasCraftingRemainingItem() 已移除，Item.getCraftingRemainder() 直接返回 ItemStack；
-        // 这里沿用 Fabric API 的 stack-aware 版本 FabricItem#getRecipeRemainder(ItemStack)（无剩余物时返回 EMPTY）。
         return input.getItem().getRecipeRemainder(input);
     }
 

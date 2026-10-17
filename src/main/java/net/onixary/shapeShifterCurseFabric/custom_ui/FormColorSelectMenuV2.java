@@ -161,9 +161,9 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public static FormColorSelectMenuV2 instance;
     private boolean isLockTempTextureSystem = false;  // 用于还原
     private boolean isLockTempModelSystem = false;  // 用于还原
-    private boolean isLockTempConfigSystem = false;  // 用于还原
+    private boolean isLockTempConfigSystem = false;
     private @Nullable Screen parsetScreen = null;
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();
     private int modelID = -1;
     private static final String identifierNameSpace = MOD_ID;
     private static final String identifierPrefix = "dynamic_fcs_v2_";
@@ -310,7 +310,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
 
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 自定义背景纹理完全遮挡，不需要暗色渐变
     }
 
     // FCS按钮生成函数
@@ -422,7 +421,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         //     case 2 -> { this.PanelConfigNameLabel.setMessage(AccentColor2Label); }
         //     case 3 -> { this.PanelConfigNameLabel.setMessage(EyeColorALabel); }
         //     case 4 -> { this.PanelConfigNameLabel.setMessage(EyeColorBLabel); }
-        // }
         int Color = 0x00FFFFFF;
         switch (this.SliderIndex) {
             case 0 -> Color = this.primaryColor;
@@ -589,7 +587,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             case 3, 4, 5 -> this.updateRGBFromHSV();
         }
     }
-    // 二级菜单
     public void updatePanel() {
         if (isOpenPanel02) {
             ConfigPanel01.forEach(element -> element.visible = false);
@@ -766,8 +763,8 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     @Override
     public void init() {
         super.init();
-        int BPosX = width / 2 - BG_WIDTH / 2;  // 图片左上角 X
-        int BPosY = height / 2 - BG_HEIGHT / 2;  // 图片左上角 Y
+        int BPosX = width / 2 - BG_WIDTH / 2;
+        int BPosY = height / 2 - BG_HEIGHT / 2;
         int TextColor = 0xDDDDDD;
         // 330,20,70,11 - Global Slot Label
         this.addRenderableWidget(new StringWidget(BPosX + 330, BPosY + 20, 70, 11, GlobalSlotTitle, font));
@@ -1048,15 +1045,10 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // renderEntityInInventory 在 1.21.11 移除，改用 renderEntityInInventoryFollowsMouse（区域 + 鼠标偏移决定旋转）
-        // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
-        // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
-        // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在 scissor 框内的位置由 y 参数补偿。
         InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
     }
 
     private void RenderEntityInViewport(GuiGraphics context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // RenderSystem.clear 已移除，RenderPipeline 自带深度状态
         context.enableScissor(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
         try {
             RenderEntity(context, x, y, size, mouseX, mouseY, entity);
@@ -1228,7 +1220,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             this.modelID = modelID;
             CleanColorSettingCache();
         }
-        // 可以关闭这个功能
         if (!this.enableFormColorSystem) {
             return texture;
         }

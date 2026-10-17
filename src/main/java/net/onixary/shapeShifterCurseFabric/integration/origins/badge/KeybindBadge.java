@@ -14,9 +14,6 @@ public record KeybindBadge(Identifier spriteId, String text) implements Badge {
         return true;
     }
 
-    // tooltip 构建（原 static addLines / getTooltipComponents，含 KeyMapping 等客户端调用）
-    // 已移到纯客户端的 BadgeTooltipRenderers。
-
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {
         instance.set("sprite", spriteId);

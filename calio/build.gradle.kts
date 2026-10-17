@@ -1,11 +1,7 @@
 plugins {
-	// 版本由根 settings.gradle 的 pluginManagement.plugins 统一提供
 	id("net.fabricmc.fabric-loom-remap")
 	`maven-publish`
 }
-
-// version / group 由根 build.gradle 的 subprojects {} 统一设置（monorepo：三个模块共用 SSCU 的 group + version）。
-// 只保留 archivesName，让 jar 名仍是 Calio-Legacy-<version>.jar，与 SSCU 的产物区分开。
 
 base {
 	archivesName.set(project.property("archives_base_name") as String)

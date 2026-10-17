@@ -19,19 +19,6 @@ import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.FormAttunerBlockEntity;
 import org.jspecify.annotations.Nullable;
 
-/**
- * Form Attuner 的信标光柱渲染器。
- *
- * <p>1.21.11 起方块实体渲染改为「提取渲染状态 + 提交」两段式（与实体渲染一致），
- * 不再是 1.21.1 的 {@code render(T, float, PoseStack, MultiBufferSource, int, int)}：
- * <ul>
- *   <li>{@code createRenderState()} / {@code extractRenderState(...)} 负责把方块实体数据抄进渲染状态；</li>
- *   <li>{@code submit(...)} 在提交阶段用 {@link SubmitNodeCollector} 画几何体。</li>
- * </ul>
- * 渲染状态直接复用原版的 {@link BeaconRenderState}（本类本就是原版 BeaconRenderer 的翻版），
- * 其 {@code Section} 的颜色已从 float[] 分量改为 ARGB int。
- * 几何体部分逐行对照 1.21.11 的 {@code BeaconRenderer} 移植。
- */
 public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerBlockEntity, BeaconRenderState> {
     public static final Identifier BEAM_TEXTURE = Identifier.withDefaultNamespace("textures/entity/beacon_beam.png");
 
@@ -52,11 +39,9 @@ public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerB
         state.sections = blockEntity.getBeamSegments().stream()
                 .map(segment -> new BeaconRenderState.Section(toArgb(segment.getColor()), segment.getHeight()))
                 .toList();
-        // 上游写法不做信标那种「离远了放大光柱」的处理，保持恒定半径
         state.beamRadiusScale = 1.0F;
     }
 
-    /** 方块实体里的光柱颜色是 0..1 的 float 分量（源自 DyeColor），这里转成渲染状态要的 ARGB int。 */
     private static int toArgb(float[] color) {
         return ARGB.color(
                 Mth.clamp((int) (color[0] * 255.0F), 0, 255),
@@ -69,7 +54,6 @@ public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerB
         int yOffset = 0;
         for (int i = 0; i < state.sections.size(); ++i) {
             BeaconRenderState.Section section = state.sections.get(i);
-            // 上游：最后一段光柱高度写死 1024（一路顶到天上），其余用实际段高
             submitBeam(poseStack, submitNodeCollector, state.beamRadiusScale, state.animationTime, yOffset,
                     i == state.sections.size() - 1 ? 1024 : section.height(), section.color());
             yOffset += section.height();
@@ -91,24 +75,16 @@ public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerB
         float z = -1.0F + vOffset;
         poseStack.pushPose();
         poseStack.mulPose(Axis.YP.rotationDegrees(animationTime * 2.25F - 45.0F));
-        // 内层光柱（不透明）
         submitPart(poseStack, submitNodeCollector, RenderTypes.beaconBeam(texture, false), color, yOffset, endY,
                 0.0F, inner, inner, 0.0F, -inner, 0.0F, 0.0F, -inner,
                 maxY * radiusScale * (0.5F / inner) + z, z);
         poseStack.popPose();
-        // 外层辉光（半透明）
         submitPart(poseStack, submitNodeCollector, RenderTypes.beaconBeam(texture, true), ARGB.color(32, color), yOffset, endY,
                 -outer, -outer, outer, -outer, -outer, outer, outer, outer,
                 maxY * radiusScale + z, z);
         poseStack.popPose();
     }
 
-    /**
-     * 一次 {@code submitCustomGeometry} 的包装。
-     *
-     * <p>单独抽出来是因为几何参数必须先落成「形参」—— 直接在 {@code submitBeam} 里写 lambda 会捕获
-     * 那些需要二次赋值的局部变量（外层辉光的 8 个顶点参数与内层不同），Java 会报「必须是最终变量」。
-     */
     private static void submitPart(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, RenderType renderType,
                                    int color, int yOffset, int endY,
                                    float f, float g, float h, float l, float m, float n, float o, float p,
@@ -151,7 +127,6 @@ public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerB
         return 256;
     }
 
-    // 沿用上游的「只算水平距离」写法
     @Override
     public boolean shouldRender(FormAttunerBlockEntity blockEntity, Vec3 cameraPos) {
         return Vec3.atCenterOf(blockEntity.getBlockPos()).multiply(1.0, 0.0, 1.0)

@@ -16,12 +16,12 @@ import java.util.List;
 public interface IFormLayer {
     @NotNull Identifier getID();
 
-    void __setID(@NotNull Identifier id);  // 禁止外部调用
+    void __setID(@NotNull Identifier id);
 
     // 可以实现一些特殊玩法 比如我拓展中的 使魔(主角) 形态 需要这套系统来实现动态Power 而不用加一堆LayerGroup
     @NotNull List<Identifier> getPowerID(@Nullable Player player);
 
-    void __setPowerID(@NotNull List<Identifier> powerIDList);  // 禁止外部调用
+    void __setPowerID(@NotNull List<Identifier> powerIDList);
 
     default void beforeApply(@NotNull Player player) {};
 

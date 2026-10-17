@@ -27,26 +27,9 @@ import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
 import org.jetbrains.annotations.Nullable;
 
-/**
- * Runs inside Fabric's existing GameTest server: {@code ./gradlew checkAltarRecipes}
- *
- * <p><b>本文件是行为契约，不是实现细节的快照。</b>它断言的燃料精确预算、网络往返、匹配/消耗语义、
- * 催化槽永不消耗、容器剩余物返还、NBT 断点续造、600 tick 才产出等，都是「祭坛应该有的行为」。</p>
- *
- * <p>1.21.1 迁移时改过调用方式（旧写法全部失效、测试一度编译不过）：</p>
- * <ul>
- *   <li>{@code RecipeSerializer} 不再有 {@code read/write}，改用 {@code codec()} + {@code streamCodec()}</li>
- *   <li>{@code matches} 的参数由 {@code SidedInventory/WorldlyContainer} 换成 {@code RecipeInput}，
- *       故一律经 {@link AltarRecipeInput} 包装（BE 本身刻意不是 RecipeInput）</li>
- *   <li>BlockEntity 的 {@code createNbt/readNbt/getCachedState} → {@code saveWithFullMetadata/loadWithComponents/getBlockState}</li>
- *   <li>{@code WorldlyContainer} 的抽象方法在 Mojmap 下叫
- *       {@code getSlotsForFace/canPlaceItemThroughFace/canTakeItemThroughFace}</li>
- * </ul>
- */
 public final class AltarRecipeCheck {
     private static final Identifier ID = Identifier.fromNamespaceAndPath("test", "altar");
 
-    /** 12 槽的最小 WorldlyContainer（Mojmap 方法名，1.21.1 的 WorldlyContainer 有三个抽象方法）。 */
     private static final class Inventory extends SimpleContainer implements WorldlyContainer {
         Inventory() { super(12); }
 
@@ -60,7 +43,6 @@ public final class AltarRecipeCheck {
         public boolean canTakeItemThroughFace(int slot, ItemStack stack, Direction side) { return true; }
     }
 
-    /** 把容器包成配方匹配用的 RecipeInput（线性映射 0-9）。 */
     private static AltarRecipeInput input(Inventory inventory) {
         return new AltarRecipeInput(inventory.getItems());
     }
@@ -69,13 +51,6 @@ public final class AltarRecipeCheck {
         if (!value) throw new AssertionError(message);
     }
 
-    /**
-     * 从 JSON 反序列化。MapCodec 本身没有 parse(DynamicOps,...)，先 .codec() 转成 Codec 再解析。
-     *
-     * <p>⚠ 必须用 {@link RegistryOps}（而不是裸 JsonOps）：1.21.11 起 {@code Ingredient.CODEC} 是
-     * {@code HolderSetCodec}，解析物品引用需要 registry 上下文，否则会退化到 decodeWithoutRegistry
-     * 并报 "Can't decode element ... without registry"。</p>
-     */
     private static AltarShapelessRecipe shapelessFromJson(String json, RegistryAccess registries) {
         return RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.codec().codec()
                 .parse(RegistryOps.create(JsonOps.INSTANCE, registries), JsonParser.parseString(json))
@@ -96,13 +71,8 @@ public final class AltarRecipeCheck {
                 """.formatted(seconds * 20, moons), registries);
     }
 
-    // 1.21.11：@GameTest 注解在 1.21.5 被 Mojang 移除，改用 Fabric 的同名注解
-    // （net.fabricmc.fabric.api.gametest.v1.GameTest）。其 structure() 默认即空结构，
-    // 等价于旧版的 FabricGameTest.EMPTY_STRUCTURE，故不再传参。
     @GameTest
     public void recipes(GameTestHelper context) {
-        // 用 RegistryAccess（HolderLookup.Provider 的子接口）——RegistryFriendlyByteBuf 要前者、
-        // saveWithFullMetadata/loadWithComponents 要后者，声明成子接口两边都能传。
         RegistryAccess registries = context.getLevel().registryAccess();
 
         for (int[] example : new int[][]{{5, 5}, {10, 10}, {30, 16}, {60, 9}, {5, 0}}) {
@@ -115,7 +85,6 @@ public final class AltarRecipeCheck {
             }
             check(total == example[1] * 800, "Exact moondust cost over full duration");
 
-            // 网络往返：走 StreamCodec（1.21.1 无 write/read）
             RegistryFriendlyByteBuf packet = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
             RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().encode(packet, recipe);
             AltarShapelessRecipe copy = RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().decode(packet);
@@ -157,7 +126,6 @@ public final class AltarRecipeCheck {
         shapedInventory.setItem(1, new ItemStack(Items.STICK));
         check(shapedCopy.matches(input(shapedInventory), null), "Shaped ingredients match");
 
-        // legacy：只用逐 tick fuel_cost、没有 moondust_cost 的旧数据包
         AltarShapelessRecipe legacy = shapelessFromJson("""
                 {"ingredients":["minecraft:stick"],"result":{"id":"minecraft:emerald"},
                  "time":100,"fuel_cost":3}
@@ -186,7 +154,6 @@ public final class AltarRecipeCheck {
         AltarBlockEntity altar = new AltarBlockEntity(BlockPos.ZERO, RegCustomBlock.ALTAR_BLOCK.defaultBlockState());
         altar.setLevel(context.getLevel());
         ItemStack oldHook = new ItemStack(RegCustomItem.ATTACH_HOOK);
-        // 1.21.1：ItemStack 的 setCustomName/hasCustomName 已移除，改用 CUSTOM_NAME 数据组件。
         oldHook.set(DataComponents.CUSTOM_NAME, Component.literal("Must not be inherited"));
         altar.setItem(0, oldHook);
         altar.setItem(9, new ItemStack(RegCustomItem.NIGHT_CATALYST_CORE));
@@ -196,9 +163,6 @@ public final class AltarRecipeCheck {
         altar.setItem(10, new ItemStack(RegCustomItem.UNTREATED_MOONDUST, 16));
         for (int tick = 0; tick < 200; tick++) altar.tick(context.getLevel(), BlockPos.ZERO, altar.getBlockState(), altar);
 
-        // 存档 / 读档：1.21.1 用 saveWithFullMetadata / loadWithComponents（旧的 createNbt/readNbt 已移除）
-        // 1.21.11：loadWithComponents 改收 ValueInput（不再是 (CompoundTag, Provider)），
-        // 用 TagValueInput 包一层 —— 与本仓库既有写法一致（如 apoli 的 PowerHolderComponentImpl）。
         var saved = altar.saveWithFullMetadata(registries);
         altar = new AltarBlockEntity(BlockPos.ZERO, RegCustomBlock.ALTAR_BLOCK.defaultBlockState());
         altar.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, saved));

@@ -90,7 +90,6 @@ public class PlayerEventHandler {
                     Thread.currentThread().interrupt();
                 }
 
-                // 在主线程中执行同步
                 server.execute(() -> {
                     if (player.connection != null && !player.hasDisconnected()) {
                         ServerLevel currentWorld = (ServerLevel) player.level();
@@ -218,9 +217,6 @@ public class PlayerEventHandler {
         var lookup = Objects.requireNonNull(oldPlayer.level().getServer()).registryAccess();
         oldComponent.writeToNbt(nbt, lookup);
         newComponent.readFromNbt(nbt, lookup);
-        // CCA 的 ALWAYS_COPY 已自动复制了组件和 origin。
-        // 不要调用 _loadForm（会触发 applyLayer → setOrigin → onRemoved → 清空重生点）。
-        // 只需应用 scale 并通知客户端即可。
         IForm form = newComponent.nowForm;
         form.applyScale(newPlayer);
         if (!newPlayer.level().isClientSide()) {

@@ -11,9 +11,6 @@ public class ServerPlayerEntityMixin {
 
     @Inject(method = "restoreFrom", at = @At("RETURN"))
     private void ssc$copySpawnPoint(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
-        // 1.21.1 的 copyFrom 不复制重生点（spawnPointPosition/spawnPointDimension/spawnForced/spawnAngle）
-        // Apoli 的 @WrapWithCondition 在 respawnPlayer 中也可能跳过 setSpawnPointFrom。
-        // 手动复制重生点，保证不论 Apoli 是否跳过，重生点都能传到新玩家。
         ServerPlayer self = (ServerPlayer)(Object)this;
         self.copyRespawnPosition(oldPlayer);
     }

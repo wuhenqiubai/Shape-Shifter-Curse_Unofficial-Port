@@ -21,8 +21,6 @@ public class FoodUtilsCondition {
     }
 
 
-    // 1.21.11 修复：is_vegan_ex 注册为 ITEM_CONDITION（checkInventory 里 itemCondition.test(ItemStack)），
-    // 泛型必须 ItemStack；原 Tuple<Level, ItemStack> 会在 itemstack.getB() 处运行时 ClassCastException。
     public static void registerCondition(Consumer<ConditionFactory<ItemStack>> register) {
         register.accept(
 		        new ConditionFactory<ItemStack>(

@@ -16,11 +16,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 
-/**
- * 1.21.11 恢复咒月月亮纹理替换：SkyRenderer 从 celestials 图集构造期烘焙 moonBuffer（GpuBuffer），
- * 1.21.1 的 @ModifyArg(setShaderTexture) 已失效。咒月时改绑 cursed_moon_phases.png
- * （8 相位 32x32 打包为 256x32）并用手算 UV 烘焙的 cursedMoonBuffer（顶点布局同原版 buildMoonPhases）。
- */
 @Mixin(SkyRenderer.class)
 public abstract class SkyRendererMixin {
     @Unique
@@ -34,8 +29,6 @@ public abstract class SkyRendererMixin {
 
     @Unique
     private AbstractTexture ssc$getCursedMoonTexture() {
-        // 纹理由 CursedMoonSkyTextures.preload() 在客户端初始化时上传（渲染 pass 外，
-        // 不能在 renderMoon 的 render pass 内 getTexture，否则 GlCommandEncoder 抛 "Close the existing render pass"）
         return CursedMoonSkyTextures.getCursedMoonTexture();
     }
 
@@ -47,7 +40,6 @@ public abstract class SkyRendererMixin {
         return this.ssc$cursedMoonBuffer;
     }
 
-    /** 8 相位（32x32 横排，256x32）手算 UV 烘焙，顶点布局与原版 buildMoonPhases 一致 */
     @Unique
     private static GpuBuffer ssc$buildCursedMoonPhases() {
         MoonPhase[] phases = MoonPhase.values();

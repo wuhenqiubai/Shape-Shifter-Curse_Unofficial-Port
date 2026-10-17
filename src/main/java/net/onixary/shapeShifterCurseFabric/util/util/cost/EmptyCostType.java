@@ -15,9 +15,6 @@ public class EmptyCostType implements IFUSDrawableCostType<EmptyCostType> {
         return id;
     }
 
-    // 图标绘制（原 drawIcon / drawOnHover 与 xpIconSprite 静态字段）已移到纯客户端的 CostTypeIcons
-    // —— 原静态字段引用的 FormUpgradeScreen 是 extends Screen 的客户端类，会让本类在专用服务端加载失败。
-
     @Override
     public Component getAmountText(@NotNull ICost costObject, @Nullable Player player) {
         return Component.literal("");

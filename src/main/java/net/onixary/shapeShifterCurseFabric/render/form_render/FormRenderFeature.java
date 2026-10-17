@@ -41,11 +41,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
 
-/**
- * 1.21.11 渲染管线（submit）适配版 FormRenderFeature。
- * 主渲染通过 GL5 GeoObjectRenderer.performRenderPass 走 SubmitNodeCollector，
- * 骨骼操作在 GL5 的 adjustModelBonesForRender（BoneUpdater）钩子中执行。
- */
 public class FormRenderFeature<S extends EntityRenderState, M extends EntityModel<? super S>> extends RenderLayer<S, M> {
     public FormRenderFeature(RenderLayerParent<S, M> context) {
         super(context);
@@ -69,7 +64,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         AvatarRenderer avatarRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         boolean slim = isSlim(player);
 
-        // EMF 暂停（feral 形态/第一人称时暂停 EMF 动画）
         boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;
         if (!pause && IS_FIRST_PERSON_MOD_LOADED
                 && Minecraft.getInstance().options.getCameraType().isFirstPerson()
@@ -78,7 +72,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         }
         if (pause) EMFIntegration.pauseAllAnimations(player);
 
-        // 隐藏 vanilla 部件（form 模型覆盖时）
         rM_PartA(avatarRenderer, player, playerModel, poseStack, i);
 
         boolean hasOutline = Minecraft.getInstance().shouldEntityAppearGlowing(player);
@@ -88,7 +81,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         float limbAngle = avatarRenderState.walkAnimationPos;
         float limbDistance = avatarRenderState.walkAnimationSpeed;
 
-        // beforeRender（tailDrag 插值等）
         for (FormRenderer formRenderer : formRendererList) {
             if (formRenderer == null) continue;
             formRenderer.realModel.AnimationSystem.beforeRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
@@ -107,15 +99,12 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             poseStack.translate(0, -1.51f, 0);
             poseStack.translate(-0.5, -0.5, -0.5);
 
-            // 主通道
             submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, i, partialTick,
                     FormRenderer.CHANNEL_NORMAL, player, limbAngle, limbDistance, f, g);
-            // fullbright 通道
             if (formModel.getFullBrightTextureResource(slim) != null) {
                 submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, Integer.MAX_VALUE - 1, partialTick,
                         FormRenderer.CHANNEL_FULLBRIGHT, player, limbAngle, limbDistance, f, g);
             }
-            // outline 通道
             if (hasOutline) {
                 submitPass(formRenderer, formAnimatable, poseStack, submitNodeCollector, cameraState, i, partialTick,
                         FormRenderer.CHANNEL_OUTLINE, player, limbAngle, limbDistance, f, g);
@@ -124,14 +113,12 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             poseStack.popPose();
         }
 
-        // afterRender + finishRender
         for (FormRenderer formRenderer : formRendererList) {
             if (formRenderer == null) continue;
             formRenderer.realModel.AnimationSystem.afterRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
             formRenderer.realModel.AnimationSystem.finishRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
         }
 
-        // overlay/emissive 纹理（vanilla PlayerModel 额外通道）
         rM_PartB(avatarRenderer, player, playerModel, avatarRenderState, poseStack, submitNodeCollector, i);
 
         if (pause) EMFIntegration.resumeAnimations(player);
@@ -142,7 +129,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                             float limbAngle, float limbDistance, float headYaw, float headPitch) {
         GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
-        // GL5：手工构建 render state 时不会自动写入光照（默认 FULL_BRIGHT），必须显式补，否则模型恒亮。
         rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
@@ -153,7 +139,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         formRenderer.performRenderPass(rs, poseStack, submitNodeCollector, cameraState, null);
     }
 
-    // 处理 BonePart 隐藏（vanilla PlayerModel 部件）
     public static void rM_PartA(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, PlayerModel playerEntityModel, PoseStack matrixStack, int i) {
         if (player.isSpectator()) {
             playerEntityModel.hat.skipDraw = false;
@@ -183,8 +168,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         boolean leftPantsHidden = !player.isModelPartShown(PlayerModelPart.LEFT_PANTS_LEG);
         boolean rightLegHidden = false;
         boolean rightPantsHidden = !player.isModelPartShown(PlayerModelPart.RIGHT_PANTS_LEG);
-        // 1.21.11：player_animator 兼容层（PlayerAnimatorCompat / FirstPersonArms）已随 1.21.11 分支删除，
-        // 该兼容层驱动的 BetterCombat 第一人称裁剪在此版本无对应实现，故不移植该段。
         for (FormRenderer formRenderer : formRendererList) {
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
             hatHidden |= formModel.Hidden_Hat;
@@ -200,9 +183,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             rightLegHidden |= formModel.Hidden_RightLeg;
             rightPantsHidden |= formModel.Hidden_RightPants;
         }
-        // 只对需要隐藏的部件设 visible=false，非 hidden 部件不动：
-        // 1.21.11 中 FPM（FirstPersonModel）等第三方 mod 会在 setupAnim 里把 head.visible 设为 false 隐藏第一人称头部，
-        // 这里若无条件 visible=!hidden（强制显示）会覆盖它们 → FPM 头部隐藏失效。vanilla 的 showXxx 已在 setupAnim 处理。
         if (hatHidden) playerEntityModel.hat.visible = false;
         if (headHidden) playerEntityModel.head.visible = false;
         if (bodyHidden) playerEntityModel.body.visible = false;
@@ -217,7 +197,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         if (rightPantsHidden) playerEntityModel.rightPants.visible = false;
     }
 
-    // 渲染 vanilla PlayerModel 的额外纹理（form overlay/emissive），1.21.11 submit 模式
     public static void rM_PartB(AvatarRenderer playerEntityRenderer, AbstractClientPlayer player, PlayerModel playerEntityModel,
                                 AvatarRenderState avatarRenderState, PoseStack matrixStack, SubmitNodeCollector submitNodeCollector, int i) {
         int p = LivingEntityRenderer.getOverlayCoords(avatarRenderState, 0.0F);
@@ -277,7 +256,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         sleeve.visible = !SleeveHidden;
     }
 
-    // 第一人称手臂：自定义手动渲染（GL5 BoneSnapshot + 隐藏非手臂骨骼 + positionAndRender 语义）
     public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(((PlayerModel) playerEntityRenderer.getModel()).rightArm);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
@@ -292,7 +270,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             FormAnimatable formAnimatable = formRenderer.realAnimatable;
             formRenderer.setPlayer(player, slim);
 
-            // 先确定手臂骨骼（缓存查找，不依赖 render pass）
             GeoBone armGeoBone = formModel.AnimationSystem.beforeRenderFirstPerson(null, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
             String armBoneName = armGeoBone != null ? armGeoBone.name() : null;
 
@@ -300,7 +277,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             matrices.translate(0, -1.51f, 0);
 
-            // 正常通道 + fullbright 通道（单骨骼渲染）
             submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, light, partialTick,
                     FormRenderer.CHANNEL_NORMAL, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
             if (formModel.getFullBrightTextureResource(slim) != null) {
@@ -310,7 +286,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
 
             matrices.popPose();
 
-            // Overlay 纹理（vanilla 手臂 overlay）
             Identifier OverlayTextureID = formModel.getOverlayTextureResource(slim);
             if (OverlayTextureID != null) {
                 RenderType OverlayLayer = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
@@ -329,7 +304,6 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                                       String armBoneName, @Nullable GeoBone armGeoBone, ModelPart arm, ModelPart sleeve, AvatarRenderer renderer) {
         GeoRenderState.Impl rs = formRenderer.createRenderState(formAnimatable, null);
         formRenderer.fillRenderState(formAnimatable, null, rs, partialTick);
-        // GL5：手工构建 render state 时不会自动写入光照（默认 FULL_BRIGHT），必须显式补，否则手臂恒亮。
         rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);
         rs.addGeckolibData(FormRenderer.TICKET_PLAYER, player);
         rs.addGeckolibData(FormRenderer.TICKET_CHANNEL, channel);
@@ -347,13 +321,10 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         });
     }
 
-    // 隐藏模型中除指定手臂骨骼子树以外的所有骨骼（等价于 renderRecursively(armBone) 语义）
     private static void hideNonArmBones(RenderPassInfo<?> renderPassInfo, BoneSnapshots snapshots, String armBoneName) {
         BakedGeoModel model = renderPassInfo.model();
         GeoBone armBone = model.getBone(armBoneName).orElse(null);
         if (armBone == null) return;
-        // 必须用 identity 集合：GL5 的 GeoBone.hashCode 因 parent 与 children 互相包含会无限递归（StackOverflow），
-        // HashSet.add(bone) 会调用 hashCode → 崩溃。IdentityHashMap 用引用比较不调 hashCode。
         Set<GeoBone> ancestors = Collections.newSetFromMap(new IdentityHashMap<>());
         for (GeoBone b = armBone; b != null; b = b.parent()) {
             ancestors.add(b);
@@ -361,11 +332,9 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         for (GeoBone topBone : model.topLevelBones()) {
             if (ancestors.contains(topBone)) {
                 if (topBone != armBone) {
-                    // 祖先骨骼：隐藏自身几何，但保留子树（手臂可见）
                     snapshots.get(topBone.name()).ifPresent(s -> s.skipRender(true));
                 }
             } else {
-                // 无关骨骼：完全隐藏
                 snapshots.get(topBone.name()).ifPresent(s -> s.skipRender(true).skipChildrenRender(true));
             }
         }

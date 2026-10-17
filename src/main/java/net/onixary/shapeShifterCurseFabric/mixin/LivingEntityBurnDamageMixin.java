@@ -16,9 +16,6 @@ import java.util.List;
 @Mixin(LivingEntity.class)
 public class LivingEntityBurnDamageMixin {
 
-    // 1.21.11: 伤害入口重构为 hurtServer(ServerLevel, DamageSource, float)，
-    // 实际伤害经 actuallyHurt(ServerLevel, DamageSource, float) 结算。这里在 hurtServer 内的
-    // actuallyHurt 调用点修改伤害参数（默认匹配 hurtServer 内全部 actuallyHurt 调用）。
     @ModifyArg(method = "hurtServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;actuallyHurt(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)V"), index = 2)
     private float modifyBurnDamage(ServerLevel serverLevel, DamageSource source, float amount) {
         LivingEntity entity = (LivingEntity) (Object) this;

@@ -10,17 +10,17 @@ import java.util.Map;
 
 public class NetheriteMorphscaleArmorMaterial {
     public static final ArmorMaterial INSTANCE = new ArmorMaterial(
-        37,  // durability
+        37,
         Map.of(
             ArmorType.HELMET, 3,
             ArmorType.CHESTPLATE, 6,
             ArmorType.LEGGINGS, 7,
             ArmorType.BOOTS, 3
         ),
-        15,  // enchantmentValue
+        15,
         SoundEvents.ARMOR_EQUIP_NETHERITE,
-        2.0F,  // toughness
-        0.1F,  // knockbackResistance
+        2.0F,
+        0.1F,
         ItemTags.REPAIRS_NETHERITE_ARMOR,
         EquipmentAssets.NETHERITE
     );

@@ -68,7 +68,6 @@ public class ItemStorePowerRender {
         int SlotY = power.getSlot() / SlotPerRow;
         int SlotXFinal = SlotBegin.getA() + SlotX;
         int SlotYFinal = SlotBegin.getB() + SlotY;
-        // 2D 变换栈不支持 z 平移，去除 translate(0,0,-90)
         context.pose().pushMatrix();
         context.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 22, 22, 29, 24, -1);
         context.pose().popMatrix();
@@ -94,7 +93,6 @@ public class ItemStorePowerRender {
     public static void render(GuiGraphics context, float tickDelta) {
         timerTick();
         if (!mc.options.hideGui) {
-            // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
             for (itemStorePowerRenderInterface power : tempPower) {
                 if (power != null) {
                     renderSlot(context, tickDelta, power);

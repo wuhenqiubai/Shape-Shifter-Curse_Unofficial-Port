@@ -14,11 +14,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/**
- * 1.21.11 恢复滞留药水 CTP 变身：1.21.1 注入 AbstractThrownPotion.makeAreaOfEffectCloud（已移除），
- * AreaEffectCloud 的创建移到 ThrownLingeringPotion.onHitAsPotion（addFreshEntity 处），
- * 子类方法需单独 @Mixin(ThrownLingeringPotion) 注入。
- */
 @Mixin(ThrownLingeringPotion.class)
 public abstract class ThrownLingeringPotionMixin {
     @Inject(

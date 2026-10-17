@@ -42,21 +42,14 @@ public class AltarShapedRecipe extends AltarRecipe {
         this.recipeTime = recipeTime;
         this.fuelCostPerTick = fuelCostPerTick;
         this.requireAdvancement = requireAdvancement;
-        // 精确燃料预算（单位 fuel unit，1 个月尘 = 800）；-1 表示未指定，走 legacy 的逐 tick fuel_cost。
         this.totalFuelCost = totalFuelCost;
     }
-
-    // 1.21.1 侧曾在此覆写 getIngredients()（那边 Recipe 接口有该方法，且 StackedContents.canCraft 会读它）。
-    // 1.21.11 的 Recipe 接口已删除 getIngredients()（改由 placementInfo() 供 StackedItemContents.canCraft 读取，
-    // 本类的 placementInfo() 已正确实现），且 ShapedRecipePattern.ingredients() 返回 List<Optional<Ingredient>>，
-    // 与该覆写的 NonNullList<Ingredient> 返回类型不符 —— 故不再保留。
 
     @Override
     public int recipeTime() {
         return recipeTime;
     }
 
-    // 进度锁：require_advancement 未完成则不可合成
     @Override
     public boolean canCraft(@Nullable Player player) {
         if (requireAdvancement == null) {
@@ -84,7 +77,6 @@ public class AltarShapedRecipe extends AltarRecipe {
 
     @Override
     public @NonNull RecipeBookCategory recipeBookCategory() {
-        // 该类无 category 字段（1.21.1 版）；alter 配方无分类概念，固定 MISC
         return RecipeBookCategories.CRAFTING_MISC;
     }
 
@@ -155,10 +147,6 @@ public class AltarShapedRecipe extends AltarRecipe {
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
                 Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
-                // 数据包用「月尘个数」表达燃料预算，内部换算成 fuel unit（1 个尘 = 800）。
-                // ⚠ 字段缺省值与「显式写了 0」必须区分：0 表示「本配方不耗燃料」（totalFuelCost=0），
-                //   而字段整个缺失才表示「未指定」（totalFuelCost=-1 → 退回逐 tick fuel_cost）。
-                //   所以这里用无默认值的 optionalFieldOf（拿到 Optional），不要写死默认 0。
                 Codec.INT.optionalFieldOf("moondust_cost")
                         .forGetter(r -> r.totalFuelCost >= 0 ? Optional.of(r.totalFuelCost / 800) : Optional.empty())
             ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement, moondustCost) ->
@@ -263,8 +251,6 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            // 必须与 toNetwork 的写入顺序严格对应 —— 那边最后还写了 totalFuelCost，
-            // 这里此前漏读，会让后续读到的字节整体错位。
             int totalFuelCost = buf.readVarInt();
             return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement, totalFuelCost);
         }

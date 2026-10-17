@@ -16,7 +16,6 @@ public class HungerManagerMixin {
     @Shadow
     private int tickTimer;
 
-    // 1.21.11: FoodData.tick 参数由 Player 改为 ServerPlayer
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void update(ServerPlayer player, CallbackInfo ci) {
         PowerHolderComponent.getPowers(player, ModifyFoodHealPower.class).forEach(power -> {

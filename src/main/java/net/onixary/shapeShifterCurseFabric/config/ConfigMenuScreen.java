@@ -90,8 +90,6 @@ public class ConfigMenuScreen extends Screen {
     }
 
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 1.21.11: Screen.render 已自动调用 renderBackground（内部 blur），
-        // 这里再手动调会 "Can only blur once per frame" 崩溃，只需 super.render
         super.render(context, mouseX, mouseY, delta);
     }
 }

@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 
-// FabricItemSettings removed in 1.21, use Item.Settings directly
-
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponents;
@@ -31,8 +29,6 @@ public class RegTransformativeEntitySpawnEgg {
     //        T_BAT, 0x1F1F1F, 0x8B8B8B, new Item.Settings()
     //);
 
-    // 1.21.11: SpawnEggItem(Properties) 从 DataComponents.ENTITY_DATA (TypedEntityData<EntityType>) 读实体类型，
-    // 不设置则 getType 返回 null → 刷怪蛋放不出实体。必须给 properties 加 ENTITY_DATA component。
     public static final Item T_BAT_SPAWN_EGG = register("custom_bat_spawn_egg", props -> new SpawnEggItem(props.component(DataComponents.ENTITY_DATA, TypedEntityData.<EntityType<?>>of(T_BAT, new CompoundTag()))));
 
     public static final Item T_AXOLOTL_SPAWN_EGG = register("custom_axolotl_spawn_egg", props -> new SpawnEggItem(props.component(DataComponents.ENTITY_DATA, TypedEntityData.<EntityType<?>>of(T_AXOLOTL, new CompoundTag()))));
@@ -50,7 +46,6 @@ public class RegTransformativeEntitySpawnEgg {
     }
 
     public static void initialize() {
-        //Registry.register(Registries.ITEM, RegistryKey.of(Registries.ITEM.getKey(), Identifier.of(ShapeShifterCurseFabric.MOD_ID, "custom_bat_spawn_egg")), T_BAT_SPAWN_EGG);
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.SPAWN_EGGS).register(content -> {
             content.accept(T_BAT_SPAWN_EGG);
             content.accept(T_AXOLOTL_SPAWN_EGG);

@@ -247,7 +247,6 @@ public class ShapeShifterCurseCommand {
                                         )
                                 )
                         )
-                        // 【临时诊断】axolotl3 氧气血量排查用，定位后可删
                         .then(literal("debug_attrs").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .executes(ShapeShifterCurseCommand::debugAttrs)
@@ -256,12 +255,6 @@ public class ShapeShifterCurseCommand {
         );
     }
 
-    /**
-     * 【临时诊断】dump 目标玩家的氧气、最大生命值 modifier 列表、以及相关 power 的激活状态。
-     *
-     * <p>用于定位 axolotl3「氧气血量不生效」：必须把 air 与 power 激活状态放在<strong>同一时刻</strong>取，
-     * 才能分辨是 air 稳态被破坏、还是 power 自身在闪。定位完成后本方法与 debug_attrs 子命令一并删除。</p>
-     */
     private static int debugAttrs(CommandContext<CommandSourceStack> commandContext) throws CommandSyntaxException {
         ServerPlayer target = EntityArgument.getPlayer(commandContext, "target");
         StringBuilder sb = new StringBuilder();
@@ -279,7 +272,6 @@ public class ShapeShifterCurseCommand {
                         .append(" = ").append(modifier.amount())
                         .append(" / ").append(modifier.operation());
             }
-            // 去掉结尾的 _<数字> 再分组：同一逻辑 modifier 若有多个 id 副本（基数相同）会被列出
             Map<String, Long> byBase = maxHealth.getModifiers().stream()
                     .collect(Collectors.groupingBy(m -> m.id().getPath().replaceAll("_\\d+$", ""), Collectors.counting()));
             sb.append("\n  duplicateBases: ").append(byBase.entrySet().stream()
@@ -580,7 +572,6 @@ public class ShapeShifterCurseCommand {
     }
 
     private static boolean CheckDebugEnvironment(CommandContext<CommandSourceStack> commandContext) {
-        // 只有权限等级>=2 或者在配置中开启才可以使用调试命令
         if (commandContext.getSource().permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             return true;
         }
@@ -825,7 +816,6 @@ public class ShapeShifterCurseCommand {
         int level = commandContext.getArgument("level", Integer.class);
         try {
             SuperUserUtils.setSULevel(player, level);
-            // 1.21.11: ServerPlayer.getServer() 移除，改用 level()（返回 ServerLevel）.getServer()
             player.level().getServer().getPlayerList().sendPlayerPermissionLevel(player);
             player.createCommandSourceStack().sendSuccess(() -> Component.literal("Set SU level to " + level), false);
         } catch (Exception e) {
@@ -854,7 +844,6 @@ public class ShapeShifterCurseCommand {
             TransformManager.sendClientFirstPersonReset(target);
         }
         catch (Exception e){
-            // 调试时在此打断点
             ShapeShifterCurseFabric.LOGGER.error("Exception when set form", e);
             throw e;
         }

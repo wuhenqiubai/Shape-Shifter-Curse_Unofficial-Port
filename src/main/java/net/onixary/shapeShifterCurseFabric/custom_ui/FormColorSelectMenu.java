@@ -142,7 +142,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private static final Minecraft minecraftClient = Minecraft.getInstance();
 
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();
     private int modelID = -1;
     private static final String IdentifierNameSpace = MOD_ID;
     private static final String IdentifierPrefix = "dynamic_fcs_v1_";
@@ -1035,13 +1035,6 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // 1.21.11: 同 FormUpgradeScreen —— 新签名收「矩形区域 + 鼠标绝对坐标」，
-        // bodyRot/yRot 的鼠标跟随由原版内部完成，且改用 render state 不改写实体自身状态。
-        // 1.21.11: 新签名收「矩形区域 + 鼠标绝对坐标」。该矩形是实体的渲染视口（画中画裁剪区），
-        // 给成 size×size 会把模型裁掉；按原版 InventoryScreen 的比例（49x70 配 size=30）换算：
-        // 半宽 ≈ size*0.817、半高 ≈ size*1.167。
-        // 另外 1.21.1 的 (x,y) 是绘制【原点】（实体自该点向上画，见 renderEntityInInventory 的
-        // pose.translate + vector3f.y=bbHeight/2），而此处的矩形中心是显示基准 → 需上移约半个身高。
         InventoryScreen.renderEntityInInventoryFollowsMouse(
                 context,
                 x - size * 4 / 5, y - size * 7 / 6 - size / 2,
@@ -1090,9 +1083,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         } else {
             timer++;
         }
-        // 20,5,60,120
         if (minecraftClient.player != null) {
-            // mouseX/mouseY 改传绝对值：1.21.11 的签名内部自行做「矩形中心 - 鼠标」的换算
             RenderEntity(context, BPosX + 50, BPosY + 100, 30, mouseX, mouseY, minecraftClient.player);
         }
         super.render(context, mouseX, mouseY, delta);
@@ -1104,7 +1095,6 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
             this.modelID = modelID;
             CleanColorSettingCache();
         }
-        // 可以关闭这个功能
         if (!this.enableFormColorSystem) {
             return texture;
         }
@@ -1547,6 +1537,5 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 自定义背景纹理完全遮挡，不需要暗色渐变
     }
 }

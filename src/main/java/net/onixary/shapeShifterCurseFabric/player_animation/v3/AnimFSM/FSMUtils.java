@@ -58,7 +58,7 @@ public class FSMUtils {
         if (player.isVisuallyCrawling()) {
             return false;
         }
-        if (player.isShiftKeyDown()) {  // 潜行时不触发停留动画
+        if (player.isShiftKeyDown()) {
             return false;
         }
         if (animSystemData.IsWalking) {
@@ -75,9 +75,6 @@ public class FSMUtils {
         if (!player.onClimbable() || player.onGround() || player.getAbilities().flying || player.isFallFlying()) {
             return false;
         }
-        // 回归修复（Apoli-Legacy 引入后）：onClimbable() 在 Apoli-Legacy 下可能浮空/跳跃时也返回 true
-        // （无贴墙校验），导致潜行+空格浮空误播爬墙动画。增加「真正贴墙（水平碰撞）」校验：
-        // 不贴墙时浮空/跳跃不判定为爬墙。
         if (!player.horizontalCollision) {
             return false;
         }

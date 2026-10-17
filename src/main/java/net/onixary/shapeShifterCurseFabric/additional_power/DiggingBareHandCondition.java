@@ -33,9 +33,8 @@ public class DiggingBareHandCondition {
             return false;
         }
 
-        // getMiningLevel removed in 1.21; check tool component instead of TieredItem
         if (playerEntity.getInventory().isEmpty()) {
-            return true;  // bare hand
+            return true;
         } else {
             ItemStack held = playerEntity.getInventory().getSelectedItem();
             return !held.has(net.minecraft.core.component.DataComponents.TOOL);

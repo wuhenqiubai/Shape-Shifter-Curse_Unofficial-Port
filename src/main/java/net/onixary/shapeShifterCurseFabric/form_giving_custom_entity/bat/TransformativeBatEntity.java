@@ -31,7 +31,6 @@ public class TransformativeBatEntity extends Bat implements ITMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE_OLD)
@@ -90,7 +89,6 @@ public class TransformativeBatEntity extends Bat implements ITMob {
         if (target instanceof Player player && !this.IsInCooldown()) {
             double distance = this.distanceToSqr(player);
             if (distance <= StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE * StaticParams.CUSTOM_MOB_DEFAULT_ATTACK_RANGE) {
-                // 1.21.11: doHurtTarget 需要 ServerLevel，客户端 tick 无 ServerLevel 直接跳过
                 if (this.level() instanceof ServerLevel serverLevel) {
                     this.doHurtTarget(serverLevel, player);
                 }

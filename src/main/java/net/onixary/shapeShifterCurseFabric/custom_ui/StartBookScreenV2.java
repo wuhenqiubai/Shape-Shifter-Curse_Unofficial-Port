@@ -68,7 +68,7 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
                     if(Minecraft.getInstance().screen instanceof StartBookScreenV2){
                         Minecraft.getInstance().setScreen(null);
                     }
-                    this.onClose(); // 关闭当前界面
+                    this.onClose();
                 }
         ).size(ButtonSizeX, ButtonSizeY).pos(ButtonPosX, ButtonPosY).build());
     }
@@ -81,7 +81,6 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
 
     @Override
     public void renderBackground(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // No blur — book texture serves as the background
     }
 
     @Override

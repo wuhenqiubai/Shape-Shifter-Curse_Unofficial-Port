@@ -15,9 +15,6 @@ public record TooltipBadge(Identifier spriteId, Component text) implements Badge
         return true;
     }
 
-    // tooltip 构建（原 static addLines / getTooltipComponents，签名含 Font 等客户端类）
-    // 已移到纯客户端的 BadgeTooltipRenderers。
-
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {
         instance.set("sprite", spriteId);

@@ -48,8 +48,6 @@ public class RippleMirror extends Item {
         return stack;
     }
 
-    // 1.21.11：appendHoverText 收 (ItemStack, Item.TooltipContext, TooltipDisplay, Consumer<Component>, TooltipFlag)
-    // —— 原来的 List<Component> tooltip 改成 Consumer<Component>，并多了一个 TooltipDisplay 参数。
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> tooltip, TooltipFlag type) {
         tooltip.accept(Component.translatable("item.shape-shifter-curse.ripple_mirror.tooltip").withStyle(ChatFormatting.YELLOW));

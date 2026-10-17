@@ -29,8 +29,6 @@ public class RegPerks {
 
     private static final ItemStack moonDust = new ItemStack(RegCustomItem.UNTREATED_MOONDUST);
     static {
-        // 1.21.1：ItemStack 的 getOrCreateNbt/getTag 已移除，等价改为设置数据组件。
-        // 1.21.11：UNBREAKABLE 组件类型由 Unbreakable record 改为 Unit。
         moonDust.set(DataComponents.UNBREAKABLE, Unit.INSTANCE);
     }
 

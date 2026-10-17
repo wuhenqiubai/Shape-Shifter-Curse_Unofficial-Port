@@ -50,7 +50,6 @@ public abstract class PotionStackMixin {
         if (this.container instanceof Inventory) {
             Player player = ((Inventory) this.container).player;
             if (itemStack.getItem() instanceof PotionItem) {
-                // PotionUtil removed in 1.21 → 从 DataComponent 读取药水类型
                 PotionContents potionContents = itemStack.get(DataComponents.POTION_CONTENTS);
                 boolean isWater = potionContents != null && potionContents.is(Potions.WATER);
                 int StackCount = PowerHolderComponent.getPowers(player, ModifyPotionStackPower.class)

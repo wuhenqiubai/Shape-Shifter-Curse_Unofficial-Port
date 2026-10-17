@@ -42,14 +42,12 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
 
     @Override
     public UUID getMinionOwnerUUID() {
-        // getOwnerUUID() 在 1.21.11 移除，改用 getOwner() 实体引用
         net.minecraft.world.entity.LivingEntity owner = this.getOwner();
         return owner != null ? owner.getUUID() : null;
     }
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        // setOwnerUUID() 在 1.21.11 移除，改为 getOwner()/setOwner() 实体引用系统
     }
 
     @Override

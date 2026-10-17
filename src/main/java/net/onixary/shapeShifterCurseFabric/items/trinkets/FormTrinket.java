@@ -17,7 +17,6 @@ public class FormTrinket extends AccessoryItem {
         super(properties.stacksTo(1));
     }
 
-    // 1.21.11：tooltip 参数由 List<Component> 变为 Consumer<Component>，并新增 TooltipDisplay。
     @Override
     public void appendHoverText(ItemStack stack, @Nullable Item.TooltipContext world, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag context) {
         tooltip.accept(Component.translatable(getDescriptionId() + ".tooltip").withStyle(ChatFormatting.YELLOW));

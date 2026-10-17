@@ -38,8 +38,6 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        // 1.21.11: 必须用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要），
-        // Mob.createMobAttributes() 缺 TEMPT_RANGE → 服务端 tick 崩 "Can't find attribute minecraft:tempt_range"
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 6.0)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)  // 不改成1点伤害不行 无法攻击

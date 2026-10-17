@@ -29,7 +29,6 @@ public class CapeFeatureRendererMixin {
     @Unique
     private AbstractClientPlayer ssc$capePlayer;
 
-    // 1.21.11 CapeLayer 改为 submit(AvatarRenderState) 模式，从 avatarRenderState.id 恢复实体
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At("HEAD"))
     private void capturePlayer(PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
                                int i, AvatarRenderState avatarRenderState, float f, float g, CallbackInfo ci) {
@@ -61,7 +60,6 @@ public class CapeFeatureRendererMixin {
         return z;
     }
 
-    // 1.21.11 CapeLayer.submit 中无 mulPose 调用，改为在提交披风模型前施加向上旋转
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
@@ -73,10 +71,6 @@ public class CapeFeatureRendererMixin {
             poseStack.mulPose(Axis.XP.rotationDegrees(baseRotation));
         }
     }
-
-    // [已迁移，勿再当作待办] 1.21.11 的 CapeLayer.submit 中已无 Axis.rotationDegrees 调用
-    // （披风摆动计算整体搬到了 PlayerCapeModel.setupAnim），原 modifyXRotationAngle 无法在此注入。
-    // 钳制逻辑已迁至 PlayerCapeModelMixin.ssc$clampCapeXRotation，语义与 1.21.1 一致。
 
     // helper func
     @Unique

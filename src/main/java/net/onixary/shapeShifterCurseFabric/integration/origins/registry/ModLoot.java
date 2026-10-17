@@ -7,9 +7,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginLootCondition;
 
-// Enchantment loot tables can be added via JSON data files:
-//   data/origins/loot_table/...
-
 public class ModLoot {
 
     private static final Identifier DUNGEON_LOOT = Identifier.fromNamespaceAndPath("minecraft", "chests/simple_dungeon");
@@ -17,10 +14,6 @@ public class ModLoot {
     private static final Identifier MINESHAFT = Identifier.fromNamespaceAndPath("minecraft", "chests/abandoned_mineshaft");
     private static final Identifier WATER_RUIN = Identifier.fromNamespaceAndPath("minecraft", "chests/underwater_ruin_small");
 
-    // 上游把 OriginLootCondition 注册成战利品条件类型。1.20 的旧写法（LootConditionType + JsonSerializer）在 1.21
-    // 已不可用 —— 条件改由 MapCodec 描述。OriginLootCondition 本身已按 1.21 风格移植好（自带 CODEC + TYPE），
-    // 但一直没被注册，导致它是个死类、数据包也用不了 "type": "origins:origin"（战利品条件）。
-    // 这里补上注册，注意用的是它自己的 TYPE（LootItemConditionType 内部包着 CODEC），不要再 new 一个。
     public static final LootItemConditionType ORIGIN_LOOT_CONDITION = Registry.register(
             BuiltInRegistries.LOOT_CONDITION_TYPE, Origins.identifier("origin"), OriginLootCondition.TYPE);
 
@@ -83,5 +76,4 @@ public class ModLoot {
 //    private static NbtCompound createEnchantmentTag(Enchantment enchantment, int level) {
 //        EnchantmentLevelEntry entry = new EnchantmentLevelEntry(enchantment, level);
 //        return EnchantedBookItem.forEnchantment(entry).getNbt();
-//    }
 }

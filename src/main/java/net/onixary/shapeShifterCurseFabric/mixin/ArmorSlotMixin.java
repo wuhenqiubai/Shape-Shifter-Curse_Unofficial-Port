@@ -18,8 +18,6 @@ public abstract class ArmorSlotMixin {
 
     @Inject(method = "mayPlace", at = @At("RETURN"), cancellable = true)
     private void allowMorphScaleArmor(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        // MorphScale 装备可放入任意防具槽（专属装备机制）。
-        // RestrictArmorPower 由 Apoli-Legacy 的 PlayerScreenHandlerMixin 处理，此处不再重复。
         if (isMorphScaleItem(stack)) {
             cir.setReturnValue(true);
         }

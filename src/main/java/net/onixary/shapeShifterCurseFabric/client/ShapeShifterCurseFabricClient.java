@@ -57,9 +57,6 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.*;
 
 public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	// 由于咒文生物使用的都是原版模型，所以无需注册Layer
-	//public static final EntityModelLayer T_BAT_LAYER = new EntityModelLayer(Identifier.of(MOD_ID, "t_bat"), "main");
-	//public static final EntityModelLayer T_AXOLOTL_LAYER = new EntityModelLayer(Identifier.of(MOD_ID, "t_axolotl"), "main");
-	//public static final EntityModelLayer T_OCELOT_LAYER = new EntityModelLayer(Identifier.of(MOD_ID, "t_ocelot"), "main");
 
 	public static final FormColorData formColorData = new FormColorData();
 
@@ -86,10 +83,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	}
 	private static final KeyMapping.Category SSC_CATEGORY = KeyMapping.Category.register(
 			Identifier.fromNamespaceAndPath(MOD_ID, "keys"));
-	// [未启用，勿再当作待办] fur gradient 整套在 1.21.1/1.21.11 两个分支上都无调用点
-	// （FurColorGradientRenderLayer.getFurLayer 只有定义），从未启用。
-	// 1.21.11 移除 Satin 后要恢复需自定义 core shader，会与光影包（Iris 等）冲突，故不采用着色器方案。
-	// private static ShaderInstance furGradientShader;
 
 	public static KeyMapping makeSound;
 	public static KeyMapping useActiveSkill1PowerKeybind;
@@ -130,21 +123,16 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 
 	private static void onClientTick(Minecraft minecraftClient){
-		// 预加载咒月月亮纹理：onInitializeClient 时 getTextureManager() 仍为 null（初始化太早），
-		// 改在首帧 tick 上传（textureManager 已就绪，且 tick 阶段不在渲染 pass 内）
 		CursedMoonSkyTextures.preload();
 		TickManager.tickClientAll();
 		LocalPlayer clientPlayer = minecraftClient.player;
 		if(clientPlayer == null){
 			return;
 		}
-		// Mana System
 		if (!Minecraft.getInstance().isPaused()) {
 			ManaUtils.manaTick(minecraftClient.player);
-			// Transform overlay tick (black screen + nausea)
 			TransformManager.clientTick();
 		}
-		// ItemStorePower restored — clientTick needs PowerHolderComponent.getPowers usage
 	}
 
 	public static void emitTransformParticle(int duration) {
@@ -228,33 +216,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		return getClientTransformState(playerUuid).TransformToForm;
 	}
 
-	/* [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
-	private void registerShaderResource()
-	{
-		CoreShaderRegistrationCallback.EVENT.register(context -> {
-			// 1. 定义着色器的 Identifier
-			Identifier shaderId = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
-
-			// 2. 使用 context.register 方法注册
-			//    这个方法会处理底层的加载逻辑
-			context.register(shaderId, DefaultVertexFormat.NEW_ENTITY, program -> {
-				// 3. 将加载好的 ShaderProgram 实例保存到我们的静态变量中
-				ShapeShifterCurseFabricClient.furGradientShader = program;
-			});
-		});
-	}
-	 */
-
 	@Override
 	public void onInitializeClient() {
 		ItemTooltipWrapping.register();
 		registerEntityModels();
 		ModPacketsS2C.register();
         ModPacketsC2S.registerClient();
-        // 网络包注册自检：防「注册了类型却忘挂 receiver」的静默失效，在客户端启动完成时执行
         NetworkRegistrationSelfCheck.registerClient();
 
-		// [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
 		// registerShaderResource();
 		// FurGradientRenderLayer.onInitializeClient();
 
@@ -266,7 +235,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		formColorData.loadFormConfig();
 
 		ClientTickEvents.END_CLIENT_TICK.register(ShapeShifterCurseFabricClient::onClientTick);
-		// 客户端能力处理
 		ClientTickEvents.START_CLIENT_TICK.register((minecraftClient) -> {
 			LocalPlayer clientPlayer = minecraftClient.player;
 			if(clientPlayer == null){
@@ -278,12 +246,10 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			// 	// getFirst是Java21的新特性 Java17没有
 			// 	LevitatePower power = clientLevitatePower.get(0);
 			// 	power.clientTick(clientPlayer);
-			// }
 			PowerHolderComponent.KEY.get(clientPlayer).getPowers().stream().filter(p -> p instanceof LevitatePower).forEach(p -> ((LevitatePower) p).clientTick(clientPlayer));
 			CustomEdiblePower.OnClientTick(clientPlayer);
 		});
 
-		// 断开连接时重置 auth 计数，避免跨世界累积导致"总请求次数"误报（对齐 1.21.1_main）
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> requestAuthCount = 0);
 
 		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);
@@ -303,8 +269,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
-		// 合并 1.21.1：取新增的 openTestUIKeybind，但分类参数用 1.21.11 的 SSC_CATEGORY
-		// （1.21.11 起 KeyMapping 的最后一个参数是 KeyMapping.Category 而不是 "category.xxx" 字符串）
 		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这个是开测试UI的 开发什么UI就绑哪个UI 发布时记得注释掉
@@ -356,9 +320,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// NetWorkTest.init();
 	}
 
-	// [未启用，勿再当作待办] 1.21.11 已移除 Satin（原因见上方说明）
-	// public static ShaderInstance getFurGradientShader() {
 	// 	return furGradientShader;
-	// }
 
 }

@@ -17,7 +17,6 @@ public class RecipeSerializerRegister {
     public static RecipeSerializer<BuiltinAltarRecipe> BUILTIN_ALTAR_RECIPE = register(ShapeShifterCurseFabric.identifier("builtin_altar"), new BuiltinAltarRecipe.Serializer());
 
     public static void register() {
-        // 触发静态字段注册，否则 lazy 初始化会在 registry freeze 之后才注册 recipe_serializer
         MORPH_SCALE_UPGRADE.toString();
         ALTAR_SHAPED_RECIPE.toString();
         ALTAR_SHAPELESS_RECIPE.toString();

@@ -55,9 +55,6 @@ public class FormAttunerBlockEntity extends BlockEntity {
             BlockState blockState = world.getBlockState(blockPos);
             Block block = blockState.getBlock();
             if (block instanceof BeaconBeamBlock) {
-                // DyeColor 的颜色分量取法：Yarn 的 getColorComponents()（float[]）→ Mojmap 的
-                // getTextureDiffuseColor()（ARGB int），这里拆成 0..1 的分量给 BeamSegment。
-                // 1.21.11：拆分量用的工具类由 FastColor.ARGB32 改名为 ARGB（方法名不变）。
                 int argb = ((BeaconBeamBlock)block).getColor().getTextureDiffuseColor();
                 float[] fs = new float[]{
                     ARGB.red(argb) / 255.0F,
@@ -76,7 +73,6 @@ public class FormAttunerBlockEntity extends BlockEntity {
                     }
                 }
             } else {
-                // 1.21.11：BlockStateBase.getLightBlock 不再收 (Level, BlockPos)，改为无参
                 if (beamSegment == null || blockState.getLightBlock() >= 15 && !blockState.is(Blocks.BEDROCK)) {
                     blockEntity.beams.clear();
                     blockEntity.minY = l;
@@ -155,7 +151,6 @@ public class FormAttunerBlockEntity extends BlockEntity {
     
     @Override
     public void setRemoved() {
-        // 注意：本类自己有个 `int level` 字段，遮蔽了 BlockEntity.level，所以用 getLevel() 取所在维度
         playSound(this.getLevel(), this.worldPosition, SoundEvents.BEACON_DEACTIVATE);
         super.setRemoved();
     }

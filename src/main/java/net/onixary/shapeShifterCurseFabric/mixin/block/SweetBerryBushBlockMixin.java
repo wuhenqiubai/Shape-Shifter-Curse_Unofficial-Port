@@ -20,7 +20,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 // 修改甜浆果丛方块行为
 @Mixin(value = SweetBerryBushBlock.class, priority = 1001)
 public abstract class SweetBerryBushBlockMixin {
-    // 1.21.11: entityInside 增加 InsideBlockEffectApplier/boolean 参数；伤害调用从 hurt 改为 hurtServer
     @Inject(
             method = "entityInside",
             at = @At(value = "INVOKE",

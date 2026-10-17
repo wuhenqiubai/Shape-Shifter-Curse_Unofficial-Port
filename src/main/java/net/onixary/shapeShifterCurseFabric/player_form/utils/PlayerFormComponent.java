@@ -48,7 +48,6 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     public float instinctRate = 0.0f;
     public HashMap<Identifier, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
 
-    // 1.21.1 侧新增：当前所在的 Perk 树
     public Identifier nowPerkTree = RegPerks.EMPTY_PERK_TREE;
     public HashMap<Identifier, List<Identifier>> formPerkMap = new HashMap<>();
 
@@ -183,15 +182,11 @@ public class PlayerFormComponent implements AutoSyncedComponent {
                 instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompoundOrEmpty(key)));
             }
         }
-        // 1.21.1 侧新增（1.21.11 侧原先没有）：当前 Perk 树
         if (tag.contains("now_perk_tree")) {
             nowPerkTree = Identifier.tryParse(tag.getStringOr("now_perk_tree", ""));
         }
         if (tag.contains("perks")) {
             formPerkMap.clear();
-            // 1.21.11 的 CompoundTag：getCompound 返回 Optional（有 getCompoundOrEmpty）、
-            // getAllKeys → keySet、getList(String, byte) → getList(String)/getListOrEmpty(String)、
-            // Tag.getAsString 没了（改判 StringTag 后取 value()）。写法对齐上面 instinctEffects 那段。
             CompoundTag perks = tag.getCompoundOrEmpty("perks");
             for (String key : perks.keySet()) {
                 Identifier treeID = Identifier.tryParse(key);
@@ -214,7 +209,6 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         if (player.level().isClientSide()) {
             InstinctUtils.fromInstinctUpdate(instinctValue, instinctRate);
             if (tag.contains("isFlying")) {
-                // 1.21.11: CompoundTag.getBoolean 返回 Optional<Boolean>
                 this.isFlying = tag.getBoolean("isFlying").orElse(false);
             }
         } else {

@@ -20,7 +20,6 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
     }
 
     public static AttributeSupplier.@NonNull Builder createAttributes() {
-        // 1.21.11: 用 Monster.createMonsterAttributes()（Spider 是 Monster，含对应属性）
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 8.0f)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)
@@ -55,8 +54,6 @@ public class TransformativeSpiderEntity extends Spider implements ITMob {
         return EntityDimensions.fixed(0.7f, 0.45f);
     }
 
-
-    // 1.21.11: 掉落表默认按 entities/<entity_id> 解析，数据包 data/shape-shifter-curse/loot_table/entities/t_spider.json 自动生效，无需 override
 
 
 }

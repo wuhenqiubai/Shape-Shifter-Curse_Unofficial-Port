@@ -26,7 +26,6 @@ public class SpiderEntityMixin extends Monster {
         Set<WrappedGoal> goals = this.targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
             if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 2 && atg.targetType == Player.class) {
-                // 1.21.11 selector 是 private 且改为双参 Selector(LivingEntity, ServerLevel)
                 atg.targetConditions.selector((entity, level) -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(entity));
             }
         }

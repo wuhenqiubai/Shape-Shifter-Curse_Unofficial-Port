@@ -109,7 +109,6 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         if (!(Minecraft.getInstance().player instanceof Player player)) {
             return;
         }
-        // if (renderState instanceof AbstractClientPlayerEntity player && LongNeckRenderUtils.hasLongNeck(player)) {
         //     return;
         // }
         matrixStack.pushPose();

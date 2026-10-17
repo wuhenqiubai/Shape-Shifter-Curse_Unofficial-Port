@@ -21,7 +21,6 @@ public class NetheriteMorphScaleArmor extends Item implements GeoItem {
     public NetheriteMorphScaleArmor(ArmorType type) {
         this(type, new Item.Properties());
     }
-    // 1.21.11: Item 构造即需 Properties.id，注册时通过工厂注入已 setId 的 Properties
     public NetheriteMorphScaleArmor(ArmorType type, Item.Properties properties) {
         super(properties.humanoidArmor(NetheriteMorphscaleArmorMaterial.INSTANCE, type).stacksTo(1).fireResistant());
         GeoItem.registerSyncedAnimatable(this);

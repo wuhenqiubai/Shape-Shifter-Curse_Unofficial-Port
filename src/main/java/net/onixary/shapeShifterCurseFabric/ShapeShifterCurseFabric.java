@@ -131,7 +131,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         return ResourceKey.create(Registries.ENTITY_TYPE, Identifier.fromNamespaceAndPath(MOD_ID, path));
     }
 
-    // Reg custom blocks
     public static ResourceKey<Block> blockKey(String path) {
         return ResourceKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath(MOD_ID, path));
     }
@@ -240,7 +239,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         // network package
         ModPacketsC2S.register();
         ModPacketsS2CServer.registerServerS2C();
-        // 网络包注册自检：防「注册了类型却忘挂 receiver」的静默失效，在服务端启动完成时执行
         NetworkRegistrationSelfCheck.registerServer();
 
         //TransformFX.INSTANCE.registerCallbacks();
@@ -251,10 +249,8 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         RegCustomPotions.registerPotions();
         RegCustomPotions.registerPotionsRecipes();
 
-        // 注册配方（必须在 registry freeze 前触发静态字段注册，否则 recipe_type/serializer lazy 初始化会 "Registry is already frozen"）
         RecipeSerializerRegister.register();
         RecipeUtils.register();
-        // 服务端注册 MenuType（MenuType 需注册到 BuiltInRegistries.MENU，否则 openMenu 生成的 MenuType 无效 → 右键祭坛静默无法交互）
         RegMenuType.AltarCraftUI.hashCode();
 
         ManaRegistries.register();

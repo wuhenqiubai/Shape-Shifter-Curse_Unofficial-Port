@@ -28,7 +28,6 @@ import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
 public class RegCustomItem {
     private RegCustomItem(){}
 
-    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", StartBook::new);
     public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", BookOfShapeShifter::new);
     public static final Item UNTREATED_MOONDUST = register("untreated_moondust", UntreatedMoonDust::new);
     public static final Item INHIBITOR = register("inhibitor", Inhibitor::new);
@@ -73,9 +72,6 @@ public class RegCustomItem {
     public static final Item RESONANT_CORE = register("resonant_core", ResonantCoreTrinket::new);
     public static final Item VENOM_SPINDLE = register("venom_spindle", VenomSpindle::new);
 
-    // 合并 1.21.1 新增物品：注册入口沿用 1.21.11 的 Function<Item.Properties, T> 工厂式 register
-    // （新物品实例由 register 内部注入带 setId 的 Properties），故一律写成 props -> new X(...)。
-    // 1.21.11 已移除 TieredItem，工具类物品统一声明为 Item（工具属性改由 Properties.sword(...) 承载）。
     public static final Item CHARM_OF_NIGHT_CRYSTAL_PLUS = register("charm_of_night_crystal_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));
     public static final Item CHARM_OF_HOLLOW_FANG_PLUS = register("charm_of_hollow_fang_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));
     public static final Item ATTACH_HOOK_PLUS = register("attach_hook_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));

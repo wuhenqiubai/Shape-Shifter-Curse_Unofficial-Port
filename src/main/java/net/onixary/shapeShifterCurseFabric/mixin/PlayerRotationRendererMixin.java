@@ -31,8 +31,6 @@ public class PlayerRotationRendererMixin {
 		return client.options.getCameraType() == CameraType.FIRST_PERSON;
 	}
 
-	// 1.21.11 AvatarRenderer 渲染管线重构：render() 已移除，
-	// 旋转在 extractRenderState() 提取渲染状态时生效，故在提取前锁定实体旋转
 	@Inject(
 			method = "extractRenderState(Lnet/minecraft/world/entity/Avatar;Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;F)V",
 			at = @At("HEAD")

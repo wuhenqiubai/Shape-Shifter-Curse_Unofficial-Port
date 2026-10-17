@@ -80,14 +80,10 @@ public class OriginDisplayScreen extends Screen {
         return layer;
     }
 
-    // renderBackground override removed — method became non-overrideable in 1.21
-
     @Override
     public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
         renderedBadges.clear();
         this.time += delta;
-        // 1.21.11: renderWithTooltipAndSubtitles 已自动调 renderBackground（blur），
-        // 这里再手动调会 "Can only blur once per frame" 崩溃
         this.renderOriginWindow(context, mouseX, mouseY);
         super.render(context, mouseX, mouseY, delta);
         if(origin != null) {
@@ -182,14 +178,12 @@ public class OriginDisplayScreen extends Screen {
     }
 
     private void renderOriginWindow(GuiGraphics context, int mouseX, int mouseY) {
-        // RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
         renderWindowBackground(context, 16, 0);
         if(origin != null) {
             this.renderOriginContent(context, mouseX, mouseY);
         }
         context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft, guiTop, 0, 0, windowWidth, windowHeight, windowWidth, windowHeight, 256, 256, -1);
         if(origin != null) {
-            // 2D 变换栈不支持 z 平移，删除原 pose().pushPose()/translate(0,0,5)/popPose()
             renderOriginName(context);
             this.renderOriginImpact(context, mouseX, mouseY);
             Component title = getTitleText();
@@ -232,8 +226,6 @@ public class OriginDisplayScreen extends Screen {
             }
         }
     }
-
-    // mouseScrolled signature changed in 1.21 (4 params: x, y, horizontal, vertical) */
 
     private void renderOriginContent(GuiGraphics context, int mouseX, int mouseY) {
 
@@ -328,7 +320,6 @@ public class OriginDisplayScreen extends Screen {
         }
 
         public List<ClientTooltipComponent> getTooltipComponents(Font textRenderer, int widthLimit) {
-            // tooltip 构建已移到纯客户端的 BadgeTooltipRenderers（Badge 接口本身不能再带客户端类型的方法签名）
             return BadgeTooltipRenderers.getTooltipComponents(badge, powerType, widthLimit, OriginDisplayScreen.this.time, textRenderer);
         }
 

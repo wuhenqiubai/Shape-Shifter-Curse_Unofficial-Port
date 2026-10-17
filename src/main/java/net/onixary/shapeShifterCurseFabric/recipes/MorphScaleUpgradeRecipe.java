@@ -33,7 +33,6 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
     public final Ingredient template;
     public final Ingredient addition;
-    // 1.21.11 配方书/槽位过滤用 baseIngredient()，这里用"全部非空气物品"宽泛表示任意可被升级的基座物品（实际匹配仍由 base 谓词控制）
     private static final Ingredient BASE_INGREDIENT = Ingredient.of(
             BuiltInRegistries.ITEM.stream().filter(item -> item != Items.AIR).toArray(ItemLike[]::new)
     );
@@ -54,7 +53,6 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
 	        CompoundTag nbtCompound = customData.copyTag();
             return !(nbtCompound.contains(IsMorphScaleItemCondition.IsMorphScaleArmorTagName) && nbtCompound.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName).orElse(false));
         }), addition, itemStack -> {
-	        // 使用 Component 系统设置标记
 	        CompoundTag nbt = itemStack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 	        nbt.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true);
 	        itemStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, CustomData.of(nbt));
@@ -64,7 +62,6 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
         this.addition = addition;
     }
 
-    // 1.21.11 SmithingRecipe 新增的抽象方法实现
     @Override
     public Optional<Ingredient> templateIngredient() {
         return Optional.of(this.template);

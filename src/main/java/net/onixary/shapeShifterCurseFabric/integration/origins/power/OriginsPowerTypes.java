@@ -23,14 +23,7 @@ public class OriginsPowerTypes {
     public static final PowerType<?> CONDUIT_POWER_ON_LAND = new PowerTypeReference<>(Origins.identifier("conduit_power_on_land"));
 
     public static void register() {
-        // Register namespace alias so origins:* types resolve to apoli:* equivalents.
-        // Apoli-Legacy 用全局静态 NamespaceAlias（一次注册即覆盖 power/condition/action 数据加载解析）。
         NamespaceAlias.addAlias("origins", "apoli");
-
-        // 1.21.11 修复：移除重复注册 apoli->origins 的 copy-registry 段。
-        // Apoli 2.12.10 读取 power/condition/action 类型时已用 NamespaceAlias.resolveAlias 把 origins:* 解析到 apoli:*
-        // （见 PowerTypes.readPower / ActionType / ConditionType），且 1.21.11 MappedRegistry 校验 value 唯一，
-        // 把同一 factory 复制到 origins:* key 会抛 "Adding duplicate value"。故仅需上方 addAlias，无需复制 value。
 
         register(new PowerFactory<>(Origins.identifier("action_on_callback"),
             new SerializableData()

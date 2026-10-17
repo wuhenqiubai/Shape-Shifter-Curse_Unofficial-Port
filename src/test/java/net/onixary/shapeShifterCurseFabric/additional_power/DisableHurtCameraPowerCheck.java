@@ -12,9 +12,6 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 
 public class DisableHurtCameraPowerCheck {
-    // 1.21.11：@GameTest 注解在 1.21.5 被 Mojang 移除，改用 Fabric 的同名注解
-    // （net.fabricmc.fabric.api.gametest.v1.GameTest）。其 structure() 默认即空结构，
-    // 等价于旧版的 FabricGameTest.EMPTY_STRUCTURE，故不再传参。
     @GameTest
     public void conditionFollowsWither(GameTestHelper context) {
         checkCondition(context, "form_anubis_wolf_disable_hurt_camera_when_withered", DisableHurtCameraPower.class);
@@ -23,7 +20,6 @@ public class DisableHurtCameraPowerCheck {
     }
 
     private static void checkCondition(GameTestHelper context, String powerId, Class<? extends Power> powerClass) {
-        // 1.21.11：EntityType.create 的单参重载已移除，需显式给 EntitySpawnReason。
         var entity = EntityType.COW.create(context.getLevel(), EntitySpawnReason.STRUCTURE);
         var type = PowerTypeRegistry.get(Identifier.fromNamespaceAndPath("shape-shifter-curse", powerId));
         var source = Identifier.fromNamespaceAndPath("test", "hurt_camera");

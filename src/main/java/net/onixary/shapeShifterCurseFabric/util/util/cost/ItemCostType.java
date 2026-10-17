@@ -19,9 +19,6 @@ public class ItemCostType implements IFUSDrawableCostType<ItemCostType> {
         return id;
     }
 
-    // 图标绘制（原 drawIcon / drawOnHover 与 itemIconSprite 静态字段）已移到纯客户端的 CostTypeIcons
-    // —— 原静态字段引用的 FormUpgradeScreen 是 extends Screen 的客户端类，会让本类在专用服务端加载失败。
-
     @Override
     public boolean canPay(@NotNull ICost costObject, @Nullable Player player) {
         if (!(costObject instanceof ItemCost cost)) {
@@ -43,8 +40,6 @@ public class ItemCostType implements IFUSDrawableCostType<ItemCostType> {
         int total = 0;
         for (int i = 0; i < playerInventory.getContainerSize(); i++) {
             ItemStack stack = playerInventory.getItem(i);
-            // Yarn 的 canCombine = 比 item + NBT、不比 count，对应 Mojmap 的 isSameItemSameComponents。
-            // 注意别用 ItemStack.matches：它会连 count 一起比，而 exampleStack 恒为 1 个，会永远匹配不上。
             if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(exampleStack, stack)) {
                 total += stack.getCount();
                 if (total >= amount) {
@@ -72,8 +67,6 @@ public class ItemCostType implements IFUSDrawableCostType<ItemCostType> {
                 break;
             }
             ItemStack stack = playerInventory.getItem(i);
-            // Yarn 的 canCombine = 比 item + NBT、不比 count，对应 Mojmap 的 isSameItemSameComponents。
-            // 注意别用 ItemStack.matches：它会连 count 一起比，而 exampleStack 恒为 1 个，会永远匹配不上。
             if (!stack.isEmpty() && ItemStack.isSameItemSameComponents(exampleStack, stack)) {
                 int take = Math.min(stack.getCount(), remaining);
                 stack.shrink(take);

@@ -89,7 +89,6 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        // Owner UUID is now managed via getOwner/setOwner entity reference system
     }
 
     @Override
@@ -105,9 +104,6 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     public AnubisWolfMinionEntity getSelf() {
         return this;
     }
-
-    // isUndead() removed in 1.21 → use entity_type tag #minecraft:undead
-    // canBreatheInWater() is final in LivingEntity 1.21 → use entity_type tag #minecraft:can_breathe_under_water
 
     @Override
     public boolean canBeAffected(MobEffectInstance effect) {

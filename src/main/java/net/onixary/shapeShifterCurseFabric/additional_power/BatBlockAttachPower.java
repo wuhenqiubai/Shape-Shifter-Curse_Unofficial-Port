@@ -184,7 +184,6 @@ public class BatBlockAttachPower extends Power {
             player.level().getServer().execute(() -> {
                 ModPacketsS2CServer.sendBatAttachState(serverPlayer, isAttached, attachType.ordinal(),
                         attachedBlockPos, attachedSide);
-                // 广播给附近的其他玩家
                 ModPacketsS2CServer.broadcastBatAttachState(serverPlayer, isAttached, attachType.ordinal(),
                         attachedBlockPos, attachedSide);
 		        });
@@ -205,7 +204,6 @@ public class BatBlockAttachPower extends Power {
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
@@ -224,7 +222,6 @@ public class BatBlockAttachPower extends Power {
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
@@ -270,13 +267,11 @@ public class BatBlockAttachPower extends Power {
             // 同时添加向上的速度
             player.push(dirX * jumpSpeed, 0.4f, dirZ * jumpSpeed);
         }
-        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
         // 同步到客户端
         if (player instanceof ServerPlayer serverPlayer) {
             ModPacketsS2CServer.sendBatAttachState(serverPlayer, false, AttachType.NONE.ordinal(), null, null);
-            // 广播给附近的其他玩家
             ModPacketsS2CServer.broadcastBatAttachState(serverPlayer, false, AttachType.NONE.ordinal(), null, null);
         }
 
@@ -314,7 +309,6 @@ public class BatBlockAttachPower extends Power {
         player.fallDistance = 0;
 
         // 直接操作移动相关字段，类似原版的处理方式
-        // walkDist removed in 1.21.11
         player.moveDist = 0;
         player.flyDist = 0;
 
@@ -324,7 +318,6 @@ public class BatBlockAttachPower extends Power {
         player.zza = 0;
 
         // 标记速度已变更
-        // player.hasImpulse = true; // removed in 1.21.11
         player.hurtMarked = true;
 
     }
