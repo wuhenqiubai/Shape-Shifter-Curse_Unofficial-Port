@@ -178,7 +178,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     public void tick() {
         if (!this.level().isClientSide()) {
             if (this.isAlive() && !this.shouldExist()) {
-                this.kill((ServerLevel) this.level());  // 自动死亡
+                this.kill((ServerLevel) this.level());
             }
             if (!this.hasEffect(MobEffects.WITHER)) {
                 this.addEffect(new MobEffectInstance(MobEffects.WITHER, -1, 0));
