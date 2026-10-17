@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.command;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
@@ -58,6 +60,7 @@ public class ShapeShifterCurseCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
         dispatcher.register(
                 literal("shape_shifter_curse")
+                        .then(PerkCommand.builder())
                         .then(literal("set_form").requires(cs -> cs.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2))))
                                 .then(argument("target", EntityArgument.player())
                                         .then(argument("form", new FormArgumentType(FormArgumentType.SET_FORM_ARG))
@@ -753,7 +756,7 @@ public class ShapeShifterCurseCommand {
         String type = commandContext.getArgument("type", String.class);
         String messageType = commandContext.getArgument("message_type", String.class);
         String encodeType = commandContext.getArgument("encode_type", String.class);
-        FormTextureUtils.ColorSetting colorSetting = FormColorData.ABGR2ARGB(RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor());
+        FormColorSetting colorSetting = FormColorData.ABGR2ARGB(RegPlayerSkinComponent.SKIN_SETTINGS.get(player).getFormColor());
         String Data = "";
         switch (encodeType) {
             case "base64" -> {
@@ -790,7 +793,7 @@ public class ShapeShifterCurseCommand {
         }
         String colorSettingString = commandContext.getArgument("color_string", String.class);
         try {
-            FormTextureUtils.ColorSetting colorSetting = FormColorData.ColorSettingFormString(colorSettingString);
+            FormColorSetting colorSetting = FormColorData.ColorSettingFormString(colorSettingString);
             if (colorSetting != null) {
                 RegPlayerSkinComponent.SKIN_SETTINGS.get(player).setFormColor(FormColorData.ARGB2ABGR(colorSetting));
                 RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);

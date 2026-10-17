@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
+import net.onixary.shapeShifterCurseFabric.magic.MagicGUIRender;
 import net.onixary.shapeShifterCurseFabric.mana.IManaRender;
 import net.onixary.shapeShifterCurseFabric.mana.ManaComponent;
 import net.onixary.shapeShifterCurseFabric.mana.ManaRegistriesClient;
@@ -34,5 +35,6 @@ public class InGameHudMixin {
             manaRenderer.render(context, tickDelta);
         }
         ItemStorePowerRender.render(context, tickDelta);
+        MagicGUIRender.render(context, tickDelta);
     }
 }

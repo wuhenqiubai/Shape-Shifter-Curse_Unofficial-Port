@@ -25,9 +25,13 @@ public interface ISprite {
     }
 
     public default void draw(GuiGraphics context, int x, int y, int z, int u, int v, int width, int height) {
-        context.blit(RenderPipelines.GUI_TEXTURED, getTextureID(), x, y,
+        this.draw(context, x, x + width, y, y + height, z, width, height, u, v);
+    }
+
+    public default void draw(GuiGraphics context, int x1, int x2, int y1, int y2, int z, int regionWidth, int regionHeight, float u, float v) {
+        context.blit(RenderPipelines.GUI_TEXTURED, getTextureID(), x1, y1,
                 getTextureX() + u, getTextureY() + v,
-                width, height, width, height,
+                x2 - x1, y2 - y1, regionWidth, regionHeight,
                 getTextureImgWidth(), getTextureImgHeight(), -1);
     }
 }

@@ -54,13 +54,13 @@ public class ManaUtils {
                     .add("multiply", SerializableDataTypes.DOUBLE, 1.0d)
                     .add("add_total", SerializableDataTypes.DOUBLE, 0.0d),
             (serializableData) -> {
-                Optional<?> add = serializableData.get("add");
-                Optional<?> multiply = serializableData.get("multiply");
-                Optional<?> addTotal = serializableData.get("add_total");
+                Double add = serializableData.get("add");
+                Double multiply = serializableData.get("multiply");
+                Double addTotal = serializableData.get("add_total");
                 return Modifier.of(
-                        (Double) add.orElse(null),
-                        (Double) multiply.orElse(null),
-                        (Double) addTotal.orElse(null)
+                        add,
+                        multiply,
+                        addTotal
                 );
             },
             (serializableData, modifier) -> {

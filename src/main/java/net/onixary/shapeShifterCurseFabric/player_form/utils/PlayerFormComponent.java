@@ -22,8 +22,10 @@ import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class PlayerFormComponent implements AutoSyncedComponent {
@@ -50,6 +52,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
 
     public Identifier nowPerkTree = RegPerks.EMPTY_PERK_TREE;
     public HashMap<Identifier, List<Identifier>> formPerkMap = new HashMap<>();
+    public final Set<Identifier> freePerkForms = new HashSet<>();
 
     // 仅用于(客户端)和(服务器端判断是否需要同步)
     public boolean isFlying;
@@ -185,6 +188,15 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         if (tag.contains("now_perk_tree")) {
             nowPerkTree = Identifier.tryParse(tag.getStringOr("now_perk_tree", ""));
         }
+        if (tag.contains("free_perk_forms")) {
+            freePerkForms.clear();
+            for (Tag element : tag.getListOrEmpty("free_perk_forms")) {
+                if (element instanceof StringTag stringTag) {
+                    Identifier form = Identifier.tryParse(stringTag.value());
+                    if (form != null) freePerkForms.add(form);
+                }
+            }
+        }
         if (tag.contains("perks")) {
             formPerkMap.clear();
             CompoundTag perks = tag.getCompoundOrEmpty("perks");
@@ -250,6 +262,9 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             entry.getValue().toNBT(effect);
             effects.put(entry.getKey().toString(), effect);
         }
+        ListTag freeForms = new ListTag();
+        for (Identifier form : freePerkForms) freeForms.add(StringTag.valueOf(form.toString()));
+        tag.put("free_perk_forms", freeForms);
         CompoundTag perks = new CompoundTag();
         for (Map.Entry<Identifier, List<Identifier>> perkEntry : formPerkMap.entrySet()) {
             ListTag perkTree = new ListTag();
@@ -278,6 +293,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         instinctValue = 0.0f;
         instinctRate = 0.0f;
         instinctEffects.clear();
+        freePerkForms.clear();
     }
 
     public void sync() {

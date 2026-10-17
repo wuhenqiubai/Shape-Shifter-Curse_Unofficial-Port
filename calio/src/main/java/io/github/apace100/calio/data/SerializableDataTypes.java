@@ -378,10 +378,17 @@ public final class SerializableDataTypes {
             var codec = particleType.codec();
             ParticleOptions effect = null;
             try {
+                // ⚠ params 可以省略（原版 /particle 与上游数据里都有 {"type":"minecraft:cloud"} 这种写法）。
+                //   缺省时必须补一个 **空 JsonObject**：MapCodec.decode(ops, input) 的第一步就是 ops.getMap(input)，
+                //   传 Java null 或 JsonNull 都会在 JsonOps.getMap 里炸 "Not a JSON object: null"。
+                //   无参粒子（SimpleParticleType）的 codec 是 MapCodec.unit，拿到空对象即可正常解出（UnitCodec 不读字段）。
+                //   炸掉的代价是整个 power 文件解析失败、该 power 静默消失，只在日志里留一行 ERROR。
+                JsonElement params = jsonObject.get("params");
                 if (particleType instanceof LegacyParticleOptionFactory factory)
-                    effect = factory.calio$createFromParams(jsonObject.get("params").getAsString());
+                    effect = factory.calio$createFromParams(params == null ? "" : params.getAsString());
                 else
-                    effect = particleType.codec().codec().decode(provider.createSerializationContext(JsonOps.INSTANCE), jsonObject.get("params")).getOrThrow().getFirst();
+                    effect = codec.codec().decode(provider.createSerializationContext(JsonOps.INSTANCE),
+                            params == null ? new JsonObject() : params).getOrThrow().getFirst();
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }

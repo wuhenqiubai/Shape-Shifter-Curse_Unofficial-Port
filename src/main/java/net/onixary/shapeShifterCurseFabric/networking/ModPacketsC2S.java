@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -205,7 +207,7 @@ public class ModPacketsC2S {
             component.setKeepOriginalSkin(keepOriginalSkin);
             component.setEnableFormColor(enableFormColorSystem);
         }
-        component.setFormColor(new FormTextureUtils.ColorSetting(primaryColor, accentColor1Color, accentColor2Color, eyeColorA, eyeColorB, primaryGreyReverse, accent1GreyReverse, accent2GreyReverse));
+        component.setFormColor(new FormColorSetting(primaryColor, accentColor1Color, accentColor2Color, eyeColorA, eyeColorB, primaryGreyReverse, accent1GreyReverse, accent2GreyReverse));
         RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
     }
 

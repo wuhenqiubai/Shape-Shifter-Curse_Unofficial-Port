@@ -51,6 +51,11 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
     }
 
     @Override
+    public void setOwner(Player player) {
+        super.setOwner(player);
+    }
+
+    @Override
     public MinionBase getSelf() {
         return this;
     }
@@ -119,7 +124,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
         if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
             iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
-        this.tame(null);
+        super.setOwner(null);
         super.die(source);
     }
 }

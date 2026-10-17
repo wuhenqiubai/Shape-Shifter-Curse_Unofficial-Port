@@ -26,6 +26,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.pathfinder.PathType;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.additional_power.WolfMinionPower;
 import net.onixary.shapeShifterCurseFabric.minion.IMinion;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
 import org.jetbrains.annotations.NotNull;
@@ -93,7 +94,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void setOwner(Player player) {
-            super.getOwner();
+        super.setOwner(player);
     }
 
     public Identifier getMinionTypeID() {
@@ -108,7 +109,7 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     @Override
     public boolean canBeAffected(MobEffectInstance effect) {
         MobEffect statusEffect = effect.getEffect().value();
-        return statusEffect != MobEffects.REGENERATION && statusEffect != MobEffects.POISON;
+        return statusEffect != MobEffects.REGENERATION.value() && statusEffect != MobEffects.POISON.value();
     }
 
     public static AttributeSupplier.Builder createWolfMinionAttributes() {
@@ -176,8 +177,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
     @Override
     public void tick() {
         if (!this.level().isClientSide()) {
-            if (!this.shouldExist()) {
-                this.setHealth(0.0f);  // 自动死亡
+            if (this.isAlive() && !this.shouldExist()) {
+                this.kill((ServerLevel) this.level());  // 自动死亡
             }
             if (!this.hasEffect(MobEffects.WITHER)) {
                 this.addEffect(new MobEffectInstance(MobEffects.WITHER, -1, 0));
@@ -249,6 +250,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void die(DamageSource source) {
+        // TODO 既然有这个需求 之后整个通用的API
+        WolfMinionPower.onDeath(this.getOwner());
         if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
             iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }

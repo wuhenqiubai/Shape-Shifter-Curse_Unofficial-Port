@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.render.form_render;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -73,17 +75,17 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public Identifier Animation = ShapeShifterCurseFabric.identifier("missing");
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_OverlayTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_EmissiveTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_FullBrightTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
 
     // Hidden Parts
     public boolean Hidden_Hat = false;
@@ -273,7 +275,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return useSlim(slim) ? ModelResource_Slim : ModelResource;
     }
 
-    private Identifier readCacheOrBake(HashMap<FormTextureUtils.ColorSetting, Identifier> Cache, Identifier Resource, Identifier ResourceMask, FormTextureUtils.ColorSetting colorSetting) {
+    private Identifier readCacheOrBake(HashMap<FormColorSetting, Identifier> Cache, Identifier Resource, Identifier ResourceMask, FormColorSetting colorSetting) {
         Identifier CachedTexture = Cache.get(colorSetting);
         if (CachedTexture != null) {
             return CachedTexture;
@@ -303,9 +305,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "texture_slim" : "texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -329,9 +331,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "overlay_texture_slim" : "overlay_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -355,9 +357,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "emissive_texture_slim" : "emissive_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null && ResourceMask != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -381,9 +383,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "fullbright_texture_slim" : "fullbright_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }

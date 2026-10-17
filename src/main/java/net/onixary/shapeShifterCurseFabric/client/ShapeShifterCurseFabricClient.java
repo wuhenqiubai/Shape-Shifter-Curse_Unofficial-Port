@@ -32,6 +32,8 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TAx
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.BatEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TOcelotEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider.TSpiderEntityRenderer;
+import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
+import net.onixary.shapeShifterCurseFabric.magic.MagicGUIRender;
 import net.onixary.shapeShifterCurseFabric.mana.ManaRegistriesClient;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
 import net.onixary.shapeShifterCurseFabric.minion.MinionRegisterClient;
@@ -91,6 +93,11 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static KeyMapping useActiveSkill4PowerKeybind;
 	public static KeyMapping useActiveSkill5PowerKeybind;
 	public static KeyMapping useActiveSkill6PowerKeybind;
+
+	public static KeyMapping scrollActiveSkillKeybind;
+	public static KeyMapping prevActiveSkillKeybind;
+	public static KeyMapping nextActiveSkillKeybind;
+	public static KeyMapping activeSkillKeybind;
 
 	public static KeyMapping openTestUIKeybind;
 
@@ -232,6 +239,9 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		FormRenderUtils.onClientInit();
 
+		net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils.poseFormGetter =
+				net.onixary.shapeShifterCurseFabric.util.FormTextureUtils::getPlayerForm_Render;
+
 		formColorData.loadFormConfig();
 
 		ClientTickEvents.END_CLIENT_TICK.register(ShapeShifterCurseFabricClient::onClientTick);
@@ -263,16 +273,20 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// 打开菜单 5->6
 		// 切换能力 6->5
 		// 这2个分配给常用技能 一般推荐绑鼠标侧键上
-		useActiveSkill1PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill2PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill1PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill2PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个介于常用和非常用之间 尽量别放类似火球这种能力 如果鼠标侧键多也可以绑侧键上
-		useActiveSkill3PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill4PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill3PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill4PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
-		useActiveSkill5PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill6PowerKeybind = new KeyMapping("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill5PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill6PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 		// 这个是开测试UI的 开发什么UI就绑哪个UI 发布时记得注释掉
 		openTestUIKeybind = new KeyMapping("key.shape-shifter-curse.open_test_ui", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		scrollActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.scroll_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		prevActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.prev_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		nextActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.next_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		activeSkillKeybind = new KeyMapping("key.shape-shifter-curse.active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
 
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_1", useActiveSkill1PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_2", useActiveSkill2PowerKeybind);
@@ -286,6 +300,10 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		KeyBindingHelper.registerKeyBinding(useActiveSkill4PowerKeybind);
 		KeyBindingHelper.registerKeyBinding(useActiveSkill5PowerKeybind);
 		KeyBindingHelper.registerKeyBinding(useActiveSkill6PowerKeybind);
+		KeyBindingHelper.registerKeyBinding(scrollActiveSkillKeybind);
+		KeyBindingHelper.registerKeyBinding(prevActiveSkillKeybind);
+		KeyBindingHelper.registerKeyBinding(nextActiveSkillKeybind);
+		KeyBindingHelper.registerKeyBinding(activeSkillKeybind);
 
 		KeyBindingHelper.registerKeyBinding(openTestUIKeybind);
 
@@ -308,6 +326,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 				FormUpgradeScreen screen = new FormUpgradeScreen(-1, Component.literal(""), PerkUtils.getPlayerNowPerkTree(client.player));
 				client.setScreen(screen);
 			}
+			MagicGUIRender.onClientTick();
 		});
 
 		RegCustomBlock.ClientInit();

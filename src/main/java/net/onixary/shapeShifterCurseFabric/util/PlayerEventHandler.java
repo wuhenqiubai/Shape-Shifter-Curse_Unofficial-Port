@@ -116,8 +116,13 @@ public class PlayerEventHandler {
             if (newPlayer.level().isClientSide()) return;
 
             copyTransformativeEffect(oldPlayer, newPlayer);
-            copyFormAndAbility(oldPlayer, newPlayer);
+            copyFormData(oldPlayer, newPlayer);
             //PlayerTeamHandler.updatePlayerTeam(newPlayer);
+        });
+
+        // Origins的架构问题 等之后移除Origins后问题自然解决(因为快到这一步了 所以先这样吧 最好的打补丁方法是把那些修改挂到一个技术性powerSource上 但是既然都要移除Origins 先凑活用吧)
+        ServerPlayerEvents.AFTER_RESPAWN.register((oldPlayer, newPlayer, alive) -> {
+            FormUtils._loadForm(newPlayer, FormUtils.getPlayerForm(newPlayer));
         });
 
         //load event
@@ -210,13 +215,13 @@ public class PlayerEventHandler {
         newPlayer.addEffect(transformativeStatusInstance);
     }
 
-    private static void copyFormAndAbility(ServerPlayer oldPlayer, ServerPlayer newPlayer) {
+    private static void copyFormData(ServerPlayer oldPlayer, ServerPlayer newPlayer) {
         PlayerFormComponent oldComponent = PlayerFormComponent.COMPONENT.get(oldPlayer);
         PlayerFormComponent newComponent = PlayerFormComponent.COMPONENT.get(newPlayer);
         CompoundTag nbt = new CompoundTag();
-        var lookup = Objects.requireNonNull(oldPlayer.level().getServer()).registryAccess();
-        oldComponent.writeToNbt(nbt, lookup);
-        newComponent.readFromNbt(nbt, lookup);
+        var registries = oldPlayer.registryAccess();
+        oldComponent.writeToNbt(nbt, registries);
+        newComponent.readFromNbt(nbt, registries);
         IForm form = newComponent.nowForm;
         form.applyScale(newPlayer);
         if (!newPlayer.level().isClientSide()) {

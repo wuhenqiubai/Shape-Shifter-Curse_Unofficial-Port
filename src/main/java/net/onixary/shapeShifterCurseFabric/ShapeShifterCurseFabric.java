@@ -68,11 +68,13 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.recipes.BrewingRecipeReloadListener;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
+import net.onixary.shapeShifterCurseFabric.recipes.altar.RegBuiltinAlterRecipe;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotionEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.attachment.EffectManager;
+import net.onixary.shapeShifterCurseFabric.util.*;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.DefaultAccessory;
 import net.onixary.shapeShifterCurseFabric.util.*;
@@ -203,7 +205,6 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public void onInitialize() {
         // PlayerDataStorage.initialize(); // 移除这行，因为这里还没有服务器实例
         RegCustomItem.initialize();
-        net.onixary.shapeShifterCurseFabric.studio.StudioGenerated.register();
         RegCustomBlock.initialize();
         RegTransformativeEntitySpawnEgg.initialize();
         RegTStatusEffect.initialize();
@@ -313,6 +314,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
                 onPlayerEndSleeping(entity);
             }
         });
+
 
         /// Debug instinct: unregister this to see instinct debug info
         //InstinctDebugHUD.register();

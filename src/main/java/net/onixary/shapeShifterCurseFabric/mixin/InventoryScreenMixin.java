@@ -16,30 +16,18 @@ public class InventoryScreenMixin {
     private static float prevBodyYaw;
 
     @Inject(method = "renderEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphics;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V", at = @At("HEAD"))
-    private static void drawEntityHead(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, float f, float g, float h, LivingEntity entity, CallbackInfo ci) {
+    private static void drawEntityHead(GuiGraphics context, int x1, int y1, int x2, int y2, int size,
+                                       float yOffset, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = true;
         prevBodyYaw = entity.yBodyRotO;
-        float angle = (float)Math.atan((double)(mouseX / 40.0F));
-        entity.yBodyRotO = 180.0F + angle * 20.0F;
-        return;
+        float p = (float)Math.atan((((x1 + x2) / 2.0F) - mouseX) / 40.0F);
+        entity.yBodyRotO = 180.0F + p * 20.0F;
     }
 
     @Inject(method = "renderEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphics;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V", at = @At("RETURN"))
-    private static void drawEntityTail(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, float f, float g, float h, LivingEntity entity, CallbackInfo ci) {
+    private static void drawEntityTail(GuiGraphics context, int x1, int y1, int x2, int y2, int size,
+                                       float yOffset, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = false;
         entity.yBodyRotO = prevBodyYaw;
-        return;
-    }
-
-    @Inject(method = "renderEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphics;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V", at = @At("HEAD"))
-    private static void drawEntityHead2(GuiGraphics context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
-        ClientUtils.isOpenInventoryScreen = true;
-        return;
-    }
-
-    @Inject(method = "renderEntityInInventoryFollowsMouse(Lnet/minecraft/client/gui/GuiGraphics;IIIIIFFFLnet/minecraft/world/entity/LivingEntity;)V", at = @At("RETURN"))
-    private static void drawEntityTail2(GuiGraphics context, int x1, int y1, int x2, int y2, int size, float f, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
-        ClientUtils.isOpenInventoryScreen = false;
-        return;
     }
 }

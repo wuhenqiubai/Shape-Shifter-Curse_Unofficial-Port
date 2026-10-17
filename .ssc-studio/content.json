@@ -9,7 +9,9 @@
       "xp": 0,
       "icon": "shape-shifter-curse:textures/perk/fallback.png",
       "add": [],
-      "remove": []
+      "remove": [],
+      "nameKey": "ssc_perk.shape-shifter-curse.snowfox_root.name",
+      "descriptionKey": "ssc_perk.shape-shifter-curse.snowfox_root.desc"
     }
   ],
   "trees": [
@@ -25,5 +27,6 @@
         }
       ]
     }
-  ]
+  ],
+  "registrationLayout": "perk-constants-v1"
 }

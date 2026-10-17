@@ -5,6 +5,7 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.ClassUtil;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.data.SerializableDataType;
 import net.minecraft.util.Tuple;
 

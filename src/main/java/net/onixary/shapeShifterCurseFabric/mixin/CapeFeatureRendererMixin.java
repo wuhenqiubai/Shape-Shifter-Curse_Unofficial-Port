@@ -80,10 +80,10 @@ public class CapeFeatureRendererMixin {
             return mcr.getCapeIdleLoc(player);
         }
         if (curForm.getBodyType() == PlayerFormBodyType.FERAL) {
-            return new Vec3(0.0f, -0.2f, 0.3f);
+            return new Vec3(0.0, -0.1f, 0.3f);
         }
         else {
-            return new Vec3(0.0, 0.2f, 0.125);
+            return new Vec3(0.0, 0.0, 0.125);
         }
     }
 

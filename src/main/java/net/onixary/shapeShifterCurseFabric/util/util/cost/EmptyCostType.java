@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.util.util.cost;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -9,6 +10,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class EmptyCostType implements IFUSDrawableCostType<EmptyCostType> {
     private static final Identifier id = ShapeShifterCurseFabric.identifier("empty");
+    public static final Identifier TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/shape_shifter_tuner_ui.png");
+    public static final int TEXTURE_WIDTH = 454;
+    public static final int TEXTURE_HEIGHT = 190;
+
+    @Override
+    public int checkInterval() {
+        return -1;
+    }
+
+
+    @Override
+    public void drawIcon(GuiGraphics context, @NotNull ICost costObject, @Nullable Player player, int x, int y, int z) {
+        CostTypeIcons.drawIcon(this, context, costObject, player, x, y, z);
+    }
 
     @Override
     public Identifier getID() {
@@ -17,7 +32,7 @@ public class EmptyCostType implements IFUSDrawableCostType<EmptyCostType> {
 
     @Override
     public Component getAmountText(@NotNull ICost costObject, @Nullable Player player) {
-        return Component.literal("");
+        return Component.empty();
     }
 
     @Override

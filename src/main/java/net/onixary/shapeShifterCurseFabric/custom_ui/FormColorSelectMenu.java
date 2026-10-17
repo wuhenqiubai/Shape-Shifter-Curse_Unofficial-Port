@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -142,7 +144,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
 
     private static final Minecraft minecraftClient = Minecraft.getInstance();
 
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();
+    private final HashMap<String, HashMap<FormColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();
     private int modelID = -1;
     private static final String IdentifierNameSpace = MOD_ID;
     private static final String IdentifierPrefix = "dynamic_fcs_v1_";
@@ -233,8 +235,8 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     // 同步配置是真只会操作一次 就不加了
 
     private boolean isColorSettingDirty = true;
-    private FormTextureUtils.ColorSetting colorSetting_ARGB = null;
-    private FormTextureUtils.ColorSetting colorSetting_ABGR = null;
+    private FormColorSetting colorSetting_ARGB = null;
+    private FormColorSetting colorSetting_ABGR = null;
 
     private int tempSliderConfigIndex = -1;
     private int tempSliderR = 0;
@@ -321,7 +323,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.updateUI();
     }
 
-    public void loadData(FormTextureUtils.ColorSetting colorSetting) {
+    public void loadData(FormColorSetting colorSetting) {
         primaryColor = colorSetting.getPrimaryColor();
         accentColor1Color = colorSetting.getAccentColor1();
         accentColor2Color = colorSetting.getAccentColor2();
@@ -334,7 +336,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.updateUI();
     }
 
-    public void loadServerData(FormTextureUtils.ColorSetting colorSetting) {
+    public void loadServerData(FormColorSetting colorSetting) {
         // 服务器上的是 ABGR
         primaryColor = FormTextureUtils.ABGR2ARGB(colorSetting.getPrimaryColor());
         accentColor1Color = FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor1());
@@ -365,7 +367,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         if (serverSide) {
             if (minecraftClient.player != null) {
                 PlayerSkinComponent component = RegPlayerSkinComponent.SKIN_SETTINGS.get(minecraftClient.player);
-                FormTextureUtils.ColorSetting colorSetting = component.getFormColor();
+                FormColorSetting colorSetting = component.getFormColor();
                 this.keepOriginalSkin = component.shouldKeepOriginalSkin();
                 this.enableFormColorSystem = component.isEnableFormColor();
                 this.loadServerData(colorSetting);
@@ -404,9 +406,9 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         AutoConfig.getConfigHolder(PlayerCustomConfig.class).save();
     }
 
-    public @NotNull FormTextureUtils.ColorSetting getColorSetting(boolean ABGR) {
+    public @NotNull FormColorSetting getColorSetting(boolean ABGR) {
         if (isColorSettingDirty) {
-            colorSetting_ARGB = new FormTextureUtils.ColorSetting(
+            colorSetting_ARGB = new FormColorSetting(
                     primaryColor,
                     accentColor1Color,
                     accentColor2Color,
@@ -416,7 +418,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
                     accent1GreyReverse,
                     accent2GreyReverse
             );
-            colorSetting_ABGR = new FormTextureUtils.ColorSetting(
+            colorSetting_ABGR = new FormColorSetting(
                     FormTextureUtils.ARGB2ABGR(primaryColor),
                     FormTextureUtils.ARGB2ABGR(accentColor1Color),
                     FormTextureUtils.ARGB2ABGR(accentColor2Color),
@@ -616,7 +618,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         // 85,77,45,15 - 从剪切板获取
         this.addRenderableWidget(Button.builder(DownloadFromClipboard, button -> {
             String keyBoardData = minecraftClient.keyboardHandler.getClipboard();
-            FormTextureUtils.ColorSetting cs = FormColorData.ColorSettingFormString(keyBoardData);
+            FormColorSetting cs = FormColorData.ColorSettingFormString(keyBoardData);
             if (cs != null) {
                 this.loadData(cs);
             }
@@ -1210,7 +1212,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return false;
     }
 
-    private @Nullable FormTextureUtils.ColorSetting getFormLocalSetting(int index) {
+    private @Nullable FormColorSetting getFormLocalSetting(int index) {
         String id = String.format("fcs_%s", index);
         Identifier formID = this.getPlayerForm();
         if (formID != null) {
@@ -1223,7 +1225,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         String id = String.format("fcs_%s", index);
         Identifier formID = this.getPlayerForm();
         if (formID != null) {
-            FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
+            FormColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.customSettingByForm.computeIfAbsent(formID, k -> new HashMap<>()).put(id, colorSettingRGBA);
         }
         this.updateSavaButtonActive();
@@ -1243,14 +1245,14 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return ShapeShifterCurseFabricClient.formColorData.customSetting.containsKey(id);
     }
 
-    private @Nullable FormTextureUtils.ColorSetting getGlobalSetting(int index) {
+    private @Nullable FormColorSetting getGlobalSetting(int index) {
         String id = String.format("fcs_%s", index);
         return ShapeShifterCurseFabricClient.formColorData.customSetting.get(id);
     }
 
     private void setGlobalSetting(int index) {
         String id = String.format("fcs_%s", index);
-        FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
+        FormColorSetting colorSettingRGBA = this.getColorSetting(false);
         ShapeShifterCurseFabricClient.formColorData.customSetting.put(id, colorSettingRGBA);
         this.updateSavaButtonActive();
     }
@@ -1269,7 +1271,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         return false;
     }
 
-    private @Nullable FormTextureUtils.ColorSetting getFormDefaultSetting() {
+    private @Nullable FormColorSetting getFormDefaultSetting() {
         Identifier formID = this.getPlayerForm();
         if (formID != null) {
             return ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.get(formID);
@@ -1280,7 +1282,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     private void setFormDefaultSetting() {
         Identifier formID = this.getPlayerForm();
         if (formID != null) {
-            FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
+            FormColorSetting colorSettingRGBA = this.getColorSetting(false);
             ShapeShifterCurseFabricClient.formColorData.formDefaultSetting.put(formID, colorSettingRGBA);
         }
         this.updateSavaButtonActive();
@@ -1363,7 +1365,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     }
 
     private void loadSaveData(int ButtonType, int Index) {
-        @Nullable FormTextureUtils.ColorSetting colorSetting = null;
+        @Nullable FormColorSetting colorSetting = null;
         if (ButtonType == 0) {
             colorSetting = getFormLocalSetting(Index);
         } else if (ButtonType == 1) {

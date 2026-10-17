@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class FormUtils {
@@ -174,6 +175,12 @@ public class FormUtils {
 
     public static @NotNull IForm getPlayerForm(Player player) {
         return PlayerFormComponent.COMPONENT.get(player).nowForm;
+    }
+
+    public static Function<Player, IForm> poseFormGetter = FormUtils::getPlayerForm;
+
+    public static @NotNull IForm getPlayerFormForPose(Player player) {
+        return poseFormGetter.apply(player);
     }
 
     public static @NotNull List<IForm> getPlayerFormHistory(Player player) {

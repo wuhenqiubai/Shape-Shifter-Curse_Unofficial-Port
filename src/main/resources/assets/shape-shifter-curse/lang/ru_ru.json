@@ -654,7 +654,7 @@
     "gui.shape_shifter_curse_fabric.fcs.accent2GreyReverse": "Reverse Accent 2",
     "gui.shape_shifter_curse.category.web_compostable": "Переваривание",
     "text.autoconfig.shape-shifter-curse-common.option.immediatelyTransform": "Force Immediately Transform",
-    "tooltip.shape_shifter_curse.morphscale_food": "Undefined Tag Name",
+    "tooltip.shape_shifter_curse.morphscale_food": "Morphscaled Food",
     "text.autoconfig.shape-shifter-curse-common.option.enableInitialForm": "Enable Custom Initial Form",
     "text.autoconfig.shape-shifter-curse-common.option.initialFormIds": "Configured Initial Form IDs(Randomize if multiple)",
     "text.autoconfig.shape-shifter-curse-common.option.statusPotionWithCurse": "Transformative Potion Can Effect Pre-Book Player",
@@ -699,5 +699,9 @@
     "item.shape-shifter-curse.surge_catalyst_core.tooltip": "Он напоминает о скрытых бурных течениях под спокойной морской гладью.",
     "item.shape-shifter-curse.dune_catalyst_core.tooltip": "Он напоминает о едва различимых очертаниях пылевых вихрей в небе.",
     "item.shape-shifter-curse.night_catalyst_core.tooltip": "Он напоминает о ночи без звёзд и луны, прозрачной, словно чёрное стекло.",
-    "jei.shape-shifter-curse.catalyst_core.info": "Не расходуется при использовании в слоте катализатора для создания предметов на алтаре перевоплощения."
+    "jei.shape-shifter-curse.catalyst_core.info": "Не расходуется при использовании в слоте катализатора для создания предметов на алтаре перевоплощения.",
+    "item.minecraft.lingering_potion.effect.moondust_potion": "Туманное зелье лунной пыли",
+    "item.minecraft.potion.effect.moondust_potion": "Зелье лунной пыли",
+    "item.minecraft.splash_potion.effect.moondust_potion": "Взрывное зелье лунной пыли",
+    "item.minecraft.tipped_arrow.effect.moondust_potion": "Стрела лунной пыли"
 }

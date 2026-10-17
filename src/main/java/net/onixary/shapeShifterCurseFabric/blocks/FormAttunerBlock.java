@@ -1,12 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.blocks;
 
 import com.mojang.serialization.MapCodec;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BaseEntityBlock;
 import net.minecraft.world.level.block.BeaconBeamBlock;
@@ -25,6 +30,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
+import java.util.List;
 
 public class FormAttunerBlock extends BaseEntityBlock implements BeaconBeamBlock {
     public static final CachedDataMap<UUID, Player, BlockPos> playerLastAttunerPos = new CachedDataMap<>((uuid -> null), Entity::getUUID);
@@ -45,7 +51,7 @@ public class FormAttunerBlock extends BaseEntityBlock implements BeaconBeamBlock
     }
 
     @Override
-    public @NotNull RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
@@ -55,8 +61,8 @@ public class FormAttunerBlock extends BaseEntityBlock implements BeaconBeamBlock
     }
 
     @Override
-    public @NotNull DyeColor getColor() {
-        return DyeColor.PURPLE;
+    public DyeColor getColor() {
+        return DyeColor.PINK;
     }
 
     @Override

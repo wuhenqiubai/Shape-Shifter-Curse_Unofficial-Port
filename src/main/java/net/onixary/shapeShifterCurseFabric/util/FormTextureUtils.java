@@ -10,6 +10,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.PlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.skin.RegPlayerSkinComponent;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
@@ -55,34 +56,6 @@ public class FormTextureUtils {
             }
         }
         return FormUtils.getPlayerForm(player);
-    }
-
-    public record ColorSetting(int primaryColor, int accentColor1, int accentColor2, int eyeColorA, int eyeColorB
-            , boolean primaryGreyReverse, boolean accent1GreyReverse, boolean accent2GreyReverse) {
-        public int getPrimaryColor() {
-            return this.primaryColor;
-        }
-        public int getAccentColor1() {
-            return this.accentColor1;
-        }
-        public int getAccentColor2() {
-            return this.accentColor2;
-        }
-        public int getEyeColorA() {
-            return this.eyeColorA;
-        }
-        public int getEyeColorB() {
-            return this.eyeColorB;
-        }
-        public boolean getPrimaryGreyReverse() {
-            return this.primaryGreyReverse;
-        }
-        public boolean getAccent1GreyReverse() {
-            return this.accent1GreyReverse;
-        }
-        public boolean getAccent2GreyReverse() {
-            return this.accent2GreyReverse;
-        }
     }
 
     public static NativeImage toNativeImage(Identifier texture) {
@@ -238,7 +211,7 @@ public class FormTextureUtils {
         return ColorMulBytes(ColorResult, Mask);
     }
 
-    public static int ProcessPixel(int Color, int Mask, ColorSetting colorSetting, Triple<Integer, Integer, Integer> MaskLayerAverageGreyScale, boolean OnlyMultiply) {
+    public static int ProcessPixel(int Color, int Mask, FormColorSetting colorSetting, Triple<Integer, Integer, Integer> MaskLayerAverageGreyScale, boolean OnlyMultiply) {
         // ABGR顺序
 
         // 如果Mask为0 那么RGB通道都为0 并且也不是特殊像素
@@ -250,16 +223,16 @@ public class FormTextureUtils {
         if (maskAlpha != 255) {
             if (maskAlpha == 1) {
                 // 使用eyeColor替换颜色，但保留原始颜色的Alpha通道
-                if ((colorSetting.eyeColorA >>> 24) == 0) {
+                if ((colorSetting.eyeColorA() >>> 24) == 0) {
                     return Color;
                 }
-                return (colorSetting.eyeColorA & 0x00FFFFFF) | (Color & 0xFF000000);
+                return (colorSetting.eyeColorA() & 0x00FFFFFF) | (Color & 0xFF000000);
             }
             if (maskAlpha == 2) {
-                if ((colorSetting.eyeColorB >>> 24) == 0) {
+                if ((colorSetting.eyeColorB() >>> 24) == 0) {
                     return Color;
                 }
-                return (colorSetting.eyeColorB & 0x00FFFFFF) | (Color & 0xFF000000);
+                return (colorSetting.eyeColorB() & 0x00FFFFFF) | (Color & 0xFF000000);
             }
         }
 
@@ -267,25 +240,25 @@ public class FormTextureUtils {
         int B = (Mask >> 16) & 0xFF;
         if (B > 0) {
             if (OnlyMultiply) {
-                return (ColorMulBytes(colorSetting.accentColor2, B) & 0x00FFFFFF) | (Color & 0xFF000000);
+                return (ColorMulBytes(colorSetting.accentColor2(), B) & 0x00FFFFFF) | (Color & 0xFF000000);
             }
-            int result = ProcessMaskChannel(Color, B, colorSetting.accentColor2, MaskLayerAverageGreyScale.getRight(), colorSetting.accent2GreyReverse);
+            int result = ProcessMaskChannel(Color, B, colorSetting.accentColor2(), MaskLayerAverageGreyScale.getRight(), colorSetting.accent2GreyReverse());
             return (result & 0x00FFFFFF) | (Color & 0xFF000000);
         }
         int G = (Mask >> 8) & 0xFF;
         if (G > 0) {
             if (OnlyMultiply) {
-                return (ColorMulBytes(colorSetting.accentColor1, G) & 0x00FFFFFF) | (Color & 0xFF000000);
+                return (ColorMulBytes(colorSetting.accentColor1(), G) & 0x00FFFFFF) | (Color & 0xFF000000);
             }
-            int result = ProcessMaskChannel(Color, G, colorSetting.accentColor1, MaskLayerAverageGreyScale.getMiddle(), colorSetting.accent1GreyReverse);
+            int result = ProcessMaskChannel(Color, G, colorSetting.accentColor1(), MaskLayerAverageGreyScale.getMiddle(), colorSetting.accent1GreyReverse());
             return (result & 0x00FFFFFF) | (Color & 0xFF000000);
         }
         int R = Mask & 0xFF;
         if (R > 0) {
             if (OnlyMultiply) {
-                return (ColorMulBytes(colorSetting.primaryColor, R) & 0x00FFFFFF) | (Color & 0xFF000000);
+                return (ColorMulBytes(colorSetting.primaryColor(), R) & 0x00FFFFFF) | (Color & 0xFF000000);
             }
-            int result = ProcessMaskChannel(Color, R, colorSetting.primaryColor, MaskLayerAverageGreyScale.getLeft(), colorSetting.primaryGreyReverse);
+            int result = ProcessMaskChannel(Color, R, colorSetting.primaryColor(), MaskLayerAverageGreyScale.getLeft(), colorSetting.primaryGreyReverse());
             return (result & 0x00FFFFFF) | (Color & 0xFF000000);
         }
         return Color;
@@ -293,7 +266,7 @@ public class FormTextureUtils {
 
     private static int maskedTextureCounter = 0;
 
-    public static Identifier BakeTexture(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply)  {
+    public static Identifier BakeTexture(Identifier texture, Identifier mask, FormColorSetting colorSetting, boolean OnlyMultiply)  {
         TextureManager TM = Minecraft.getInstance().getTextureManager();
         // 客户端会在每次重载资源包时数据溢出 溢出量不高 等以后再优化吧
         Identifier id = Identifier.fromNamespaceAndPath("shape-shifter-curse", "masked_texture_" + maskedTextureCounter++);
@@ -301,7 +274,7 @@ public class FormTextureUtils {
         return id;
     }
 
-    public static DynamicTexture BakeTextureNoMemLeak(Identifier texture, Identifier mask, ColorSetting colorSetting, boolean OnlyMultiply) {
+    public static DynamicTexture BakeTextureNoMemLeak(Identifier texture, Identifier mask, FormColorSetting colorSetting, boolean OnlyMultiply) {
         if (texture == null || mask == null) return null;
         NativeImage textureImage = toNativeImage(texture);
         NativeImage maskImage = toNativeImage(mask);
@@ -317,7 +290,7 @@ public class FormTextureUtils {
     }
 
     // 仅渲染使用 会处理isEnableFormColor
-    public static @Nullable ColorSetting getPlayerColorSetting(Player player) {
+    public static @Nullable FormColorSetting getPlayerColorSetting(Player player) {
         try {
             PlayerSkinComponent component = RegPlayerSkinComponent.SKIN_SETTINGS.get(player);
             if (!component.isEnableFormColor()) {

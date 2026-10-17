@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -243,7 +245,7 @@ public class ModPacketsS2C {
         }).start();
     }
 
-    public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
+    public static void sendUpdateCustomColor(FormColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         buf.writeBoolean(sendExtraData);
         if (sendExtraData) {
@@ -482,7 +484,7 @@ public class ModPacketsS2C {
                 if (!ShapeShifterCurseFabric.playerCustomConfig.enable_server_modify_FCD_config) {
                     return;
                 }
-                FormTextureUtils.ColorSetting nowColorSetting = FormColorData.getPlayerColorSetting(false);
+                FormColorSetting nowColorSetting = FormColorData.getPlayerColorSetting(false);
                 if (nowColorSetting == null) {
                     return;
                 }
@@ -503,7 +505,7 @@ public class ModPacketsS2C {
                 if (!ShapeShifterCurseFabric.playerCustomConfig.enable_server_modify_FCD_config) {
                     return;
                 }
-                FormTextureUtils.ColorSetting colorSetting = null;
+                FormColorSetting colorSetting = null;
                 switch (arg1) {
                     case "form" -> {
                         colorSetting = ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).getOrDefault(arg2, null);

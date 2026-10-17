@@ -9,6 +9,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.BeaconBeamBlock;
 import net.minecraft.world.level.block.Block;
@@ -16,8 +17,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.onixary.shapeShifterCurseFabric.blocks.FormAttunerBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
-import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 
 import java.util.Arrays;
 import java.util.List;
@@ -31,6 +32,14 @@ public class FormAttunerBlockEntity extends BlockEntity {
 
     public static void allocMaxLevel(int maxLevel) {
         MAX_LEVEL = Math.max(MAX_LEVEL, maxLevel);
+    }
+
+    private static float[] toColorComponents(DyeColor dyeColor) {
+        int rgb = dyeColor.getTextureDiffuseColor();
+        return new float[]{
+                ARGB.red(rgb) / 255.0F,
+                ARGB.green(rgb) / 255.0F,
+                ARGB.blue(rgb) / 255.0F};
     }
 
     public FormAttunerBlockEntity(BlockPos blockPos, BlockState blockState) {
@@ -55,12 +64,9 @@ public class FormAttunerBlockEntity extends BlockEntity {
             BlockState blockState = world.getBlockState(blockPos);
             Block block = blockState.getBlock();
             if (block instanceof BeaconBeamBlock) {
-                int argb = ((BeaconBeamBlock)block).getColor().getTextureDiffuseColor();
-                float[] fs = new float[]{
-                    ARGB.red(argb) / 255.0F,
-                    ARGB.green(argb) / 255.0F,
-                    ARGB.blue(argb) / 255.0F
-                };
+                float[] fs = block instanceof FormAttunerBlock
+                        ? new float[]{0.902f, 0.373f, 0.945f}
+                        : toColorComponents(((BeaconBeamBlock) block).getColor());
                 if (blockEntity.beams.size() <= 1) {
                     beamSegment = new BeamSegment(fs);
                     blockEntity.beams.add(beamSegment);
@@ -112,11 +118,8 @@ public class FormAttunerBlockEntity extends BlockEntity {
     }
 
     private static int updateLevel(Level world, int x, int y, int z) {
-        // 设定上需要诅咒之月的力量 So 仅主世界可用
+        // 保留主世界限制；阶数由基座结构决定，不受月相影响。
         if (world.dimension() != Level.OVERWORLD) {
-            return 0;
-        }
-        if (!CursedMoon.isInCursedMoon(world)) {
             return 0;
         }
         int i = 0;
