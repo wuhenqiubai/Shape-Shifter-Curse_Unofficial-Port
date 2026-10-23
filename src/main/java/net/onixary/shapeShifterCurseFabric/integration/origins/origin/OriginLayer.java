@@ -5,7 +5,6 @@ import com.google.gson.*;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -381,7 +380,7 @@ public class OriginLayer implements Comparable<OriginLayer> {
                 throw new JsonParseException("Expected origin in layer to be either a string or an object.");
             } else if(element.isJsonObject()) {
                 SerializableData.Instance data = conditionedOriginObjectData.read(element.getAsJsonObject(), null);
-                return new ConditionedOrigin((ConditionFactory<Entity>.Instance)data.get("condition"), (List<ResourceLocation>)data.get("origins"));
+                return new ConditionedOrigin(data.get("condition"), data.get("origins"));
             }
             throw new JsonParseException("Expected origin in layer to be either a string or an object.");
         }

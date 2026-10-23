@@ -253,7 +253,7 @@ tasks.withType(JavaCompile).configureEach {
         it.options.release.set(targetJavaVersion)
     }
     options.deprecation = false
-    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
+    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0", "-AdisableOverwriteChecker=true"]
 }
 
 java {
