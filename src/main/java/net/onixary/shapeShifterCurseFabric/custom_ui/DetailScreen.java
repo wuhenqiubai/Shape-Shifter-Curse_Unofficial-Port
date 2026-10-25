@@ -102,4 +102,9 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
         }
         return false;
     }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 取消模糊背景
+    }
 }

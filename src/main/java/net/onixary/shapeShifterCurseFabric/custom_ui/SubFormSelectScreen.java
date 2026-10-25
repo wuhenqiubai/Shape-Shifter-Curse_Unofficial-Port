@@ -302,4 +302,9 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         IForm playerForm = this.getForm();
         return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
     }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 取消模糊背景
+    }
 }

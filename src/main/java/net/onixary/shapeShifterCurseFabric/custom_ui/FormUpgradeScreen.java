@@ -22,11 +22,9 @@ import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.util.util.BaseSprite;
 import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.CostTypeIcons;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.IFUSDrawableCostType;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.ItemCostType;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.XPCostType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -627,5 +625,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         }
         this.refreshSelectedPerkState();
         ModPacketsS2C.sendRequestPerkAvailability();
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 取消模糊背景
     }
 }

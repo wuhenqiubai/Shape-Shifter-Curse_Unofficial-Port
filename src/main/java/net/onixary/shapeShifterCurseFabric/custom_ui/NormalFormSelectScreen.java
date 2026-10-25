@@ -183,4 +183,9 @@ public class NormalFormSelectScreen extends Screen {
         }
         return false;
     }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        // 取消模糊背景
+    }
 }
