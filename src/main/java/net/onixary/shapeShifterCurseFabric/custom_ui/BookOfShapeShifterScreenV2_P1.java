@@ -112,6 +112,14 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         InventoryScreen.renderEntityInInventoryFollowsMouse(context, x1, y1, x2, y2, size, 0.0625f, mouseX, mouseY, entity);
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(delta);
+        this.RenderBook(context);
+    }
+
     private void RenderBook(GuiGraphics context) {
         int FinalBookSizeX = BookSizeX;
         int FinalBookSizeY = BookSizeY;
@@ -160,8 +168,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
-        this.RenderBook(context);
-	    super.render(context, mouseX, mouseY, delta);
+        this.renderBackdrop(context, delta);
         // 实体渲染原点为实体中心脚下
         // Size -> (70, 66) Pos -> (35, 15)
         int PlayerX = BookPosX + 70 * BookScale;

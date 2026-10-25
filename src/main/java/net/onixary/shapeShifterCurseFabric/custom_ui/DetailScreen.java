@@ -45,9 +45,17 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
 	    }
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(delta);
+        context.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+    }
+
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        context.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
+        this.renderBackdrop(context, delta);
         super.render(context, mouseX, mouseY, delta);
     }
 
@@ -105,6 +113,5 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
 
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 取消模糊背景
     }
 }

@@ -154,6 +154,14 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         super.onClose();
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(delta);
+        this.renderBackgroundTexture(context);
+    }
+
     public void renderBackgroundTexture(GuiGraphics context) {
         // 计算居中位置，保持固定尺寸
         context.blit(BG_TEXTURE, 0, 0, this.width, this.height, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT);
@@ -201,7 +209,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackgroundTexture(context);
+        this.renderBackdrop(context, delta);
         int baseX = (this.width - MENU_WIDTH) / 2;
         int baseY = (this.height - MENU_HEIGHT) / 2;
         // 120 58 100 133
@@ -305,6 +313,5 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     @Override
     public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        // 取消模糊背景
     }
 }
