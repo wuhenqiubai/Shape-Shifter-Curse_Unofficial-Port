@@ -5,6 +5,8 @@ import io.github.apace100.apoli.power.Active;
 import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
+import io.github.apace100.apoli.power.factory.action.ActionFactory;
+import net.minecraft.world.entity.Entity;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.HolderLookup;
@@ -18,12 +20,14 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 /** Configurable extra impulses per airborne interval; never invokes LivingEntity.jump(). */
 public class AirJumpPower extends Power implements Active {
     private final double speed;
+    private final ActionFactory<Entity>.Instance jumpAction;
     private Key key;
     private final int jumps;
     private int used;
     private int airTicks;
     public AirJumpPower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
         super(type, entity); speed = data.getDouble("speed"); jumps = Math.max(1, data.getInt("jumps")); key = data.get("key"); setTicking(true);
+        jumpAction = data.get("jump_action");
     }
     @Override public Key getKey() { return key; }
     @Override public void setKey(Key key) { this.key = key; }
@@ -37,6 +41,7 @@ public class AirJumpPower extends Power implements Active {
         used++;
         Vec3 velocity = entity.getDeltaMovement();
         PerkActions.setVelocity(entity, new Vec3(velocity.x, speed, velocity.z));
+        if (jumpAction != null) jumpAction.accept(entity);
     }
     @Override public Tag toTag(HolderLookup.Provider provider) { return IntTag.valueOf(used); }
     // Accept the old boolean byte as a spent single jump.
@@ -45,6 +50,7 @@ public class AirJumpPower extends Power implements Active {
         return new PowerFactory<>(ShapeShifterCurseFabric.identifier("air_jump"), new SerializableData()
                 .add("speed", SerializableDataTypes.DOUBLE, 0.6)
                 .add("jumps", SerializableDataTypes.INT, 1)
+                .add("jump_action", ApoliDataTypes.ENTITY_ACTION, null)
                 .add("key", ApoliDataTypes.BACKWARDS_COMPATIBLE_KEY, new Active.Key()),
                 data -> (type, entity) -> new AirJumpPower(type, entity, data)).allowCondition();
     }
