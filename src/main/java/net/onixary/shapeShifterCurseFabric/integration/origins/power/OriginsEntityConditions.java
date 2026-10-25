@@ -17,6 +17,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModCompo
 
 public class OriginsEntityConditions {
 
+    @SuppressWarnings("unchecked")
     public static void register() {
         register(new ConditionFactory<>(Origins.identifier("origin"), new SerializableData()
             .add("origin", SerializableDataTypes.IDENTIFIER)

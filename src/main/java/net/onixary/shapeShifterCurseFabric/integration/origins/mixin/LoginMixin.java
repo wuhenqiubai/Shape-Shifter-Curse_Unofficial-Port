@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 @Mixin(PlayerList.class)
 public abstract class LoginMixin {
 

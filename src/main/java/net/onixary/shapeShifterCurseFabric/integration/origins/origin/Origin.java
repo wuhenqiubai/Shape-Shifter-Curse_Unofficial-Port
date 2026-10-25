@@ -6,6 +6,7 @@ import io.github.apace100.apoli.power.MultiplePowerType;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import io.github.apace100.calio.data.SerializableData;
+import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -47,6 +48,10 @@ public class Origin {
 
     static {
         EMPTY = register(new Origin(ResourceLocation.fromNamespaceAndPath(Origins.MODID, "empty"), new ItemStack(Items.AIR), Impact.NONE, -1, Integer.MAX_VALUE).setUnchoosable().setSpecial());
+    }
+
+    public static void init() {
+
     }
 
     private static Origin register(Origin origin) {
@@ -224,8 +229,8 @@ public class Origin {
     @SuppressWarnings("unchecked")
     public static Origin createFromData(ResourceLocation id, SerializableData.Instance data) {
         Origin origin = new Origin(id,
-                data.get("icon"),
-                data.get("impact"),
+            (ItemStack)data.get("icon"),
+            (Impact)data.get("impact"),
             data.getInt("order"),
             data.getInt("loading_priority"));
 

@@ -14,6 +14,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.integration.OriginDataLoadedCallback;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class OriginLayers extends MultiJsonDataLoader implements IdentifiableResourceReloadListener {
 
@@ -56,7 +57,7 @@ public class OriginLayers extends MultiJsonDataLoader implements IdentifiableRes
         // Merge phase
         for (Map.Entry<ResourceLocation, HashMap<Integer, List<JsonObject>>> layerToLoad : layers.entrySet()) {
             ResourceLocation layerId = layerToLoad.getKey();
-            List<Integer> keys = layerToLoad.getValue().keySet().stream().sorted().toList();
+            List<Integer> keys = layerToLoad.getValue().keySet().stream().sorted().collect(Collectors.toList());
             OriginLayer layer = null;
             for(Integer key : keys) {
                 for(JsonObject jo : layerToLoad.getValue().get(key)) {

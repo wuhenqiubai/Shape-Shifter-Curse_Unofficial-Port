@@ -1,10 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.util;
 
+import com.google.gson.Gson;
+import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import me.shedaniel.autoconfig.util.Utils;
-import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -13,6 +14,18 @@ public class OriginsJsonConfigSerializer<T extends ConfigData> extends GsonConfi
 
     private final OriginsConfigSerializer<T> legacySerializer;
     private final Path configPath;
+
+    public OriginsJsonConfigSerializer(Config definition, Class<T> configClass, Gson gson) {
+        super(definition, configClass, gson);
+        configPath = Utils.getConfigFolder().resolve(definition.name() + ".json5");
+        legacySerializer = null;
+    }
+
+    public OriginsJsonConfigSerializer(Config definition, Class<T> configClass) {
+        super(definition, configClass);
+        configPath = Utils.getConfigFolder().resolve(definition.name() + ".json5");
+        legacySerializer = null;
+    }
 
     public OriginsJsonConfigSerializer(Config definition, Class<T> configClass, OriginsConfigSerializer<T> legacySerializer) {
         super(definition, configClass);

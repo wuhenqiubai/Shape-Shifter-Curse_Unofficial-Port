@@ -24,18 +24,16 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.onixary.shapeShifterCurseFabric.integration.origins.badge.BadgeManager;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPackets;
 import net.onixary.shapeShifterCurseFabric.integration.origins.networking.ModPacketsC2S;
+import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginManager;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.OriginsEntityConditions;
 import net.onixary.shapeShifterCurseFabric.integration.origins.power.OriginsPowerTypes;
-import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModBlocks;
-import net.onixary.shapeShifterCurseFabric.integration.origins.registry.ModEntities;
-import net.onixary.shapeShifterCurseFabric.integration.origins.registry.OriginsTagLoader;
+import net.onixary.shapeShifterCurseFabric.integration.origins.registry.*;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.ChoseOriginCriterion;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginsConfigSerializer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginsJsonConfigSerializer;
-import net.onixary.shapeShifterCurseFabric.networking.BytePayload;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,13 +78,18 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		OriginsEntityConditions.register();
 
 		ModBlocks.register();
+		ModItems.register();
+		ModTags.register();
 		ModPacketsC2S.register();
 		BytePayload.registerS2C(ModPackets.ORIGIN_LIST);
 		BytePayload.registerS2C(ModPackets.LAYER_LIST);
 		BytePayload.registerS2C(ModPackets.OPEN_ORIGIN_SCREEN);
 		BytePayload.registerS2C(ModPackets.CONFIRM_ORIGIN);
 		BytePayload.registerS2C(ModPackets.BADGE_LIST);
+		ModEnchantments.register();
 		ModEntities.register();
+		ModLoot.registerLootTables();
+		Origin.init();
 
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			//OriginCommand.register(dispatcher);

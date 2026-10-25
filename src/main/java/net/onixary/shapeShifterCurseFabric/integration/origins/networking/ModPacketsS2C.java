@@ -97,6 +97,20 @@ public class ModPacketsS2C {
 
 	@Environment(EnvType.CLIENT)
 	private static void receiveOpenOriginScreen(BytePayload payload, ClientPlayNetworking.Context ctx) {
+		// 用于显示Origins选择页面，不需要，将其注释掉：
+        /*PacketByteBuf buf = payload.data();
+        boolean showDirtBackground = buf.readBoolean();
+        ctx.client().execute(() -> {
+            ArrayList<OriginLayer> layers = new ArrayList<>();
+            OriginComponent component = ModComponents.ORIGIN.get(ctx.client().player);
+            OriginLayers.getLayers().forEach(layer -> {
+                if(layer.isEnabled() && !component.hasOrigin(layer)) {
+                    layers.add(layer);
+                }
+            });
+            Collections.sort(layers);
+            ctx.client().setScreen(new ChooseOriginScreen(layers, 0, showDirtBackground));
+        });*/
 	}
 
 	@Environment(EnvType.CLIENT)

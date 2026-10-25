@@ -19,6 +19,10 @@ public class ModBlocks {
         register("temporary_cobweb", TEMPORARY_COBWEB, false);
     }
 
+    private static void register(String blockName, Block block) {
+        register(blockName, block, true);
+    }
+
     private static void register(String blockName, Block block, boolean withBlockItem) {
         Registry.register(BuiltInRegistries.BLOCK, ResourceLocation.fromNamespaceAndPath(Origins.MODID, blockName), block);
         if(withBlockItem) {

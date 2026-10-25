@@ -150,7 +150,7 @@ public class OriginDisplayScreen extends Screen {
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if(this.scrolling) {
             int delta = (int)(mouseY - mouseDragStart);
-            int newScrollPos = Math.max(36, Math.min(141, scrollDragStart + delta));
+            int newScrollPos = (int)Math.max(36, Math.min(141, scrollDragStart + delta));
             float part = (newScrollPos - 36) / (float)(141 - 36);
             scrollPos = (int)(part * currentMaxScroll);
         }

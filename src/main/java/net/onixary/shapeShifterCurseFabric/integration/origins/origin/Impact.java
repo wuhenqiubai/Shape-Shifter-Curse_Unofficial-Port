@@ -36,5 +36,8 @@ public enum Impact {
 	public MutableComponent getTextComponent() {
 		return Component.translatable(getTranslationKey()).withStyle(getTextStyle());
 	}
-
+	
+	public static Impact getByValue(int impactValue) {
+		return Impact.values()[impactValue];
+	}
 }

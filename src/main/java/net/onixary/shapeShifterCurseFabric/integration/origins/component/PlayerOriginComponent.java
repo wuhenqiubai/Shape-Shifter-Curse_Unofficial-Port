@@ -19,6 +19,7 @@ import net.onixary.shapeShifterCurseFabric.integration.origins.util.ChoseOriginC
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class PlayerOriginComponent implements OriginComponent {
@@ -92,6 +93,12 @@ public class PlayerOriginComponent implements OriginComponent {
                 }
             }
         }
+    }
+
+    private void revokeRemovedPowers(Origin origin, PowerHolderComponent powerComponent) {
+        ResourceLocation source = origin.getIdentifier();
+        List<PowerType<?>> powersByOrigin = powerComponent.getPowersFromSource(source);
+        powersByOrigin.stream().filter(p -> !origin.hasPowerType(p)).forEach(p -> powerComponent.removePower(p, source));
     }
 
     @Override
@@ -242,6 +249,11 @@ public class PlayerOriginComponent implements OriginComponent {
                 }
             }
         }
+    }
+
+    @Override
+    public void onPowersRead() {
+        // NO-OP
     }
 
     @Override
