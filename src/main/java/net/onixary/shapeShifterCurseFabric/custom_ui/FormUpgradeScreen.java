@@ -262,10 +262,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double mouseZ, double g) {
-        this.onScrollWidget(mouseX, mouseY, mouseZ);
-        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, mouseZ);
-        return super.mouseScrolled(mouseX, mouseY, mouseZ, g);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        this.onScrollWidget(mouseX, mouseY, verticalAmount);
+        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, verticalAmount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
