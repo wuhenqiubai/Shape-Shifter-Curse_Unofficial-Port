@@ -108,14 +108,14 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
                 if (SubFormSelectScreen.this.font.width(getMessage()) <= getWidth()) {
                     super.renderWidget(context, mouseX, mouseY, delta);
                 } else {
-                    drawScrollableText(context, SubFormSelectScreen.this.font, 0, getColor());
+                    renderScrollingString(context, SubFormSelectScreen.this.font, 0, getColor());
                 }
             }
         };
         // 223 75 77 88 - Form Desc
         formDescText = new ScaleScrollTextWidget(baseX + 223, baseY + 75, 77, 88, 1.0f, Component.empty(), this.font);
         formDescText.setEnableScrollableIconRender(true);
-        this.addWidget(formDescText);
+        this.addWidget((WidgetEXUtils.IWidgetEX) formDescText);
         // 223 166 77 14 - Select Form Button
         selectFormButton = Button.builder(Component.translatable("gui.shape-shifter-curse.sub_form.select"), button -> {
             ResourceLocation formID = availableForms.get(nowFormIndex);
@@ -292,7 +292,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        this.onScrollWidget(mouseX, mouseY, mouseZ);
+        this.onScrollWidget(mouseX, mouseY, verticalAmount);
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 

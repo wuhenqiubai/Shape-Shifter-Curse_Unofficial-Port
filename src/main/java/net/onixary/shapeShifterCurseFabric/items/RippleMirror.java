@@ -51,7 +51,7 @@ public class RippleMirror extends Item {
         boolean finishing = remainingUseTicks == 1;
         if (!finishing && remainingUseTicks % 5 != 0) return;
 
-        float progress = (getUseDuration(stack) - remainingUseTicks) / (float) getUseDuration(stack);
+        float progress = (getUseDuration(stack, user) - remainingUseTicks) / (float) getUseDuration(stack, user);
         int count = finishing ? 32 : 4 + (int) (progress * 20);
         var random = user.getRandom();
         double centerY = user.getY() + user.getBbHeight() * 0.5;
