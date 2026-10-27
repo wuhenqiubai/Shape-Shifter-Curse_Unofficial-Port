@@ -18,7 +18,10 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.Accessory.AccessoryUtils;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class TrinketUtils {
     public interface CustomPowerTrinketInterface {
@@ -302,7 +305,7 @@ public class TrinketUtils {
             // PowerHolderComponent.KEY.sync(player);
 
             // 子形态的Bug 不能用这种方式还原了 等之后写双端时改成计数式Power
-            for (Identifier powerID : accessoryPowers) {
+            for (ResourceLocation powerID : accessoryPowers) {
                 this.RemovePower(player, powerID, itemID);
             }
             FormUtils.reApplyPower(player);
