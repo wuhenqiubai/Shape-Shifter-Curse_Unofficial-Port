@@ -4,6 +4,8 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,5 +31,15 @@ public class InventoryScreenMixin {
                                        float yOffset, float mouseX, float mouseY, LivingEntity entity, CallbackInfo ci) {
         ClientUtils.isOpenInventoryScreen = false;
         entity.yBodyRotO = prevBodyYaw;
+    }
+
+    @Inject(method = "renderEntityInInventory(Lnet/minecraft/client/gui/GuiGraphics;FFFLorg/joml/Vector3f;Lorg/joml/Quaternionf;Lorg/joml/Quaternionf;Lnet/minecraft/world/entity/LivingEntity;)V", at = @At("HEAD"))
+    private static void drawEntityHead2(GuiGraphics context, float x, float y, float size, Vector3f translation, Quaternionf rotation, Quaternionf headRotation, LivingEntity entity, CallbackInfo ci) {
+        ClientUtils.isOpenInventoryScreen = true;
+    }
+
+    @Inject(method = "renderEntityInInventory(Lnet/minecraft/client/gui/GuiGraphics;FFFLorg/joml/Vector3f;Lorg/joml/Quaternionf;Lorg/joml/Quaternionf;Lnet/minecraft/world/entity/LivingEntity;)V", at = @At("RETURN"))
+    private static void drawEntityTail2(GuiGraphics context, float x, float y, float size, Vector3f translation, Quaternionf rotation, Quaternionf headRotation, LivingEntity entity, CallbackInfo ci) {
+        ClientUtils.isOpenInventoryScreen = false;
     }
 }
