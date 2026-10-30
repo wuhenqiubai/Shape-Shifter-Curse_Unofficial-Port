@@ -1047,7 +1047,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)mouseX, (float)mouseY, entity);
     }
 
     private void RenderEntityInViewport(GuiGraphics context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -1114,7 +1114,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         }
         // 20,34,142,157
         if (minecraftClient.player != null) {
-            RenderEntityInViewport(context, BPosX + 20, BPosY + 34, 142, 157, BPosX + 91, BPosY + 112, 90, BPosX + 91 - mouseX, BPosY + 96 - mouseY, minecraftClient.player);
+            RenderEntityInViewport(context, BPosX + 20, BPosY + 34, 142, 157, BPosX + 91, BPosY + 112, 90, mouseX, mouseY, minecraftClient.player);
         }
         super.render(context, mouseX, mouseY, delta);
     }

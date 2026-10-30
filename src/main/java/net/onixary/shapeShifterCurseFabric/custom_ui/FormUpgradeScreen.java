@@ -286,7 +286,13 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         entity.setXRot(-g * 20.0F);
         entity.yHeadRot = entity.getYRot();
         entity.yHeadRotO = entity.getYRot();
-        InventoryScreen.renderEntityInInventoryFollowsMouse(context, x, y, x, y, size, 0.0625F, mouseX, mouseY, entity);
+        int halfWidth = size * 4 / 5;
+        int halfHeight = size * 7 / 6;
+        int feetOffset = size * 31 / 32;
+        InventoryScreen.renderEntityInInventoryFollowsMouse(context,
+                x - halfWidth, y - feetOffset - halfHeight,
+                x + halfWidth, y - feetOffset + halfHeight,
+                size, 0.0625F, mouseX, mouseY, entity);
         entity.yBodyRot = h;
         entity.yBodyRotO = m;
         entity.setYRot(i);
@@ -338,7 +344,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
                     FORM_MODEL_REVIEW_WIDTH, FORM_MODEL_REVIEW_HEIGHT,
                     entityX, entityY,
                     entitySize,
-                    entityX - mouseX, entityY - mouseY - entitySize,
+                    mouseX, mouseY,
                     minecraft.player
             );
         }
