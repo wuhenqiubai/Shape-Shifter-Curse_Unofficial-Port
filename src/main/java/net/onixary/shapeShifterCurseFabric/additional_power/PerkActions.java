@@ -8,6 +8,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
+import net.minecraft.core.particles.VibrationParticleOption;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Monster;
@@ -25,6 +26,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Tuple;
+import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -90,6 +92,13 @@ public final class PerkActions {
     }
 
     public static void registerActions() {
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("echolocation_vibration"),
+                new SerializableData(), (data, pair) -> {
+            if (!(pair.getA() instanceof ServerPlayer player)) return;
+            Vec3 origin = pair.getB().getBoundingBox().getCenter();
+            var particle = new VibrationParticleOption(new EntityPositionSource(player, player.getEyeHeight()), 10);
+            player.level().sendParticles(player, particle, true, false, origin.x, origin.y, origin.z, 1, 0, 0, 0, 0);
+        }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("recall_wolf_minions"),
                 new SerializableData(), (data, entity) -> {
             if (!(entity instanceof ServerPlayer player)

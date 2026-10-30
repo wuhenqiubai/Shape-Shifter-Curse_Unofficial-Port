@@ -30,4 +30,5 @@ public class InventoryScreenMixin {
         ClientUtils.isOpenInventoryScreen = false;
         entity.yBodyRotO = prevBodyYaw;
     }
+
 }

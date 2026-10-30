@@ -1,8 +1,11 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,8 +38,40 @@ public class RippleMirror extends Item {
 
     @Override
     public InteractionResult use(Level world, Player user, InteractionHand hand) {
+        if (!world.isClientSide() && !user.isUsingItem()) {
+            world.playSound(null, user.getX(), user.getY(), user.getZ(),
+                    SoundEvents.PORTAL_TRIGGER, SoundSource.PLAYERS, 0.1f, 2.0f);
+        }
         user.startUsingItem(hand);
         return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public void onUseTick(Level world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+        if (!world.isClientSide()) return;
+        boolean finishing = remainingUseTicks == 1;
+        if (!finishing && remainingUseTicks % 5 != 0) return;
+
+        float progress = (getUseDuration(stack, user) - remainingUseTicks) / (float) getUseDuration(stack, user);
+        int count = finishing ? 32 : 4 + (int) (progress * 20);
+        var random = user.getRandom();
+        double centerY = user.getY() + user.getBbHeight() * 0.5;
+        for (int i = 0; i < count; i++) {
+            // Enchantment particles converge on the player as the charge builds.
+            world.addParticle(ParticleTypes.ENCHANT, user.getX(), centerY, user.getZ(),
+                    (random.nextDouble() - 0.5) * 3,
+                    random.nextDouble() * 2,
+                    (random.nextDouble() - 0.5) * 3);
+            if (finishing || (progress >= 0.25f && i % 3 == 0)) {
+                world.addParticle(ParticleTypes.END_ROD,
+                        user.getX() + (random.nextDouble() - 0.5) * 1.5,
+                        user.getY() + random.nextDouble() * user.getBbHeight(),
+                        user.getZ() + (random.nextDouble() - 0.5) * 1.5,
+                        (random.nextDouble() - 0.5) * 0.08,
+                        0.03 + random.nextDouble() * 0.07,
+                        (random.nextDouble() - 0.5) * 0.08);
+            }
+        }
     }
 
     @Override

@@ -98,6 +98,14 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         );
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.RenderBook(context);
+    }
+
     private void RenderBook(GuiGraphics context) {
         int FinalBookSizeX = BookSizeX;
         int FinalBookSizeY = BookSizeY;
@@ -136,7 +144,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.RenderBook(context);
+        this.renderBackdrop(context, delta);
         super.render(context, mouseX, mouseY, delta);
         renderInstinctsBottomTexture(context);
     }

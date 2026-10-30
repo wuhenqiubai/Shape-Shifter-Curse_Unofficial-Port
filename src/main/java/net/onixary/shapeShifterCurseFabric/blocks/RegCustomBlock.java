@@ -30,10 +30,10 @@ public final class RegCustomBlock {
     public static final Block WEB_COMPOSTER = register("web_composter", WebComposterBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT).strength(0.6F).sound(SoundType.AZALEA).noOcclusion());
     public static final Block DEW_COVERED_COBWEB = register("dew_covered_cobweb", DewCoveredCobwebBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(1.0F).sound(SoundType.WOOL).noCollision().noOcclusion());
 
-    public static final Block ALTAR_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(4.0F, 10.0F).sound(SoundType.AMETHYST).noOcclusion());
+    public static final Block ALTAR_BLOCK = register("altar", AltarBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).strength(3.0F, 10.0F).requiresCorrectToolForDrops().sound(SoundType.AMETHYST).noOcclusion());
     public static final BlockEntityType<AltarBlockEntity> ALTAR_BLOCK_ENTITY = registerBlockEntity("altar_block_entity", FabricBlockEntityTypeBuilder.create(AltarBlockEntity::new, ALTAR_BLOCK).build(null));
 
-    public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", FormAttunerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(4.0F, 10.0F).sound(SoundType.GLASS).noOcclusion());
+    public static final Block FORM_ATTUNER_BLOCK = register("form_attuner", FormAttunerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).instrument(NoteBlockInstrument.BELL).lightLevel((state) -> 15).strength(3.0F, 10.0F).requiresCorrectToolForDrops().sound(SoundType.GLASS).noOcclusion());
     public static final BlockEntityType<FormAttunerBlockEntity> FORM_ATTUNER_BLOCK_ENTITY = registerBlockEntity("form_attuner_block_entity", FabricBlockEntityTypeBuilder.create(FormAttunerBlockEntity::new, FORM_ATTUNER_BLOCK).build());
 
     public static void ClientInit() {

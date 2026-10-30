@@ -1,8 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 
-import java.util.List;
 import net.minecraft.util.Tuple;
+
+import java.util.List;
 
 public class WidgetEXUtils {
     public static class WidgetRect {
@@ -66,12 +67,12 @@ public class WidgetEXUtils {
             }
 		}
 
-		default void onScrollWidget(double mouseX, double mouseY, double mouseZ) {
+		default void onScrollWidget(double mouseX, double mouseY, double scrollAmount) {
             for (IWidgetEX widget : getWidgetList()) {
                 WidgetRect rect = widget.getRect();
                 if (rect.isMouseInside(mouseX, mouseY)) {
                     Tuple<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
-                    widget.onScrollWidget(newMousePos.getA(), newMousePos.getB(), mouseZ);
+                    widget.onScrollWidget(newMousePos.getA(), newMousePos.getB(), scrollAmount);
                 }
             }
 		}

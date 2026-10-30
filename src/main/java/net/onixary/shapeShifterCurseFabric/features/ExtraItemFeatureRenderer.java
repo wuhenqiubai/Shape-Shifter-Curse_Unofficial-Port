@@ -104,10 +104,10 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         // 的 base scale。因此必须用 getBaseScale() 比较同一坐标系下的值，否则 0.9 * 0.55
                         // 会被错误地与 0.6 相减，导致补偿方向和幅度都不正确。
                         // 此处是在 Pehkui 模型缩放矩阵内平移，HEIGHT scale 会在矩阵上自动应用，无需再手动除以它。
-                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(limbDistance);
-                        float feralDefaultEyeScale = curForm.getDefaultEyeScale();
+                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
+                        float formEyeScale = curForm.getEyeScale();
                         // Entity feature 渲染坐标的 Y 轴与世界坐标相反：eye height 增加时需要减小局部 Y。
-                        float eyeHeightDeltaPixels = (feralDefaultEyeScale - eyeScale) * 1.62F * 16.0F;
+                        float eyeHeightDeltaPixels = (formEyeScale - eyeScale) * 1.62F * 16.0F;
                         Vec3 rotCenter = new Vec3(0.0F, -4.0F + eyeHeightDeltaPixels, -6.0F);
                         matrices.translate(rotCenter.x / 16.0F, rotCenter.y / 16.0F, rotCenter.z / 16.0F);
                         //Vec3d posOffset = ShapeShifterCurseFabric.feralItemPosOffset;

@@ -475,6 +475,14 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.parsetScreen = parsetScreen;
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.renderTextureBackground(context);
+    }
+
     public void renderTextureBackground(GuiGraphics context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
@@ -1057,8 +1065,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
-        this.renderBackground(context, mouseX, mouseY, 1.0f);
-        this.renderTextureBackground(context);
+        this.renderBackdrop(context, delta);
         if (!isOpenSlider) {
             // 228,27,11,11
             // context.fill(BPosX + 228, BPosY + 27, BPosX + 239, BPosY + 38, 0xFF000000);

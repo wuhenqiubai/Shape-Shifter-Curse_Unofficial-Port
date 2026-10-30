@@ -26,17 +26,25 @@ public class SubFormSelectScreen_NoForm extends Screen {
         int baseX = (this.width - MENU_WIDTH) / 2;
         int baseY = (this.height - MENU_HEIGHT) / 2;
         // 152 32 116 14 - Label
-        this.addRenderableWidget(new StringWidget(baseX + 152, baseY + 32, 116, 14, Component.literal("Sub Form Select Menu"), this.font));
+        this.addRenderableWidget(new StringWidget(baseX + 152, baseY + 32, 116, 14, Component.translatable("gui.shape-shifter-curse.sub_form.title"), this.font));
         // 393 7 20 20 - Close
         this.addRenderableWidget(Button.builder(Component.literal("X"), button -> this.onClose()).pos(baseX + 393, baseY + 7).size(20, 20).build());
         // 132 107 156 36 - No Form Can Select Tip
-        this.addRenderableWidget(new StringWidget(baseX + 132, baseY + 107, 156, 36, Component.literal("No Form Can Select"), this.font));
+        this.addRenderableWidget(new StringWidget(baseX + 132, baseY + 107, 156, 36, Component.translatable("gui.shape-shifter-curse.sub_form.no_forms"), this.font));
         super.init();
     }
 
     @Override
     public void onClose() {
         super.onClose();
+    }
+
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.renderBackgroundTexture(context);
     }
 
     public void renderBackgroundTexture(GuiGraphics context) {
@@ -49,7 +57,7 @@ public class SubFormSelectScreen_NoForm extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackgroundTexture(context);
+        this.renderBackdrop(context, delta);
         super.render(context, mouseX, mouseY, delta);
     }
 
@@ -67,5 +75,9 @@ public class SubFormSelectScreen_NoForm extends Screen {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 }

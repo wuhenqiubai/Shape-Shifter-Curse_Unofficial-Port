@@ -22,11 +22,9 @@ import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.util.util.BaseSprite;
 import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.CostTypeIcons;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.IFUSDrawableCostType;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.ItemCostType;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.XPCostType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
@@ -89,10 +87,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public static final int PERK_INFO_NAME_WIDTH = 91;
     public static final int PERK_INFO_NAME_HEIGHT = 14;
 
-    public static final int PERK_INFO_DESC_X = 316;
-    public static final int PERK_INFO_DESC_Y = 28;
-    public static final int PERK_INFO_DESC_WIDTH = 91;
-    public static final int PERK_INFO_DESC_HEIGHT = 115;
+    public static final int PERK_INFO_DESC_X = 314;
+    public static final int PERK_INFO_DESC_Y = 34;
+    public static final int PERK_INFO_DESC_WIDTH = 98;
+    public static final int PERK_INFO_DESC_HEIGHT = 110;
 
     public static final int PERK_INFO_COST_ICON_X = 315;
     public static final int PERK_INFO_COST_ICON_Y = 144;
@@ -200,7 +198,17 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public void init() {
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
-        this.PerkNameWidget = new StringWidget(baseX + PERK_INFO_NAME_X, baseY + PERK_INFO_NAME_Y, PERK_INFO_NAME_WIDTH, PERK_INFO_NAME_HEIGHT, Component.literal(""), this.font);
+        this.PerkNameWidget = new StringWidget(baseX + PERK_INFO_NAME_X, baseY + PERK_INFO_NAME_Y, PERK_INFO_NAME_WIDTH, PERK_INFO_NAME_HEIGHT, Component.literal(""), this.font) {
+            @Override
+            public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
+                if (FormUpgradeScreen.this.font.width(getMessage()) <= getWidth()) {
+                    super.renderWidget(context, mouseX, mouseY, delta);
+                } else {
+                    // Vanilla button marquee clips long titles to the existing name area.
+                    this.renderScrollingStringOverContents(context.textRendererForWidget(this, GuiGraphics.HoveredTextEffects.NONE), getMessage(), 2);
+                }
+            }
+        };
         this.PerkDescWidget = new ScaleScrollTextWidget(baseX + PERK_INFO_DESC_X, baseY + PERK_INFO_DESC_Y, PERK_INFO_DESC_WIDTH, PERK_INFO_DESC_HEIGHT, 1.0f, Component.literal(""), this.font);
         this.PerkDescWidget.setEnableScrollableIconRender(true);
         this.WidgetList.add(this.PerkDescWidget);
@@ -253,10 +261,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double mouseZ, double g) {
-        this.onScrollWidget(mouseX, mouseY, mouseZ);
-        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, mouseZ);
-        return super.mouseScrolled(mouseX, mouseY, mouseZ, g);
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        this.onScrollWidget(mouseX, mouseY, verticalAmount);
+        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, verticalAmount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     private void RenderEntity(GuiGraphics context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -295,11 +303,19 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         }
     }
 
-    @Override
-    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
         context.blit(TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+    }
+
+    @Override
+    public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+        this.renderBackdrop(context, delta);
         nodeWindowX = baseX + PERK_UI_X;
         nodeWindowY = baseY + PERK_UI_Y;
         cameraCenter = new Vector2i(nodeWindowX + PERK_UI_WIDTH / 2, nodeWindowY + PERK_UI_HEIGHT / 2);
@@ -592,12 +608,12 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     public void onNodeSelect() {
-        try {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Node Selected: " + this.nowSelectNode.perkID.toString()), false);
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("Can Gained (Cache): " + this.perkAvailableMap.getOrDefault(this.nowSelectNode.perkID, true)), false);
-        } catch (Exception e) {
-            Minecraft.getInstance().player.displayClientMessage(Component.literal("No Node Selected"), false);
-        }
+        // try {
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("Node Selected: " + this.nowSelectNode.perkID.toString()), false);
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("Can Gained (Cache): " + this.perkAvailableMap.getOrDefault(this.nowSelectNode.perkID, true)), false);
+        // } catch (Exception e) {
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("No Node Selected"), false);
+        // }
         if (this.nowSelectNode != null) {
             this.PerkNameWidget.setMessage(RegPerks.getPerkName(this.nowSelectNode.perkID));
             this.PerkDescWidget.reloadText(RegPerks.getPerkDescription(this.nowSelectNode.perkID));
@@ -607,5 +623,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         }
         this.refreshSelectedPerkState();
         ModPacketsS2C.sendRequestPerkAvailability();
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 }

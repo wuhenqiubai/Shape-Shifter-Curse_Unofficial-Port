@@ -154,6 +154,14 @@ public class NormalFormSelectScreen extends Screen {
         super.onClose();
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.renderBackgroundTexture(context);
+    }
+
     public void renderBackgroundTexture(GuiGraphics context) {
         // 计算居中位置，保持固定尺寸
         int bgX = (this.width - BG_WIDTH) / 2;
@@ -164,7 +172,7 @@ public class NormalFormSelectScreen extends Screen {
 
     @Override
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.renderBackgroundTexture(context);
+        this.renderBackdrop(context, delta);
         //this.renderTexture(context);
         super.render(context, mouseX, mouseY, delta);
     }
@@ -183,5 +191,9 @@ public class NormalFormSelectScreen extends Screen {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics context, int mouseX, int mouseY, float delta) {
     }
 }

@@ -91,11 +91,11 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public void onScrollWidget(double mouseX, double mouseY, double mouseZ) {
+    public void onScrollWidget(double mouseX, double mouseY, double scrollAmount) {
         if (this.enableScrollableIconRender && mouseX >= this.realWidth) {
             return;
         }
-        scrollZTotal += mouseZ;
+        scrollZTotal += scrollAmount;
         if (scrollZTotal > 0.0625f || scrollZTotal < -0.0625f) {
             int amount = (int) (scrollZTotal * 16);
             scrollZTotal -= amount * 0.0625f;

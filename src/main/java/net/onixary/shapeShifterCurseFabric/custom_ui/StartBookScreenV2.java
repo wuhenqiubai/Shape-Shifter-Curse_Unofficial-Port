@@ -73,6 +73,14 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
         ).size(ButtonSizeX, ButtonSizeY).pos(ButtonPosX, ButtonPosY).build());
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.RenderBook(context);
+    }
+
     private void RenderBook(GuiGraphics context) {
         int BookPosX = width / 2 - BookSizeX / 2;
         int BookPosY = height / 2 - BookSizeY / 2;
@@ -85,7 +93,7 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
 
     @Override
     public void render(@NonNull GuiGraphics context, int mouseX, int mouseY, float delta) {
-        this.RenderBook(context);
+        this.renderBackdrop(context, delta);
         super.render(context, mouseX, mouseY, delta);
     }
 

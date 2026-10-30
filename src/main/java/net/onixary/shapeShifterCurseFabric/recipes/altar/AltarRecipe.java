@@ -36,6 +36,11 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
         return RecipeUtils.ALTAR_RECIPE;
     }
 
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
     public abstract int recipeTime();
 
     // 进度锁 虽然SSC目前没这个需求 但我的拓展有这个需求

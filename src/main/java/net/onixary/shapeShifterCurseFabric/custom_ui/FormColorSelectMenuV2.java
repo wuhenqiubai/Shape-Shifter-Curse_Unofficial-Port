@@ -1065,6 +1065,14 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, x, y, realX, realY, Width, Height, Width, Height, BG_IMAGE_WIDTH, BG_IMAGE_HEIGHT, -1);
     }
 
+    private void renderBackdrop(GuiGraphics context, float delta) {
+        if (this.minecraft.level == null) {
+            this.renderPanorama(context, delta);
+        }
+        this.renderBlurredBackground(context);
+        this.renderTextureBackground(context);
+    }
+
     public void renderTextureBackground(GuiGraphics context) {
         int BG_X = width / 2 - BG_WIDTH / 2;
         int BG_Y = height / 2 - BG_HEIGHT / 2;
@@ -1082,8 +1090,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
-        this.renderBackground(context, mouseX, mouseY, 1.0f);
-        this.renderTextureBackground(context);
+        this.renderBackdrop(context, delta);
 
         if (!isOpenPanel02) {
             // 177,39,11,11

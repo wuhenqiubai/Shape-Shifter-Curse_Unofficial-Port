@@ -94,7 +94,8 @@ public class AnubisWolfMinionEntity extends Wolf implements IMinion<AnubisWolfMi
 
     @Override
     public void setOwner(Player player) {
-        super.setOwner(player);
+        this.setTame(player != null, false);
+        this.setOwnerReference(EntityReference.of(player));
     }
 
     public Identifier getMinionTypeID() {

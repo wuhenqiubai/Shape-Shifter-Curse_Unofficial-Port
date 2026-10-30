@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.minion;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -52,7 +53,8 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
 
     @Override
     public void setOwner(Player player) {
-        super.setOwner(player);
+        this.setTame(player != null, false);
+        this.setOwnerReference(EntityReference.of(player));
     }
 
     @Override

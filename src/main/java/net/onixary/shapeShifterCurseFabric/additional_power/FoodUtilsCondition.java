@@ -20,15 +20,14 @@ public class FoodUtilsCondition {
         return Default;
     }
 
-
     public static void registerCondition(Consumer<ConditionFactory<ItemStack>> register) {
         register.accept(
-		        new ConditionFactory<ItemStack>(
-				        ShapeShifterCurseFabric.identifier("is_vegan_ex"),
-				        new SerializableData()
-						        .add("default", SerializableDataTypes.BOOLEAN, false),
+                new ConditionFactory<ItemStack>(
+                        ShapeShifterCurseFabric.identifier("is_vegan_ex"),
+                        new SerializableData()
+                                .add("default", SerializableDataTypes.BOOLEAN, false),
                         (data, itemstack) -> FC_isVegan(itemstack, data.getBoolean("default"))
-		        )
+                )
         );
     }
 }
