@@ -264,6 +264,8 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             entry.getValue().toNBT(effect);
             effects.put(entry.getKey().toString(), effect);
         }
+        tag.put("instinctEffects", effects);
+        tag.putString("now_perk_tree", nowPerkTree.toString());
         ListTag freeForms = new ListTag();
         for (Identifier form : freePerkForms) freeForms.add(StringTag.valueOf(form.toString()));
         tag.put("free_perk_forms", freeForms);
