@@ -8,6 +8,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -310,7 +311,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         this.renderBlurredBackground(context);
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
-        context.blit(TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
 
     @Override
@@ -461,7 +462,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             //         lineLeftX + 1, nodeWindowY + PERK_UI_HEIGHT,
             //         LineColor
             // );
-            context.blit(TEXTURE, lineLeftX - 1, nodeWindowY, 431, 0, 3, PERK_UI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, lineLeftX - 1, nodeWindowY, 431, 0, 3, PERK_UI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             int screenIconX = lineLeftX - (LEVEL_ICON_WIDTH - 1) / 2;
             ISprite icon = levelSprites.get(tierIndex);
             if (icon != null) {
