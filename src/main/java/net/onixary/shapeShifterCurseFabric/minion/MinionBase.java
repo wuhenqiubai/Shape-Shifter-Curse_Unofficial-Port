@@ -50,6 +50,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
 
     @Override
     public void setOwner(Player player) {
+        this.setTame(player != null, false);
         this.setOwnerUUID(player == null ? null : player.getUUID());
     }
 
