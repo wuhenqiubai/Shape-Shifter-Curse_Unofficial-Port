@@ -16,7 +16,6 @@ import java.util.function.Function;
 
 public class ModBlocks {
 
-    // 1.21.11: Block 构造即需 Properties.id，静态初始化时通过工厂注册（setId 后构造）
     public static final Block TEMPORARY_COBWEB = registerBlock("temporary_cobweb", TemporaryCobwebBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).forceSolidOn().noCollision().requiresCorrectToolForDrops().strength(4.0F), false);
 
     private static Block registerBlock(String blockName, Function<BlockBehaviour.Properties, Block> factory, BlockBehaviour.Properties props, boolean withBlockItem) {

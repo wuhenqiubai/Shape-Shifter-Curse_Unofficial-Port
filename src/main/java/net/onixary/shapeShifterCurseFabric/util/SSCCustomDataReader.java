@@ -22,7 +22,6 @@ public class SSCCustomDataReader {
      */
 
     static {
-        // fabric.mod.json 的 id 是 shape-shifter-curse-unofficial（MOD_ID 只是资源命名空间）
         Optional<ModContainer> container = FabricLoader.getInstance().getModContainer("shape-shifter-curse-unofficial");
         if (container.isEmpty()) {
             ShapeShifterCurseFabric.LOGGER.error("ShapeShifterCurseFabric ModContainer is not found!");  // 除非哪个小天才直接复制代码连改都没改 否则不应该到这个分支

@@ -230,7 +230,6 @@ public class CustomFeralItemRenderer {
 		matrices.scale(0.0078125F, 0.0078125F, 0.0078125F);
 		MapId mapId = stack.get(DataComponents.MAP_ID);
 		MapItemSavedData mapState = MapItem.getSavedData(mapId, this.client.level);
-		// 1.21.11 submit 管线：SubmitNodeCollector 无 getBuffer，改用 submitCustomGeometry 提交地图背景 quad
 		vertexConsumers.submitCustomGeometry(matrices, mapState == null ? MAP_BACKGROUND : MAP_BACKGROUND_CHECKERBOARD, (pose, vertexConsumer) -> {
 			Matrix4f matrix4f = pose.pose();
 			vertexConsumer.addVertex(matrix4f, -7.0F, 135.0F, 0.0F).setColor(255, 255, 255, 255).setUv(0.0F, 1.0F).setLight(swingProgress);

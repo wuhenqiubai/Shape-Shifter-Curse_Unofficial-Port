@@ -4,7 +4,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.NotNull;
 import org.ladysnake.cca.api.v3.component.Component;
 import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
@@ -14,7 +13,7 @@ import java.util.OptionalInt;
 public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     private boolean keepOriginalSkin = false;
     private boolean enableFormColor = false;
-    private FormTextureUtils.ColorSetting formColor = new FormTextureUtils.ColorSetting(0x00FFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0x00000000, 0x00000000, false, false, false);
+    private FormColorSetting formColor = new FormColorSetting(0x00FFFFFF, 0x00FFFFFF, 0x00FFFFFF, 0x00000000, 0x00000000, false, false, false);
     private boolean enableFormRandomSound = true;
 
     public boolean shouldKeepOriginalSkin() {
@@ -25,7 +24,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
         return enableFormColor;
     }
 
-    public FormTextureUtils.ColorSetting getFormColor() {
+    public FormColorSetting getFormColor() {
         return formColor;
     }
 
@@ -37,12 +36,12 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
         this.enableFormColor = enableFormColor;
     }
 
-    public void setFormColor(FormTextureUtils.ColorSetting formColor) {
+    public void setFormColor(FormColorSetting formColor) {
         this.formColor = formColor;
     }
 
     public void setFormColor(int primaryColorRGBA, int accentColor1RGBA, int accentColor2RGBA, int eyeColorA, int eyeColorB, boolean primaryGreyReverse, boolean accent1GreyReverse, boolean accent2GreyReverse) {
-        this.formColor = new FormTextureUtils.ColorSetting(FormTextureUtils.RGBA2ABGR(primaryColorRGBA), FormTextureUtils.RGBA2ABGR(accentColor1RGBA), FormTextureUtils.RGBA2ABGR(accentColor2RGBA), FormTextureUtils.RGBA2ABGR(eyeColorA), FormTextureUtils.RGBA2ABGR(eyeColorB), primaryGreyReverse, accent1GreyReverse, accent2GreyReverse);
+        this.formColor = new FormColorSetting(FormColorSetting.RGBA2ABGR(primaryColorRGBA), FormColorSetting.RGBA2ABGR(accentColor1RGBA), FormColorSetting.RGBA2ABGR(accentColor2RGBA), FormColorSetting.RGBA2ABGR(eyeColorA), FormColorSetting.RGBA2ABGR(eyeColorB), primaryGreyReverse, accent1GreyReverse, accent2GreyReverse);
     }
 
     public OptionalInt RGBA_Str2RGBA(String rgbaStr) {
@@ -92,7 +91,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
         try {
             this.keepOriginalSkin = tag.getBooleanOr("KeepOriginalSkin", false);
             this.enableFormColor = tag.getBooleanOr("EnableFormColor", false);
-            this.formColor = new FormTextureUtils.ColorSetting(FormTextureUtils.RGBA2ABGR(tag.getIntOr("PrimaryColor", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("AccentColor1", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("AccentColor2", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("EyeColorA", 0)), FormTextureUtils.RGBA2ABGR(tag.getIntOr("EyeColorB", 0)),
+            this.formColor = new FormColorSetting(FormColorSetting.RGBA2ABGR(tag.getIntOr("PrimaryColor", 0)), FormColorSetting.RGBA2ABGR(tag.getIntOr("AccentColor1", 0)), FormColorSetting.RGBA2ABGR(tag.getIntOr("AccentColor2", 0)), FormColorSetting.RGBA2ABGR(tag.getIntOr("EyeColorA", 0)), FormColorSetting.RGBA2ABGR(tag.getIntOr("EyeColorB", 0)),
                     tag.getBooleanOr("PrimaryGreyReverse", false), tag.getBooleanOr("Accent1GreyReverse", false), tag.getBooleanOr("Accent2GreyReverse", false));
             this.enableFormRandomSound = tag.getBooleanOr("EnableFormRandomSound", true);
         }
@@ -100,7 +99,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
         {
             this.keepOriginalSkin = false; // Default to false
             this.enableFormColor = false; // Default to false
-            this.formColor = new FormTextureUtils.ColorSetting(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, false, false, false); // Default to default color
+            this.formColor = new FormColorSetting(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, false, false, false); // Default to default color
             this.enableFormRandomSound = true; // Default to true
         }
     }
@@ -108,11 +107,11 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     public void writeToNbt(CompoundTag tag, HolderLookup.@NotNull Provider registryLookup) {
         tag.putBoolean("KeepOriginalSkin", this.keepOriginalSkin);
         tag.putBoolean("EnableFormColor", this.enableFormColor);
-        tag.putInt("PrimaryColor", FormTextureUtils.ABGR2RGBA(this.formColor.getPrimaryColor()));
-        tag.putInt("AccentColor1", FormTextureUtils.ABGR2RGBA(this.formColor.getAccentColor1()));
-        tag.putInt("AccentColor2", FormTextureUtils.ABGR2RGBA(this.formColor.getAccentColor2()));
-        tag.putInt("EyeColorA", FormTextureUtils.ABGR2RGBA(this.formColor.getEyeColorA()));
-        tag.putInt("EyeColorB", FormTextureUtils.ABGR2RGBA(this.formColor.getEyeColorB()));
+        tag.putInt("PrimaryColor", FormColorSetting.ABGR2RGBA(this.formColor.getPrimaryColor()));
+        tag.putInt("AccentColor1", FormColorSetting.ABGR2RGBA(this.formColor.getAccentColor1()));
+        tag.putInt("AccentColor2", FormColorSetting.ABGR2RGBA(this.formColor.getAccentColor2()));
+        tag.putInt("EyeColorA", FormColorSetting.ABGR2RGBA(this.formColor.getEyeColorA()));
+        tag.putInt("EyeColorB", FormColorSetting.ABGR2RGBA(this.formColor.getEyeColorB()));
         tag.putBoolean("PrimaryGreyReverse", this.formColor.getPrimaryGreyReverse());
         tag.putBoolean("Accent1GreyReverse", this.formColor.getAccent1GreyReverse());
         tag.putBoolean("Accent2GreyReverse", this.formColor.getAccent2GreyReverse());
@@ -122,7 +121,7 @@ public class PlayerSkinComponent implements Component, AutoSyncedComponent {
     public void clear() {
         this.keepOriginalSkin = false; // Default to false
         this.enableFormColor = false; // Default to false
-        this.formColor = new FormTextureUtils.ColorSetting(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, false, false, false); // Default to default color
+        this.formColor = new FormColorSetting(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, false, false, false); // Default to default color
         this.enableFormRandomSound = true; // Default to true
     }
 

@@ -41,7 +41,6 @@ public class BaseCost implements ICost {
     }
 
 
-    // BaseCost 只存 type + amount，用不到 registries，但签名必须与 ICost 一致。
     @Override
     public void writeToNBT(CompoundTag nbt, HolderLookup.Provider registries) {
         nbt.putString("type", type.getID().toString());
@@ -52,7 +51,6 @@ public class BaseCost implements ICost {
     @Override
     public void readFromNBT(CompoundTag nbt, HolderLookup.Provider registries) {
         try {
-            // 1.21.11：CompoundTag 的 getString/getInt 改返回 Optional，用 getStringOr/getIntOr。
             type = RegCostType.getCostType(Identifier.tryParse(nbt.getStringOr("type", "")));
             amount = nbt.getIntOr("amount", 0);
         } catch (Exception e) {

@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class LongNeckArmorFeatureRendererMixin<S extends HumanoidRenderState, M extends HumanoidModel<S>, A extends HumanoidModel<S>> {
     @Unique private static FormRenderUtils.BoneBipedState headBoneState;
 
-    // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
     @Unique
     private static AbstractClientPlayer getRenderedPlayer(HumanoidRenderState humanoidRenderState) {
         if (humanoidRenderState instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
@@ -38,8 +37,6 @@ public class LongNeckArmorFeatureRendererMixin<S extends HumanoidRenderState, M 
         return null;
     }
 
-    // 1.21.11 的 renderArmorPiece 不再暴露 armor model，改为在 getArmorModel 返回后立刻修改头部姿态，
-    // 再在 renderArmorPiece 返回时恢复，以保持原逻辑（渲染护甲前改头、渲染完成后还原）
     @Inject(
             method = "getArmorModel(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/client/model/HumanoidModel;",
             at = @At("RETURN")

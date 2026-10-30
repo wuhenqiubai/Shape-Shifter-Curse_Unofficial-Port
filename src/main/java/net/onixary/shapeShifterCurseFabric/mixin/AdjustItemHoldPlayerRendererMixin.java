@@ -34,8 +34,6 @@ public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRend
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void init(EntityRendererProvider.Context ctx, boolean slim, CallbackInfo ci) {
         this.addLayer(new MouthItemFeature<>(this, this.entityRenderDispatcher.getItemInHandRenderer()));
-        // ThirdPersonExtraHandItemRender 仍保留旧的 LivingEntity 泛型（RenderLayer 在 1.21.11 已改为渲染状态泛型），
-        // 此处用原始类型适配调用，待该渲染器迁移后此调用仍可编译
         this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, this.entityRenderDispatcher.getItemInHandRenderer()));
         ItemInHandRenderer itemRenderer = this.entityRenderDispatcher.getItemInHandRenderer();
         this.addLayer(new ExtraItemFeatureRenderer<>(this, this.entityRenderDispatcher, itemRenderer));

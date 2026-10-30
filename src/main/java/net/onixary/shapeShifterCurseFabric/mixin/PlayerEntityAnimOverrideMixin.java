@@ -49,27 +49,9 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
     @Unique
     AnimSystem animSystem = new AnimSystem(this);
 
-    /**
-     * 本 controller 上已经注册过的额外骨骼名。
-     * 用它去重是必须的：{@code registerPlayerAnimBone(String)} 每次都会 new 一个
-     * {@code AdvancedPlayerAnimBone} 覆盖旧对象，重复调用会把 per-bone 的 enable / 各轴开关状态重置。
-     */
     @Unique
     Set<String> ssc$registeredExtraBones = new HashSet<>();
 
-    /**
-     * 把形态 {@code extra_parts_map} 里的额外骨骼注册进 PAL 控制器。
-     * <p>
-     * PAL 的 {@code setupNewAnimation} 只把「控制器注册表里有的名字」放进 {@code activeBones}；
-     * 而 {@code PlayerAnimationController.registerBones()} 硬编码只注册 11 根 vanilla 骨，
-     * 未注册的骨骼在 {@code get3DTransformRaw} 里被**静默返回零值**（不报错不打日志）——
-     * 这正是 {@code bipedRightHindLeg} / {@code bipedLeftHindLeg} 这类额外骨骼完全没有动画的原因。
-     * <p>
-     * 上游用 PlayerAnimator 时按动画原始骨骼名直查、不需要注册，所以这是换用 PAL 之后引入的。
-     * <p>
-     * 必须在本方法内**先于** {@code triggerAnimation} / {@code playAnimation} 执行：
-     * {@code activeBones} 是在 {@code setupNewAnimation} 里算出来的，注册晚了要等下一次换动画才生效。
-     */
     @Unique
     private void ssc$ensureExtraBonesRegistered() {
         if (controller == null || AnimSystem.EXTRA_ANIM_BONES.isEmpty()) {
@@ -85,7 +67,6 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
 
     @Inject(method = "tick", at = @At("TAIL"))
     void tick(CallbackInfo ci) {
-        // 必须放在触发动画之前，见 ssc$ensureExtraBonesRegistered 的说明
         ssc$ensureExtraBonesRegistered();
         animToPlay = this.animSystem.getAnimation();
         if (animToPlay != null) {
@@ -103,22 +84,6 @@ public abstract class PlayerEntityAnimOverrideMixin extends Player {
             currentAnimation = null;
             controller.stop();
         }
-        // 上半身覆盖层
-//        AnimationHolder upperAnim = this.animSystem.getUpperBodyOverride();
-//        if (upperAnim != null) {
-//            Animation palAnim = upperAnim.getAnimation();
-//            if (currentUpperAnimation != palAnim) {
-//                currentUpperAnimation = palAnim;
-//                if (palAnim != null) {
-//                    upperController.triggerAnimation(palAnim, 0);
-//                } else {
-//                    upperController.stop();
-//                }
-//            }
-//        } else {
-//            currentUpperAnimation = null;
-//            upperController.stop();
-//        }
     }
 
     @Unique

@@ -6,8 +6,14 @@
   "environment": "server",
   "entrypoints": {
     "fabric-gametest": [
+      "net.onixary.shapeShifterCurseFabric.additional_power.SnowFoxPerkCheck",
       "net.onixary.shapeShifterCurseFabric.recipes.altar.AltarRecipeCheck",
-      "net.onixary.shapeShifterCurseFabric.additional_power.DisableHurtCameraPowerCheck"
+      "net.onixary.shapeShifterCurseFabric.additional_power.DisableHurtCameraPowerCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.FormPerkCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.FamiliarFoxPerkCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.WolfSpiderPerkCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.SubformPerkCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.AxolotlVegetationCheck"
     ]
   }
 }

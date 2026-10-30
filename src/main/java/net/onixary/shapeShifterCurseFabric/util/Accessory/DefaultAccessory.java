@@ -41,6 +41,9 @@ public class DefaultAccessory {
                     for (String slotName : invMap.get(slotGroup).keySet()) {
                         List<ItemStack> stacks = new ArrayList<>();
                         TrinketInventory inventory = invMap.get(slotGroup).get(slotName);
+                        if (inventory == null) {
+                            continue;
+                        }
                         for (int i = 0; i < inventory.getContainerSize(); i++) {
                             ItemStack stack = inventory.getItem(i);
                             stacks.add(stack);
@@ -61,6 +64,9 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = attachment.getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
+                    if (inventory == null) {
+                        return ItemList;
+                    }
                     for (int i = 0; i < inventory.getContainerSize(); i++) {
                         ItemStack stack = inventory.getItem(i);
                         ItemList.add(stack);
@@ -78,6 +84,9 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = attachment.getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
+                    if (inventory == null) {
+                        return null;
+                    }
                     if (Index >= 0 && Index < inventory.getContainerSize()) {
                         return inventory.getItem(Index);
                     }
@@ -94,6 +103,9 @@ public class DefaultAccessory {
                 Map<String, Map<String, TrinketInventory>> invMap = attachment.getInventory();
                 if (invMap.containsKey(SlotGroup) && invMap.get(SlotGroup).containsKey(SlotName)) {
                     TrinketInventory inventory = invMap.get(SlotGroup).get(SlotName);
+                    if (inventory == null) {
+                        return;
+                    }
                     inventory.setItem(Index, stack);
                 }
             }

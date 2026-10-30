@@ -70,7 +70,6 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
 
     public static AttributeSupplier.Builder createAttributes() {
         // 我觉得把逆天攻击距离移除之后 攻击力高点也没多大问题
-        // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 12.0)
                 .add(Attributes.ATTACK_DAMAGE, 3.0f)
@@ -127,9 +126,6 @@ public class TransformativeWolfEntity extends Wolf implements ITMob {
         return;
     }
 
-    // 1.21.11 起 Entity.getDefaultLootTable() 被移除，战利品表改由 EntityType 声明：
-    // EntityType.Builder 默认按「<命名空间>:entities/<实体id>」推导，本实体注册 id 为 t_wolf，
-    // 推导结果恰好等于原先 override 的返回值，故直接删除该 override（行为不变）。
     protected ResourceKey<LootTable> getLootTableKey() {
         return ResourceKey.create(
                 Registries.LOOT_TABLE,

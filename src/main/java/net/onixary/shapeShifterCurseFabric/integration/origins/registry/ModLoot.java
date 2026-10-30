@@ -8,9 +8,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 import net.onixary.shapeShifterCurseFabric.integration.origins.util.OriginLootCondition;
 
-// Enchantment loot tables can be added via JSON data files:
-//   data/origins/loot_table/...
-
 public class ModLoot {
 
     private static final Identifier DUNGEON_LOOT = Identifier.fromNamespaceAndPath("minecraft", "chests/simple_dungeon");
@@ -87,5 +84,4 @@ public class ModLoot {
 //    private static NbtCompound createEnchantmentTag(Enchantment enchantment, int level) {
 //        EnchantmentLevelEntry entry = new EnchantmentLevelEntry(enchantment, level);
 //        return EnchantedBookItem.forEnchantment(entry).getNbt();
-//    }
 }

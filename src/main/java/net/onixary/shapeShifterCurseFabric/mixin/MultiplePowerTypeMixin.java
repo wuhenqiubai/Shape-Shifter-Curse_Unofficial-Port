@@ -7,12 +7,6 @@ import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-/**
- * Prevents NPE when {@link MultiplePowerType#getSubPowers()} is called
- * before {@link MultiplePowerType#setSubPowers} has been set.
- * This can happen during data pack loading when GlobalPowerSet processing
- * encounters a MultiplePowerType whose sub-powers haven't been loaded yet.
- */
 @Mixin(value = MultiplePowerType.class, remap = false)
 public abstract class MultiplePowerTypeMixin {
 

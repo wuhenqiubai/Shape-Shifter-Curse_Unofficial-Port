@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.item.*;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.material.Fluids;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.items.armors.MorphScaleArmor;
@@ -28,7 +29,10 @@ import static net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock.*;
 public class RegCustomItem {
     private RegCustomItem(){}
 
-    //public static final Item CURSED_BOOK_OF_SHAPE_SHIFTER = register("cursed_book_of_shape_shifter", StartBook::new);
+    public static final Item GRAPHENE_BLADE = register("graphene_blade",
+            p -> new Item(p.sword(ToolMaterial.DIAMOND, 4.0f, -2.4f).durability(128)));
+    public static final Item COMPOUND_KINETIC_BOW = register("compound_kinetic_bow", p -> new BowItem(p.durability(768)));
+
     public static final Item BOOK_OF_SHAPE_SHIFTER = register("book_of_shape_shifter", BookOfShapeShifter::new);
     public static final Item UNTREATED_MOONDUST = register("untreated_moondust", UntreatedMoonDust::new);
     public static final Item INHIBITOR = register("inhibitor", Inhibitor::new);
@@ -73,9 +77,6 @@ public class RegCustomItem {
     public static final Item RESONANT_CORE = register("resonant_core", ResonantCoreTrinket::new);
     public static final Item VENOM_SPINDLE = register("venom_spindle", VenomSpindle::new);
 
-    // 合并 1.21.1 新增物品：注册入口沿用 1.21.11 的 Function<Item.Properties, T> 工厂式 register
-    // （新物品实例由 register 内部注入带 setId 的 Properties），故一律写成 props -> new X(...)。
-    // 1.21.11 已移除 TieredItem，工具类物品统一声明为 Item（工具属性改由 Properties.sword(...) 承载）。
     public static final Item CHARM_OF_NIGHT_CRYSTAL_PLUS = register("charm_of_night_crystal_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));
     public static final Item CHARM_OF_HOLLOW_FANG_PLUS = register("charm_of_hollow_fang_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));
     public static final Item ATTACH_HOOK_PLUS = register("attach_hook_plus", props -> new FormTrinket(props.rarity(Rarity.RARE)));
@@ -109,10 +110,15 @@ public class RegCustomItem {
     // 用于成就图标的占位物品
     public static final Item ICON_CURSED_MOON = register("icon_cursed_moon", Item::new);
     // 蛛丝弹占位物品
-    public static final Item WEB_PROJECTILE = register("web_projectile", Item::new);
+    public static final Item WEB_PROJECTILE = register("web_projectile", WebProjectileItem::new);
     public static final Item SILK_DEW = register("silk_dew", SilkDew::new);
 
     public static final Item RIPPLE_MIRROR = register("ripple_mirror", RippleMirror::new);
+
+    public static final Item HEALING_CHARM = register("healing_charm_paper", p -> new PotionCharmItem(Potions.STRONG_HEALING, p));
+    public static final Item HARMING_CHARM = register("harming_charm_paper", p -> new PotionCharmItem(Potions.STRONG_HARMING, p));
+    public static final Item POISON_CHARM = register("poison_charm_paper", p -> new PotionCharmItem(Potions.STRONG_POISON, p));
+
 
     public static ItemStack buildPotion(Item PotionItem, Potion potion) {
         ItemStack potionStack = new ItemStack(PotionItem);
@@ -185,16 +191,22 @@ public class RegCustomItem {
                 entries.accept(TRANSFORMATIVE_AXOLOTL_BUCKET);
                 entries.accept(SPIDER_FLUID_COCOON);
                 entries.accept(AUXILIARY_SWORD);
+                entries.accept(GRAPHENE_BLADE);
+                entries.accept(COMPOUND_KINETIC_BOW);
                 entries.accept(AUXILIARY_PICKAXE);
                 entries.accept(AUXILIARY_AXE);
                 entries.accept(SELECT_FORM_ITEM);
                 entries.accept(SILK_DEW);
                 entries.accept(RIPPLE_MIRROR);
+                entries.accept(HEALING_CHARM);
+                entries.accept(HARMING_CHARM);
+                entries.accept(POISON_CHARM);
                 // 方块物品注册
                 entries.accept(MOONDUST_CRYSTAL_GRIT);
                 entries.accept(WEB_COMPOSTER);
                 entries.accept(DEW_COVERED_COBWEB);
                 entries.accept(ALTAR_BLOCK);
+                entries.accept(FORM_ATTUNER_BLOCK);
                 entries.acceptAll(buildAllPotions(
                         RegCustomPotions.MOONDUST_POTION,
                         RegCustomPotions.BAT_FORM_POTION,
@@ -271,4 +283,5 @@ public class RegCustomItem {
         });
          */
     }
+
 }

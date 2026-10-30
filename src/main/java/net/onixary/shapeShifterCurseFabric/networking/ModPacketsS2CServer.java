@@ -325,7 +325,6 @@ public class ModPacketsS2CServer {
         ServerPlayNetworking.send(player,  new BytePayload(BytePayload.id(ModPackets.REQUEST_PATRON_AUTH_FILE), buf));
     }
 
-    // 服务端注册全部 S2C payload 类型（修复 issue #21：服务端漏注册导致进服 ClassCastException）
     public static void registerServerS2C() {
         BytePayload.registerS2C(ModPackets.SYNC_CURSED_MOON_DATA);
         BytePayload.registerS2C(ModPackets.SYNC_FORM_CHANGE);
@@ -393,7 +392,6 @@ public class ModPacketsS2CServer {
         for (IPerk perk : perks) {
             buf.writeIdentifier(perk.getID());
             CompoundTag nbt = new CompoundTag();
-            // 1.21.1：ItemStack 序列化必须带 registry 上下文（ItemCost 的示例栈要用）。
             perk.getCost().__writeToNBT(nbt, player.level().registryAccess());
             buf.writeNbt(nbt);
         }

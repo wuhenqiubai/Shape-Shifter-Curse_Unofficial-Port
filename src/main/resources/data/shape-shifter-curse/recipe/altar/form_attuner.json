@@ -1,0 +1,13 @@
+{
+  "type": "shape-shifter-curse:altar_shapeless",
+  "ingredients": [
+    "minecraft:beacon",
+    "shape-shifter-curse:altar"
+  ],
+  "result": {
+    "id": "shape-shifter-curse:form_attuner",
+    "count": 1
+  },
+  "time": 400,
+  "moondust_cost": 4
+}

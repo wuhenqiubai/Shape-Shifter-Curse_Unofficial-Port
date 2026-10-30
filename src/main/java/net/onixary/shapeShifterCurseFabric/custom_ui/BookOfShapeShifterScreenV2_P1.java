@@ -19,7 +19,6 @@ import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidg
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleTextRenderer;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
-import org.joml.Quaternionf;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
@@ -50,8 +49,6 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - (BookSizeX * BookScale) / 2;
         int BookPosY = height / 2 - (BookSizeY * BookScale) / 2;
-        // 1.21.11 文字渲染用标准 ARGB alpha 做透明度：0x222222 的 alpha=0x22(13%) 会让正文几乎透明不可见。
-        // 保持 RGB 不变（上游乘法模式语义），补全 alpha=FF 恢复可见性。
         int DefaultTextColor = 0xFF222222;
         int HeaderTextColor = 0xFFDDDDDD;
         ScaleTextRenderer scaleTextRenderer = new ScaleTextRenderer(font);
@@ -112,37 +109,13 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
     }
 
     private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        float f = (float)Math.atan((double)(mouseX / 40.0F));
-        float g = (float)Math.atan((double)(mouseY / 40.0F));
-        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
-        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
-        quaternionf.mul(quaternionf2);
-        float h = entity.yBodyRot;
-        float i = entity.getYRot();
-        float j = entity.getXRot();
-        float k = entity.yHeadRotO;
-        float l = entity.yHeadRot;
-        float m = entity.yBodyRotO;
-        entity.yBodyRot = 180.0F + f * 20.0F;
-        entity.yBodyRotO = entity.yBodyRot;
-        entity.setYRot(180.0F + f * 40.0F);
-        entity.setXRot(-g * 20.0F);
-        entity.yHeadRot = entity.getYRot();
-        entity.yHeadRotO = entity.getYRot();
-
         int x1 = x - size;
         int y1 = y - size;
         int x2 = x + size;
         int y2 = y + size;
         InventoryScreen.extractEntityInInventoryFollowsMouse(context, x1, y1, x2, y2, size, 0.0625f, mouseX, mouseY, entity);
-
-        entity.yBodyRot = h;
-        entity.yBodyRotO = m;
-        entity.setYRot(i);
-        entity.setXRot(j);
-        entity.yHeadRotO = k;
-        entity.yHeadRot = l;
     }
+
 
     private void RenderBook(GuiGraphicsExtractor context) {
         int FinalBookSizeX = BookSizeX;
@@ -194,12 +167,11 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         int BookPosX = width / 2 - FinalBookSizeX / 2;
         int BookPosY = height / 2 - FinalBookSizeY / 2;
         this.RenderBook(context);
-	    super.extractRenderState(context, mouseX, mouseY, delta);
         // 实体渲染原点为实体中心脚下
         // Size -> (70, 66) Pos -> (35, 15)
         int PlayerX = BookPosX + 70 * BookScale;
 	    int PlayerY = BookPosY + 45 * BookScale;
-        this.RenderEntity(context, PlayerX, PlayerY, 30 * BookScale, PlayerX - mouseX, PlayerY - 37 * BookScale - mouseY, currentPlayer);
+        this.RenderEntity(context, PlayerX, PlayerY, 30 * BookScale, mouseX, mouseY, currentPlayer);
         // Cursed Moon Icon
         // Size -> (8, 8), Pos -> (115, 92)
         context.blit(RenderPipelines.GUI_TEXTURED, cursed_moon_icon_texID, BookPosX + 115 * BookScale, BookPosY + 92 * BookScale,

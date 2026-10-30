@@ -1,16 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
-import net.minecraft.client.input.KeyEvent;
-import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,22 +14,20 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.ScaleScrollTextWidget;
 import net.onixary.shapeShifterCurseFabric.custom_ui.ui_part.WidgetEXUtils;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
+import net.onixary.shapeShifterCurseFabric.perk.IDependent;
 import net.onixary.shapeShifterCurseFabric.perk.PerkTree;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.util.util.BaseSprite;
 import net.onixary.shapeShifterCurseFabric.util.util.ISprite;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.BaseCost;
-import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.CostTypeIcons;
+import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.IFUSDrawableCostType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix3x2fStack;
 import org.joml.Quaternionf;
 import org.joml.Vector2i;
-import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,11 +37,9 @@ import java.util.Objects;
 // 标记 UNTESTED 代表这个函数没测试 测试完了就删(估计最后得有一堆没测试函数 还是标一下大概率炸的函数吧)
 
 public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX {
-    // 合并 1.21.1：级别图标（levelSprites）与 452 宽的贴图（新增段位图标 + 431 处的分隔竖线）
-    // 属于 1.21.1 的新功能，予以保留；类型沿用 1.21.11 的 Identifier。
     public static final Identifier TEXTURE = ShapeShifterCurseFabric.identifier("textures/gui/shape_shifter_tuner_ui.png");
     public static final HashMap<Integer, ISprite> levelSprites = new HashMap<>();
-    public static final int TEXTURE_WIDTH = 452;
+    public static final int TEXTURE_WIDTH = 454;
     public static final int TEXTURE_HEIGHT = 190;
 
     static {
@@ -92,10 +84,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public static final int PERK_INFO_NAME_WIDTH = 91;
     public static final int PERK_INFO_NAME_HEIGHT = 14;
 
-    public static final int PERK_INFO_DESC_X = 316;
-    public static final int PERK_INFO_DESC_Y = 28;
-    public static final int PERK_INFO_DESC_WIDTH = 91;
-    public static final int PERK_INFO_DESC_HEIGHT = 115;
+    public static final int PERK_INFO_DESC_X = 314;
+    public static final int PERK_INFO_DESC_Y = 34;
+    public static final int PERK_INFO_DESC_WIDTH = 98;
+    public static final int PERK_INFO_DESC_HEIGHT = 110;
 
     public static final int PERK_INFO_COST_ICON_X = 315;
     public static final int PERK_INFO_COST_ICON_Y = 144;
@@ -115,14 +107,14 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public int baseX = 0;
     public int baseY = 0;
 
-    public static final Identifier LABEL_GAINED = ShapeShifterCurseFabric.identifier("textures/perk/system/gained.png");
-    public static final Identifier LABEL_SELECT = ShapeShifterCurseFabric.identifier("textures/perk/system/select.png");
-    public static final Identifier LABEL_SELECTED = ShapeShifterCurseFabric.identifier("textures/perk/system/selected.png");
-    public static final Identifier LABEL_CAN_NOT_GAIN = ShapeShifterCurseFabric.identifier("textures/perk/system/can_not_gain.png");
-    public static final Identifier LABEL_DEPEND = ShapeShifterCurseFabric.identifier("textures/perk/system/depend.png");
+    // TODO 此处最好由PerkTree决定用用什么贴图
+    public static final ISprite GAINED_SPRITE = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 112, 20, 20);
+    public static final ISprite SELECTED_SPRITE = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 72, 20, 20);
+    public static final ISprite NOT_GAINED_SPRITE = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 132, 20, 20);
+    public static final ISprite CAN_NOT_GAIN_SPRITE = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 152, 20, 20);
+    public static final ISprite DEPEND_SPRITE = new BaseSprite(TEXTURE, TEXTURE_WIDTH, TEXTURE_HEIGHT, 434, 92, 20, 20);
 
     public static final HashMap<Identifier, Boolean> perkAvailableMap = new HashMap<>();  // 仅客户端数据 仅影响渲染 仅代表服务器获取这个表时无法获取这个Perk
-    // 合并 1.21.1：消耗从「固定经验值」升级为通用 ICost（XP / 物品等），类型沿用 1.21.11 的 Identifier
     public static final HashMap<Identifier, ICost> perkCostMap = new HashMap<>();  // 仅客户端数据 实际消耗由服务器决定
     public static final ICost EMPTY_COST = new BaseCost();
 
@@ -145,6 +137,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public Vector2i nodeCenter = new Vector2i( 0, 0);
 
     public static final int nodeBaseX = 25;
+    public static int nowNodeBaseX = 0;
     public static final int posXPerTier = 50;
     public static final int nodeLineRootXOffset = 11;
     public static final int nodeLineDependXOffset = -10;
@@ -167,6 +160,8 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public StringWidget PerkCostAmountWidget;
 
     public int MaxPerkLevel = 0;
+    public int updateCostTicker = 0;
+    public int nowCostTicker = -1;
 
     @Override
     public WidgetEXUtils.WidgetRect getRect() {
@@ -184,6 +179,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         super(title);
         this.tier = tier;
         this.perkTree = perkTree != null ? perkTree : Objects.requireNonNull(RegPerks.getPerkTree(RegPerks.EMPTY_PERK_TREE));
+        int lowestTier = this.perkTree.perkLowestTier_r;
+        nowNodeBaseX = nodeBaseX - lowestTier * posXPerTier;
+
         ModPacketsS2C.sendRequestPerkAvailability();
         ModPacketsS2C.sendRequestPerkData();
         for (PerkTree.PerkNode node : this.perkTree.getAllNodes()) {
@@ -197,94 +195,102 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     public void init() {
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
-        this.PerkNameWidget = new StringWidget(baseX + PERK_INFO_NAME_X, baseY + PERK_INFO_NAME_Y, PERK_INFO_NAME_WIDTH, PERK_INFO_NAME_HEIGHT, Component.literal(""), this.font);
+        this.PerkNameWidget = new StringWidget(baseX + PERK_INFO_NAME_X, baseY + PERK_INFO_NAME_Y, PERK_INFO_NAME_WIDTH, PERK_INFO_NAME_HEIGHT, Component.literal(""), this.font)
+                .setMaxWidth(PERK_INFO_NAME_WIDTH, StringWidget.TextOverflow.SCROLLING);
         this.PerkDescWidget = new ScaleScrollTextWidget(baseX + PERK_INFO_DESC_X, baseY + PERK_INFO_DESC_Y, PERK_INFO_DESC_WIDTH, PERK_INFO_DESC_HEIGHT, 1.0f, Component.literal(""), this.font);
         this.PerkDescWidget.setEnableScrollableIconRender(true);
         this.WidgetList.add(this.PerkDescWidget);
-        this.AcquirePerkButton = Button.builder(Component.literal("GET"), button -> {
+        this.AcquirePerkButton = Button.builder(Component.translatable("gui.shape-shifter-curse.perk.select_node"), button -> {
             if (this.nowSelectNode != null) {
                 PerkUtils.addPerk(Minecraft.getInstance().player, this.perkTree.getID(), this.nowSelectNode.perkID);
+                // 因为更新时会自动更新nowCostTicker 所以其实这个参数可以做倒计时更新
+                nowCostTicker = 5;
                 ModPacketsS2C.sendRequestPerkAvailability();
             }
         }).pos(baseX + PERK_INFO_GAIN_BUTTON_X, baseY + PERK_INFO_GAIN_BUTTON_Y).size(PERK_INFO_GAIN_BUTTON_WIDTH, PERK_INFO_GAIN_BUTTON_HEIGHT).build();
-        // 合并 1.21.1：消耗数值控件改为 PerkCostAmountWidget（COST_AMOUNT 版坐标）
         this.PerkCostAmountWidget = new StringWidget(baseX + PERK_INFO_COST_AMOUNT_X, baseY + PERK_INFO_COST_AMOUNT_Y, PERK_INFO_COST_AMOUNT_WIDTH, PERK_INFO_COST_AMOUNT_HEIGHT, Component.literal(""), this.font);
-        // 1.21.11: StringWidget 移除了 alignRight()/horizontalAlignment（1.21.1 是靠私有 alignX 字段
-        // 在 renderWidget 内做 x 偏移）。改为在 setPerkCostAmountText() 里直接调整 widget 的 x 实现右对齐。
-        this.setPerkCostAmountText(Component.literal(""));
         this.addRenderableWidget(this.PerkNameWidget);
         this.addRenderableWidget(this.PerkDescWidget);
         this.addRenderableWidget(this.AcquirePerkButton);
         this.addRenderableWidget(this.PerkCostAmountWidget);
         super.init();
+        this.refreshSelectedPerkState();
     }
 
     @Override
-    public boolean mouseClicked(MouseButtonEvent mouseButtonEvent, boolean bl) {
-        // 1.21.11: mouseClicked 的形参改成了 MouseButtonEvent，旧代码里的 mouseX/mouseY/button 要从事件里取
-        double mouseX = mouseButtonEvent.x();
-        double mouseY = mouseButtonEvent.y();
-        int button = mouseButtonEvent.button();
-        this.onClickWidget(mouseX, mouseY, button);
-        this.NodeScreenMouseClickHandler((int)mouseX, (int)mouseY, button);
-        return super.mouseClicked(mouseButtonEvent, bl);
+    public void tick() {
+        super.tick();
+        if (nowCostTicker >= 0) {
+            this.updateCostTicker++;
+            if (updateCostTicker >= nowCostTicker) {
+                this.refreshSelectedPerkState();
+            }
+        }
     }
 
     @Override
-    public boolean mouseReleased(MouseButtonEvent mouseButtonEvent) {
-        // 1.21.11: mouseReleased/mouseDragged 的形参同样改成了 MouseButtonEvent
-        double mouseX = mouseButtonEvent.x();
-        double mouseY = mouseButtonEvent.y();
-        int button = mouseButtonEvent.button();
-        this.onReleaseWidget(mouseX, mouseY, button);
-        return super.mouseReleased(mouseButtonEvent);
+    public boolean mouseClicked(net.minecraft.client.input.MouseButtonEvent event, boolean bl) {
+        this.onClickWidget(event.x(), event.y(), event.button());
+        this.NodeScreenMouseClickHandler((int)event.x(), (int)event.y(), event.button());
+        return super.mouseClicked(event, bl);
     }
 
     @Override
-    public boolean mouseDragged(MouseButtonEvent mouseButtonEvent, double deltaX, double deltaY) {
-        double mouseX = mouseButtonEvent.x();
-        double mouseY = mouseButtonEvent.y();
-        int button = mouseButtonEvent.button();
-        this.onDragWidget(mouseX, mouseY, button, deltaX, deltaY);
-        this.NodeScreenMouseDragHandler((int)mouseX, (int)mouseY, button, deltaX, deltaY);
-        return super.mouseDragged(mouseButtonEvent, deltaX, deltaY);
+    public boolean mouseReleased(net.minecraft.client.input.MouseButtonEvent event) {
+        this.onReleaseWidget(event.x(), event.y(), event.button());
+        return super.mouseReleased(event);
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double mouseZ, double g) {
-        this.onScrollWidget(mouseX, mouseY, mouseZ);
-        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, mouseZ);
-        return super.mouseScrolled(mouseX, mouseY, mouseZ, g);
+    public boolean mouseDragged(net.minecraft.client.input.MouseButtonEvent event, double deltaX, double deltaY) {
+        this.onDragWidget(event.x(), event.y(), event.button(), deltaX, deltaY);
+        this.NodeScreenMouseDragHandler((int)event.x(), (int)event.y(), event.button(), deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        this.onScrollWidget(mouseX, mouseY, verticalAmount);
+        this.NodeScreenMouseScrollHandler((int)mouseX, (int)mouseY, verticalAmount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
-        // 1.21.11: renderEntityInInventoryFollowsMouse 改为「矩形区域 + 鼠标绝对坐标」签名，
-        // 内部自行完成 bodyRot/yRot 的鼠标跟随计算，并改用 render state（不再改写实体自身状态）。
-        // 原先手写的 atan / Quaternionf / 实体朝向保存恢复整段随之删除。
-        // 注意 mouseX/mouseY 现在要传【绝对屏幕坐标】（旧签名收的是「中心-鼠标」差值）。
-        // 1.21.11: 矩形是实体的渲染视口（画中画裁剪区），size×size 会裁掉模型。
-        // 按原版 InventoryScreen 比例（49x70 配 size=30）换算：半宽 ≈ size*0.817、半高 ≈ size*1.167。
-        // 1.21.1 的 (x,y) 是绘制原点（实体向上画），此处矩形中心是显示基准 → 上移约半个身高。
-        InventoryScreen.extractEntityInInventoryFollowsMouse(
-                context,
-                x - size * 4 / 5, y - size * 7 / 6 - size / 2,
-                x + size * 4 / 5, y + size * 7 / 6 - size / 2,
-                size, 0.0625F,
-                mouseX, mouseY, entity);
-    }
-
-    // 1.21.11: StringWidget 不再支持内部对齐（alignRight/horizontalAlignment 已移除），
-    // 改为按「基准 x + 区域宽 - 文本宽」手动设置 widget 位置来实现右对齐。
-    private void setPerkCostAmountText(Component component) {
-        this.PerkCostAmountWidget.setMessage(component);
-        this.PerkCostAmountWidget.setX(baseX + PERK_INFO_COST_AMOUNT_X + PERK_INFO_COST_AMOUNT_WIDTH - this.font.width(component));
+        float f = (float)Math.atan((double)(mouseX / 40.0F));
+        float g = (float)Math.atan((double)(mouseY / 40.0F));
+        Quaternionf quaternionf = (new Quaternionf()).rotateZ(3.1415927F);
+        Quaternionf quaternionf2 = (new Quaternionf()).rotateX(g * 20.0F * 0.017453292F);
+        quaternionf.mul(quaternionf2);
+        float h = entity.yBodyRot;
+        float i = entity.getYRot();
+        float j = entity.getXRot();
+        float k = entity.yHeadRotO;
+        float l = entity.yHeadRot;
+        float m = entity.yBodyRotO;
+        entity.yBodyRot = 180.0F + f * 20.0F;
+        entity.yBodyRotO = entity.yBodyRot;
+        entity.setYRot(180.0F + f * 40.0F);
+        entity.setXRot(-g * 20.0F);
+        entity.yHeadRot = entity.getYRot();
+        entity.yHeadRotO = entity.getYRot();
+        int halfWidth = size * 4 / 5;
+        int halfHeight = size * 7 / 6;
+        int feetOffset = size * 31 / 32;
+        InventoryScreen.extractEntityInInventoryFollowsMouse(context,
+                x - halfWidth, y - feetOffset - halfHeight,
+                x + halfWidth, y - feetOffset + halfHeight,
+                size, 0.0625F, mouseX, mouseY, entity);
+        entity.yBodyRot = h;
+        entity.yBodyRotO = m;
+        entity.setYRot(i);
+        entity.setXRot(j);
+        entity.yHeadRotO = k;
+        entity.yHeadRot = l;
     }
 
     private void RenderEntityInViewport(GuiGraphicsExtractor context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         context.enableScissor(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
         try {
-            // 1.21.11: RenderSystem.clear 已随 GL5 管线移除；原版 InventoryScreen 在 GUI 内渲染实体时
-            // 也不再手动清深度（帧级清屏由 GuiRenderer / GameRenderer 负责），故此处直接去掉。
             RenderEntity(context, x, y, size, mouseX, mouseY, entity);
         } finally {
             context.disableScissor();
@@ -292,21 +298,19 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     @Override
-    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        super.extractBackground(context, mouseX, mouseY, delta);
         baseX = this.width / 2 - BACKGROUND_WIDTH / 2;
         baseY = this.height / 2 - BACKGROUND_HEIGHT / 2;
-        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
+        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX, baseY, 0, 0, BACKGROUND_WIDTH, BACKGROUND_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+    }
+
+    @Override
+    public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         nodeWindowX = baseX + PERK_UI_X;
         nodeWindowY = baseY + PERK_UI_Y;
         cameraCenter = new Vector2i(nodeWindowX + PERK_UI_WIDTH / 2, nodeWindowY + PERK_UI_HEIGHT / 2);
         nodeCenter = new Vector2i( -PERK_UI_WIDTH / 2, 0);
-        // 26.1: Screen#render 已改名为 extractRenderState，由本方法末尾那处统一调用
-        //（26.1 侧原本就把它放在末尾；这里是 1.21.11 侧遗留在中间的旧调用，留着会重复调用父类）。
-        // 1.21.11: RenderSystem.enableBlend()/defaultBlendFunc()/setShaderColor()/disableBlend() 已随 GL5 管线移除，
-        // RenderPipeline（此处为 RenderPipelines.GUI_TEXTURED）自带混合与颜色状态，无需手动开关。
-        // 1.21.11: blit 必须带 RenderPipeline，且区域尺寸(fileUV)与贴图总尺寸分开传，
-        // 末尾 -1 为着色。1.21.1 的 blit(TEXTURE, x, y, u, v, w, h, texW, texH) 已不存在。
-        context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, baseX + PERK_UI_ICON_X, baseY + PERK_UI_ICON_Y, 434, 0, PERK_UI_ICON_WIDTH, PERK_UI_ICON_HEIGHT, PERK_UI_ICON_WIDTH, PERK_UI_ICON_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         this.drawAllNode(context, mouseX, mouseY, delta);
 
         if (minecraft.player != null) {
@@ -328,11 +332,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
 
         if (this.nowSelectNode != null) {
             ICost nowCost = perkCostMap.getOrDefault(this.nowSelectNode.perkID, EMPTY_COST);
-            if (nowCost.getType() instanceof IFUSDrawableCostType<?> fusDrawable) {
+            if (nowCost.getType() instanceof IFUSDrawableCostType<?>) {
                 int rx = baseX + PERK_INFO_COST_ICON_X;
                 int ry = baseY + PERK_INFO_COST_ICON_Y;
-                // 图标绘制改走纯客户端的 CostTypeIcons —— IFUSDrawableCostType 不能再带
-                // GuiGraphics 签名的方法，否则实现类在专用服务端加载时就会拉起客户端类。
                 CostTypeIcons.drawIcon(nowCost.getType(), context, nowCost, minecraft.player, rx, ry, 0);
                 CostTypeIcons.drawOnHover(nowCost.getType(), context, nowCost, minecraft.player, rx, ry, 0, mouseX - rx, mouseY - ry);
             }
@@ -351,10 +353,10 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     }
 
     @Override
-    public boolean keyPressed(KeyEvent keyEvent) {
-        if (super.keyPressed(keyEvent)) {
+    public boolean keyPressed(net.minecraft.client.input.KeyEvent event) {
+        if (super.keyPressed(event)) {
             return true;
-        } else if (this.minecraft.options.keyInventory.matches(keyEvent)) {
+        } else if (this.minecraft.options.keyInventory.matches(event)) {
             this.onClose();
             return true;
         }
@@ -364,104 +366,79 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
     // Utils
 
     public void drawConnectLine(GuiGraphicsExtractor context, PerkTree.PerkNode perkNode) {
-        List<Identifier> depends = perkNode.dependentPerkIDs;
-        if (depends.isEmpty()) return;
-        for (Identifier depend : depends) {
-            PerkTree.PerkNode dependNodeMetaData = perkTree.getNode(depend);
-            if (dependNodeMetaData == null) return;
-            int ox = nodeCenter.x;
-            int oy = nodeCenter.y;
-            int x1 = nodeBaseX + posXPerTier * perkNode.tier + nodeLineDependXOffset;
-            int x2 = nodeBaseX + posXPerTier * dependNodeMetaData.tier + nodeLineRootXOffset;
-            int y1 = perkNode.y;
-            int y2 = dependNodeMetaData.y;
-            if (perkNode.tier - 1 == dependNodeMetaData.tier) {
-                int halfX = (x1 + x2) / 2;
-                context.fill(
-                        ox + Math.min(x1, halfX), oy + y1,
-                        ox + Math.max(x1, halfX) + 1, oy + y1 + 1,
-                        LineColor);
-                context.fill(
-                        ox + halfX, oy + Math.min(y1, y2),
-                        ox + halfX + 1, oy + Math.max(y1, y2) + 1,
-                        LineColor);
-                context.fill(
-                        ox + Math.min(x2, halfX), oy + y2,
-                        ox + Math.max(x2, halfX) + 1, oy + y2 + 1,
-                        LineColor);
-            } else {
-                // AI整的虚线 看起来应该没有对应的API了 所以尽量别整需要虚线的Perk 这种比较费性能 除非使用贴图 但是这种不太好改
-                int dashLen = posXPerTier / 2 - 10;
-                int dashSize = 2;
-                int gapSize = 1;
-                int lastPixelX = x1;
-                for (int i = 0; i < dashLen; i += dashSize + gapSize) {
-                    int to = Math.min(i + dashSize, dashLen);
-                    if (i >= to) break;
-                    context.fill(
-                            ox + x1 - to, oy + y1,
-                            ox + x1 - i, oy + y1 + 1,
-                            LineColor);
-                    lastPixelX = x1 - to;
-                }
-                context.fill(ox + lastPixelX - 2, oy + y1 - 1, ox + lastPixelX - 1, oy + y1 + 2, LineColor);
-            }
+        List<IDependent> depends = perkNode.dependents;
+        if (depends.isEmpty()) { return; }
+        for (IDependent depend : depends) {
+            depend.drawDependentLine(context, nowNodeBaseX, nodeCenter, perkTree, perkNode);
         }
     }
 
     // playerGainedPerk 由调用方获取 毕竟drawNode调用频繁
     public void drawNode(GuiGraphicsExtractor context, PerkTree.PerkNode perkNode, @Nullable List<Identifier> playerGainedPerk, int mouseX, int mouseY, float delta) {
         // this.drawConnectLine(context, perkNode);
-        Identifier icon = RegPerks.getPerkIcon(perkNode.perkID);
+        ISprite icon = RegPerks.getPerkIcon(perkNode.perkID);
         if (icon == null) {
             icon = RegPerks.FALLBACK_PERK_ICON;
         }
-        int virtualNodeX = nodeBaseX + posXPerTier * perkNode.tier;
+        int virtualNodeX = nowNodeBaseX + posXPerTier * perkNode.tier;
         int virtualNodeY = perkNode.y;
         int NodePosX = nodeCenter.x + virtualNodeX;
         int NodePosY = nodeCenter.y + virtualNodeY;
-        int left = virtualNodeX + NodeSelectStartX;
-        int top = virtualNodeY + NodeSelectStartY;
+        // int left = virtualNodeX + NodeSelectStartX;
+        // int top = virtualNodeY + NodeSelectStartY;
         if (playerGainedPerk != null && playerGainedPerk.contains(perkNode.perkID)) {
-            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_GAINED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
+            GAINED_SPRITE.draw(context, NodePosX - 9, NodePosY - 9);
         } else if (!perkAvailableMap.getOrDefault(perkNode.perkID, true)) {
-            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_CAN_NOT_GAIN, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
+            CAN_NOT_GAIN_SPRITE.draw(context, NodePosX - 9, NodePosY - 9);
+        } else {
+            NOT_GAINED_SPRITE.draw(context, NodePosX - 9, NodePosY - 9);
         }
 
         if (this.nowSelectNode != null) {
             if (perkNode == this.nowSelectNode) {
-                context.blit(RenderPipelines.GUI_TEXTURED, LABEL_SELECTED, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
-            } else if (this.nowSelectNode.dependentPerkIDs.contains(perkNode.perkID)) {
-                context.blit(RenderPipelines.GUI_TEXTURED, LABEL_DEPEND, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
+                SELECTED_SPRITE.draw(context, NodePosX - 9, NodePosY - 9);
+            } else if (this.nowSelectNode.dependents != null && this.nowSelectNode.dependents.stream().anyMatch(d -> d.isDependentPerk(perkNode.perkID))) {
+                DEPEND_SPRITE.draw(context, NodePosX - 9, NodePosY - 9);
             }
         }
-        if (mouseX >= left && mouseX < left + NodeSelectRectWidth && mouseY >= top && mouseY < top + NodeSelectRectHeight) {
-            context.blit(RenderPipelines.GUI_TEXTURED, LABEL_SELECT, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20, 20, 20, -1);
+        // if (mouseX >= left && mouseX < left + NodeSelectRectWidth && mouseY >= top && mouseY < top + NodeSelectRectHeight) {
+        //     context.drawTexture(LABEL_SELECT, NodePosX - 9, NodePosY - 9, 0, 0, 20, 20, 20, 20);
+        // }
+        icon.draw(context, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY);
+        // context.drawTexture(icon, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY, 0, 0, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight);
+        // final int PerkNameBoxWidth = 33;
+        // int perkNameTextWidth = this.textRenderer.getWidth(perkNameText);
+        // int iconCenterX = NodePosX + NodeDrawStartX + NodeTextureWidth / 2;
+        // int perkNameY = NodePosY + NodeDrawStartY + NodeTextureHeight + 2;
+        // int perkNameBoxLeftX = iconCenterX - PerkNameBoxWidth / 2;
+        // int perkNameX = perkNameBoxLeftX + (PerkNameBoxWidth - perkNameTextWidth) / 2;
+        // context.drawText(
+        //                 this.textRenderer,
+        //         perkNameText,
+        //         perkNameX,
+        //         perkNameY,
+        //         0xFFFFFFFF,
+        //         false
+        //         );
+    }
+
+    public void drawVirtualNode(GuiGraphicsExtractor context, PerkTree.PerkNode perkNode, @Nullable List<Identifier> playerGainedPerk, int mouseX, int mouseY, float delta) {
+        ISprite icon = RegPerks.getPerkIcon(perkNode.perkID);
+        if (icon == null) {
+            icon = RegPerks.FALLBACK_PERK_ICON;
         }
-        context.blit(RenderPipelines.GUI_TEXTURED, icon, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY, 0, 0, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight, NodeTextureWidth, NodeTextureHeight, -1);
-        final int PerkNameBoxWidth = 33;
-        Component perkNameText = RegPerks.getPerkName(perkNode.perkID);
-        int perkNameTextWidth = this.font.width(perkNameText);
-        int iconCenterX = NodePosX + NodeDrawStartX + NodeTextureWidth / 2;
-        int perkNameY = NodePosY + NodeDrawStartY + NodeTextureHeight + 2;
-        int perkNameBoxLeftX = iconCenterX - PerkNameBoxWidth / 2;
-        int perkNameX = perkNameBoxLeftX + (PerkNameBoxWidth - perkNameTextWidth) / 2;
-        context.text(
-                this.font,
-                perkNameText,
-                perkNameX,
-                perkNameY,
-                0xFFFFFFFF,
-                false
-        );
+        int virtualNodeX = nowNodeBaseX + posXPerTier * perkNode.tier;
+        int virtualNodeY = perkNode.y;
+        int NodePosX = nodeCenter.x + virtualNodeX;
+        int NodePosY = nodeCenter.y + virtualNodeY;
+        icon.draw(context, NodePosX + NodeDrawStartX, NodePosY + NodeDrawStartY);
     }
 
     public void drawAllNode(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         if (this.minecraft == null) return;
         context.enableScissor(nodeWindowX, nodeWindowY, nodeWindowX + PERK_UI_WIDTH, nodeWindowY + PERK_UI_HEIGHT);
-        // 1.21.11: GuiGraphics.pose() 返回 org.joml.Matrix3x2fStack（原为 PoseStack）
-        Matrix3x2fStack matrixStack = context.pose();
-        int firstX = nodeBaseX + nodeCenter.x;
+        org.joml.Matrix3x2fStack matrixStack = context.pose();
+        int firstX = nowNodeBaseX + nodeCenter.x;
         int firstY = nodeWindowY + LEVEL_ICON_Y;
         for (int tierIndex = 1; tierIndex <= this.MaxPerkLevel; tierIndex++) {
             int localLineX = firstX + tierIndex * posXPerTier;
@@ -473,8 +450,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
             //         lineLeftX + 1, nodeWindowY + PERK_UI_HEIGHT,
             //         LineColor
             // );
-            // 1.21.11: 同上，9 参 blit 已移除，改为带 RenderPipeline 的 13 参重载
-            context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, lineLeftX - 1, nodeWindowY, 431, 0, 3, PERK_UI_HEIGHT, 3, PERK_UI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
+            context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, lineLeftX - 1, nodeWindowY, 431, 0, 3, PERK_UI_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
             int screenIconX = lineLeftX - (LEVEL_ICON_WIDTH - 1) / 2;
             ISprite icon = levelSprites.get(tierIndex);
             if (icon != null) {
@@ -487,11 +463,8 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
                 );
             }
         }
-        // 1.21.11: RenderSystem.disableBlend() 已移除，混合状态由 RenderPipeline 承载
         context.disableScissor();
         context.enableScissor(nodeWindowX, nodeWindowY + PERK_UI_VIEW_Y, nodeWindowX + PERK_UI_WIDTH, nodeWindowY + PERK_UI_HEIGHT);
-        // 1.21.11: Matrix3x2fStack 是 JOML 的 2D 矩阵栈 —— pushPose → pushMatrix，
-        // translate / scale 只收 2 个分量（无 z）。
         matrixStack.pushMatrix();
         matrixStack.translate(cameraCenter.x + cameraPosX, cameraCenter.y + cameraPosY);
         matrixStack.scale(cameraScale, cameraScale);
@@ -503,6 +476,9 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         }
         for (PerkTree.PerkNode perkNode : tree.getAllNodes()) {
             this.drawNode(context, perkNode, playerGainedPerk, vMousePos.x, vMousePos.y, delta);
+        }
+        for (PerkTree.PerkNode perkNode : tree.getAllVirtualNodes()) {
+            this.drawVirtualNode(context, perkNode, playerGainedPerk, vMousePos.x, vMousePos.y, delta);
         }
         matrixStack.popMatrix();
         context.disableScissor();
@@ -516,7 +492,7 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
 
     public @Nullable PerkTree.PerkNode getMouseNode(int mouseX, int mouseY) {
         for (PerkTree.PerkNode perkNode : this.perkTree.getAllNodes()) {
-            int centerX = nodeBaseX + posXPerTier * perkNode.tier;
+            int centerX = nowNodeBaseX + posXPerTier * perkNode.tier;
             int centerY = perkNode.y;
             int left = centerX + NodeSelectStartX;
             int top = centerY + NodeSelectStartY;
@@ -575,53 +551,67 @@ public class FormUpgradeScreen extends Screen implements WidgetEXUtils.IWidgetEX
         cameraScale = newScale;
     }
 
-    public boolean isNowPerkCanGain() {
+    private @Nullable Component getPerkUnavailableReason() {
         if (this.nowSelectNode == null) {
-            return false;
-        }
-        if (this.nowSelectNode.tier > this.tier) {
-            return false;
+            return Component.translatable("gui.shape-shifter-curse.perk.select_node");
         }
         List<Identifier> playerGainedPerk = PerkUtils.getPlayerPerks(this.minecraft.player, this.perkTree.getID());
         if (playerGainedPerk != null && playerGainedPerk.contains(this.nowSelectNode.perkID)) {
-            return false;
+            return Component.translatable("gui.shape-shifter-curse.perk.acquired");
         }
-        if (this.nowSelectNode.dependentPerkIDs != null && !this.nowSelectNode.dependentPerkIDs.isEmpty()) {
-            if (playerGainedPerk == null) return false;
-            for (Identifier dependentPerkID : this.nowSelectNode.dependentPerkIDs) if (!playerGainedPerk.contains(dependentPerkID)) return false;
+        if (this.nowSelectNode.tier > this.tier) {
+            return Component.translatable("gui.shape-shifter-curse.perk.insufficient_tier");
+        }
+        if (this.nowSelectNode.dependents != null && !this.nowSelectNode.dependents.isEmpty()) {
+            for (IDependent dependent : this.nowSelectNode.dependents) {
+                if (!dependent.isAllDependentGained(this.minecraft.player, playerGainedPerk)) {
+                    return Component.translatable("gui.shape-shifter-curse.perk.requires_previous");
+                }
+            }
         }
         ICost cost = perkCostMap.get(this.nowSelectNode.perkID);
-        if (cost != null && !cost.getType().canPay_CLIENT(cost, minecraft.player)) {
-            return false;
+        if (!PerkUtils.isFreeUnlock(minecraft.player) && cost != null && !cost.getType().canPay_CLIENT(cost, minecraft.player)) {
+            if (cost.getType() instanceof IFUSDrawableCostType<?> drawable) {
+                return drawable.getResourceNotEnoughText(cost, minecraft.player);
+            }
+            return Component.translatable("gui.shape-shifter-curse.perk.unavailable");
         }
-        return true;
+        return perkAvailableMap.getOrDefault(this.nowSelectNode.perkID, true)
+                ? null : Component.translatable("gui.shape-shifter-curse.perk.unavailable");
+    }
+
+    private void refreshSelectedPerkState() {
+        this.updateCostTicker = 0;
+        if (this.minecraft == null || this.minecraft.player == null) return;
+        Component reasonText = this.getPerkUnavailableReason();
+        this.AcquirePerkButton.active = reasonText == null;
+        this.AcquirePerkButton.setMessage(reasonText == null ? Component.translatable("gui.shape-shifter-curse.perk.acquire") : reasonText);
+        ICost cost = this.nowSelectNode == null ? null : perkCostMap.get(this.nowSelectNode.perkID);
+        if (cost != null && cost.getType() instanceof IFUSDrawableCostType<?> drawable) {
+            this.nowCostTicker = drawable.checkInterval();
+            this.PerkCostAmountWidget.setMessage(drawable.getAmountText(cost, this.minecraft.player));
+        } else {
+            this.nowCostTicker = -1;
+            this.PerkCostAmountWidget.setMessage(Component.empty());
+        }
     }
 
     public void onNodeSelect() {
-        // 26.1: displayClientMessage(msg, false) 已拆分为 sendSystemMessage(msg)（true 才是 sendOverlayMessage）
-        try {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Node Selected: " + this.nowSelectNode.perkID.toString()));
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("Can Gained (Cache): " + this.perkAvailableMap.getOrDefault(this.nowSelectNode.perkID, true)));
-        } catch (Exception e) {
-            Minecraft.getInstance().player.sendSystemMessage(Component.literal("No Node Selected"));
-        }
+        // try {
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("Node Selected: " + this.nowSelectNode.perkID.toString()), false);
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("Can Gained (Cache): " + this.perkAvailableMap.getOrDefault(this.nowSelectNode.perkID, true)), false);
+        // } catch (Exception e) {
+        //     MinecraftClient.getInstance().player.sendMessage(Text.literal("No Node Selected"), false);
+        // }
         if (this.nowSelectNode != null) {
             this.PerkNameWidget.setMessage(RegPerks.getPerkName(this.nowSelectNode.perkID));
             this.PerkDescWidget.reloadText(RegPerks.getPerkDescription(this.nowSelectNode.perkID));
-            ICost cost = perkCostMap.get(this.nowSelectNode.perkID);
-            if (cost != null && cost.getType() instanceof IFUSDrawableCostType<?> ifusDrawableCostType) {
-                // 1.21.11: 用带手动右对齐的 setPerkCostAmountText（StringWidget.alignRight 已移除）
-                this.setPerkCostAmountText(ifusDrawableCostType.getAmountText(cost, minecraft.player));
-            } else {
-                this.setPerkCostAmountText(Component.literal(""));
-            }
-            this.AcquirePerkButton.active = this.isNowPerkCanGain();
         } else {
-            this.PerkNameWidget.setMessage(Component.literal(""));
-            this.PerkDescWidget.reloadText(Component.literal(""));
-            this.setPerkCostAmountText(Component.literal(""));
-            this.AcquirePerkButton.active = false;
+            this.PerkNameWidget.setMessage(Component.empty());
+            this.PerkDescWidget.reloadText(Component.empty());
         }
+        this.refreshSelectedPerkState();
         ModPacketsS2C.sendRequestPerkAvailability();
     }
+
 }

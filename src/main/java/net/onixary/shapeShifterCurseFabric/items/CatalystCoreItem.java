@@ -14,7 +14,6 @@ public class CatalystCoreItem extends Item {
         super(settings);
     }
 
-    // 1.21.11：tooltip 参数由 List<Component> 变为 Consumer<Component>，并新增 TooltipDisplay。
     @Override
     public void appendHoverText(ItemStack stack, Item.TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip, TooltipFlag type) {
         tooltip.accept(Component.translatable(getDescriptionId() + ".tooltip").withStyle(ChatFormatting.YELLOW));

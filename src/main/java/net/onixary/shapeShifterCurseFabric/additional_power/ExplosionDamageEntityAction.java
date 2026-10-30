@@ -26,21 +26,25 @@ import java.util.List;
 
 public class ExplosionDamageEntityAction {
     public static void action(SerializableData.Instance data, Entity entity) {
+        // 仅实现爆炸伤害实体的能力
+        // 参数 power -> 威力 entity_condition -> 实体条件
+        // 额外加入可选的EntityAction以及是否对实体应用爆炸伤害的设置
+        // entity_action -> 额外的实体action; explosion_damage_entity -> 爆炸是否伤害实体
+        if (entity.level().isClientSide()) return;
         int Power = data.getInt("power");
-        @SuppressWarnings("unchecked")
+        float DamageMultiplier = data.getFloat("damage_multiplier");
+        float baseDamage = data.getFloat("base_damage");
         ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition = data.get("entity_condition");
-        @SuppressWarnings("unchecked")
         ActionFactory<Entity>.Instance entityAction = data.get("entity_action");
         boolean explosion_damage_entity = data.get("explosion_damage_entity");
-        float baseDamage = data.getFloat("base_damage");
-        float damageMultiplier = data.getFloat("damage_multiplier");
-        explosion(entity, Power, entityCondition, entityAction, explosion_damage_entity, baseDamage, damageMultiplier);
+        explosion(entity, Power, entityCondition, entityAction, data.get("bientity_action"), explosion_damage_entity, baseDamage, DamageMultiplier);
     }
 
     private static void explosion(Entity entity,
                                   int power,
                                   ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition,
                                   ActionFactory<Entity>.Instance entityAction,
+                                  ActionFactory<Tuple<Entity, Entity>>.Instance bientityAction,
                                   boolean explosion_damage_entity,
                                   float baseDamage,
                                   float damageMultiplier
@@ -60,43 +64,44 @@ public class ExplosionDamageEntityAction {
         for (Entity value : list) {
             Entity target_entity = (Entity) value;
             if (!target_entity.ignoreExplosion(null) && (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity)))) {
-			    double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double) q;
-			    if (w <= 1.0) {
-				    double x = target_entity.getX() - ExplosionPos.x();
-				    double y = (target_entity instanceof PrimedTnt ? target_entity.getY() : target_entity.getEyeY()) - ExplosionPos.y();
-				    double z = target_entity.getZ() - ExplosionPos.z();
-				    double aa = Math.sqrt(x * x + y * y + z * z);
-				    if (aa != 0.0) {
-					    x /= aa;
-					    y /= aa;
-					    z /= aa;
-                        double ab = ServerExplosion.getSeenPercent(ExplosionPos, target_entity);
-					    double ac = (1.0 - w) * ab;
+                double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double) q;
+                if (w <= 1.0) {
+                    double x = target_entity.getX() - ExplosionPos.x();
+                    double y = (target_entity instanceof PrimedTnt ? target_entity.getY() : target_entity.getEyeY()) - ExplosionPos.y();
+                    double z = target_entity.getZ() - ExplosionPos.z();
+                    double aa = Math.sqrt(x * x + y * y + z * z);
+                    if (aa != 0.0) {
+                        x /= aa;
+                        y /= aa;
+                        z /= aa;
+                        double ab = (double) ServerExplosion.getSeenPercent(ExplosionPos, target_entity);
+                        double ac = (1.0 - w) * ab;
                         if (explosion_damage_entity) {
-                            target_entity.hurt(source, (float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0)) * damageMultiplier + baseDamage);
-					    }
-					    double ad;
-					    if (target_entity instanceof LivingEntity livingEntity) {
-							Holder<Enchantment> blastProt = entity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.BLAST_PROTECTION);
-							int blastProtLevel = EnchantmentHelper.getEnchantmentLevel(blastProt, livingEntity);
-							ad = blastProtLevel > 0 ? ac * Mth.clamp(1.0 - (double) blastProtLevel * 0.15, 0.0, 1.0) : ac;
-					    } else {
-						    ad = ac;
-					    }
-					    x *= ad;
-					    y *= ad;
-					    z *= ad;
-					    Vec3 vec3d2 = new Vec3(x, y, z);
-					    target_entity.setDeltaMovement(target_entity.getDeltaMovement().add(vec3d2));
-						    target_entity.hurtMarked = true;
-					    // 加入额外可选的EntityAction
-					    if (entityAction != null) {
-						    entityAction.accept(target_entity);
-					    }
-				    }
-			    }
-		    }
-	    }
+                            target_entity.hurt(source, ((float) ((int) ((ac * ac + ac) / 2.0 * 7.0 * (double) q + 1.0))) * damageMultiplier + baseDamage);
+                        }
+                        double ad;
+                        if (target_entity instanceof LivingEntity livingEntity) {
+                            Holder<Enchantment> blastProtEntry = entity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.BLAST_PROTECTION.identifier()).orElseThrow();
+                            int blastProtLevel = EnchantmentHelper.getEnchantmentLevel(blastProtEntry, livingEntity);
+                            ad = blastProtLevel > 0 ? ac * Mth.clamp(1.0 - (double) blastProtLevel * 0.15, 0.0, 1.0) : ac;
+                        } else {
+                            ad = ac;
+                        }
+                        x *= ad;
+                        y *= ad;
+                        z *= ad;
+                        Vec3 vec3d2 = new Vec3(x, y, z);
+                        target_entity.setDeltaMovement(target_entity.getDeltaMovement().add(vec3d2));
+                        // 加入额外可选的EntityAction
+                        if (entityAction != null) {
+                            entityAction.accept(target_entity);
+                        }
+                        if (bientityAction != null) bientityAction.accept(new Tuple<>(entity, target_entity));
+                        target_entity.hurtMarked = true;
+                    }
+                }
+            }
+        }
     }
 
     public static ActionFactory<Entity> createFactory() {
@@ -108,6 +113,7 @@ public class ExplosionDamageEntityAction {
                         .add("damage_multiplier", SerializableDataTypes.FLOAT, 1.0f)
                         .add("entity_condition", ApoliDataTypes.BIENTITY_CONDITION, null)
                         .add("entity_action", ApoliDataTypes.ENTITY_ACTION, null)
+                        .add("bientity_action", ApoliDataTypes.BIENTITY_ACTION, null)
                         .add("explosion_damage_entity", SerializableDataTypes.BOOLEAN, true),
 
                 ExplosionDamageEntityAction::action

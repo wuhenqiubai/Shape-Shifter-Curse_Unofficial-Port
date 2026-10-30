@@ -42,7 +42,7 @@ public abstract class CursedMoonLightmapMixin {
         }
         // 保留原有混合公式（原封不动从 updateLightTexture 那版搬过来）
         Vector3f modifiedColor = new Vector3f(1.0F, 0.24F, 0.82F);
-        float skyBlend = 1.0F - partialTicks - client.level.getRainLevel(1.0F);
+        float skyBlend = 1.0F - renderState.skyFactor - client.level.getRainLevel(1.0F);
         // skyLightColor 是 Vector3fc（只读视图），须复制成可变的再 lerp
         Vector3f skyLightColor = new Vector3f(renderState.skyLightColor);
         skyLightColor.lerp(modifiedColor, skyBlend);

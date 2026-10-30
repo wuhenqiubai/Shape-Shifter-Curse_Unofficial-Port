@@ -21,12 +21,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity, S extends EntityRenderState> {
 
-	// 1.21.11 渲染管线改为 submit(RenderState)，RenderState 不再携带实体引用。
-	// 用 GeckoLib 的 GeoRenderState DataTicket 把实体暂存到 RenderState，submit 时再取回。
 	@Unique
 	private static final DataTicket<Entity> SSC_ENTITY = DataTicket.create("ssc_entity", Entity.class);
 
-	// 提取渲染状态时记录实体引用（供 submit 阶段渲染覆盖层使用）
 	@Inject(method = "extractRenderState(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/entity/state/EntityRenderState;F)V", at = @At("HEAD"))
 	private void captureEntity(T entity, S entityRenderState, float tickDelta, CallbackInfo ci) {
 		entityRenderState.addGeckolibData(SSC_ENTITY, entity);

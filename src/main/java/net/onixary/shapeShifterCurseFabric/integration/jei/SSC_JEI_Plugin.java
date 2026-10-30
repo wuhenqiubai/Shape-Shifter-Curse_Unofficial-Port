@@ -61,10 +61,6 @@ public class SSC_JEI_Plugin implements IModPlugin {
         if (client.level == null || client.getConnection() == null) {
             return;
         }
-        // 1.21.11: 客户端不再同步完整配方表 —— ClientPacketListener.getRecipeManager() 已移除，
-        // RecipeManager.getAllRecipesFor(RecipeType) 也不存在（客户端侧 ClientRecipeContainer 只剩
-        // 配方属性集与石切机配方）。改为从集成服务器取全量配方再按类型过滤。
-        // ⚠ 多人游戏下 getSingleplayerServer() 返回 null —— 届时祭坛配方页为空（功能降级）。
         MinecraftServer server = client.getSingleplayerServer();
         if (server == null) {
             return;

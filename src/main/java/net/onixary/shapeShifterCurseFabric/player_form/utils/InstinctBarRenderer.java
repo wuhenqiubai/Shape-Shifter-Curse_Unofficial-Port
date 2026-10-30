@@ -62,7 +62,6 @@ public class InstinctBarRenderer {
         boolean isInstinctLock = FormUtils.LockInstinct.hasFlag(curForm) || CursedMoon.isInCursedMoon(player.level());
         instinctProportion = currentInstinct / StaticParams.INSTINCT_MAX;
         int instinctWidth = (int) Math.ceil(80 * instinctProportion);
-        // 1.21.11: 无管线9参 blit 语义已变（归一化 UV），改用带管线13参（像素 UV，uWidth/vHeight=显示尺寸）
         context.blit(RenderPipelines.GUI_TEXTURED, instinctBarID, x, y, 0, currentBarY, 80 - instinctWidth, 5, 80 - instinctWidth, 5, 160, 40, -1);
         context.blit(RenderPipelines.GUI_TEXTURED, instinctBarID, x + 80 - instinctWidth, y, 160 - instinctWidth, currentBarY, instinctWidth, 5, instinctWidth, 5, 160, 40, -1);
         if (isInstinctLock) {

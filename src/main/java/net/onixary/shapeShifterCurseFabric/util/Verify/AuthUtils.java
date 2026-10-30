@@ -202,7 +202,7 @@ public final class AuthUtils {
 
     private static final HashMap<Integer, KeySegment> storedKeySegments = new HashMap<>();
     private static final List<Tuple<Long, KeySegment>> forgiveKeySegments = new ArrayList<>();
-    private static final long forgiveTime = 60 * 30;  // 30分钟
+    private static final long forgiveTime = 60 * 30;
     static {
         loadLocalKeySegments();
     }
@@ -248,7 +248,6 @@ public final class AuthUtils {
     }
 
     public static boolean loadKey(@Nullable KeySegment keySegment) {
-        // 返回值 -> 是否触发熔断
         if (keySegment == null || !keySegment.isUseMeltdown()) {
             return false;
         }

@@ -23,7 +23,6 @@ import java.util.List;
 @Mixin(AbstractThrownPotion.class)
 public class PotionEntityMixin {
 
-    // 1.21.11 applyWater 重构为 private onHitAsWater(ServerLevel)
     @Inject(method = "onHitAsWater(Lnet/minecraft/server/level/ServerLevel;)V", at = @At("HEAD"))
     private void onApplyWater(ServerLevel serverLevel, CallbackInfo ci) {
         AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
@@ -44,7 +43,6 @@ public class PotionEntityMixin {
         }
     }
 
-    // 1.21.11 applySplash 重构：改为注入 onHit(HEAD)，仅溅射药水生效
     @Inject(method = "onHit(Lnet/minecraft/world/phys/HitResult;)V", at = @At("HEAD"))
     private void onApplySplashPotion(HitResult hitResult, CallbackInfo ci) {
         if (!((Object) this instanceof ThrownSplashPotion)) {
@@ -68,7 +66,6 @@ public class PotionEntityMixin {
         }
     }
 
-    // 1.21.11 makeAreaOfEffectCloud 重构：改为注入 onHit(HEAD)，仅滞留药水生效
     @Inject(method = "onHit(Lnet/minecraft/world/phys/HitResult;)V", at = @At("HEAD"))
     private void onApplyLingeringPotion(HitResult hitResult, CallbackInfo ci) {
         if (!((Object) this instanceof ThrownLingeringPotion)) {

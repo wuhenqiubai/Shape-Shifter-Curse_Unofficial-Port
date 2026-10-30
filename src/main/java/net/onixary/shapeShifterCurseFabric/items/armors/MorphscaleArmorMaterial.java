@@ -10,17 +10,17 @@ import java.util.Map;
 
 public class MorphscaleArmorMaterial {
     public static final ArmorMaterial INSTANCE = new ArmorMaterial(
-        33,  // durability
+        33,
         Map.of(
             ArmorType.HELMET, 2,
             ArmorType.CHESTPLATE, 6,
             ArmorType.LEGGINGS, 7,
             ArmorType.BOOTS, 2
         ),
-        10,  // enchantmentValue
+        10,
         SoundEvents.ARMOR_EQUIP_DIAMOND,
-        1.0F,  // toughness
-        0.0F,  // knockbackResistance
+        1.0F,
+        0.0F,
         ItemTags.REPAIRS_DIAMOND_ARMOR,
         EquipmentAssets.DIAMOND
     );

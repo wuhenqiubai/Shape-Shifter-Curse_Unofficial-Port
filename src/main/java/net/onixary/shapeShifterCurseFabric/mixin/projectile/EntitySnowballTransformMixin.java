@@ -75,7 +75,7 @@ public abstract class EntitySnowballTransformMixin {
 
             // 销毁雪球（模拟碰撞效果）
             if (!world.isClientSide()) {
-                snowball.level().broadcastEntityEvent(snowball, (byte) 3); // 粒子效果
+                snowball.level().broadcastEntityEvent(snowball, (byte) 3);
                 snowball.discard();
             }
         }

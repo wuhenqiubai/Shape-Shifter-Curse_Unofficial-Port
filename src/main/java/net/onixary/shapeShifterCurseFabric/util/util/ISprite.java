@@ -34,4 +34,5 @@ public interface ISprite {
                 width, height, width, height,
                 getTextureImgWidth(), getTextureImgHeight(), -1);
     }
+
 }

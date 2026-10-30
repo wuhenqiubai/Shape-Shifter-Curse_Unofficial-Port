@@ -46,7 +46,6 @@ public class SimpleIntSliderWidget extends AbstractSliderButton {
         int textureY = this.active ? (this.isHovered() ? 1 : 0) : 2;
         int color = ARGB.white(this.alpha);
 
-        // 1.21.11: 13参 blit 语义 (pipeline,id,x,y,u,v,w,h,uWidth,vHeight,texW,texH,color)，uWidth/vHeight 是 UV 区域尺寸（=显示宽高），不能为 0
         context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, this.getX(), this.getY(), 0, textureY * 20,
                 this.getWidth(), this.getHeight(), this.getWidth(), this.getHeight(), 200, 60, color);
 

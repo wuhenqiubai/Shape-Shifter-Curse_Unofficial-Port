@@ -69,7 +69,6 @@ public class RegCustomPotions {
     }
 
     public static void registerPotionsRecipes(){
-        // 使用新的动态酿造配方系统
         // awkward + moondust_matrix = moondust_potion
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(Potions.AWKWARD, RegCustomItem.MOONDUST_MATRIX, MOONDUST_POTION));
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, Items.POINTED_DRIPSTONE, BAT_FORM_POTION));
@@ -77,7 +76,6 @@ public class RegCustomPotions {
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, Items.CHICKEN, OCELOT_FORM_POTION));
         // familiar fox只能通过女巫发射或掉落的溅射药水给与，没有配方
         // The familiar fox can only be obtained via splash potions thrown or drop by witches, no recipe available
-        // BrewingRecipeRegistry disabled for 1.21 port, use BrewingRecipeUtils instead
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, RegCustomItem.ECTOPLASM_RAG, ANUBIS_WOLF_FORM_POTION));
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, RegCustomItem.SILK_DEW, SPIDER_FORM_POTION));
         // snow fox 需要通过净化familiar fox药水来得到
@@ -85,23 +83,12 @@ public class RegCustomPotions {
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(FAMILIAR_FOX_FORM_POTION, Items.GOLD_NUGGET, SNOW_FOX_FORM_POTION));
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, Items.AMETHYST_SHARD, ALLEY_FORM_POTION));
         BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson(MOONDUST_POTION, Items.COD_BUCKET, FERAL_CAT_FORM_POTION));
-        /* 未支持数据包时代的占位形态 现在可以使用数据添加形态了
-        // custom empty forms
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.RED_DYE, ALPHA_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.YELLOW_DYE, BETA_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.BLUE_DYE, GAMMA_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.GREEN_DYE, OMEGA_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.ORANGE_DYE, PSI_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.PURPLE_DYE, CHI_FORM_POTION));
-        BrewingRecipeUtils.registerPotionRecipe(createPotionRecipeJson("potion", MOONDUST_POTION, Items.WHITE_DYE, PHI_FORM_POTION));
-        */
     }
 
     private static JsonObject createPotionRecipeJson(Object input, Object ingredient, Object output) {
         JsonObject json = new JsonObject();
         json.addProperty("type", "potion");
 
-        // 处理输入药水（1.21 中 Potions.* 是 RegistryEntry<Potion>）
         if (input instanceof Holder<?> entry) {
             json.addProperty("input", entry.unwrapKey().get().identifier().toString());
         } else if (input instanceof Potion) {
@@ -113,7 +100,6 @@ public class RegCustomPotions {
             json.addProperty("input", str);
         }
 
-        // 处理输出药水
         if (output instanceof Holder<?> entry) {
             json.addProperty("output", entry.unwrapKey().get().identifier().toString());
         } else if (output instanceof Potion) {
@@ -125,7 +111,6 @@ public class RegCustomPotions {
             json.addProperty("output", str);
         }
 
-        // 处理材料（物品）
         if (ingredient instanceof net.minecraft.world.item.Item) {
             var itemId = BuiltInRegistries.ITEM.getKey((net.minecraft.world.item.Item) ingredient);
             if (itemId != null) {

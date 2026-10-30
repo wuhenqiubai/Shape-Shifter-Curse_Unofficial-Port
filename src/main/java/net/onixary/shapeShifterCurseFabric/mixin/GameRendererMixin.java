@@ -39,7 +39,6 @@ public class GameRendererMixin {
         TransformOverlayRenderer.render();
     }
 
-    /** Guard getNightVisionStrength against null entity (Fabric Loader 0.19.3 mapping corruption). */
     @ModifyExpressionValue(
             method = "getNightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F",
             at = @At(value = "INVOKE",

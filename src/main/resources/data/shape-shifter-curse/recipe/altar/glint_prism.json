@@ -16,7 +16,7 @@
     "B": "shape-shifter-curse:moondust_crystal_shard",
     "C": "minecraft:glass",
     "D": "minecraft:glass",
-    "E": "minecraft:sea_lantern",
+    "E": ["minecraft:sea_lantern", "minecraft:ghast_tear"],
     "F": "minecraft:glass",
     "G": "minecraft:glass",
     "H": "shape-shifter-curse:moondust_crystal_shard",

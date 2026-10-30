@@ -18,8 +18,8 @@ public class MobTeamManager {
             sorceryTeam = scoreboard.addPlayerTeam(SORCERY_TEAM_NAME);
 
             // 配置队伍属性
-            sorceryTeam.setAllowFriendlyFire(false);          // 队友之间不会误伤
-            sorceryTeam.setSeeFriendlyInvisibles(true);       // 可以看到隐形的队友
+            sorceryTeam.setAllowFriendlyFire(false);
+            sorceryTeam.setSeeFriendlyInvisibles(true);
         } else {
             sorceryTeam = scoreboard.getPlayerTeam(SORCERY_TEAM_NAME);
         }

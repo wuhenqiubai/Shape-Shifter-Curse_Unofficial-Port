@@ -6,11 +6,6 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.network.chat.Component;
 import org.jspecify.annotations.NonNull;
 
-/**
- * 1.21.11 的 StringWidget 通过 ActiveTextCollector 渲染，文本颜色固定为白色（ARGB.white(opacity)），
- * 无 setTextColor，浅色背景（如书页纹理）上不可见。
- * 本类改用 GuiGraphics.drawString 直接渲染，支持 setColor，恢复 1.21.1 TextWidget.setTextColor 语义。
- */
 public class ColorStringWidget extends StringWidget {
     private int color = 0xFFFFFF;
 

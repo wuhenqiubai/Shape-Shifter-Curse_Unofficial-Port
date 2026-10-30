@@ -10,7 +10,6 @@ public class ModPackets {
 
     // 新增服务端到客户端的附件同步包
     // New server-to-client attachment sync packet
-    // public static final Identifier SYNC_EFFECT_ATTACHMENT = Identifier.of(ShapeShifterCurseFabric.MOD_ID, "sync_effect_attachment");
 
 
     public static final Identifier SYNC_CURSED_MOON_DATA = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "sync_cursed_moon_data");

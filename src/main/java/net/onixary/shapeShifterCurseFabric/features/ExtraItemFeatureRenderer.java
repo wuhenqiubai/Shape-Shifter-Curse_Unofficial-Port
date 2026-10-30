@@ -73,7 +73,6 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
             IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
 
-            // 排除 GUI 预览（PIP）：预览渲染第一人称 FERAL 物品会跟随鼠标疯狂旋转
             if (isFeral && Minecraft.getInstance().options.getCameraType().isFirstPerson() && player == Minecraft.getInstance().player && !ClientUtils.isOpenInventoryScreen) {
 
                 if(IS_FIRST_PERSON_MOD_LOADED) {
@@ -98,7 +97,6 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         // 仅限开启FirstPersonModel时渲染额外物品
                         matrices.pushPose();
                         //var eR = (PlayerEntityRenderer) MinecraftClient.getInstance().getEntityRenderDispatcher().getRenderer(player);
-                        //var head = ((PlayerModel)eR.getModel()).head;
                         // FirstPerson Mod会直接将head.pivot移动到某个非常远的位置来“隐藏”头部，所以需要直接定义好一个固定位置
                         // Vec3d posOffset = new Vec3d(0.0F, 0.0F, 0.0F);
                         // Vec3d rotCenter = ShapeShifterCurseFabric.feralItemCenter;
@@ -106,16 +104,14 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         // 的 base scale。因此必须用 getBaseScale() 比较同一坐标系下的值，否则 0.9 * 0.55
                         // 会被错误地与 0.6 相减，导致补偿方向和幅度都不正确。
                         // 此处是在 Pehkui 模型缩放矩阵内平移，HEIGHT scale 会在矩阵上自动应用，无需再手动除以它。
-                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(limbDistance);
-                        float feralDefaultEyeScale = curForm.getDefaultEyeScale();
+                        float eyeScale = ScaleTypes.EYE_HEIGHT.getScaleData(player).getBaseScale(Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false));
+                        float formEyeScale = curForm.getEyeScale();
                         // Entity feature 渲染坐标的 Y 轴与世界坐标相反：eye height 增加时需要减小局部 Y。
-                        float eyeHeightDeltaPixels = (feralDefaultEyeScale - eyeScale) * 1.62F * 16.0F;
+                        float eyeHeightDeltaPixels = (formEyeScale - eyeScale) * 1.62F * 16.0F;
                         Vec3 rotCenter = new Vec3(0.0F, -4.0F + eyeHeightDeltaPixels, -6.0F);
                         matrices.translate(rotCenter.x / 16.0F, rotCenter.y / 16.0F, rotCenter.z / 16.0F);
                         //Vec3d posOffset = ShapeShifterCurseFabric.feralItemPosOffset;
-                        // 叼物固定在玩家坐标系（跟随摄像机位移），更靠近摄像头（贴合 1.20 原版观感）：posOffset.z 4→12
                         Vec3 posOffset = new Vec3(-12.0F, 15.0F, 12.0F);
-                        // 叼在嘴前的物品应固定朝向、不随头部旋转（跟随 headYaw/headPitch 会让转头时物品转动/疯狂旋转）
                         matrices.mulPose(Axis.ZP.rotationDegrees(240.0F));
                         matrices.translate(posOffset.x / 16.0F, posOffset.y / 16.0F, posOffset.z / 16.0F);
                         float pitch = Mth.lerp(limbAngle, player.xRotO, player.getXRot());

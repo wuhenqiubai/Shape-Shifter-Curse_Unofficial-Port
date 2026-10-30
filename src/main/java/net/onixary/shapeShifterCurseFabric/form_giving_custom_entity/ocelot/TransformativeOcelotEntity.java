@@ -35,7 +35,6 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
     }
 
     public static AttributeSupplier.Builder createAttributes() {
-        // 1.21.11: 用 Animal.createAnimalAttributes()（含 TEMPT_RANGE，TemptingSensor 需要）
         return Animal.createAnimalAttributes()
                 .add(Attributes.MAX_HEALTH, 10.0)
                 .add(Attributes.ATTACK_DAMAGE, StaticParams.CUSTOM_MOB_DEFAULT_DAMAGE)

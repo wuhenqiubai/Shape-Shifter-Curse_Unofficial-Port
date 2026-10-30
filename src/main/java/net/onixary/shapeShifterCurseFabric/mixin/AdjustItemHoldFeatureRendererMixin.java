@@ -94,7 +94,6 @@ public abstract class AdjustItemHoldFeatureRendererMixin<S extends ArmedEntityRe
 
     @Unique
     private boolean shouldHideItem(S armedEntityRenderState) {
-        // 1.21.11 渲染状态中无法直接拿到实体，通过 AvatarRenderState 的实体 id 反查
         if (armedEntityRenderState instanceof AvatarRenderState avatarRenderState
                 && Minecraft.getInstance().level != null
                 && Minecraft.getInstance().level.getEntity(avatarRenderState.id) instanceof AbstractClientPlayer player) {

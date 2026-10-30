@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.minion;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.goal.target.OwnerHurtByTargetGoal;
@@ -42,14 +43,18 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
 
     @Override
     public UUID getMinionOwnerUUID() {
-        // getOwnerUUID() 在 1.21.11 移除，改用 getOwner() 实体引用
         net.minecraft.world.entity.LivingEntity owner = this.getOwner();
         return owner != null ? owner.getUUID() : null;
     }
 
     @Override
     public void setMinionOwnerUUID(UUID uuid) {
-        // setOwnerUUID() 在 1.21.11 移除，改为 getOwner()/setOwner() 实体引用系统
+    }
+
+    @Override
+    public void setOwner(Player player) {
+        this.setTame(player != null, false);
+        this.setOwnerReference(EntityReference.of(player));
     }
 
     @Override
@@ -121,7 +126,7 @@ public abstract class MinionBase extends TamableAnimal implements IMinion<Minion
         if (this.getMinionOwnerUUID() != null && this.level().getPlayerByUUID(this.getMinionOwnerUUID()) instanceof IPlayerEntityMinion iPlayerEntityMinion) {
             iPlayerEntityMinion.shape_shifter_curse$removeMinion(this.getMinionTypeID(), this.getUUID());
         }
-        this.tame(null);
+        super.setOwner(null);
         super.die(source);
     }
 }

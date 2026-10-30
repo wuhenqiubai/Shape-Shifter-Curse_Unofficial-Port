@@ -41,8 +41,6 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         }
         int BookPosX = width / 2 - (BookSizeX * BookScale) / 2;
         int BookPosY = height / 2 - (BookSizeY * BookScale) / 2;
-        // 1.21.11 文字渲染用标准 ARGB alpha 做透明度：0x222222 的 alpha=0x22(13%) 会让正文几乎透明不可见。
-        // 保持 RGB 不变（上游乘法模式语义），补全 alpha=FF 恢复可见性。
         int DefaultTextColor = 0xFF222222;
         int HeaderTextColor = 0xFFDDDDDD;
         ScaleTextRenderer scaleTextRenderer = new ScaleTextRenderer(font);
@@ -134,7 +132,10 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        // No blur — book texture serves as the background
+        if (this.minecraft.level == null) {
+            this.extractPanorama(context, delta);
+        }
+        this.extractBlurredBackground(context);
     }
 
     @Override
@@ -164,7 +165,6 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         int textureHeight = Math.round(textureWidth * (texture.imageHeight() / (float) texture.imageWidth()));
         int x = BookPosX + 220 * BookScale;
         int y = BookPosY + 160 * BookScale - textureHeight;
-        // 1.21.11: RenderSystem.enableBlend()/disableBlend() 已移除，RenderPipeline 自带渲染状态
         context.blit(RenderPipelines.GUI_TEXTURED, texture.id(), x, y, 0, 0, textureWidth, textureHeight, textureWidth, textureHeight, textureWidth, textureHeight, -1);
     }
 

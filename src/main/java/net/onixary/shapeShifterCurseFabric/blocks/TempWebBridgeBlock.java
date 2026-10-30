@@ -70,7 +70,7 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
             BlockRemoved = this.increaseAge(state, world, pos);
         }
         if (!BlockRemoved) {
-            world.scheduleTick(pos, this, Mth.nextInt(random, 150, 300));  // 7.5s~15s
+            world.scheduleTick(pos, this, Mth.nextInt(random, 150, 300));
         }
         BlockPos.MutableBlockPos mutable = new BlockPos.MutableBlockPos();
         for (Direction direction : Direction.values()) {

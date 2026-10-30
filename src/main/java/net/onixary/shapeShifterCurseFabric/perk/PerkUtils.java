@@ -1,13 +1,13 @@
 package net.onixary.shapeShifterCurseFabric.perk;
 
 import com.google.common.base.Objects;
+import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.blocks.FormAttunerBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.FormAttunerBlockEntity;
-import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
 import net.onixary.shapeShifterCurseFabric.util.util.cost.ICost;
@@ -18,6 +18,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class PerkUtils {
+    public static boolean isFreeUnlock(Player player) {
+        var component = PlayerFormComponent.COMPONENT.get(player);
+        return player.getAbilities().instabuild || component.freePerkForms.contains(component.nowForm.getFormID());
+    }
+
     public static HashMap<Identifier, List<Identifier>> getPlayerPerks(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
         return component.formPerkMap;
@@ -75,6 +80,7 @@ public class PerkUtils {
         }
         component.sync();
         perkData.onGain(player, component.nowForm);
+        PowerHolderComponent.KEY.sync(player);
     }
 
     public static void addPerk(Player player, Identifier perkTreeID, Identifier perkID) {
@@ -105,7 +111,7 @@ public class PerkUtils {
         if (!perkTree.getAllPerks().contains(perkID)) return;
 
         ICost cost = perkData.getCost();
-        if (!player.getAbilities().instabuild) {
+        if (!isFreeUnlock(player)) {
             if (!cost.getType().canPay(cost, player)) {
                 return;
             }
@@ -114,17 +120,18 @@ public class PerkUtils {
         PerkTree.PerkNode node = perkTree.getNode(perkID);
         if (node == null) return;
         List<Identifier> playerPerkList = getPlayerPerks(player, perkTreeID);
-        if (!node.dependentPerkIDs.isEmpty()) {
-            if (playerPerkList == null) return;
-            for (Identifier dependentPerkID : node.dependentPerkIDs) {
-                if (!playerPerkList.contains(dependentPerkID)) return;
+        if (!node.dependents.isEmpty()) {
+            for (IDependent dependent : node.dependents) {
+                if (!dependent.isAllDependentGained(player, playerPerkList)) {
+                    return;
+                }
             }
         }
         if (playerPerkList != null && playerPerkList.contains(perkID)) {
             return;
         }
         int tier = node.tier;
-        // 感觉Tier0在无诅咒之月可以点可以作为特性使用 可以在tier0设置一些特殊的Perk
+        // Tier0保留不受环境限制的行为。
         if (tier > 0 && !isCanGainPerk(player)) {
             return;
         }
@@ -134,7 +141,7 @@ public class PerkUtils {
         }
 
         if (perkData.canGain(player, component.nowForm)) {
-            if (!player.getAbilities().instabuild) {
+            if (!isFreeUnlock(player)) {
                 cost.getType().pay(cost, player);
             }
             __addPerk(player, perkTreeID, perkID);
@@ -146,9 +153,6 @@ public class PerkUtils {
         // 仅检测从客户端提交的加点请求 服务器端的加点请求直接过 所以这里只能加环境检测
         Level world = player.level();
         if (world.dimension() != Level.OVERWORLD) {
-            return false;
-        }
-        if (!CursedMoon.isInCursedMoon(world)) {
             return false;
         }
         return true;

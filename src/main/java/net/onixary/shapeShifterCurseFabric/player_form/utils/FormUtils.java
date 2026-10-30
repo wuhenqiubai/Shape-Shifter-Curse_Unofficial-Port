@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class FormUtils {
@@ -136,7 +137,7 @@ public class FormUtils {
         });
     }
 
-    public static void applyLayer(Player player, Tuple<Identifier, Identifier> layerData) {
+    public static void applyLayer(Player player, Tuple<Identifier, Identifier> layerData, boolean shouldReload) {
         // 临时 等移除Origins后再重新这部分
         OriginComponent component = ModComponents.ORIGIN.get(player);
         OriginLayer layer = OriginLayers.getLayer(layerData.getA());
@@ -146,7 +147,9 @@ public class FormUtils {
                 if (TechnicalFormOrigin == null) {
                     TechnicalFormOrigin = OriginRegistry.get(ShapeShifterCurseFabric.identifier("technical_form"));
                 }
-                component.setOrigin(layer, TechnicalFormOrigin);
+                if (shouldReload) {
+                    component.setOrigin(layer, TechnicalFormOrigin);
+                }
                 component.setOrigin(layer, origin);
                 // component.sync();
             }
@@ -174,6 +177,12 @@ public class FormUtils {
 
     public static @NotNull IForm getPlayerForm(Player player) {
         return PlayerFormComponent.COMPONENT.get(player).nowForm;
+    }
+
+    public static Function<Player, IForm> poseFormGetter = FormUtils::getPlayerForm;
+
+    public static @NotNull IForm getPlayerFormForPose(Player player) {
+        return poseFormGetter.apply(player);
     }
 
     public static @NotNull List<IForm> getPlayerFormHistory(Player player) {
@@ -217,7 +226,7 @@ public class FormUtils {
         IForm form = playerFormComponent.nowForm;
         form.applyScale(player);
         Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
-        applyLayer(player, layerPair);
+        applyLayer(player, layerPair, true);
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();
         PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
@@ -229,7 +238,7 @@ public class FormUtils {
         // TransformManager.sendClientFirstPersonReset(player);
     }
 
-    public static void _loadForm(Player player, IForm form) {
+    public static void _loadForm(Player player, IForm form, boolean shouldReload) {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm oldForm = playerFormComponent.nowForm;
         playerFormComponent.setForm(form);
@@ -242,7 +251,7 @@ public class FormUtils {
         form.applyScale(player);
         // 应用Power Origin -> OriginExtraPower -> AccessoryPower
         Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
-        applyLayer(player, layerPair);
+        applyLayer(player, layerPair, shouldReload);
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();
         PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
@@ -267,7 +276,7 @@ public class FormUtils {
         IForm prevForm = getPlayerForm(player);
         prevForm.onTransform_To(player, form);
         form.onTransform_From(player, prevForm);
-        _loadForm(player, form);
+        _loadForm(player, form, true);
         form.onTransform_Finish(player);
     }
 
@@ -344,7 +353,7 @@ public class FormUtils {
 
     public static void applyFallback(Player player) {
         PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
-        FormUtils._loadForm(player, component.getFallbackForm());
+        FormUtils._loadForm(player, component.getFallbackForm(), true);
     }
 
     public static boolean isFormCanUse(@Nullable Player player, @Nullable IForm form) {

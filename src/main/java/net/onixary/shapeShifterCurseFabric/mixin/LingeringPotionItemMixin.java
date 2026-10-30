@@ -21,11 +21,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Consumer;
 
-// 1.21.11 LingeringPotionItem 不再覆写 appendHoverText（继承自 Item），
-// 因此改为混入 Item 基类，并在方法内用 instanceof LingeringPotionItem 守卫保持仅滞留药水生效
 @Mixin(Item.class)
 public class LingeringPotionItemMixin {
-    // 1.21.11 appendHoverText 签名改为 (ItemStack, Item.TooltipContext, TooltipDisplay, Consumer<Component>, TooltipFlag)
     @Inject(method = "appendHoverText", at = @At("RETURN"))
     public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type, CallbackInfo ci) {
         if (!(stack.getItem() instanceof LingeringPotionItem)) {

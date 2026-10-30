@@ -21,7 +21,6 @@ import java.util.UUID;
 public class PlayerListHudMixin {
     @ModifyReturnValue(method = "getNameForDisplay", at = @At("RETURN"))
     private Component getNameForDisplay(Component original, @Local(argsOnly = true) PlayerInfo entry) {
-        // 1.21.11: GameProfile 的访问器改为 record 风格 id()（原 getId()）
         UUID uuid = entry.getProfile().id();
         Minecraft client = Minecraft.getInstance();
         LocalPlayer nowPlayer = client.player;
@@ -32,7 +31,6 @@ public class PlayerListHudMixin {
         if (nowPlayer == null || playerEntity == null) {
             return original;
         }
-        // 1.21.11: ClientInput.shiftKeyDown 已改为 Input keyPresses 上的 shift()
         if (nowPlayer.input.keyPresses.shift()) {
             IForm form = FormUtils.getPlayerForm(playerEntity);
             if (RegPlayerForms.ORIGINAL_BEFORE_ENABLE.isEquals(form)) {

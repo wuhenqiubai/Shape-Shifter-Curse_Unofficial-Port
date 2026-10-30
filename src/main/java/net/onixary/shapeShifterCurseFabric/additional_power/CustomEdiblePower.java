@@ -30,12 +30,10 @@ public class CustomEdiblePower extends Power {
                 .nutrition(data.getInt("hunger"))
                 .saturationModifier(data.getFloat("saturation_modifier"));
         if (data.getBoolean("meat")) {
-            // .meat() removed in 1.21 — 1.21 的 FoodComponent 已无 meat 属性，改由 ItemTags.WOLF_FOOD 处理
         }
         if (data.getBoolean("always_edible")) {
             foodComponentBuilder.alwaysEdible();
         }
-        // snack and effect methods removed from FoodProperties.Builder in 1.21.11
         this.foodComponent = foodComponentBuilder.build();
     }
 

@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -9,6 +8,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.LivingEntity;
@@ -22,9 +22,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.ISubForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +29,13 @@ import java.util.List;
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidgetEX, FormTextureUtils.TempFormModelProcessor {
+    private static final int MENU_WIDTH = 420;
+    private static final int MENU_HEIGHT = 227;
+    private static final Identifier MENU_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu.png");
+
     private static final int BG_WIDTH = 420;
     private static final int BG_HEIGHT = 227;
-    private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu.png");
+    private static final Identifier BG_TEXTURE = Identifier.fromNamespaceAndPath(MOD_ID, "textures/gui/sub_form_menu_bg.png");
 
     private List<Identifier> availableForms;
     private int nowFormIndex = 0;
@@ -45,6 +46,15 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     private Button selectFormButton;
     private Button prevFormButton;
     private Button nextFormButton;
+
+    public static void openSubFormSelectScreen() {
+        Minecraft client = Minecraft.getInstance();
+        if (getAvailableForms(client).isEmpty()) {
+            client.setScreen(new SubFormSelectScreen_NoForm(Component.empty()));
+        } else {
+            client.setScreen(new SubFormSelectScreen(Component.empty()));
+        }
+    }
 
     public SubFormSelectScreen(Component title) {
         super(title);
@@ -57,9 +67,9 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         }
     }
 
-    private List<Identifier> getAvailableForms() {
+    public static List<Identifier> getAvailableForms(Minecraft client) {
         List<Identifier> availableForms = new ArrayList<>();
-        IForm playerForm = FormUtils.getPlayerForm(this.minecraft.player);
+        IForm playerForm = FormUtils.getPlayerForm(client.player);
         IForm nowForm = playerForm;
         if (playerForm instanceof ISubForm subForm && subForm.isSubForm()) {
             playerForm = subForm.getMasterForm();
@@ -70,7 +80,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         List<IForm> subForms = RegPlayerForms.getSubForms(playerForm);
         subForms.add(playerForm);
         subForms.removeIf(form -> form.isEquals(nowForm));
-        subForms.removeIf(form -> !(FormUtils.isFormCanUse(this.minecraft.player, form)));
+        subForms.removeIf(form -> !(FormUtils.isFormCanUse(client.player, form)));
         availableForms.addAll(subForms.stream().map(IForm::getFormID).toList());
         return availableForms;
     }
@@ -81,20 +91,32 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     @Override
     public void init() {
-        availableForms = getAvailableForms();
-        int baseX = (this.width - BG_WIDTH) / 2;
-        int baseY = (this.height - BG_HEIGHT) / 2;
+        WidgetList.clear();
+        availableForms = getAvailableForms(minecraft);
+        int baseX = (this.width - MENU_WIDTH) / 2;
+        int baseY = (this.height - MENU_HEIGHT) / 2;
         // 152 32 116 14 - Label
-        this.addRenderableWidget(new StringWidget(baseX + 152, baseY + 32, 116, 14, Component.literal("Sub Form Select Menu"), this.font));
+        this.addRenderableWidget(new StringWidget(baseX + 152, baseY + 32, 116, 14, Component.translatable("gui.shape-shifter-curse.sub_form.title"), this.font));
         // 393 7 20 20 - Close
         this.addRenderableWidget(Button.builder(Component.literal("X"), button -> this.onClose()).pos(baseX + 393, baseY + 7).size(20, 20).build());
 
         // 223 58 77 14 - FormName
-        formNameText = new StringWidget(baseX + 223, baseY + 58, 77, 14, Component.literal(""), this.font);
+        formNameText = new StringWidget(baseX + 223, baseY + 58, 77, 14, Component.empty(), this.font) {
+            @Override
+            public void extractWidgetRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+                if (SubFormSelectScreen.this.font.width(getMessage()) <= getWidth()) {
+                    super.extractWidgetRenderState(context, mouseX, mouseY, delta);
+                } else {
+                    this.extractScrollingStringOverContents(context.textRendererForWidget(this, GuiGraphicsExtractor.HoveredTextEffects.NONE), getMessage(), 2);
+                }
+            }
+        };
         // 223 75 77 88 - Form Desc
-        formDescText = new ScaleScrollTextWidget(baseX + 223, baseY + 75, 77, 88, 1.0f, Component.literal(""), this.font);
+        formDescText = new ScaleScrollTextWidget(baseX + 223, baseY + 75, 77, 88, 1.0f, Component.empty(), this.font);
+        formDescText.setEnableScrollableIconRender(true);
+        this.addWidget((WidgetEXUtils.IWidgetEX) formDescText);
         // 223 166 77 14 - Select Form Button
-        selectFormButton = Button.builder(Component.literal("SELECT"), button -> {
+        selectFormButton = Button.builder(Component.translatable("gui.shape-shifter-curse.sub_form.select"), button -> {
             Identifier formID = availableForms.get(nowFormIndex);
             if (formID != null) {
                 SendSetForm(formID);
@@ -145,9 +167,10 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
 
     public void renderBackgroundTexture(GuiGraphicsExtractor context) {
         // 计算居中位置，保持固定尺寸
-        int bgX = (this.width - BG_WIDTH) / 2;
-        int bgY = (this.height - BG_HEIGHT) / 2;
-        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, bgX, bgY, 0, 0, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, -1);
+        context.blit(RenderPipelines.GUI_TEXTURED, BG_TEXTURE, 0, 0, 0, 0, this.width, this.height, BG_WIDTH, BG_HEIGHT, BG_WIDTH, BG_HEIGHT, -1);
+        int bgX = (this.width - MENU_WIDTH) / 2;
+        int bgY = (this.height - MENU_HEIGHT) / 2;
+        context.blit(RenderPipelines.GUI_TEXTURED, MENU_TEXTURE, bgX, bgY, 0, 0, MENU_WIDTH, MENU_HEIGHT, MENU_WIDTH, MENU_HEIGHT, MENU_WIDTH, MENU_HEIGHT, -1);
     }
 
     private void RenderEntity(GuiGraphicsExtractor context, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -167,12 +190,18 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     private void RenderEntityInViewport(GuiGraphicsExtractor context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
         context.enableScissor(viewportX, viewportY, viewportX + viewportWidth, viewportY + viewportHeight);
         try {
-            // 1.21.11: RenderSystem.clear 已随 GL5 管线移除；原版 InventoryScreen 在 GUI 内渲染实体时
-            // 也不再手动清深度（帧级清屏由 GuiRenderer / GameRenderer 负责），故此处直接去掉。
             RenderEntity(context, x, y, size, mouseX, mouseY, entity);
         } finally {
             context.disableScissor();
         }
+    }
+
+    @Override
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        if (this.minecraft.level == null) {
+            this.extractPanorama(context, delta);
+        }
+        this.extractBlurredBackground(context);
     }
 
     @Override
@@ -183,10 +212,10 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         // 120 58 100 133
         if (minecraft.player != null) {
             int viewportX = baseX + 120;
-            int viewportY = baseY + 50;
+            int viewportY = baseY + 58;
             int entityX = viewportX + 100 / 2;
-            int entityY = viewportY + 133 - 15;
-            int entitySize = 50;
+            int entityY = viewportY + 133 + 30;
+            int entitySize = 80;
             RenderEntityInViewport(
                     context,
                     viewportX, viewportY,
@@ -228,14 +257,38 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         return this.WidgetList;
     }
 
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean bl) {
+        this.onClickWidget(event.x(), event.y(), event.button());
+        return super.mouseClicked(event, bl);
+    }
+
+    @Override
+    public boolean mouseReleased(MouseButtonEvent event) {
+        this.onReleaseWidget(event.x(), event.y(), event.button());
+        return super.mouseReleased(event);
+    }
+
+    @Override
+    public boolean mouseDragged(MouseButtonEvent event, double deltaX, double deltaY) {
+        this.onDragWidget(event.x(), event.y(), event.button(), deltaX, deltaY);
+        return super.mouseDragged(event, deltaX, deltaY);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
+        this.onScrollWidget(mouseX, mouseY, verticalAmount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+    }
+
     public void updatePageButtons() {
         prevFormButton.active = nowFormIndex > 0;
         nextFormButton.active = nowFormIndex < availableForms.size() - 1;
     }
 
     public void clearInfo() {
-        formNameText.setMessage(Component.literal(""));
-        formDescText.setMessage(Component.literal(""));
+        formNameText.setMessage(Component.empty());
+        formDescText.reloadText(Component.empty());
         selectFormButton.active = false;
         updatePageButtons();
     }
@@ -256,7 +309,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
             return;
         }
         formNameText.setMessage(form.getContentText(CodexData.ContentType.NAME));
-        formDescText.setMessage(form.getContentText(CodexData.ContentType.DESC));
+        formDescText.reloadText(form.getContentText(CodexData.ContentType.DESC));
         selectFormButton.active = true;
         updatePageButtons();
     }
@@ -278,4 +331,5 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
         IForm playerForm = this.getForm();
         return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
     }
+
 }

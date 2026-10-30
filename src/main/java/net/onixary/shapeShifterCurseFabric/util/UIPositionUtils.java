@@ -30,43 +30,43 @@ public class UIPositionUtils {
         int posY = 0;
         
         switch (positionType) {
-            case 1 -> { // 左上角
+            case 1 -> {
                 posX = 0;
                 posY = 0;
             }
-            case 2 -> { // 上中
+            case 2 -> {
                 posX = centerX;
                 posY = 0;
             }
-            case 3 -> { // 右上角
+            case 3 -> {
                 posX = windowWidth;
                 posY = 0;
             }
-            case 4 -> { // 左中
+            case 4 -> {
                 posX = 0;
                 posY = centerY;
             }
-            case 5 -> { // 中心
+            case 5 -> {
                 posX = centerX;
                 posY = centerY;
             }
-            case 6 -> { // 右中
+            case 6 -> {
                 posX = windowWidth;
                 posY = centerY;
             }
-            case 7 -> { // 左下角
+            case 7 -> {
                 posX = 0;
                 posY = windowHeight;
             }
-            case 8 -> { // 下中
+            case 8 -> {
                 posX = centerX;
                 posY = windowHeight;
             }
-            case 9 -> { // 右下角
+            case 9 -> {
                 posX = windowWidth;
                 posY = windowHeight;
             }
-            default -> { // 默认中心
+            default -> {
                 posX = centerX;
                 posY = centerY;
             }

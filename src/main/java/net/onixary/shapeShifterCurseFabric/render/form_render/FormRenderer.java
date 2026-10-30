@@ -17,7 +17,6 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRen
     public FormAnimatable realAnimatable = null;
     public FormModel realModel = null;
 
-    // GL5 render pass 数据通道
     public static final DataTicket<Player> TICKET_PLAYER = DataTicket.create("ssc_player", Player.class);
     public static final DataTicket<Integer> TICKET_CHANNEL = DataTicket.create("ssc_channel", Integer.class);
     public static final DataTicket<Float> TICKET_LIMB_ANGLE = DataTicket.create("ssc_limb_angle", Float.class);
@@ -57,7 +56,6 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRen
         return RenderTypes.entityTranslucent(texture);
     }
 
-    // GL5 骨骼操作挂接点：render pass 内执行 SSC 的 processAnimation（PAL 驱动 + 轴向转换 + IK）
     @Override
     public void adjustModelBonesForRender(RenderPassInfo<GeoRenderState.Impl> renderPassInfo, BoneSnapshots snapshots) {
         FormModel model = this.realModel;

@@ -7,25 +7,11 @@ plugins {
 version = "${project.mod_version}${project.special_build_version}+${minecraft_version}"
 group = project.maven_group
 
-// Apoli / Calio 的源码已并入本仓库（见 settings.gradle）。monorepo 下各模块自持版本号没有意义，
-// 这里统一成 SSCU 的 group + version —— 发布坐标因此是
-// net.wuhenqiubai:{shape-shifter-curse-unofficial, Apoli-Legacy, Calio-Legacy}:<同一个版本>。
-// ⚠ 子项目自己的 build 脚本里不能再写 version/group，否则会覆盖这里。
 subprojects {
     version = rootProject.version
     group = rootProject.group
 }
 
-// 不发布 Gradle Module Metadata(.module)。
-//
-// 原因：JitPack 改写 .module 时拿「仓库名」当 module 名，而本仓库是多构件 monorepo
-// （Apoli-Legacy / Calio-Legacy / shape-shifter-curse-unofficial / shape-shifter-curse-bom），
-// 没有一个等于仓库名 → 四个构件的 .module 组件坐标全都对不上消费者请求的坐标。
-// Gradle 读 .module 优先于 .pom，于是直接报 "inconsistent module metadata found"，
-// 导致 JitPack 上的四个构件对任何消费者都解析不了（POM 的坐标反而是对的，JitPack 改写正确）。
-//
-// ⚠ bom/build.gradle 里不要把这个开关重新打开，否则 bom 在 JitPack 上照样解析不了；
-//   BOM 的约束本来就是靠 POM 的 <dependencyManagement> 传的，不依赖 .module。
 allprojects {
     tasks.withType(GenerateModuleMetadata).configureEach { enabled = false }
 }
@@ -93,7 +79,6 @@ repositories {
             includeGroup "maven.modrinth"
         }
     }
-    // CurseMaven
     exclusiveContent {
         forRepository {
             maven {
@@ -127,7 +112,6 @@ repositories {
         url = "https://jitpack.io"
     }
 
-    //ModMenu
     maven {
         url "https://maven.terraformersmc.com/releases/"
     }
@@ -136,7 +120,6 @@ repositories {
         name = "Fuzs Mod Resources"
         url = "https://raw.githubusercontent.com/Fuzss/modresources/main/maven/"
     }
-    // AppleSkin
     maven {
         url "https://maven.ryanliptak.com/"
     }
@@ -148,7 +131,6 @@ repositories {
         name = "RedlanceMinecraft"
         url = "https://repo.redlance.org/public"
     }
-    // Cloth Config
     maven {
         url "https://maven.shedaniel.me/"
     }
@@ -228,8 +210,6 @@ processResources {
     inputs.property "loader_version", project.loader_version
     filteringCharset "UTF-8"
 
-    // Curios 兼容层已改为 src 源码编译（mixin/forge/CurioImpl.java 等），resources 里残留的上游预编译 .class
-    // 会与编译产物在 jar 里重名冲突，打包时排除（源码保存在 src/main/resources 不变，仅不进 jar）。
     exclude "net/onixary/shapeShifterCurseFabric/mixin/forge/*.class"
 
     filesMatching("fabric.mod.json") {
@@ -252,7 +232,7 @@ tasks.withType(JavaCompile).configureEach {
         it.options.release.set(targetJavaVersion)
     }
     options.deprecation = false
-    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
+    options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0", "-AdisableOverwriteChecker=true"]
 }
 
 java {
@@ -274,9 +254,6 @@ def licenseFiles = [
 ]
 
 // 同时覆盖 dev 产物与 remap 后的产物（jar / sourcesJar / remapJar / remapSourcesJar）
-// duplicatesStrategy 说明：remapJar/remapSourcesJar 会继承 jar/sourcesJar 的输出，而后者已经带上这 4 个
-// 协议文件，所以这里再加一次必然重名。Gradle 9 默认对重复条目直接报错（BUILD FAILED），设成 EXCLUDE
-// 让先到的那份生效 —— 两边取自同一个源文件，内容完全相同，无副作用。
 tasks.matching { it.name in ["jar", "sourcesJar", "remapJar", "remapSourcesJar"] }.configureEach {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     licenseFiles.each { source, target ->
@@ -286,9 +263,6 @@ tasks.matching { it.name in ["jar", "sourcesJar", "remapJar", "remapSourcesJar"]
     }
 }
 
-// src/test 下只有 Fabric GameTest（@GameTest，在游戏内跑、由 checkAltarRecipes 驱动），
-// 没有 JUnit 测试。Gradle 9 遇到「有测试源码但扫不到测试」会直接让 :test 失败，
-// 这里显式关掉该校验 —— 不是配置错误，是有意为之。
 tasks.named('test') {
     failOnNoDiscoveredTests = false
 }

@@ -25,7 +25,6 @@ public class EntityOverlayRenderSystem {
     static {
         overlayDataList.add(new OverlayData() {
             private static CocoonModel cocoonModel = new CocoonModel();
-            // GL5 的 GeoObjectRenderer 需要三个类型参数 <TAnimatable, TItemStack, TRenderState>
             private static GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl> cocoonRenderer = new GeoObjectRenderer<EmptyAnimatable, Void, GeoRenderState.Impl>(cocoonModel);
 
             @Override
@@ -37,7 +36,6 @@ public class EntityOverlayRenderSystem {
             public void render(Entity entity, float yaw, float tickDelta, PoseStack matrices, MultiBufferSource vertexConsumers, int light) {
                 matrices.pushPose();
                 matrices.translate(-0.5, -0.5, -0.5);
-                // GL5: MultiBufferSource 渲染入口已移除，改走当前帧的 SubmitNodeStorage + CameraRenderState
                 GeoRenderState.Impl rs = cocoonRenderer.createRenderState(EmptyAnimatable, null);
                 cocoonRenderer.fillRenderState(EmptyAnimatable, null, rs, tickDelta);
                 rs.addGeckolibData(DataTickets.PACKED_LIGHT, light);

@@ -191,7 +191,6 @@ public class OriginDisplayScreen extends Screen {
         }
         context.blit(RenderPipelines.GUI_TEXTURED, WINDOW, guiLeft, guiTop, 0, 0, windowWidth, windowHeight, windowWidth, windowHeight, 256, 256, -1);
         if(origin != null) {
-            // 2D 变换栈不支持 z 平移，删除原 pose().pushPose()/translate(0,0,5)/popPose()
             renderOriginName(context);
             this.renderOriginImpact(context, mouseX, mouseY);
             Component title = getTitleText();
@@ -333,7 +332,6 @@ public class OriginDisplayScreen extends Screen {
         }
 
         public List<ClientTooltipComponent> getTooltipComponents(Font textRenderer, int widthLimit) {
-            // tooltip 构建已移到纯客户端的 BadgeTooltipRenderers（Badge 接口本身不能再带客户端类型的方法签名）
             return BadgeTooltipRenderers.getTooltipComponents(badge, powerType, widthLimit, OriginDisplayScreen.this.time, textRenderer);
         }
 

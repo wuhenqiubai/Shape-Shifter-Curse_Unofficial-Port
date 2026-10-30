@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.*;
@@ -27,10 +29,10 @@ import java.util.function.Consumer;
 
 public class FormColorData {
     public boolean enableDefaultFormColor = true;
-    public final HashMap<Identifier, FormTextureUtils.ColorSetting> formDefaultSetting = new HashMap<>();
+    public final HashMap<Identifier, FormColorSetting> formDefaultSetting = new HashMap<>();
 
-    public final HashMap<String, FormTextureUtils.ColorSetting> customSetting = new HashMap<>();
-    public final HashMap<Identifier, HashMap<String, FormTextureUtils.ColorSetting>> customSettingByForm = new HashMap<>();
+    public final HashMap<String, FormColorSetting> customSetting = new HashMap<>();
+    public final HashMap<Identifier, HashMap<String, FormColorSetting>> customSettingByForm = new HashMap<>();
 
     public static int GlobalSlotCount = 9;
     public static int LocalSlotCount = 3;
@@ -45,7 +47,7 @@ public class FormColorData {
     public static int V2_GlobalSlotCount = 9;
     public final List<String> V2_FormColorSelectMenu_Global_Names = new ArrayList<>();
 
-    public CompoundTag dumpColorSetting(FormTextureUtils.ColorSetting colorSetting) {
+    public CompoundTag dumpColorSetting(FormColorSetting colorSetting) {
         CompoundTag nbt = new CompoundTag();
         nbt.putInt("primaryColor", colorSetting.getPrimaryColor());
         nbt.putInt("accentColor1", colorSetting.getAccentColor1());
@@ -58,8 +60,8 @@ public class FormColorData {
         return nbt;
     }
 
-    public FormTextureUtils.ColorSetting loadColorSetting(CompoundTag nbt) {
-        return new FormTextureUtils.ColorSetting(nbt.getIntOr("primaryColor", 0), nbt.getIntOr("accentColor1", 0), nbt.getIntOr("accentColor2", 0), nbt.getIntOr("eyeColorA", 0), nbt.getIntOr("eyeColorB", 0), nbt.getBooleanOr("primaryGreyReverse", false), nbt.getBooleanOr("accent1GreyReverse", false), nbt.getBooleanOr("accent2GreyReverse", false));
+    public FormColorSetting loadColorSetting(CompoundTag nbt) {
+        return new FormColorSetting(nbt.getIntOr("primaryColor", 0), nbt.getIntOr("accentColor1", 0), nbt.getIntOr("accentColor2", 0), nbt.getIntOr("eyeColorA", 0), nbt.getIntOr("eyeColorB", 0), nbt.getBooleanOr("primaryGreyReverse", false), nbt.getBooleanOr("accent1GreyReverse", false), nbt.getBooleanOr("accent2GreyReverse", false));
     }
 
     public CompoundTag saveCompound() {
@@ -275,7 +277,7 @@ public class FormColorData {
         }
     }
 
-    public static byte[] ColorSettingToBytes(FormTextureUtils.ColorSetting colorSetting) {
+    public static byte[] ColorSettingToBytes(FormColorSetting colorSetting) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (DataOutputStream dos = new DataOutputStream(baos)) {
             dos.writeInt(1);
@@ -296,7 +298,7 @@ public class FormColorData {
         }
     }
 
-    public static @Nullable FormTextureUtils.ColorSetting ColorSettingFromBytes(byte[] bytes) {
+    public static @Nullable FormColorSetting ColorSettingFromBytes(byte[] bytes) {
         try (DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bytes))) {
             if (dis.readInt() != 1) {
                 return null;
@@ -310,7 +312,7 @@ public class FormColorData {
             boolean primaryGreyReverse = (bools & 1) != 0;
             boolean accent1GreyReverse = (bools & 2) != 0;
             boolean accent2GreyReverse = (bools & 4) != 0;
-            return new FormTextureUtils.ColorSetting(primaryColor, accentColor1, accentColor2,
+            return new FormColorSetting(primaryColor, accentColor1, accentColor2,
                     eyeColorA, eyeColorB, primaryGreyReverse, accent1GreyReverse, accent2GreyReverse);
         } catch (Exception e) {
             return null;
@@ -346,7 +348,7 @@ public class FormColorData {
         return stringBuilder.toString();
     }
 
-    public static @Nullable FormTextureUtils.ColorSetting ColorSettingFormString(String data) {
+    public static @Nullable FormColorSetting ColorSettingFormString(String data) {
         try {
             if (data.startsWith("b")) {
                 byte[] bytes = Base64.getDecoder().decode(data.substring(1));
@@ -362,7 +364,7 @@ public class FormColorData {
         }
     }
 
-    public static String ColorSettingtoString(FormTextureUtils.ColorSetting data, boolean useBase64) {
+    public static String ColorSettingtoString(FormColorSetting data, boolean useBase64) {
         if (useBase64) {
             byte[] bytes = FormColorData.ColorSettingToBytes(data);
             return "b" + Base64.getEncoder().encodeToString(bytes);
@@ -439,7 +441,7 @@ public class FormColorData {
         this.FormColorSelectMenu_Form_Default_Names.put(formID, name);
     }
 
-    public static @Nullable FormTextureUtils.ColorSetting getPlayerColorSetting(boolean ABGR) {
+    public static @Nullable FormColorSetting getPlayerColorSetting(boolean ABGR) {
         Player player = Minecraft.getInstance().player;
         if (player == null) {
             return null;
@@ -448,8 +450,8 @@ public class FormColorData {
         if (ABGR) {
             return skinComponent.getFormColor();
         } else {
-            FormTextureUtils.ColorSetting colorSetting = skinComponent.getFormColor();
-            return new FormTextureUtils.ColorSetting(
+            FormColorSetting colorSetting = skinComponent.getFormColor();
+            return new FormColorSetting(
                     FormTextureUtils.ABGR2ARGB(colorSetting.getPrimaryColor()),
                     FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor1()),
                     FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor2()),
@@ -462,8 +464,8 @@ public class FormColorData {
         }
     }
 
-    public static FormTextureUtils.ColorSetting ARGB2ABGR(FormTextureUtils.ColorSetting colorSetting) {
-        return new FormTextureUtils.ColorSetting(
+    public static FormColorSetting ARGB2ABGR(FormColorSetting colorSetting) {
+        return new FormColorSetting(
                 FormTextureUtils.ARGB2ABGR(colorSetting.getPrimaryColor()),
                 FormTextureUtils.ARGB2ABGR(colorSetting.getAccentColor1()),
                 FormTextureUtils.ARGB2ABGR(colorSetting.getAccentColor2()),
@@ -475,8 +477,8 @@ public class FormColorData {
         );
     }
 
-    public static FormTextureUtils.ColorSetting ABGR2ARGB(FormTextureUtils.ColorSetting colorSetting) {
-        return new FormTextureUtils.ColorSetting(
+    public static FormColorSetting ABGR2ARGB(FormColorSetting colorSetting) {
+        return new FormColorSetting(
                 FormTextureUtils.ABGR2ARGB(colorSetting.getPrimaryColor()),
                 FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor1()),
                 FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor2()),

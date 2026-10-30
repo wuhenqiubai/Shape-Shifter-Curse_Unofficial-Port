@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -37,7 +39,6 @@ import static net.onixary.shapeShifterCurseFabric.networking.ModPackets.*;
 // This class should only be registered on the server side
 public class ModPacketsC2S {
 
-    /** Called from client initializer: registers C2S payload codecs so the client can send. */
     public static void registerClient() {
         BytePayload.registerC2S(VALIDATE_START_BOOK_BUTTON);
         BytePayload.registerC2S(Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "update_skin_setting"));
@@ -58,7 +59,6 @@ public class ModPacketsC2S {
     }
 
     public static void register() {
-        // Register C2S payload types before registering handlers
 	    registerClient();
 
         ServerPlayNetworking.registerGlobalReceiver(BytePayload.id(VALIDATE_START_BOOK_BUTTON), (payload, ctx) -> {
@@ -157,13 +157,6 @@ public class ModPacketsC2S {
         );
     }
 
-    /**
-     * 上游（1.20.1）在 {@code register()} 里把 {@code VALIDATE_START_BOOK_BUTTON} 接到本方法；
-     * 1.21.1 移植时改成了在 {@code register()} 里直接写 lambda，于是本方法不再被注册、成为死代码，
-     * 仅留作参考。原方法末尾还挂着 8 行 {@code registerGlobalReceiver}（与 {@code register()} 里的
-     * 那批完全重复）——那是内联时漏删的残留，一旦有人把本方法重新接上，Fabric 会因重复注册抛
-     * {@code IllegalArgumentException} 直接崩服，故已删除。
-     */
     private static void onPressStartBookButton(BytePayload payload, ServerPlayNetworking.Context ctx) {
         // 就凭这个网络Bug 我就可以做一个可以直接还原形态的作弊客户端 还可以给其他玩家还原 不知道为什么要往buf里写uuid
         // UUID playerUuid = packetByteBuf.readUuid();
@@ -214,7 +207,7 @@ public class ModPacketsC2S {
             component.setKeepOriginalSkin(keepOriginalSkin);
             component.setEnableFormColor(enableFormColorSystem);
         }
-        component.setFormColor(new FormTextureUtils.ColorSetting(primaryColor, accentColor1Color, accentColor2Color, eyeColorA, eyeColorB, primaryGreyReverse, accent1GreyReverse, accent2GreyReverse));
+        component.setFormColor(new FormColorSetting(primaryColor, accentColor1Color, accentColor2Color, eyeColorA, eyeColorB, primaryGreyReverse, accent1GreyReverse, accent2GreyReverse));
         RegPlayerSkinComponent.SKIN_SETTINGS.sync(player);
     }
 
@@ -251,8 +244,6 @@ public class ModPacketsC2S {
         ServerPlayer player = ctx.player();
         UUID target = buf.readUUID();
         Identifier formID = Identifier.tryParse(buf.readUtf());
-        // [移植修复] 上游此处还有第三个字段 immediately（sendSetForm 一直在发），移植时漏读，
-        // 且把上游的 forceTransform 换成了 startTransform —— 后者不清形态历史（clearPlayerFormHistory）。
         boolean immediately = buf.readBoolean();
         if (target.equals(player.getUUID()) || player.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.byId(2)))) {
             ServerPlayer targetPlayer = player.level().getServer().getPlayerList().getPlayer(target);
@@ -270,8 +261,6 @@ public class ModPacketsC2S {
         ServerPlayer player = ctx.player();
         IForm form = RegPlayerForms.getPlayerForm(Identifier.tryParse(buf.readUtf()));
         if (form instanceof DynamicForm pfd && pfd.PlayerUUIDs.contains(player.getUUID())) {
-            // [移植修复] 上游用的是 forceTransform(…, false)，移植时被换成 startTransform，
-            // 少了 clearPlayerFormHistory —— 与 receiveSetForm 同一处退化。
             TransformManager.forceTransform(player, form, false);
         }
     }

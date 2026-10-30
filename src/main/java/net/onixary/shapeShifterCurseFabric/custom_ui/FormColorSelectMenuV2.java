@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import me.shedaniel.autoconfig.AutoConfig;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -72,8 +74,8 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
 
     // Data0:
     private boolean isColorSettingDirty = true;
-    private FormTextureUtils.ColorSetting colorSetting_ARGB = null;
-    private FormTextureUtils.ColorSetting colorSetting_ABGR = null;
+    private FormColorSetting colorSetting_ARGB = null;
+    private FormColorSetting colorSetting_ABGR = null;
 
     // Data1: 由它更新Data0修改它后需要把isColorSettingDirty设为true 和触发更新Data2函数
     private int primaryColor = 0x00FFFFFF;
@@ -161,9 +163,9 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public static FormColorSelectMenuV2 instance;
     private boolean isLockTempTextureSystem = false;  // 用于还原
     private boolean isLockTempModelSystem = false;  // 用于还原
-    private boolean isLockTempConfigSystem = false;  // 用于还原
+    private boolean isLockTempConfigSystem = false;
     private @Nullable Screen parsetScreen = null;
-    private final HashMap<String, HashMap<FormTextureUtils.ColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();  // 防止内存泄漏
+    private final HashMap<String, HashMap<FormColorSetting, Identifier>> colorSettingCacheMap = new HashMap<>();
     private int modelID = -1;
     private static final String identifierNameSpace = MOD_ID;
     private static final String identifierPrefix = "dynamic_fcs_v2_";
@@ -321,7 +323,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             if (button instanceof FCS_ButtonWidget fcsButtonWidget) {
                 // 靠UI判断 省的写一个变量了
                 if (fcsButtonWidget.TEXTURE_X == 15) {
-                    FormTextureUtils.ColorSetting colorSetting = this.getGlobalSetting(Index);
+                    FormColorSetting colorSetting = this.getGlobalSetting(Index);
                     if (colorSetting != null) {
                         this.loadData(colorSetting);
                     }
@@ -353,7 +355,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     // Data0 函数
 
     private void updateColorSetting() {
-        colorSetting_ARGB = new FormTextureUtils.ColorSetting(
+        colorSetting_ARGB = new FormColorSetting(
                 primaryColor,
                 accentColor1Color,
                 accentColor2Color,
@@ -363,7 +365,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
                 accent1GreyReverse,
                 accent2GreyReverse
         );
-        colorSetting_ABGR = new FormTextureUtils.ColorSetting(
+        colorSetting_ABGR = new FormColorSetting(
                 FormTextureUtils.ARGB2ABGR(primaryColor),
                 FormTextureUtils.ARGB2ABGR(accentColor1Color),
                 FormTextureUtils.ARGB2ABGR(accentColor2Color),
@@ -376,7 +378,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         this.isColorSettingDirty = false;
     }
 
-    public FormTextureUtils.ColorSetting getColorSetting(boolean isABGR) {
+    public FormColorSetting getColorSetting(boolean isABGR) {
         if (this.isColorSettingDirty) {
             updateColorSetting();
         }
@@ -422,7 +424,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         //     case 2 -> { this.PanelConfigNameLabel.setMessage(AccentColor2Label); }
         //     case 3 -> { this.PanelConfigNameLabel.setMessage(EyeColorALabel); }
         //     case 4 -> { this.PanelConfigNameLabel.setMessage(EyeColorBLabel); }
-        // }
         int Color = 0x00FFFFFF;
         switch (this.SliderIndex) {
             case 0 -> Color = this.primaryColor;
@@ -589,7 +590,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             case 3, 4, 5 -> this.updateRGBFromHSV();
         }
     }
-    // 二级菜单
     public void updatePanel() {
         if (isOpenPanel02) {
             ConfigPanel01.forEach(element -> element.visible = false);
@@ -644,14 +644,14 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         return ShapeShifterCurseFabricClient.formColorData.customSetting.containsKey(id);
     }
 
-    private @Nullable FormTextureUtils.ColorSetting getGlobalSetting(int index) {
+    private @Nullable FormColorSetting getGlobalSetting(int index) {
         String id = String.format("fcs_v2_%s", index);
         return ShapeShifterCurseFabricClient.formColorData.customSetting.get(id);
     }
 
     private void setGlobalSetting(int index) {
         String id = String.format("fcs_v2_%s", index);
-        FormTextureUtils.ColorSetting colorSettingRGBA = this.getColorSetting(false);
+        FormColorSetting colorSettingRGBA = this.getColorSetting(false);
         ShapeShifterCurseFabricClient.formColorData.customSetting.put(id, colorSettingRGBA);
         this.updateSavaButtonActive();
     }
@@ -682,7 +682,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         this.parsetScreen = parsetScreen;
     }
 
-    public void loadData(FormTextureUtils.ColorSetting colorSetting) {
+    public void loadData(FormColorSetting colorSetting) {
         primaryColor = colorSetting.getPrimaryColor();
         accentColor1Color = colorSetting.getAccentColor1();
         accentColor2Color = colorSetting.getAccentColor2();
@@ -695,7 +695,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         this.onData1Changed();
     }
 
-    public void loadServerData(FormTextureUtils.ColorSetting colorSetting) {
+    public void loadServerData(FormColorSetting colorSetting) {
         // 服务器上的是 ABGR
         primaryColor = FormTextureUtils.ABGR2ARGB(colorSetting.getPrimaryColor());
         accentColor1Color = FormTextureUtils.ABGR2ARGB(colorSetting.getAccentColor1());
@@ -712,7 +712,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public void loadData() {
         if (minecraftClient.player != null) {
             PlayerSkinComponent component = RegPlayerSkinComponent.SKIN_SETTINGS.get(minecraftClient.player);
-            FormTextureUtils.ColorSetting colorSetting = component.getFormColor();
+            FormColorSetting colorSetting = component.getFormColor();
             this.keepCustomSkin = component.shouldKeepOriginalSkin();
             this.enableFormColorSystem = component.isEnableFormColor();
             this.loadServerData(colorSetting);
@@ -766,15 +766,15 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     @Override
     public void init() {
         super.init();
-        int BPosX = width / 2 - BG_WIDTH / 2;  // 图片左上角 X
-        int BPosY = height / 2 - BG_HEIGHT / 2;  // 图片左上角 Y
+        int BPosX = width / 2 - BG_WIDTH / 2;
+        int BPosY = height / 2 - BG_HEIGHT / 2;
         int TextColor = 0xDDDDDD;
         // 330,20,70,11 - Global Slot Label
         this.addRenderableWidget(new StringWidget(BPosX + 330, BPosY + 20, 70, 11, GlobalSlotTitle, font));
         // 20,196,68,11 - 从剪切板获取
         this.addRenderableWidget(Button.builder(DownloadFromClipboard, button -> {
                     String keyBoardData = minecraftClient.keyboardHandler.getClipboard();
-                    FormTextureUtils.ColorSetting cs = FormColorData.ColorSettingFormString(keyBoardData);
+                    FormColorSetting cs = FormColorData.ColorSettingFormString(keyBoardData);
                     if (cs != null) {
                         this.loadData(cs);
                     }
@@ -1052,7 +1052,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         // 1.21.11 该函数内部 vector3f=(0, bboxHeight/2 + f, 0)，模型脚在纹理内 = 视口中心 + (bboxHeight/2 + f)*size。
         // offset=0（f=-bboxHeight/2）会让模型上半身超出 PIP 纹理被硬裁剪（模型高 1.8*size > 纹理中心上方 size）。
         // 模型完整需 offset>=0.8，故 f=0（模型居中于视口）；模型在 scissor 框内的位置由 y 参数补偿。
-        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)(x - mouseX), (float)(y - mouseY), entity);
+        InventoryScreen.extractEntityInInventoryFollowsMouse(context, x - size, y - size, x + size, y + size, size, 0.0F, (float)mouseX, (float)mouseY, entity);
     }
 
     private void RenderEntityInViewport(GuiGraphicsExtractor context, int viewportX, int viewportY, int viewportWidth, int viewportHeight, int x, int y, int size, int mouseX, int mouseY, LivingEntity entity) {
@@ -1088,9 +1088,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         int BPosX = width / 2 - BG_WIDTH / 2;
         int BPosY = height / 2 - BG_HEIGHT / 2;
-        // 26.1: 背景由框架经 extractBackground 自动调用，不再手动调。
-        // （本类的 extractBackground 是空实现，用于抑制原版 blur/panorama；此前它不构成覆写，
-        //   导致「抑制原版背景」的意图一直没生效 —— 现已修正。）
         this.renderTextureBackground(context);
 
         if (!isOpenPanel02) {
@@ -1115,7 +1112,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         }
         // 20,34,142,157
         if (minecraftClient.player != null) {
-            RenderEntityInViewport(context, BPosX + 20, BPosY + 34, 142, 157, BPosX + 91, BPosY + 112, 90, BPosX + 91 - mouseX, BPosY + 96 - mouseY, minecraftClient.player);
+            RenderEntityInViewport(context, BPosX + 20, BPosY + 34, 142, 157, BPosX + 91, BPosY + 112, 90, mouseX, mouseY, minecraftClient.player);
         }
         super.extractRenderState(context, mouseX, mouseY, delta);
     }
@@ -1230,7 +1227,6 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             this.modelID = modelID;
             CleanColorSettingCache();
         }
-        // 可以关闭这个功能
         if (!this.enableFormColorSystem) {
             return texture;
         }

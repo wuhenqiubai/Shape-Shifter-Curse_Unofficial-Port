@@ -19,7 +19,6 @@ public class AdditionalItemCondition {
                 ShapeShifterCurseFabric.identifier("is_weapon"),
                 new SerializableData(),
                 (data, itemstack) -> {
-                    // Apoli-Legacy: ITEM_CONDITION 泛型是 ItemStack（alpha7 是 Tuple<Level, ItemStack>）
                     var attrComponent = itemstack.get(DataComponents.ATTRIBUTE_MODIFIERS);
                     double totalAdd = 0;
                     if (attrComponent != null) {

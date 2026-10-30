@@ -91,11 +91,11 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
     }
 
     @Override
-    public void onScrollWidget(double mouseX, double mouseY, double mouseZ) {
+    public void onScrollWidget(double mouseX, double mouseY, double scrollAmount) {
         if (this.enableScrollableIconRender && mouseX >= this.realWidth) {
             return;
         }
-        scrollZTotal += mouseZ;
+        scrollZTotal += scrollAmount;
         if (scrollZTotal > 0.0625f || scrollZTotal < -0.0625f) {
             int amount = (int) (scrollZTotal * 16);
             scrollZTotal -= amount * 0.0625f;
@@ -194,15 +194,11 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
             }
         }
         Font font = Objects.requireNonNull(this.getFont());
-        // 文字行距/居中用未缩放值，缩放由下面的 GUI pose 完成
         int k = 9;
         int l = this.getColor();
         List<FormattedCharSequence> lines = font.split(this.getMessage(), this.getTextWidth());
         // 这API真好用 比我硬算剔除好写不止一点
         context.enableScissor(i, j, i + this.getWidth(), j + this.boxHeight);
-        // 1.21.11: MultiLineLabel 只剩 visitLines(...)，renderCentered/renderLeftAligned 已删除；
-        // 且 AbstractStringWidget 不再提供 shadow 开关，文字渲染走 GuiTextRenderState（延迟提交）、
-        // 字形缩放只能由保存的 2D pose 决定。故这里自己按行画：pose 缩放 Scale 倍 + scroll 走设备像素。
         Matrix3x2fStack pose = context.pose();
         pose.pushMatrix();
         pose.translate(i, j - this.scroll);

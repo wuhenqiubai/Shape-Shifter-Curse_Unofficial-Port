@@ -206,9 +206,6 @@ public class FormRenderUtils {
         return new Vec3(wrapRadians(part.xRot), wrapRadians(part.yRot), wrapRadians(part.zRot));
     }
 
-    // 把欧拉角弧度 wrap 到 [-π, π]，等价 Mth.wrapDegrees 的弧度版。
-    // PAL 动画对右臂常用 >180° 的表示（如 axolotl_3_crawling 右臂 x=+190°，物理等价 -170°），
-    // 直接写入 GeoBone 会让渲染插值走长弧（非最短路翻转）；wrap 只改表示不改物理姿态，确保走最短路。
     private static float wrapRadians(float v) {
         float twoPi = Mth.TWO_PI;
         float pi = Mth.PI;

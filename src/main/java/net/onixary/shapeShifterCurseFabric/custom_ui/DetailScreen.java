@@ -49,6 +49,14 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
     }
 
     @Override
+    public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+        if (this.minecraft.level == null) {
+            this.extractPanorama(context, delta);
+        }
+        this.extractBlurredBackground(context);
+    }
+
+    @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         context.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
         super.extractRenderState(context, mouseX, mouseY, delta);

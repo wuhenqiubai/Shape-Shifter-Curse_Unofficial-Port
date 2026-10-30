@@ -26,7 +26,10 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     @Override
     public Vec3 getCapeIdleLoc(AbstractClientPlayer player) {
         if (player.onGround()) {
-            return new Vec3(0.0f, 0.7f, 0.2f);
+            if (player.isCrouching()) {
+                return new Vec3(0.0f, 0.4f, -0.3f);
+            }
+            return new Vec3(0.0f, 0.2f, 0.1f);
         }
         else {
             return new Vec3(0.0, 0.0, 0.125);
@@ -35,7 +38,7 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
 
     @Override
     public float getCapeBaseRotateAngle(AbstractClientPlayer player) {
-        return 100.0f;
+        return 20.0f;
     }
 
     @Override

@@ -214,19 +214,14 @@ public class PlayerOriginComponent implements OriginComponent {
 
         if(!player.level().isClientSide()) {
             PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(player);
-	        if (powerComponent == null) {
-		        Origins.LOGGER.warn("PowerHolderComponent is null for player {}", player.getName().getString());
-		        return;
-	        }
-
-            for(Origin origin : origins.values()) {
-                // Grants powers only if the player doesn't have them yet from the specific Origin source.
-                // Needed in case the origin was set before the update to Apoli happened.
-                grantPowersFromOrigin(origin, powerComponent);
-            }
-            for(Origin origin : origins.values()) {
-                revokeRemovedPowers(origin, powerComponent);
-            }
+            // for(Origin origin : origins.values()) {
+            //     // Grants powers only if the player doesn't have them yet from the specific Origin source.
+            //     // Needed in case the origin was set before the update to Apoli happened.
+            //     grantPowersFromOrigin(origin, powerComponent);
+            // }
+            // for(Origin origin : origins.values()) {
+            //     revokeRemovedPowers(origin, powerComponent);
+            // }
 
             // Compatibility with old worlds:
             // Loads power data from Origins tag, whereas new versions

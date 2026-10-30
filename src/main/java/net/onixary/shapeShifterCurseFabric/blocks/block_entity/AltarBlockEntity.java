@@ -42,19 +42,8 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
     public UUID lastUser;
     public AltarRecipe nowRecipe;
     public RecipeHolder<?> nowRecipeHolder;
-    // 1.21.1 侧新增（1.21.11 侧原先缺）：记住上次匹配到的配方 id，重载后可比对恢复进度。
-    // 1.21.11: ResourceLocation 已改名为 Identifier；而 RecipeHolder.id() 变成 ResourceKey<Recipe<?>>，
-    // 取注册名要用 .identifier()（1.21.1 那边 id() 直接就是 id）。存 Identifier 保持与 1.21.1 相同的 NBT 字符串。
     private @Nullable Identifier resumeRecipeId;
     public static final int maxFuel = 102400;
-    // data slot 网络用 16-bit(short) 传输，值域 [-32768,32767]；而 fuelTime 可累积到 102400 超上限，
-    // 超过 32767 会被 writeShort 截断成负值 → 客户端燃料条"消失-重涨"。
-    // 按原作者建议：用 2 个 short 无损拆分传输 fuelTime —— slot 2=低16位, slot 3=高16位，
-    // 客户端 getNowFuel() 拼回完整 int。getCount() 相应从 3 增到 4。
-    // ⚠ 这里不要写 `public int size()`：1.21 Mojmap 的 ContainerData 只有 get/set/getCount，
-    //   `size()` 是 1.20.1 Yarn 时代的遗留（已无调用方）。它会让匿名类同时存在 `size` 和
-    //   `method_17389`(=getCount)，下游用 Yarn 映射的模组（Addon）把 jar 从 intermediary remap 回
-    //   yarn 时两者都叫 size → tiny-remapper "Unfixable conflicts"，整个包 remap 失败。
     public int progress = 0;
     public int totalProgress = 0;  // Only Client
     public int fuelTime = 0;
@@ -178,13 +167,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.setChanged();
     }
 
-    // 构造包含燃料/催化剂槽(slot 9)的 RecipeInput 给 Recipe 匹配。
-    // 1.21.1 的 CraftingInput.of 会按非空网格裁剪、丢弃 slot 9，使 matches().getItem(9) 越界；
-    // 故改用自定义 AltarRecipeInput 线性映射 inventory 0-9（0-8 键材 + slot 9 燃料/催化剂）。
-    // AltarBlockEntity 自身不 implements RecipeInput，避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义。
     public RecipeInput craftInput() {
-        // 带上 owner：BuiltinAltarRecipe 需要拿回 BE 才能跑它的运行时匹配/产出函数
-        //（BE 本身不是 RecipeInput，见上方注释）。
         return new AltarRecipeInput(this.inventory, this);
     }
 
@@ -277,8 +260,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.progress = 0;
             return;
         }
-        // 必须传 craftInput()（含 slot 9 燃料/催化剂槽的线性 RecipeInput），不能把 BlockEntity 本身当 RecipeInput；
-        // 且 getRecipeFor 返回的是 RecipeHolder，配方本体要 .value()
         var altarRecipe = this.matchGetter.getRecipeFor(this.craftInput(), serverLevel);
         if (altarRecipe.isPresent()) {
             this.nowRecipe = altarRecipe.get().value();
@@ -294,8 +275,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.nowRecipeHolder = null;
             this.totalProgress = 0;
         }
-        // 1.21.1: Recipe 不再自带 id（改由 RecipeHolder 管理），所以判 holder 而不是 recipe。
-        // 1.21.11: holder.id() 是 ResourceKey<Recipe<?>>，取注册名要经 .identifier() 才能与 Identifier 比。
         this.progress = this.nowRecipeHolder != null && this.nowRecipeHolder.id().identifier().equals(savedRecipe)
                 && savedTotal == this.totalProgress
                 ? Math.max(0, Math.min(savedProgress, this.totalProgress - 1)) : 0;
@@ -406,7 +385,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         this.fuelTime = valueInput.getIntOr("FuelTime", 0);
         this.progress = valueInput.getIntOr("Process", 0);
         this.totalProgress = valueInput.getIntOr("TotalProcess", 0);
-        // 1.21.1 侧新增：读回配方 id，并强制重查配方（BE 的 nowRecipe 不落盘）。
         this.resumeRecipeId = valueInput.read("Recipe", Identifier.CODEC).orElse(null);
         this.nowRecipe = null;
         this.needCheckRecipe = true;
@@ -420,8 +398,6 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         valueOutput.putInt("FuelTime", this.fuelTime);
         valueOutput.putInt("Process", this.progress);
         valueOutput.putInt("TotalProcess", this.totalProgress);
-        // 1.21.1 侧新增：把当前/待恢复的配方 id 一起存盘，重载后可据此恢复进度。
-        // 1.21.11: holder.id() 是 ResourceKey<Recipe<?>>，其注册名经 .identifier() 取出。
         Identifier recipeId = this.nowRecipeHolder != null ? this.nowRecipeHolder.id().identifier() : this.resumeRecipeId;
         if (recipeId != null) {
             valueOutput.putString("Recipe", recipeId.toString());

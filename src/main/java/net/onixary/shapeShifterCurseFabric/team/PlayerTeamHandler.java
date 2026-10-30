@@ -23,7 +23,6 @@ public class PlayerTeamHandler {
             MobTeamManager.registerTeam(player.level());
         }
         if (PowerHolderComponent.hasPower(player, PillagerFriendlyPower.class)) {
-            // 将玩家添加到队伍
             MobTeamManager.sorceryTeam.getPlayers().add(player.getScoreboardName());
         } else {
             // 从队伍中移除（如果是成员）

@@ -17,8 +17,6 @@ public class ScaleTextRenderer extends Font {
     public float Scale = 1.0f;
 
 	public ScaleTextRenderer(@NotNull Font textRenderer) {
-        // 1.21.11: Font.provider 字段运行时是 intermediary 混淆名，反射 getDeclaredField("provider") 找不到
-        // （NoSuchFieldException）。改用 mixin @Accessor（处理器会映射字段名）。
         super(((FontAccessor) textRenderer).getProvider());
     }
 

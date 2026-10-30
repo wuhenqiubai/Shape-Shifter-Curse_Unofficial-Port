@@ -30,8 +30,6 @@ public abstract class ElytraEntityModelMixin {
     @Final
     private ModelPart leftWing;
 
-    // 1.21.11 中 elytraRotX/Y/Z 已从实体移到渲染状态（HumanoidRenderState），且渲染状态每帧重建，
-    // 这里用实例字段（每个 ElytraModel 对应一个玩家的渲染器）维持原有的平滑动画
     @Unique
     private float ssc$elytraRotX;
     @Unique
@@ -50,7 +48,6 @@ public abstract class ElytraEntityModelMixin {
         float m = 0.0f;
         float n = 0.0f;
 
-        // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
         AbstractClientPlayer player = null;
         if (humanoidRenderState instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
             Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
@@ -79,7 +76,6 @@ public abstract class ElytraEntityModelMixin {
             IForm curForm0 = FormTextureUtils.getPlayerForm_Render(player);
             if(curForm0 == RegPlayerForms.BAT_3){
                 //ShapeShifterCurseFabric.LOGGER.info("BAT3 set elytra");
-                // 1.21.11 渲染状态中没有 onGround，用「非滑翔」近似表示在地面上
                 if (!humanoidRenderState.isFallFlying){
                     if (humanoidRenderState.isCrouching){
                         k += (float)Math.toRadians(30.0);
@@ -99,7 +95,6 @@ public abstract class ElytraEntityModelMixin {
         }
 
         this.leftWing.y = m;
-        // 1.21.11 的渲染状态里拿不到实体（Entity 是上面块内的局部变量），统一用反查到的 player 判空
         if (player != null) {
             ssc$elytraRotX += (k - ssc$elytraRotX) * 0.1f;
             ssc$elytraRotY += (n - ssc$elytraRotY) * 0.1f;

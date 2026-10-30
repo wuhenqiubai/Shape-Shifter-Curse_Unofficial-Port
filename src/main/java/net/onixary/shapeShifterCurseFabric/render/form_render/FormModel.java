@@ -15,6 +15,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
@@ -27,12 +28,8 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
     public static HashMap<Player, Boolean> SlimMap = new HashMap<>();
 
-    // 1.21.11 (GL5): 模型资源 key 是 stripPrefixAndSuffix 结果（geckolib/models/geo/missing.geo.json → geo/missing），
-    // 返回 "geo/missing.geo.json" 会在加载时被 stripLegacyPath 处理并每次打印 "Superfluous prefix or suffix" 警告刷屏
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
-    // 1.21.11 (GL5): 动画资源 key 是 stripPrefixAndSuffix 后的结果（geckolib/animations/missing.animation.json → missing），
-    // 若返回 "animations/missing.animation.json" 会在 BakedAnimationCache.getAnimation 的 stripLegacyPath 后 miss（missing.animation ≠ missing）→ 崩服
     public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":missing";
 
     public Player entity;
@@ -77,17 +74,17 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public Identifier Animation = ShapeShifterCurseFabric.identifier("missing");
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_Textures = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_Textures_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_OverlayTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_OverlayTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_EmissiveTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_EmissiveTexture_Slim = new HashMap<>();
 
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture = new HashMap<>();
-    public HashMap<FormTextureUtils.ColorSetting, Identifier> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_FullBrightTexture = new HashMap<>();
+    public HashMap<FormColorSetting, Identifier> ColorMask_Baked_FullBrightTexture_Slim = new HashMap<>();
 
     // Hidden Parts
     public boolean Hidden_Hat = false;
@@ -277,7 +274,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return useSlim(slim) ? ModelResource_Slim : ModelResource;
     }
 
-    private Identifier readCacheOrBake(HashMap<FormTextureUtils.ColorSetting, Identifier> Cache, Identifier Resource, Identifier ResourceMask, FormTextureUtils.ColorSetting colorSetting) {
+    private Identifier readCacheOrBake(HashMap<FormColorSetting, Identifier> Cache, Identifier Resource, Identifier ResourceMask, FormColorSetting colorSetting) {
         Identifier CachedTexture = Cache.get(colorSetting);
         if (CachedTexture != null) {
             return CachedTexture;
@@ -307,9 +304,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "texture_slim" : "texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_Textures_Slim : ColorMask_Baked_Textures;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -333,9 +330,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "overlay_texture_slim" : "overlay_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_OverlayTexture_Slim : ColorMask_Baked_OverlayTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -359,9 +356,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "emissive_texture_slim" : "emissive_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null && ResourceMask != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_EmissiveTexture_Slim : ColorMask_Baked_EmissiveTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -385,9 +382,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
             if (FormTextureUtils.useTempFormTexture && Objects.equals(this.entity, Minecraft.getInstance().player)) {
                 return FormTextureUtils.tempFormTextureProcessor.getTexture(this.modelID, uslim ? "fullbright_texture_slim" : "fullbright_texture", Resource, ResourceMask, UseMultiplyMask);
             }
-            FormTextureUtils.ColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
+            FormColorSetting colorSetting = FormTextureUtils.getPlayerColorSetting(this.entity);
             if (colorSetting != null) {
-                HashMap<FormTextureUtils.ColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
+                HashMap<FormColorSetting, Identifier> Cache = uslim ? ColorMask_Baked_FullBrightTexture_Slim : ColorMask_Baked_FullBrightTexture;
                 return readCacheOrBake(Cache, Resource, ResourceMask, colorSetting);
             }
         }
@@ -396,7 +393,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public final HashMap<String, GeoBone> geoBoneCache = new HashMap<>();
 
-    // GL5 render pass 会话：BoneSnapshots 在 adjustModelBonesForRender 时注入，render 结束后清理
     public BoneSnapshots currentSnapshots = null;
 
     public void beginRenderPass(BoneSnapshots snapshots) {
@@ -450,7 +446,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
     }
 
     public final @Nullable GeoBone setModelPositionForBone(String bone_name, Vec3 pos) {
-        // GL5 中 GeoBone 无 modelPosition 概念，骨骼绑定位置由 pivot 决定，此方法仅保留签名以兼容调用方
         return getCachedGeoBone(bone_name);
     }
 
@@ -483,10 +478,6 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return getCachedGeoBone(bone_name);
     }
 
-    /**
-     * GL5：对单根 GeoBone 按轴设置旋转（当前 render pass 会话内生效）。
-     * axisId 映射：0=x, 1=-x, 2=y, 3=-y, 4=z, 5=-z
-     */
     public final void setRotationAxisForBone(@Nullable GeoBone bone, int axisId, float value) {
         if (currentSnapshots == null || bone == null) return;
         currentSnapshots.get(bone.name()).ifPresent(s -> {
@@ -501,13 +492,11 @@ public class FormModel extends GeoModel<FormAnimatable> {
         });
     }
 
-    /** GL5：清零单根 GeoBone 的三轴旋转（当前 render pass 会话内生效） */
     public final void resetRotationForGeoBone(@Nullable GeoBone bone) {
         if (currentSnapshots == null || bone == null) return;
         currentSnapshots.get(bone.name()).ifPresent(s -> s.setRotation(0, 0, 0));
     }
 
-    /** GL5：隐藏/显示单根 GeoBone（当前 render pass 会话内生效，对应 GL4 GeoBone.setHidden） */
     public final void setBoneHidden(@Nullable GeoBone bone, boolean hidden) {
         if (currentSnapshots == null || bone == null) return;
         currentSnapshots.get(bone.name()).ifPresent(s -> s.skipRender(hidden));
@@ -546,11 +535,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
         return this.Animation;
     }
 
-//    @Override
-//    public void handleAnimations(FormAnimatable animatable, long instanceId, AnimationState<FormAnimatable> animationState, float partialTick) {
 //        if (this.UseAzureAnim) {
 //            super.handleAnimations(animatable, instanceId, animationState);
-//        }
-//    }
 
 }

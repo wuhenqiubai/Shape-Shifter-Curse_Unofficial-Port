@@ -24,10 +24,6 @@ public record CraftingRecipeBadge(Identifier spriteId,
         return true;
     }
 
-    // 配方展示解析（getIngredientDisplays / getRecipeWidth / getRecipeHeight / getResultStack /
-    // peekInputs）与 tooltip 构建都要用 Minecraft.getInstance()、Font 等客户端类，
-    // 已整体移到纯客户端的 BadgeTooltipRenderers。
-
     @Override
     public SerializableData.Instance toData(SerializableData.Instance instance) {
         instance.set("sprite", spriteId);

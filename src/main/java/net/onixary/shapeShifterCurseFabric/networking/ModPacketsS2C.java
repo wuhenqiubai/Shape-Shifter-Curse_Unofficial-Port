@@ -1,5 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.networking;
 
+import net.onixary.shapeShifterCurseFabric.player_form.skin.FormColorSetting;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -106,15 +108,11 @@ public class ModPacketsS2C {
         });
     }
 
-    /**
-     * 接收形态变化同步包
-     */
     public static void receiveFormChange(BytePayload payload, ClientPlayNetworking.Context ctx) {
         Identifier newFormID = payload.data().readIdentifier();
 
         ctx.client().execute(() -> {
             if (ctx.client().player != null) {
-                // 触发动画重新初始化
                 ShapeShifterCurseFabricClient.refreshPlayerAnimations();
 
                 // 更新 formColorData 的数据(其实是FormColorSelectMenu的数据) 如果启动了自动切换 那么还会自动切换颜色数据
@@ -123,9 +121,6 @@ public class ModPacketsS2C {
         });
     }
 
-    /**
-     * 接收变身状态同步包
-     */
     public static void receiveTransformState(BytePayload payload, ClientPlayNetworking.Context ctx) {
         UUID playerUuid = payload.data().readUUID();
         boolean isTransforming = payload.data().readBoolean();
@@ -150,16 +145,10 @@ public class ModPacketsS2C {
         });
     }
 
-    /**
-     * 接收FirstPerson重置包
-     */
     public static void receiveResetFirstPerson(BytePayload payload, ClientPlayNetworking.Context ctx) {
         ctx.client().execute(TransformManager::executeClientFirstPersonReset);
     }
 
-    /**
-     * 接收蝙蝠吸附状态同步包
-     */
     public static void receiveBatAttachState(BytePayload payload, ClientPlayNetworking.Context ctx) {
         boolean isAttached = payload.data().readBoolean();
         int attachTypeOrdinal = payload.data().readInt();
@@ -186,9 +175,6 @@ public class ModPacketsS2C {
         });
     }
 
-    /**
-     * 接收其他玩家的蝙蝠吸附状态同步包
-     */
     public static void receiveOtherPlayerBatAttachState(BytePayload payload, ClientPlayNetworking.Context ctx) {
         UUID targetPlayerUuid = payload.data().readUUID();
         boolean isAttached = payload.data().readBoolean();
@@ -259,7 +245,7 @@ public class ModPacketsS2C {
         }).start();
     }
 
-    public static void sendUpdateCustomColor(FormTextureUtils.ColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
+    public static void sendUpdateCustomColor(FormColorSetting colorSetting, boolean sendRAW, boolean sendExtraData, boolean keepOriginalSkin, boolean enableFormColorSystem) {
         FriendlyByteBuf buf = FriendlyByteBufs.create();
         buf.writeBoolean(sendExtraData);
         if (sendExtraData) {
@@ -498,7 +484,7 @@ public class ModPacketsS2C {
                 if (!ShapeShifterCurseFabric.playerCustomConfig.enable_server_modify_FCD_config) {
                     return;
                 }
-                FormTextureUtils.ColorSetting nowColorSetting = FormColorData.getPlayerColorSetting(false);
+                FormColorSetting nowColorSetting = FormColorData.getPlayerColorSetting(false);
                 if (nowColorSetting == null) {
                     return;
                 }
@@ -519,7 +505,7 @@ public class ModPacketsS2C {
                 if (!ShapeShifterCurseFabric.playerCustomConfig.enable_server_modify_FCD_config) {
                     return;
                 }
-                FormTextureUtils.ColorSetting colorSetting = null;
+                FormColorSetting colorSetting = null;
                 switch (arg1) {
                     case "form" -> {
                         colorSetting = ShapeShifterCurseFabricClient.formColorData.customSettingByForm.getOrDefault(formID, new HashMap<>()).getOrDefault(arg2, null);
@@ -666,7 +652,6 @@ public class ModPacketsS2C {
         boolean fullUpdate = payload.data().readBoolean();
         int updateCount = payload.data().readInt();
         HashMap<Identifier, ICost> perkCostMap = new HashMap<>();
-        // 1.21.1：ItemStack 反序列化必须带 registry 上下文（ItemCost 的示例栈要用）。
         net.minecraft.core.RegistryAccess registries = ctx.client().level != null
                 ? ctx.client().level.registryAccess()
                 : net.minecraft.core.RegistryAccess.EMPTY;
@@ -693,10 +678,7 @@ public class ModPacketsS2C {
 
 
     public static void receiveOpenSelectSubFormMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
-        ctx.client().execute(() -> {
-            SubFormSelectScreen screen = new SubFormSelectScreen(Component.literal(""));
-            ctx.client().setScreen(screen);
-        });
+        ctx.client().execute(SubFormSelectScreen::openSubFormSelectScreen);
     }
 
     public static void sendSetSubForm(Identifier formID) {

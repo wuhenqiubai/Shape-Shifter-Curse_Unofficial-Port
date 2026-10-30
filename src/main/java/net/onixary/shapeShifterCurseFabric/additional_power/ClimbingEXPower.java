@@ -36,9 +36,6 @@ public class ClimbingEXPower extends ClimbingPower {
         if (this.holdingCondition != null) {
             return this.holdingCondition.test(this.entity);
         }
-        // 1.21.11 修复：holdingCondition 为 null 时不能只看 isShiftKeyDown——
-        // Apoli 的 LivingEntityMixin.doSpiderClimbing 用 canHold() 判定攀爬，任何 shift（含空中）都会触发
-        // 攀爬 → 玩家在空中按 shift 悬停。改为复用 isActive()（start/continue 条件 = 贴住可攀爬面）判定。
         return this.isActive();
     }
 
@@ -54,9 +51,6 @@ public class ClimbingEXPower extends ClimbingPower {
         if (!super.isActive()) {
             return false;
         }
-        // 注：不能用 horizontalCollision 区分「贴墙爬墙」与「开阔地浮空」——爬墙（竖直移动）时 horizontalCollision 为 false，
-        // 会误伤爬墙悬停。真正的区分靠 start/continue 条件（start 要求 collided_horizontally 贴墙；
-        // continue 要求不在地面 + 旁边有方块）。开阔地（无墙）start/continue 均 false → 不激活。
         boolean active;
         if (lastIsClimbing) {
             active = continueClimbCondition == null || continueClimbCondition.test(this.entity);

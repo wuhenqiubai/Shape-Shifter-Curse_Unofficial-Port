@@ -26,7 +26,6 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
         super(ctx, model, shadowRadius);
     }
 
-    // 1.21.11 渲染状态中不再直接携带实体，通过 AvatarRenderState 的实体 id 反查当前正在渲染的玩家
     @Unique
     private static AbstractClientPlayer ssc$getRenderedPlayer(AvatarRenderState avatarRenderState) {
         if (Minecraft.getInstance().level != null) {
@@ -61,13 +60,11 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             return;
         }
         else{
-            // 1.21.11 中飞行偏航角已由 extractFlightData 预计算进渲染状态（flyingYRot），
-            // 这里将其转回角度制以保持原有 Feral 形态的旋转行为
             super.setupRotations(avatarRenderState, poseStack, f, g);
             poseStack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(avatarRenderState.flyingYRot)));
-            poseStack.mulPose(Axis.XP.rotationDegrees(0.0F)); // 不向下倾斜
+            poseStack.mulPose(Axis.XP.rotationDegrees(0.0F));
             // 你可以在这里添加任何额外的旋转
-            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F)); // 使翅膀向上
+            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
             ci.cancel();
         }
     }

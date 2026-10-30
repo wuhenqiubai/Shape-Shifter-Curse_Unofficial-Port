@@ -41,7 +41,6 @@ public class PowerfulCatalyst extends Item {
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level world, LivingEntity user) {
-        // 1.21.11 修复：效果改由自身直接调用（此前依赖 ItemStackMixin 注入，但该 mixin 已不处理 powerful_catalyst）
         if (user instanceof Player player) {
             TransformRelatedItems.OnUsePowerfulCatalyst(player, stack);
         }

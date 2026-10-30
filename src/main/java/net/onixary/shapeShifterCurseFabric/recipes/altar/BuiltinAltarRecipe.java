@@ -83,7 +83,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
                     }
                 }
 
-                // 1.21.11: StackedContents 变成了泛型的 StackedItemContents（accountStack 仍在），与 AltarShapelessRecipe 对齐
                 StackedItemContents recipeMatcher = new StackedItemContents();
                 int i = 0;
                 for(int j = 0; j < 9; ++j) {
@@ -100,7 +99,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         }
     }
 
-    /** 配方配置 id（指向 {@link BARecipeConfigMap}）；1.21.1 Recipe 不再自带配方 id（由 RecipeHolder 管理）。 */
     public final Identifier configId;
     public final BARecipeConfig recipeConfig;
 
@@ -114,10 +112,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return this.recipeConfig.recipeTime;
     }
 
-    // 拿 BE 必须经由 AltarRecipeInput 的 owner —— AltarBlockEntity 本身刻意没有 implements RecipeInput
-    //（避免与 WorldlyContainer 的 getItem/isEmpty 双接口在 remap 时二义）。
-    // 此前这里直接判 `recipeInput instanceof AltarBlockEntity`，而调用方传的是 craftInput()（AltarRecipeInput），
-    // 于是恒为 false —— 所有内置配方（Apoli/饰品升级）静默失效。
     @Override
     public boolean matches(RecipeInput recipeInput, Level world) {
         if (recipeInput instanceof AltarRecipeInput input && input.owner() != null) {
@@ -143,8 +137,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return ItemStack.EMPTY;
     }
 
-    // 1.21.11 的 Recipe 接口删掉了 canCraftInDimensions / getResultItem（结果展示改走 display()/RecipeDisplay），
-    // 并新增了 placementInfo() / recipeBookCategory()。本配方由 Java 代码驱动、没有原料表，故不可放置。
     @Override
     public @NonNull PlacementInfo placementInfo() {
         return PlacementInfo.NOT_PLACEABLE;
@@ -155,7 +147,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         return RecipeBookCategories.CRAFTING_MISC;
     }
 
-    /** 原 getResultItem 的语义（虚拟产物），Recipe 接口已不再要求，保留为普通方法供内部/调试使用。 */
     public @NotNull ItemStack getVirtualResultItem(HolderLookup.Provider provider) {
         return this.recipeConfig.virtualOutput.apply(provider);
     }
@@ -194,8 +185,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
     }
 
     @Override
-    // 1.21.11 的 Recipe.getSerializer() 返回 RecipeSerializer<? extends Recipe<T>>（1.21.1 是 ?）；
-    // 名称取 1.21.1 侧的 BUILTIN_ALTAR_RECIPE（与 RecipeSerializerRegister 里的字段声明一致）。
     public @NonNull RecipeSerializer<? extends Recipe<RecipeInput>> getSerializer() {
         return RecipeSerializerRegister.BUILTIN_ALTAR_RECIPE;
     }
@@ -222,7 +211,6 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         }
     }
 
-    /** 从配置 id 查运行时配置构造配方（配置未注册则抛错）。 */
     private static BuiltinAltarRecipe fromConfigId(Identifier configId) {
         BARecipeConfig recipeConfig = BARecipeConfig.get(configId);
         if (recipeConfig == null) {

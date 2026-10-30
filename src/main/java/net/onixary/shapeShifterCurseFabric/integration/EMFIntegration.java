@@ -5,9 +5,6 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.world.entity.Entity;
 import java.lang.reflect.Method;
 
-/**
- * 通过反射调用 EMF Animation API，避免硬依赖 Entity Model Features。
- */
 public class EMFIntegration {
     private static final boolean EMF_LOADED;
     private static Method emfEntityOf;

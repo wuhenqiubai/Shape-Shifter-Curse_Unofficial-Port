@@ -72,7 +72,6 @@ public final class CostTypeIcons {
         if (stack.isEmpty()) {
             return;
         }
-        // 1.21.11 移除了 renderTooltip(Font, ItemStack, x, y)；对应物是 setTooltipForNextFrame。
         context.setTooltipForNextFrame(Minecraft.getInstance().font, stack, x + mouseX, y + mouseY);
     }
 }

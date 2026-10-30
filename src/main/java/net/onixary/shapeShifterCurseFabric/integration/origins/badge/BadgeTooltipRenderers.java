@@ -32,27 +32,12 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Badge 的 tooltip 构建——**纯客户端**实现。
- *
- * <p><b>为什么单独抽一个类</b>：{@link Badge} 接口原先自带
- * {@code getTooltipComponents(PowerType, int, float, Font)}，其签名含 {@code Font} 与
- * {@code ClientTooltipComponent} 两个客户端类。而该接口在<b>专用服务端</b>也会被加载
- * （{@code Origins#registerResourceListeners} → {@code BadgeManager.init()} 注册 badge 工厂，
- * 且 {@code BadgeManager} 的静态字段引用了 {@code Badge.class}），
- * JVM 解析方法签名时就会去加载那些客户端类 → {@code Cannot load class ... in environment type SERVER}
- * → {@code BootstrapMethodError} → {@code ExceptionInInitializerError} → 服务端启动失败。</p>
- *
- * <p>注意 {@code @Environment(EnvType.CLIENT)} 注解**并不能**阻止链接期的签名解析，
- * 所以必须把带客户端类型的方法整体移出接口/实现类，而不是只加注解。</p>
- */
 @Environment(EnvType.CLIENT)
 public final class BadgeTooltipRenderers {
 
     private BadgeTooltipRenderers() {
     }
 
-    /** 按 badge 具体类型分发 tooltip，替代原先 {@code Badge#getTooltipComponents} 的多态调用。 */
     public static List<ClientTooltipComponent> getTooltipComponents(Badge badge, PowerType<?> powerType,
                                                                     int widthLimit, float time, Font textRenderer) {
         if (badge instanceof TooltipBadge tooltipBadge) {
@@ -65,7 +50,6 @@ public final class BadgeTooltipRenderers {
         }
         if (badge instanceof KeybindBadge keybindBadge) {
             List<ClientTooltipComponent> tooltips = new LinkedList<>();
-            // Component.nullToEmpty 返回的是 Component 而非 MutableComponent，必须强转后才能链式 append
             MutableComponent keyText = ((MutableComponent) Component.nullToEmpty("["))
                     .append(KeyMapping.createNameSupplier(PowerKeyManager.getKeyIdentifier(powerType.getIdentifier())).get())
                     .append(Component.nullToEmpty("]"));
@@ -78,7 +62,6 @@ public final class BadgeTooltipRenderers {
         return new ArrayList<>();
     }
 
-    /** TooltipBadge / KeybindBadge 共用的折行逻辑（原来两边各抄了一份）。 */
     public static void addLines(List<ClientTooltipComponent> tooltips, Component text, Font textRenderer, int widthLimit) {
         if (textRenderer.width(text) > widthLimit) {
             for (FormattedCharSequence orderedText : textRenderer.split(text, widthLimit)) {
@@ -102,7 +85,6 @@ public final class BadgeTooltipRenderers {
         int recipeHeight = getRecipeHeight(badge);
         ItemStack output = getResultStack(badge);
 
-        // 应用 ModifyCraftingPower 修改输出
         ItemStack[] outputRef = { output };
         CraftingInput craftingInput = CraftingInput.of(recipeWidth, recipeHeight,
                 new ArrayList<>(inputs.subList(0, Math.min(recipeWidth * recipeHeight, inputs.size()))));

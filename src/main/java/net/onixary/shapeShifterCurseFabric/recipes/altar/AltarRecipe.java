@@ -52,6 +52,11 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
         return RecipeUtils.ALTAR_RECIPE;
     }
 
+    @Override
+    public boolean isSpecial() {
+        return true;
+    }
+
     public abstract int recipeTime();
 
     // 进度锁 虽然SSC目前没这个需求 但我的拓展有这个需求
@@ -87,7 +92,7 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
         return remainders;
     }
 
-    private static ItemStack inputRemainder(ItemStack input) {
+    public static ItemStack inputRemainder(ItemStack input) {
         // Unlike fluid buckets, vanilla's powder snow bucket declares no recipe remainder.
         if (input.is(Items.POWDER_SNOW_BUCKET)) {
             return new ItemStack(Items.BUCKET);

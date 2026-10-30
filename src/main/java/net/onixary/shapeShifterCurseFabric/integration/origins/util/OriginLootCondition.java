@@ -42,7 +42,6 @@ public class OriginLootCondition implements LootItemCondition {
 
     @Override
     public boolean test(LootContext lootContext) {
-        // 1.21.11 把 LootContext.getParamOrNull 改名为 getOptionalParameter（LootContextParam → ContextKey）
         OriginComponent component = ModComponents.ORIGIN.maybeGet(lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY))
             .orElse(null);
         if (component == null) {

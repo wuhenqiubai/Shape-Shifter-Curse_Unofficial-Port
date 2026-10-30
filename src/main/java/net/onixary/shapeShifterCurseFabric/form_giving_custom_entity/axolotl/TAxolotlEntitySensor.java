@@ -29,7 +29,7 @@ public class TAxolotlEntitySensor extends AxolotlAttackablesSensor {
     }
 
     private boolean isInRange(LivingEntity axolotl, LivingEntity target) {
-        return target.distanceToSqr(axolotl) <= (double)64.0F;  // 8.0f x 8.0f
+        return target.distanceToSqr(axolotl) <= (double)64.0F;
     }
 
     private boolean canHunt(LivingEntity axolotl, LivingEntity target) {

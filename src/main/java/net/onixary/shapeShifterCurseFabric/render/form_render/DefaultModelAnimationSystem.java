@@ -85,7 +85,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             }
             s.setTranslation(s.getTranslateX() + pos.x(), s.getTranslateY() + pos.y(), s.getTranslateZ() + pos.z());
             s.setRotation(s.getRotX() + rot.x(), s.getRotY() + rot.y(), s.getRotZ() + rot.z());
-            // GL5 中 pivot 为只读（绑定位置由模型 JSON 决定），忽略 pivot 累加
         }
 
         public static partTransform of(JsonObject json) {
@@ -297,7 +296,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
 
         public void setAxisRotation(@NotNull GeoBone bone, int axis, float value) {
-            // GL5: GeoBone 只读，此方法逻辑已由 FormModel.setRotationAxisForBone 替代（经 render pass 会话）
         }
 
         public static float[] readWeights(JsonArray json, @Nullable Float total, int size) {
@@ -389,9 +387,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             JsonObject extraPartsMap = json.getAsJsonObject("extra_parts_map");
             for (String key : extraPartsMap.keySet()) {
                 this.extraPartsMap.add(new Tuple<>(key, extraPartsMap.get(key).getAsString()));
-                // 顺手把这些「动画侧骨骼名」登记到全局集合，由 PlayerEntityAnimOverrideMixin 注册进 PAL 控制器。
-                // PAL 只认注册过的骨骼名，未注册的在 get3DTransformRaw 里会被静默返回零值 → 该骨骼无动画。
-                // 这里存归一化后的名字，与 AnimSystem 的查询侧保持同一套规则。
                 AnimSystem.EXTRA_ANIM_BONES.add(AnimSystem.normalizeAnimBoneName(key));
             }
         }
@@ -487,24 +482,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     public void ProcessExtraBone(FormModel m, Player player, String AnimBoneID, String OriginFursBoneID) {
         GeoBone bone =  m.resetBone(OriginFursBoneID);
         Vec3f AnimPosition = AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.POSITION, new Vec3f(0, 0, 0));
-        // X/Z 取反，Y 的符号**按后端分派**（见下）。
-        //
-        // 推导用的是两条已核对的「表示法转换」，以 ModelPart 为中间表示复合：
-        //   ① 已观察正常的 vanilla 骨骼路径：GeoBone = -ModelPart 偏移（FormRenderUtils.getPartPosition 的 .reverse()，三轴全负）
-        //   ② PAL 自己的转换 RenderUtil.translatePartToBone：ModelPart 偏移 = (p.x, -p.y, p.z)  （只有 Y 取反）
-        // PAL 下复合得 GeoBone = (-p.x, +p.y, -p.z)。
-        //
-        // **为什么 Y 必须分派**：PlayerAnimator 的位置 Y 相对 PAL 在 Y 上整体反号（上游 1.20.1 用的就是 PA），
-        // 所以两个后端要用相反的系数才能得到同一个 ModelPart 偏移：
-        //   PA  路径 → (-x, -y, -z)   与官方 master 的写法一致
-        //   PAL 路径 → (-x, +y, -z)
-        // 硬编码成任一边，切到另一边时额外骨骼的位移动画就会在 Y（上下）方向整体镜像。
-        // 历史：24786162 迁移到 PAL 后这行是 (-x,-y,-z)，3f42d62d 才为 PAL 补上 Y 的取反 ——
-        // 加回 PA 路径时若忘了分派，就会重现「蜘蛛额外肢体上下动反」。
-        //
-        // 注：Z 保留取反是沿用原实现。另有一条只比较两库 translate 调用的推导会得出「Z 也不该取反」，
-        // 但那个推导假设两库的 translate 处于同一空间（GeckoLib 的 -posX 怪癖说明并非如此），故未采信。
-        // 实测中若发现额外骨骼在前后（Z）方向也镜像，把这里 z 的符号翻过来即可。
         m.setPositionForBone(OriginFursBoneID, new Vec3(-AnimPosition.x(), AnimPosition.y(), -AnimPosition.z()));
         m.setRotationForBone(OriginFursBoneID, AnimSystem.getPlayerBone3DTransform(player, AnimBoneID, TransformType.ROTATION, new Vec3f(0, 0, 0)));
         m.invertRotForPart(OriginFursBoneID, false, true, true);
@@ -717,8 +694,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.invertRotForPart(RM_LeftArmGeoBoneID, false, true, true);
         model.invertRotForPart(RM_LeftLegGeoBoneID, false, true, true);
         model.invertRotForPart(RM_RightLegGeoBoneID, false, true, true);
-        // FPM 第一人称：FPM 只隐藏 vanilla PlayerModel.head，Geo 形态模型的所有头部相关骨骼需自行隐藏
-        // （head 及整个子树：头饰/耳朵/角/挂在 head 下的 headTail，以及独立的 headTail 链），否则第一人称仍会看到。
         if (LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player)) {
             hideBoneAndChildren(model, model.getCachedGeoBone(RM_HeadGeoBoneID));
             if (headTailChain != null) {
@@ -736,13 +711,11 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             GeoBone neckHead = neckConfig.getHead(model);
             GeoBone neckRoot = neckConfig.getRoot(model);
             if (neckHead != null && neckRoot != null) {
-                // GL5: setTrackingMatrices 无对应物（骨骼位置由渲染管线自动追踪），忽略
                 model.setBoneHidden(neckRoot, LongNeckRenderUtils.isFirstPersonModelActiveForSelf(player));
             }
         }
     }
 
-    /** GL5：递归隐藏骨骼及其整个子树（BoneSnapshot skipRender，需在 render pass 会话内调用） */
     private void hideBoneAndChildren(FormModel model, GeoBone bone) {
         if (bone == null) {
             return;
@@ -755,7 +728,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
 
     @Override
     public void afterRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
-        // GL5: 骨骼隐藏由 render pass 内的 snapshot 控制，renderPosed 后自动清理，无需在此恢复
     }
 
     @Override
@@ -784,7 +756,6 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         PlayerModel playerModel = (PlayerModel) renderer.getModel();
         boolean IsRenderRight = arm.equals(playerModel.rightArm);
         String GeoBoneName = IsRenderRight ? this.rightArmGeoBoneID : this.leftArmGeoBoneID;
-        // GL5: GeoBone 从 BakedGeoModel 直接按名查找并缓存，无 AnimationProcessor 注册流程
         geoBone = model.getCachedGeoBone(GeoBoneName);
         return geoBone;
     }

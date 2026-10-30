@@ -7,6 +7,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -19,12 +20,12 @@ public class ItemCooldownCA {
                 new SerializableData()
                         .add("item", SerializableDataTypes.ITEM, null),
                 (data, e) -> {
-                    ItemStack item = data.get("item");
+                    Item item = data.get("item");
                     if (item == null) {
                         return false;
                     }
                     if (e instanceof Player player) {
-                        return player.getCooldowns().isOnCooldown(item);
+                        return player.getCooldowns().isOnCooldown(new ItemStack(item));
                     }
                     return false;
                 }
@@ -38,13 +39,13 @@ public class ItemCooldownCA {
                         .add("item", SerializableDataTypes.ITEM, null)
                         .add("cooldown", SerializableDataTypes.INT, 0),
                 (data, entity) -> {
-                    ItemStack item = data.get("item");
+                    Item item = data.get("item");
                     int cooldown = data.get("cooldown");
                     if (item == null) {
                         return;
                     }
                     if (entity instanceof Player player) {
-                        player.getCooldowns().addCooldown(item, cooldown);
+                        player.getCooldowns().addCooldown(new ItemStack(item), cooldown);
                     }
                 }
         ));

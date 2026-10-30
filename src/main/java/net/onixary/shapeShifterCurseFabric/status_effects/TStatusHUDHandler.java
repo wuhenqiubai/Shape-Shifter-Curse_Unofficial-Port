@@ -28,7 +28,7 @@ public class TStatusHUDHandler {
 
                             Matrix3x2fStack matrices = context.pose();
                             matrices.pushMatrix();
-                            matrices.scale(0.5f, 0.5f); // 缩放为 75% 大小
+                            matrices.scale(0.5f, 0.5f);
                             // 计算 Y 坐标（每个效果间隔 20 像素）
                             int y = baseY + (index * (int)(20 / 0.5));
 

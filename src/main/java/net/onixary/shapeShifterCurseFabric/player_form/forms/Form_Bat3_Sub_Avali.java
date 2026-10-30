@@ -15,8 +15,6 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.ModifyCapeRender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.UUID;
-
 public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRender {
     public Form_Bat3_Sub_Avali(Identifier formID) {
         super(formID, RegPlayerForms.BAT_3);
@@ -37,6 +35,8 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRend
         this.removePower(ShapeShifterCurseFabric.identifier("no_render_arm"));
         this.addPower(ShapeShifterCurseFabric.identifier("sub_form_avali_side_block_attach"));
         this.addPower(ShapeShifterCurseFabric.identifier("sub_form_avali_step_sound"));
+        this.addPower(ShapeShifterCurseFabric.identifier("sub_form_avali_water_slowness"));
+        this.addPower(ShapeShifterCurseFabric.identifier("sub_form_avali_hot_health_down"));
     }
 
     @Override
@@ -44,26 +44,27 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRend
         return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
-    // 以下暂时沿用 bat_3 的披风渲染参数
-
     @Override
     public Vec3 getCapeIdleLoc(AbstractClientPlayer player) {
         if (player.onGround()) {
-            return new Vec3(0.0f, 0.7f, 0.2f);
+            if (player.isCrouching()) {
+                return new Vec3(0.0f, 0.1f, -0.05f);
+            }
+            return new Vec3(0.0, 0.0f, 0.05f);
         }
         else {
-            return new Vec3(0.0, 0.0, 0.125);
+            return new Vec3(0.0, 0.0, 0.05);
         }
     }
 
     @Override
     public float getCapeBaseRotateAngle(AbstractClientPlayer player) {
-        return 100.0f;
+        return 15.0f;
     }
 
     @Override
     public boolean NeedModifyXRotationAngle() {
-        return true;
+        return false;
     }
 
     // avali 专属动画 无 avali 版本的动画(jump/riding)沿用 bat 家族的缺失回退模式

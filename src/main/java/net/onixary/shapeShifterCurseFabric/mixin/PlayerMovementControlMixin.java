@@ -45,8 +45,6 @@ public class PlayerMovementControlMixin implements IMoveController {
                 .orElse(null);
 
         if (attachPower != null) {
-            // 1.21.11 中 jumpFromGround 已上移到 LivingEntity（Player 不再覆写），此处无法再拦截 Player 的跳跃。
-            // 改在 travel 内检测跳跃输入：吸附状态下按住跳跃键即向服务器请求脱离吸附（服务器侧幂等，重复发送安全）。
             if (player.isJumping() && player.level().isClientSide()) {
                 FriendlyByteBuf buf = FriendlyByteBufs.create();
                 ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID), buf));
@@ -77,48 +75,17 @@ public class PlayerMovementControlMixin implements IMoveController {
 			    .findFirst().ifPresent(attachPower -> cir.setReturnValue(0.0f));
     }
 
-    // [已迁移，勿再当作待办] jumpFromGround 上移至 LivingEntity 后，@Mixin(Player.class) 解析不到该注入点。
-    // jump_event 条件 / JUMP_EVENT 包 / ActionOnJumpPower 的触发已迁至 LivingEntityJumpMixin
-    // （@Mixin(LivingEntity.class) 注入 LivingEntity.jumpFromGround，并在 handler 内 instanceof Player 过滤）。
-    // 其中「服务端权威执行 ActionOnJumpPower / SneakingJumpClashPower、不依赖 C2S 包往返」的修复
-    // 也一并保留在 LivingEntityJumpMixin（见其 else 分支）。
-    // 吸附状态下的跳跃脱离另由 preventTravelWhenAttached 通过 player.isJumping() 检测。
-    // 下列旧实现保留作参考。
-    // @Inject(method = "jumpFromGround", at = @At("HEAD"), cancellable = true)
     // private void handleJump(CallbackInfo ci) {
-    //     Player player = (Player) (Object) this;
-    //
-    //     // 添加空值检查
     //     PowerHolderComponent component = PowerHolderComponent.KEY.getNullable(player);
     //     if (component == null) {
     //         return; // 组件未初始化，跳过处理
-    //     }
-    //
     //     BatBlockAttachPower attachPower = PowerHolderComponent.getPowers(player, BatBlockAttachPower.class)
-    //             .stream()
     //             .filter(BatBlockAttachPower::isAttached)
     //             .findFirst()
     //             .orElse(null);
-    //
     //     if (attachPower != null) {
-    //         // 处理跳跃取消吸附
-    //         if (player.level().isClientSide()) {
-    //             FriendlyByteBuf buf = PacketByteBufs.create();
-    //             ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_DETACH_REQUEST_ID),  buf));
-    //         }
     //         ci.cancel();
-    //     }
-    //
-    //     // handle jump_event condition
     //     JumpEventCondition.setJumping(player, true);
-    //
-    //     // 发送网络包到服务器
-    //     if (player.level().isClientSide()) {
-    //         FriendlyByteBuf buf = PacketByteBufs.create();
-    //         buf.writeUUID(player.getUUID());
-    //         ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.JUMP_EVENT_ID),  buf));
-    //     }
-    // }
 
     @Inject(method = "tryToStartFallFlying", at = @At("HEAD"), cancellable = true)
     private void preventElytraCheckWhenAttached(CallbackInfoReturnable<Boolean> cir) {

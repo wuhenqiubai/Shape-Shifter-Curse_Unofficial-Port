@@ -22,8 +22,10 @@ import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class PlayerFormComponent implements AutoSyncedComponent {
@@ -48,9 +50,9 @@ public class PlayerFormComponent implements AutoSyncedComponent {
     public float instinctRate = 0.0f;
     public HashMap<Identifier, InstinctUtils.InstinctEffect> instinctEffects = new HashMap<>();
 
-    // 1.21.1 侧新增：当前所在的 Perk 树
     public Identifier nowPerkTree = RegPerks.EMPTY_PERK_TREE;
     public HashMap<Identifier, List<Identifier>> formPerkMap = new HashMap<>();
+    public final Set<Identifier> freePerkForms = new HashSet<>();
 
     // 仅用于(客户端)和(服务器端判断是否需要同步)
     public boolean isFlying;
@@ -183,15 +185,20 @@ public class PlayerFormComponent implements AutoSyncedComponent {
                 instinctEffects.put(Identifier.tryParse(key), InstinctUtils.InstinctEffect.fromNBT(effects.getCompoundOrEmpty(key)));
             }
         }
-        // 1.21.1 侧新增（1.21.11 侧原先没有）：当前 Perk 树
         if (tag.contains("now_perk_tree")) {
             nowPerkTree = Identifier.tryParse(tag.getStringOr("now_perk_tree", ""));
         }
+        if (tag.contains("free_perk_forms")) {
+            freePerkForms.clear();
+            for (Tag element : tag.getListOrEmpty("free_perk_forms")) {
+                if (element instanceof StringTag stringTag) {
+                    Identifier form = Identifier.tryParse(stringTag.value());
+                    if (form != null) freePerkForms.add(form);
+                }
+            }
+        }
         if (tag.contains("perks")) {
             formPerkMap.clear();
-            // 1.21.11 的 CompoundTag：getCompound 返回 Optional（有 getCompoundOrEmpty）、
-            // getAllKeys → keySet、getList(String, byte) → getList(String)/getListOrEmpty(String)、
-            // Tag.getAsString 没了（改判 StringTag 后取 value()）。写法对齐上面 instinctEffects 那段。
             CompoundTag perks = tag.getCompoundOrEmpty("perks");
             for (String key : perks.keySet()) {
                 Identifier treeID = Identifier.tryParse(key);
@@ -212,9 +219,10 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             }
         }
         if (player.level().isClientSide()) {
-            InstinctUtils.fromInstinctUpdate(instinctValue, instinctRate);
+            if (player.isLocalPlayer()) {
+                InstinctUtils.fromInstinctUpdate(instinctValue, instinctRate);
+            }
             if (tag.contains("isFlying")) {
-                // 1.21.11: CompoundTag.getBoolean 返回 Optional<Boolean>
                 this.isFlying = tag.getBoolean("isFlying").orElse(false);
             }
         } else {
@@ -256,6 +264,11 @@ public class PlayerFormComponent implements AutoSyncedComponent {
             entry.getValue().toNBT(effect);
             effects.put(entry.getKey().toString(), effect);
         }
+        tag.put("instinctEffects", effects);
+        tag.putString("now_perk_tree", nowPerkTree.toString());
+        ListTag freeForms = new ListTag();
+        for (Identifier form : freePerkForms) freeForms.add(StringTag.valueOf(form.toString()));
+        tag.put("free_perk_forms", freeForms);
         CompoundTag perks = new CompoundTag();
         for (Map.Entry<Identifier, List<Identifier>> perkEntry : formPerkMap.entrySet()) {
             ListTag perkTree = new ListTag();
@@ -284,6 +297,7 @@ public class PlayerFormComponent implements AutoSyncedComponent {
         instinctValue = 0.0f;
         instinctRate = 0.0f;
         instinctEffects.clear();
+        freePerkForms.clear();
     }
 
     public void sync() {
