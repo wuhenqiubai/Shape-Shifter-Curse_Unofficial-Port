@@ -12,7 +12,8 @@
       "net.onixary.shapeShifterCurseFabric.additional_power.FormPerkCheck",
       "net.onixary.shapeShifterCurseFabric.additional_power.FamiliarFoxPerkCheck",
       "net.onixary.shapeShifterCurseFabric.additional_power.WolfSpiderPerkCheck",
-      "net.onixary.shapeShifterCurseFabric.additional_power.SubformPerkCheck"
+      "net.onixary.shapeShifterCurseFabric.additional_power.SubformPerkCheck",
+      "net.onixary.shapeShifterCurseFabric.additional_power.AxolotlVegetationCheck"
     ]
   }
 }

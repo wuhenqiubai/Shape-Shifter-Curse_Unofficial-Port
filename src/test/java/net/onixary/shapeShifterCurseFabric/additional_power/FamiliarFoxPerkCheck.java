@@ -13,6 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.projectile.Arrow;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -238,6 +240,26 @@ public class FamiliarFoxPerkCheck {
         for (int i = 0; i < 4; i++) { reservoir.tickCount = 20; reservoir.tick(); }
         context.assertTrue(!reservoir.isAlive(), "Empty pulses still expire after five ticks of service");
         context.assertTrue(ManaUtils.getPlayerMana(player) == 55, "Out of range players receive no mana");
+        player.discard();
+        context.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void charmCraftingThroughGrantedMultipleAndClick(GameTestHelper context) {
+        var player = player(context);
+        var holder = PowerHolderComponent.KEY.get(player);
+        holder.addPower(PowerTypeRegistry.get(id("perks/familiar_fox_potion_charms")), id("fox_test"));
+        var granted = PowerHolderComponent.getPowers(player, ItemOnItemPower.class);
+        context.assertTrue(granted.size() == 3, "Granted multiple exposes three crafting powers: " + granted.size());
+        var slot = new Slot(player.getInventory(), 0, 0, 0);
+        player.getInventory().setItem(0, new ItemStack(Items.GLISTERING_MELON_SLICE, 2));
+        var carried = new ItemStack(Items.PAPER, 2);
+        boolean handled = slot.getItem().overrideOtherStackedOnMe(carried, slot, ClickAction.SECONDARY, player, SlotAccess.NULL);
+        context.assertTrue(handled, "Vanilla secondary click is intercepted");
+        context.assertTrue(player.getInventory().countItem(RegCustomItem.HEALING_CHARM) == 1, "Charm crafted through the vanilla click path");
+        context.assertTrue(ManaUtils.getPlayerMana(player) == 45, "Craft costs five mana: " + ManaUtils.getPlayerMana(player));
+        ManaUtils.setPlayerMana(player, 4);
+        context.assertTrue(PowerHolderComponent.getPowers(player, ItemOnItemPower.class).isEmpty(), "Below five mana the crafting powers are inactive");
         player.discard();
         context.succeed();
     }
