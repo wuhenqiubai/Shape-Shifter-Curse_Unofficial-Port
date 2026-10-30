@@ -5718,7 +5718,7 @@
   "item.minecraft.lingering_potion.effect.feed_potion": [
     "Lingering Compressed Energy Potion"
   ],
-  "item.minecraft.lingering_potion.effect.moondust_potion": [
+  "item.minecraft.lingering_potion.effect.moondust": [
     "Lingering Potion of Moondust"
   ],
   "item.minecraft.lingering_potion.effect.to_allay_sp_potion": [
@@ -5754,7 +5754,7 @@
   "item.minecraft.potion.effect.feed_potion": [
     "Compressed Energy Potion"
   ],
-  "item.minecraft.potion.effect.moondust_potion": [
+  "item.minecraft.potion.effect.moondust": [
     "Potion of Moondust"
   ],
   "item.minecraft.potion.effect.to_allay_sp_potion": [
@@ -5790,7 +5790,7 @@
   "item.minecraft.splash_potion.effect.feed_potion": [
     "Splash Compressed Energy Potion"
   ],
-  "item.minecraft.splash_potion.effect.moondust_potion": [
+  "item.minecraft.splash_potion.effect.moondust": [
     "Splash Potion of Moondust"
   ],
   "item.minecraft.splash_potion.effect.to_allay_sp_potion": [
@@ -5826,7 +5826,7 @@
   "item.minecraft.tipped_arrow.effect.feed_potion": [
     "Arrow of Compressed Energy"
   ],
-  "item.minecraft.tipped_arrow.effect.moondust_potion": [
+  "item.minecraft.tipped_arrow.effect.moondust": [
     "Arrow of Moondust"
   ],
   "item.minecraft.tipped_arrow.effect.to_allay_sp_potion": [

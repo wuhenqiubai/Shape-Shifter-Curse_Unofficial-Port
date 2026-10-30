@@ -8157,7 +8157,7 @@
   "item.minecraft.lingering_potion.effect.feed_potion": [
     "滞留型压缩能量药水"
   ],
-  "item.minecraft.lingering_potion.effect.moondust_potion": [
+  "item.minecraft.lingering_potion.effect.moondust": [
     "滞留型月尘药水"
   ],
   "item.minecraft.lingering_potion.effect.to_allay_sp_potion": [
@@ -8193,7 +8193,7 @@
   "item.minecraft.potion.effect.feed_potion": [
     "压缩能量药水"
   ],
-  "item.minecraft.potion.effect.moondust_potion": [
+  "item.minecraft.potion.effect.moondust": [
     "月尘药水"
   ],
   "item.minecraft.potion.effect.to_allay_sp_potion": [
@@ -8229,7 +8229,7 @@
   "item.minecraft.splash_potion.effect.feed_potion": [
     "喷溅型压缩能量药水"
   ],
-  "item.minecraft.splash_potion.effect.moondust_potion": [
+  "item.minecraft.splash_potion.effect.moondust": [
     "喷溅型月尘药水"
   ],
   "item.minecraft.splash_potion.effect.to_allay_sp_potion": [
@@ -8265,7 +8265,7 @@
   "item.minecraft.tipped_arrow.effect.feed_potion": [
     "压缩能量之箭"
   ],
-  "item.minecraft.tipped_arrow.effect.moondust_potion": [
+  "item.minecraft.tipped_arrow.effect.moondust": [
     "月尘之箭"
   ],
   "item.minecraft.tipped_arrow.effect.to_allay_sp_potion": [

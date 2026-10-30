@@ -1625,7 +1625,7 @@
   "item.minecraft.lingering_potion.effect.feed_potion": [
     "Туманное зелье сжатой энергии"
   ],
-  "item.minecraft.lingering_potion.effect.moondust_potion": [
+  "item.minecraft.lingering_potion.effect.moondust": [
     "Туманное зелье лунной пыли"
   ],
   "item.minecraft.lingering_potion.effect.to_allay_sp_potion": [
@@ -1661,7 +1661,7 @@
   "item.minecraft.potion.effect.feed_potion": [
     "Зелье сжатой энергии"
   ],
-  "item.minecraft.potion.effect.moondust_potion": [
+  "item.minecraft.potion.effect.moondust": [
     "Зелье лунной пыли"
   ],
   "item.minecraft.potion.effect.to_allay_sp_potion": [
@@ -1697,7 +1697,7 @@
   "item.minecraft.splash_potion.effect.feed_potion": [
     "Взрывное зелье сжатой энергии"
   ],
-  "item.minecraft.splash_potion.effect.moondust_potion": [
+  "item.minecraft.splash_potion.effect.moondust": [
     "Взрывное зелье лунной пыли"
   ],
   "item.minecraft.splash_potion.effect.to_allay_sp_potion": [
@@ -1733,7 +1733,7 @@
   "item.minecraft.tipped_arrow.effect.feed_potion": [
     "Стрела сжатой энергии"
   ],
-  "item.minecraft.tipped_arrow.effect.moondust_potion": [
+  "item.minecraft.tipped_arrow.effect.moondust": [
     "Стрела лунной пыли"
   ],
   "item.minecraft.tipped_arrow.effect.to_allay_sp_potion": [
