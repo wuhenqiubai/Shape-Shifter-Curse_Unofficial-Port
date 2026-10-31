@@ -181,7 +181,7 @@ dependencies {
     }
 
     //  Modmenu
-    modImplementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     modImplementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:${project.pal_version}"
 
@@ -234,7 +234,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 21
+def targetJavaVersion = project.property('java_version').toString().toInteger()
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {

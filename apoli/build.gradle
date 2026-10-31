@@ -100,8 +100,8 @@ dependencies {
 	}
 	include "dev.onyxstudios.cardinal-components-api:cardinal-components-entity:${project.cca_version}"
 
-	modApi "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
-	include "io.github.ladysnake:PlayerAbilityLib:${pal_version}"
+	modApi "io.github.ladysnake:PlayerAbilityLib:${player_ability_lib_version}"
+	include "io.github.ladysnake:PlayerAbilityLib:${player_ability_lib_version}"
 
 	api project(path: ":calio", configuration: "namedElements")
 	include project(":calio")
@@ -128,6 +128,8 @@ processResources {
 	}
 }
 
+def targetJavaVersion = JavaVersion.toVersion(project.property('java_version'))
+
 tasks.withType(JavaCompile).configureEach {
 	// ensure that the encoding is set to UTF-8, no matter what the system default is
 	// this fixes some edge cases with special characters not displaying correctly
@@ -135,7 +137,7 @@ tasks.withType(JavaCompile).configureEach {
 	// If Javadoc is generated, this must be specified in that task too.
 	it.options.encoding = "UTF-8"
 
-	it.options.release = 21
+	it.options.release = targetJavaVersion.majorVersion.toInteger()
 	options.compilerArgs = ["-Xlint:-deprecation", "-Xlint:-removal", "-Xmaxerrs", "0"]
 }
 
@@ -145,8 +147,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = targetJavaVersion
+	targetCompatibility = targetJavaVersion
 }
 
 jar {
