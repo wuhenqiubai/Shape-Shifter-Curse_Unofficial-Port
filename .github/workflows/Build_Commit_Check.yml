@@ -1,0 +1,127 @@
+# 提交自动构建校验 | Commit Build Check
+#
+# 每次 push / Pull Request 自动跑一次 ./gradlew build，只做校验，不产出也不上传发布产物。
+# jar 发布仍然只走这两个工作流，互不干扰：
+#   - Build_Dev_Version.yml  手动 workflow_dispatch 触发，出开发版 jar
+#   - gradle-publish.yml     创建 Release 时触发，把 jar 传上 Release
+#
+# 不跑 runAltarCheck（Fabric GameTest）：三个活跃分支上各有 9 个预存在的断言缺陷
+# （PerkTree.getAllNodes() 不含虚拟根节点；cold_whirlwind_1 / spider_silk_grapple 的注册被注释掉但测试仍断言），
+# 现在接入会长期红灯，等测试修好再作为门禁加进来。
+#
+# JDK 自动判定：minecraft_version 26.x 起要 Java 25；另外 fabric-loom 1.19 起本身就要求 JDK 25（踩过一次：
+# 1.21.1 + loom 1.19.3 用 21 会直接报 “Dependency requires at least JVM runtime version 25”）。
+# 两者取高，所以同一份文件复制到 ver/1.21.11 / ver/26.1 都不用改。
+
+name: 提交构建 | Commit Build
+
+on:
+  push:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  pull_request:
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - name: 从仓库拉取代码
+        uses: actions/checkout@v4
+
+      - name: 读取 gradle.properties
+        id: properties
+        uses: christian-draeger/read-properties@1.1.1
+        with:
+          path: gradle.properties
+          properties: 'mod_version archives_base_name minecraft_version special_build_version'
+
+      - name: 选择 JDK 版本
+        id: jdk
+        shell: bash
+        env:
+          MC_VERSION: ${{ steps.properties.outputs.minecraft_version }}
+        run: |
+          if [ -z "$MC_VERSION" ]; then
+            echo "::error::gradle.properties 里读不到 minecraft_version"
+            exit 1
+          fi
+          mc_major="${MC_VERSION%%.*}"
+          case "$mc_major" in
+            ''|*[!0-9]*)
+              echo "::error::minecraft_version 不是数字开头: $MC_VERSION"
+              exit 1
+              ;;
+          esac
+          required="21"
+          if [ "$mc_major" -ge 26 ]; then
+            required="25"
+          fi
+          loom="$(grep -Eo "fabric-loom(-remap)?' version '[0-9.]+" settings.gradle | grep -Eo '[0-9]+\.[0-9]+' | head -1)"
+          if [ -n "$loom" ]; then
+            loom_major="${loom%%.*}"
+            loom_minor="${loom#*.}"
+            if [ "$loom_major" -ge 2 ] || [ "$loom_minor" -ge 19 ]; then
+              required="25"
+            fi
+          fi
+          echo "Minecraft $MC_VERSION / loom ${loom:-未知} -> JDK $required"
+          echo "version=$required" >> "$GITHUB_OUTPUT"
+
+      - name: 配置Java环境
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ steps.jdk.outputs.version }}
+          distribution: 'temurin'
+
+      - name: 让 ./gradlew 可执行
+        if: ${{ runner.os != 'Windows' }}
+        run: chmod +x ./gradlew
+
+      - name: 初始化 Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+
+      - name: 构建 Mod
+        run: ./gradlew build --stacktrace
+
+      - name: 汇总构建产物
+        shell: bash
+        env:
+          MC_VERSION: ${{ steps.properties.outputs.minecraft_version }}
+          JDK_VERSION: ${{ steps.jdk.outputs.version }}
+          MOD_VERSION: ${{ steps.properties.outputs.mod_version }}
+        run: |
+          jars=$(ls build/libs/*.jar 2>/dev/null | grep -v sources || true)
+          if [ -z "$jars" ]; then
+            echo "::error::构建成功但 build/libs 下没有 jar，检查 build.gradle 的 version 拼法"
+            exit 1
+          fi
+          {
+            echo "### 提交构建通过"
+            echo ""
+            echo "| 项目 | 值 |"
+            echo "| --- | --- |"
+            echo "| 分支 | \`${GITHUB_REF_NAME}\` |"
+            echo "| 提交 | \`${GITHUB_SHA:0:7}\` |"
+            echo "| Minecraft | ${MC_VERSION} |"
+            echo "| JDK | ${JDK_VERSION} |"
+            echo "| mod_version | ${MOD_VERSION} |"
+            echo ""
+            echo "产物（仅本机构建结果，未上传）："
+            echo ""
+            echo '```'
+            ls -lh build/libs/*.jar
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
