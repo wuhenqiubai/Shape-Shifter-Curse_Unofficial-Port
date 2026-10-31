@@ -3,28 +3,16 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
         maven {
-            name = 'Fabric-Hangbing_Proxy'
-            url = "https://repository.hanbings.io/proxy"
-        }
-        maven {
-            name = 'Fabric-BMCL'
-            url = 'https://bmclapi2.bangbang93.com/maven/'
-        }
-        maven {
-            name = 'Fabric-Meta'
-            url = 'https://meta.fabricmc.net/'
-        }
-        maven {
-            name = 'Fabric-Meta-BMCL'
-            url = 'https://bmclapi2.bangbang93.com/fabric-meta'
-        }
-        maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
+        maven {
+            name = 'Fabric-Hangbing_Proxy'
+            url = "https://repository.hanbings.io/proxy"
+        }
     }
     plugins {
-        id 'net.fabricmc.fabric-loom-remap' version '1.17.19'
+        id 'net.fabricmc.fabric-loom-remap' version '1.19.3'
     }
 }
 
