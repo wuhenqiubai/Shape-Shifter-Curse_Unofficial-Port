@@ -1,34 +1,31 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderDispatcher.class)
 public class EntityRenderDispatcherSafetyMixin {
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Redirect(method = "shouldRender", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;shouldRender(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/client/renderer/culling/Frustum;DDD)Z"))
-	private boolean preventNullRendererShouldRender(EntityRenderer instance, net.minecraft.world.entity.Entity entity, Frustum frustum, double x, double y, double z) {
-		if (instance == null) return false;
-		return instance.shouldRender(entity, frustum, x, y, z);
+	@Inject(method = "render", at = @At("HEAD"), cancellable = true, require = 0)
+	private void skipNullRendererRender(Entity entity, double x, double y, double z, float yaw, float tickDelta, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, CallbackInfo ci) {
+		if (((EntityRenderDispatcher) (Object) this).getRenderer(entity) == null) ci.cancel();
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;render(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V"))
-	private void preventNullRendererRender(EntityRenderer instance, net.minecraft.world.entity.Entity entity, float yaw, float tickDelta, com.mojang.blaze3d.vertex.PoseStack matrices, net.minecraft.client.renderer.MultiBufferSource vertexConsumers, int light) {
-		if (instance != null) {
-			instance.render(entity, yaw, tickDelta, matrices, vertexConsumers, light);
-		}
+	@Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
+	private void skipNullRendererShouldRender(Entity entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+		if (((EntityRenderDispatcher) (Object) this).getRenderer(entity) == null) cir.setReturnValue(false);
 	}
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Redirect(method = "getPackedLightCoords", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/EntityRenderer;getPackedLightCoords(Lnet/minecraft/world/entity/Entity;F)I"))
-	private int preventNullRendererGetLight(EntityRenderer instance, net.minecraft.world.entity.Entity entity, float tickDelta) {
-		if (instance == null) return 15;
-		return instance.getPackedLightCoords(entity, tickDelta);
+	@Inject(method = "getPackedLightCoords", at = @At("HEAD"), cancellable = true)
+	private void skipNullRendererPackedLight(Entity entity, float tickDelta, CallbackInfoReturnable<Integer> cir) {
+		if (((EntityRenderDispatcher) (Object) this).getRenderer(entity) == null) cir.setReturnValue(15);
 	}
 }
