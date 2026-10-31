@@ -42,10 +42,10 @@ tasks.withType<JavaCompile>().configureEach {
 	options.encoding = "UTF-8"
 
 	// Minecraft 1.17 (21w19a) upwards uses Java 16.
-	options.release = 25
+	options.release = (project.property("java_version") as String).toInt()
 }
 
-val targetJavaVersion = "25"
+val targetJavaVersion = project.property("java_version") as String
 
 java {
 	val javaVersion = JavaVersion.toVersion(targetJavaVersion)

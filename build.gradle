@@ -176,7 +176,7 @@ dependencies {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    implementation "com.terraformersmc:modmenu:${project.mod_menu_version}"
+    implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation "com.zigythebird.playeranim:PlayerAnimationLibFabric:$pal_version"
 
@@ -225,7 +225,7 @@ processResources {
     }
 }
 
-def targetJavaVersion = 25
+def targetJavaVersion = project.property('java_version').toString().toInteger()
 tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
     if (targetJavaVersion >= 10 || JavaVersion.current().isJava10Compatible()) {
