@@ -58,7 +58,7 @@ public class MagicGUIRender {
         IMagic magic = magics[index];
         if (magic == null) return;
         ISprite sprite = index == MagicUtils.nowSelectMagicIndex ? magic.getSprite() : magic.getUnselectedSprite();
-        sprite.draw(context, x, y, 0, 0, 0, size, size);
+        sprite.draw(context, x, x + size, y, y + size, sprite.getTextureWidth(), sprite.getTextureHeight(), 0, 0);
         float cooldown;
         try {
             cooldown = getCooldownPercent(magic, tickDelta);
