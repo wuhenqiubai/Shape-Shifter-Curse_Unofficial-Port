@@ -151,7 +151,10 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
 
 	@Override
 	public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-		// No blur — book texture serves as the background
+		if (this.minecraft.level == null) {
+			this.extractPanorama(context, delta);
+		}
+		this.extractBlurredBackground(context);
 	}
 
     @Override

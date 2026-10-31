@@ -312,7 +312,10 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
 
     @Override
     public void extractBackground(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
-        // 自定义背景纹理完全遮挡，不需要暗色渐变
+        if (this.minecraft.level == null) {
+            this.extractPanorama(context, delta);
+        }
+        this.extractBlurredBackground(context);
     }
 
     // FCS按钮生成函数
