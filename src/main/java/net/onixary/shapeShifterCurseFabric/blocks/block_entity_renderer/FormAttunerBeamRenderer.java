@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BeaconRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.blockentity.state.BeaconRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer;
@@ -20,7 +21,7 @@ import net.onixary.shapeShifterCurseFabric.blocks.block_entity.FormAttunerBlockE
 import org.jspecify.annotations.Nullable;
 
 public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerBlockEntity, BeaconRenderState> {
-    public static final Identifier BEAM_TEXTURE = Identifier.withDefaultNamespace("textures/entity/beacon_beam.png");
+    public static final Identifier BEAM_TEXTURE = BeaconRenderer.BEAM_LOCATION;
 
     public FormAttunerBeamRenderer(BlockEntityRendererProvider.Context ctx) {
     }
