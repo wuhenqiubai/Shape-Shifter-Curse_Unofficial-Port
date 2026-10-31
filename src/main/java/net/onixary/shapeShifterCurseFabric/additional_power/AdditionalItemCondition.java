@@ -36,7 +36,6 @@ public class AdditionalItemCondition {
         FoodUtilsCondition.registerCondition(AdditionalItemCondition::register);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private static void register(ConditionFactory<?> conditionFactory) {
         Registry.register(ApoliRegistries.ITEM_CONDITION, conditionFactory.getSerializerId(), (ConditionFactory) conditionFactory);
     }

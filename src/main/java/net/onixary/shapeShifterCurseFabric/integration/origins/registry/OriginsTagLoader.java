@@ -28,7 +28,6 @@ public class OriginsTagLoader implements SimpleSynchronousResourceReloadListener
     public void onResourceManagerReload(ResourceManager manager) {
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private int registerTags(Map<TagKey<?>, Collection<Holder<?>>> registryTags,
                              ResourceKey<? extends Registry<?>> registryKey,
                              ResourceManager manager,
