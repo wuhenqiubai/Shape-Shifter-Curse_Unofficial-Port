@@ -11,6 +11,7 @@
 #
 # JDK 自动判定：minecraft_version 26.x 起要 Java 25；另外 fabric-loom 1.19 起本身就要求 JDK 25（踩过一次：
 # 1.21.1 + loom 1.19.3 用 21 会直接报 “Dependency requires at least JVM runtime version 25”）。
+# loom 版本改由 gradle.properties 的 loom_version 提供（settings.gradle 同源读取），不再从 settings.gradle 抠版本号。
 # 两者取高，所以同一份文件复制到 ver/1.21.11 / ver/26.1 都不用改。
 
 name: 提交构建 | Commit Build
@@ -69,7 +70,7 @@ jobs:
           if [ "$mc_major" -ge 26 ]; then
             required="25"
           fi
-          loom="$(grep -Eo "fabric-loom(-remap)?' version '[0-9.]+" settings.gradle | grep -Eo '[0-9]+\.[0-9]+' | head -1)"
+          loom="$(grep -E '^loom_version[[:space:]]*=' gradle.properties | head -1 | grep -Eo '[0-9]+\.[0-9]+' | head -1)"
           if [ -n "$loom" ]; then
             loom_major="${loom%%.*}"
             loom_minor="${loom#*.}"
