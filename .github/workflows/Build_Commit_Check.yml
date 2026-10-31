@@ -1,7 +1,7 @@
 # 提交自动构建校验 | Commit Build Check
 #
-# 每次 push / Pull Request 自动跑一次 ./gradlew build，只做校验，不产出也不上传发布产物。
-# jar 发布仍然只走这两个工作流，互不干扰：
+# 每次 push / Pull Request 自动跑一次 ./gradlew build，构建出的 mod jar 作为 workflow artifact 上传（保留 14 天），
+# 可直接在 Actions 运行页下载；它不打 tag、不发布 Release，正式发布仍然只走这两个工作流，互不干扰：
 #   - Build_Dev_Version.yml  手动 workflow_dispatch 触发，出开发版 jar
 #   - gradle-publish.yml     创建 Release 时触发，把 jar 传上 Release
 #
@@ -97,12 +97,19 @@ jobs:
       - name: 构建 Mod
         run: ./gradlew build --stacktrace
 
+      - name: 计算产物名
+        id: artifact
+        shell: bash
+        run: |
+          echo "name=shape-shifter-curse-${GITHUB_REF_NAME//\//-}-${GITHUB_SHA:0:7}" >> "$GITHUB_OUTPUT"
+
       - name: 汇总构建产物
         shell: bash
         env:
           MC_VERSION: ${{ steps.properties.outputs.minecraft_version }}
           JDK_VERSION: ${{ steps.jdk.outputs.version }}
           MOD_VERSION: ${{ steps.properties.outputs.mod_version }}
+          ARTIFACT_NAME: ${{ steps.artifact.outputs.name }}
         run: |
           jars=$(ls build/libs/*.jar 2>/dev/null | grep -v sources || true)
           if [ -z "$jars" ]; then
@@ -119,10 +126,21 @@ jobs:
             echo "| Minecraft | ${MC_VERSION} |"
             echo "| JDK | ${JDK_VERSION} |"
             echo "| mod_version | ${MOD_VERSION} |"
+            echo "| artifact | \`${ARTIFACT_NAME}\` |"
             echo ""
-            echo "产物（仅本机构建结果，未上传）："
+            echo "产物（本运行已上传为 artifact，保留 14 天）："
             echo ""
             echo '```'
             ls -lh build/libs/*.jar
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: |
+            build/libs/*.jar
+            !build/libs/*-sources.jar
+          if-no-files-found: error
+          retention-days: 14
