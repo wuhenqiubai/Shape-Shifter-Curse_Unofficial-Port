@@ -3,6 +3,8 @@ plugins {
 	id 'maven-publish'
 }
 
+def targetJavaVersion = JavaVersion.toVersion(project.property('java_version'))
+
 base {
 	archivesName = project.archives_base_name
 }
@@ -127,8 +129,6 @@ processResources {
 		expand "version": project.version
 	}
 }
-
-def targetJavaVersion = JavaVersion.toVersion(project.property('java_version'))
 
 tasks.withType(JavaCompile).configureEach {
 	// ensure that the encoding is set to UTF-8, no matter what the system default is
