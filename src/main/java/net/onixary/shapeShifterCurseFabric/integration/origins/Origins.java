@@ -77,6 +77,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 		OriginsPowerTypes.register();
 		OriginsEntityConditions.register();
 
+		ModBlocks.register();
 		ModItems.register();
 		ModTags.register();
 		ModPacketsC2S.register();
