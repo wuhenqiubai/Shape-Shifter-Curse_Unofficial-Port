@@ -39,13 +39,25 @@ public class EntityMixin {
         }
     }
 
+    @Unique
+    private boolean shapeShifter$longStepInterval;
+
     @Inject(method = "nextStep", at = @At("RETURN"), cancellable = true)
     private void modifyFootstepSoundDistance(CallbackInfoReturnable<Float> cir) {
         if ((Object)this instanceof Player player) {
             var powers = PowerHolderComponent.getPowers(player, ModifyFootstepSoundSpeedPower.class);
             if (!powers.isEmpty()) {
-                float multiplier = powers.getFirst().getSpeedMultiplierFor(player);
-                cir.setReturnValue(((Entity) (Object) this).moveDist + (1.0f / multiplier));
+                var power = powers.get(0);
+                if (player.isInWater()) {
+                    // This vanilla threshold also schedules swimming sounds; retain their uniform cadence.
+                    shapeShifter$longStepInterval = false;
+                    cir.setReturnValue(player.moveDist + 1.0f / power.getSpeedMultiplierFor(player));
+                } else {
+                    cir.setReturnValue(player.moveDist + power.getStepSoundDistance(player, 1.0f, shapeShifter$longStepInterval));
+                    shapeShifter$longStepInterval = !shapeShifter$longStepInterval;
+                }
+            } else {
+                shapeShifter$longStepInterval = false;
             }
         }
     }
