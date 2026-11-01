@@ -4,6 +4,8 @@ plugins {
 	id 'maven-publish'
 }
 
+def targetJavaVersion = JavaVersion.toVersion(project.property('java_version'))
+
 base {
 	archivesName = project.archives_base_name
 }
@@ -84,8 +86,6 @@ dependencies {
 	implementation 'com.demonwav.mcdev:annotations:1.0'
 
 	// To change the versions see the gradle.properties file
-	// 26.1 无混淆：改用 net.fabricmc.fabric-loom（不 remap Minecraft 与 mod），
-	// 因此不再声明 mappings，且 modImplementation / modApi 一律退化为标准的 implementation / api。
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
@@ -129,8 +129,6 @@ processResources {
 		expand "version": project.version
 	}
 }
-
-def targetJavaVersion = JavaVersion.toVersion(project.property('java_version'))
 
 tasks.withType(JavaCompile).configureEach {
 	// ensure that the encoding is set to UTF-8, no matter what the system default is
