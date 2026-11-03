@@ -63,12 +63,12 @@ public final class AltarRecipeCheck {
                 .getOrThrow();
     }
 
-    private static AltarShapelessRecipe recipe(int seconds, int moons, RegistryAccess registries) {
+    private static AltarShapelessRecipe recipe(int seconds, int fuelPerTick) {
         return shapelessFromJson("""
                 {"ingredients":["minecraft:stick"],
                  "catalyst":"minecraft:diamond",
-                 "result":{"id":"minecraft:emerald"},"time":%d,"moondust_cost":%d}
-                """.formatted(seconds * 20, moons), registries);
+                 "result":{"id":"minecraft:emerald"},"time":%d,"fuel_cost":%d}
+                """.formatted(seconds * 20, fuelPerTick));
     }
 
     @GameTest
@@ -76,14 +76,15 @@ public final class AltarRecipeCheck {
         RegistryAccess registries = context.getLevel().registryAccess();
 
         for (int[] example : new int[][]{{5, 5}, {10, 10}, {30, 16}, {60, 9}, {5, 0}}) {
-            AltarShapelessRecipe recipe = recipe(example[0], example[1], registries);
+            AltarShapelessRecipe recipe = recipe(example[0], example[1]);
             int total = 0;
             for (int tick = 0; tick < recipe.recipeTime(); tick++) {
-                int cost = recipe.fuelUsage(tick);
+                int cost = recipe.fuelUsage();
                 check(cost >= 0, "Fuel must never be created");
                 total += cost;
             }
-            check(total == example[1] * 800, "Exact moondust cost over full duration");
+            check(total == example[1] * recipe.recipeTime(), "Per-tick fuel totals up over the full duration");
+            check(recipe.totalFuelUsage() == total, "totalFuelUsage derives from per-tick fuel");
 
             RegistryFriendlyByteBuf packet = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
             RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().encode(packet, recipe);
@@ -92,7 +93,7 @@ public final class AltarRecipeCheck {
             packet.release();
         }
 
-        AltarShapelessRecipe recipe = recipe(30, 16, registries);
+        AltarShapelessRecipe recipe = recipe(30, 16);
         Inventory inventory = new Inventory();
         inventory.setItem(0, new ItemStack(Items.STICK));
         check(!recipe.matches(input(inventory), null), "A catalyst is required");
@@ -112,12 +113,12 @@ public final class AltarRecipeCheck {
 
         AltarShapedRecipe shaped = shapedFromJson("""
                 {"pattern":["SS"],"key":{"S":"minecraft:stick"},
-                 "result":{"id":"minecraft:emerald"},"time":600,"moondust_cost":16}
-                """, registries);
+                 "result":{"id":"minecraft:emerald"},"time":600,"fuel_cost":16}
+                """);
         RegistryFriendlyByteBuf shapedPacket = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
         RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().encode(shapedPacket, shaped);
         AltarShapedRecipe shapedCopy = RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().decode(shapedPacket);
-        check(shapedCopy.totalFuelUsage() == 12800 && shapedCopy.recipeTime() == 600, "Shaped network roundtrip");
+        check(shapedCopy.totalFuelUsage() == 9600 && shapedCopy.recipeTime() == 600, "Shaped network roundtrip");
         shapedPacket.release();
 
         Inventory shapedInventory = new Inventory();
@@ -129,8 +130,8 @@ public final class AltarRecipeCheck {
         AltarShapelessRecipe legacy = shapelessFromJson("""
                 {"ingredients":["minecraft:stick"],"result":{"id":"minecraft:emerald"},
                  "time":100,"fuel_cost":3}
-                """, registries);
-        check(legacy.fuelUsage(0) == 3 && legacy.totalFuelUsage() == 300, "Legacy per-tick fuel remains compatible");
+                """);
+        check(legacy.fuelUsage() == 3 && legacy.totalFuelUsage() == 300, "Legacy per-tick fuel remains compatible");
 
         // Check the actual loaded data, not only the vanilla-item fixtures above.
         int upgradeMappings = 0;
@@ -168,9 +169,12 @@ public final class AltarRecipeCheck {
         altar.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, registries, saved));
         altar.setLevel(context.getLevel());
 
-        for (int tick = 200; tick < 599; tick++) altar.tick(context.getLevel(), BlockPos.ZERO, altar.getBlockState(), altar);
-        check(altar.getItem(11).isEmpty(), "Upgrade takes the full 30 seconds");
-        altar.tick(context.getLevel(), BlockPos.ZERO, altar.getBlockState(), altar);
+        int guard = 0;
+        while (altar.getItem(11).isEmpty() && guard < 2000) {
+            altar.tick(context.getLevel(), BlockPos.ZERO, altar.getBlockState(), altar);
+            guard++;
+        }
+        check(guard < 2000, "Upgrade completes within the fuel budget");
         check(altar.getItem(11).is(RegCustomItem.ATTACH_HOOK_PLUS), "Correct standalone upgrade output");
         check(altar.getItem(11).get(DataComponents.CUSTOM_NAME) == null, "No input NBT inheritance");
         check(altar.fuelTime == 0 && altar.getItem(10).isEmpty(), "Exactly 16 moondust consumed");

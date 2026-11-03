@@ -2,19 +2,20 @@
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
     "LLL",
-    "GMI",
-    "   "
+    " M ",
+    "BCI"
   ],
   "key": {
     "M": "shape-shifter-curse:moondust_crystal_shard",
     "L": "minecraft:leather",
-    "G": "minecraft:ghast_tear",
-    "I": "minecraft:iron_nugget"
+    "B": "minecraft:water_bucket",
+    "I": "minecraft:soul_sand",
+    "C": "minecraft:conduit"
   },
   "result": {
-    "id": "shape-shifter-curse:collar_of_whiskers",
+    "id": "shape-shifter-curse:fountain_belt",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }

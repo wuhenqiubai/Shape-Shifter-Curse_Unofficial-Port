@@ -2,19 +2,19 @@
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
     " S ",
-    "AMA",
-    " P "
+    "MPM",
+    " B "
   ],
   "key": {
     "M": "shape-shifter-curse:moondust_crystal_shard",
     "S": "minecraft:string",
-    "A": "minecraft:amethyst_shard",
-    "P": "minecraft:phantom_membrane"
+    "P": "minecraft:prismarine_shard",
+    "B": "minecraft:bone_meal"
   },
   "result": {
-    "id": "shape-shifter-curse:charm_of_night_crystal",
+    "id": "shape-shifter-curse:charm_of_hollow_fang",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }

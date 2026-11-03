@@ -1,19 +1,19 @@
 {
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
-    "BAB",
-    "AMA",
-    "BAB"
+    "WSW",
+    "SMS",
+    "WSW"
   ],
   "key": {
     "M": "shape-shifter-curse:moondust_crystal_shard",
-    "A": "minecraft:amethyst_shard",
-    "B": "minecraft:amethyst_block"
+    "W": "minecraft:wheat_seeds",
+    "S": "minecraft:string"
   },
   "result": {
-    "id": "shape-shifter-curse:resonant_core",
+    "id": "shape-shifter-curse:digestion_fiber_ball",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }

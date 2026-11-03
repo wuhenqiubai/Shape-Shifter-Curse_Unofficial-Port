@@ -9,6 +9,6 @@
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 0,
+  "fuel_cost": 0,
   "catalyst": "shape-shifter-curse:foxfire_catalyst_core"
 }

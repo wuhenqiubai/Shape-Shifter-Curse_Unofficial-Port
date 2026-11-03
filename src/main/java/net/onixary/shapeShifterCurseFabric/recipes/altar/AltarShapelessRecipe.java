@@ -35,14 +35,13 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     public final @Nullable Identifier requireAdvancement;
 
-    public AltarShapelessRecipe(ItemStack output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement, int totalFuelCost) {
+    public AltarShapelessRecipe(ItemStack output, NonNullList<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.output = output;
         this.input = input;
         this.recipeTime = recipeTime;
         this.catalyst = catalyst;
         this.fuelCostPerTick = fuelCostPerTick;
         this.requireAdvancement = requireAdvancement;
-        this.totalFuelCost = totalFuelCost;
     }
 
     @Override
@@ -124,12 +123,9 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
-                Codec.INT.optionalFieldOf("moondust_cost")
-                        .forGetter(r -> r.totalFuelCost >= 0 ? Optional.of(r.totalFuelCost / 800) : Optional.empty())
-            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement, moondustCost) ->
-                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null),
-                        moondustCost.map(integer -> integer * 800).orElse(-1)))
+                    Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
+            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement) ->
+                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
 
         private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
@@ -159,8 +155,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            int totalFuelCost = buf.readVarInt();
-            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement, totalFuelCost);
+            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf packetByteBuf, AltarShapelessRecipe shapelessRecipe) {
@@ -183,7 +178,6 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStack.STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.output);
             packetByteBuf.writeVarInt(shapelessRecipe.recipeTime);
             packetByteBuf.writeVarInt(shapelessRecipe.fuelCostPerTick);
-            packetByteBuf.writeVarInt(shapelessRecipe.totalFuelCost);
         }
     }
 }

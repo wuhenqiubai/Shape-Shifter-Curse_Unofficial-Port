@@ -1,20 +1,20 @@
 {
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
-    "CCC",
-    "DMD",
-    " G "
+    "NIC",
+    "NIM",
+    "   "
   ],
   "key": {
     "M": "shape-shifter-curse:moondust_crystal_shard",
     "C": "minecraft:copper_ingot",
-    "D": "minecraft:glowstone_dust",
-    "G": "minecraft:gold_nugget"
+    "I": "minecraft:iron_ingot",
+    "N": "minecraft:iron_nugget"
   },
   "result": {
-    "id": "shape-shifter-curse:amulet_bracelet",
+    "id": "shape-shifter-curse:attach_hook",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }
