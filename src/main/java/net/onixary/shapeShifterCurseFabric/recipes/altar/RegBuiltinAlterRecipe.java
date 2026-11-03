@@ -3,6 +3,7 @@ package net.onixary.shapeShifterCurseFabric.recipes.altar;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
@@ -18,7 +19,7 @@ public class RegBuiltinAlterRecipe {
     public static final BuiltinAltarRecipe.BARecipeConfig MorphScaleFoodConfig = new BuiltinAltarRecipe.BARecipeConfigBuilder()
             .match(
                     (altarBlockEntity, world) -> {
-                        ItemStack catalystItemStack = altarBlockEntity.getStack(9);
+                        ItemStack catalystItemStack = altarBlockEntity.getItem(9);
                         if (!catalystItemStack.isEmpty()) {
                             return false;
                         }
@@ -88,14 +89,14 @@ public class RegBuiltinAlterRecipe {
     public static final BuiltinAltarRecipe.BARecipeConfig MorphScaleArmorConfig = new BuiltinAltarRecipe.BARecipeConfigBuilder()
             .match(
                     (altarBlockEntity, world) -> {
-                        ItemStack catalystItemStack = altarBlockEntity.getStack(9);
-                        if (!catalystItemStack.isOf(MorphScaleArmorCatalyst)) {
+                        ItemStack catalystItemStack = altarBlockEntity.getItem(9);
+                        if (!catalystItemStack.is(MorphScaleArmorCatalyst)) {
                             return false;
                         }
                         int airCount = 0;
                         ItemStack unScaleStack = null;
                         for (int j = 0; j < 9; ++j) {
-                            ItemStack itemStack = altarBlockEntity.getStack(j);
+                            ItemStack itemStack = altarBlockEntity.getItem(j);
                             if (itemStack.isEmpty()) {
                                 ++airCount;
                             } else {
@@ -105,7 +106,7 @@ public class RegBuiltinAlterRecipe {
                         if (airCount != 8 || unScaleStack == null) {
                             return false;
                         }
-                        NbtCompound ItemNBT = unScaleStack.getNbt();
+                        CompoundTag ItemNBT = unScaleStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
                         if (ItemNBT != null && ItemNBT.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName)) {
                             return false;
                         }
@@ -117,7 +118,7 @@ public class RegBuiltinAlterRecipe {
                         int airCount = 0;
                         ItemStack unScaledStack = null;
                         for (int j = 0; j < 9; ++j) {
-                            ItemStack itemStack = altarBlockEntity.getStack(j);
+                            ItemStack itemStack = altarBlockEntity.getItem(j);
                             if (itemStack.isEmpty()) {
                                 ++airCount;
                             } else {
@@ -128,16 +129,16 @@ public class RegBuiltinAlterRecipe {
                             return ItemStack.EMPTY;
                         }
                         ItemStack output = unScaledStack.copyWithCount(1);
-                        NbtCompound nbtCompound = output.getOrCreateNbt();
-                        nbtCompound.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true);
+                        CustomData.update(DataComponents.CUSTOM_DATA, output,
+                                tag -> tag.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true));
                         return output;
                     }
             )
             .consumeInputs(
                     altarBlockEntity -> {
                         for (int j = 0; j < 9; ++j) {
-                            ItemStack itemStack = altarBlockEntity.getStack(j);
-                            if (!itemStack.isEmpty()) altarBlockEntity.removeStack(j, 1);
+                            ItemStack itemStack = altarBlockEntity.getItem(j);
+                            if (!itemStack.isEmpty()) altarBlockEntity.removeItem(j, 1);
                         }
                     }
             )
@@ -146,8 +147,8 @@ public class RegBuiltinAlterRecipe {
             .virtualOutput(
                     registryManager -> {
                         ItemStack example = new ItemStack(Items.DIAMOND_CHESTPLATE);
-                        NbtCompound nbtCompound = example.getOrCreateNbt();
-                        nbtCompound.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true);
+                        CustomData.update(DataComponents.CUSTOM_DATA, example,
+                                tag -> tag.putBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, true));
                         return example;
                     }
             )
