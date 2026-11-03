@@ -247,7 +247,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
         int savedTotal = this.totalProgress;
         this.resumeRecipeId = null;
         if (this.nowRecipe != null) {
-            if (world != null && this.canCraftRecipe(world.registryAccess())) {
+            if (this.canCraftRecipe(world.registryAccess())) {
                 return;
             }
             this.nowRecipe = null;
@@ -265,7 +265,18 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.nowRecipe = altarRecipe.get().value();
             this.nowRecipeHolder = altarRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
-            if (!this.canCraftRecipe(world.registryAccess())) {
+            boolean fuelEnough = true;
+            int requireFuel = nowRecipe.fuelUsage() * nowRecipe.recipeTime();
+            if (savedRecipe != null && savedRecipe.equals(this.nowRecipeHolder.id().identifier()) && savedTotal == this.totalProgress) {
+                int doneProgress = Math.max(0, Math.min(savedProgress, this.totalProgress));
+                requireFuel = nowRecipe.fuelUsage() * (this.totalProgress - doneProgress);
+            }
+            if (requireFuel > 0 && requireFuel <= maxFuel) {
+                if (this.fuelTime < requireFuel) {
+                    fuelEnough = false;
+                }
+            }
+            if (!(this.canCraftRecipe(world.registryAccess()) && fuelEnough)) {
                 this.nowRecipe = null;
                 this.nowRecipeHolder = null;
                 this.totalProgress = 0;
@@ -354,7 +365,7 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             }
         }
         if (this.nowRecipe != null) {
-            int fuelCost = nowRecipe.fuelUsage(this.progress);
+            int fuelCost = nowRecipe.fuelUsage();
             if (this.fuelTime >= fuelCost) {
                 this.fuelTime -= fuelCost;
                 this.progress++;

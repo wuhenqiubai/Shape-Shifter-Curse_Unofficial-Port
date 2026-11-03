@@ -35,15 +35,13 @@ public class AltarShapedRecipe extends AltarRecipe {
     public final @Nullable Identifier requireAdvancement;
     private @Nullable PlacementInfo placementInfo;
 
-    // 26.1 的 ItemStackTemplate 序列化类型 + 1.21.11 的 totalFuelCost（Cost 系统精确燃料预算）并存
-    public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStackTemplate output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement, int totalFuelCost) {
+    public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStackTemplate output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.pattern = pattern;
         this.output = output;
         this.catalyst = catalyst;
         this.recipeTime = recipeTime;
         this.fuelCostPerTick = fuelCostPerTick;
         this.requireAdvancement = requireAdvancement;
-        this.totalFuelCost = totalFuelCost;
     }
 
     @Override
@@ -147,12 +145,9 @@ public class AltarShapedRecipe extends AltarRecipe {
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
-                Codec.INT.optionalFieldOf("moondust_cost")
-                        .forGetter(r -> r.totalFuelCost >= 0 ? Optional.of(r.totalFuelCost / 800) : Optional.empty())
-            ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement, moondustCost) ->
-                new AltarShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null),
-                        moondustCost.map(integer -> integer * 800).orElse(-1)))
+                    Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
+            ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement) ->
+                new AltarShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
         );
 
         public static final StreamCodec<RegistryFriendlyByteBuf, AltarShapedRecipe> STREAM_CODEC = StreamCodec.of(
@@ -177,8 +172,7 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStackTemplate output = ItemStackTemplate.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            int totalFuelCost = buf.readVarInt();
-            return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement, totalFuelCost);
+            return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf packetByteBuf, AltarShapedRecipe altarRecipe) {
@@ -198,7 +192,6 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStackTemplate.STREAM_CODEC.encode(packetByteBuf, altarRecipe.output);
             packetByteBuf.writeVarInt(altarRecipe.recipeTime);
             packetByteBuf.writeVarInt(altarRecipe.fuelCostPerTick);
-            packetByteBuf.writeVarInt(altarRecipe.totalFuelCost);
         }
     }
 }

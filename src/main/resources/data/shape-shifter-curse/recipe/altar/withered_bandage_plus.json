@@ -7,7 +7,7 @@
     "id": "shape-shifter-curse:withered_bandage_plus",
     "count": 1
   },
-  "time": 600,
-  "moondust_cost": 16,
+  "time": 800,
+  "fuel_cost": 16,
   "catalyst": "shape-shifter-curse:dune_catalyst_core"
 }

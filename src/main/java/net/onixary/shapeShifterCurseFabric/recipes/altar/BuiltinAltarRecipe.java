@@ -11,6 +11,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.player.StackedItemContents;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
@@ -36,7 +37,8 @@ public class BuiltinAltarRecipe extends AltarRecipe {
             int fuelUsage,
             Predicate<AltarBlockEntity> isInputsCountEnough,
             Consumer<AltarBlockEntity> consumeInputs,
-            Function<AltarBlockEntity, List<ItemStack>> extraOutput
+            Function<AltarBlockEntity, List<ItemStack>> extraOutput,
+            @Nullable Item catalyst
     ) {
         public void register(Identifier id) {
             BARecipeConfigMap.put(id, this);
@@ -57,6 +59,7 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         Predicate<AltarBlockEntity> isInputsCountEnough = altarBlockEntity -> true;
         Consumer<AltarBlockEntity> consumeInputs = altarBlockEntity -> {};
         Function<AltarBlockEntity, List<ItemStack>> extraOutput = altarBlockEntity -> List.of();
+        @Nullable Item catalyst = null;
 
         public BARecipeConfigBuilder() { }
 
@@ -69,7 +72,8 @@ public class BuiltinAltarRecipe extends AltarRecipe {
         public BARecipeConfigBuilder isInputsCountEnough(Predicate<AltarBlockEntity> isInputsCountEnough) { this.isInputsCountEnough = isInputsCountEnough; return this; }
         public BARecipeConfigBuilder consumeInputs(Consumer<AltarBlockEntity> consumeInputs) { this.consumeInputs = consumeInputs; return this; }
         public BARecipeConfigBuilder extraOutput(Function<AltarBlockEntity, List<ItemStack>> extraOutput) { this.extraOutput = extraOutput; return this; }
-        public BARecipeConfig build() { return new BARecipeConfig(match, craft, virtualOutput, canCraft, recipeTime, fuelUsage, isInputsCountEnough, consumeInputs, extraOutput); }
+        public BARecipeConfigBuilder catalyst(@Nullable Item catalyst) { this.catalyst = catalyst; return this; }
+        public BARecipeConfig build() { return new BARecipeConfig(match, craft, virtualOutput, canCraft, recipeTime, fuelUsage, isInputsCountEnough, consumeInputs, extraOutput, catalyst); }
 
         // TODO 还差几个预设生成器 比如match函数 让它支持Shape和Shapeless
 
