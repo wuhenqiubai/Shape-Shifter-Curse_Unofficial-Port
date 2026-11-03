@@ -1,28 +1,25 @@
 {
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
-    " S ",
-    "MPM",
-    " B "
+    "WSW",
+    "SMS",
+    "WSW"
   ],
   "key": {
     "M": {
       "item": "shape-shifter-curse:moondust_crystal_shard"
     },
+    "W": {
+      "item": "minecraft:wheat_seeds"
+    },
     "S": {
       "item": "minecraft:string"
-    },
-    "P": {
-      "item": "minecraft:prismarine_shard"
-    },
-    "B": {
-      "item": "minecraft:bone_meal"
     }
   },
   "result": {
-    "id": "shape-shifter-curse:charm_of_hollow_fang",
+    "id": "shape-shifter-curse:digestion_fiber_ball",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }

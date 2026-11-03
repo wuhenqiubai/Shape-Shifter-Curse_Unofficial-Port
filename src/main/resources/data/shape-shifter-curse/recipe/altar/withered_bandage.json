@@ -1,25 +1,25 @@
 {
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
-    "BAB",
-    "AMA",
-    "BAB"
+    "  H",
+    "MEE",
+    "E  "
   ],
   "key": {
     "M": {
       "item": "shape-shifter-curse:moondust_crystal_shard"
     },
-    "A": {
-      "item": "minecraft:amethyst_shard"
+    "E": {
+      "item": "shape-shifter-curse:ectoplasm_rag"
     },
-    "B": {
-      "item": "minecraft:amethyst_block"
+    "H": {
+      "item": "minecraft:wither_skeleton_skull"
     }
   },
   "result": {
-    "id": "shape-shifter-curse:resonant_core",
+    "id": "shape-shifter-curse:withered_bandage",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }

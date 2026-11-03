@@ -201,7 +201,6 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStack.STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.output);
             packetByteBuf.writeVarInt(shapelessRecipe.recipeTime);
             packetByteBuf.writeVarInt(shapelessRecipe.fuelCostPerTick);
-            packetByteBuf.writeVarInt(shapelessRecipe.totalFuelCost);
         }
     }
 }

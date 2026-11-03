@@ -279,7 +279,6 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStack.STREAM_CODEC.encode(packetByteBuf, altarRecipe.output);
             packetByteBuf.writeVarInt(altarRecipe.recipeTime);
             packetByteBuf.writeVarInt(altarRecipe.fuelCostPerTick);
-            packetByteBuf.writeVarInt(altarRecipe.totalFuelCost);
         }
     }
 }

@@ -1,28 +1,28 @@
 {
   "type": "shape-shifter-curse:altar_shaped",
   "pattern": [
-    "NIC",
-    "NIM",
+    "LLL",
+    "GMI",
     "   "
   ],
   "key": {
     "M": {
       "item": "shape-shifter-curse:moondust_crystal_shard"
     },
-    "C": {
-      "item": "minecraft:copper_ingot"
+    "L": {
+      "item": "minecraft:leather"
+    },
+    "G": {
+      "item": "minecraft:ghast_tear"
     },
     "I": {
-      "item": "minecraft:iron_ingot"
-    },
-    "N": {
       "item": "minecraft:iron_nugget"
     }
   },
   "result": {
-    "id": "shape-shifter-curse:attach_hook",
+    "id": "shape-shifter-curse:collar_of_whiskers",
     "count": 1
   },
   "time": 100,
-  "moondust_cost": 5
+  "fuel_cost": 40
 }
