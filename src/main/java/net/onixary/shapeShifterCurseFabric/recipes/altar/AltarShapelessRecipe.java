@@ -35,7 +35,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     public final @Nullable Identifier requireAdvancement;
 
-    public AltarShapelessRecipe(ItemStack output, NonNullList<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
+    public AltarShapelessRecipe(ItemStack output, List<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
         this.output = output;
         this.input = input;
         this.recipeTime = recipeTime;

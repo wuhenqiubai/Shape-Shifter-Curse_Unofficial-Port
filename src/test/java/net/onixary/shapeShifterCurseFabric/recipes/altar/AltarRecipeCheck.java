@@ -48,7 +48,10 @@ public final class AltarRecipeCheck {
     }
 
     private static void check(boolean value, String message) {
-        if (!value) throw new AssertionError(message);
+        if (!value) {
+            System.out.println("[altar-check-failed] " + message);
+            throw new AssertionError(message);
+        }
     }
 
     private static AltarShapelessRecipe shapelessFromJson(String json, RegistryAccess registries) {
@@ -63,12 +66,12 @@ public final class AltarRecipeCheck {
                 .getOrThrow();
     }
 
-    private static AltarShapelessRecipe recipe(int seconds, int fuelPerTick) {
+    private static AltarShapelessRecipe recipe(int seconds, int fuelPerTick, RegistryAccess registries) {
         return shapelessFromJson("""
                 {"ingredients":["minecraft:stick"],
                  "catalyst":"minecraft:diamond",
                  "result":{"id":"minecraft:emerald"},"time":%d,"fuel_cost":%d}
-                """.formatted(seconds * 20, fuelPerTick));
+                """.formatted(seconds * 20, fuelPerTick), registries);
     }
 
     @GameTest
@@ -76,7 +79,7 @@ public final class AltarRecipeCheck {
         RegistryAccess registries = context.getLevel().registryAccess();
 
         for (int[] example : new int[][]{{5, 5}, {10, 10}, {30, 16}, {60, 9}, {5, 0}}) {
-            AltarShapelessRecipe recipe = recipe(example[0], example[1]);
+            AltarShapelessRecipe recipe = recipe(example[0], example[1], registries);
             int total = 0;
             for (int tick = 0; tick < recipe.recipeTime(); tick++) {
                 int cost = recipe.fuelUsage();
@@ -93,7 +96,7 @@ public final class AltarRecipeCheck {
             packet.release();
         }
 
-        AltarShapelessRecipe recipe = recipe(30, 16);
+        AltarShapelessRecipe recipe = recipe(30, 16, registries);
         Inventory inventory = new Inventory();
         inventory.setItem(0, new ItemStack(Items.STICK));
         check(!recipe.matches(input(inventory), null), "A catalyst is required");
@@ -114,7 +117,7 @@ public final class AltarRecipeCheck {
         AltarShapedRecipe shaped = shapedFromJson("""
                 {"pattern":["SS"],"key":{"S":"minecraft:stick"},
                  "result":{"id":"minecraft:emerald"},"time":600,"fuel_cost":16}
-                """);
+                """, registries);
         RegistryFriendlyByteBuf shapedPacket = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
         RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().encode(shapedPacket, shaped);
         AltarShapedRecipe shapedCopy = RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().decode(shapedPacket);
@@ -130,7 +133,7 @@ public final class AltarRecipeCheck {
         AltarShapelessRecipe legacy = shapelessFromJson("""
                 {"ingredients":["minecraft:stick"],"result":{"id":"minecraft:emerald"},
                  "time":100,"fuel_cost":3}
-                """);
+                """, registries);
         check(legacy.fuelUsage() == 3 && legacy.totalFuelUsage() == 300, "Legacy per-tick fuel remains compatible");
 
         // Check the actual loaded data, not only the vanilla-item fixtures above.

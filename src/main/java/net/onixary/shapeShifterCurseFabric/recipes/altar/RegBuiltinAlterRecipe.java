@@ -107,7 +107,7 @@ public class RegBuiltinAlterRecipe {
                             return false;
                         }
                         CompoundTag ItemNBT = unScaleStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
-                        if (ItemNBT != null && ItemNBT.getBoolean(IsMorphScaleItemCondition.IsMorphScaleArmorTagName)) {
+                        if (ItemNBT != null && ItemNBT.getBooleanOr(IsMorphScaleItemCondition.IsMorphScaleArmorTagName, false)) {
                             return false;
                         }
                         return true;
