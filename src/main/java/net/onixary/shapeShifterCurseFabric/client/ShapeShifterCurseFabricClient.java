@@ -42,11 +42,8 @@ import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfChe
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
-import net.onixary.shapeShifterCurseFabric.render.render_layer.FurGradientRenderLayer;
-import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
-import net.onixary.shapeShifterCurseFabric.util.FormColorData;
-import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
-import net.onixary.shapeShifterCurseFabric.util.TickManager;
+import net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX_V2;
+import net.onixary.shapeShifterCurseFabric.util.*;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
 import net.onixary.shapeShifterCurseFabric.util.test.NetWorkTest;
 import org.lwjgl.glfw.GLFW;
@@ -228,7 +225,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
         ModPacketsC2S.registerClient();
         NetworkRegistrationSelfCheck.registerClient();
 
-		FurGradientRenderLayer.onInitializeClient();
+		registerShaderResource();
 
 		ManaRegistriesClient.register();
 		RegCustomEntityRenderer.init();
@@ -329,6 +326,8 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		RegMenuScreen.init();
 
 		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);
+
+		TransformFX_V2.INSTANCE.registerCallbacks();
 
 		// NetWorkTest.init();
 	}

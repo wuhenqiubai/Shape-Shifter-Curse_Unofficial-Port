@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.component.OriginComponent;
+import net.onixary.shapeShifterCurseFabric.integration.origins.component.PlayerOriginComponent;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.Origin;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayer;
 import net.onixary.shapeShifterCurseFabric.integration.origins.origin.OriginLayers;
@@ -139,6 +140,7 @@ public class FormUtils {
     public static void applyLayer(Player player, Tuple<ResourceLocation, ResourceLocation> layerData, boolean shouldReload) {
         // 临时 等移除Origins后再重新这部分
         OriginComponent component = ModComponents.ORIGIN.get(player);
+        if (!(component instanceof PlayerOriginComponent playerOriginComponent)) return;
         OriginLayer layer = OriginLayers.getLayer(layerData.getA());
         if (layer != null && layerData.getB() != null) {
             Origin origin = OriginRegistry.get(layerData.getB());
@@ -146,10 +148,16 @@ public class FormUtils {
                 if (TechnicalFormOrigin == null) {
                     TechnicalFormOrigin = OriginRegistry.get(ShapeShifterCurseFabric.identifier("technical_form"));
                 }
+                // 虽然这样的代码看上去很屎山 但能work 之后移除Origins后就没这个问题了
                 if (shouldReload) {
                     component.setOrigin(layer, TechnicalFormOrigin);
+                    component.setOrigin(layer, origin);
+                } else {
+                    component.setOrigin(layer, origin);
+                    PowerHolderComponent powerComponent = PowerHolderComponent.KEY.get(player);
+                    playerOriginComponent.grantPowersFromOrigin(origin, powerComponent);
+                    playerOriginComponent.revokeRemovedPowers(origin, powerComponent);
                 }
-                component.setOrigin(layer, origin);
                 // component.sync();
             }
         }

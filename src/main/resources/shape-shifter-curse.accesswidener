@@ -26,3 +26,4 @@ accessible field net/minecraft/world/entity/ai/targeting/TargetingConditions sel
 accessible field net/minecraft/world/entity/ai/goal/target/NearestAttackableTargetGoal targetType Ljava/lang/Class;
 accessible method net/minecraft/world/entity/animal/Ocelot isTrusting ()Z
 accessible method net/minecraft/client/gui/GuiGraphics blit (Lnet/minecraft/resources/ResourceLocation;IIIIIIIFFII)V
+accessible field net/minecraft/client/renderer/PostChain passes Ljava/util/List;
