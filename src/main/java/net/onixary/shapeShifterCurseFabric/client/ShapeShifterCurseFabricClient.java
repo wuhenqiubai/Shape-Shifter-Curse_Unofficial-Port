@@ -1,19 +1,16 @@
 package net.onixary.shapeShifterCurseFabric.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import io.github.apace100.apoli.ApoliClient;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -25,8 +22,8 @@ import net.onixary.shapeShifterCurseFabric.additional_power.ItemStorePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity_renderer.FormAttunerBeamRenderer;
-import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
+import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpgradeScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
@@ -37,7 +34,6 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TAx
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.BatEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TOcelotEntityRenderer;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.spider.TSpiderEntityRenderer;
-import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.magic.MagicGUIRender;
 import net.onixary.shapeShifterCurseFabric.mana.ManaRegistriesClient;
 import net.onixary.shapeShifterCurseFabric.mana.ManaUtils;
@@ -50,7 +46,6 @@ import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
-import net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX_V2;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
@@ -85,7 +80,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static Minecraft getClient() {
 		return Minecraft.getInstance();
 	}
-	private static ShaderInstance furGradientShader;
 	private static final KeyMapping.Category SSC_CATEGORY = KeyMapping.Category.register(
 			Identifier.fromNamespaceAndPath(MOD_ID, "keys"));
 
@@ -240,21 +234,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		return getClientTransformState(playerUuid).TransformToForm;
 	}
 
-	private void registerShaderResource()
-	{
-		CoreShaderRegistrationCallback.EVENT.register(context -> {
-			// 1. 定义着色器的 Identifier
-			ResourceLocation shaderId = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
-
-			// 2. 使用 context.register 方法注册
-			//    这个方法会处理底层的加载逻辑
-			context.register(shaderId, DefaultVertexFormat.NEW_ENTITY, program -> {
-				// 3. 将加载好的 ShaderProgram 实例保存到我们的静态变量中
-				ShapeShifterCurseFabricClient.furGradientShader = program;
-			});
-		});
-	}
-
 	@Override
 	public void onInitializeClient() {
 		ItemTooltipWrapping.register();
@@ -262,8 +241,6 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		ModPacketsS2C.register();
         ModPacketsC2S.registerClient();
         NetworkRegistrationSelfCheck.registerClient();
-
-		registerShaderResource();
 
 		ManaRegistriesClient.register();
 		RegCustomEntityRenderer.init();
@@ -368,13 +345,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);
 
-		TransformFX_V2.INSTANCE.registerCallbacks();
-
 		// NetWorkTest.init();
-	}
-
-	public static ShaderInstance getFurGradientShader() {
-		return furGradientShader;
 	}
 
 }

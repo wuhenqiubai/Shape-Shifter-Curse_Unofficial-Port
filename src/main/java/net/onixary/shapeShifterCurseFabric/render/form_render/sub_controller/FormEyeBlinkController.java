@@ -66,7 +66,7 @@ public final class FormEyeBlinkController {
                 state = STATE_MAP.get(player);
                 state.update(player, tickDelta, BlinkConfig.fromClientConfig(), this);
             }
-            applyScale(eyeRoot, state.currentScaleY);
+            applyScale(model, eyeRoot, state.currentScaleY);
         }
     }
 
