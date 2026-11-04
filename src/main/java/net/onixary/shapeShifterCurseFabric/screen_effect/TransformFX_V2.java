@@ -1,17 +1,17 @@
 package net.onixary.shapeShifterCurseFabric.screen_effect;
 
+import com.mojang.blaze3d.shaders.Uniform;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.GlUniform;
-import net.minecraft.client.gl.PostEffectPass;
-import net.minecraft.client.gl.PostEffectProcessor;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.ResourceType;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.PostChain;
+import net.minecraft.client.renderer.PostPass;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 
@@ -22,8 +22,8 @@ public final class TransformFX_V2 implements ClientTickEvents.EndTick {
 
     public static final TransformFX_V2 INSTANCE = new TransformFX_V2();
 
-    private PostEffectProcessor processor;
-    private GlUniform sliderUniform;
+    private PostChain processor;
+    private Uniform sliderUniform;
 
     private static int transformEffectDuration = 0;
     private static boolean doEffectIn = false;
@@ -34,24 +34,24 @@ public final class TransformFX_V2 implements ClientTickEvents.EndTick {
 
     public void registerCallbacks() {
         ClientTickEvents.END_CLIENT_TICK.register(this);
-        WorldRenderEvents.LAST.register(ctx -> INSTANCE.render(ctx.tickDelta()));
+        WorldRenderEvents.LAST.register(ctx -> INSTANCE.render(ctx.tickCounter().getGameTimeDeltaPartialTick(false)));
 
-        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES)
+        ResourceManagerHelper.get(PackType.CLIENT_RESOURCES)
                 .registerReloadListener(new SimpleSynchronousResourceReloadListener() {
                     @Override
-                    public Identifier getFabricId() {
+                    public ResourceLocation getFabricId() {
                         return ShapeShifterCurseFabric.identifier("transform_fx_reload");
                     }
 
                     @Override
-                    public void reload(ResourceManager manager) {
+                    public void onResourceManagerReload(ResourceManager manager) {
                         INSTANCE.onResourceReload();
                     }
                 });
     }
 
     @Override
-    public void onEndTick(MinecraftClient client) {
+    public void onEndTick(Minecraft client) {
         ensureProcessor(client);
 
         if (doEffectIn || doEffectOut) {
@@ -62,23 +62,23 @@ public final class TransformFX_V2 implements ClientTickEvents.EndTick {
         }
     }
 
-    private void ensureProcessor(MinecraftClient client) {
+    private void ensureProcessor(Minecraft client) {
         if (processor != null) return;
         if (client.getResourceManager() == null) return;
 
         try {
-            Identifier id = ShapeShifterCurseFabric.identifier("shaders/post/transform_effect_v2.json");
-            processor = new PostEffectProcessor(
+            ResourceLocation id = ShapeShifterCurseFabric.identifier("shaders/post/transform_effect_v2.json");
+            processor = new PostChain(
                     client.getTextureManager(),
                     client.getResourceManager(),
-                    client.getFramebuffer(),
+                    client.getMainRenderTarget(),
                     id
             );
             System.out.println("[TransformFX] processor created");
 
-            List<PostEffectPass> passes = processor.passes;
+            List<PostPass> passes = processor.passes;
             for (int i = 0; i < passes.size(); i++) {
-                GlUniform u = passes.get(i).getProgram().getUniformByName("Slider");
+                Uniform u = passes.get(i).getEffect().getUniform("Slider");
                 System.out.println("[TransformFX] pass[" + i + "] Slider = " + (u != null ? "FOUND" : "null"));
                 if (u != null) {
                     sliderUniform = u;
@@ -96,12 +96,12 @@ public final class TransformFX_V2 implements ClientTickEvents.EndTick {
     public void render(float tickDelta) {
         if (processor == null || (!doEffectIn && !doEffectOut)) return;
 
-        MinecraftClient client = MinecraftClient.getInstance();
+        Minecraft client = Minecraft.getInstance();
 
-        int w = client.getWindow().getFramebufferWidth();
-        int h = client.getWindow().getFramebufferHeight();
+        int w = client.getWindow().getWidth();
+        int h = client.getWindow().getHeight();
         if (w != lastWidth || h != lastHeight) {
-            processor.setupDimensions(w, h);
+            processor.resize(w, h);
             lastWidth = w;
             lastHeight = h;
         }
@@ -124,7 +124,7 @@ public final class TransformFX_V2 implements ClientTickEvents.EndTick {
         RenderSystem.depthMask(false);
         RenderSystem.disableCull();
 
-        processor.render(tickDelta);
+        processor.process(tickDelta);
 
         RenderSystem.enableCull();
         RenderSystem.depthMask(true);
