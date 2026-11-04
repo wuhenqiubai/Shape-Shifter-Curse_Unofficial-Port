@@ -1,16 +1,19 @@
 package net.onixary.shapeShifterCurseFabric.client;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import io.github.apace100.apoli.ApoliClient;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.CoreShaderRegistrationCallback;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -18,10 +21,12 @@ import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.additional_power.CustomEdiblePower;
+import net.onixary.shapeShifterCurseFabric.additional_power.ItemStorePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity_renderer.FormAttunerBeamRenderer;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonSkyTextures;
+import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpgradeScreen;
 import net.onixary.shapeShifterCurseFabric.custom_ui.RegMenuScreen;
@@ -42,14 +47,15 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsC2S;
 import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2C;
 import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
 import net.onixary.shapeShifterCurseFabric.perk.PerkUtils;
+import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
+import net.onixary.shapeShifterCurseFabric.screen_effect.TransformFX_V2;
 import net.onixary.shapeShifterCurseFabric.util.ClientTicker;
 import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.TickManager;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
-import net.onixary.shapeShifterCurseFabric.util.test.NetWorkTest;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
@@ -59,6 +65,9 @@ import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.*;
 
 public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	// 由于咒文生物使用的都是原版模型，所以无需注册Layer
+	//public static final EntityModelLayer T_BAT_LAYER = new EntityModelLayer(new Identifier(MOD_ID, "t_bat"), "main");
+	//public static final EntityModelLayer T_AXOLOTL_LAYER = new EntityModelLayer(new Identifier(MOD_ID, "t_axolotl"), "main");
+	//public static final EntityModelLayer T_OCELOT_LAYER = new EntityModelLayer(new Identifier(MOD_ID, "t_ocelot"), "main");
 
 	public static final FormColorData formColorData = new FormColorData();
 
@@ -73,16 +82,10 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		requestAuthCount++;
 	}
 
-	public static void refreshPlayerAnimations() {
-		Minecraft client = Minecraft.getInstance();
-		if (client.player != null) {
-			ShapeShifterCurseFabric.LOGGER.info("Refreshing player animations on client");
-		}
-	}
-
 	public static Minecraft getClient() {
 		return Minecraft.getInstance();
 	}
+	private static ShaderInstance furGradientShader;
 	private static final KeyMapping.Category SSC_CATEGORY = KeyMapping.Category.register(
 			Identifier.fromNamespaceAndPath(MOD_ID, "keys"));
 
@@ -136,10 +139,14 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		if(clientPlayer == null){
 			return;
 		}
+		// Mana System
+		TransformManager.clientTick();
+		CursedMoonClient.clientTick(minecraftClient.level);
+		InstinctUtils.clientTick();
 		if (!Minecraft.getInstance().isPaused()) {
 			ManaUtils.manaTick(minecraftClient.player);
-			TransformManager.clientTick();
 		}
+		PowerHolderComponent.getPowers(clientPlayer, ItemStorePower.class).forEach(ItemStorePower::clientTick);
 	}
 
 	public static void emitTransformParticle(int duration) {
@@ -183,6 +190,16 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		}
 	}
 
+	// 添加动画刷新方法
+	public static void refreshPlayerAnimations() {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player != null) {
+			ShapeShifterCurseFabric.LOGGER.info("Refreshing player animations on client");
+			// 强制重新初始化动画系统
+			// 这里可以触发动画重新注册或刷新
+		}
+	}
+
 	// 原先的仅考虑到当前玩家变身动作 其他玩家变身动作不会更新
 	public static class TransformingStage {
 		public boolean IsTransforming = false;
@@ -223,6 +240,21 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		return getClientTransformState(playerUuid).TransformToForm;
 	}
 
+	private void registerShaderResource()
+	{
+		CoreShaderRegistrationCallback.EVENT.register(context -> {
+			// 1. 定义着色器的 Identifier
+			ResourceLocation shaderId = Identifier.fromNamespaceAndPath(ShapeShifterCurseFabric.MOD_ID, "fur_gradient_remap");
+
+			// 2. 使用 context.register 方法注册
+			//    这个方法会处理底层的加载逻辑
+			context.register(shaderId, DefaultVertexFormat.NEW_ENTITY, program -> {
+				// 3. 将加载好的 ShaderProgram 实例保存到我们的静态变量中
+				ShapeShifterCurseFabricClient.furGradientShader = program;
+			});
+		});
+	}
+
 	@Override
 	public void onInitializeClient() {
 		ItemTooltipWrapping.register();
@@ -231,8 +263,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
         ModPacketsC2S.registerClient();
         NetworkRegistrationSelfCheck.registerClient();
 
-		// registerShaderResource();
-		// FurGradientRenderLayer.onInitializeClient();
+		registerShaderResource();
 
 		ManaRegistriesClient.register();
 		RegCustomEntityRenderer.init();
@@ -245,6 +276,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		formColorData.loadFormConfig();
 
 		ClientTickEvents.END_CLIENT_TICK.register(ShapeShifterCurseFabricClient::onClientTick);
+		// 客户端能力处理
 		ClientTickEvents.START_CLIENT_TICK.register((minecraftClient) -> {
 			LocalPlayer clientPlayer = minecraftClient.player;
 			if(clientPlayer == null){
@@ -336,9 +368,13 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);
 
+		TransformFX_V2.INSTANCE.registerCallbacks();
+
 		// NetWorkTest.init();
 	}
 
-	// 	return furGradientShader;
+	public static ShaderInstance getFurGradientShader() {
+		return furGradientShader;
+	}
 
 }
