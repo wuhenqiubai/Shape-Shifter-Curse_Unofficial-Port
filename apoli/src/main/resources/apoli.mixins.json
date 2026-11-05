@@ -82,6 +82,7 @@
     "LocatorBarRendererMixin",
     "MinecraftClientMixin",
     "PlayerEntityRendererMixin",
+    "SkyRendererMixin",
     "WorldRendererMixin"
   ],
   "injectors": {
