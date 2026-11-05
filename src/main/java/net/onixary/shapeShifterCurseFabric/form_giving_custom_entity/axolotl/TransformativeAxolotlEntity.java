@@ -18,7 +18,6 @@ import net.minecraft.world.entity.ai.sensing.SensorType;
 import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.animal.Bucketable;
 import net.minecraft.world.entity.animal.axolotl.Axolotl;
-import net.minecraft.world.entity.animal.axolotl.AxolotlAi;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -27,6 +26,7 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.AxolotlAiAccessor;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 import org.jetbrains.annotations.NotNull;
 
@@ -105,11 +105,11 @@ public class TransformativeAxolotlEntity extends Axolotl implements Bucketable, 
     // 自动注册，见 Brain.java 的 provider 构造），且 Brain.provider 的 2 参形式从
     // (memoryTypes, sensorTypes) 变成了 (sensorTypes, activities)。
     // 按原版 Axolotl 的同构写法（Axolotl.java:76-78 + :523）：静态 BRAIN_PROVIDER + 覆写 makeBrain。
-    // AxolotlAi.getActivities() 是异包 protected static，已由 shape-shifter-curse.accesswidener 打开。
+    // AxolotlAi.getActivities() 是异包 protected static，经 AxolotlAiAccessor 静态 invoker 调用。
     // SENSORS 原样保留 —— 其中含自定义的 TAxolotlEntitySensor.T_AXOLOTL_ENTITY_SENSOR，行为不变。
     private static final Brain.Provider<Axolotl> BRAIN_PROVIDER = Brain.provider(
             SENSORS,
-            var0 -> AxolotlAi.getActivities());
+            var0 -> AxolotlAiAccessor.ssc_getActivities());
 
     @Override
     protected Brain<Axolotl> makeBrain(Brain.Packed packedBrain) {

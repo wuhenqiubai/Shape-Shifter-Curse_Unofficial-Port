@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.factory.action.block;
 
 import io.github.apace100.apoli.Apoli;
+import io.github.apace100.apoli.mixin.LevelAccessor;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.util.MiscUtil;
@@ -68,7 +69,7 @@ public class ExplodeAction {
         for (ServerPlayer serverPlayer : ((ServerLevel) world).players()) {
             if (serverPlayer.distanceToSqr(pos) < 4096.0) {
                 Optional<Vec3> optional = Optional.ofNullable(explosion.getHitPlayers().get(serverPlayer));
-                serverPlayer.connection.send(new ClientboundExplodePacket(pos, power, blockCount, optional, particleOptions, SoundEvents.GENERIC_EXPLODE, Level.DEFAULT_EXPLOSION_BLOCK_PARTICLES));
+                serverPlayer.connection.send(new ClientboundExplodePacket(pos, power, blockCount, optional, particleOptions, SoundEvents.GENERIC_EXPLODE, LevelAccessor.apoli$getDefaultExplosionBlockParticles()));
             }
         }
     }

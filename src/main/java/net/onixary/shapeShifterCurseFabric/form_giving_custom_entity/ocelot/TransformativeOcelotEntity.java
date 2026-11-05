@@ -20,6 +20,7 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.data.StaticParams;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ITMob;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.OcelotAccessor;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.status_effects.BaseTransformativeStatusEffect;
 
@@ -105,7 +106,7 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
         }
 
         this.goalSelector.removeGoal(this.fleeGoal);
-        if (!this.isTrusting()) {
+        if (!((OcelotAccessor) this).ssc_isTrusting()) {
             this.goalSelector.addGoal(4, this.fleeGoal);
         }
     }
@@ -120,12 +121,12 @@ public class TransformativeOcelotEntity extends Ocelot implements ITMob {
 
         @Override
         public boolean canUse() {
-            return !this.ocelot.isTrusting() && super.canUse();
+            return !((OcelotAccessor) this.ocelot).ssc_isTrusting() && super.canUse();
         }
 
         @Override
         public boolean canContinueToUse() {
-            return !this.ocelot.isTrusting() && super.canContinueToUse();
+            return !((OcelotAccessor) this.ocelot).ssc_isTrusting() && super.canContinueToUse();
         }
     }
 }

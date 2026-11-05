@@ -33,6 +33,7 @@
     "HungerManagerMixin",
     "ItemMixin",
     "ItemStackMixin",
+    "LevelAccessor",
     "LivingEntityMixin",
     "LoginMixin",
     "LootContextBuilderMixin",

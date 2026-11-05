@@ -10,6 +10,7 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
 import net.onixary.shapeShifterCurseFabric.mixin.accessor.MobEntityAccessor;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.NearestAttackableTargetGoalAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -28,8 +29,8 @@ public abstract class ScareCreeperMixin {
         goalSelector.addGoal(3, goal);
         Set<WrappedGoal> goals = targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
-            if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && atg.targetType == Player.class) {
-                atg.targetConditions.selector((entity, level) ->
+            if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 1 && ((NearestAttackableTargetGoalAccessor) atg).ssc_getTargetType() == Player.class) {
+                ((NearestAttackableTargetGoalAccessor) atg).ssc_getTargetConditions().selector((entity, level) ->
                         EntitySelector.NO_CREATIVE_OR_SPECTATOR.test(entity) && !AdditionalPowers.SCARE_CREEPERS.isActive(entity));
             }
         }

@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SmithingMenu;
 import net.minecraft.world.item.ItemStack;
@@ -21,6 +22,8 @@ import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.items.tools.SuperMorphScaleCore;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.ItemCombinerMenuAccessor;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.SmithingMenuAccessor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -108,22 +111,24 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
 
     @Override
     public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack) {
-        ItemStack coreStack = screenHandler.inputSlots.getItem(0);
+        Container inputSlots = ((ItemCombinerMenuAccessor) screenHandler).ssc_getInputSlots();
+        SmithingMenuAccessor smithing = (SmithingMenuAccessor) screenHandler;
+        ItemStack coreStack = inputSlots.getItem(0);
         if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
-            ItemStack baseStack = screenHandler.inputSlots.getItem(1);
+            ItemStack baseStack = inputSlots.getItem(1);
             int multiplier = SuperMorphScaleCore.getUpgradeDamageMultiplier(baseStack);
             SuperMorphScaleCore.damageItemAfterUpgrade(coreStack, multiplier);
-            screenHandler.shrinkStackInSlot(1);
-            screenHandler.shrinkStackInSlot(2);
+            smithing.ssc_shrinkStackInSlot(1);
+            smithing.ssc_shrinkStackInSlot(2);
         }
         else {
-            screenHandler.shrinkStackInSlot(0);
+            smithing.ssc_shrinkStackInSlot(0);
             if (this.isUpgradeAll()) {
-                screenHandler.inputSlots.setItem(1, ItemStack.EMPTY);
+                inputSlots.setItem(1, ItemStack.EMPTY);
             } else {
-                screenHandler.shrinkStackInSlot(1);
+                smithing.ssc_shrinkStackInSlot(1);
             }
-            screenHandler.shrinkStackInSlot(2);
+            smithing.ssc_shrinkStackInSlot(2);
         }
     }
 

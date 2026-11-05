@@ -11,6 +11,8 @@ import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.SmithingRecipe;
 import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.level.Level;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.ItemCombinerMenuAccessor;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.SmithingMenuAccessor;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -114,9 +116,10 @@ public abstract class UpgradeRecipe implements SmithingRecipe, ISmithingRecipeEX
     @Override
     public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack) {
         if (this.isUpgradeAll()) {
-            screenHandler.shrinkStackInSlot(0);
-            screenHandler.inputSlots.setItem(1, ItemStack.EMPTY);
-            screenHandler.shrinkStackInSlot(2);
+            SmithingMenuAccessor smithing = (SmithingMenuAccessor) screenHandler;
+            smithing.ssc_shrinkStackInSlot(0);
+            ((ItemCombinerMenuAccessor) screenHandler).ssc_getInputSlots().setItem(1, ItemStack.EMPTY);
+            smithing.ssc_shrinkStackInSlot(2);
         }
     }
 }

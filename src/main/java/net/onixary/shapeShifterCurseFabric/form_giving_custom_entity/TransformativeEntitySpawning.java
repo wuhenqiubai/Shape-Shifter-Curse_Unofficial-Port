@@ -22,6 +22,7 @@ import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.Tra
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.wolf.TransformativeWolfEntity;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.StructureAccessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -123,6 +124,6 @@ public class TransformativeEntitySpawning {
             .generationStep(structure.step())
             .terrainAdapation(structure.terrainAdaptation())
             .build();
-        structure.settings = newSettings;
+        ((StructureAccessor) structure).ssc_setSettings(newSettings);
     }
 }

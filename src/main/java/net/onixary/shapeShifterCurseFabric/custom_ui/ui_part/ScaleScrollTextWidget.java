@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.FormattedCharSequence;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.MultiLineTextWidgetAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix3x2fStack;
 import org.jspecify.annotations.NonNull;
@@ -206,7 +207,7 @@ public class ScaleScrollTextWidget extends MultiLineTextWidget implements Widget
         pose.translate(-i, -j);
         int lineY = j;
         for (FormattedCharSequence line : lines) {
-            int lineX = this.centered ? i + (this.MaxWidth + this.modMaxWidth - font.width(line)) / 2 : i;
+            int lineX = ((MultiLineTextWidgetAccessor) this).ssc_isCentered() ? i + (this.MaxWidth + this.modMaxWidth - font.width(line)) / 2 : i;
             context.text(font, line, lineX, lineY, l, this.shadow);
             lineY += k;
         }

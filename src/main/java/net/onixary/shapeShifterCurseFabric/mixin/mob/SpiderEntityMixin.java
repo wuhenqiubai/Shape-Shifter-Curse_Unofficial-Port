@@ -8,6 +8,7 @@ import net.minecraft.world.entity.monster.spider.Spider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.additional_power.AdditionalPowers;
+import net.onixary.shapeShifterCurseFabric.mixin.accessor.NearestAttackableTargetGoalAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -25,8 +26,8 @@ public class SpiderEntityMixin extends Monster {
     private void addGoals(CallbackInfo info) {
         Set<WrappedGoal> goals = this.targetSelector.getAvailableGoals();
         for (WrappedGoal prioritizedGoal : goals) {
-            if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 2 && atg.targetType == Player.class) {
-                atg.targetConditions.selector((entity, level) -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(entity));
+            if (prioritizedGoal.getGoal() instanceof NearestAttackableTargetGoal<?> atg && prioritizedGoal.getPriority() == 2 && ((NearestAttackableTargetGoalAccessor) atg).ssc_getTargetType() == Player.class) {
+                ((NearestAttackableTargetGoalAccessor) atg).ssc_getTargetConditions().selector((entity, level) -> !AdditionalPowers.SPIDER_FRIENDLY.isActive(entity));
             }
         }
     }
