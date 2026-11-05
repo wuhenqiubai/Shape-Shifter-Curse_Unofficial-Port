@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -10,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.onixary.shapeShifterCurseFabric.additional_power.ConditionedModifySlipperinessPower;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
 @Mixin(LivingEntity.class)
 public abstract class EntitySlipperinessMixin extends Entity {
@@ -18,8 +18,11 @@ public abstract class EntitySlipperinessMixin extends Entity {
         super(type, world);
     }
 
-    @ModifyExpressionValue(method = "travelInAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
+    @ModifyVariable(method = "travelInAir", at = @At(value = "STORE"), index = 3)
     private float modifySlipperiness(float original) {
+        if (!this.onGround()) {
+            return original;
+        }
         if (!((Object)this instanceof Player player)) {
             return original;
         }

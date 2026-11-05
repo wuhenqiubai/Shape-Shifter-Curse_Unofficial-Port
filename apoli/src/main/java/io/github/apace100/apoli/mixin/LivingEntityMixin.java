@@ -375,9 +375,9 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
         }
     }
 
-    @ModifyExpressionValue(method = "travelInAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F", ordinal = 0))
+    @ModifyVariable(method = "travelInAir", at = @At(value = "STORE"), index = 3)
     private float modifySlipperiness(float original) {
-        if (!((Object)this instanceof LivingEntity)) {
+        if (!this.onGround()) {
             return original;
         }
         return PowerHolderComponent.modify(this, ModifySlipperinessPower.class, original, p -> p.doesApply(level(), getBlockPosBelowThatAffectsMyMovement()));
