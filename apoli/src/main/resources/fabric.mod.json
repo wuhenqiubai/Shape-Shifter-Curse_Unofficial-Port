@@ -63,6 +63,7 @@
     "fabricloader": ">=0.14.0",
     "fabric-api": ">=0.124.0",
     "minecraft": "~26.1",
-    "calio-legacy": "*"
+    "calio-legacy": "*",
+    "additionalentityattributes": ">=2.2.4"
   }
 }

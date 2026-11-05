@@ -152,7 +152,8 @@
     "pehkui": ">=3.8.3",
     "player_animation_library": ">=1.2.2",
     "geckolib": ">=5.5.1",
-    "cardinal-components": ">=8.0.0"
+    "cardinal-components": ">=8.0.0",
+    "additionalentityattributes": ">=2.2.4"
   },
   "breaks": {
     "origins": ">0.0.0",

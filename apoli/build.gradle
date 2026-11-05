@@ -116,7 +116,6 @@ dependencies {
 	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
 	api "maven.modrinth:additionalentityattributes:${project.aea_version}"
-	include "maven.modrinth:additionalentityattributes:${project.aea_version}"
 //	api "com.github.eggohito:AdditionalEntityAttributes:${project.aea_version}"
 //	include "com.github.eggohito:AdditionalEntityAttributes:${project.aea_version}"
 

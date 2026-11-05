@@ -78,6 +78,7 @@
     "ExperienceBarRendererMixin",
     "GameRendererMixin",
     "InGameHudMixin",
+    "InGameHudOverlayMixin",
     "InGameOverlayRendererMixin",
     "ItemStackMixinClient",
     "JumpableVehicleBarRendererMixin",
@@ -86,7 +87,9 @@
     "LocatorBarRendererMixin",
     "MinecraftClientMixin",
     "PlayerEntityRendererMixin",
+    "SkyRendererMixin",
     "WorldRendererMixin",
+    "integration.connector.InGameHudOverlayMixin",
     "powers.night_vision.LightmapRenderStateExtractorMixin"
   ],
   "injectors": {
