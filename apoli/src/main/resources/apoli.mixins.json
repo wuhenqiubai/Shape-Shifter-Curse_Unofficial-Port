@@ -89,7 +89,6 @@
     "PlayerEntityRendererMixin",
     "SkyRendererMixin",
     "WorldRendererMixin",
-    "integration.connector.InGameHudOverlayMixin",
     "powers.night_vision.LightmapRenderStateExtractorMixin"
   ],
   "injectors": {

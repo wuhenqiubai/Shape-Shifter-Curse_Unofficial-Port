@@ -23,7 +23,7 @@ public class InGameHudOverlayMixin {
 
     @Shadow @Final private Minecraft minecraft;
 
-    @Inject(method = "extractHotbarAndDecorations", at = @At("HEAD"))
+    @Inject(method = "extractCrosshair", at = @At("HEAD"))
     private void apoli$renderOverlay(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         boolean hudHidden = minecraft.options.hideGui;
         boolean thirdPerson = !minecraft.options.getCameraType().isFirstPerson();

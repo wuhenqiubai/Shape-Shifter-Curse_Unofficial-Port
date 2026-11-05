@@ -36,8 +36,7 @@ public class ApoliMixinPlugin implements IMixinConfigPlugin {
     /** Connector 环境下禁用、改由 {@code integration.connector} 包替代的主包 mixin。 */
     private List<String> preventMixins = List.of(
             ".mixin.ServerPlayerInteractionManagerMixin",
-            ".mixin.PhantomSpawnerMixin",
-            ".mixin.InGameHudOverlayMixin"
+            ".mixin.PhantomSpawnerMixin"
     );
 
     @Override
