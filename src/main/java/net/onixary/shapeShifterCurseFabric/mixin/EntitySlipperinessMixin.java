@@ -20,14 +20,14 @@ public abstract class EntitySlipperinessMixin extends Entity {
 
     @ModifyExpressionValue(method = "travelInAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
     private float modifySlipperiness(float original) {
-        Entity entity = (Entity)(Object)this;
-        if (entity instanceof Player player) {
-            PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
+        if (!((Object)this instanceof Player player)) {
+            return original;
+        }
+        PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
 
-            for (ConditionedModifySlipperinessPower power : component.getPowers(ConditionedModifySlipperinessPower.class)) {
-                if(power.doesApply(level(), getBlockPosBelowThatAffectsMyMovement())) {
-                    return original + power.getSlipperinessModifier();
-                }
+        for (ConditionedModifySlipperinessPower power : component.getPowers(ConditionedModifySlipperinessPower.class)) {
+            if(power.doesApply(level(), getBlockPosBelowThatAffectsMyMovement())) {
+                return original + power.getSlipperinessModifier();
             }
         }
         return  original;
