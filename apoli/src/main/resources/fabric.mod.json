@@ -58,6 +58,7 @@
   "accessWidener": "apoli.accesswidener",
 
   "depends": {
-    "minecraft": ">=1.21"
+    "minecraft": ">=1.21",
+    "additionalentityattributes": ">=2.0.2"
   }
 }
