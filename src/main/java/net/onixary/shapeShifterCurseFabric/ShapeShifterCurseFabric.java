@@ -60,6 +60,7 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
 import net.onixary.shapeShifterCurseFabric.player_animation.form_animation.AnimationTransform;
 import net.onixary.shapeShifterCurseFabric.player_form.FormDataPackReloadListener;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
@@ -268,8 +269,11 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> server.getPlayerList().getPlayers().forEach((player) -> {
             ModPacketsS2CServer.updateDynamicForm(player);
             PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
-            if (RegPlayerForms.getPlayerForm(component.nowFormID) == null) {
+            IForm newForm = RegPlayerForms.getPlayerForm(component.nowFormID);
+            if (newForm == null) {
                 FormUtils._loadForm(player, component.getFallbackForm(), true);
+            } else if (newForm != component.nowForm) {
+                FormUtils._loadForm(player, newForm, true);
             }
         }));
         initLocalDataStorage();

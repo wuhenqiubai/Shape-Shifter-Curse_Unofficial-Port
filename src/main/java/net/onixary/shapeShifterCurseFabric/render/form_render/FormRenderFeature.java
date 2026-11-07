@@ -78,6 +78,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
                 formModel.AnimationSystem.afterRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, matrices, vertexConsumers, light, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
                 matrices.popPose();
                 formModel.AnimationSystem.finishRender(formRenderer, formModel, playerEntityRenderer, abstractClientPlayerEntity, matrices, vertexConsumers, light, limbAngle, limbDistance, tickDelta, animationProgress, headYaw, headPitch);
+                formRenderer.clearPlayer();
             }
         }
     }
@@ -175,8 +176,10 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
         for (FormRenderer formRenderer : formRendererList) {
             PlayerModel<AbstractClientPlayer> playerEntityModel = playerEntityRenderer.getModel();
             FormModel formModel = (FormModel) formRenderer.getGeoModel();
+            formRenderer.setPlayer(player, playerEntityModel.slim);
             ResourceLocation overlayTexture = formModel.getOverlayTextureResource(playerEntityModel.slim);
             ResourceLocation emissiveTexture = formModel.getEmissiveTextureResource(playerEntityModel.slim);
+            formRenderer.clearPlayer();
             boolean bl = playerEntityRenderer.isBodyVisible(player);
             boolean bl2 = !bl && !player.isInvisibleTo(Minecraft.getInstance().player);
             if (overlayTexture != null) {
@@ -277,6 +280,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
             if (geoBone == null) {
                 formModel.AnimationSystem.afterRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
                 matrices.popPose();
+                formRenderer.clearPlayer();
                 continue;
             }
             RenderType renderLayerNormal = RenderType.entityTranslucent(formModel.getTextureResource(formAnimatable));
@@ -302,6 +306,7 @@ public class FormRenderFeature <T extends Player, M extends HumanoidModel<T>, A 
                 arm.render(matrices, vertexConsumers.getBuffer(OverlayLayer), light, OverlayInt);
             }
             formModel.AnimationSystem.afterRenderFirstPerson(geoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+            formRenderer.clearPlayer();
         }
     }
 }

@@ -126,7 +126,7 @@ public class AltarCraftUIHandler extends RecipeBookMenu<RecipeInput, AltarRecipe
         ItemStack slotItem = slot.hasItem() ? slot.getItem() : ItemStack.EMPTY;
         ItemStack slotItemCopy = slotItem.copy();
         if (slotIndex >= 0 && slotIndex < 12) {
-            if (!this.moveItemStackTo(slotItem, 12, 47, slotIndex == 10)) {
+            if (!this.moveItemStackTo(slotItem, 12, 48, slotIndex == 11)) {
                 return ItemStack.EMPTY;
             }
             if (slotIndex == 0) {
@@ -172,6 +172,6 @@ public class AltarCraftUIHandler extends RecipeBookMenu<RecipeInput, AltarRecipe
 
     @Override
     public boolean stillValid(Player player) {
-        return stillValid(this.context, player, Blocks.CRAFTING_TABLE);
+        return this.altarBlockEntity.stillValid(player);
     }
 }

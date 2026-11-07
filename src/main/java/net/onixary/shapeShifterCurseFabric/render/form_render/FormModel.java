@@ -7,11 +7,13 @@ import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import net.onixary.shapeShifterCurseFabric.util.util.CachedDataMap;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 import software.bernie.geckolib.cache.object.GeoBone;
@@ -22,13 +24,13 @@ import java.util.*;
 @SuppressWarnings("removal")
 public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
-    public static HashMap<Player, Boolean> SlimMap = new HashMap<>();
+    public static CachedDataMap<UUID, Player, Boolean> SlimMap = new CachedDataMap<>(p -> false, Entity::getUUID);
 
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing.geo.json";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
     public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":animations/missing.animation.json";
 
-    public Player entity;
+    public @Nullable Player entity;
 
     public JsonObject modelJson;
 
@@ -253,7 +255,11 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public void setPlayer(Player player, boolean slim) {
         this.entity = player;
-        SlimMap.put(player, slim);
+        SlimMap.setA(player, slim);
+    }
+
+    public void __setPlayer(Player player) {
+        this.entity = player;
     }
 
     public boolean useSlim(boolean slim) {
@@ -486,6 +492,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
     @Override
     public ResourceLocation getModelResource(FormAnimatable animatable) {
         Player player = animatable.e;
+        if (player == null) {
+            return getModelResource(false);
+        }
         // Skin Model System Not Implemented
         // if (player != null) {
         //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
@@ -496,18 +505,24 @@ public class FormModel extends GeoModel<FormAnimatable> {
         //         }
         //     }
         // }
-        return getModelResource(SlimMap.getOrDefault(player, false));
+        return getModelResource(SlimMap.get(player));
     }
 
     @Override
     public ResourceLocation getTextureResource(FormAnimatable animatable) {
         Player player = animatable.e;
-        return getTextureResource(SlimMap.getOrDefault(player, false));
+        if (player == null) {
+            return getTextureResource(false);
+        }
+        return getTextureResource(SlimMap.get(player));
     }
 
     public ResourceLocation getFullbrightTextureResource(FormAnimatable animatable) {
         Player player = animatable.e;
-        return getFullBrightTextureResource(SlimMap.getOrDefault(player, false));
+        if (player == null) {
+            return getFullBrightTextureResource(false);
+        }
+        return getFullBrightTextureResource(SlimMap.get(player));
 
     }
 

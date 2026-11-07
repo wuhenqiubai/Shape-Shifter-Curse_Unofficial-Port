@@ -5,6 +5,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
@@ -35,7 +36,7 @@ public class XPCostType implements IFUSDrawableCostType<XPCostType> {
         }
         return Component.literal(String.valueOf(costObject.getAmount()))
                 .append(Component.translatable("gui.shape-shifter-curse.perk.cost_separator"))
-                .append(String.valueOf(player.totalExperience));
+                .append(String.valueOf(getTotalExperience(player.experienceLevel, Mth.floor(player.experienceProgress * (float) player.getXpNeededForNextLevel()))));
     }
 
     @Override
@@ -48,12 +49,28 @@ public class XPCostType implements IFUSDrawableCostType<XPCostType> {
                 throw new RuntimeException("CostType.canPay Player Argument In ServerSide Must NotNull");
             }
         }
-        return player.totalExperience >= costAmount;
+        return getTotalExperience(player.experienceLevel, Mth.floor(player.experienceProgress * (float) player.getXpNeededForNextLevel())) >= costAmount;
     }
 
     @Override
     public void pay(@NotNull ICost costObject, @NotNull Player player) {
         player.giveExperiencePoints(-costObject.getAmount());
+    }
+
+    // 还是用我很久之前写的代码吧 至少用到现在没炸过
+    public static int getTotalExperience(int level, int xp) {
+        int totalExp;
+        if (level <= 16) {
+            totalExp = level * level + 6 * level;
+        }
+        else if (level <= 31) {
+            totalExp = (int) (2.5 * level * level - 40.5 * level + 360);
+        }
+        else {
+            totalExp = (int) (4.5 * level * level - 162.5 * level + 2220);
+        }
+        int sum = totalExp + xp;
+        return sum < 0 ? totalExp : sum;
     }
 
     @Override

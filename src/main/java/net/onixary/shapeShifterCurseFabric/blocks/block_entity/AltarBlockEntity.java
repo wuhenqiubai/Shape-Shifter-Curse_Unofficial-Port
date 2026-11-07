@@ -257,12 +257,9 @@ public class AltarBlockEntity extends BaseContainerBlockEntity implements Worldl
             this.nowRecipeHolder = altarRecipe.get();
             this.totalProgress = this.nowRecipe.recipeTime();
             boolean fuelEnough = true;
+            boolean resume = this.nowRecipeHolder.id().equals(savedRecipe) && savedTotal == this.totalProgress;
             int requireFuel = nowRecipe.fuelUsage() * nowRecipe.recipeTime();
-            if (savedRecipe != null && savedRecipe.equals(this.nowRecipeHolder.id()) && savedTotal == this.totalProgress) {
-                int doneProgress = Math.max(0, Math.min(savedProgress, this.totalProgress));
-                requireFuel = nowRecipe.fuelUsage() * (this.totalProgress - doneProgress);
-            }
-            if (requireFuel > 0 && requireFuel <= maxFuel) {
+            if (resume || (requireFuel > 0 && requireFuel <= maxFuel)) {
                 if (this.fuelTime < requireFuel) {
                     fuelEnough = false;
                 }

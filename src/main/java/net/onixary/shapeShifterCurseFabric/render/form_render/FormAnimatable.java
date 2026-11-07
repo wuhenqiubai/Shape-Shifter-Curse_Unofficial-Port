@@ -4,6 +4,7 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
+import org.jetbrains.annotations.Nullable;
 import software.bernie.geckolib.animatable.GeoAnimatable;
 import software.bernie.geckolib.animatable.instance.AnimatableInstanceCache;
 import software.bernie.geckolib.animatable.instance.SingletonAnimatableInstanceCache;
@@ -21,7 +22,7 @@ public class FormAnimatable implements GeoAnimatable {
         }));
     }
 
-    public Player e;
+    public @Nullable Player e;
 
     public void setPlayer(Player e) {
         this.e = e;

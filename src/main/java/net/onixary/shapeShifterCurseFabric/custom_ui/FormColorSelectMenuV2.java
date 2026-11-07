@@ -1161,6 +1161,21 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
 
     @Override
     public void onClose() {
+        try {
+            ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepCustomSkin,  this.enableFormColorSystem); // 如果没进游戏时会发送失败 懒得做判断了 加一个Try
+        } catch (Exception ignored) {
+        }
+        this.saveDataToClient(true, true);
+        ShapeShifterCurseFabricClient.formColorData.writeToConfig();
+        if (this.parsetScreen != null && this.minecraft != null) {
+            this.minecraft.setScreen(this.parsetScreen);
+        } else {
+            super.onClose();
+        }
+    }
+
+    @Override
+    public void removed() {
         CleanColorSettingCache();
         if (this.isLockTempTextureSystem) {
             FormTextureUtils.useTempFormTexture = false;
@@ -1177,18 +1192,8 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
             FormTextureUtils.tempCustomSkinConfigOverrider = null;
             isLockTempConfigSystem = false;
         }
-        instance = null;
-        try {
-            ModPacketsS2C.sendUpdateCustomColor(this.getColorSetting(false), false, true, this.keepCustomSkin,  this.enableFormColorSystem); // 如果没进游戏时会发送失败 懒得做判断了 加一个Try
-        } catch (Exception ignored) {
-        }
-        this.saveDataToClient(true, true);
-        ShapeShifterCurseFabricClient.formColorData.writeToConfig();
-        if (this.parsetScreen != null && this.minecraft != null) {
-            this.minecraft.setScreen(this.parsetScreen);
-        } else {
-            super.onClose();
-        }
+        if (instance == this) instance = null;
+        super.removed();
     }
 
     @Override

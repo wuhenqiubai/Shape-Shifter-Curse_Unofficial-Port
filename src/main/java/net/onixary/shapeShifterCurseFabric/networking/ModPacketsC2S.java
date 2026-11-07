@@ -26,6 +26,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.TransformManager;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthServer;
+import net.onixary.shapeShifterCurseFabric.util.Verify.AuthUtils;
 
 import java.util.UUID;
 
@@ -262,7 +263,7 @@ public class ModPacketsC2S {
     }
 
     private static void receivePatronAuthFile(BytePayload payload, ServerPlayNetworking.Context ctx) {
-        byte[] data = payload.data().readByteArray();
+        byte[] data = payload.data().readByteArray(AuthUtils.MAX_AUTH_FILE_BYTES);
         if (data != null) {
             ctx.server().execute(() -> {
                 AuthServer.loadAuthFile(ctx.player(), new FriendlyByteBuf(Unpooled.wrappedBuffer(data)));
