@@ -6,6 +6,7 @@ import com.geckolib.constant.DataTickets;
 import com.geckolib.renderer.base.BoneSnapshots;
 import com.geckolib.renderer.base.GeoRenderState;
 import com.geckolib.renderer.base.RenderPassInfo;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
@@ -36,6 +37,7 @@ import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Quaternionf;
+import org.joml.Vector3f;
 // 26.1 的 GeckoLib 包名已由 software.bernie.geckolib 改为 com.geckolib（见文件顶部那组 import），
 // 故 1.21.11 侧的这组 software.bernie.* import 不适用，整块删除。
 
@@ -52,6 +54,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
     private static final boolean IS_FIRST_PERSON_MOD_LOADED = FabricLoader.getInstance().isModLoaded("firstperson");
     private static final boolean IRISInstalled = FabricLoader.getInstance().isModLoaded("iris");
     private static final boolean ImmediatelyFastInstalled = FabricLoader.getInstance().isModLoaded("immediatelyfast");
+    private static final Vector3f SSC_ARM_ORIGIN = new Vector3f(-0.43663f, -0.43706f, -0.36978f);
+    private static final Vector3f SSC_ARM_OFFSET = new Vector3f(0.16f, 0.015f, -0.01f);
 
     private static boolean isSlim(AbstractClientPlayer player) {
         return player.getSkin().model() == PlayerModelType.SLIM;
@@ -286,6 +290,10 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             matrices.pushPose();
             matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             matrices.translate(0, -1.51f, 0);
+            matrices.translate(SSC_ARM_ORIGIN.x, SSC_ARM_ORIGIN.y, SSC_ARM_ORIGIN.z);
+            org.joml.Matrix4f sscEyeToPose = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(new org.joml.Matrix4f(matrices.last().pose())).invert();
+            Vector3f sscPoseOffset = sscEyeToPose.transformDirection(new Vector3f(SSC_ARM_OFFSET));
+            matrices.translate(sscPoseOffset.x, sscPoseOffset.y, sscPoseOffset.z);
 
             submitArmPass(formRenderer, formAnimatable, matrices, submitNodeCollector, cameraState, light, partialTick,
                     FormRenderer.CHANNEL_NORMAL, player, armBoneName, armGeoBone, arm, sleeve, playerEntityRenderer);
