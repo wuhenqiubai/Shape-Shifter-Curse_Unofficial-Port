@@ -366,12 +366,7 @@ public class TrinketUtils {
                         if (stack.getItem() instanceof AccessoryItem && accessoryIO != AccessoryUtils.nowAccessoryMod) {
                             continue;
                         }
-                        AccessoryItem.SlotData data = null;
-                        if (slotPair.getA() == null) {
-                            data = new AccessoryItem.SlotData(ResourceLocation.fromNamespaceAndPath(ioName, slotPair.getB()), Index);
-                        } else {
-                            data = new AccessoryItem.SlotData(ResourceLocation.fromNamespaceAndPath(ioName, "%s/%s".formatted(slotPair.getA(), slotPair.getB())), Index);
-                        }
+                        AccessoryItem.SlotData data = AccessoryItem.slotDataOf(ioName, slotPair.getA(), slotPair.getB(), Index);
                         allAccessory.add(new Tuple<>(data, stack));
                         Index++;
                     }

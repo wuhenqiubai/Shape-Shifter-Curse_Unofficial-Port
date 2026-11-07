@@ -231,7 +231,11 @@ public class FormUtils {
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();
         PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
-        TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        try {
+            TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        } catch (Exception e) {
+            ShapeShifterCurseFabric.LOGGER.error("Failed to reapply accessory powers on form change: ", e);
+        }
         form.onApplyPowerEnd(player);
         AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);
         ModComponents.ORIGIN.get(player).sync();
@@ -256,7 +260,11 @@ public class FormUtils {
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();
         PerkUtils.loadAllPerk(player, PerkUtils.getPlayerNowPerkTreeID(player));
-        TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        try {
+            TrinketUtils.ReApplyAccessoryPowerOnPlayerFormChange(player);
+        } catch (Exception e) {
+            ShapeShifterCurseFabric.LOGGER.error("Failed to reapply accessory powers on form change: ", e);
+        }
         form.onApplyPowerEnd(player);
         // 停止Power动画 目前就蝙蝠用了
         AnimUtils.stopPowerAnim(player, AnimUtils.AnimationSendSideType.ONLY_SERVER);

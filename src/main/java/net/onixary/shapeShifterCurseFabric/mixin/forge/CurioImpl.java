@@ -1,6 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.mixin.forge;
 
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -21,7 +20,7 @@ public class CurioImpl implements ICurioItem {
 
     @Unique
     private AccessoryItem.SlotData getSlotData(SlotContext slot) {
-        return new AccessoryItem.SlotData(ResourceLocation.fromNamespaceAndPath("curios", slot.identifier()), slot.index());
+        return AccessoryItem.slotDataOf("curios", null, slot.identifier(), slot.index());
     }
 
     @Inject(method = "accessoryInit", at = @At("HEAD"))

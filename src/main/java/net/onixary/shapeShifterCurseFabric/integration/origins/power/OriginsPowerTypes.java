@@ -9,7 +9,6 @@ import io.github.apace100.apoli.util.NamespaceAlias;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
 import net.onixary.shapeShifterCurseFabric.integration.origins.Origins;
 
 @SuppressWarnings("unchecked")
@@ -25,46 +24,6 @@ public class OriginsPowerTypes {
 
     public static void register() {
         NamespaceAlias.addAlias("origins", "apoli");
-
-        for (var registry : new Registry[]{
-            ApoliRegistries.POWER_FACTORY,
-            ApoliRegistries.ENTITY_CONDITION,
-            ApoliRegistries.BIENTITY_CONDITION,
-            ApoliRegistries.ITEM_CONDITION,
-            ApoliRegistries.BLOCK_CONDITION,
-            ApoliRegistries.DAMAGE_CONDITION,
-            ApoliRegistries.FLUID_CONDITION,
-            ApoliRegistries.BIOME_CONDITION,
-            ApoliRegistries.ENTITY_ACTION,
-            ApoliRegistries.ITEM_ACTION,
-            ApoliRegistries.BLOCK_ACTION,
-            ApoliRegistries.BIENTITY_ACTION,
-        }) {
-            try {
-                var values = new java.util.ArrayList<>();
-                registry.forEach(values::add);
-                for (var value : values) {
-                    ResourceLocation apoliId = switch (value) {
-                        case io.github.apace100.apoli.power.factory.PowerFactory pf -> pf.getSerializerId();
-                        case io.github.apace100.apoli.power.factory.condition.ConditionFactory<?> cf -> cf.getSerializerId();
-                        case io.github.apace100.apoli.power.factory.action.ActionFactory<?> af -> af.getSerializerId();
-                        default -> null;
-                    };
-                    if (apoliId != null && "apoli".equals(apoliId.getNamespace())) {
-                        ResourceLocation originsId = Origins.identifier(apoliId.getPath());
-                        if (!registry.containsKey(originsId)) {
-                            Registry.register(registry, originsId, value);
-                        }
-                    }
-                }
-                Origins.LOGGER.info("Aliased {} apoli->origins types in registry", values.size());
-            } catch (Exception e) {
-                Origins.LOGGER.error("Failed to alias registry", e);
-            }
-            if (!ApoliRegistries.POWER_FACTORY.containsKey(Origins.identifier("multiple"))) {
-                Origins.LOGGER.warn("origins:multiple not found in POWER_FACTORY after alias!");
-            }
-        }
 
         register(new PowerFactory<>(Origins.identifier("action_on_callback"),
             new SerializableData()
