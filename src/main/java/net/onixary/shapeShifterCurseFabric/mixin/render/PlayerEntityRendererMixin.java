@@ -60,13 +60,22 @@ public abstract class PlayerEntityRendererMixin extends LivingEntityRenderer<Abs
         FormRenderFeature.rFPM_PartA(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
     }
 
-    @Inject(method = "renderHand", at = @At("RETURN"))
-    private void shape_shifter_curse$RenderArm_RETURN(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve, CallbackInfo ci) {
-        // 渲染变身模型
-        if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}  // 仅当玩家激活Mod后才进行修改
-        if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}  // 仅当启用自定义第一人称渲染时才进行修改
+    @Inject(method = "renderRightHand", at = @At("RETURN"))
+    private void shape_shifter_curse$rightHand_RETURN(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo ci) {
+        if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}
+        if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}
+        if (!ShapeShifterCurseFabric.clientConfig.ignoreNoRenderArmPower && PowerHolderComponent.hasPower(player, NoRenderArmPower.class)) {return;}
         PlayerRenderer realThis = (PlayerRenderer) (Object) this;
-        FormRenderFeature.rFPM_PartB(realThis, matrices, vertexConsumers, light, player, arm, sleeve);
+        FormRenderFeature.rFPM_PartB(realThis, matrices, vertexConsumers, light, player, realThis.getModel().rightArm, realThis.getModel().rightSleeve);
+    }
+
+    @Inject(method = "renderLeftHand", at = @At("RETURN"))
+    private void shape_shifter_curse$leftHand_RETURN(PoseStack matrices, MultiBufferSource vertexConsumers, int light, AbstractClientPlayer player, CallbackInfo ci) {
+        if (RegPlayerFormComponent.PLAYER_FORM.get(player).nowForm.equals(RegPlayerForms.ORIGINAL_BEFORE_ENABLE)) {return;}
+        if (!ShapeShifterCurseFabric.clientConfig.enableFormModelOnVanillaFirstPersonRender) {return;}
+        if (!ShapeShifterCurseFabric.clientConfig.ignoreNoRenderArmPower && PowerHolderComponent.hasPower(player, NoRenderArmPower.class)) {return;}
+        PlayerRenderer realThis = (PlayerRenderer) (Object) this;
+        FormRenderFeature.rFPM_PartB(realThis, matrices, vertexConsumers, light, player, realThis.getModel().leftArm, realThis.getModel().leftSleeve);
     }
 
     @Redirect(method = "renderHand", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/player/AbstractClientPlayer;getSkin()Lnet/minecraft/client/resources/PlayerSkin;"))
