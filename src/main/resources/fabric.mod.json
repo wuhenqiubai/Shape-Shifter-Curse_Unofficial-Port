@@ -82,9 +82,6 @@
 
   "environment": "*",
   "entrypoints": {
-    "preLaunch": [
-      "net.onixary.shapeShifterCurseFabric.PreLaunchCheck"
-    ],
     "main": [
       "net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric",
       "net.onixary.shapeShifterCurseFabric.integration.origins.Origins"

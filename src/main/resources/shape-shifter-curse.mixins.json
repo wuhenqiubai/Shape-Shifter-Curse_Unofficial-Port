@@ -35,6 +35,7 @@
     "ItemStackMixin",
     "LingeringPotionItemMixin",
     "LivingEntityBurnDamageMixin",
+    "LivingEntityDirtyAttributesMixin",
     "LivingEntityJumpMixin",
     "LivingEntityMixin",
     "LoginMixin",
