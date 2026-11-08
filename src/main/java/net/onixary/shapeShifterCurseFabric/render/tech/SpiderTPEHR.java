@@ -28,7 +28,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
 
 	    EntityRenderDispatcher ed = Minecraft.getInstance().getEntityRenderDispatcher();
 	    if (ed == null) return;
-	    AvatarRenderer eR = (AvatarRenderer) ed.getRenderer(player);
+	    AvatarRenderer eR = ed.getPlayerRenderer(player);
 	    if (eR == null) return;
         ModelPart body = ((PlayerModel)eR.getModel()).body;
         body.translateAndRotate(matrices);

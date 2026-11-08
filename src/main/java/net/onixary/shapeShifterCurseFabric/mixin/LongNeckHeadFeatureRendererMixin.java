@@ -43,7 +43,7 @@ public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState,
         if (player == null) {
             return;
         }
-        AvatarRenderer playerEntityRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+        AvatarRenderer playerEntityRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(player);
         FormRenderer renderer = FormRenderUtils.searchFirstRenderer(player, formRenderer -> {
             FormModel formModel = formRenderer.realModel;
             if (formModel == null) {

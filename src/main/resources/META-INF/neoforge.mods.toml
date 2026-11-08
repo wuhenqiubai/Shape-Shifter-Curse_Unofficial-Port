@@ -16,14 +16,14 @@ description='''An unofficial port of the mod that allows you to gradually transf
 [[dependencies."shape_shifter_curse_unofficial"]]
 modId="neoforge"
 type="required"
-versionRange="[26.1.2.0,)"
+versionRange="[26.1,26.2)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies."shape_shifter_curse_unofficial"]]
 modId="minecraft"
 type="required"
-versionRange="[26.1.2,)"
+versionRange="[26.1,26.2)"
 ordering="NONE"
 side="BOTH"
 
