@@ -10,7 +10,7 @@
 		"description": {
 			"translate": "advancements.shape-shifter-curse.on_enable_mod.description"
 		},
-		"background": "shape-shifter-curse:textures/gui/advancements/backgrounds/shape_shifter_curse.png",
+		"background": "shape-shifter-curse:gui/advancements/backgrounds/shape_shifter_curse",
 		"frame": "task",
 		"show_toast": true,
 		"announce_to_chat": true,
