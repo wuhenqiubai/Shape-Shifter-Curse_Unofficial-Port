@@ -65,7 +65,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         if (!(entity instanceof AbstractClientPlayer player)) return;
         if (player.isInvisible() || player.isSpectator()) return;
         if (!(getParentModel() instanceof PlayerModel playerModel)) return;
-        AvatarRenderer avatarRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+        AvatarRenderer avatarRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(player);
         boolean slim = isSlim(player);
 
         boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;

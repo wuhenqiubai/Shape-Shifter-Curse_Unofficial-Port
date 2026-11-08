@@ -142,7 +142,7 @@ public class CustomFeralItemRenderer {
 		if (this.client.player == null) {
 			return;
 		}
-		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher.<AbstractClientPlayer>getRenderer(this.client.player);
+		AvatarRenderer playerEntityRenderer = this.entityRenderDispatcher.getPlayerRenderer(this.client.player);
 		matrices.pushPose();
 		float f = arm == HumanoidArm.RIGHT ? 1.0F : -1.0F;
 		matrices.mulPose(Axis.YP.rotationDegrees(92.0F));
@@ -269,8 +269,7 @@ public class CustomFeralItemRenderer {
 		matrices.mulPose(Axis.XP.rotationDegrees(200.0F));
 		matrices.mulPose(Axis.YP.rotationDegrees(f * -135.0F));
 		matrices.translate(f * 5.6F, 0.0F, 0.0F);
-		AvatarRenderer playerEntityRenderer = (AvatarRenderer)this.entityRenderDispatcher
-			.<AbstractClientPlayer>getRenderer(abstractClientPlayerEntity);
+		AvatarRenderer playerEntityRenderer = this.entityRenderDispatcher.getPlayerRenderer(abstractClientPlayerEntity);
 		if (bl) {
 			playerEntityRenderer.renderRightHand(matrices, vertexConsumers, light,
 					abstractClientPlayerEntity.getSkin().body().texturePath(), false);

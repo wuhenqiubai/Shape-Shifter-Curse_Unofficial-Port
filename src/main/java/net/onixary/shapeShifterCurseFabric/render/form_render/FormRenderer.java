@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.render.form_render;
 
 import com.google.gson.JsonObject;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
@@ -64,7 +65,9 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRen
             Player player = renderPassInfo.getGeckolibData(TICKET_PLAYER);
             if (player == null) player = model.entity;
             if (player == null || model.AnimationSystem == null) return;
-            AvatarRenderer renderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
+            AvatarRenderer renderer = player instanceof AbstractClientPlayer clientPlayer
+                    ? Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(clientPlayer)
+                    : (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             float partialTick = renderPassInfo.renderState().getPartialTick();
             float limbAngle = renderPassInfo.getOrDefaultGeckolibData(TICKET_LIMB_ANGLE, 0f);
             float limbDistance = renderPassInfo.getOrDefaultGeckolibData(TICKET_LIMB_DISTANCE, 0f);
