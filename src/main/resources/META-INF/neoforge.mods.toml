@@ -1,0 +1,35 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[properties]
+"connector:placeholder"=true
+
+[[mods]]
+modId="shape_shifter_curse_unofficial"
+version="${version}"
+displayName="Shape Shifter Curse-Unofficial Port"
+logoFile="assets/shape-shifter-curse/icon.png"
+authors="onixary, XuHaoNan, wuhenqiubai"
+description='''An unofficial port of the mod that allows you to gradually transform into different vanilla creatures, each with unique models and animations.'''
+
+[[dependencies."shape_shifter_curse_unofficial"]]
+modId="neoforge"
+type="required"
+versionRange="[26.1.2.0,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies."shape_shifter_curse_unofficial"]]
+modId="minecraft"
+type="required"
+versionRange="[26.1.2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies."shape_shifter_curse_unofficial"]]
+modId="connector"
+type="required"
+versionRange="*"
+ordering="NONE"
+side="BOTH"
