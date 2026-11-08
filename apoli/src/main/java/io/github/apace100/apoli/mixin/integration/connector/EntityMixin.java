@@ -172,6 +172,9 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
         if(tag == null || fluidOnEyes == null) {
             return false;
         }
+        if(((Entity)(Object)this).isEyeInFluid(tag)) {
+            return true;
+        }
         if(fluidOnEyes.contains(tag)) {
             return true;
         }
@@ -182,6 +185,10 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
     public double getFluidHeightLoosely(TagKey<Fluid> tag) {
         if(tag == null) {
             return 0;
+        }
+        double height = ((Entity)(Object)this).getFluidHeight(tag);
+        if(height > 0) {
+            return height;
         }
         if(fluidHeight.containsKey(tag)) {
             return fluidHeight.getDouble(tag);
