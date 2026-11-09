@@ -11,6 +11,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -24,6 +25,9 @@ import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public final class AltarRecipeCheck {
     private static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("test", "altar");
@@ -43,6 +47,12 @@ public final class AltarRecipeCheck {
 
     private static AltarRecipeInput input(Inventory inventory) {
         return new AltarRecipeInput(inventory.getItems());
+    }
+
+    private static AltarRecipeInput input(AltarBlockEntity altar) {
+        List<ItemStack> items = new ArrayList<>(AltarRecipeInput.SIZE);
+        for (int slot = 0; slot < AltarRecipeInput.SIZE; slot++) items.add(altar.getItem(slot));
+        return new AltarRecipeInput(items, altar);
     }
 
     private static void check(boolean value, String message) {
@@ -67,6 +77,30 @@ public final class AltarRecipeCheck {
                  "catalyst":{"item":"minecraft:diamond"},
                  "result":{"id":"minecraft:emerald"},"time":%d,"fuel_cost":%d}
                 """.formatted(seconds * 20, fuelPerTick));
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void morphscaleCatalyst(GameTestHelper context) {
+        AltarBlockEntity altar = new AltarBlockEntity(BlockPos.ZERO, RegCustomBlock.ALTAR_BLOCK.defaultBlockState());
+        altar.setLevel(context.getLevel());
+        altar.setItem(0, new ItemStack(Items.DIAMOND_CHESTPLATE));
+        var recipe = RegBuiltinAlterRecipe.MorphScaleArmorRecipe;
+        check(!recipe.matches(input(altar), context.getLevel()), "Morphscale upgrade requires its catalyst");
+        altar.setItem(9, new ItemStack(Items.NETHER_STAR));
+        check(!recipe.matches(input(altar), context.getLevel()), "A nether star no longer substitutes for the core");
+        altar.setItem(9, new ItemStack(RegCustomItem.MORPHSCALE_CATALYST_CORE));
+        check(recipe.matches(input(altar), context.getLevel()), "New core enables equipment morphscale upgrades");
+        ItemStack output = recipe.assemble(input(altar), context.getLevel().registryAccess());
+        var outputData = output.get(DataComponents.CUSTOM_DATA);
+        check(output.is(Items.DIAMOND_CHESTPLATE) && outputData != null && outputData.copyTag().getBoolean(
+                net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition.IsMorphScaleArmorTagName),
+                "Output retains equipment and gains the morphscale flag");
+        recipe.consumeInputs(altar);
+        check(altar.getItem(0).isEmpty(), "Equipment input consumed");
+        check(altar.getItem(9).is(RegCustomItem.MORPHSCALE_CATALYST_CORE), "Morphscale catalyst retained");
+        altar.setItem(0, output);
+        check(!recipe.matches(input(altar), context.getLevel()), "Already upgraded equipment is rejected");
+        context.succeed();
     }
 
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)

@@ -45,7 +45,6 @@ public class RegCustomItem {
     public static final Item MOONDUST_MATRIX = register("moondust_matrix", new MoonDustMatrix(new Item.Properties()));
     // morphscale armor
     public static final Item MORPHSCALE_CORE = register("morphscale_core", new Item(new Item.Properties()));
-    public static final Item SUPER_MORPHSCALE_CORE = register("super_morphscale_core", new SuperMorphScaleCore(new Item.Properties().durability(64 * SuperMorphScaleCore.damagePerItem).rarity(Rarity.EPIC)));
     public static final Item MORPHSCALE_HEADRING = register("morphscale_headring", new MorphScaleArmor(ArmorItem.Type.HELMET));
     public static final Item MORPHSCALE_VEST = register("morphscale_vest", new MorphScaleArmor(ArmorItem.Type.CHESTPLATE));
     public static final Item MORPHSCALE_CUISH = register("morphscale_cuish", new MorphScaleArmor(ArmorItem.Type.LEGGINGS));
@@ -99,6 +98,7 @@ public class RegCustomItem {
     public static final Item FOXFIRE_CATALYST_CORE = register("foxfire_catalyst_core", new CatalystCoreItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
     public static final Item SURGE_CATALYST_CORE = register("surge_catalyst_core", new CatalystCoreItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
     public static final Item DUNE_CATALYST_CORE = register("dune_catalyst_core", new CatalystCoreItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
+    public static final Item MORPHSCALE_CATALYST_CORE = register("morphscale_catalyst_core", new CatalystCoreItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
     public static final Item NIGHT_CATALYST_CORE = register("night_catalyst_core", new CatalystCoreItem(new Item.Properties().stacksTo(1).rarity(Rarity.RARE)));
 
     public static final Item TRANSFORMATIVE_AXOLOTL_BUCKET = register("transformative_axolotl_bucket", new MobBucketItem(ShapeShifterCurseFabric.T_AXOLOTL, Fluids.WATER, SoundEvents.BUCKET_EMPTY_AXOLOTL, (new Item.Properties()).stacksTo(1)));
@@ -136,7 +136,6 @@ public class RegCustomItem {
                 entries.accept(UNTREATED_MOONDUST);
                 entries.accept(MOONDUST_MATRIX);
                 entries.accept(MORPHSCALE_CORE);
-                entries.accept(SUPER_MORPHSCALE_CORE);
                 entries.accept(INHIBITOR);
                 entries.accept(POWERFUL_INHIBITOR);
                 entries.accept(CREATIVE_INHIBITOR);
@@ -188,6 +187,7 @@ public class RegCustomItem {
                 entries.accept(SURGE_CATALYST_CORE);
                 entries.accept(DUNE_CATALYST_CORE);
                 entries.accept(NIGHT_CATALYST_CORE);
+                entries.accept(MORPHSCALE_CATALYST_CORE);
                 entries.accept(CUSTOM_TRINKET);
                 entries.accept(FIRE_CHARM_PAPER);
                 entries.accept(TRANSFORMATIVE_AXOLOTL_BUCKET);

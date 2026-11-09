@@ -5522,6 +5522,7 @@
   "gui.shape-shifter-curse.perk.unavailable": [
     "Unavailable"
   ],
+  "gui.shape_shifter_curse.altar.remaining_moondust": "Remaining Moondust fuel: %s / %s",
   "gui.shape_shifter_curse.category.altar_shaped": "Shape Shifter Altar Shaped Crafting",
   "gui.shape_shifter_curse.category.altar_shapeless": "Shape Shifter Altar Shapeless Crafting",
   "gui.shape_shifter_curse.category.web_compostable": "Digesting",
@@ -6114,6 +6115,12 @@
   "item.shape-shifter-curse.morphscale_armor.tooltip": [
     "The moondust magic infused in these armors automatically adapts to your form"
   ],
+  "item.shape-shifter-curse.morphscale_catalyst_core": [
+    "Morphscale Catalyst Core"
+  ],
+  "item.shape-shifter-curse.morphscale_catalyst_core.tooltip": [
+    "Each time you observe it, its shape differs from last time"
+  ],
   "item.shape-shifter-curse.morphscale_core": [
     "Morphscale Core"
   ],
@@ -6451,7 +6458,7 @@
           "text": ". Cooldown: "
         },
         {
-          "text": "5 seconds",
+          "text": "1 second",
           "color": "#5555ff"
         },
         {
@@ -8089,7 +8096,7 @@
           "text": ". Cooldown: "
         },
         {
-          "text": "5 seconds",
+          "text": "1 second",
           "color": "#5555ff"
         },
         {

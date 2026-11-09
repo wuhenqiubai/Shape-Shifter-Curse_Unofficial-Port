@@ -7,6 +7,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
 public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
@@ -51,7 +54,23 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
         super.render(context, mouseX, mouseY, delta);
         this.drawProcess(context);
         this.drawFuel(context);
-        this.renderTooltip(context, mouseX, mouseY);
+        if (isOverFuelBar(mouseX - baseX, mouseY - baseY)) {
+            context.renderTooltip(this.font, Component.translatable(
+                    "gui.shape_shifter_curse.altar.remaining_moondust",
+                    formatMoondust(this.menu.getNowFuel()), formatMoondust(AltarBlockEntity.maxFuel)), mouseX, mouseY);
+        } else {
+            this.renderTooltip(context, mouseX, mouseY);
+        }
+    }
+
+    static boolean isOverFuelBar(int localX, int localY) {
+        return localX >= FUEL_BAR_ORIG_X && localX < FUEL_BAR_ORIG_X + FUEL_BAR_W
+                && localY >= FUEL_BAR_ORIG_Y && localY < FUEL_BAR_ORIG_Y + FUEL_BAR_H;
+    }
+
+    static String formatMoondust(int fuel) {
+        return BigDecimal.valueOf(fuel).divide(BigDecimal.valueOf(800), 2, RoundingMode.HALF_UP)
+                .stripTrailingZeros().toPlainString();
     }
 
     @Override

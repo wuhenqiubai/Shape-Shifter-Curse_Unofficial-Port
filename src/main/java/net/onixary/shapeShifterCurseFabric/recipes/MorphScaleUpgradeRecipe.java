@@ -2,6 +2,7 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -12,9 +13,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.IsMorphScaleItemCondition;
-import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.items.tools.SuperMorphScaleCore;
 import org.jetbrains.annotations.NotNull;
 
@@ -54,10 +55,10 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     }
 
     @Override
-    public @NotNull ItemStack assemble(net.minecraft.world.item.crafting.SmithingRecipeInput input, net.minecraft.core.HolderLookup.Provider lookup) {
-	    ItemStack coreStack = input.template();
-        if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
-	        ItemStack itemStack = input.base();
+    public @NotNull ItemStack assemble(SmithingRecipeInput input, HolderLookup.Provider lookup) {
+        ItemStack coreStack = input.getItem(0);
+        if (coreStack.getItem() instanceof SuperMorphScaleCore) {
+            ItemStack itemStack = input.getItem(1);
             int multiplier = SuperMorphScaleCore.getUpgradeDamageMultiplier(itemStack);
             int canCraftCount = SuperMorphScaleCore.getMaxUseCount(coreStack, multiplier);
             if (this.base.test(itemStack) && canCraftCount > 0) {
@@ -83,7 +84,7 @@ public class MorphScaleUpgradeRecipe extends UpgradeRecipe {
     @Override
     public void onTakeOutput(SmithingMenu screenHandler, Player player, ItemStack stack) {
         ItemStack coreStack = screenHandler.inputSlots.getItem(0);
-        if (coreStack.is(RegCustomItem.SUPER_MORPHSCALE_CORE)) {
+        if (coreStack.getItem() instanceof SuperMorphScaleCore) {
             ItemStack baseStack = screenHandler.inputSlots.getItem(1);
             int multiplier = SuperMorphScaleCore.getUpgradeDamageMultiplier(baseStack);
             SuperMorphScaleCore.damageItemAfterUpgrade(coreStack, multiplier);

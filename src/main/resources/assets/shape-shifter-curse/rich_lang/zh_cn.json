@@ -7961,6 +7961,7 @@
   "gui.shape-shifter-curse.perk.unavailable": [
     "暂不可获取"
   ],
+  "gui.shape_shifter_curse.altar.remaining_moondust": "剩余月尘燃料：%s / %s",
   "gui.shape_shifter_curse.category.altar_shaped": "幻形祭坛有序合成",
   "gui.shape_shifter_curse.category.altar_shapeless": "幻形祭坛无序合成",
   "gui.shape_shifter_curse.category.web_compostable": "消化",
@@ -8553,6 +8554,12 @@
   "item.shape-shifter-curse.morphscale_armor.tooltip": [
     "这些护甲中融入的月尘魔法可以自动适应你的形态"
   ],
+  "item.shape-shifter-curse.morphscale_catalyst_core": [
+    "塑形催化核心"
+  ],
+  "item.shape-shifter-curse.morphscale_catalyst_core.tooltip": [
+    "每次你观察它时，它的形状都与你上一次看到的有所不同"
+  ],
   "item.shape-shifter-curse.morphscale_core": [
     "塑形核心"
   ],
@@ -8894,7 +8901,7 @@
           "text": "。冷却"
         },
         {
-          "text": "5秒",
+          "text": "1秒",
           "color": "#5555ff"
         },
         {
@@ -10549,7 +10556,7 @@
           "text": "。冷却"
         },
         {
-          "text": "5秒",
+          "text": "1秒",
           "color": "#5555ff"
         },
         {
