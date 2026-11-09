@@ -83,7 +83,7 @@
   "block.shape-shifter-curse.temp_web_bridge": "Bridge Cobweb",
   "block.shape-shifter-curse.web_composter": "Nutrient Dissolve Cocoon",
 
-  "category.shape-shifter-curse": "Shape Shifter Curse",
+  "key.category.shape-shifter-curse.keys": "Shape Shifter Curse",
 
   "codex.desc.appearance_0": "Magical resonance with creatures causes physical changes. At this stage, a Golden Apple can completely reverse them...",
   "codex.desc.appearance_1": "Intensified magic further alters your body. You sense it seeking new equilibrium - completely different from your original self.\nUsing a Golden Apple before progression might be wise...",
@@ -395,7 +395,7 @@
   "entity.shape-shifter-curse.t_spider": "Cursed Spider",
   "entity.shape-shifter-curse.t_wolf": "Cursed Wandering Jackal Wraith",
 
-  "gamerule.category.shape-shifter-curse.ssc": "Shape Shifter Curse",
+  "gamerule.key.category.shape-shifter-curse.keys.ssc": "Shape Shifter Curse",
   "gamerule.category.ssc_gamerule": "Shape Shifter Curse",
   "gamerule.sscUseInitialForm": "Use SSC custom initial form",
   "gamerule.sscUseInitialForm.description": "When enabled, players who have not chosen a form will immediately transform into the server-configured initial form on join",
