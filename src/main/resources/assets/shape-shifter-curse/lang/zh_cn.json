@@ -81,7 +81,7 @@
   "block.shape-shifter-curse.moondust_crystal_grit": "月尘晶砾",
   "block.shape-shifter-curse.temp_web_bridge": "桥梁蛛丝",
   "block.shape-shifter-curse.web_composter": "液化茧体",
-  "category.shape-shifter-curse": "幻形者诅咒",
+  "key.category.shape-shifter-curse.keys": "幻形者诅咒",
   "codex.desc.appearance_0": "由于你体内的魔法与其他生物的共鸣，你的身体出现了一些变化。在这一阶段，一个金苹果便足以完全将其逆转…",
   "codex.desc.appearance_1": "被激化的魔法进一步改变了你的身体。你觉察到它正在试图达到某种新的稳态，某种..和原来的你完全不同的状态。\n也许在其进入到下一个阶段之前使用金苹果逆转它是个好主意...",
   "codex.desc.appearance_2": "你体内的魔法几乎彻底改变了你。它进入了新的稳定状态，即使是金苹果也无济于补了…\n除非有某些“更加强大”的影响可以让它再次流动…",
