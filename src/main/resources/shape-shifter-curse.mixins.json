@@ -91,7 +91,8 @@
     "mob.VillagerHostilesSensorMixin",
     "mob.WitchEntityMixin",
     "projectile.EntitySnowballTransformMixin",
-    "projectile.PotionEntityMixin"
+    "projectile.PotionEntityMixin",
+    "integration.JEI_Utils_Implement"
   ],
   "client": [
     "AdjustItemHoldFeatureRendererMixin",
