@@ -1,10 +1,12 @@
 package net.onixary.shapeShifterCurseFabric.mixin.integration;
 
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.recipe.*;
+import mezz.jei.api.recipe.IFocus;
+import mezz.jei.api.recipe.IFocusFactory;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.runtime.IJeiRuntime;
 import mezz.jei.api.runtime.IRecipesGui;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.integration.jei.JEI_Utils;
 import net.onixary.shapeShifterCurseFabric.integration.jei.SSC_JEI_Plugin;
