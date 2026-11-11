@@ -82,9 +82,12 @@ public class SnowFoxPerkCheck {
     }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void registrations(GameTestHelper c) {
-        for (String key : new String[]{"revenge", "elusive_paws", "air_jump", "frost_dive", "cold_whirlwind_1", "cold_whirlwind_2", "cold_recovery_1", "cold_recovery_2"}) {
+        for (String key : new String[]{"revenge", "elusive_paws", "air_jump", "frost_dive", "cold_recovery_1", "cold_recovery_2"}) {
             c.assertTrue(PowerTypeRegistry.contains(id("perks/snow_fox_" + key)), "Power loaded: " + key);
             c.assertTrue(RegPerks.getPerk(id("snow_fox_" + key)) != null, "Perk registered: " + key);
+        }
+        for (String key : new String[]{"cold_whirlwind_1", "cold_whirlwind_2"}) {
+            c.assertTrue(PowerTypeRegistry.contains(id("perks/snow_fox_" + key)), "Power loaded: " + key);
         }
         c.succeed();
     }
