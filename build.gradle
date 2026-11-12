@@ -223,6 +223,8 @@ dependencies {
     modImplementation "maven.modrinth:jei:19.51.0.418-fabric,1.21.1"
     // 调用频率有点高 所以直接项目依赖吧
     modImplementation "maven.modrinth:carry-on:2.2.6-fabric,1.21.1"
+    // Accessories
+    modCompileOnly "maven.modrinth:accessories:1.1.0-beta.54+1.21.1-fabric"
 }
 
 processResources {

@@ -74,6 +74,12 @@
       "contact": {
         "github": "https://github.com/Sh1roCu"
       }
+    },
+    {
+      "name": "bedulge-sub",
+      "contact": {
+        "github": "https://github.com/bedulge-sub"
+      }
     }
   ],
 
@@ -139,6 +145,12 @@
         "priority": 2000,
         "depends": [
           "curios"
+        ]
+      },
+      "accessories": {
+        "priority": 3000,
+        "depends": [
+          "accessories"
         ]
       }
     }
