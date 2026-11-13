@@ -1,7 +1,7 @@
 <h1 align="center">幻形者诅咒非官方版 Minecraft Java 版 Mod</h1>
 
 <p align="center">
-  <img width="720" alt="ssc_title_new" src="https://github.com/user-attachments/assets/339da901-17be-4fe6-ba83-586a01e22666" />
+  <img width="1920" height="1080" alt="model" src="https://github.com/user-attachments/assets/bcd867ba-2377-48de-8f78-8975f5b8d67b" />
 </p>
 
 <p align="center">
