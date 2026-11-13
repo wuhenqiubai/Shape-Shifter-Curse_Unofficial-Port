@@ -100,7 +100,7 @@ public class AdditionalEntityConditions {
                 ShapeShifterCurseFabric.identifier("is_spectator"),
                 new SerializableData(),
                 (data, e) -> {
-                    if (e instanceof PlayerEntity player) {
+                    if (e instanceof Player player) {
                         return player.isSpectator();
                     }
                     return false;

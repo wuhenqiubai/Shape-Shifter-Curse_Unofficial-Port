@@ -1,19 +1,18 @@
-<h1 align="center">幻形者诅咒 Minecraft Java 版 Mod</h1>
+<h1 align="center">幻形者诅咒非官方版 Minecraft Java 版 Mod</h1>
 
 <p align="center">
   <img width="720" alt="ssc_title_new" src="https://github.com/user-attachments/assets/339da901-17be-4fe6-ba83-586a01e22666" />
 </p>
 
 <p align="center">
-  <a href="https://modrinth.com/mod/shape-shifter-curse"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
-  <a href="https://www.curseforge.com/minecraft/mc-mods/shape-shifter-curse"><img alt="CurseForge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg"></a>
+  <a href="https://modrinth.com/mod/shape-shifter-curse-unofficial-port"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
 </p>
 
 <p align="center">
   <a href="README.md">English</a> | 简体中文
 </p>
 
-幻形者诅咒mod的Github仓库，适用于Fabric端
+幻形者诅咒非官方版mod的Github仓库，适用于Fabric端，1.21.1/26.1版也适用于信雅互联
 
 mod正在持续开发中。由于我只是业余时间开发，更新可能比较慢
 

@@ -1,37 +1,25 @@
-<h1 align="center">Shape Shifter Curse Mod for Minecraft Java version</h1>
+<h1 align="center">Shape Shifter Curse-Unofficial Port Mod for Minecraft Java version</h1>
 
 <p align="center">
   <img width="720" alt="ssc_title_new" src="https://github.com/user-attachments/assets/339da901-17be-4fe6-ba83-586a01e22666" />
 </p>
 
 <p align="center">
-  <a href="https://modrinth.com/mod/shape-shifter-curse"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
-  <a href="https://www.curseforge.com/minecraft/mc-mods/shape-shifter-curse"><img alt="CurseForge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg"></a>
+  <a href="https://modrinth.com/mod/shape-shifter-curse-unofficial-port"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
 </p>
 
 <p align="center">
   English | <a href="README_zh_cn.md">简体中文</a>
 </p>
 
-GitHub repository for the mod Shape Shifter Curse, created for Fabric
+GitHub repository for the mod Shape Shifter Curse-Unofficial Port, created for Fabric
 
-## **幻形者诅咒非官方版 (Shape-Shifter-Curse_Unofficial-Port)**
-- 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
-- 原作者：[onixary](https://github.com/onixary)
-- 许可证：翻原作者仓库去吧，反正遵循原项目协议，保留所有版权声明。
-> 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
-> 因为频繁合并上游commit，并同步进行bugfix，所以比官方提早发布内容，但并不代表这是官方的想法。
+This mod is under active development. As I'm only working on it during my spare time, updates may be slow
 
-  ---
+If you want to create custom forms using data packs and resource packs, please check the [wiki](https://ssc-wiki.readthedocs.io/en/latest/) here
 
-  | MC版本 | 更新状态 | 备注 |
-  |---|---|---|
-  | <1.21 | 无计划 | 无降级计划 |
-  | 1.21.1FC/Connector | 活跃 | 正式版本，跟随官方版本更新 |
-  | 1.21.2 ~ 1.21.10 | 无计划 | 无支持计划 |
-  | 1.21.11FC | 活跃 | 跟随1.21.1分支更新 |
-  | 26.1FC/Connector | 活跃 | 跟随1.21.11分支更新 |
-  | 26.2 | 计划中 | 暂无计划 |
+This mod is open-source and free. Do not trust any third-party channels that charge for downloads
+
 ## Form Roadmap
 
 ### Progressive Forms
@@ -106,4 +94,4 @@ Of course, if you want a challenge, you could still transform into an SP form an
 - Avali chatter: [Avali sounds by Nefumi](https://steamcommunity.com/sharedfiles/filedetails/?id=3164757879) — custom permission: free, no monetization, credit and source link required. See [third-party notices](THIRD-PARTY-NOTICES.md).
 - Third-party code and assets: their upstream licenses, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
----
+See [LICENSING.md](LICENSING.md) for the exact list of paths covered by each license.
