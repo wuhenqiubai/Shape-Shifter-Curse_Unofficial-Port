@@ -94,6 +94,7 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
         List<LivingEntity> targets = entity.level().getEntitiesOfClass(LivingEntity.class, box, e -> e != entity);
         double radiusSq = pullRadius * pullRadius;
         for (LivingEntity target : targets) {
+            if (!target.isAlive() || target.isRemoved() || target.isSpectator()) continue;
             if (target.distanceToSqr(center) > radiusSq) continue;
             if (entityCondition != null && !entityCondition.test(new Tuple<>(entity, target))) continue;
             Vec3 direction = center.subtract(target.position());

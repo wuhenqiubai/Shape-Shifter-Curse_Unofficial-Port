@@ -1,7 +1,19 @@
+<h1 align="center">Shape Shifter Curse Mod for Minecraft Java version</h1>
 
-# 感谢 [onixary](https://github.com/onixary) 与 [xu233333](https://github.com/xu233333) 开发了这个优秀的模组！本项目仅为适配与修复维护，所有核心功能版权归原作者所有。
-# 本Mod将于2026/8/22开始进入随机停更状态，因为我的在校时间长，缺少时间进行开发，但仍然欢迎PR和提交Issue。
-# This mod will be randomly suspended starting August 22, 2026, due to my long hours at school and lack of time for development. However, pull requests and issue submissions are still welcome.
+<p align="center">
+  <img width="720" alt="ssc_title_new" src="https://github.com/user-attachments/assets/339da901-17be-4fe6-ba83-586a01e22666" />
+</p>
+
+<p align="center">
+  <a href="https://modrinth.com/mod/shape-shifter-curse"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
+  <a href="https://www.curseforge.com/minecraft/mc-mods/shape-shifter-curse"><img alt="CurseForge" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/curseforge_vector.svg"></a>
+</p>
+
+<p align="center">
+  English | <a href="README_zh_cn.md">简体中文</a>
+</p>
+
+GitHub repository for the mod Shape Shifter Curse, created for Fabric
 
 ## **幻形者诅咒非官方版 (Shape-Shifter-Curse_Unofficial-Port)**
 - 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
@@ -18,8 +30,73 @@
   | 1.21.1FC/Connector | 活跃 | 正式版本，跟随官方版本更新 |
   | 1.21.2 ~ 1.21.10 | 无计划 | 无支持计划 |
   | 1.21.11FC | 活跃 | 跟随1.21.1分支更新 |
-  | 26.1FC | 活跃 | 跟随1.21.11分支更新 |
-  | 26.2 | 计划中 | 在26.1发布后作计划 |
+  | 26.1FC/Connector | 活跃 | 跟随1.21.11分支更新 |
+  | 26.2 | 计划中 | 暂无计划 |
+## Form Roadmap
+
+### Progressive Forms
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Ocelot Form:**<br>
+  A raw-meat-eating hunter that can climb and sweep its claws through prey, but burns through hunger quickly.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Bat Form:**<br>
+  A nocturnal creature that feeds on grains, fruit, and vegetables. It can see in the dark, descend slowly, glide, cling to blocks, and hang upside down, but becomes severely weakened by sunlight.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Axolotl Form:**<br>
+  An amphibian with abundant health and regenerative abilities. It moves nimbly through water and currents, but must stay moist at all times.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Familiar Fox Form:**<br>
+  A creature transformed by magic from elsewhere. It keeps company with witches and illagers and feeds on the energy of other creatures.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Snow Fox Form:**<br>
+  A predator that draws on icy magic, attacking with leaps and empowered snowballs. It bounds swiftly through its surroundings, but is extremely vulnerable to fire.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Jackal/Anubis Wolf Form:**<br>
+  A pack leader that calls forth wolf spirits to fight together and harnesses Wither as its own strength.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Spider Form:**<br>
+  A web-spinner that reshapes the terrain with specialized silk projectiles and cobwebs, creating routes for swift movement and traps for enemies.
+
+- ![In Development](https://img.shields.io/badge/In%20Development-0969da?style=flat-square) **???:**<br>
+  Something entirely new…?
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Bee Form:**<br>
+  A grower whose core mechanics revolve around flowers, pollination, and colored pigments.
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **???**
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **???**
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Ender Dragon Form:**<br>
+  A milestone form with **unique mechanics that will reshape SSC’s existing gameplay**. (Addon creators, the Ender Dragon is already spoken for!)
+
+### Special (SP) Forms
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Allay Form:**<br>
+  An airborne spirit that eats nothing but amethyst shards. Frail yet adept with a bow, it can drain health from its targets with arrows.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Feral Cat Form:**<br>
+  A four-legged animal immune to fall damage, with relatively modest advantages and drawbacks.
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Phantom Form?**
+
+#### ![In Development](https://img.shields.io/badge/In%20Development-0969da?style=flat-square) SP Form System Rework:
+
+SP forms currently do not stand out much. What if they offered more extreme advantages and penalties, and there were a way to temporarily switch from any form into an SP form?
+
+Of course, if you want a challenge, you could still transform into an SP form and try to survive as one!
+
+### Subforms
+
+- **Snow Fox Form**
+  - ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Marbled Polecat Form:**<br>
+    A nimble hunter with a long, slender body and a remarkably flexible neck.
+
+- **Bat Form**
+  - ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Avali Form:**<br>
+    An alien raptor from another plane of existence🍐. What could have brought them here?
+
+## License
 
 - Source code: [MIT License](LICENSE.txt)
 - Media assets (3D models, textures, animations, sounds, fonts, translations):
@@ -30,33 +107,3 @@
 - Third-party code and assets: their upstream licenses, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
 
 ---
-
-## 非官方维护声明
-
-**本分支是社区维护的 1.21.1 移植版本，非官方发布。**
-
-- 此移植由社区贡献者完成，**未经官方开发者 (onixary) 审核或认可**
-- 欢迎提交 Issue 或 PR 协助改进移植质量
-
----
-
-## 移植贡献者 / Port Contributors
-
-| 贡献者                                         | 角色                                  |
-|-----------------------------------------------|---------------------------------------|
-| [wuhenqiubai](https://github.com/wuhenqiubai) | 移植版维护                |
-| [Claude Code](https://claude.com/product/claude-code)                       | 代码辅助 |
-| [onixary](https://github.com/onixary)         | 原作者                 |
-| [xu233333](https://github.com/xu233333)       | 原作者                 |
-
-## 授权
-
-- 源代码：[MIT 许可证](LICENSE.txt)
-- 媒体资源（3D 模型、贴图、动画、音效、字体、翻译文本）：
-  [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt)，仅限非商业用途
-- avali 子形态资源（模型及由它导出的 geo 模型、贴图、动画）：
-  [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
-- Avali 叫声：[Nefumi 的 Avali sounds](https://steamcommunity.com/sharedfiles/filedetails/?id=3164757879)，按作者自定义许可使用：免费、无变现，须署名并链接来源，详见 [第三方声明](THIRD-PARTY-NOTICES.md)。
-- 第三方代码与资源：遵循其原始授权，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-
-各许可证的具体适用范围见 [LICENSING.md](LICENSING.md)。
