@@ -36,7 +36,7 @@ public class AccessoriesImpl implements Accessory {
     }
 
     @Inject(method = "accessoryInit", at = @At("HEAD"))
-    private void initAccessory(Item.Settings settings, CallbackInfo ci) {
+    private void initAccessory(Item.Properties settings, CallbackInfo ci) {
         AccessoryItem realThis = ((AccessoryItem) (Object) this);
         if (realThis instanceof Accessory accessory) {
             AccessoriesAPI.registerAccessory(realThis, accessory);
