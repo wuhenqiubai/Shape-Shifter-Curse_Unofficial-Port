@@ -101,8 +101,10 @@ public class ModPacketsS2C {
     public static void receiveCursedMoonData(BytePayload payload, ClientPlayNetworking.Context ctx) {
         boolean isCursedMoon = payload.data().readBoolean();
         ctx.client().execute(() -> {
+            if (CursedMoonClient.isCursedMoon != isCursedMoon) {
+                CursedMoonClient.middayMessageSent = false;
+            }
             CursedMoonClient.isCursedMoon = isCursedMoon;
-            CursedMoonClient.middayMessageSent = false;
         });
     }
 

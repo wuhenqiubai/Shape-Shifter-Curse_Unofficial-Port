@@ -11,12 +11,19 @@ import static net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon.isCurse
 public class CursedMoonClient {
     // Client Side
     public static boolean isCursedMoon = false;  // 由同步包更新
-    public static boolean middayMessageSent = false;  // 接收到同步包时自动置为 false
+    public static boolean middayMessageSent = false;
+    private static long middayMessageDay = Long.MIN_VALUE;
 
     public static void clientTick(Level world) {
         if (!isCursedMoonDay(world)) { return; }
         // 26.1：getDayTime 已删除，Level#getOverworldClockTime 是等价替代（客户端走 ClientClockManager）
-        long dayTime = world.getOverworldClockTime() % 24000;
+        long clockTime = world.getOverworldClockTime();
+        long day = clockTime / 24000;
+        long dayTime = clockTime % 24000;
+        if (day != middayMessageDay) {
+            middayMessageDay = day;
+            middayMessageSent = false;
+        }
         if (dayTime >= 6000L && dayTime < 12500L && !middayMessageSent) {
             Player player = Minecraft.getInstance().player;
             if (player != null) {
