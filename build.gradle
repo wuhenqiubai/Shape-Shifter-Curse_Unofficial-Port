@@ -188,6 +188,9 @@ dependencies {
     // Trinkets
     modCompileOnly "maven.modrinth:trinkets-updated:${project.trinkets_version}"
 
+    // Accessories
+    modCompileOnly "maven.modrinth:accessories:1.1.0-beta.54+1.21.1-fabric"
+
     modCompileOnly "maven.modrinth:iris:1.10.8+1.21.11-fabric"
     modCompileOnly "maven.modrinth:better-combat:3.1.0+1.21.11-fabric"
     modCompileOnly "maven.modrinth:first-person-model:2.7.3-fabric,1.21.11"
@@ -253,7 +256,8 @@ java {
 }
 
 
-// 代码为 MIT，模型/贴图/动画等资源为 CC BY-NC 4.0，两份协议都要随产物分发
+// 代码为 MIT，模型/贴图/动画等资源为 CC BY-NC 4.0（avali 子形态资源为 CC BY-SA 2.0，
+// Avali 叫声另按 Nefumi 自定义无变现许可；见 LICENSING.md / THIRD-PARTY-NOTICES.md），协议文件都要随产物分发
 def licenseFiles = [
         "LICENSE.txt"              : "LICENSE_${project.base.archivesName.get()}.txt",
         "LICENSE-CC-BY-NC-4.0.txt" : "LICENSE-CC-BY-NC-4.0_${project.base.archivesName.get()}.txt",

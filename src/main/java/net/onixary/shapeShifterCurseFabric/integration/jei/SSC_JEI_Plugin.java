@@ -7,6 +7,7 @@ import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
+import mezz.jei.api.runtime.IJeiRuntime;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -30,6 +31,17 @@ public class SSC_JEI_Plugin implements IModPlugin {
     public static final RecipeType<AltarShapedRecipe> ALTAR_SHAPED = RecipeType.create(ShapeShifterCurseFabric.MOD_ID, "altar_shaped", AltarShapedRecipe.class);
     public static final RecipeType<AltarShapelessRecipe> ALTAR_SHAPELESS = RecipeType.create(ShapeShifterCurseFabric.MOD_ID, "altar_shapeless", AltarShapelessRecipe.class);
 
+    private static IJeiRuntime jeiRuntime;
+
+    @Override
+    public void onRuntimeAvailable(@NotNull IJeiRuntime jeiRuntime) {
+        SSC_JEI_Plugin.jeiRuntime = jeiRuntime;
+    }
+
+    public static IJeiRuntime getJeiRuntime() {
+        return jeiRuntime;
+    }
+
     @Override
     public @NotNull Identifier getPluginUid() {
         return ShapeShifterCurseFabric.identifier("jei_plugin");
@@ -51,7 +63,8 @@ public class SSC_JEI_Plugin implements IModPlugin {
                 new ItemStack(RegCustomItem.FOXFIRE_CATALYST_CORE),
                 new ItemStack(RegCustomItem.SURGE_CATALYST_CORE),
                 new ItemStack(RegCustomItem.DUNE_CATALYST_CORE),
-                new ItemStack(RegCustomItem.NIGHT_CATALYST_CORE)
+                new ItemStack(RegCustomItem.NIGHT_CATALYST_CORE),
+                new ItemStack(RegCustomItem.MORPHSCALE_CATALYST_CORE)
         ), Component.translatable("jei.shape-shifter-curse.catalyst_core.info"));
 
         IIngredientManager ingredientManager = registration.getIngredientManager();

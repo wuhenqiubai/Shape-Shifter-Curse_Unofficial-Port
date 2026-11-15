@@ -9,11 +9,13 @@ import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.FormSkinSystem;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
+import net.onixary.shapeShifterCurseFabric.util.util.CachedDataMap;
 import org.jetbrains.annotations.Nullable;
 import org.jspecify.annotations.NonNull;
 import software.bernie.geckolib.animation.state.BoneSnapshot;
@@ -27,13 +29,13 @@ import java.util.*;
 @SuppressWarnings("removal")
 public class FormModel extends GeoModel<FormAnimatable> {
     public static List<FormModel> loadedModel = new ArrayList<>();
-    public static HashMap<Player, Boolean> SlimMap = new HashMap<>();
+    public static CachedDataMap<UUID, Player, Boolean> SlimMap = new CachedDataMap<>(p -> false, Entity::getUUID);
 
     public static final String MissingGeoString = ShapeShifterCurseFabric.MOD_ID + ":geo/missing";
     public static final String MissingTextureString = ShapeShifterCurseFabric.MOD_ID + ":textures/missing.png";
     public static final String MissingAnimationString = ShapeShifterCurseFabric.MOD_ID + ":missing";
 
-    public Player entity;
+    public @Nullable Player entity;
 
     public JsonObject modelJson;
 
@@ -258,7 +260,11 @@ public class FormModel extends GeoModel<FormAnimatable> {
 
     public void setPlayer(Player player, boolean slim) {
         this.entity = player;
-        SlimMap.put(player, slim);
+        SlimMap.setA(player, slim);
+    }
+
+    public void __setPlayer(Player player) {
+        this.entity = player;
     }
 
     public boolean useSlim(boolean slim) {
@@ -412,7 +418,7 @@ public class FormModel extends GeoModel<FormAnimatable> {
     public final @Nullable GeoBone getCachedGeoBone(String name) {
         GeoBone bone = geoBoneCache.get(name);
         if (bone == null) {
-            Identifier modelRes = getModelResource(SlimMap.getOrDefault(this.entity, false));
+            Identifier modelRes = getModelResource(this.entity != null && SlimMap.get(this.entity));
             bone = getBakedModel(modelRes).getBone(name).orElse(null);
             if (bone != null) {
                 geoBoneCache.put(name, bone);
@@ -506,6 +512,9 @@ public class FormModel extends GeoModel<FormAnimatable> {
     @Override
     public @NonNull Identifier getModelResource(GeoRenderState animatable) {
         Player player = this.entity;
+        if (player == null) {
+            return getModelResource(false);
+        }
         // Skin Model System Not Implemented
         // if (player != null) {
         //     FormSkinSystem.FormSkin formSkin = FormSkinSystem.getFormSkin(player.getUuid(), this.Form);
@@ -516,18 +525,24 @@ public class FormModel extends GeoModel<FormAnimatable> {
         //         }
         //     }
         // }
-        return getModelResource(SlimMap.getOrDefault(player, false));
+        return getModelResource(SlimMap.get(player));
     }
 
     @Override
     public Identifier getTextureResource(GeoRenderState animatable) {
         Player player = this.entity;
-        return getTextureResource(SlimMap.getOrDefault(player, false));
+        if (player == null) {
+            return getTextureResource(false);
+        }
+        return getTextureResource(SlimMap.get(player));
     }
 
     public Identifier getFullbrightTextureResource(FormAnimatable animatable) {
         Player player = animatable.e;
-        return getFullBrightTextureResource(SlimMap.getOrDefault(player, false));
+        if (player == null) {
+            return getFullBrightTextureResource(false);
+        }
+        return getFullBrightTextureResource(SlimMap.get(player));
 
     }
 

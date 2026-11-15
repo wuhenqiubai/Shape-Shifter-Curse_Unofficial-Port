@@ -60,6 +60,7 @@ import net.onixary.shapeShifterCurseFabric.networking.ModPacketsS2CServer;
 import net.onixary.shapeShifterCurseFabric.networking.NetworkRegistrationSelfCheck;
 import net.onixary.shapeShifterCurseFabric.player_animation.form_animation.AnimationTransform;
 import net.onixary.shapeShifterCurseFabric.player_form.FormDataPackReloadListener;
+import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.InstinctUtils;
@@ -70,6 +71,7 @@ import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.recipes.altar.RegBuiltinAlterRecipe;
 import net.onixary.shapeShifterCurseFabric.screen_effect.TransformOverlay;
+import net.onixary.shapeShifterCurseFabric.sound.RegCustomSound;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegOtherStatusEffects;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusEffect;
 import net.onixary.shapeShifterCurseFabric.status_effects.RegTStatusPotionEffect;
@@ -215,6 +217,7 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         TransformativeEntitySpawning.addEntitySpawns();
         BatAttachEventHandler.register();
         RegCustomEntity.init();
+        RegCustomSound.init();
         // 注册动画（需要在服务端也执行以支持变换动画的同步）
         registerAnimations();
 
@@ -275,8 +278,11 @@ public class ShapeShifterCurseFabric implements ModInitializer {
         ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((server, resourceManager, success) -> server.getPlayerList().getPlayers().forEach((player) -> {
             ModPacketsS2CServer.updateDynamicForm(player);
             PlayerFormComponent component = PlayerFormComponent.COMPONENT.get(player);
-            if (RegPlayerForms.getPlayerForm(component.nowFormID) == null) {
+            IForm newForm = RegPlayerForms.getPlayerForm(component.nowFormID);
+            if (newForm == null) {
                 FormUtils._loadForm(player, component.getFallbackForm(), true);
+            } else if (newForm != component.nowForm) {
+                FormUtils._loadForm(player, newForm, true);
             }
         }));
         initLocalDataStorage();

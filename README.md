@@ -1,32 +1,99 @@
+<h1 align="center">Shape Shifter Curse-Unofficial Port Mod for Minecraft Java version</h1>
 
-# 感谢 [onixary](https://github.com/onixary) 与 [xu233333](https://github.com/xu233333) 开发了这个优秀的模组！本项目仅为适配与修复维护，所有核心功能版权归原作者所有。
-# 本Mod将于2026/8/22开始进入随机停更状态，因为我的在校时间长，缺少时间进行开发，但仍然欢迎PR和提交Issue。
-# This mod will be randomly suspended starting August 22, 2026, due to my long hours at school and lack of time for development. However, pull requests and issue submissions are still welcome.
+<p align="center">
+  <img width="1920" height="1080" alt="model" src="https://github.com/user-attachments/assets/bcd867ba-2377-48de-8f78-8975f5b8d67b" />
+</p>
 
-## **幻形者诅咒非官方版 (Shape-Shifter-Curse_Unofficial-Port)**
-- 原项目：[Shape Shifter Curse](https://github.com/onixary/shape-shifter-curse-fabric)
-- 原作者：[onixary](https://github.com/onixary)
-- 许可证：翻原作者仓库去吧，反正遵循原项目协议，保留所有版权声明。
-> 本项目独立于原项目，仅用于适配新版 Minecraft 与修复问题，所有功能版权归原作者所有。
-> 因为频繁合并上游commit，并同步进行bugfix，所以比官方提早发布内容，但并不代表这是官方的想法。
+<p align="center">
+  <a href="https://modrinth.com/mod/shape-shifter-curse-unofficial-port"><img alt="Modrinth" height="56" src="https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/cozy/available/modrinth_vector.svg"></a>
+</p>
 
-  ---
+<p align="center">
+  English | <a href="README_zh_cn.md">简体中文</a>
+</p>
 
-  | MC版本 | 更新状态 | 备注 |
-  |---|---|---|
-  | <1.21 | 无计划 | 无降级计划 |
-  | 1.21.1FC/Connector | 活跃 | 正式版本，跟随官方版本更新 |
-  | 1.21.2 ~ 1.21.10 | 无计划 | 无支持计划 |
-  | 1.21.11FC | 活跃 | 跟随1.21.1分支更新 |
-  | 26.1FC | 活跃 | 跟随1.21.11分支更新 |
-  | 26.2 | 计划中 | 在26.1发布后作计划 |
+GitHub repository for the mod Shape Shifter Curse-Unofficial Port, created for Fabric
+
+This mod is under active development. As I'm only working on it during my spare time, updates may be slow
+
+If you want to create custom forms using data packs and resource packs, please check the [wiki](https://ssc-wiki.readthedocs.io/en/latest/) here
+
+This mod is open-source and free. Do not trust any third-party channels that charge for downloads
+
+## Form Roadmap
+
+### Progressive Forms
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Ocelot Form:**<br>
+  A hunter that feeds on raw meat, capable of climbing and slashing prey with its claws, but suffers from rapid hunger depletion.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Bat Form:**<br>
+  A nocturnal creature that consumes grains, vegetables, and fruits, equipped with night vision, slow falling, gliding, and the ability to cling to or hang from blocks, but grows very weak in sunlight.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Axolotl Form:**<br>
+  An amphibian with high health and regeneration, highly agile in water and currents, but requires constant moisture.
+  
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Familiar Fox Form:**<br>
+  A magical being altered by foreign sorcery, allied with witches and illagers, sustaining itself on the energy of other creatures.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Snow Fox Form:**<br>
+  A predator infused with frigid magic, using enhanced leaps and snowballs as its primary attacks, capable of swift environmental traversal, but highly vulnerable to fire.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Jackal/Anubis Wolf Form:**<br>
+  A leader who summons a pack of wolf wraiths to fight and transforms the power of Wither into their own.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Spider Form:**<br>
+  A web weaver that uses special web projectiles and cobwebs to reshape terrain for rapid movement and trap enemies.
+
+- ![In Development](https://img.shields.io/badge/In%20Development-0969da?style=flat-square) **???:**<br>
+  Something entirely new…?
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Bee Form:**<br>
+  A grower whose core mechanics revolve around flowers, pollination, and colored pigments.
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **???**
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **???**
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Ender Dragon Form:**<br>
+  A milestone form with **unique mechanics that will reshape SSC’s existing gameplay**. (Addon creators, the Ender Dragon is already spoken for!)
+
+### Special (SP) Forms
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Allay Form:**<br>
+  A floating spectral entity that can only consume amethyst shards. Fragile but skilled with bows, capable of absorbing targets' health through arrows.
+
+- ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Feral Cat Form:**<br>
+  A quadruped animal with conservative strengths and weaknesses, possessing fall damage immunity.
+
+- ![Planned](https://img.shields.io/badge/Planned-orange?style=flat-square) **Phantom Form?**
+
+#### ![In Development](https://img.shields.io/badge/In%20Development-0969da?style=flat-square) SP Form System Rework:
+
+SP forms currently do not stand out much. What if they offered more extreme advantages and penalties, and there were a way to temporarily switch from any form into an SP form?
+
+Of course, if you want a challenge, you could still transform into an SP form and try to survive as one!
+
+### Subforms
+
+- **Snow Fox Form**
+  - ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Marbled Polecat Form:**<br>
+    A nimble hunter with a long, slender body and a remarkably flexible neck.
+
+- **Bat Form**
+  - ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Avali Form:**<br>
+    An alien raptor from another plane of existence🍐. What could have brought them here?
+
+## License
 
 - Source code: [MIT License](LICENSE.txt)
 - Media assets (3D models, textures, animations, sounds, fonts, translations):
   [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt) - non-commercial use only
 - Avali sub-form assets (the models and the geo models, textures and animations
   exported from them): [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
+- Avali chatter: [Avali sounds by Nefumi](https://steamcommunity.com/sharedfiles/filedetails/?id=3164757879) — custom permission: free, no monetization, credit and source link required. See [third-party notices](THIRD-PARTY-NOTICES.md).
 - Third-party code and assets: their upstream licenses, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
+
 
 ---
 

@@ -3,6 +3,8 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import com.google.gson.JsonObject;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.*;
+
+import io.github.apace100.apoli.power.factory.PowerFactory;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -80,9 +82,12 @@ public class SnowFoxPerkCheck {
     }
     @GameTest
     public void registrations(GameTestHelper c) {
-        for (String key : new String[]{"revenge", "elusive_paws", "air_jump", "frost_dive", "cold_whirlwind_1", "cold_whirlwind_2", "cold_recovery_1", "cold_recovery_2"}) {
+        for (String key : new String[]{"revenge", "elusive_paws", "air_jump", "frost_dive", "cold_recovery_1", "cold_recovery_2"}) {
             c.assertTrue(PowerTypeRegistry.contains(id("perks/snow_fox_" + key)), "Power loaded: " + key);
             c.assertTrue(RegPerks.getPerk(id("snow_fox_" + key)) != null, "Perk registered: " + key);
+        }
+        for (String key : new String[]{"cold_whirlwind_1", "cold_whirlwind_2"}) {
+            c.assertTrue(PowerTypeRegistry.contains(id("perks/snow_fox_" + key)), "Power loaded: " + key);
         }
         c.succeed();
     }
@@ -132,6 +137,33 @@ public class SnowFoxPerkCheck {
         p.discard(); zombie.discard(); c.succeed();
     }
     @GameTest
+    public void freezeImmunityByType(GameTestHelper c) {
+        var entity = EntityType.COW.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        var holder = PowerHolderComponent.KEY.get(entity);
+        var source = id("freeze_test");
+        c.assertTrue(entity.canFreeze(), "Vanilla freezing remains without a power");
+        for (String path : new String[]{"immune_freeze", "perks/snow_fox_cold_recovery_1", "perks/snow_fox_cold_recovery_2"}) {
+            var type = PowerTypeRegistry.get(id(path));
+            holder.addPower(type, source);
+            c.assertTrue(!entity.canFreeze(), "Standalone and multiple powers prevent freezing: " + path);
+            holder.removePower(type, source);
+            c.assertTrue(entity.canFreeze(), "Removing the power restores vanilla freezing: " + path);
+        }
+        var json = com.google.gson.JsonParser.parseString(
+                "{\"condition\":{\"type\":\"apoli:sneaking\"}}").getAsJsonObject();
+        PowerFactory<Power> freezeFactory = (PowerFactory<Power>) ImmuneFreezePower.createFactory();
+        var conditional = new PowerType<>(id("arbitrary_conditional_freeze_test"), freezeFactory.read(json, c.getLevel().registryAccess()));
+        holder.addPower(conditional, source);
+        c.assertTrue(entity.canFreeze(), "Inactive condition does not prevent freezing");
+        entity.setShiftKeyDown(true);
+        c.assertTrue(!entity.canFreeze(), "Active condition works without the original power ID");
+        entity.setShiftKeyDown(false);
+        c.assertTrue(entity.canFreeze(), "Condition changes restore vanilla freezing");
+        holder.removePower(conditional, source);
+        c.succeed();
+    }
+
+    @GameTest
     public void revengeAndRecovery(GameTestHelper c) {
         var p = player(c, 1); add(p, "revenge_melee"); add(p, "revenge_projectile");
         var witch = c.spawn(EntityType.WITCH, new BlockPos(4, 1, 2));
@@ -140,8 +172,8 @@ public class SnowFoxPerkCheck {
         var arrow = new Arrow(c.getLevel(), p, new ItemStack(Items.ARROW), null); witch.invulnerableTime = 0;
         before = witch.getHealth(); witch.hurt(p.damageSources().arrow(arrow, p), 2);
         c.assertTrue(Math.abs(before - witch.getHealth() - 2.6) < 0.01, "Projectile bonus");
-        add(p, "cold_recovery_1_immunity"); p.hurt(p.damageSources().freeze(), 3);
-        c.assertTrue(p.getHealth() == 20, "Freeze immunity");
+        add(p, "cold_recovery_1_immune_freeze");
+        c.assertTrue(!p.canFreeze(), "Freeze immunity prevents freezing");
         var heal = add(p, "cold_recovery_1_healing"); p.setHealth(10); c.setBlock(new BlockPos(2, 1, 2), Blocks.POWDER_SNOW);
         heal.tick();
         for (int i = 0; i < 60; i++) { p.tickCount++; heal.tick(); }

@@ -34,12 +34,18 @@ public class MixinConfigPlugin implements IMixinConfigPlugin {
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketSlotMixin", new MixinRequiredMods(new String[]{"trinkets"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioItemImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioUtilsImpl", new MixinRequiredMods(new String[]{"curios"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.AccessoriesUtilsImpl", new MixinRequiredMods(new String[]{"accessories"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.AccessoriesEventImpl", new MixinRequiredMods(new String[]{"accessories"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.AccessoriesImpl", new MixinRequiredMods(new String[]{"accessories"}, new String[]{}));
+
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.BOP_WebbingBlockMixin", new MixinRequiredMods(new String[]{"biomesoplenty"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.LodeStoneIntegrationMixin", new MixinRequiredMods(new String[]{"lodestone"}, new String[]{}));
         mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.CarryOnIntegrationMixin", new MixinRequiredMods(new String[]{"carryon"}, new String[]{}));
+        mixinRequiredMods.put("net.onixary.shapeShifterCurseFabric.mixin.integration.JEI_Utils_Implement", new MixinRequiredMods(new String[]{"jei"}, new String[]{}));
 
         mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.TrinketImpl", "trinkets");
         mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.forge.CurioImpl", "curios");
+        mixinAccessoryMixin.put("net.onixary.shapeShifterCurseFabric.mixin.accessory.AccessoriesImpl", "accessories");
     }
 
     private boolean isNeoForge = false;

@@ -96,8 +96,10 @@ public class FormAttunerBlockEntity extends BlockEntity {
         if (world.getGameTime() % 80L == 0L) {
             if (!blockEntity.beamSegments.isEmpty()) {
                 blockEntity.level = updateLevel(world, i, j, k);
+            } else {
+                blockEntity.level = 0;
             }
-            if (blockEntity.level > 0 && !blockEntity.beamSegments.isEmpty()) {
+            if (blockEntity.level > 0) {
                 // 这里可以写加 Buff
                 playSound(world, pos, SoundEvents.BEACON_AMBIENT);
             }
