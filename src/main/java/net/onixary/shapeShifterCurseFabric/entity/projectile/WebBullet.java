@@ -171,6 +171,7 @@ public class WebBullet extends ThrowableItemProjectile {
 
     @Override
     public void onHitBlock(BlockHitResult blockHitResult) {
+        if (this.level().isClientSide) return;
         WebBridgeAction.WebLadderConfig nowConfig = null;
         switch (Tier) {
             case 1 -> nowConfig = ladderConfigTier1;
@@ -189,6 +190,7 @@ public class WebBullet extends ThrowableItemProjectile {
     @Override
     public void onHitEntity(EntityHitResult entityHitResult) {
         super.onHitEntity(entityHitResult);
+        if (this.level().isClientSide) return;
         Entity entity = entityHitResult.getEntity();
 
         //ShapeShifterCurseFabric.LOGGER.info("Hit entity " + entity.getName().getString());
