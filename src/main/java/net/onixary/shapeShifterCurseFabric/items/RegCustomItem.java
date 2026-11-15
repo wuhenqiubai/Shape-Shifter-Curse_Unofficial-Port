@@ -97,6 +97,7 @@ public class RegCustomItem {
     public static final Item FOXFIRE_CATALYST_CORE = register("foxfire_catalyst_core", props -> new CatalystCoreItem(props.stacksTo(1).rarity(Rarity.RARE)));
     public static final Item SURGE_CATALYST_CORE = register("surge_catalyst_core", props -> new CatalystCoreItem(props.stacksTo(1).rarity(Rarity.RARE)));
     public static final Item DUNE_CATALYST_CORE = register("dune_catalyst_core", props -> new CatalystCoreItem(props.stacksTo(1).rarity(Rarity.RARE)));
+    public static final Item MORPHSCALE_CATALYST_CORE = register("morphscale_catalyst_core", props -> new CatalystCoreItem(props.stacksTo(1).rarity(Rarity.RARE)));
     public static final Item NIGHT_CATALYST_CORE = register("night_catalyst_core", props -> new CatalystCoreItem(props.stacksTo(1).rarity(Rarity.RARE)));
 
     public static final Item TRANSFORMATIVE_AXOLOTL_BUCKET = register("transformative_axolotl_bucket", props -> new MobBucketItem(ShapeShifterCurseFabric.T_AXOLOTL, Fluids.WATER, SoundEvents.BUCKET_EMPTY_AXOLOTL, props.stacksTo(1)));

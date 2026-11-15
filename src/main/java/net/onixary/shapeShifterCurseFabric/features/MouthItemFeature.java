@@ -25,10 +25,8 @@ import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ShieldItem;
 import net.onixary.shapeShifterCurseFabric.player_form.IForm;
 import net.onixary.shapeShifterCurseFabric.player_form.PlayerFormBodyType;
-import net.onixary.shapeShifterCurseFabric.render.form_render.FormModel;
-import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderUtils;
-import net.onixary.shapeShifterCurseFabric.render.form_render.FormRenderer;
-import net.onixary.shapeShifterCurseFabric.render.form_render.IModifyHead_MAS;
+import net.onixary.shapeShifterCurseFabric.render.form_render.*;
+import net.onixary.shapeShifterCurseFabric.util.ClientUtils;
 import net.onixary.shapeShifterCurseFabric.util.FeralRenderUtils;
 import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jspecify.annotations.NonNull;
@@ -50,7 +48,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         Minecraft mc = Minecraft.getInstance();
         if (IS_FIRST_PERSON_MOD_LOADED && mc.options.getCameraType().isFirstPerson() && mc.player == Minecraft.getInstance().player) {
             FirstPersonModelCore fpm = FirstPersonModelCore.instance;
-            if (fpm.isEnabled()) {
+            if (fpm.isEnabled() && !ClientUtils.isOpenInventoryScreen) {
                 return;
             }
         }

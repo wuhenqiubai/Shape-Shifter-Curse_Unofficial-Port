@@ -2,11 +2,16 @@ package net.onixary.shapeShifterCurseFabric.custom_ui;
 
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
+import net.onixary.shapeShifterCurseFabric.integration.jei.JEI_Utils;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 import static net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric.MOD_ID;
 
@@ -48,11 +53,17 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
     @Override
     public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
         // 26.1: Screen#render 已改名为 extractRenderState（原名不再存在，继续写 render 不构成覆写 = 静默死代码）。
-        // 背景由框架经 extractBackground 自动调用、tooltip 由 AbstractContainerScreen#extractRenderState
-        // 自动调用，故原先手动的 renderBackground/renderTooltip 两行一并删除，否则会重复提交。
         super.extractRenderState(context, mouseX, mouseY, delta);
         this.drawBar(context);
         this.drawFuel(context);
+        if (isOverFuelBar(mouseX - baseX, mouseY - baseY)) {
+            context.setTooltipForNextFrame(Component.translatable(
+                    "gui.shape_shifter_curse.altar.remaining_moondust",
+                    formatMoondust(this.getMenu().getNowFuel()), formatMoondust(AltarBlockEntity.maxFuel)), mouseX, mouseY);
+        }
+        if (JEI_Utils.isJEILoaded && isHoveringProcessBar(mouseX, mouseY)) {
+            context.setTooltipForNextFrame(Component.translatable("jei.tooltip.show.recipes"), mouseX, mouseY);
+        }
     }
 
     @Override
@@ -86,5 +97,29 @@ public class AltarCraftUI extends AbstractContainerScreen<AltarCraftUIHandler> {
             int FuelWidth = (int) (FUEL_BAR_W * ((float) uiHandler.getNowFuel() / (float) maxFuel));
             context.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND, baseX + FUEL_BAR_ORIG_X, baseY + FUEL_BAR_ORIG_Y, FUEL_BAR_FULL_X, FUEL_BAR_FULL_Y, FuelWidth, FUEL_BAR_H, FuelWidth, FUEL_BAR_H, TEXTURE_WIDTH, TEXTURE_HEIGHT, -1);
         }
+    }
+
+    static boolean isOverFuelBar(int localX, int localY) {
+        return localX >= FUEL_BAR_ORIG_X && localX < FUEL_BAR_ORIG_X + FUEL_BAR_W
+                && localY >= FUEL_BAR_ORIG_Y && localY < FUEL_BAR_ORIG_Y + FUEL_BAR_H;
+    }
+
+    static String formatMoondust(int fuel) {
+        return BigDecimal.valueOf(fuel).divide(BigDecimal.valueOf(800), 2, RoundingMode.HALF_UP)
+                .stripTrailingZeros().toPlainString();
+    }
+
+    private boolean isHoveringProcessBar(double mouseX, double mouseY) {
+        return mouseX >= baseX + PROCESS_BAR_ORIG_X && mouseX < baseX + PROCESS_BAR_ORIG_X + PROCESS_BAR_W
+                && mouseY >= baseY + PROCESS_BAR_ORIG_Y && mouseY < baseY + PROCESS_BAR_ORIG_Y + PROCESS_BAR_H;
+    }
+
+    @Override
+    public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        if (JEI_Utils.isJEILoaded && event.button() == 0 && isHoveringProcessBar(event.x(), event.y())) {
+            JEI_Utils.openJEIAltarRecipeScreen();
+            return true;
+        }
+        return super.mouseClicked(event, doubleClick);
     }
 }

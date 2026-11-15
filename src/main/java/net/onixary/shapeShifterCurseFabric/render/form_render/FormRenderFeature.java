@@ -126,6 +126,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             if (formRenderer == null) continue;
             formRenderer.realModel.AnimationSystem.afterRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
             formRenderer.realModel.AnimationSystem.finishRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+            formRenderer.clearPlayer();
         }
 
         rM_PartB(avatarRenderer, player, playerModel, avatarRenderState, poseStack, submitNodeCollector, i);
@@ -314,6 +315,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                 submitNodeCollector.submitModelPart(arm, matrices, OverlayLayer, light, OverlayInt, null);
             }
             formModel.AnimationSystem.afterRenderFirstPerson(armGeoBone, formRenderer, formModel, playerEntityRenderer, player, arm, sleeve);
+            formRenderer.clearPlayer();
         }
     }
 

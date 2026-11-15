@@ -115,6 +115,6 @@ public class DefaultAccessory {
     }
 
     public static void init() {
-        // DO NOTHING
+        // DO NOTHING 或许可以用于Inject?
     }
 }

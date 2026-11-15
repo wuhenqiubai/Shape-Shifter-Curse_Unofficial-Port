@@ -39,6 +39,11 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRen
         this.realModel.setPlayer(player, slim);
     }
 
+    public void clearPlayer() {
+        this.realAnimatable.setPlayer(null);
+        this.realModel.__setPlayer(null);
+    }
+
     @Override
     public Identifier getTextureLocation(GeoRenderState.Impl renderState) {
         Integer channel = renderState.getGeckolibData(TICKET_CHANNEL);
