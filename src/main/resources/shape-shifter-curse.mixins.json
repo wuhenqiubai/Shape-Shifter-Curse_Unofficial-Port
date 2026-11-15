@@ -95,10 +95,7 @@
     "mob.WitchEntityMixin",
     "projectile.EntitySnowballTransformMixin",
     "projectile.PotionEntityMixin",
-    "integration.JEI_Utils_Implement",
-    "accessory.AccessoriesImpl",
-    "accessory.AccessoriesEventImpl",
-    "accessory.AccessoriesUtilsImpl"
+    "integration.JEI_Utils_Implement"
   ],
   "client": [
     "AdjustItemHoldFeatureRendererMixin",
