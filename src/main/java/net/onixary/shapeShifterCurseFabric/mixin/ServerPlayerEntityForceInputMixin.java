@@ -12,10 +12,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerPlayer.class)
 public class ServerPlayerEntityForceInputMixin {
+    // 我当时在想什么呢 怎么这里用上static了
     @Unique
-    private static boolean lastForceSneakState = false;
+    private boolean lastForceSneakState = false;
+
     @Unique
-    private static int ticker = 0;
+    private int ticker = 0;
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo ci) {
