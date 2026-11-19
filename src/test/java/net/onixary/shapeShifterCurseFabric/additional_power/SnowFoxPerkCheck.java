@@ -19,6 +19,7 @@ import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
@@ -106,7 +107,7 @@ public class SnowFoxPerkCheck {
     @GameTest
     public void diveImpactAndLock(GameTestHelper c) {
         floor(c, true); var p = player(c, 8); var d = dive(p);
-        var zombie = c.spawn(EntityType.ZOMBIE, new BlockPos(4, 1, 2)); zombie.setNoAi(true);
+        var zombie = c.spawn(EntityTypes.ZOMBIE, new BlockPos(4, 1, 2)); zombie.setNoAi(true);
         zombie.getAttribute(Attributes.ARMOR).setBaseValue(0);
         p.getFoodData().setFoodLevel(2); p.setRemainingFireTicks(200); d.onUse();
         c.assertTrue(FrostDivePower.isDiving(p) && p.getFoodData().getFoodLevel() == 0 && !p.isOnFire(), "Start costs exactly 2 food and extinguishes");
@@ -131,14 +132,14 @@ public class SnowFoxPerkCheck {
         p.setDeltaMovement(Vec3.ZERO); air.onUse(); c.assertTrue(p.getDeltaMovement().y == 0, "Only one jump per flight");
         p.setOnGround(true); air.tick(); p.setOnGround(false); air.tick(); air.tick(); air.onUse();
         c.assertTrue(p.getDeltaMovement().y > 0, "Landing replenishes air jump");
-        var zombie = c.spawn(EntityType.ZOMBIE, new BlockPos(4, 1, 2)); var d = dive(p); d.onUse();
+        var zombie = c.spawn(EntityTypes.ZOMBIE, new BlockPos(4, 1, 2)); var d = dive(p); d.onUse();
         for (int i = 0; i < 8 && FrostDivePower.isDiving(p); i++) { d.tick(); p.move(MoverType.SELF, p.getDeltaMovement()); }
         c.assertTrue(zombie.getHealth() == 20 && !zombie.hasEffect(MobEffects.SLOWNESS), "Exactly four blocks has no shockwave");
         p.discard(); zombie.discard(); c.succeed();
     }
     @GameTest
     public void freezeImmunityByType(GameTestHelper c) {
-        var entity = EntityType.COW.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        var entity = EntityTypes.COW.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         var holder = PowerHolderComponent.KEY.get(entity);
         var source = id("freeze_test");
         c.assertTrue(entity.canFreeze(), "Vanilla freezing remains without a power");
@@ -166,7 +167,7 @@ public class SnowFoxPerkCheck {
     @GameTest
     public void revengeAndRecovery(GameTestHelper c) {
         var p = player(c, 1); add(p, "revenge_melee"); add(p, "revenge_projectile");
-        var witch = c.spawn(EntityType.WITCH, new BlockPos(4, 1, 2));
+        var witch = c.spawn(EntityTypes.WITCH, new BlockPos(4, 1, 2));
         float before = witch.getHealth(); witch.hurt(p.damageSources().playerAttack(p), 10);
         c.assertTrue(Math.abs(before - witch.getHealth() - 13) < 0.01, "Witch attack bonus");
         var arrow = new Arrow(c.getLevel(), p, new ItemStack(Items.ARROW), null); witch.invulnerableTime = 0;

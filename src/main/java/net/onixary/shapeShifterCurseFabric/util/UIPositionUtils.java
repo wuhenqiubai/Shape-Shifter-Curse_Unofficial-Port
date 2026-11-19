@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.util;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 
 @Environment(EnvType.CLIENT)
 public class UIPositionUtils {
@@ -14,10 +14,10 @@ public class UIPositionUtils {
     // 7 8 9
     // 额外XY偏移量
 
-    public static Tuple<Integer, Integer> getCorrectPosition(int positionType, int extraX, int extraY) {
+    public static Pair<Integer, Integer> getCorrectPosition(int positionType, int extraX, int extraY) {
         Minecraft client = Minecraft.getInstance();
         if (client == null || client.getWindow() == null) {
-            return new Tuple<>(0, 0);
+            return new Pair<>(0, 0);
         }
 
         int windowWidth = client.getWindow().getGuiScaledWidth();
@@ -72,6 +72,6 @@ public class UIPositionUtils {
             }
         }
 
-        return new Tuple<>(posX + extraX, posY + extraY);
+        return new Pair<>(posX + extraX, posY + extraY);
     }
 }

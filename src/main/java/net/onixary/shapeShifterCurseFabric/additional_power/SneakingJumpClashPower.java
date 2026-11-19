@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 public class SneakingJumpClashPower extends Power {
 
-    private final Consumer<Tuple<Entity, Entity>> bientityAction;
+    private final Consumer<Pair<Entity, Entity>> bientityAction;
     private final int checkDuration;
     private final double expansionDistance;
     private final float damage;
@@ -34,7 +34,7 @@ public class SneakingJumpClashPower extends Power {
     public int jumpTicks = 0;
 
     public SneakingJumpClashPower(PowerType<?> type, LivingEntity entity,
-                                  Consumer<Tuple<Entity, Entity>> bientityAction,
+                                  Consumer<Pair<Entity, Entity>> bientityAction,
                                  int checkDuration, double expansionDistance, float damage, boolean needJump) {
         super(type, entity);
         this.bientityAction = bientityAction;
@@ -107,7 +107,7 @@ public class SneakingJumpClashPower extends Power {
 
             // 触发碰撞action
             if (bientityAction != null) {
-                this.bientityAction.accept(new Tuple<>(player, target));
+                this.bientityAction.accept(new Pair<>(player, target));
             }
 
             // 触发伤害

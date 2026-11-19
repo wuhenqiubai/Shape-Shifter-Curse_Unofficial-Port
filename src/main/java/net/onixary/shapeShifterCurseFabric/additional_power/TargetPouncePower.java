@@ -6,7 +6,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -18,7 +18,7 @@ import java.util.function.Consumer;
 public class TargetPouncePower extends Power {
     private final double speed;
     private final int duration;
-    private final Consumer<Tuple<Entity, Entity>> hitAction;
+    private final Consumer<Pair<Entity, Entity>> hitAction;
     private LivingEntity target;
     private Vec3 direction;
     private int remaining;
@@ -50,7 +50,7 @@ public class TargetPouncePower extends Power {
         if (entity.getBoundingBox().inflate(0.3).intersects(target.getBoundingBox())) {
             LivingEntity hit = target;
             stop();
-            hitAction.accept(new Tuple<>(entity, hit));
+            hitAction.accept(new Pair<>(entity, hit));
             return;
         }
         double distance = entity.getBoundingBox().getCenter().distanceTo(target.getBoundingBox().getCenter());

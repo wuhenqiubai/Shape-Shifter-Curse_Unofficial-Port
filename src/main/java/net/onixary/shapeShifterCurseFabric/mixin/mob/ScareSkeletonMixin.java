@@ -36,24 +36,24 @@ public abstract class ScareSkeletonMixin extends Monster implements RangedAttack
     private LivingEntity currentTarget;
 
     @Inject(method = "performRangedAttack", at = @At("HEAD"))
-    private void captureTarget(LivingEntity target, float pullProgress, CallbackInfo ci) {
+    private void captureTarget(LivingEntity target, float power, CallbackInfo ci) {
         this.currentTarget = target;
     }
 
     @Redirect(method = "performRangedAttack", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/Projectile;spawnProjectileUsingShoot(Lnet/minecraft/world/entity/projectile/Projectile;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;DDDFF)Lnet/minecraft/world/entity/projectile/Projectile;"))
-    private Projectile aimAtFeralBody(Projectile projectile, ServerLevel level, ItemStack stack, double x, double y, double z,
-                                       float speed, float divergence) {
+    private Projectile aimAtFeralBody(Projectile projectile, ServerLevel serverLevel, ItemStack itemStack, double targetX, double targetY, double targetZ,
+                                      float pow, float uncertainty) {
         LivingEntity target = this.currentTarget;
         if (target instanceof Player player
                 && FormUtils.getPlayerForm(player).getBodyType() == PlayerFormBodyType.FERAL) {
-            var direction = ArrowAimUtils.launchDirection(target.getBoundingBox().getCenter().subtract(projectile.position()), speed);
+            var direction = ArrowAimUtils.launchDirection(target.getBoundingBox().getCenter().subtract(projectile.position()), pow);
             if (direction != null) {
-                x = direction.x;
-                y = direction.y;
-                z = direction.z;
+                targetX = direction.x;
+                targetY = direction.y;
+                targetZ = direction.z;
             }
         }
-        return Projectile.spawnProjectileUsingShoot(projectile, level, stack, x, y, z, speed, divergence);
+        return Projectile.spawnProjectileUsingShoot(projectile, serverLevel, itemStack, targetX, targetY, targetZ, pow, uncertainty);
     }
 
     @Inject(at = @At("TAIL"), method = "registerGoals")
@@ -63,8 +63,8 @@ public abstract class ScareSkeletonMixin extends Monster implements RangedAttack
     }
 
     @Redirect(at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/ai/goal/GoalSelector;addGoal(ILnet/minecraft/world/entity/ai/goal/Goal;)V", ordinal = 7), method = "registerGoals")
-    private void redirectTargetGoal(GoalSelector goalSelector, int priority, Goal goal) {
+    private void redirectTargetGoal(GoalSelector goalSelector, int prio, Goal goal) {
 	    Goal newGoal = new NearestAttackableTargetGoal<>(this, Player.class, 10, true, false, (e, level) -> !AdditionalPowers.SCARE_SKELETON.isActive(e));
-        goalSelector.addGoal(priority, newGoal);
+        goalSelector.addGoal(prio, newGoal);
     }
 }

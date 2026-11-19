@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
@@ -235,11 +236,11 @@ public class PlayerEventHandler {
         PlayerTeam sorceryTeam = scoreboard.getPlayerTeam(MobTeamManager.SORCERY_TEAM_NAME);
         for (Entity entity : world.getAllEntities()) {
             // Sorcery Team
-            if (entity.getType() == EntityType.EVOKER
-            || entity.getType() == EntityType.WITCH
-            || entity.getType() == EntityType.VINDICATOR
-            || entity.getType() == EntityType.PILLAGER
-            || entity.getType() == EntityType.RAVAGER)
+            if (entity.getType() == EntityTypes.EVOKER
+            || entity.getType() == EntityTypes.WITCH
+            || entity.getType() == EntityTypes.VINDICATOR
+            || entity.getType() == EntityTypes.PILLAGER
+            || entity.getType() == EntityTypes.RAVAGER)
             {
                 if (sorceryTeam != null) {
                     scoreboard.addPlayerToTeam(entity.getScoreboardName(), sorceryTeam);

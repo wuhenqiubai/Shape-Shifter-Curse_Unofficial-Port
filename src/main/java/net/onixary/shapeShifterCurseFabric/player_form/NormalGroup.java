@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class NormalGroup implements IFormGroup {
     public final Identifier id;
-    public Map<Integer, List<Tuple<Integer, IForm>>> groupData = new HashMap<>();
+    public Map<Integer, List<Pair<Integer, IForm>>> groupData = new HashMap<>();
 
     public NormalGroup(Identifier id) {
         this.id = id;
@@ -22,7 +22,7 @@ public class NormalGroup implements IFormGroup {
     }
 
     @Override
-    public @NotNull Map<Integer, List<Tuple<Integer, IForm>>> getGroupData() {
+    public @NotNull Map<Integer, List<Pair<Integer, IForm>>> getGroupData() {
         return groupData;
     }
 }

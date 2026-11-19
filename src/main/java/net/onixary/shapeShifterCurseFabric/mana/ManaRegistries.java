@@ -4,7 +4,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
@@ -44,18 +44,18 @@ public class ManaRegistries {
 
     public static final Identifier FAMILIAR_FOX_MANA = registerManaType(ShapeShifterCurseFabric.identifier("familiar_fox_mana"),
             new ManaUtils.ModifierList(
-                    new Tuple<>(
+                    new Pair<>(
                             ShapeShifterCurseFabric.identifier("base_value"),
-                            new Tuple<>(
+                            new Pair<>(
                                     MC_AlwaysTrue,
                                     new ManaUtils.Modifier(100d, 1.0d, 0d)
                             )
                     )
             ),
             new ManaUtils.ModifierList(
-                    new Tuple<>(
+                    new Pair<>(
                             ShapeShifterCurseFabric.identifier("cursed_moon"),
-                            new Tuple<>(
+                            new Pair<>(
                                     MC_IsCursedMoon,
                                     new ManaUtils.Modifier(0.02d, 1.0d, 0d)
                             )
@@ -66,9 +66,9 @@ public class ManaRegistries {
 
     public static final Identifier WEB_RESOURCE = registerManaType(ShapeShifterCurseFabric.identifier("web_resource"),
             new ManaUtils.ModifierList(
-                    new Tuple<>(
+                    new Pair<>(
                             ShapeShifterCurseFabric.identifier("base_value"),
-                            new Tuple<>(
+                            new Pair<>(
                                     MC_AlwaysTrue,
                                     new ManaUtils.Modifier(100d, 1.0d, 0d)
                             )

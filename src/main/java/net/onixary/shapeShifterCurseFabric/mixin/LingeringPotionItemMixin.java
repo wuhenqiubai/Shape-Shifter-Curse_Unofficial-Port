@@ -24,22 +24,22 @@ import java.util.function.Consumer;
 @Mixin(Item.class)
 public class LingeringPotionItemMixin {
     @Inject(method = "appendHoverText", at = @At("RETURN"))
-    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type, CallbackInfo ci) {
-        if (!(stack.getItem() instanceof LingeringPotionItem)) {
+    public void appendTooltip(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag, CallbackInfo ci) {
+        if (!(itemStack.getItem() instanceof LingeringPotionItem)) {
             return;
         }
-	    PotionContents potionContents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+	    PotionContents potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
 	    var potionEntry = potionContents.potion().orElse(null);
 	    if (potionEntry == null || potionEntry.value() != RegCustomPotions.CUSTOM_STATUE_FORM_POTION) {
             return;
         }
 
-	    var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+	    var nbt = itemStack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
         Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
         if (CTPFormID != null) {
             Component formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
-            consumer.accept(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
+            builder.accept(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
         }
     }
 }

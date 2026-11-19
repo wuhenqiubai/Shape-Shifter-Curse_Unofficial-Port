@@ -26,7 +26,7 @@ public abstract class SweetBerryBushBlockMixin {
                     target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
             cancellable = true
     )
-    private void preventBerryDamage(BlockState state, Level world, BlockPos pos, Entity entity, InsideBlockEffectApplier applier, boolean bl, CallbackInfo ci) {
+    private void preventBerryDamage(BlockState state, Level level, BlockPos pos, Entity entity, InsideBlockEffectApplier effectApplier, boolean isPrecise, CallbackInfo ci) {
         if (entity instanceof Player player) {
             if (PowerHolderComponent.hasPower(player, PreventBerryEffectPower.class)) {
                 ci.cancel();
@@ -41,15 +41,15 @@ public abstract class SweetBerryBushBlockMixin {
                     target = "Lnet/minecraft/world/entity/Entity;makeStuckInBlock(Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/phys/Vec3;)V"
             )
     )
-    private void preventBerrySlowdown(Entity entity, BlockState state, Vec3 multiplier, Operation<Void> original) {
+    private void preventBerrySlowdown(Entity entity, BlockState blockState, Vec3 speedMultiplier, Operation<Void> original) {
         // 如果是玩家则跳过减速
         if ((entity instanceof Player)) {
             if (!PowerHolderComponent.hasPower((Player)entity, PreventBerryEffectPower.class)) {
-                original.call(entity, state, multiplier);
+                original.call(entity, blockState, speedMultiplier);
             }
         }
         else{
-            original.call(entity, state, multiplier);
+            original.call(entity, blockState, speedMultiplier);
         }
     }
 }

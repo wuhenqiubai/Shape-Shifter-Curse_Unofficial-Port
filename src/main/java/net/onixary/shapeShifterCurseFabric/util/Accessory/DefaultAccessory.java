@@ -4,7 +4,7 @@ import eu.pb4.trinkets.api.TrinketAttachment;
 import eu.pb4.trinkets.api.TrinketInventory;
 import eu.pb4.trinkets.api.TrinketsApi;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +28,8 @@ public class DefaultAccessory {
             }
 
             @Override
-            public Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
-                Map<Tuple<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
+            public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity) {
+                Map<Pair<@Nullable String, String>, List<ItemStack>> map = new HashMap<>();
                 // 4.0: getTrinketComponent 返回 Optional<TrinketComponent>，
                 // 现改为 getAttachment 直接返回非空的 TrinketAttachment（不再有「无配件组件」分支）。
                 // 注：getInventory() 在 4.0 已标 @Deprecated(forRemoval)，但仍是维护中的实时视图
@@ -48,7 +48,7 @@ public class DefaultAccessory {
                             ItemStack stack = inventory.getItem(i);
                             stacks.add(stack);
                         }
-                        map.put(new Tuple<>(slotGroup, slotName), stacks);
+                        map.put(new Pair<>(slotGroup, slotName), stacks);
                     }
                 }
                 return map;

@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(LivingEntity.class)
 public class FrostFallDamageMixin {
     @Inject(method = "causeFallDamage", at = @At("HEAD"), cancellable = true)
-    private void frostFall(double distance, float multiplier, DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+    private void frostFall(double fallDistance, float damageModifier, DamageSource damageSource, CallbackInfoReturnable<Boolean> cir) {
         if (FrostDivePower.isDiving((LivingEntity) (Object) this)) cir.setReturnValue(false);
     }
 }

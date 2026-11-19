@@ -11,7 +11,7 @@ import net.minecraft.world.entity.projectile.hurtingprojectile.SmallFireball;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -29,10 +29,10 @@ public final class FamiliarFoxActions {
                 ShapeShifterCurseFabric.identifier("blocking"), new io.github.apace100.apoli.power.factory.condition.ConditionFactory<Entity>(
                         ShapeShifterCurseFabric.identifier("blocking"), new SerializableData(),
                         (data, entity) -> entity instanceof LivingEntity living && living.isBlocking()));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(
                 ShapeShifterCurseFabric.identifier("fireball_at_target"), new SerializableData(), (data, pair) -> {
-            if (!(pair.getA() instanceof LivingEntity actor) || !(actor.level() instanceof ServerLevel world)) return;
-            Vec3 direction = pair.getB().getBoundingBox().getCenter().subtract(actor.getEyePosition()).normalize();
+            if (!(pair.getFirst() instanceof LivingEntity actor) || !(actor.level() instanceof ServerLevel world)) return;
+            Vec3 direction = pair.getSecond().getBoundingBox().getCenter().subtract(actor.getEyePosition()).normalize();
             var fireball = new SmallFireball(world, actor, direction);
             fireball.setPos(actor.getEyePosition().add(direction.scale(0.6)));
             world.addFreshEntity(fireball);
@@ -76,11 +76,11 @@ public final class FamiliarFoxActions {
         }
         double radius = data.getDouble("radius");
         if (radius <= 0) return;
-        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
-        Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
+        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
+        Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
         for (var target : world.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(radius),
                 target -> target != actor && target.isAlive() && !target.isSpectator() && target.distanceToSqr(center) <= radius * radius)) {
-            var pair = new Tuple<Entity, Entity>(actor, target);
+            var pair = new Pair<Entity, Entity>(actor, target);
             if (action != null && (condition == null || condition.test(pair))) action.accept(pair);
         }
         for (int i = 0; i < 64; i++) {

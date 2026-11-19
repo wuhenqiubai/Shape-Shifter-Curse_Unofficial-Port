@@ -18,10 +18,10 @@ public class MouseMixin {
     private Minecraft minecraft;
 
     @Inject(method = "onScroll", at = @At("HEAD"), cancellable = true)
-    private void ssc$onMouseScroll(long window, double horizontal, double vertical, CallbackInfo ci) {
-        if (window == Minecraft.getInstance().getWindow().handle()) {
-            double d = ((Boolean) this.minecraft.options.discreteMouseScroll().get() ? Math.signum(vertical) : vertical) * (Double) this.minecraft.options.mouseWheelSensitivity().get();
-            if (this.minecraft.getOverlay() == null && this.minecraft.screen == null && ShapeShifterCurseFabricClient.scrollActiveSkillKeybind.isDown()) {
+    private void ssc$onMouseScroll(long handle, double xoffset, double yoffset, CallbackInfo ci) {
+        if (handle == Minecraft.getInstance().getWindow().handle()) {
+            double d = ((Boolean) this.minecraft.options.discreteMouseScroll().get() ? Math.signum(yoffset) : yoffset) * (Double) this.minecraft.options.mouseWheelSensitivity().get();
+            if (this.minecraft.gui.overlay() == null && this.minecraft.gui.screen() == null && ShapeShifterCurseFabricClient.scrollActiveSkillKeybind.isDown()) {
                 MagicGUIRender.onMouseScroll(d);
                 ci.cancel();
             }

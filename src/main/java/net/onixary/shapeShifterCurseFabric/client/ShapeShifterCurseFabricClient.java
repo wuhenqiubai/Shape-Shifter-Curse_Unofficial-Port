@@ -101,17 +101,17 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 	public static boolean isBlockingClipAtLedge = false;
 
 	public static void openBookScreen(Player user) {
-		if (!(Minecraft.getInstance().screen instanceof BookOfShapeShifterScreenV2_P1)) {
+		if (!(Minecraft.getInstance().gui.screen() instanceof BookOfShapeShifterScreenV2_P1)) {
 			BookOfShapeShifterScreenV2_P1 bookScreen = new BookOfShapeShifterScreenV2_P1();
 			bookScreen.currentPlayer = user;
-			Minecraft.getInstance().setScreen(bookScreen);
+			Minecraft.getInstance().gui.setScreen(bookScreen);
 		}
 	}
 	public static void openStartBookScreen(Player user) {
-		if (!(Minecraft.getInstance().screen instanceof StartBookScreenV2)) {
+		if (!(Minecraft.getInstance().gui.screen() instanceof StartBookScreenV2)) {
 			StartBookScreenV2 startScreen = new StartBookScreenV2();
 			startScreen.currentPlayer = user;
-			Minecraft.getInstance().setScreen(startScreen);
+			Minecraft.getInstance().gui.setScreen(startScreen);
 		}
 	}
 
@@ -333,7 +333,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 			}
 			if (openTestUIKeybind.isDown()) {
 				FormUpgradeScreen screen = new FormUpgradeScreen(-1, Component.literal(""), PerkUtils.getPlayerNowPerkTree(client.player));
-				client.setScreen(screen);
+				client.gui.setScreen(screen);
 			}
 			MagicGUIRender.onClientTick();
 		});

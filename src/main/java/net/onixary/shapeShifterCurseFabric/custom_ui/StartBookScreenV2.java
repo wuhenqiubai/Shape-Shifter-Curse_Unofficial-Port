@@ -65,8 +65,8 @@ public class StartBookScreenV2 extends Screen implements WidgetEXUtils.IWidgetEX
                     // buf.writeUuid(currentPlayer.getUuid());
                     // 发送到服务端
                     ClientPlayNetworking.send(new BytePayload(BytePayload.id(ModPackets.VALIDATE_START_BOOK_BUTTON),  buf));
-                    if(Minecraft.getInstance().screen instanceof StartBookScreenV2){
-                        Minecraft.getInstance().setScreen(null);
+                    if(Minecraft.getInstance().gui.screen() instanceof StartBookScreenV2){
+                        Minecraft.getInstance().gui.setScreen(null);
                     }
                     this.onClose();
                 }

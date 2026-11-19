@@ -40,7 +40,7 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             at = @At("HEAD"),
             cancellable = true
     )
-    public void setupTransformsInject(AvatarRenderState avatarRenderState, PoseStack poseStack, float f, float g, CallbackInfo ci) {
+    public void setupTransformsInject(AvatarRenderState state, PoseStack poseStack, float bodyRot, float entityScale, CallbackInfo ci) {
         // 如果 vivecraft 对此Inject仍不兼容 把下面代码解除注释
         /*
         if (FabricLoader.getInstance().isModLoaded("vivecraft")) {
@@ -48,10 +48,10 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             return;
         }
         */
-        if (!avatarRenderState.isFallFlying) {
+        if (!state.isFallFlying) {
             return;
         }
-        AbstractClientPlayer abstractClientPlayerEntity = ssc$getRenderedPlayer(avatarRenderState);
+        AbstractClientPlayer abstractClientPlayerEntity = ssc$getRenderedPlayer(state);
         if (abstractClientPlayerEntity == null) {
             return;
         }
@@ -60,8 +60,8 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
             return;
         }
         else{
-            super.setupRotations(avatarRenderState, poseStack, f, g);
-            poseStack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(avatarRenderState.flyingYRot)));
+            super.setupRotations(state, poseStack, bodyRot, entityScale);
+            poseStack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(state.flyingYRot)));
             poseStack.mulPose(Axis.XP.rotationDegrees(0.0F));
             // 你可以在这里添加任何额外的旋转
             poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));

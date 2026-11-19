@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ProjectileWeaponItem.class)
 public abstract class CompoundBowMixin {
     @Inject(method = "createProjectile", at = @At("RETURN"), cancellable = true)
-    private void ssc$kineticArrow(Level level, LivingEntity shooter, ItemStack weapon, ItemStack ammo, boolean crit,
+    private void ssc$kineticArrow(Level level, LivingEntity shooter, ItemStack weapon, ItemStack projectile, boolean isCrit,
                                   CallbackInfoReturnable<Projectile> cir) {
         if (weapon.is(RegCustomItem.COMPOUND_KINETIC_BOW) && cir.getReturnValue() instanceof AbstractArrow arrow) {
             AbstractArrowAccessor accessor = (AbstractArrowAccessor) arrow;

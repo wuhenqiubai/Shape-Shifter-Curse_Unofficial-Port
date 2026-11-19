@@ -17,6 +17,8 @@ import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.GsonHelper;
@@ -100,7 +102,7 @@ public class Origins implements ModInitializer, OrderedResourceListenerInitializ
 			//content.add(ModItems.ORB_OF_ORIGIN);
 		});
 
-		net.minecraft.advancements.CriteriaTriggers.register(ChoseOriginCriterion.ID.toString(), ChoseOriginCriterion.INSTANCE);
+		Registry.register(BuiltInRegistries.TRIGGER_TYPES, ChoseOriginCriterion.ID, ChoseOriginCriterion.INSTANCE);
 	}
 
 	public static void serializeConfig() {

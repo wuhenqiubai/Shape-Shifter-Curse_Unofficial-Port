@@ -31,8 +31,8 @@ public class CapeFeatureRendererMixin {
 
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/AvatarRenderState;FF)V", at = @At("HEAD"))
     private void capturePlayer(PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
-                               int i, AvatarRenderState avatarRenderState, float f, float g, CallbackInfo ci) {
-        Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
+                               int lightCoords, AvatarRenderState state, float yRot, float xRot, CallbackInfo ci) {
+        Entity entity = Minecraft.getInstance().level.getEntity(state.id);
         this.ssc$capePlayer = entity instanceof AbstractClientPlayer player ? player : null;
     }
 
@@ -65,7 +65,7 @@ public class CapeFeatureRendererMixin {
                     target = "Lnet/minecraft/client/renderer/SubmitNodeCollector;submitModel(Lnet/minecraft/client/model/Model;Ljava/lang/Object;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/rendertype/RenderType;IIILnet/minecraft/client/renderer/feature/ModelFeatureRenderer$CrumblingOverlay;)V",
                     shift = At.Shift.BEFORE))
     private void addCapeUpwardRotation(PoseStack poseStack, SubmitNodeCollector submitNodeCollector,
-                                       int i, AvatarRenderState avatarRenderState, float f, float g, CallbackInfo ci) {
+                                       int lightCoords, AvatarRenderState state, float yRot, float xRot, CallbackInfo ci) {
         if (ssc$capePlayer != null) {
             float baseRotation = getCapeBaseRotateAngle(ssc$capePlayer);
             poseStack.mulPose(Axis.XP.rotationDegrees(baseRotation));

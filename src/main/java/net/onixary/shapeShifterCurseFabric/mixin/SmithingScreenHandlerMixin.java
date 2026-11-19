@@ -22,7 +22,7 @@ import java.util.Optional;
 @Mixin(SmithingMenu.class)
 public class SmithingScreenHandlerMixin {
     @Inject(method = "onTake", at = @At("HEAD"), cancellable = true)
-    public void onTake(Player player, ItemStack itemStack, CallbackInfo ci) {
+    public void onTake(Player player, ItemStack carried, CallbackInfo ci) {
         SmithingMenu realThis = (SmithingMenu) (Object) this;
         ItemCombinerMenuAccessor combiner = (ItemCombinerMenuAccessor) realThis;
         Level level = ((SmithingMenuAccessor) realThis).ssc_getLevel();
@@ -34,8 +34,8 @@ public class SmithingScreenHandlerMixin {
         }
         SmithingRecipe recipe = recipeOptional.get().value();
         if (recipe instanceof ISmithingRecipeEX iSmithingRecipeEX && iSmithingRecipeEX.overrideVanillaOnTakeOutput()) {
-            iSmithingRecipeEX.onTakeOutput(realThis, player, itemStack);
-            itemStack.onCraftedBy(player, itemStack.getCount());
+            iSmithingRecipeEX.onTakeOutput(realThis, player, carried);
+            carried.onCraftedBy(player, carried.getCount());
             combiner.ssc_getAccess().execute((world, pos) -> world.levelEvent(1044, pos, 0));
             ci.cancel();
         }

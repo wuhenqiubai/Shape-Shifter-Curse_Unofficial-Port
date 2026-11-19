@@ -20,13 +20,13 @@ public abstract class HoldBreathMixin extends Entity {
     }
 
     @Inject(at = @At("HEAD"), method = "decreaseAirSupply", cancellable = true)
-    private void getNextAirUnderwater(int air, CallbackInfoReturnable<Integer> info) {
+    private void getNextAirUnderwater(int currentSupply, CallbackInfoReturnable<Integer> info) {
         PowerHolderComponent component = PowerHolderComponent.KEY.get(this);
 
 
         if (PowerHolderComponent.getPowers(this, HoldBreathPower.class).stream().anyMatch(Power::isActive)) {
             int i = 3;
-            int returnValue = this.random.nextInt(i + 1) > 0 ? air : air - 1;
+            int returnValue = this.random.nextInt(i + 1) > 0 ? currentSupply : currentSupply - 1;
             info.setReturnValue(returnValue);
         }
 

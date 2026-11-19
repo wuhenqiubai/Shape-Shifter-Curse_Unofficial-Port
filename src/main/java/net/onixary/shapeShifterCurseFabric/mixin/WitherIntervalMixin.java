@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class WitherIntervalMixin {
     @Redirect(method = "tickServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/entity/LivingEntity;Ljava/lang/Runnable;)Z",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/effect/MobEffect;shouldApplyEffectTickThisTick(II)Z"))
-    private boolean ssc$witherInterval(MobEffect effect, int duration, int amplifier, ServerLevel serverLevel, LivingEntity entity, Runnable callback) {
-        boolean vanilla = effect.shouldApplyEffectTickThisTick(duration, amplifier);
-        return effect == MobEffects.WITHER.value() ? WitherIntervalPower.shouldApply(entity, duration, amplifier, vanilla) : vanilla;
+    private boolean ssc$witherInterval(MobEffect effect, int tickCount, int amplification, ServerLevel serverLevel, LivingEntity target, Runnable onEffectUpdate) {
+        boolean vanilla = effect.shouldApplyEffectTickThisTick(tickCount, amplification);
+        return effect == MobEffects.WITHER.value() ? WitherIntervalPower.shouldApply(target, tickCount, amplification, vanilla) : vanilla;
     }
 }

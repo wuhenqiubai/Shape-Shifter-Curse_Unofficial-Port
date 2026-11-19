@@ -32,7 +32,7 @@ public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRend
     }
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void init(EntityRendererProvider.Context ctx, boolean slim, CallbackInfo ci) {
+    public void init(EntityRendererProvider.Context context, boolean slimSteve, CallbackInfo ci) {
         this.addLayer(new MouthItemFeature<>(this, this.entityRenderDispatcher.getItemInHandRenderer()));
         this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, this.entityRenderDispatcher.getItemInHandRenderer()));
         ItemInHandRenderer itemRenderer = this.entityRenderDispatcher.getItemInHandRenderer();

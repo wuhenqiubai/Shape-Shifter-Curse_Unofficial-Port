@@ -12,7 +12,7 @@ import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -287,12 +287,12 @@ public class FormRenderUtils {
             //     }
             // }
             IForm playerFormBase = FormUtils.getPlayerForm(player);
-            Tuple<Identifier, Identifier> currentLayer = playerFormBase.getRenderLayerOverride();
+            Pair<Identifier, Identifier> currentLayer = playerFormBase.getRenderLayerOverride();
             if (currentLayer != null) {
                 List<FormRenderer> formRenderers = new ArrayList<>();
-                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getFirst(), currentLayer.getSecond());
                 if (formRenderer == null) {
-                    ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", currentLayer.getA(), currentLayer.getB());
+                    ShapeShifterCurseFabric.LOGGER.warn("ShapeShifterCurseFabric: IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", currentLayer.getFirst(), currentLayer.getSecond());
                     return new ArrayList<>();
                 }
                 formRenderers.add(formRenderer);
@@ -330,23 +330,23 @@ public class FormRenderUtils {
         List<FormRenderer> formRenderers = new ArrayList<>();
         try {
             IForm form = FormUtils.getPlayerForm(player);
-            Tuple<Identifier, Identifier> layerOverride = form.getRenderLayerOverride();
+            Pair<Identifier, Identifier> layerOverride = form.getRenderLayerOverride();
             if (layerOverride != null) {
-                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layerOverride.getA(), layerOverride.getB());
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(layerOverride.getFirst(), layerOverride.getSecond());
                 if (formRenderer != null) {
                     formRenderers.add(formRenderer);
                 } else {
-                    ShapeShifterCurseFabric.LOGGER.warn("IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", layerOverride.getA(), layerOverride.getB());
+                    ShapeShifterCurseFabric.LOGGER.warn("IForm.layerRenderOverwrite is not null, but the model is not registered: {} - {}", layerOverride.getFirst(), layerOverride.getSecond());
                 }
                 return formRenderers;
             }
-            Tuple<Identifier, Identifier> currentLayer = form.getFormLayer();
+            Pair<Identifier, Identifier> currentLayer = form.getFormLayer();
             if (currentLayer != null) {
-                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getA(), currentLayer.getB());
+                FormRenderer formRenderer = FormRenderUtils.getFormRenderer(currentLayer.getFirst(), currentLayer.getSecond());
                 if (formRenderer != null) {
                     formRenderers.add(formRenderer);
                 } else {
-                    ShapeShifterCurseFabric.LOGGER.warn("IForm.formLayer is not null, but the model is not registered: {} - {}", currentLayer.getA(), currentLayer.getB());
+                    ShapeShifterCurseFabric.LOGGER.warn("IForm.formLayer is not null, but the model is not registered: {} - {}", currentLayer.getFirst(), currentLayer.getSecond());
                 }
                 return formRenderers;
             }

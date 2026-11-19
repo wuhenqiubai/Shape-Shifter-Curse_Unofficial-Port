@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.Power;
 import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.Phantom;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Consumer;
 
 public class HissPhantomPower extends Power {
-    private final @Nullable Consumer<Tuple<Entity, Entity>> onHissPhantomAction;
+    private final @Nullable Consumer<Pair<Entity, Entity>> onHissPhantomAction;
 
     public HissPhantomPower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
         super(type, entity);
@@ -24,7 +24,7 @@ public class HissPhantomPower extends Power {
 
     public void invokeAction(LivingEntity powerOwner, Phantom phantom) {
         if (this.onHissPhantomAction != null) {
-            this.onHissPhantomAction.accept(new Tuple<>(powerOwner, phantom));
+            this.onHissPhantomAction.accept(new Pair<>(powerOwner, phantom));
         }
     }
 

@@ -29,7 +29,7 @@ import java.util.List;
 public class PlayerMovementControlMixin implements IMoveController {
 
     @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
-    private void preventTravelWhenAttached(Vec3 movementInput, CallbackInfo ci) {
+    private void preventTravelWhenAttached(Vec3 input, CallbackInfo ci) {
         Player player = (Player) (Object) this;
 
         // 添加空值检查
@@ -153,14 +153,14 @@ public class PlayerMovementControlMixin implements IMoveController {
     }
 
     @ModifyVariable(method = "makeStuckInBlock", at = @At("HEAD"), ordinal = 0, argsOnly = true)
-    private Vec3 SlowdownPercentMixin(Vec3 multiplier) {
+    private Vec3 SlowdownPercentMixin(Vec3 speedMultiplier) {
         Player player = (Player) (Object) this;
         List<SlowdownPercentPower> slowdownPower = PowerHolderComponent.getPowers(player, SlowdownPercentPower.class);
         float slowdownPercent = 1.0f;
         for (SlowdownPercentPower power : slowdownPower) {
             slowdownPercent *= power.Multiplier;
         }
-        return multiplier.scale(slowdownPercent);
+        return speedMultiplier.scale(slowdownPercent);
     }
 
     @Inject(method = "tick", at = @At("HEAD"))

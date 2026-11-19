@@ -77,17 +77,17 @@ public abstract class AdjustItemHoldFeatureRendererMixin<S extends ArmedEntityRe
             cancellable = true
     )
     private void hideHeldItem(
-            PoseStack matrices,
-            SubmitNodeCollector vertexConsumers,
-            int light,
-            S armedEntityRenderState,
-            float limbAngle,
-            float limbDistance,
+            PoseStack poseStack,
+            SubmitNodeCollector submitNodeCollector,
+            int lightCoords,
+            S state,
+            float yRot,
+            float xRot,
             CallbackInfo ci
     ) {
         // 条件判断：例如隐藏特定玩家或满足条件时
 
-        if (shouldHideItem(armedEntityRenderState)) {
+        if (shouldHideItem(state)) {
             ci.cancel(); // 取消原版渲染逻辑
         }
     }

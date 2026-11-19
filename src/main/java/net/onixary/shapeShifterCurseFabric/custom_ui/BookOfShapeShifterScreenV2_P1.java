@@ -77,14 +77,14 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
                         if (FormColorSelectMenu.instance == null) {
                             Screen screen = new FormColorSelectMenu(Component.literal("text.shape-shifter-curse.config.form_color_select_menu"), this);
 	                        if (minecraft != null) {
-		                        minecraft.setScreen(screen);
+		                        minecraft.gui.setScreen(screen);
 	                        }
                         }
                     } else {
                         if (FormColorSelectMenuV2.instance == null) {
                             Screen screen = new FormColorSelectMenuV2(Component.literal("text.shape-shifter-curse.config.form_color_select_menu_v2"), this);
 	                        if (minecraft != null) {
-		                        minecraft.setScreen(screen);
+		                        minecraft.gui.setScreen(screen);
 	                        }
                         }
                     }
@@ -132,7 +132,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
     private void NextPage() {
         BookOfShapeShifterScreenV2_P2 NextPage = new BookOfShapeShifterScreenV2_P2();
         NextPage.currentPlayer = currentPlayer;
-        Minecraft.getInstance().setScreen(NextPage);
+        Minecraft.getInstance().gui.setScreen(NextPage);
     }
 
     private Button BuildDetailScreenButton(int InBookPosX, int InBookPosY, int SizeX, int SizeY, Component DetailText) {
@@ -146,7 +146,7 @@ public class BookOfShapeShifterScreenV2_P1 extends Screen implements WidgetEXUti
         int FixedPosY = BookPosY + InBookPosY * BookScale;
         int FixedSizeX = SizeX * BookScale;
         int FixedSizeY = SizeY * BookScale;
-	    return Button.builder(Component.nullToEmpty("+"), button -> Minecraft.getInstance().setScreen(new DetailScreen(this, DetailText))).size(FixedSizeX, FixedSizeY).pos(FixedPosX, FixedPosY).build();
+	    return Button.builder(Component.nullToEmpty("+"), button -> Minecraft.getInstance().gui.setScreen(new DetailScreen(this, DetailText))).size(FixedSizeX, FixedSizeY).pos(FixedPosX, FixedPosY).build();
     }
 
 	@Override

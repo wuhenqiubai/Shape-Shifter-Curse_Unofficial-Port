@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class ServerPlayerEntityMixin {
 
     @Inject(method = "restoreFrom", at = @At("RETURN"))
-    private void ssc$copySpawnPoint(ServerPlayer oldPlayer, boolean alive, CallbackInfo ci) {
+    private void ssc$copySpawnPoint(ServerPlayer oldPlayer, boolean restoreAll, CallbackInfo ci) {
         ServerPlayer self = (ServerPlayer)(Object)this;
         self.copyRespawnPosition(oldPlayer);
     }

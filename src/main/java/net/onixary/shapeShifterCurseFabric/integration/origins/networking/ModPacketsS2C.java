@@ -78,8 +78,8 @@ public class ModPacketsS2C {
 			}
 
 			component.setOrigin(layer, origin);
-			if (ctx.client().screen instanceof WaitForNextLayerScreen) {
-				((WaitForNextLayerScreen) ctx.client().screen).openSelection();
+			if (ctx.client().gui.screen() instanceof WaitForNextLayerScreen) {
+				((WaitForNextLayerScreen) ctx.client().gui.screen()).openSelection();
 			}
 		});
 	}
@@ -109,7 +109,7 @@ public class ModPacketsS2C {
                 }
             });
             Collections.sort(layers);
-            ctx.client().setScreen(new ChooseOriginScreen(layers, 0, showDirtBackground));
+            ctx.client().gui.setScreen(new ChooseOriginScreen(layers, 0, showDirtBackground));
         });*/
 	}
 

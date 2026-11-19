@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
 import net.minecraft.world.entity.projectile.arrow.Arrow;
 import net.minecraft.world.inventory.Slot;
@@ -77,7 +78,7 @@ public class FamiliarFoxPerkCheck {
         add(player, "mana_capacity_2");
         context.assertTrue(ManaUtils.getPlayerMaxMana(player) == 150, "Capacity II replaces I");
         add(player, "siphon_2");
-        var zombie = context.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 3));
+        var zombie = context.spawn(EntityTypes.ZOMBIE, new BlockPos(0, 1, 3));
         var arrow = new Arrow(context.getLevel(), player, new ItemStack(Items.ARROW), null);
         zombie.hurt(player.damageSources().arrow(arrow, player), 3);
         context.assertTrue(ManaUtils.getPlayerMana(player) == 54, "Projectile hits restore mana");
@@ -90,7 +91,7 @@ public class FamiliarFoxPerkCheck {
     public void deflectionPayment(GameTestHelper context) {
         var player = player(context);
         add(player, "deflection_reduction"); add(player, "deflection_payment");
-        var skeleton = context.spawn(EntityType.SKELETON, new BlockPos(0, 1, 3));
+        var skeleton = context.spawn(EntityTypes.SKELETON, new BlockPos(0, 1, 3));
         var arrow = new Arrow(context.getLevel(), skeleton, new ItemStack(Items.ARROW), null);
         var source = player.damageSources().arrow(arrow, skeleton);
         player.hurt(source, 8);
@@ -113,13 +114,13 @@ public class FamiliarFoxPerkCheck {
         player.startUsingItem(InteractionHand.MAIN_HAND);
         for (int i = 0; i < 6; i++) player.doTick();
         context.assertTrue(player.isBlocking(), "Shield raised");
-        var skeleton = context.spawn(EntityType.SKELETON, new BlockPos(0, 1, 3));
+        var skeleton = context.spawn(EntityTypes.SKELETON, new BlockPos(0, 1, 3));
         var arrow = new Arrow(context.getLevel(), skeleton, new ItemStack(Items.ARROW), null); arrow.setPos(skeleton.position());
         float before = player.getHealth();
         player.hurt(player.damageSources().arrow(arrow, skeleton), 6);
         context.assertTrue(player.getHealth() == before, "Shield blocks damage");
         context.assertTrue(ManaUtils.getPlayerMana(player) == 45, "Blocked projectile costs five mana");
-        var fireballs = context.getLevel().getEntities(EntityType.SMALL_FIREBALL, player.getBoundingBox().inflate(3), e -> e.getOwner() == player);
+        var fireballs = context.getLevel().getEntities(EntityTypes.SMALL_FIREBALL, player.getBoundingBox().inflate(3), e -> e.getOwner() == player);
         context.assertTrue(fireballs.size() == 1 && fireballs.get(0).getDeltaMovement().z > 0, "One fireball aimed at attacker");
         player.discard();
         context.succeed();
@@ -132,7 +133,7 @@ public class FamiliarFoxPerkCheck {
         add(player, "siphon_2");
         var charge = (ChargePower) add(player, "siphoning_ring");
         context.setBlock(new BlockPos(0, 2, 5), Blocks.STONE);
-        var target = context.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 4));
+        var target = context.spawn(EntityTypes.ZOMBIE, new BlockPos(0, 1, 4));
         charge.onUse(); charge.onUse();
         context.assertTrue(ManaUtils.getPlayerMana(player) == 30, "Holding costs twenty once");
         charge.fire(false);
@@ -187,7 +188,7 @@ public class FamiliarFoxPerkCheck {
                 onHitEntity(new EntityHitResult(target));
             }
         }
-        var target = context.spawn(EntityType.COW, new BlockPos(1, 2, 1));
+        var target = context.spawn(EntityTypes.COW, new BlockPos(1, 2, 1));
         target.setNoAi(true);
         for (var item : new Item[]{RegCustomItem.HEALING_CHARM, RegCustomItem.HARMING_CHARM, RegCustomItem.POISON_CHARM}) {
             var arrow = new TestCharm();

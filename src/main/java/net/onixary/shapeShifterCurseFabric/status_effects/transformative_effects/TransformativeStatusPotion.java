@@ -19,7 +19,7 @@ public class TransformativeStatusPotion extends MobEffect {
     }
 
     @Override
-    public boolean isInstantenous() {
+    public boolean isInstantaneous() {
         return true;
     }
 
@@ -30,13 +30,13 @@ public class TransformativeStatusPotion extends MobEffect {
 
     @Override
     public boolean applyEffectTick(ServerLevel serverLevel, LivingEntity entity, int amplifier) {
-        this.applyInstantenousEffect(serverLevel, null, null, entity, amplifier, 0);
+        this.applyInstantaneousEffect(serverLevel, null, null, entity, amplifier, 0);
         entity.removeEffect(net.minecraft.core.registries.BuiltInRegistries.MOB_EFFECT.wrapAsHolder(this));
         return true;
     }
 
     @Override
-    public void applyInstantenousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
+    public void applyInstantaneousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
         if (!target.level().isClientSide() && target instanceof ServerPlayer player) {
             TransformativeStatusInstance instance = EffectManager.getTransformativeEffect(player);
             if (instance == null || instance.getTransformativeEffectType() == null || !instance.getTransformativeEffectType().getToForm(player).equals(this.TransformativeStatusEffect.getToForm(player))) {  // 如果当前效果的形态与regStatusEffect不同

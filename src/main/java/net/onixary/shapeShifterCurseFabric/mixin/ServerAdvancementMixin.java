@@ -22,7 +22,7 @@ public class ServerAdvancementMixin {
 	private Map<Identifier, AdvancementHolder> advancements;
 
 	@Inject(method = "apply(Ljava/util/Map;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/util/profiling/ProfilerFiller;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/AdvancementTree;<init>()V",shift = At.Shift.BEFORE))
-	private void patchAdvancements(Map<Identifier, JsonElement> map, ResourceManager resourceManager, ProfilerFiller profiler, CallbackInfo ci) {
+	private void patchAdvancements(Map<Identifier, JsonElement> preparations, ResourceManager manager, ProfilerFiller profiler, CallbackInfo ci) {
 		ImmutableMap.Builder<Identifier,AdvancementHolder> builder = ImmutableMap.builder();
 		this.advancements.forEach((id, entry) ->
 				builder.put(id,AdvancementUtils.onAdvancementAdded(entry)));

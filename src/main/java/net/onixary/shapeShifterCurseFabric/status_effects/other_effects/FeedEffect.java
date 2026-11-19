@@ -16,12 +16,12 @@ public class FeedEffect extends MobEffect {
     }
 
     @Override
-    public boolean isInstantenous() {
+    public boolean isInstantaneous() {
         return true;
     }
 
     @Override
-    public void applyInstantenousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
+    public void applyInstantaneousEffect(ServerLevel serverLevel, @Nullable Entity source, @Nullable Entity attacker, LivingEntity target, int amplifier, double proximity) {
         // 检查目标是否为玩家
         if (target instanceof Player player) {
             // 基础数值

@@ -24,21 +24,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class PlayerCapeModelMixin {
 
     @Inject(method = "setupAnim(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)V", at = @At("HEAD"))
-    private void ssc$clampCapeXRotation(AvatarRenderState avatarRenderState, CallbackInfo ci) {
+    private void ssc$clampCapeXRotation(AvatarRenderState state, CallbackInfo ci) {
         Level level = Minecraft.getInstance().level;
         if (level == null) {
             return;
         }
-        Entity entity = level.getEntity(avatarRenderState.id);
+        Entity entity = level.getEntity(state.id);
         if (!(entity instanceof AbstractClientPlayer player)) {
             return;
         }
         if (!ssc$needModifyXRotationAngle(player)) {
             return;
         }
-        float movable = avatarRenderState.capeLean / 2.0F + avatarRenderState.capeFlap;
+        float movable = state.capeLean / 2.0F + state.capeFlap;
         float clamped = Mth.clamp(movable, -10.0F, 35.0F);
-        avatarRenderState.capeFlap += clamped - movable;
+        state.capeFlap += clamped - movable;
     }
 
     @Unique

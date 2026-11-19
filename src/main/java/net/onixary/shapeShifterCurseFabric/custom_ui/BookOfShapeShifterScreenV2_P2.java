@@ -113,7 +113,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
     private void NextPage() {
         BookOfShapeShifterScreenV2_P1 NextPage = new BookOfShapeShifterScreenV2_P1();
         NextPage.currentPlayer = currentPlayer;
-        Minecraft.getInstance().setScreen(NextPage);
+        Minecraft.getInstance().gui.setScreen(NextPage);
     }
 
     private Button BuildDetailScreenButton(int InBookPosX, int InBookPosY, int SizeX, int SizeY, Component DetailText) {
@@ -127,7 +127,7 @@ public class BookOfShapeShifterScreenV2_P2 extends Screen implements WidgetEXUti
         int FixedPosY = BookPosY + InBookPosY * BookScale;
         int FixedSizeX = SizeX * BookScale;
         int FixedSizeY = SizeY * BookScale;
-	    return Button.builder(Component.nullToEmpty("+"), button -> Minecraft.getInstance().setScreen(new DetailScreen(this, DetailText))).size(FixedSizeX, FixedSizeY).pos(FixedPosX, FixedPosY).build();
+	    return Button.builder(Component.nullToEmpty("+"), button -> Minecraft.getInstance().gui.setScreen(new DetailScreen(this, DetailText))).size(FixedSizeX, FixedSizeY).pos(FixedPosX, FixedPosY).build();
     }
 
     @Override

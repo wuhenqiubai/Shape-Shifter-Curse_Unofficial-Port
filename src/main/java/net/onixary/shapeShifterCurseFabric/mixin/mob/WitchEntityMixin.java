@@ -27,7 +27,7 @@ public abstract class WitchEntityMixin {
     private static final float POTION_REPLACE_CHANCE = 0.6f;
 
 	@Inject(method = "performRangedAttack", at = @At("HEAD"), cancellable = true)
-    private void injectCustomPotionAttack(LivingEntity target, float pullProgress, CallbackInfo ci) {
+    private void injectCustomPotionAttack(LivingEntity target, float power, CallbackInfo ci) {
         Witch witch = (Witch) (Object) this;
         Level world = witch.level();
 

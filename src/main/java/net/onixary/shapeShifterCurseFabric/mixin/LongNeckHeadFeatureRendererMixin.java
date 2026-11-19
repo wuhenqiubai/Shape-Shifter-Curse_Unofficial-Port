@@ -38,8 +38,8 @@ public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState,
     }
 
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At("HEAD"), cancellable = true)
-    private void shape_shifter_curse$modifyHeadStateForMAS(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int light, S livingEntityRenderState, float limbAngle, float limbDistance, CallbackInfo ci) {
-        AbstractClientPlayer player = getRenderedPlayer(livingEntityRenderState);
+    private void shape_shifter_curse$modifyHeadStateForMAS(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, S state, float yRot, float xRot, CallbackInfo ci) {
+        AbstractClientPlayer player = getRenderedPlayer(state);
         if (player == null) {
             return;
         }
@@ -59,7 +59,7 @@ public class LongNeckHeadFeatureRendererMixin<S extends LivingEntityRenderState,
     }
 
     @Inject(method = "submit(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;ILnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;FF)V", at = @At("RETURN"))
-    private void shape_shifter_curse$restoreVanillaHeadFeatureForLongNeck(PoseStack matrixStack, SubmitNodeCollector vertexConsumerProvider, int light, S livingEntityRenderState, float limbAngle, float limbDistance, CallbackInfo ci) {
+    private void shape_shifter_curse$restoreVanillaHeadFeatureForLongNeck(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, int lightCoords, S state, float yRot, float xRot, CallbackInfo ci) {
         if (headBoneState != null) {
             headBoneState.restore();
             headBoneState = null;

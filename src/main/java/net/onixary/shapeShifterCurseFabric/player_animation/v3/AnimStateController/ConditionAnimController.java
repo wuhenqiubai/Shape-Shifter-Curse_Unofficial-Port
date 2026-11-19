@@ -1,6 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimStateController;
 
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -15,21 +15,21 @@ import java.util.List;
 import java.util.function.BiFunction;
 
 public class ConditionAnimController extends AbstractAnimStateController {
-    private List<Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder>> animConditionList;
-    private final List<Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData>> animConditionBuilder;
+    private List<Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder>> animConditionList;
+    private final List<Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData>> animConditionBuilder;
     private @Nullable AnimationHolder defaultAnimation;
     private final @NotNull AnimUtils.AnimationHolderData defaultAnimationData;
 
-    public ConditionAnimController(List<Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData>> animConditionBuilder, @NotNull AnimUtils.AnimationHolderData defaultAnimationData) {
+    public ConditionAnimController(List<Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData>> animConditionBuilder, @NotNull AnimUtils.AnimationHolderData defaultAnimationData) {
         this.animConditionBuilder = animConditionBuilder;
         this.defaultAnimationData = AnimUtils.ensureAnimHolderDataNotNull(defaultAnimationData);
     }
 
     @Override
     public void registerAnim(Player player, AnimSystem.AnimSystemData data) {
-        List<Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder>> animConditionList = new LinkedList<>();
-        for (Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData> pair : this.animConditionBuilder) {
-            animConditionList.add(new Tuple<>(pair.getA(), AnimUtils.ensureAnimHolderDataNotNull(pair.getB()).build()));
+        List<Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder>> animConditionList = new LinkedList<>();
+        for (Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimUtils.AnimationHolderData> pair : this.animConditionBuilder) {
+            animConditionList.add(new Pair<>(pair.getFirst(), AnimUtils.ensureAnimHolderDataNotNull(pair.getSecond()).build()));
         }
         this.animConditionList = animConditionList;
         this.defaultAnimation = this.defaultAnimationData.build();
@@ -38,9 +38,9 @@ public class ConditionAnimController extends AbstractAnimStateController {
 
     @Override
     public @Nullable AnimationHolder getAnimation(Player player, AnimSystem.AnimSystemData data) {
-        for (Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder> pair : this.animConditionList) {
-            if (pair.getA().apply(player, data)) {
-                return pair.getB();
+        for (Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder> pair : this.animConditionList) {
+            if (pair.getFirst().apply(player, data)) {
+                return pair.getSecond();
             }
         }
         return this.defaultAnimation;
@@ -49,8 +49,8 @@ public class ConditionAnimController extends AbstractAnimStateController {
     @Override
     public @NotNull List<AnimationHolder> getAllAnimations() {
         List<AnimationHolder> result = new ArrayList<>();
-        for (Tuple<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder> pair : this.animConditionList) {
-            result.add(pair.getB());
+        for (Pair<BiFunction<Player, AnimSystem.AnimSystemData, Boolean>, AnimationHolder> pair : this.animConditionList) {
+            result.add(pair.getSecond());
         }
         result.add(this.defaultAnimation);
         return result;

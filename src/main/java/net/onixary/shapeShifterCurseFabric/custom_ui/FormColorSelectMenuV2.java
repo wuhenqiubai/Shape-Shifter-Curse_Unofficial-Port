@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
@@ -171,7 +171,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     private static final String identifierPrefix = "dynamic_fcs_v2_";
     private static long nowColorSettingIndex = 0;  // 自增ID
     private int timer = 0;
-    private List<Tuple<FCS_ButtonWidget, FCS_ButtonWidget>> globalSlotButton = new ArrayList<>();
+    private List<Pair<FCS_ButtonWidget, FCS_ButtonWidget>> globalSlotButton = new ArrayList<>();
     private List<EditBox> globalSlotNameInputs = new ArrayList<>();
     private int formIDIndex = -1;
 
@@ -302,7 +302,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
     @Override
     public Identifier getLayerID() {
         IForm playerForm = this.getForm();
-        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
+        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getSecond() : playerForm.getRenderLayerOverride().getSecond();
     }
 
     @Override
@@ -347,7 +347,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
                 }
             }
         }), (textSupplier) -> textSupplier.get().copy(), 30);
-        globalSlotButton.add(new Tuple<>(updButtonWidget, deleteButtonWidget));
+        globalSlotButton.add(new Pair<>(updButtonWidget, deleteButtonWidget));
         globalSlotNameInputs.add(textFieldWidget);
         textFieldWidget.setValue(this.getGlobalSlotName(Index));
         this.addRenderableWidget(updButtonWidget);
@@ -671,10 +671,10 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         }
         for (int index = 0; index < this.globalSlotNameInputs.size(); index++) {
             boolean dataExist = this.isGlobalSettingExists(index);
-            Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSlotButton.get(index);
-            FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
+            Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSlotButton.get(index);
+            FCS_ButtonWidget deleteButtonWidget = buttonWidget.getSecond();
             deleteButtonWidget.active = dataExist;
-            FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
+            FCS_ButtonWidget updButtonWidget = buttonWidget.getFirst();
             updButtonWidget.active = true;
             updButtonWidget.TEXTURE_X = dataExist ? 15 : 0;
         }
@@ -1148,7 +1148,7 @@ public class FormColorSelectMenuV2 extends Screen implements FormTextureUtils.Te
         this.saveDataToClient(true, true);
         ShapeShifterCurseFabricClient.formColorData.writeToConfig();
         if (this.parsetScreen != null && this.minecraft != null) {
-            this.minecraft.setScreen(this.parsetScreen);
+            this.minecraft.gui.setScreen(this.parsetScreen);
         } else {
             super.onClose();
         }

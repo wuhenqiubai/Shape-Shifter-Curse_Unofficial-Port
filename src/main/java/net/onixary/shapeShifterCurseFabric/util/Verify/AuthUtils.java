@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.Verify.KeyManager.RootKeyManager;
 // import net.onixary.shapeShifterCurseFabric.util.Verify.PatronDataSegment;
@@ -166,20 +166,20 @@ public final class AuthUtils {
         }
     }
 
-    private static final List<Tuple<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
+    private static final List<Pair<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>>> dataReaderRegistry = new ArrayList<>();
 
     public static void registerDataReader(BiPredicate<Integer, Integer> typeVersionPredicate, Function<FriendlyByteBuf, IDataSegment> dataReader) {
-        dataReaderRegistry.add(new Tuple<>(typeVersionPredicate, dataReader));
+        dataReaderRegistry.add(new Pair<>(typeVersionPredicate, dataReader));
     }
 
     // 由于DataSegment没有对应验证 所以改为package private
     static @Nullable IDataSegment readDataSegment(FriendlyByteBuf buf) {
         int type = buf.readInt();
         int version = buf.readInt();
-        for (Tuple<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>> reader : dataReaderRegistry) {
-            if (reader.getA().test(type, version)) {
+        for (Pair<BiPredicate<Integer, Integer>, Function<FriendlyByteBuf, IDataSegment>> reader : dataReaderRegistry) {
+            if (reader.getFirst().test(type, version)) {
                 buf.setIndex(0, buf.capacity());
-                return reader.getB().apply(buf);
+                return reader.getSecond().apply(buf);
             }
         }
         return null;
@@ -203,7 +203,7 @@ public final class AuthUtils {
     }
 
     private static final HashMap<Integer, KeySegment> storedKeySegments = new HashMap<>();
-    private static final List<Tuple<Long, KeySegment>> forgiveKeySegments = new ArrayList<>();
+    private static final List<Pair<Long, KeySegment>> forgiveKeySegments = new ArrayList<>();
     private static final long forgiveTime = 60 * 30;
     static {
         loadLocalKeySegments();
@@ -263,7 +263,7 @@ public final class AuthUtils {
                 return false;
             } else {
                 storedKeySegments.put(keySegment.getType(), keySegment);
-                forgiveKeySegments.add(new Tuple<>(System.currentTimeMillis() / 1000, storedKey));
+                forgiveKeySegments.add(new Pair<>(System.currentTimeMillis() / 1000, storedKey));
                 saveKey(keySegment);
                 return true;
             }
@@ -272,7 +272,7 @@ public final class AuthUtils {
 
     public static void removeExpiredKey() {
         long currentTime = System.currentTimeMillis() / 1000;
-        forgiveKeySegments.removeIf(pair -> pair.getA() + forgiveTime < currentTime);
+        forgiveKeySegments.removeIf(pair -> pair.getFirst() + forgiveTime < currentTime);
     }
 
     public static boolean isKeyCanUse(@Nullable KeySegment keySegment) {
@@ -290,8 +290,8 @@ public final class AuthUtils {
         if (storedKey.getVersion() <= keySegment.getVersion()) {
             return true;
         }
-        for (Tuple<Long, KeySegment> forgiveKeySegment : forgiveKeySegments) {
-            if (keySegment.softEquals(forgiveKeySegment.getB())) {
+        for (Pair<Long, KeySegment> forgiveKeySegment : forgiveKeySegments) {
+            if (keySegment.softEquals(forgiveKeySegment.getSecond())) {
                 return true;
             }
         }

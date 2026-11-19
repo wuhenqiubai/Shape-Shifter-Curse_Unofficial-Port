@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.entity;
 
-import net.minecraft.world.entity.EntityDimensions;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -22,7 +20,7 @@ public class RegCustomEntity {
     public static final EntityType<PotionCharmArrowEntity> POTION_CHARM_ARROW = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             ShapeShifterCurseFabric.identifier("potion_charm_arrow"),
-            FabricEntityTypeBuilder.create(MobCategory.MISC, PotionCharmArrowEntity::new).dimensions(EntityDimensions.fixed(0.5f, 0.5f)).trackable(64, 1).build(ResourceKey.create(Registries.ENTITY_TYPE, ShapeShifterCurseFabric.identifier("potion_charm_arrow"))));
+            EntityType.Builder.of(PotionCharmArrowEntity::new, MobCategory.MISC).sized(0.5f, 0.5f).clientTrackingRange(64).updateInterval(1).build(ResourceKey.create(Registries.ENTITY_TYPE, ShapeShifterCurseFabric.identifier("potion_charm_arrow"))));
 
     public static void init() {
     }

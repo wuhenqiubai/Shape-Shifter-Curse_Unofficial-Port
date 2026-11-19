@@ -29,7 +29,7 @@ public abstract class LodeStoneIntegrationMixin {
     // 调了半天 现在心情不好了 感觉Lodestone就没考虑别人的Mixin 直接ci.cancel还把客户端操作给屏蔽了 还有大量位置直接覆盖原始值 还不用mixinExtra读取原始值
 
     @Inject(method = "startUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;getUseDuration(Lnet/minecraft/world/entity/LivingEntity;)I"), order = 900)
-    private void setCurrentHand$getMaxUseTimeA(InteractionHand interactionHand, CallbackInfo ci) {
+    private void setCurrentHand$getMaxUseTimeA(InteractionHand hand, CallbackInfo ci) {
         if ((Object)this instanceof Player playerEntity) {
             FoodProperties fc = getPowerFoodComponent(playerEntity, useItem);
             if (fc == null) {
@@ -38,7 +38,7 @@ public abstract class LodeStoneIntegrationMixin {
             this.useItemRemaining = 32;
             if (!playerEntity.level().isClientSide()) {
                 this.setLivingEntityFlag(1, true);
-                this.setLivingEntityFlag(2, interactionHand == InteractionHand.OFF_HAND);
+                this.setLivingEntityFlag(2, hand == InteractionHand.OFF_HAND);
                 playerEntity.gameEvent(GameEvent.ITEM_INTERACT_START);
             }
         }

@@ -8,7 +8,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -34,7 +34,7 @@ public class ExplosionDamageEntityAction {
         int Power = data.getInt("power");
         float DamageMultiplier = data.getFloat("damage_multiplier");
         float baseDamage = data.getFloat("base_damage");
-        ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition = data.get("entity_condition");
+        ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition = data.get("entity_condition");
         ActionFactory<Entity>.Instance entityAction = data.get("entity_action");
         boolean explosion_damage_entity = data.get("explosion_damage_entity");
         explosion(entity, Power, entityCondition, entityAction, data.get("bientity_action"), explosion_damage_entity, baseDamage, DamageMultiplier);
@@ -42,9 +42,9 @@ public class ExplosionDamageEntityAction {
 
     private static void explosion(Entity entity,
                                   int power,
-                                  ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition,
+                                  ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition,
                                   ActionFactory<Entity>.Instance entityAction,
-                                  ActionFactory<Tuple<Entity, Entity>>.Instance bientityAction,
+                                  ActionFactory<Pair<Entity, Entity>>.Instance bientityAction,
                                   boolean explosion_damage_entity,
                                   float baseDamage,
                                   float damageMultiplier
@@ -66,7 +66,7 @@ public class ExplosionDamageEntityAction {
             if (target_entity.isSpectator()) {
                 continue;
             }
-            if (!target_entity.ignoreExplosion(null) && (entityCondition == null || entityCondition.test(new Tuple<>(entity, target_entity)))) {
+            if (!target_entity.ignoreExplosion(null) && (entityCondition == null || entityCondition.test(new Pair<>(entity, target_entity)))) {
                 double w = Math.sqrt(target_entity.distanceToSqr(ExplosionPos)) / (double) q;
                 if (w <= 1.0) {
                     double x = target_entity.getX() - ExplosionPos.x();
@@ -99,7 +99,7 @@ public class ExplosionDamageEntityAction {
                         if (entityAction != null) {
                             entityAction.accept(target_entity);
                         }
-                        if (bientityAction != null) bientityAction.accept(new Tuple<>(entity, target_entity));
+                        if (bientityAction != null) bientityAction.accept(new Pair<>(entity, target_entity));
                         target_entity.hurtMarked = true;
                     }
                 }

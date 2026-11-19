@@ -35,12 +35,12 @@ public class GameRendererMixin {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 0))
-    private void shape_shifter_curse$renderOverlayAboveHud(net.minecraft.client.DeltaTracker tickCounter, boolean tick, CallbackInfo ci) {
+    private void shape_shifter_curse$renderOverlayAboveHud(net.minecraft.client.DeltaTracker deltaTracker, boolean advanceGameTime, CallbackInfo ci) {
         TransformOverlayRenderer.render();
     }
 
     @ModifyExpressionValue(
-            method = "getNightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F",
+            method = "nightVisionScale(Lnet/minecraft/world/entity/LivingEntity;F)F",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/entity/LivingEntity;getEffect(Lnet/minecraft/core/Holder;)Lnet/minecraft/world/effect/MobEffectInstance;"))
     private static MobEffectInstance ssc$guardNightVision(MobEffectInstance raw) {

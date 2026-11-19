@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.perk.RegPerks;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimSystem;
@@ -99,8 +99,8 @@ public class NormalForm implements IForm {
     }
 
     @Override
-    public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
-        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
+    public @NotNull Pair<Identifier, Identifier> getFormLayer() {
+        return new Pair<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.FORM_ID.getNamespace(), "form_" + this.FORM_ID.getPath()));
     }
 
     @Override

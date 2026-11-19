@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
@@ -63,11 +63,11 @@ public class ItemStorePowerRender {
     }
 
     private static void renderSlot(GuiGraphicsExtractor context, float tickDelta, itemStorePowerRenderInterface power) {
-        Tuple<Integer, Integer> SlotBegin = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.itemStorePowerPosType, ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetX - (NowCol * 20), ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetY - (NowRow * 20));
+        Pair<Integer, Integer> SlotBegin = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.itemStorePowerPosType, ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetX - (NowCol * 20), ShapeShifterCurseFabric.clientConfig.itemStorePowerPosOffsetY - (NowRow * 20));
         int SlotX = power.getSlot() % SlotPerRow;
         int SlotY = power.getSlot() / SlotPerRow;
-        int SlotXFinal = SlotBegin.getA() + SlotX;
-        int SlotYFinal = SlotBegin.getB() + SlotY;
+        int SlotXFinal = SlotBegin.getFirst() + SlotX;
+        int SlotYFinal = SlotBegin.getSecond() + SlotY;
         context.pose().pushMatrix();
         context.blit(RenderPipelines.GUI_TEXTURED, WIDGETS_TEXTURE, SlotXFinal - 2, SlotYFinal - 4, 0, 1, 22, 22, 22, 22, 29, 24, -1);
         context.pose().popMatrix();
@@ -92,7 +92,7 @@ public class ItemStorePowerRender {
 
     public static void render(GuiGraphicsExtractor context, float tickDelta) {
         timerTick();
-        if (!mc.options.hideGui) {
+        if (!mc.gui.hud.isHidden()) {
             for (itemStorePowerRenderInterface power : tempPower) {
                 if (power != null) {
                     renderSlot(context, tickDelta, power);

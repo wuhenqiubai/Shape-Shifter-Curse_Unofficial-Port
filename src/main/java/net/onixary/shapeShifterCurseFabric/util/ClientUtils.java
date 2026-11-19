@@ -25,7 +25,7 @@ public class ClientUtils {
             throw new RuntimeException("Cannot invoke this method in a non-client environment");
             // return true;
         }
-        return !Minecraft.getInstance().options.hideGui;
+        return !Minecraft.getInstance().gui.hud.isHidden();
     }
 
     public static @Nullable UUID getPlayerUUID() {

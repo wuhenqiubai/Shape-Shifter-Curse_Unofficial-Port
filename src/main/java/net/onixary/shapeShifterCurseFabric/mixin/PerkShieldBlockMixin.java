@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class PerkShieldBlockMixin {
     @Inject(method = "applyItemBlocking",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/component/BlocksAttacks;hurtBlockingItem(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/world/InteractionHand;F)V"))
-    private void ssc$shieldResponse(ServerLevel serverLevel, DamageSource damageSource, float f, CallbackInfoReturnable<Float> cir) {
-        ActionOnShieldBlockPower.onBlock((LivingEntity) (Object) this, damageSource);
+    private void ssc$shieldResponse(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Float> cir) {
+        ActionOnShieldBlockPower.onBlock((LivingEntity) (Object) this, source);
     }
 }

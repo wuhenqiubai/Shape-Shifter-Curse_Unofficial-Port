@@ -12,7 +12,7 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -110,25 +110,25 @@ public class ShapeShifterCurseFabric implements ModInitializer {
     public static float feralItemEulerX = 0.0F;
 
     // Reg custom advancement criterion
-    public static final OnEnableMod ON_ENABLE_MOD = CriteriaTriggers.register(OnEnableMod.ID.toString(), new OnEnableMod());
-    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = CriteriaTriggers.register(OnOpenBookOfShapeShifter.ID.toString(), new OnOpenBookOfShapeShifter());
-    public static final OnEndCursedMoon ON_END_CURSED_MOON = CriteriaTriggers.register(OnEndCursedMoon.ID.toString(), new OnEndCursedMoon());
-    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = CriteriaTriggers.register(OnEndCursedMoonCured.ID.toString(), new OnEndCursedMoonCured());
-    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = CriteriaTriggers.register(OnEndCursedMoonCuredForm2.ID.toString(), new OnEndCursedMoonCuredForm2());
-    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = CriteriaTriggers.register(OnGetTransformEffect.ID.toString(), new OnGetTransformEffect());
-    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = CriteriaTriggers.register(OnSleepWhenHaveTransformEffect.ID.toString(), new OnSleepWhenHaveTransformEffect());
-    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = CriteriaTriggers.register(OnTransformByCatalyst.ID.toString(), new OnTransformByCatalyst());
-    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = CriteriaTriggers.register(OnTransformByCure.ID.toString(), new OnTransformByCure());
-    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = CriteriaTriggers.register(OnUseGoldenApple.ID.toString(), new OnUseGoldenApple());
-    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = CriteriaTriggers.register(OnTransformByCureFinal.ID.toString(), new OnTransformByCureFinal());
-    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = CriteriaTriggers.register(OnTransformEffectFade.ID.toString(), new OnTransformEffectFade());
-    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = CriteriaTriggers.register(OnTriggerCursedMoon.ID.toString(), new OnTriggerCursedMoon());
-    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = CriteriaTriggers.register(OnTriggerCursedMoonForm2.ID.toString(), new OnTriggerCursedMoonForm2());
-    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = CriteriaTriggers.register(OnFirstJoinWithMod.ID.toString(), new OnFirstJoinWithMod());
-    public static final OnFirstTransformEnableFormList ON_FIRST_TRANSFORM_ENABLE_FORM_LIST = CriteriaTriggers.register(OnFirstTransformEnableFormList.ID.toString(), new OnFirstTransformEnableFormList());
+    public static final OnEnableMod ON_ENABLE_MOD = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnEnableMod.ID, new OnEnableMod());
+    public static final OnOpenBookOfShapeShifter ON_OPEN_BOOK_OF_SHAPE_SHIFTER = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnOpenBookOfShapeShifter.ID, new OnOpenBookOfShapeShifter());
+    public static final OnEndCursedMoon ON_END_CURSED_MOON = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnEndCursedMoon.ID, new OnEndCursedMoon());
+    public static final OnEndCursedMoonCured ON_END_CURSED_MOON_CURED = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnEndCursedMoonCured.ID, new OnEndCursedMoonCured());
+    public static final OnEndCursedMoonCuredForm2 ON_END_CURSED_MOON_CURED_FORM_2 = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnEndCursedMoonCuredForm2.ID, new OnEndCursedMoonCuredForm2());
+    public static final OnGetTransformEffect ON_GET_TRANSFORM_EFFECT = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnGetTransformEffect.ID, new OnGetTransformEffect());
+    public static final OnSleepWhenHaveTransformEffect ON_SLEEP_WHEN_HAVE_TRANSFORM_EFFECT = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnSleepWhenHaveTransformEffect.ID, new OnSleepWhenHaveTransformEffect());
+    public static final OnTransformByCatalyst ON_TRANSFORM_BY_CATALYST = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTransformByCatalyst.ID, new OnTransformByCatalyst());
+    public static final OnTransformByCure ON_TRANSFORM_BY_CURE = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTransformByCure.ID, new OnTransformByCure());
+    public static final OnUseGoldenApple ON_USE_GOLDEN_APPLE = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnUseGoldenApple.ID, new OnUseGoldenApple());
+    public static final OnTransformByCureFinal ON_TRANSFORM_BY_CURE_FINAL = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTransformByCureFinal.ID, new OnTransformByCureFinal());
+    public static final OnTransformEffectFade ON_TRANSFORM_EFFECT_FADE = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTransformEffectFade.ID, new OnTransformEffectFade());
+    public static final OnTriggerCursedMoon ON_TRIGGER_CURSED_MOON = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTriggerCursedMoon.ID, new OnTriggerCursedMoon());
+    public static final OnTriggerCursedMoonForm2 ON_TRIGGER_CURSED_MOON_FORM_2 = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnTriggerCursedMoonForm2.ID, new OnTriggerCursedMoonForm2());
+    public static final OnFirstJoinWithMod ON_FIRST_JOIN_WITH_MOD = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnFirstJoinWithMod.ID, new OnFirstJoinWithMod());
+    public static final OnFirstTransformEnableFormList ON_FIRST_TRANSFORM_ENABLE_FORM_LIST = Registry.register(BuiltInRegistries.TRIGGER_TYPES, OnFirstTransformEnableFormList.ID, new OnFirstTransformEnableFormList());
 
-    public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = CriteriaTriggers.register(CriterionAdditions.OnTransformForm.ID.toString(), CriterionAdditions.createOnTransformForm());
-    public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = CriteriaTriggers.register(CriterionAdditions.OnWebEntity.ID.toString(), CriterionAdditions.createOnWebEntity());
+    public static final CriterionAdditions.OnTransformForm ON_TRANSFORM_FORM = Registry.register(BuiltInRegistries.TRIGGER_TYPES, CriterionAdditions.OnTransformForm.ID, CriterionAdditions.createOnTransformForm());
+    public static final CriterionAdditions.OnWebEntity ON_WEB_ENTITY = Registry.register(BuiltInRegistries.TRIGGER_TYPES, CriterionAdditions.OnWebEntity.ID, CriterionAdditions.createOnWebEntity());
 
     // Reg custom entities
     private static ResourceKey<EntityType<?>> entityKey(String path) {

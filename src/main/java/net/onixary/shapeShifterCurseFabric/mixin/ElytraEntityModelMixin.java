@@ -42,21 +42,21 @@ public abstract class ElytraEntityModelMixin {
             at = @At("TAIL"),
             cancellable = true
     )
-    private void customElytraAngles(HumanoidRenderState humanoidRenderState, CallbackInfo ci) {
+    private void customElytraAngles(HumanoidRenderState state, CallbackInfo ci) {
         float k = 0.2617994f;
         float l = -0.2617994f;
         float m = 0.0f;
         float n = 0.0f;
 
         AbstractClientPlayer player = null;
-        if (humanoidRenderState instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
+        if (state instanceof AvatarRenderState avatarRenderState && Minecraft.getInstance().level != null) {
             Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
             if (entity instanceof AbstractClientPlayer abstractClientPlayer) {
                 player = abstractClientPlayer;
             }
         }
 
-        if (humanoidRenderState.isFallFlying) {
+        if (state.isFallFlying) {
             float o = 1.0f;
             Vec3 vec3d = player != null ? player.getDeltaMovement() : Vec3.ZERO;
             if (vec3d.y < 0.0) {
@@ -65,7 +65,7 @@ public abstract class ElytraEntityModelMixin {
             }
             k = o * 0.34906584f + (1.0f - o) * k;
             l = o * -1.5707964f + (1.0f - o) * l;
-        } else if (humanoidRenderState.isCrouching) {
+        } else if (state.isCrouching) {
             k = 0.6981317f;
             l = -0.7853982f;
             m = 3.0f;
@@ -76,8 +76,8 @@ public abstract class ElytraEntityModelMixin {
             IForm curForm0 = FormTextureUtils.getPlayerForm_Render(player);
             if(curForm0 == RegPlayerForms.BAT_3){
                 //ShapeShifterCurseFabric.LOGGER.info("BAT3 set elytra");
-                if (!humanoidRenderState.isFallFlying){
-                    if (humanoidRenderState.isCrouching){
+                if (!state.isFallFlying){
+                    if (state.isCrouching){
                         k += (float)Math.toRadians(30.0);
                         m = 12.0f;
                     }

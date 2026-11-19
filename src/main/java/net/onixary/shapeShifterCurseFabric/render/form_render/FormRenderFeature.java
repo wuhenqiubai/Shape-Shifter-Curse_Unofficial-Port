@@ -83,14 +83,14 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
 
         boolean hasOutline = Minecraft.getInstance().shouldEntityAppearGlowing(player);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         float limbAngle = avatarRenderState.walkAnimationPos;
         float limbDistance = avatarRenderState.walkAnimationSpeed;
 
         for (FormRenderer formRenderer : formRendererList) {
             if (formRenderer == null) continue;
-            formRenderer.realModel.AnimationSystem.beforeRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+            formRenderer.realModel.AnimationSystem.beforeRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, i, limbAngle, limbDistance, partialTick, 0f, f, g);
         }
 
         for (FormRenderer formRenderer : formRendererList) {
@@ -124,8 +124,8 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
 
         for (FormRenderer formRenderer : formRendererList) {
             if (formRenderer == null) continue;
-            formRenderer.realModel.AnimationSystem.afterRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
-            formRenderer.realModel.AnimationSystem.finishRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, null, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+            formRenderer.realModel.AnimationSystem.afterRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, i, limbAngle, limbDistance, partialTick, 0f, f, g);
+            formRenderer.realModel.AnimationSystem.finishRender(formRenderer, formRenderer.realModel, avatarRenderer, player, poseStack, i, limbAngle, limbDistance, partialTick, 0f, f, g);
             formRenderer.clearPlayer();
         }
 
@@ -274,7 +274,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
     public static void rFPM_PartB(AvatarRenderer playerEntityRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, ModelPart arm, ModelPart sleeve) {
         boolean IsRenderRight = arm.equals(((PlayerModel) playerEntityRenderer.getModel()).rightArm);
         List<FormRenderer> formRendererList = FormRenderUtils.getPlayerAllFormRenderer(player);
-        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState;
+        CameraRenderState cameraState = Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState;
         float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
         boolean slim = isSlim(player);
         for (FormRenderer formRenderer : formRendererList) {
@@ -292,7 +292,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             matrices.translate(0, -1.51f, 0);
             matrices.translate(SSC_ARM_ORIGIN.x, SSC_ARM_ORIGIN.y, SSC_ARM_ORIGIN.z);
-            org.joml.Matrix4f sscEyeToPose = new org.joml.Matrix4f(RenderSystem.getModelViewMatrix()).mul(new org.joml.Matrix4f(matrices.last().pose())).invert();
+            org.joml.Matrix4f sscEyeToPose = new org.joml.Matrix4f(RenderSystem.getModelViewMatrixCopy()).mul(new org.joml.Matrix4f(matrices.last().pose())).invert();
             Vector3f sscPoseOffset = sscEyeToPose.transformDirection(new Vector3f(SSC_ARM_OFFSET));
             matrices.translate(sscPoseOffset.x, sscPoseOffset.y, sscPoseOffset.z);
 

@@ -66,6 +66,7 @@ public class EntityMixin {
         }
     }
 
+    @Unique
     private boolean lastIsSwimming = false;
 
     @Inject(method = "updateSwimming", at = @At("HEAD"))

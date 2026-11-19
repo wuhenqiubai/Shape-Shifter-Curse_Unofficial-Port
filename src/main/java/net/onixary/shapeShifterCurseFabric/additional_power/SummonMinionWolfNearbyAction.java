@@ -9,7 +9,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.minion.IPlayerEntityMinion;
@@ -17,12 +17,12 @@ import net.onixary.shapeShifterCurseFabric.minion.MinionRegister;
 import net.onixary.shapeShifterCurseFabric.minion.mobs.AnubisWolfMinionEntity;
 
 public class SummonMinionWolfNearbyAction {
-    public static void action(SerializableData.Instance data, Tuple<Entity, Entity> entities) {
-        Entity Owner = entities.getA();
-        Entity SpawnNearbyTarget = entities.getB();
+    public static void action(SerializableData.Instance data, Pair<Entity, Entity> entities) {
+        Entity Owner = entities.getFirst();
+        Entity SpawnNearbyTarget = entities.getSecond();
         if (data.isPresent("reverse") && data.getBoolean("reverse")) {
-            Owner = entities.getB();
-            SpawnNearbyTarget = entities.getA();
+            Owner = entities.getSecond();
+            SpawnNearbyTarget = entities.getFirst();
         }
         int MinionLevel = data.getInt("minion_level");
         int MinionCount = data.getInt("count");
@@ -88,7 +88,7 @@ public class SummonMinionWolfNearbyAction {
         }
     }
 
-    public static ActionFactory<Tuple<Entity, Entity>> createBIFactory() {
+    public static ActionFactory<Pair<Entity, Entity>> createBIFactory() {
         return new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("bi_summon_anubis_wolf_minion"),
                 new SerializableData()
@@ -116,7 +116,7 @@ public class SummonMinionWolfNearbyAction {
                         .add("owner_action", ApoliDataTypes.ENTITY_ACTION, null)
                         .add("target_action", ApoliDataTypes.ENTITY_ACTION, null)  // 没用 但是防止解析错误 但是会正常执行
                         .add("reverse", SerializableDataTypes.BOOLEAN, false),  // 没用 但是防止解析错误
-		        (data, entity) -> action(data, new Tuple<>(entity, entity))
+		        (data, entity) -> action(data, new Pair<>(entity, entity))
         );
     }
 }

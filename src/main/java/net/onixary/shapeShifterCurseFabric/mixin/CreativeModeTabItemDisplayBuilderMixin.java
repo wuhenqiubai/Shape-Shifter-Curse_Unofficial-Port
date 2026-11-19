@@ -22,8 +22,8 @@ public abstract class CreativeModeTabItemDisplayBuilderMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void ssc$skipDuplicateStack(ItemStack itemStack, CreativeModeTab.TabVisibility tabVisibility, CallbackInfo ci) {
-        if (tabContents.contains(itemStack) && tabVisibility != CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY) {
+    private void ssc$skipDuplicateStack(ItemStack stack, CreativeModeTab.TabVisibility tabVisibility, CallbackInfo ci) {
+        if (tabContents.contains(stack) && tabVisibility != CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY) {
             ci.cancel();
         }
     }

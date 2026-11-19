@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.custom_ui.ui_part;
 
 
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 
 import java.util.List;
 
@@ -23,8 +23,8 @@ public class WidgetEXUtils {
             return mouseX >= x && mouseX < x + width && mouseY >= y && mouseY < y + height;
         }
 
-        public Tuple<Double, Double> getMousePos(double mouseX, double mouseY) {
-            return new Tuple<>(mouseX - x, mouseY - y);
+        public Pair<Double, Double> getMousePos(double mouseX, double mouseY) {
+            return new Pair<>(mouseX - x, mouseY - y);
         }
     }
 
@@ -41,8 +41,8 @@ public class WidgetEXUtils {
             for (IWidgetEX widget : getWidgetList()) {
                 WidgetRect rect = widget.getRect();
                 if (rect.isMouseInside(mouseX, mouseY)) {
-                    Tuple<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
-                    widget.onClickWidget(newMousePos.getA(), newMousePos.getB(), button);
+                    Pair<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
+                    widget.onClickWidget(newMousePos.getFirst(), newMousePos.getSecond(), button);
                 }
             }
 		}
@@ -51,8 +51,8 @@ public class WidgetEXUtils {
             for (IWidgetEX widget : getWidgetList()) {
                 WidgetRect rect = widget.getRect();
                 if (rect.isMouseInside(mouseX, mouseY)) {
-                    Tuple<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
-                    widget.onReleaseWidget(newMousePos.getA(), newMousePos.getB(), button);
+                    Pair<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
+                    widget.onReleaseWidget(newMousePos.getFirst(), newMousePos.getSecond(), button);
                 }
             }
 		}
@@ -61,8 +61,8 @@ public class WidgetEXUtils {
             for (IWidgetEX widget : getWidgetList()) {
                 WidgetRect rect = widget.getRect();
                 if (rect.isMouseInside(mouseX, mouseY)) {
-                    Tuple<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
-                    widget.onDragWidget(newMousePos.getA(), newMousePos.getB(), button, deltaX, deltaY);
+                    Pair<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
+                    widget.onDragWidget(newMousePos.getFirst(), newMousePos.getSecond(), button, deltaX, deltaY);
                 }
             }
 		}
@@ -71,8 +71,8 @@ public class WidgetEXUtils {
             for (IWidgetEX widget : getWidgetList()) {
                 WidgetRect rect = widget.getRect();
                 if (rect.isMouseInside(mouseX, mouseY)) {
-                    Tuple<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
-                    widget.onScrollWidget(newMousePos.getA(), newMousePos.getB(), scrollAmount);
+                    Pair<Double, Double> newMousePos = rect.getMousePos(mouseX, mouseY);
+                    widget.onScrollWidget(newMousePos.getFirst(), newMousePos.getSecond(), scrollAmount);
                 }
             }
 		}

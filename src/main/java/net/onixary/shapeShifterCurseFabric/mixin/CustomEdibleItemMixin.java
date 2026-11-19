@@ -22,14 +22,14 @@ import static net.onixary.shapeShifterCurseFabric.util.CustomEdibleUtils.getPowe
 public abstract class CustomEdibleItemMixin {
 
     @Inject(method = "use", at = @At("HEAD"), cancellable = true)
-    private void ssc$use(Level level, Player user, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        ItemStack stack = user.getItemInHand(hand);
-        FoodProperties food = getPowerFoodComponent(user, stack);
+    private void ssc$use(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        ItemStack stack = player.getItemInHand(hand);
+        FoodProperties food = getPowerFoodComponent(player, stack);
         if (food == null) {
             return;
         }
-        if (user.canEat(food.canAlwaysEat())) {
-            user.startUsingItem(hand);
+        if (player.canEat(food.canAlwaysEat())) {
+            player.startUsingItem(hand);
             cir.setReturnValue(InteractionResult.CONSUME);
         } else {
             cir.setReturnValue(InteractionResult.FAIL);
@@ -37,31 +37,31 @@ public abstract class CustomEdibleItemMixin {
     }
 
     @Inject(method = "finishUsingItem", at = @At("HEAD"), cancellable = true)
-    private void ssc$finishUsing(ItemStack stack, Level level, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!(user instanceof Player player)) {
+    private void ssc$finishUsing(ItemStack itemStack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
+        if (!(entity instanceof Player player)) {
             return;
         }
-        FoodProperties food = getPowerFoodComponent(player, stack);
+        FoodProperties food = getPowerFoodComponent(player, itemStack);
         if (food == null) {
             return;
         }
-        if (stack.isEmpty()) {
+        if (itemStack.isEmpty()) {
             return;
         }
-        Consumable consumable = stack.get(DataComponents.CONSUMABLE);
+        Consumable consumable = itemStack.get(DataComponents.CONSUMABLE);
         if (consumable == null) {
             consumable = Consumables.DEFAULT_FOOD;
         }
-        FoodProperties previous = stack.get(DataComponents.FOOD);
-        stack.set(DataComponents.FOOD, food);
+        FoodProperties previous = itemStack.get(DataComponents.FOOD);
+        itemStack.set(DataComponents.FOOD, food);
         try {
-            cir.setReturnValue(consumable.onConsume(level, user, stack));
+            cir.setReturnValue(consumable.onConsume(level, entity, itemStack));
         } finally {
-            if (!stack.isEmpty()) {
+            if (!itemStack.isEmpty()) {
                 if (previous == null) {
-                    stack.remove(DataComponents.FOOD);
+                    itemStack.remove(DataComponents.FOOD);
                 } else {
-                    stack.set(DataComponents.FOOD, previous);
+                    itemStack.set(DataComponents.FOOD, previous);
                 }
             }
         }

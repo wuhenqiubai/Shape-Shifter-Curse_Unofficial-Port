@@ -83,7 +83,7 @@ public class NormalPerk implements IPerk, IPerkClient {
 
     @Override
     public void onLoad(Player player, IForm form) {
-        Identifier powerSource = form.getFormLayer().getB();
+        Identifier powerSource = form.getFormLayer().getSecond();
         for (Identifier powerID : powerAdd) {
             FormUtils.applyPower(player, powerID, powerSource);
         }

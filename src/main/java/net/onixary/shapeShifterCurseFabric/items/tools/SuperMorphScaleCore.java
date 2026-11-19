@@ -94,7 +94,8 @@ public class SuperMorphScaleCore extends Item {
             int max_repair = damage;
             need_repair = Math.min(need_repair, max_repair);
             float exp_multiplier = mendingMultiplier;
-            if (EnchantmentHelper.getItemEnchantmentLevel((Holder<Enchantment>) Enchantments.MENDING, stack) > 0) {
+            net.minecraft.core.Registry<Enchantment> sscEnchantRegistry = player.registryAccess().lookupOrThrow(net.minecraft.core.registries.Registries.ENCHANTMENT);
+            if (EnchantmentHelper.getItemEnchantmentLevel(sscEnchantRegistry.wrapAsHolder(sscEnchantRegistry.getValueOrThrow(Enchantments.MENDING)), stack) > 0) {
                 exp_multiplier *= quickChargeCostMultiplier;
             } else {
                 exp_multiplier *= quickChargeCostMultiplierNoMending;

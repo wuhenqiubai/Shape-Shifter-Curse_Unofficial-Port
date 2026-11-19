@@ -44,7 +44,7 @@ public class DetailScreen extends Screen implements WidgetEXUtils.IWidgetEX {
     @Override
     public void onClose() {
 	    if (this.minecraft != null) {
-		    this.minecraft.setScreen(this.PreviousScreen);
+		    this.minecraft.gui.setScreen(this.PreviousScreen);
 	    }
     }
 

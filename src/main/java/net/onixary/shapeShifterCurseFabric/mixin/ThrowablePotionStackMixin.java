@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ThrowablePotionItem.class)
 public abstract  class ThrowablePotionStackMixin {
     @Inject(method = "use", at = @At("RETURN"))
-    private void addCooldown(Level world, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
-        if (!world.isClientSide()) {
+    private void addCooldown(Level level, Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        if (!level.isClientSide()) {
             player.getCooldowns().addCooldown(BuiltInRegistries.ITEM.getKey((ThrowablePotionItem) (Object) this), 20); // 20 ticks = 1 second
         }
     }

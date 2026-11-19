@@ -7,7 +7,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 
@@ -27,7 +27,7 @@ public final class DirectedParticlesAction {
                 Math.max(0, data.getFloat("speed")), 0);
     }
 
-    public static ActionFactory<Tuple<Entity, Entity>> getFactory() {
+    public static ActionFactory<Pair<Entity, Entity>> getFactory() {
         return new ActionFactory<>(ShapeShifterCurseFabric.identifier("directed_particles"), new SerializableData()
                 .add("particle", SerializableDataTypes.PARTICLE_EFFECT_OR_TYPE)
                 .add("direction", SerializableDataType.enumValue(Direction.class), Direction.ACTOR_TO_TARGET)
@@ -36,7 +36,7 @@ public final class DirectedParticlesAction {
                 .add("speed", SerializableDataTypes.FLOAT, 0.3f)
                 .add("count", SerializableDataTypes.INT, 1)
                 .add("force", SerializableDataTypes.BOOLEAN, false), (data, pair) -> {
-            Entity actor = pair.getA(), target = pair.getB();
+            Entity actor = pair.getFirst(), target = pair.getSecond();
             if (actor == null || target == null || !(actor.level() instanceof ServerLevel world)
                     || target.level() != world || actor.isRemoved() || target.isRemoved()) return;
             int count = Math.max(0, data.getInt("count"));

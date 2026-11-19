@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.textures.GpuSampler;
 import com.mojang.blaze3d.textures.GpuTextureView;
@@ -19,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 @Mixin(SkyRenderer.class)
 public abstract class SkyRendererMixin {
     @Unique
-    private GpuBuffer ssc$cursedMoonBuffer;
+    private GpuBufferSlice ssc$cursedMoonBuffer;
 
     @Unique
     private boolean ssc$isCursedMoon() {
@@ -33,7 +34,7 @@ public abstract class SkyRendererMixin {
     }
 
     @Unique
-    private GpuBuffer ssc$getCursedMoonBuffer() {
+    private GpuBufferSlice ssc$getCursedMoonBuffer() {
         if (this.ssc$cursedMoonBuffer == null) {
             this.ssc$cursedMoonBuffer = ssc$buildCursedMoonPhases();
         }
@@ -41,11 +42,11 @@ public abstract class SkyRendererMixin {
     }
 
     @Unique
-    private static GpuBuffer ssc$buildCursedMoonPhases() {
+    private static GpuBufferSlice ssc$buildCursedMoonPhases() {
         MoonPhase[] phases = MoonPhase.values();
         VertexFormat vf = DefaultVertexFormat.POSITION_TEX;
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(phases.length * 4 * vf.getVertexSize())) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, VertexFormat.Mode.QUADS, vf);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, com.mojang.blaze3d.PrimitiveTopology.QUADS, vf);
             for (MoonPhase phase : phases) {
                 int idx = phase.index();
                 float u0 = idx * 32.0F / 256.0F;
@@ -56,7 +57,8 @@ public abstract class SkyRendererMixin {
                 bufferBuilder.addVertex(-1.0F, 0.0F, 1.0F).setUv(u1, 0.0F);
             }
             try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-                return RenderSystem.getDevice().createBuffer(() -> "Cursed Moon phases", 32, meshData.vertexBuffer());
+                GpuBuffer buffer = RenderSystem.getDevice().createBuffer(() -> "Cursed Moon phases", 32, meshData.vertexBuffer());
+                return new GpuBufferSlice(buffer, 0L, meshData.vertexBuffer().remaining());
             }
         }
     }
@@ -71,8 +73,8 @@ public abstract class SkyRendererMixin {
         return ssc$isCursedMoon() ? ssc$getCursedMoonTexture().getSampler() : sampler;
     }
 
-    @ModifyArg(method = "renderMoon", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setVertexBuffer(ILcom/mojang/blaze3d/buffers/GpuBuffer;)V"), index = 1)
-    private GpuBuffer ssc$modifyMoonBuffer(GpuBuffer buffer) {
+    @ModifyArg(method = "renderMoon", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setVertexBuffer(ILcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"), index = 1)
+    private GpuBufferSlice ssc$modifyMoonBuffer(GpuBufferSlice buffer) {
         return ssc$isCursedMoon() ? ssc$getCursedMoonBuffer() : buffer;
     }
 }

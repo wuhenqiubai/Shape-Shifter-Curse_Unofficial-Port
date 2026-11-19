@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.data.CodexData;
@@ -31,9 +31,9 @@ public interface IForm {
     public void setFormGroup(IFormGroup group, int formTier);
 
     // 临时能力系统 等Origins移除后再写
-    public @NotNull Tuple<Identifier, Identifier> getFormLayer();
+    public @NotNull Pair<Identifier, Identifier> getFormLayer();
 
-    public default @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
+    public default @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
         return null;
     }
 
@@ -121,8 +121,8 @@ public interface IForm {
         return true;
     }
 
-    public default @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
-        return new Tuple<>(false, null);
+    public default @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+        return new Pair<>(false, null);
     }
 
     default void onRegister() { }

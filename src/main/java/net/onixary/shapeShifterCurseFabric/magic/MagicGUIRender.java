@@ -4,7 +4,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
@@ -32,15 +32,15 @@ public class MagicGUIRender {
     public static void render(GuiGraphicsExtractor context, float tickDelta) {
         Player player = mc.player;
         if (player == null) return;
-        if (mc.options.hideGui) return;
+        if (mc.gui.hud.isHidden()) return;
         if (!MagicUtils.shouldShowMagicUI(player)) return;
 
-        Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(
+        Pair<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(
                 ShapeShifterCurseFabric.clientConfig.magicGUIPosType,
                 ShapeShifterCurseFabric.clientConfig.magicGUIPosOffsetX,
                 ShapeShifterCurseFabric.clientConfig.magicGUIPosOffsetY);
-        int ax = pos.getA();
-        int ay = pos.getB();
+        int ax = pos.getFirst();
+        int ay = pos.getSecond();
 
         IMagic[] magics = MagicUtils.getPlayerMagic(player);
         int n = MagicUtils.MAGIC_SLOT_COUNT;

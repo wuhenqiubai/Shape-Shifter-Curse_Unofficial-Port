@@ -20,18 +20,18 @@ import java.util.Map;
 public abstract class CalioParticleEffectMixin {
 
     @Inject(method = "read(Lcom/google/gson/JsonElement;Lnet/minecraft/core/HolderLookup$Provider;)Ljava/lang/Object;", at = @At("HEAD"), cancellable = true)
-    private void ssc$fixParticleEffectRead(JsonElement json, HolderLookup.Provider provider, CallbackInfoReturnable<Object> cir) {
+    private void ssc$fixParticleEffectRead(JsonElement jsonElement, HolderLookup.Provider provider, CallbackInfoReturnable<Object> cir) {
         if ((Object) this != SerializableDataTypes.PARTICLE_EFFECT) {
             return;
         }
-        if (!json.isJsonObject()) {
+        if (!jsonElement.isJsonObject()) {
             return;
         }
-        JsonElement params = json.getAsJsonObject().get("params");
+        JsonElement params = jsonElement.getAsJsonObject().get("params");
         if (params != null && params.isJsonPrimitive()) {
             return;
         }
-        cir.setReturnValue(ssc$readParticle21(json, provider));
+        cir.setReturnValue(ssc$readParticle21(jsonElement, provider));
     }
 
     @Unique

@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class FoxEntityMixin {
 
     @Inject(method = "trusts", at = @At("HEAD"), cancellable = true)
-    private void allowTrustingFriendlyPlayers(LivingEntity livingEntity, CallbackInfoReturnable<Boolean> cir) {
-        if (livingEntity instanceof Player player) {
+    private void allowTrustingFriendlyPlayers(LivingEntity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (entity instanceof Player player) {
             if (PowerHolderComponent.hasPower(player, FoxFriendlyPower.class)) {
                 cir.setReturnValue(true);
             }

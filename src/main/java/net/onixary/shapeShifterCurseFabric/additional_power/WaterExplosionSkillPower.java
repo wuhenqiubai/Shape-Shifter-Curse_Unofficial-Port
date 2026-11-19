@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -42,11 +42,11 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
     private final int pullDuration;
     private final boolean verticalPull;
     private final double maxSpeed;
-    private final ConditionFactory<Tuple<Entity, Entity>>.Instance entityCondition;
+    private final ConditionFactory<Pair<Entity, Entity>>.Instance entityCondition;
     private final ConditionFactory<Entity>.Instance condition;
     private final ActionFactory<Entity>.Instance onStartAction;
     private final ActionFactory<Entity>.Instance onDoneAction;
-    private final ActionFactory<Tuple<Entity, Entity>>.Instance onPullAction;
+    private final ActionFactory<Pair<Entity, Entity>>.Instance onPullAction;
 
     private int currentTick;
 
@@ -96,7 +96,7 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
         for (LivingEntity target : targets) {
             if (!target.isAlive() || target.isRemoved() || target.isSpectator()) continue;
             if (target.distanceToSqr(center) > radiusSq) continue;
-            if (entityCondition != null && !entityCondition.test(new Tuple<>(entity, target))) continue;
+            if (entityCondition != null && !entityCondition.test(new Pair<>(entity, target))) continue;
             Vec3 direction = center.subtract(target.position());
             if (!verticalPull) {
                 direction = new Vec3(direction.x, 0.0, direction.z);
@@ -109,7 +109,7 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
                 newVelocity = newVelocity.scale(maxSpeed / speed);
             }
             if (onPullAction != null) {
-                onPullAction.accept(new Tuple<>(entity, target));
+                onPullAction.accept(new Pair<>(entity, target));
             }
             target.setDeltaMovement(newVelocity);
             target.hurtMarked = true;

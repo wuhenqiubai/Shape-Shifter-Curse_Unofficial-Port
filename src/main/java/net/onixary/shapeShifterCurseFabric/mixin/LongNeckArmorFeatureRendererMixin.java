@@ -41,12 +41,12 @@ public class LongNeckArmorFeatureRendererMixin<S extends HumanoidRenderState, M 
             method = "getArmorModel(Lnet/minecraft/client/renderer/entity/state/HumanoidRenderState;Lnet/minecraft/world/entity/EquipmentSlot;)Lnet/minecraft/client/model/HumanoidModel;",
             at = @At("RETURN")
     )
-    private void shape_shifter_curse$modifyHeadStateForMAS(S humanoidRenderState, EquipmentSlot armorSlot, CallbackInfoReturnable<A> cir) {
+    private void shape_shifter_curse$modifyHeadStateForMAS(S state, EquipmentSlot slot, CallbackInfoReturnable<A> cir) {
         A model = cir.getReturnValue();
         if (model == null) {
             return;
         }
-        AbstractClientPlayer player = getRenderedPlayer(humanoidRenderState);
+        AbstractClientPlayer player = getRenderedPlayer(state);
         if (player == null) {
             return;
         }
@@ -64,7 +64,7 @@ public class LongNeckArmorFeatureRendererMixin<S extends HumanoidRenderState, M 
     }
 
     @Inject(method = "renderArmorPiece(Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;ILnet/minecraft/client/renderer/entity/state/HumanoidRenderState;)V", at = @At(value = "RETURN"))
-    private void shape_shifter_curse$restoreHeadStateForMAS(PoseStack matrices, SubmitNodeCollector vertexConsumers, ItemStack itemStack, EquipmentSlot armorSlot, int light, S humanoidRenderState, CallbackInfo ci) {
+    private void shape_shifter_curse$restoreHeadStateForMAS(PoseStack poseStack, SubmitNodeCollector submitNodeCollector, ItemStack itemStack, EquipmentSlot slot, int lightCoords, S state, CallbackInfo ci) {
         if (headBoneState != null) {
             headBoneState.restore();
             headBoneState = null;

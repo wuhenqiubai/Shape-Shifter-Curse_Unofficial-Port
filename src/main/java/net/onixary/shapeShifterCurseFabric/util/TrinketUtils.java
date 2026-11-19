@@ -8,7 +8,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -37,7 +37,7 @@ public class TrinketUtils {
         public final HashMap<Identifier, HashMap<Identifier, List<Identifier>>> layerPowerAddMap;
         public final HashMap<Identifier, HashMap<Identifier, List<Identifier>>> layerPowerRemoveMap;
 
-        private Tuple<List<Identifier>, List<Identifier>> parsePowerList(JsonObject jsonObject) {
+        private Pair<List<Identifier>, List<Identifier>> parsePowerList(JsonObject jsonObject) {
             List<Identifier> allFormPowerAdd = new ArrayList<>();
             List<Identifier> allFormPowerRemove = new ArrayList<>();
             if (jsonObject.has("add")) {
@@ -56,7 +56,7 @@ public class TrinketUtils {
                     }
                 });
             }
-            return new Tuple<>(allFormPowerAdd, allFormPowerRemove);
+            return new Pair<>(allFormPowerAdd, allFormPowerRemove);
         }
 
         public TrinketPowerData(JsonObject jsonObject) {
@@ -87,9 +87,9 @@ public class TrinketUtils {
                 });
             }
             if (jsonObject.has("all_form") && jsonObject.get("all_form").isJsonObject()) {
-                Tuple<List<Identifier>, List<Identifier>> allFormPowerList = parsePowerList(jsonObject.get("all_form").getAsJsonObject());
-                allFormPowerAdd = allFormPowerList.getA();
-                allFormPowerRemove = allFormPowerList.getB();
+                Pair<List<Identifier>, List<Identifier>> allFormPowerList = parsePowerList(jsonObject.get("all_form").getAsJsonObject());
+                allFormPowerAdd = allFormPowerList.getFirst();
+                allFormPowerRemove = allFormPowerList.getSecond();
             }
             if (jsonObject.has("forms") && jsonObject.get("forms").isJsonObject()) {
                 JsonObject formData = jsonObject.get("forms").getAsJsonObject();
@@ -100,9 +100,9 @@ public class TrinketUtils {
                         continue;
                     }
                     JsonObject formPowerData = formData.get(formID).getAsJsonObject();
-                    Tuple<List<Identifier>, List<Identifier>> formPowerList = parsePowerList(formPowerData);
-                    formPowerAdd.put(currentFormID, formPowerList.getA());
-                    formPowerRemove.put(currentFormID, formPowerList.getB());
+                    Pair<List<Identifier>, List<Identifier>> formPowerList = parsePowerList(formPowerData);
+                    formPowerAdd.put(currentFormID, formPowerList.getFirst());
+                    formPowerRemove.put(currentFormID, formPowerList.getSecond());
                 }
             }
             if (jsonObject.has("layers") && jsonObject.get("layers").isJsonObject()) {
@@ -122,9 +122,9 @@ public class TrinketUtils {
                             continue;
                         }
                         JsonObject layerPowerData = layerData.get(layerID).getAsJsonObject();
-                        Tuple<List<Identifier>, List<Identifier>> layerPowerList = parsePowerList(layerPowerData);
-                        layerPowerAddMap2.put(currentLayerID, layerPowerList.getA());
-                        layerPowerRemoveMap2.put(currentLayerID, layerPowerList.getB());
+                        Pair<List<Identifier>, List<Identifier>> layerPowerList = parsePowerList(layerPowerData);
+                        layerPowerAddMap2.put(currentLayerID, layerPowerList.getFirst());
+                        layerPowerRemoveMap2.put(currentLayerID, layerPowerList.getSecond());
                     }
                     layerPowerAddMap.put(currentLayerGroupID, layerPowerAddMap2);
                     layerPowerRemoveMap.put(currentLayerGroupID, layerPowerRemoveMap2);
@@ -221,9 +221,9 @@ public class TrinketUtils {
 
         public void onPlayerFormChangeReApply(Player player) {
             IForm form = FormUtils.getPlayerForm(player);
-            Tuple<Identifier, Identifier> currentFormLayer = form.getFormLayer();
+            Pair<Identifier, Identifier> currentFormLayer = form.getFormLayer();
             Identifier currentFormID = form.getFormID();
-            Identifier currentOriginsID = currentFormLayer.getB();
+            Identifier currentOriginsID = currentFormLayer.getSecond();
             for (Identifier powerID : allFormPowerAdd) {
                 this.AddPower(player, powerID, currentOriginsID);
             }
@@ -232,8 +232,8 @@ public class TrinketUtils {
             }
             List<Identifier> formPowerAddList = formPowerAdd.get(currentFormID);
             List<Identifier> formPowerRemoveList = formPowerRemove.get(currentFormID);
-            List<Identifier> layerGroupPowerAddList = layerPowerAddMap.getOrDefault(currentFormLayer.getA(), new HashMap<>()).get(currentFormLayer.getB());
-            List<Identifier> layerGroupPowerRemoveList = layerPowerRemoveMap.getOrDefault(currentFormLayer.getA(), new HashMap<>()).get(currentFormLayer.getB());
+            List<Identifier> layerGroupPowerAddList = layerPowerAddMap.getOrDefault(currentFormLayer.getFirst(), new HashMap<>()).get(currentFormLayer.getSecond());
+            List<Identifier> layerGroupPowerRemoveList = layerPowerRemoveMap.getOrDefault(currentFormLayer.getFirst(), new HashMap<>()).get(currentFormLayer.getSecond());
             if (formPowerAddList != null) {
                 for (Identifier powerID : formPowerAddList) {
                     this.AddPower(player, powerID, currentOriginsID);
@@ -350,16 +350,16 @@ public class TrinketUtils {
         powerData.onPlayerFormChangeReApply(player);
     }
 
-    public static List<Tuple<AccessoryItem.SlotData, ItemStack>> getAllAccessory(Player player) {
-        List<Tuple<AccessoryItem.SlotData, ItemStack>> allAccessory = new ArrayList<>();
+    public static List<Pair<AccessoryItem.SlotData, ItemStack>> getAllAccessory(Player player) {
+        List<Pair<AccessoryItem.SlotData, ItemStack>> allAccessory = new ArrayList<>();
 
         for (Map.Entry<String, AccessoryUtils.AccessoryIO> accessoryReg : AccessoryUtils.activeAccessoryModInterfaces.entrySet()) {
             String ioName = accessoryReg.getKey();
             AccessoryUtils.AccessoryIO accessoryIO = accessoryReg.getValue();
-            @Nullable Map<Tuple<@Nullable String, String>, List<ItemStack>> allSlots = accessoryIO.getEntitySlots(player);
+            @Nullable Map<Pair<@Nullable String, String>, List<ItemStack>> allSlots = accessoryIO.getEntitySlots(player);
             if (allSlots != null) {
-                for (Map.Entry<Tuple<@Nullable String, String>, List<ItemStack>> entry : allSlots.entrySet()) {
-                    Tuple<@Nullable String, String> slotPair = entry.getKey();
+                for (Map.Entry<Pair<@Nullable String, String>, List<ItemStack>> entry : allSlots.entrySet()) {
+                    Pair<@Nullable String, String> slotPair = entry.getKey();
                     List<ItemStack> stacks = entry.getValue();
                     int Index = 0;
                     for (ItemStack stack : stacks) {
@@ -367,12 +367,12 @@ public class TrinketUtils {
                             continue;
                         }
                         AccessoryItem.SlotData data = null;
-                        if (slotPair.getA() == null) {
-                            data = new AccessoryItem.SlotData(Identifier.fromNamespaceAndPath(ioName, slotPair.getB()), Index);
+                        if (slotPair.getFirst() == null) {
+                            data = new AccessoryItem.SlotData(Identifier.fromNamespaceAndPath(ioName, slotPair.getSecond()), Index);
                         } else {
-                            data = new AccessoryItem.SlotData(Identifier.fromNamespaceAndPath(ioName, "%s/%s".formatted(slotPair.getA(), slotPair.getB())), Index);
+                            data = new AccessoryItem.SlotData(Identifier.fromNamespaceAndPath(ioName, "%s/%s".formatted(slotPair.getFirst(), slotPair.getSecond())), Index);
                         }
-                        allAccessory.add(new Tuple<>(data, stack));
+                        allAccessory.add(new Pair<>(data, stack));
                         Index++;
                     }
                 }
@@ -383,10 +383,10 @@ public class TrinketUtils {
 
     // 适配新架构的函数 等完工后再改 现在为了不影响正在使用的功能 先注释掉
     public static void ReApplyAccessoryPowerOnPlayerFormChange(Player player) {
-        List<Tuple<AccessoryItem.SlotData, ItemStack>> allAccessory = getAllAccessory(player);
-        for (Tuple<AccessoryItem.SlotData, ItemStack> accessoryPair : allAccessory) {
-            AccessoryItem.SlotData slot = accessoryPair.getA();
-            ItemStack stack = accessoryPair.getB();
+        List<Pair<AccessoryItem.SlotData, ItemStack>> allAccessory = getAllAccessory(player);
+        for (Pair<AccessoryItem.SlotData, ItemStack> accessoryPair : allAccessory) {
+            AccessoryItem.SlotData slot = accessoryPair.getFirst();
+            ItemStack stack = accessoryPair.getSecond();
             if (stack.getItem() instanceof CustomPowerTrinketInterface cpti) {
                 cpti.onFormChange(stack, slot, player);
             } else {

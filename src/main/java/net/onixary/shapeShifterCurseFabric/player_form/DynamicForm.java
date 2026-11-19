@@ -8,7 +8,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.mixin.accessor.PowerTypeRegistryAccessor;
@@ -37,8 +37,8 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     private int formTier = -2;
     private PlayerFormBodyType bodyType = PlayerFormBodyType.NORMAL;
 
-    private @Nullable Tuple<Identifier, Identifier> layerOverwrite = null;
-    public @Nullable Tuple<Identifier, Identifier> layerRenderOverwrite = null;
+    private @Nullable Pair<Identifier, Identifier> layerOverwrite = null;
+    public @Nullable Pair<Identifier, Identifier> layerRenderOverwrite = null;
     private boolean powerAnimRegistered = false;
 
     private JsonObject formData;
@@ -97,8 +97,8 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
 
 
     @Override
-    public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
-        return Objects.requireNonNullElseGet(this.layerOverwrite, () -> new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.formID.getNamespace(), "form_" + this.formID.getPath())));
+    public @NotNull Pair<Identifier, Identifier> getFormLayer() {
+        return Objects.requireNonNullElseGet(this.layerOverwrite, () -> new Pair<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.formID.getNamespace(), "form_" + this.formID.getPath())));
     }
 
     @Override
@@ -127,17 +127,17 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     }
 
     @Override
-    public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
+    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
         return this.layerRenderOverwrite;
     }
 
-    public Tuple<Identifier, Identifier> getCurrentRenderLayer() {
+    public Pair<Identifier, Identifier> getCurrentRenderLayer() {
         return Objects.requireNonNullElseGet(this.getRenderLayerOverride(), this::getFormLayer);
     }
 
     public boolean isModelExist() {
-        Tuple<Identifier, Identifier> currentLayer = this.getCurrentRenderLayer();
-        return FormRenderUtils.formRendererRegistry.getOrDefault(currentLayer.getA(), new HashMap<>()).containsKey(currentLayer.getB());
+        Pair<Identifier, Identifier> currentLayer = this.getCurrentRenderLayer();
+        return FormRenderUtils.formRendererRegistry.getOrDefault(currentLayer.getFirst(), new HashMap<>()).containsKey(currentLayer.getSecond());
     }
 
     @Override
@@ -158,16 +158,16 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         if (!this.isModelExist()) {
-            return new Tuple<>(false, null); // 如果未加载模型则不修改动画
+            return new Pair<>(false, null); // 如果未加载模型则不修改动画
         }
         boolean isAnimRegistered = powerAnimMap.containsKey(powerAnimID);
         AnimationHolder powerAnimData = powerAnimMap.get(powerAnimID);
         if (isAnimRegistered) {
-            return new Tuple<>(true, powerAnimData);
+            return new Pair<>(true, powerAnimData);
         }
-        return new Tuple<>(false, null);
+        return new Pair<>(false, null);
     }
 
     @Override
@@ -205,7 +205,7 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
         Identifier layerID = Identifier.tryParse(_Gson_GetString(formData, "originLayerID", null));
         Identifier powerFormID = Identifier.tryParse(_Gson_GetString(formData, "originID", null));
         if (layerID != null && powerFormID != null) {
-            this.layerOverwrite = new Tuple<>(layerID, powerFormID);
+            this.layerOverwrite = new Pair<>(layerID, powerFormID);
         }
         HashSet<String> flags = new HashSet<>();
         if (this.formData.has("flag")) {
@@ -250,7 +250,7 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
             this.defaultAnimStateController = AnimUtils.readController(formData.get("animDefault").getAsJsonObject());
         }
         String IDStr = _Gson_GetString(formData, "render_layer", null);
-        this.layerRenderOverwrite = IDStr == null ? null : new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.tryParse(IDStr));
+        this.layerRenderOverwrite = IDStr == null ? null : new Pair<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.tryParse(IDStr));
         this.loadExtraPower(formData);
         this.IsPatronForm = _Gson_GetBoolean(formData, "IsPatronForm", false);
         this.PlayerUUIDs.clear();
@@ -401,7 +401,7 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
     }
 
     @Override
-    public @Nullable Tuple<List<Identifier>, List<Identifier>> getLayerModifier() {
+    public @Nullable Pair<List<Identifier>, List<Identifier>> getLayerModifier() {
         return null;
     }
 
@@ -418,7 +418,7 @@ public class DynamicForm implements IForm, ISubForm, NeedCheckUsableForm {
 
     @Override
     public void afterApplyLayer(Player player) {
-        Identifier layer = this.getFormLayer().getB();
+        Identifier layer = this.getFormLayer().getSecond();
         for (Identifier powerID: this.getExtraPower()) {
             FormUtils.applyPower(player, powerID, layer);
         }

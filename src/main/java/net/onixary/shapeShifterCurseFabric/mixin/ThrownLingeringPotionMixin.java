@@ -20,8 +20,8 @@ public abstract class ThrownLingeringPotionMixin {
             method = "onHitAsPotion(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/phys/HitResult;)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z")
     )
-    private void ssc$applyLingeringPotion(ServerLevel serverLevel, ItemStack itemStack, HitResult hitResult, CallbackInfo ci, @Local AreaEffectCloud areaEffectCloud) {
-        var customData = itemStack.get(DataComponents.CUSTOM_DATA);
+    private void ssc$applyLingeringPotion(ServerLevel level, ItemStack potionItem, HitResult hitResult, CallbackInfo ci, @Local AreaEffectCloud areaEffectCloud) {
+        var customData = potionItem.get(DataComponents.CUSTOM_DATA);
         if (customData != null) {
             Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(customData.copyTag());
             if (CTPFormID != null && areaEffectCloud instanceof CTPUtils.CTPFormIDHolder holder) {

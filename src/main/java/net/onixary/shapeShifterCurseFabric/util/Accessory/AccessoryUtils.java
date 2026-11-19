@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.util.Accessory;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -28,7 +28,7 @@ public class AccessoryUtils {
             return true;
         }
 
-        public Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity);
+        public Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity);
 
         public List<@Nullable ItemStack> getEntitySlot(LivingEntity entity, @Nullable String SlotGroup, String SlotName);
 
@@ -68,18 +68,18 @@ public class AccessoryUtils {
         if (accessoryModInterfaces.isEmpty()) {
             return;
         }
-        List<Tuple<AccessoryIO, Integer>> list = new ArrayList<>();
+        List<Pair<AccessoryIO, Integer>> list = new ArrayList<>();
         for (Map.Entry<String, AccessoryIO> entry : accessoryModInterfaces.entrySet()) {
             if (entry.getValue().canLoaded()) {
-                list.add(new Tuple<>(entry.getValue(), entry.getValue().priority()));
+                list.add(new Pair<>(entry.getValue(), entry.getValue().priority()));
                 activeAccessoryModInterfaces.put(entry.getKey(), entry.getValue());
             } else {
                 ShapeShifterCurseFabric.LOGGER.warn("Accessory Mod: " + entry.getKey() + " can't loaded");
             }
         }
-        list.sort((o1, o2) -> o2.getB() - o1.getB());
+        list.sort((o1, o2) -> o2.getSecond() - o1.getSecond());
         if (!list.isEmpty()) {
-            nowAccessoryMod = list.getFirst().getA();
+            nowAccessoryMod = list.getFirst().getFirst();
         }
         for (Map.Entry<String, AccessoryIO> entry : accessoryModInterfaces.entrySet()) {
             if (entry.getValue() == nowAccessoryMod) {
@@ -101,7 +101,7 @@ public class AccessoryUtils {
     public static String nowAccessoryModID = "";
     public static AccessoryIO nowAccessoryMod = null;
 
-    public static @Nullable Map<Tuple<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity, @Nullable String accessoryModID) {
+    public static @Nullable Map<Pair<@Nullable String, String>, List<ItemStack>> getEntitySlots(LivingEntity entity, @Nullable String accessoryModID) {
         if (nowAccessoryMod == null) {
             return null;
         }

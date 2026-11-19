@@ -89,7 +89,7 @@ public class AxolotlVegetationCheck {
         player.snapTo(stand.getX() + 0.5, stand.getY(), stand.getZ() + 0.5, 0.0F, 0.0F);
         player.setOnGround(true);
         var form = RegPlayerForms.AXOLOTL_3;
-        var source = form.getFormLayer().getB();
+        var source = form.getFormLayer().getSecond();
         var base = PowerTypeRegistry.get(id("form_axolotl_3_ground_speed_down"));
         var holder = PowerHolderComponent.KEY.get(player);
         holder.addPower(base, source);

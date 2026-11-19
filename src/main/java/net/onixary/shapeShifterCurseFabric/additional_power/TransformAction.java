@@ -4,7 +4,7 @@ import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -48,12 +48,12 @@ public class TransformAction {
             Identifier formId = data.get("form_id");
             if (formId != null) {
                 CTPUtils.setTransformativePotionForm(player, formId);
-                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantenousEffect((net.minecraft.server.level.ServerLevel) player.level(), player, player, player, 0, 1.0d);
+                RegTStatusPotionEffect.TO_CUSTOM_STATUE_POTION.applyInstantaneousEffect((net.minecraft.server.level.ServerLevel) player.level(), player, player, player, 0, 1.0d);
             }
         }
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("transform_to_form"),
                 new SerializableData()

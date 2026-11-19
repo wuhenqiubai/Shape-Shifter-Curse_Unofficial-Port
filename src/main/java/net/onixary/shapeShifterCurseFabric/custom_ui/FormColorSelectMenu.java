@@ -20,7 +20,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.client.ShapeShifterCurseFabricClient;
@@ -1124,7 +1124,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         }
         this.saveData();
         if (this.parsetScreen != null && this.minecraft != null) {
-            this.minecraft.setScreen(this.parsetScreen);
+            this.minecraft.gui.setScreen(this.parsetScreen);
         } else {
             super.onClose();
         }
@@ -1300,47 +1300,47 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         this.updateSavaButtonActive();
     }
 
-    private final List<Tuple<FCS_ButtonWidget, FCS_ButtonWidget>> formLocalSettingButtons = new ArrayList<>();
+    private final List<Pair<FCS_ButtonWidget, FCS_ButtonWidget>> formLocalSettingButtons = new ArrayList<>();
     private final List<EditBox> formLocalSettingTextFields = new ArrayList<>();
-    private Tuple<FCS_ButtonWidget, FCS_ButtonWidget> formDefaultSettingButton = null;
+    private Pair<FCS_ButtonWidget, FCS_ButtonWidget> formDefaultSettingButton = null;
     private EditBox formDefaultSettingTextField = null;
-    private final List<Tuple<FCS_ButtonWidget, FCS_ButtonWidget>> globalSettingButtons = new ArrayList<>();
+    private final List<Pair<FCS_ButtonWidget, FCS_ButtonWidget>> globalSettingButtons = new ArrayList<>();
     private final List<EditBox> globalSettingTextFields = new ArrayList<>();
 
     private void updateSavaButtonActive() {
         if (this.isScreenInit) {
             if (minecraftClient.player == null) {
-                for (Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget : this.formLocalSettingButtons) {
-                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
+                for (Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget : this.formLocalSettingButtons) {
+                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getSecond();
                     deleteButtonWidget.active = false;
-                    FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
+                    FCS_ButtonWidget updButtonWidget = buttonWidget.getFirst();
                     updButtonWidget.active = false;
                     updButtonWidget.TEXTURE_X = 0;
                 }
-                this.formDefaultSettingButton.getA().active = false;
-                this.formDefaultSettingButton.getB().active = false;
-                this.formDefaultSettingButton.getA().TEXTURE_X = 0;
+                this.formDefaultSettingButton.getFirst().active = false;
+                this.formDefaultSettingButton.getSecond().active = false;
+                this.formDefaultSettingButton.getFirst().TEXTURE_X = 0;
             } else {
                 for (int index = 0; index < formLocalSettingButtons.size(); index++) {
                     boolean dataExist = this.isFormLocalSettingExists(index);
-                    Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = formLocalSettingButtons.get(index);
-                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
+                    Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = formLocalSettingButtons.get(index);
+                    FCS_ButtonWidget deleteButtonWidget = buttonWidget.getSecond();
                     deleteButtonWidget.active = dataExist;
-                    FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
+                    FCS_ButtonWidget updButtonWidget = buttonWidget.getFirst();
                     updButtonWidget.active = true;
                     updButtonWidget.TEXTURE_X = dataExist ? 15 : 0;
                 }
                 boolean dataExist = this.isFormDefaultSettingExists();
-                this.formDefaultSettingButton.getA().active = true;
-                this.formDefaultSettingButton.getB().active = dataExist;
-                this.formDefaultSettingButton.getA().TEXTURE_X = dataExist ? 15 : 0;
+                this.formDefaultSettingButton.getFirst().active = true;
+                this.formDefaultSettingButton.getSecond().active = dataExist;
+                this.formDefaultSettingButton.getFirst().TEXTURE_X = dataExist ? 15 : 0;
             }
             for (int index = 0; index < globalSettingButtons.size(); index++) {
                 boolean dataExist = this.isGlobalSettingExists(index);
-                Tuple<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSettingButtons.get(index);
-                FCS_ButtonWidget deleteButtonWidget = buttonWidget.getB();
+                Pair<FCS_ButtonWidget, FCS_ButtonWidget> buttonWidget = globalSettingButtons.get(index);
+                FCS_ButtonWidget deleteButtonWidget = buttonWidget.getSecond();
                 deleteButtonWidget.active = dataExist;
-                FCS_ButtonWidget updButtonWidget = buttonWidget.getA();
+                FCS_ButtonWidget updButtonWidget = buttonWidget.getFirst();
                 updButtonWidget.active = true;
                 updButtonWidget.TEXTURE_X = dataExist ? 15 : 0;
             }
@@ -1460,15 +1460,15 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
         }), (textSupplier) -> (MutableComponent)textSupplier.get(), 30);
         switch (ButtonType) {
             case 0:
-                formLocalSettingButtons.add(new Tuple<>(updButtonWidget, deleteButtonWidget));
+                formLocalSettingButtons.add(new Pair<>(updButtonWidget, deleteButtonWidget));
                 formLocalSettingTextFields.add(textFieldWidget);
                 break;
             case 1:
-                globalSettingButtons.add(new Tuple<>(updButtonWidget, deleteButtonWidget));
+                globalSettingButtons.add(new Pair<>(updButtonWidget, deleteButtonWidget));
                 globalSettingTextFields.add(textFieldWidget);
                 break;
             case 2:
-                formDefaultSettingButton = new Tuple<>(updButtonWidget, deleteButtonWidget);
+                formDefaultSettingButton = new Pair<>(updButtonWidget, deleteButtonWidget);
                 formDefaultSettingTextField = textFieldWidget;
                 break;
         }
@@ -1517,7 +1517,7 @@ public class FormColorSelectMenu extends Screen implements FormTextureUtils.Temp
     @Override
     public Identifier getLayerID() {
         IForm playerForm = this.getForm();
-        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
+        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getSecond() : playerForm.getRenderLayerOverride().getSecond();
     }
 
     @Override

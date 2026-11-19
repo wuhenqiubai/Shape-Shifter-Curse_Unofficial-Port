@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.Vec3;
@@ -48,8 +48,8 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRend
     }
 
     @Override
-    public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
-        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
+        return new Pair<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     @Override
@@ -170,9 +170,9 @@ public class Form_Bat3_Sub_Avali extends NormalSubForm implements ModifyCapeRend
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
-            return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
+            return new Pair<>(true, POWER_ANIM_ATTACH_SIDE);
         }
         return super.getPowerAnim(player, animSystemData, powerAnimID);
     }

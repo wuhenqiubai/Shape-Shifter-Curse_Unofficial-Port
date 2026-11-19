@@ -25,7 +25,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.level.gameevent.EntityPositionSource;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.AABB;
@@ -55,12 +55,12 @@ public final class PerkActions {
 
     public static void registerConditions() {
         Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("in_oriented_box"),
-                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("in_oriented_box"),
+                new ConditionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("in_oriented_box"),
                         new SerializableData().add("width", SerializableDataTypes.DOUBLE, 4.0)
                                 .add("length", SerializableDataTypes.DOUBLE, 7.0)
                                 .add("height", SerializableDataTypes.DOUBLE, 3.0)
                                 .add("centered", SerializableDataTypes.BOOLEAN, false),
-                        (data, pair) -> inBox(data, pair.getA(), pair.getB())));
+                        (data, pair) -> inBox(data, pair.getFirst(), pair.getSecond())));
         Registry.register(ApoliRegistries.ENTITY_CONDITION, ShapeShifterCurseFabric.identifier("airborne"),
                 new ConditionFactory<Entity>(ShapeShifterCurseFabric.identifier("airborne"), new SerializableData(),
                         (data, entity) -> entity instanceof LivingEntity living && FrostDivePower.airborne(living)));
@@ -74,12 +74,12 @@ public final class PerkActions {
                     return power instanceof ChargePower charge && charge.isCharging();
                 }));
         Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("enemy"),
-                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("enemy"),
-                        new SerializableData(), (data, pair) -> isEnemy(pair.getA(), pair.getB())));
+                new ConditionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("enemy"),
+                        new SerializableData(), (data, pair) -> isEnemy(pair.getFirst(), pair.getSecond())));
         Registry.register(ApoliRegistries.BIENTITY_CONDITION, ShapeShifterCurseFabric.identifier("raycast_target"),
-                new ConditionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("raycast_target"),
+                new ConditionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("raycast_target"),
                         new SerializableData().add("distance", SerializableDataTypes.DOUBLE, 10.0), (data, pair) -> {
-                    Entity actor = pair.getA();
+                    Entity actor = pair.getFirst();
                     Vec3 from = actor.getEyePosition();
                     Vec3 to = from.add(actor.getViewVector(1).scale(data.getDouble("distance")));
                     var block = actor.level().clip(new ClipContext(from, to, ClipContext.Block.COLLIDER,
@@ -87,15 +87,15 @@ public final class PerkActions {
                     double max = block.getType() == HitResult.Type.MISS ? from.distanceToSqr(to) : from.distanceToSqr(block.getLocation());
                     var hit = ProjectileUtil.getEntityHitResult(actor, from, to, actor.getBoundingBox().expandTowards(to.subtract(from)).inflate(1),
                             e -> e instanceof LivingEntity && e.isAlive() && !e.isSpectator(), max);
-                    return hit != null && hit.getEntity() == pair.getB();
+                    return hit != null && hit.getEntity() == pair.getSecond();
                 }));
     }
 
     public static void registerActions() {
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("echolocation_vibration"),
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("echolocation_vibration"),
                 new SerializableData(), (data, pair) -> {
-            if (!(pair.getA() instanceof ServerPlayer player)) return;
-            Vec3 origin = pair.getB().getBoundingBox().getCenter();
+            if (!(pair.getFirst() instanceof ServerPlayer player)) return;
+            Vec3 origin = pair.getSecond().getBoundingBox().getCenter();
             var particle = new VibrationParticleOption(new EntityPositionSource(player, player.getEyeHeight()), 10);
             player.level().sendParticles(player, particle, true, false, origin.x, origin.y, origin.z, 1, 0, 0, 0, 0);
         }));
@@ -123,21 +123,21 @@ public final class PerkActions {
                 hunger.setSaturation(Math.min(hunger.getSaturationLevel(), hunger.getFoodLevel()));
             }
         }));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("damage_on_success"),
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("damage_on_success"),
                 new SerializableData().add("amount", SerializableDataTypes.FLOAT)
                         .add("bientity_action", ApoliDataTypes.BIENTITY_ACTION, null), (data, pair) -> {
-            if (!(pair.getA() instanceof LivingEntity actor) || actor.level().isClientSide()) return;
+            if (!(pair.getFirst() instanceof LivingEntity actor) || actor.level().isClientSide()) return;
             var source = actor instanceof Player player ? actor.damageSources().playerAttack(player) : actor.damageSources().mobAttack(actor);
-            if (pair.getB().hurtOrSimulate(source, data.getFloat("amount"))) {
-                Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
+            if (pair.getSecond().hurtOrSimulate(source, data.getFloat("amount"))) {
+                Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
                 if (action != null) action.accept(pair);
             }
         }));
-        AdditionalEntityActions.registerBIAction(new ActionFactory<Tuple<Entity, Entity>>(ShapeShifterCurseFabric.identifier("start_target_pounce"),
+        AdditionalEntityActions.registerBIAction(new ActionFactory<Pair<Entity, Entity>>(ShapeShifterCurseFabric.identifier("start_target_pounce"),
                 new SerializableData().add("power", SerializableDataTypes.IDENTIFIER), (data, pair) -> {
-            if (pair.getA().level().isClientSide() || !(pair.getB() instanceof LivingEntity target)) return;
+            if (pair.getFirst().level().isClientSide() || !(pair.getSecond() instanceof LivingEntity target)) return;
             var type = PowerTypeRegistry.get(data.getId("power"));
-            var power = PowerHolderComponent.KEY.get(pair.getA()).getPower(type);
+            var power = PowerHolderComponent.KEY.get(pair.getFirst()).getPower(type);
             if (power instanceof TargetPouncePower pounce) pounce.start(target);
         }));
         AdditionalEntityActions.registerAction(new ActionFactory<Entity>(ShapeShifterCurseFabric.identifier("fire_held_arrow"),
@@ -174,12 +174,12 @@ public final class PerkActions {
         Vec3 right = new Vec3(forward.z, 0, -forward.x);
         double offset = data.getBoolean("centered") ? 0 : length / 2;
         Vec3 center = actor.position().add(forward.scale(offset)).add(0, height / 2, 0);
-        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
-        Consumer<Tuple<Entity, Entity>> action = data.get("bientity_action");
+        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
+        Consumer<Pair<Entity, Entity>> action = data.get("bientity_action");
         for (LivingEntity target : world.getEntitiesOfClass(LivingEntity.class, new AABB(center, center).inflate(width + length, height, width + length),
                 e -> e != actor && e.isAlive() && !e.isSpectator())) {
             if (!inBox(data, actor, target)) continue;
-            Tuple<Entity, Entity> pair = new Tuple<>(actor, target);
+            Pair<Entity, Entity> pair = new Pair<>(actor, target);
             if (condition == null || condition.test(pair)) action.accept(pair);
         }
         if (data.getBoolean("particles")) {

@@ -8,7 +8,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,14 +77,14 @@ public class ManaUtils {
     public static class ModifierList {
         public double lastValue = 0.0d;
         public boolean needSync = false;
-        private final LinkedHashMap<Identifier, Tuple<Identifier, Modifier>> modifiers;
+        private final LinkedHashMap<Identifier, Pair<Identifier, Modifier>> modifiers;
 
         @SafeVarargs
-        public ModifierList(Tuple<Identifier, Tuple<Identifier, Modifier>>... modifier) {
+        public ModifierList(Pair<Identifier, Pair<Identifier, Modifier>>... modifier) {
             modifiers = new LinkedHashMap<>();
             if (modifier != null) {
-                for (Tuple<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifier) {
-                    modifiers.put(modifierEntry.getA(), modifierEntry.getB());
+                for (Pair<Identifier, Pair<Identifier, Modifier>> modifierEntry : modifier) {
+                    modifiers.put(modifierEntry.getFirst(), modifierEntry.getSecond());
                 }
             }
         }
@@ -93,7 +93,7 @@ public class ManaUtils {
             modifiers = new LinkedHashMap<>(other.getModifiers());
         }
 
-        public LinkedHashMap<Identifier, Tuple<Identifier, Modifier>> getModifiers() {
+        public LinkedHashMap<Identifier, Pair<Identifier, Modifier>> getModifiers() {
             return modifiers;
         }
 
@@ -102,7 +102,7 @@ public class ManaUtils {
         }
 
         public void add(Identifier identifier, Identifier conditionID, Modifier modifier) {
-            modifiers.put(identifier, new Tuple<>(conditionID, modifier));
+            modifiers.put(identifier, new Pair<>(conditionID, modifier));
         }
 
         public void remove(Identifier identifier) {
@@ -110,30 +110,30 @@ public class ManaUtils {
         }
 
         private double applyAdd(Player player, double value) {
-            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
-                Identifier conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Pair<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getFirst();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
-                    value = modifierEntry.getValue().getB().applyAdd(value);
+                    value = modifierEntry.getValue().getSecond().applyAdd(value);
                 }
             }
             return value;
         }
 
         private double applyMultiply(Player player, double value) {
-            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
-                Identifier conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Pair<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getFirst();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
-                    value = modifierEntry.getValue().getB().applyMultiply(value);
+                    value = modifierEntry.getValue().getSecond().applyMultiply(value);
                 }
             }
             return value;
         }
 
         private double applyAddTotal(Player player, double value) {
-            for(Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
-                Identifier conditionID = modifierEntry.getValue().getA();
+            for(Map.Entry<Identifier, Pair<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+                Identifier conditionID = modifierEntry.getValue().getFirst();
                 if(ManaRegistries.ManaConditionCheck(conditionID, player)) {
-                    value = modifierEntry.getValue().getB().applyAddTotal(value);
+                    value = modifierEntry.getValue().getSecond().applyAddTotal(value);
                 }
             }
             return value;
@@ -174,19 +174,19 @@ public class ManaUtils {
                     Identifier identifier = Identifier.parse(modifierEntryNbt.getStringOr("identifier", ""));
                     Identifier conditionID = Identifier.parse(modifierEntryNbt.getStringOr("conditionID", ""));
                     Modifier modifier = Modifier.readFromNbt(modifierEntryNbt.getCompound("modifier").orElse(new CompoundTag()));
-                    modifiers.put(identifier, new Tuple<>(conditionID, modifier));
+                    modifiers.put(identifier, new Pair<>(conditionID, modifier));
                 }
             }
         }
 
         public void writeToNbt(CompoundTag nbtCompound) {
             ListTag nbtList = new ListTag();
-            for (Map.Entry<Identifier, Tuple<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
+            for (Map.Entry<Identifier, Pair<Identifier, Modifier>> modifierEntry : modifiers.entrySet()) {
                 CompoundTag modifierEntryNbt = new CompoundTag();
                 modifierEntryNbt.putString("identifier", modifierEntry.getKey().toString());
-                modifierEntryNbt.putString("conditionID", modifierEntry.getValue().getA().toString());
+                modifierEntryNbt.putString("conditionID", modifierEntry.getValue().getFirst().toString());
                 CompoundTag modifierNbt = new CompoundTag();
-                modifierEntry.getValue().getB().writeToNbt(modifierNbt);
+                modifierEntry.getValue().getSecond().writeToNbt(modifierNbt);
                 modifierEntryNbt.put("modifier", modifierNbt);
                 nbtList.add(modifierEntryNbt);
             }

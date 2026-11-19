@@ -10,7 +10,7 @@ import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Avatar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
@@ -197,9 +197,9 @@ public class AnimSystem {
                 if (!this.data.playerForm.isPowerAnimRegistered(this.player, this.data)) {
                     this.data.playerForm.registerPowerAnim(this.player, this.data);
                 }
-                Tuple<Boolean, @Nullable AnimationHolder> result = this.data.playerForm.getPowerAnim(this.player, this.data, powerAnimID);
-                if (result.getA()) {
-                    return result.getB();
+                Pair<Boolean, @Nullable AnimationHolder> result = this.data.playerForm.getPowerAnim(this.player, this.data, powerAnimID);
+                if (result.getFirst()) {
+                    return result.getSecond();
                 }
                 @Nullable AnimRegistry.PowerDefaultAnim resultPowerDefaultAnim = AnimRegistry.getPowerDefaultAnim(powerAnimID);
                 if (resultPowerDefaultAnim == null) {
@@ -208,11 +208,11 @@ public class AnimSystem {
                 anim = resultPowerDefaultAnim.ANIM_SYSTEM_GET_CURRENT_ANIM(this.player, this.data);
                 this.NPPA_SetAnimation(powerAnimID, anim);
             } else {
-                Tuple<@Nullable Identifier, @NotNull Identifier> result = this.getAnimFSM().update(this.player, this.data);
-                if (result.getA() != null) {
-                    this.nowAnimFSMID = result.getA();
+                Pair<@Nullable Identifier, @NotNull Identifier> result = this.getAnimFSM().update(this.player, this.data);
+                if (result.getFirst() != null) {
+                    this.nowAnimFSMID = result.getFirst();
                 }
-                Identifier animStateControllerID = result.getB();
+                Identifier animStateControllerID = result.getSecond();
                 AbstractAnimStateController animStateController = this.data.playerForm.getAnimStateController(this.player, this.data, animStateControllerID);
                 if (animStateController == null) {
                     AnimRegistry.AnimState resultAnimState = Objects.requireNonNull(AnimRegistry.getAnimState(animStateControllerID));

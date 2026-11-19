@@ -391,7 +391,7 @@ public class ModPacketsS2C {
     public static void receiveOldOpenPatronFormSelectMenu(BytePayload payload, ClientPlayNetworking.Context ctx) {
         ctx.client().execute(() -> {
             Screen screen = new OldPatronFormSelectScreen(Component.literal("PatronFromSelectScreen"), ctx.player());
-            ctx.client().setScreen(screen);
+            ctx.client().gui.setScreen(screen);
         });
     }
 
@@ -400,7 +400,7 @@ public class ModPacketsS2C {
         UUID targetUUID = payload.data().readUUID();
         ctx.client().execute(() -> {
             Screen screen = new NormalFormSelectScreen(Component.literal("FormSelectScreen"), targetName, targetUUID);
-            ctx.client().setScreen(screen);
+            ctx.client().gui.setScreen(screen);
         });
     }
 
@@ -441,12 +441,12 @@ public class ModPacketsS2C {
             if (ShapeShifterCurseFabric.clientConfig.fcs_use_v1_menu) {
                 if (FormColorSelectMenu.instance == null) {
                     Screen screen = new FormColorSelectMenu(Component.literal("text.shape-shifter-curse.config.form_color_select_menu"));
-                    ctx.client().setScreen(screen);
+                    ctx.client().gui.setScreen(screen);
                 }
             } else {
                 if (FormColorSelectMenuV2.instance == null) {
                     Screen screen = new FormColorSelectMenuV2(Component.literal("text.shape-shifter-curse.config.form_color_select_menu_v2"));
-                    ctx.client().setScreen(screen);
+                    ctx.client().gui.setScreen(screen);
                 }
             }
         });
@@ -672,7 +672,7 @@ public class ModPacketsS2C {
         int tier = payload.data().readInt();
         ctx.client().execute(() -> {
             FormUpgradeScreen screen = new FormUpgradeScreen(tier, Component.literal(""), PerkUtils.getPlayerNowPerkTree(ctx.player()));
-            ctx.client().setScreen(screen);
+            ctx.client().gui.setScreen(screen);
         });
     }
 

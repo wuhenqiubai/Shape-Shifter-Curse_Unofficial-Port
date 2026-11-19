@@ -10,6 +10,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 
 public class DisableHurtCameraPowerCheck {
     @GameTest
@@ -20,7 +21,7 @@ public class DisableHurtCameraPowerCheck {
     }
 
     private static void checkCondition(GameTestHelper context, String powerId, Class<? extends Power> powerClass) {
-        var entity = EntityType.COW.create(context.getLevel(), EntitySpawnReason.STRUCTURE);
+        var entity = EntityTypes.COW.create(context.getLevel(), EntitySpawnReason.STRUCTURE);
         var type = PowerTypeRegistry.get(Identifier.fromNamespaceAndPath("shape-shifter-curse", powerId));
         var source = Identifier.fromNamespaceAndPath("test", "hurt_camera");
         var holder = PowerHolderComponent.KEY.get(entity);

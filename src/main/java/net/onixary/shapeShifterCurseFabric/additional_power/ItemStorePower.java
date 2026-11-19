@@ -14,7 +14,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -103,12 +103,12 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
         this.entity.setItemSlot(slot, stored);
     }
 
-    public void InvokeItemAction(ActionFactory<Tuple<Level, ItemStack>>.Instance action) {
+    public void InvokeItemAction(ActionFactory<Pair<Level, ItemStack>>.Instance action) {
         if (this.entity.level().isClientSide()) {
             return;
         }
         if (action != null) {
-            action.accept(new Tuple<>(this.entity.level(), this.storedItem));
+            action.accept(new Pair<>(this.entity.level(), this.storedItem));
         }
         PowerHolderComponent.syncPower(this.entity, this.getType());
     }
@@ -182,7 +182,7 @@ public class ItemStorePower extends Power implements ItemStorePowerRender.itemSt
         ));
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
         ActionRegister.accept(new ActionFactory<>(
                 ShapeShifterCurseFabric.identifier("gain_store_power_item"),
                 new SerializableData()

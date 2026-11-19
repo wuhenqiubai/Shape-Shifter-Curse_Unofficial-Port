@@ -28,7 +28,7 @@ public class RecipeManagerMixin {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeMap;create(Ljava/lang/Iterable;)Lnet/minecraft/world/item/crafting/RecipeMap;")
     )
     private void ssc$onPrepare(
-            ResourceManager resourceManager, ProfilerFiller profilerFiller, CallbackInfoReturnable<RecipeMap> cir,
+            ResourceManager manager, ProfilerFiller profiler, CallbackInfoReturnable<RecipeMap> cir,
             @Local List<RecipeHolder<?>> recipeList
     ) {
         SSCEvent.BEFORE_APPLY_RECIPE.invoker().beforeApplyRecipe(

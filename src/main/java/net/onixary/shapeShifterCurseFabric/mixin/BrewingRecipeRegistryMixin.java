@@ -28,15 +28,15 @@ public class BrewingRecipeRegistryMixin {
     }
 
     @Inject(method = "isIngredient", at = @At("HEAD"), cancellable = true)
-    private void ssc$isIngredient(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
+    private void ssc$isIngredient(ItemStack ingredient, CallbackInfoReturnable<Boolean> cir) {
         for (BrewingRecipeUtils.DynamicRecipe<Potion> recipe : BrewingRecipeUtils.getPotionRecipes()) {
-            if (recipe.ingredient.test(itemStack)) {
+            if (recipe.ingredient.test(ingredient)) {
                 cir.setReturnValue(true);
                 return;
             }
         }
         for (BrewingRecipeUtils.DynamicRecipe<Item> recipe : BrewingRecipeUtils.getItemRecipes()) {
-            if (recipe.ingredient.test(itemStack)) {
+            if (recipe.ingredient.test(ingredient)) {
                 cir.setReturnValue(true);
                 return;
             }
@@ -44,16 +44,16 @@ public class BrewingRecipeRegistryMixin {
     }
 
     @Inject(method = "mix", at = @At("HEAD"), cancellable = true)
-    private void ssc$mix(ItemStack ingredient, ItemStack input, CallbackInfoReturnable<ItemStack> cir) {
-        if (input.isEmpty()) {
+    private void ssc$mix(ItemStack ingredient, ItemStack source, CallbackInfoReturnable<ItemStack> cir) {
+        if (source.isEmpty()) {
             return;
         }
-        Item item = input.getItem();
+        Item item = source.getItem();
 
         for (BrewingRecipeUtils.DynamicRecipe<Item> recipe : BrewingRecipeUtils.getItemRecipes()) {
             if (recipe.matchesInput(item) && recipe.ingredient.test(ingredient)) {
                 ItemStack out;
-                PotionContents contents = input.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+                PotionContents contents = source.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
                 Holder<Potion> potionEntry = contents.potion().orElse(null);
                 if (potionEntry != null) {
                     out = PotionContents.createItemStack(recipe.output, potionEntry);
@@ -68,7 +68,7 @@ public class BrewingRecipeRegistryMixin {
             }
         }
 
-        PotionContents potionContents = input.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        PotionContents potionContents = source.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
         Holder<Potion> potionEntry = potionContents.potion().orElse(null);
         if (potionEntry == null) {
             return;
@@ -76,7 +76,7 @@ public class BrewingRecipeRegistryMixin {
         Potion potion = potionEntry.value();
         for (BrewingRecipeUtils.DynamicRecipe<Potion> recipe : BrewingRecipeUtils.getPotionRecipes()) {
             if (recipe.matchesInput(potion) && recipe.ingredient.test(ingredient)) {
-                ItemStack out = PotionContents.createItemStack(input.getItem(), BuiltInRegistries.POTION.wrapAsHolder(recipe.output));
+                ItemStack out = PotionContents.createItemStack(source.getItem(), BuiltInRegistries.POTION.wrapAsHolder(recipe.output));
                 if (recipe.targetForm != null) {
                     setTargetForm(out, recipe.targetForm);
                 }

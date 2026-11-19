@@ -3,7 +3,7 @@ package net.onixary.shapeShifterCurseFabric.additional_power;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.registry.ApoliRegistries;
 import net.minecraft.core.Registry;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 
 public class AdditionalEntityActions {
@@ -33,7 +33,7 @@ public class AdditionalEntityActions {
         return Registry.register(ApoliRegistries.ENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 
-    public static ActionFactory<Tuple<Entity, Entity>> registerBIAction(ActionFactory<Tuple<Entity, Entity>> actionFactory) {
+    public static ActionFactory<Pair<Entity, Entity>> registerBIAction(ActionFactory<Pair<Entity, Entity>> actionFactory) {
         return Registry.register(ApoliRegistries.BIENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 }

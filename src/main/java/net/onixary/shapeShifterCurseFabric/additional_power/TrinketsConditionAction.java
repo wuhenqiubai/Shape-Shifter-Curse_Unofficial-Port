@@ -7,7 +7,7 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -37,7 +37,7 @@ public class TrinketsConditionAction {
         if (entity instanceof LivingEntity livingEntity) {
             if (Objects.equals(AccessoryMod, "all")) {
                 for (AccessoryUtils.AccessoryIO accessoryIO : AccessoryUtils.activeAccessoryModInterfaces.values()) {
-                    @Nullable Map<Tuple<@Nullable String, String>, List<ItemStack>> slots = accessoryIO.getEntitySlots(livingEntity);
+                    @Nullable Map<Pair<@Nullable String, String>, List<ItemStack>> slots = accessoryIO.getEntitySlots(livingEntity);
                     if (slots != null) {
                         for (List<ItemStack> slot : slots.values()) {
                             for (ItemStack stack : slot) {
@@ -49,7 +49,7 @@ public class TrinketsConditionAction {
                     }
                 }
             } else {
-                @Nullable Map<Tuple<@Nullable String, String>, List<ItemStack>> slots = AccessoryUtils.getEntitySlots(livingEntity, AccessoryMod);
+                @Nullable Map<Pair<@Nullable String, String>, List<ItemStack>> slots = AccessoryUtils.getEntitySlots(livingEntity, AccessoryMod);
                 if (slots != null) {
                     for (List<ItemStack> slot : slots.values()) {
                         for (ItemStack stack : slot) {
@@ -77,13 +77,13 @@ public class TrinketsConditionAction {
         return rDefault;
     }
 
-    public static void InvokeEquipped(Entity entity, String AccessoryMod, String GroupString, String SlotString, int Slot, Consumer<Tuple<Level, ItemStack>> action) {
+    public static void InvokeEquipped(Entity entity, String AccessoryMod, String GroupString, String SlotString, int Slot, Consumer<Pair<Level, ItemStack>> action) {
         if (entity instanceof LivingEntity livingEntity) {
             List<ItemStack> accessoryList = AccessoryUtils.getEntitySlot(livingEntity, AccessoryMod, GroupString, SlotString);
             if (accessoryList != null && Slot >= 0 && Slot < accessoryList.size()) {
                 ItemStack stack = accessoryList.get(Slot);
                 if (!stack.isEmpty()) {
-                    action.accept(new Tuple<>(entity.level(), stack));
+                    action.accept(new Pair<>(entity.level(), stack));
                 }
             }
         }
@@ -128,7 +128,7 @@ public class TrinketsConditionAction {
         ));
     }
 
-    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Tuple<Entity, Entity>>> BIActionRegister) {
+    public static void registerAction(Consumer<ActionFactory<Entity>> ActionRegister, Consumer<ActionFactory<Pair<Entity, Entity>>> BIActionRegister) {
 	    ActionRegister.accept(new ActionFactory<>(
 			    ShapeShifterCurseFabric.identifier("drop_accessory"),
 			    new SerializableData()

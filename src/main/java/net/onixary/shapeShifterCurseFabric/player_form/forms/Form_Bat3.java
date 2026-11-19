@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -100,11 +100,11 @@ public class Form_Bat3 extends NormalForm implements ModifyCapeRender {
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_SIDE)) {
-            return new Tuple<>(true, POWER_ANIM_ATTACH_SIDE);
+            return new Pair<>(true, POWER_ANIM_ATTACH_SIDE);
         } else if (powerAnimID.equals(AnimRegistries.POWER_ANIM_ATTACH_BOTTOM)) {
-            return new Tuple<>(true, POWER_ANIM_ATTACH_BOTTOM);
+            return new Pair<>(true, POWER_ANIM_ATTACH_BOTTOM);
         }
         return super.getPowerAnim(player, animSystemData, powerAnimID);
     }

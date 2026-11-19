@@ -11,12 +11,11 @@ import com.zigythebird.playeranimcore.math.Vec3f;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.player.PlayerModel;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.player.AvatarRenderer;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -42,7 +41,7 @@ import java.util.function.Predicate;
 
 public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModifyHead_MAS {
 
-    public final List<Tuple<String, String>> extraPartsMap = new ArrayList<>();
+    public final List<Pair<String, String>> extraPartsMap = new ArrayList<>();
 
     public String leftArmGeoBoneID = "bipedLeftArm";
     public String rightArmGeoBoneID = "bipedRightArm";
@@ -386,7 +385,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         if (json.has("extra_parts_map")) {
             JsonObject extraPartsMap = json.getAsJsonObject("extra_parts_map");
             for (String key : extraPartsMap.keySet()) {
-                this.extraPartsMap.add(new Tuple<>(key, extraPartsMap.get(key).getAsString()));
+                this.extraPartsMap.add(new Pair<>(key, extraPartsMap.get(key).getAsString()));
                 AnimSystem.EXTRA_ANIM_BONES.add(AnimSystem.normalizeAnimBoneName(key));
             }
         }
@@ -639,7 +638,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void beforeRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void beforeRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         float targetDrag = Mth.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
         td.currentTailDragAmount = Mth.lerp(0.04f, td.currentTailDragAmount, targetDrag);
@@ -657,8 +656,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.resetBone(RM_RightArmGeoBoneID);
         model.resetBone(RM_LeftLegGeoBoneID);
         model.resetBone(RM_RightLegGeoBoneID);
-        for (Tuple<String, String> pair : extraPartsMap) {
-            ProcessExtraBone(model, player, pair.getA(), pair.getB());
+        for (Pair<String, String> pair : extraPartsMap) {
+            ProcessExtraBone(model, player, pair.getFirst(), pair.getSecond());
         }
         PlayerModel playerModel = (PlayerModel) renderer.getModel();
         model.setRotationForBone(RM_HeadGeoBoneID, FormRenderUtils.getPartRotation(playerModel.head));
@@ -727,11 +726,11 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     }
 
     @Override
-    public void afterRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void afterRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
     }
 
     @Override
-    public void finishRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
+    public void finishRender(FormRenderer formRenderer, FormModel model, AvatarRenderer renderer, Player player, PoseStack matrices, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
         td.tailDragAmountO = td.tailDragAmount;
         td.tailDragAmount *= 0.75F;

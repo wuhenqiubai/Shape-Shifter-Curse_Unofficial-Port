@@ -40,8 +40,8 @@ public abstract class ItemStackMixin {
             method = "finishUsingItem",
             at = @At("HEAD")
     )
-    private void shape_shifter_curse$onFinishUsing(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClientSide() && user instanceof ServerPlayer player) {
+    private void shape_shifter_curse$onFinishUsing(Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir) {
+        if (!level.isClientSide() && livingEntity instanceof ServerPlayer player) {
             ItemStack stack = (ItemStack) (Object) this;
             if(stack.getItem() == Items.GOLDEN_APPLE || stack.getItem() == Items.ENCHANTED_GOLDEN_APPLE){
                 IForm currentForm = FormUtils.getPlayerForm(player);
@@ -81,8 +81,8 @@ public abstract class ItemStackMixin {
     }
 
     @Inject(method = "finishUsingItem", at = @At("TAIL"))
-    private void shape_shifter_curse$onFinishUsingEnd(Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!world.isClientSide() && user instanceof ServerPlayer player) {
+    private void shape_shifter_curse$onFinishUsingEnd(Level level, LivingEntity livingEntity, CallbackInfoReturnable<ItemStack> cir) {
+        if (!level.isClientSide() && livingEntity instanceof ServerPlayer player) {
             if (!tsiList.isEmpty()) {
                 tsiList.forEach(tsi -> player.getActiveEffectsMap().put(tsi.getEffect(), tsi));
                 tsiList.clear();
@@ -91,7 +91,7 @@ public abstract class ItemStackMixin {
     }
 
 	@Inject(method = "getTooltipLines", at = @At("TAIL"))
-	private void shape_shifter_curse$getTooltip(TooltipContext context, Player player, TooltipFlag type, CallbackInfoReturnable<List<Component>> cir) {
+	private void shape_shifter_curse$getTooltip(TooltipContext context, Player player, TooltipFlag tooltipFlag, CallbackInfoReturnable<List<Component>> cir) {
 		ItemStack realThis = (ItemStack) (Object) this;
 		List<Component> tooltip = cir.getReturnValue();
 		var nbt = realThis.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);

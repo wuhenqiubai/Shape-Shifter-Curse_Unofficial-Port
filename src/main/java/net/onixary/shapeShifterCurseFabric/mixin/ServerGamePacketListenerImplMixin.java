@@ -16,7 +16,7 @@ public class ServerGamePacketListenerImplMixin {
     public ServerPlayer player;
 
     @Inject(method = "handlePlayerAbilities", at = @At("TAIL"))
-    private void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket serverboundPlayerAbilitiesPacket, CallbackInfo ci) {
+    private void handlePlayerAbilities(ServerboundPlayerAbilitiesPacket packet, CallbackInfo ci) {
         PlayerFormComponent.COMPONENT.get(this.player).checkFlyUpdate();
     }
 }

@@ -22,9 +22,9 @@ public abstract class PlayerEntityAttackMixin {
 
     @WrapOperation(method = "attack", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"))
-    private boolean ssc$successfulPrimaryHit(Entity instance, DamageSource damageSource, float f, Operation<Boolean> original, @Local(ordinal = 2) boolean critical) {
+    private boolean ssc$successfulPrimaryHit(Entity instance, DamageSource source, float damage, Operation<Boolean> original, @Local(ordinal = 2) boolean critical) {
         float before = ActionOnCombatHitPower.health(instance);
-        boolean success = original.call(instance, damageSource, f + ActionOnCombatHitPower.meleeBonus((Player) (Object) this, instance));
+        boolean success = original.call(instance, source, damage + ActionOnCombatHitPower.meleeBonus((Player) (Object) this, instance));
         if (success) {
             float dealt = before - ActionOnCombatHitPower.health(instance);
             Player player = (Player) (Object) this;
@@ -59,9 +59,9 @@ public abstract class PlayerEntityAttackMixin {
     // 直接改暴击的常量岂不是兼容性更好 对了 之前的版本会导致攻击附魔暴击伤害计算错误
     // 修改常量容易出现量子态(你观测(打断点 打日志(这个不是100%))就能生效 不观测就不生效) 而且日志里的值是正确的 但就是没生效(可能和常量优化有关系) 调了快1个小时了
     @ModifyVariable(method = "attack(Lnet/minecraft/world/entity/Entity;)V", ordinal = 0, at = @At(value = "STORE", ordinal = 2))
-    private float modifyCritMultiplier(float critMultiplier, @Local(ordinal = 0, argsOnly = true) Entity target) {
+    private float modifyCritMultiplier(float baseDamage, @Local(ordinal = 0, argsOnly = true) Entity target) {
         Player player = (Player) (Object) this;
-        float finalMultiplier = critMultiplier;
+        float finalMultiplier = baseDamage;
         List<CriticalDamageModifierPower> critModifierPowers = PowerHolderComponent.getPowers(player, CriticalDamageModifierPower.class);
         List<EnhancedFallingAttackPower> fallingAttackPowers = PowerHolderComponent.getPowers(player, EnhancedFallingAttackPower.class);
         for (CriticalDamageModifierPower power : critModifierPowers) {

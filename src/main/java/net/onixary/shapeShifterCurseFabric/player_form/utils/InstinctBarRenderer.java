@@ -4,7 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoon;
@@ -28,10 +28,10 @@ public class InstinctBarRenderer {
         Player player = Minecraft.getInstance().player;
         IForm curForm = FormUtils.getPlayerForm(player);
         boolean showInstinctBar = !FormUtils.NoInstinct.hasFlag(curForm);
-        if (!mc.options.hideGui && mc.gameMode != null && mc.gameMode.canHurtPlayer() && showInstinctBar) {
-            Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.instinctBarPosType, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetY);
+        if (!mc.gui.hud.isHidden() && mc.gameMode != null && mc.gameMode.canHurtPlayer() && showInstinctBar) {
+            Pair<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.instinctBarPosType, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.instinctBarPosOffsetY);
             updateBarTextures(player);
-            renderInstinctBar(context, tickDelta, pos.getA(), pos.getB(), player);
+            renderInstinctBar(context, tickDelta, pos.getFirst(), pos.getSecond(), player);
         }
     }
 

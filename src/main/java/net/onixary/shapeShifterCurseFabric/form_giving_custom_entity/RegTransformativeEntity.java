@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.form_giving_custom_entity;
 
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.axolotl.TransformativeAxolotlEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.bat.TransformativeBatEntity;
 import net.onixary.shapeShifterCurseFabric.form_giving_custom_entity.ocelot.TransformativeOcelotEntity;
@@ -22,11 +23,11 @@ public class RegTransformativeEntity {
     }
 
     static {
-        registerTMobLink(EntityType.BAT, T_BAT);
-        registerTMobLink(EntityType.AXOLOTL, T_AXOLOTL);
-        registerTMobLink(EntityType.OCELOT, T_OCELOT);
-        registerTMobLink(EntityType.WOLF, T_WOLF);
-        registerTMobLink(EntityType.SPIDER, T_SPIDER);
+        registerTMobLink(EntityTypes.BAT, T_BAT);
+        registerTMobLink(EntityTypes.AXOLOTL, T_AXOLOTL);
+        registerTMobLink(EntityTypes.OCELOT, T_OCELOT);
+        registerTMobLink(EntityTypes.WOLF, T_WOLF);
+        registerTMobLink(EntityTypes.SPIDER, T_SPIDER);
     }
 
 

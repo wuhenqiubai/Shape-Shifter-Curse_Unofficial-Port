@@ -19,21 +19,21 @@ public abstract class EntitySlipperinessMixin extends Entity {
     }
 
     @ModifyVariable(method = "travelInAir", at = @At(value = "STORE"), index = 3)
-    private float modifySlipperiness(float original) {
+    private float modifySlipperiness(float blockFriction) {
         if (!this.onGround()) {
-            return original;
+            return blockFriction;
         }
         if (!((Object)this instanceof Player player)) {
-            return original;
+            return blockFriction;
         }
         PowerHolderComponent component = PowerHolderComponent.KEY.get(player);
 
         for (ConditionedModifySlipperinessPower power : component.getPowers(ConditionedModifySlipperinessPower.class)) {
             if(power.doesApply(level(), getBlockPosBelowThatAffectsMyMovement())) {
-                return original + power.getSlipperinessModifier();
+                return blockFriction + power.getSlipperinessModifier();
             }
         }
-        return  original;
+        return blockFriction;
     }
 
 }

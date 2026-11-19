@@ -17,8 +17,8 @@ public abstract class ArmorSlotMixin {
     private static final String MSI_TAG = "MorphScaleItem";
 
     @Inject(method = "mayPlace", at = @At("RETURN"), cancellable = true)
-    private void allowMorphScaleArmor(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (isMorphScaleItem(stack)) {
+    private void allowMorphScaleArmor(ItemStack itemStack, CallbackInfoReturnable<Boolean> cir) {
+        if (isMorphScaleItem(itemStack)) {
             cir.setReturnValue(true);
         }
     }

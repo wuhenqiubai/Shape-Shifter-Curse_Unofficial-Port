@@ -15,6 +15,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -113,7 +114,7 @@ public class WolfSpiderPerkCheck {
         p.invulnerableTime=0;
         new MobEffectInstance(MobEffects.WITHER,40,1).tickServer(c.getLevel(), p, ()->{});
         c.assertTrue(p.getHealth()==18,"Wither II uses 40 ticks");
-        var zombie=c.spawn(EntityType.ZOMBIE,new BlockPos(4,1,2));
+        var zombie=c.spawn(EntityTypes.ZOMBIE,new BlockPos(4,1,2));
         new MobEffectInstance(MobEffects.WITHER,40,0).tickServer(c.getLevel(), zombie, ()->{});
         c.assertTrue(zombie.getHealth()<20,"Other entities keep vanilla cadence");
         p.discard();zombie.discard();c.succeed();
@@ -137,7 +138,7 @@ public class WolfSpiderPerkCheck {
         var out=net.minecraft.world.level.storage.TagValueOutput.createWithoutContext(net.minecraft.util.ProblemReporter.DISCARDING);bullet.addAdditionalSaveData(out);
         var restored=new WebBullet(RegCustomEntity.WEB_BULLET,c.getLevel());restored.readAdditionalSaveData(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING, c.getLevel().registryAccess(), out.buildResult()));
         c.assertTrue(restored.Tier==3 && !restored.EnableVenomSpindle,"Projectile configuration survives reload");
-        var target=c.spawn(EntityType.ZOMBIE,new BlockPos(4,1,2));
+        var target=c.spawn(EntityTypes.ZOMBIE,new BlockPos(4,1,2));
         restored.onHitEntity(new EntityHitResult(target));
         c.assertTrue(target.getEffect(MobEffects.SLOWNESS).getAmplifier()==3 && target.getEffect(MobEffects.WEAKNESS).getDuration()==160,"Fully charged projectile effects survive reload");
         bullet.discard();target.discard();p.discard();c.succeed();
@@ -161,7 +162,7 @@ public class WolfSpiderPerkCheck {
         c.assertTrue(!glow.isActive(),"No outline off web bridge");
         c.setBlock(new BlockPos(2,2,2),RegCustomBlock.TEMP_WEB_BRIDGE);
         c.assertTrue(glow.isActive(),"Standing inside bridge enables outline");
-        var sheep=c.spawn(EntityType.SHEEP,new BlockPos(4,2,2));
+        var sheep=c.spawn(EntityTypes.SHEEP,new BlockPos(4,2,2));
         c.assertTrue(glow.doesApply(sheep) && !glow.usesTeams() && glow.getRed()==1,"Passive animals receive white outline too");
         sheep.setPos(p.position().add(33,0,0));c.assertTrue(!glow.doesApply(sheep),"Outline range is 32 blocks");
         sheep.discard();p.discard();c.succeed();

@@ -38,12 +38,12 @@ public class WaitForNextLayerScreen extends Screen {
 	    }
 	    while (index < layerList.size()) {
 		    if (component != null && !component.hasOrigin(layerList.get(index)) && !layerList.get(index).getOrigins(player).isEmpty()) {
-			    Minecraft.getInstance().setScreen(new ChooseOriginScreen(layerList, index, showDirtBackground));
+			    Minecraft.getInstance().gui.setScreen(new ChooseOriginScreen(layerList, index, showDirtBackground));
 			    return;
 		    }
 		    index++;
         }
-        Minecraft.getInstance().setScreen(null);
+        Minecraft.getInstance().gui.setScreen(null);
     }
 
     @Override

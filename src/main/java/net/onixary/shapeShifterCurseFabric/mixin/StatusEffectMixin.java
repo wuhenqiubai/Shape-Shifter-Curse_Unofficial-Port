@@ -84,17 +84,17 @@ public class StatusEffectMixin {
     }
 
     @Inject(method = "applyEffectTick", at = @At("HEAD"), cancellable = true)
-    private void applyUpdateEffect(ServerLevel serverLevel, LivingEntity entity, int amplifier, CallbackInfoReturnable<Boolean> cir) {
+    private void applyUpdateEffect(ServerLevel serverLevel, LivingEntity mob, int amplification, CallbackInfoReturnable<Boolean> cir) {
         MobEffect realThis = (MobEffect)(Object)this;
-        if (applyEffect(realThis, entity, null, null, amplifier, 0.0, false)) {
+        if (applyEffect(realThis, mob, null, null, amplification, 0.0, false)) {
             cir.cancel();
         }
     }
 
-    @Inject(method = "applyInstantenousEffect", at = @At("HEAD"), cancellable = true)
-    private void applyInstantEffect(ServerLevel serverLevel, Entity source, Entity attacker, LivingEntity target, int amplifier, double proximity, CallbackInfo ci) {
+    @Inject(method = "applyInstantaneousEffect", at = @At("HEAD"), cancellable = true)
+    private void applyInstantEffect(ServerLevel level, Entity source, Entity owner, LivingEntity mob, int amplification, double scale, CallbackInfo ci) {
         MobEffect realThis = (MobEffect)(Object)this;
-        if (applyEffect(realThis, target, source, attacker, amplifier, proximity, true)) {
+        if (applyEffect(realThis, mob, source, owner, amplification, scale, true)) {
             ci.cancel();
         }
     }

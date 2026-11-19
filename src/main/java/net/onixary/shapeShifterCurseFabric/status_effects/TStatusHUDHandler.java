@@ -23,7 +23,7 @@ public class TStatusHUDHandler {
                     // 遍历所有药水效果
                     int index = 0;
                     for (MobEffectInstance effect : Minecraft.getInstance().player.getActiveEffects()) {
-                        if (effect.getEffect() instanceof BaseTransformativeStatusEffect) {
+                        if (effect.getEffect().value() instanceof BaseTransformativeStatusEffect) {
                             Component description = Component.translatable(effect.getDescriptionId() + ".description");
 
                             Matrix3x2fStack matrices = context.pose();

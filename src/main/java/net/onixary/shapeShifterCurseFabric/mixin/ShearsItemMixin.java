@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ShearsItem.class)
 public class ShearsItemMixin {
 	@Inject(method = "mineBlock", at = @At("RETURN"), cancellable = true)
-	private void postMineMixin(ItemStack stack, Level world, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> cir) {
+	private void postMineMixin(ItemStack itemStack, Level level, BlockState state, BlockPos pos, LivingEntity miner, CallbackInfoReturnable<Boolean> cir) {
 		if (!cir.getReturnValueZ() && state.is(ModTags.LIKE_COBWEB_TAG)) {
 			cir.setReturnValue(true);
 		}

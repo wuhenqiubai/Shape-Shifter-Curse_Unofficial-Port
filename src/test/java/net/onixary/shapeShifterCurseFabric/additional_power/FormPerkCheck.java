@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -43,10 +44,10 @@ public class FormPerkCheck {
         holder.addPower(chargeType,SOURCE);holder.addPower(glowType,SOURCE);
         var charge=(ChargePower)holder.getPower(chargeType);
         var glow=(EntityGlowPower)holder.getPower(glowType);
-        var a=c.spawn(EntityType.ZOMBIE,new BlockPos(8,1,0));
-        var b=c.spawn(EntityType.ZOMBIE,new BlockPos(-2,1,0));
-        var far=c.spawn(EntityType.ZOMBIE,new BlockPos(11,1,0));
-        var friend=c.spawn(EntityType.COW,new BlockPos(0,1,2));
+        var a=c.spawn(EntityTypes.ZOMBIE,new BlockPos(8,1,0));
+        var b=c.spawn(EntityTypes.ZOMBIE,new BlockPos(-2,1,0));
+        var far=c.spawn(EntityTypes.ZOMBIE,new BlockPos(11,1,0));
+        var friend=c.spawn(EntityTypes.COW,new BlockPos(0,1,2));
         // Isolate the enlarged area from entities and walls in neighbouring GameTests.
         for (var entity : new Entity[]{p,a,b,far,friend}) entity.setPos(entity.position().add(0,100,0));
         p.setAirSupply(100);charge.onUse();charge.onUse();
@@ -98,7 +99,7 @@ public class FormPerkCheck {
     public void pounceMovementAndHit(GameTestHelper context) {
         var player = context.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(context.absoluteVec(new Vec3(0.5, 1, 0.5)));
-        var target = context.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 5));
+        var target = context.spawn(EntityTypes.ZOMBIE, new BlockPos(0, 1, 5));
         var holder = PowerHolderComponent.KEY.get(player);
         var type = PowerTypeRegistry.get(id("perks/ocelot_long_pounce_flight"));
         holder.addPower(type, SOURCE);
@@ -124,8 +125,8 @@ public class FormPerkCheck {
         var player = context.makeMockPlayer(GameType.SURVIVAL);
         player.setPos(context.absoluteVec(new Vec3(0.5, 1, 0.5)));
         player.setYRot(0); player.setXRot(0);
-        var near = context.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 3));
-        var far = context.spawn(EntityType.ZOMBIE, new BlockPos(0, 1, 6));
+        var near = context.spawn(EntityTypes.ZOMBIE, new BlockPos(0, 1, 3));
+        var far = context.spawn(EntityTypes.ZOMBIE, new BlockPos(0, 1, 6));
         var holder = PowerHolderComponent.KEY.get(player);
         var chargeType = PowerTypeRegistry.get(id("perks/axolotl_tidal_pull_charge"));
         var glowType = PowerTypeRegistry.get(id("perks/axolotl_tidal_pull_glow"));
@@ -163,7 +164,7 @@ public class FormPerkCheck {
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         player.setShiftKeyDown(true);
         player.getFoodData().setFoodLevel(10);
-        var target = EntityType.ZOMBIE.create(context.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        var target = EntityTypes.ZOMBIE.create(context.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         player.attack(target);
         context.assertTrue(target.getHealth() < 15, "Primary attack applies ambush bonus through mixin");
         context.assertTrue(player.getFoodData().getFoodLevel() == 9, "Successful primary attack pays once");
@@ -208,7 +209,7 @@ public class FormPerkCheck {
     @GameTest
     public void combatThresholdsAndFood(GameTestHelper context) {
         var player = context.makeMockPlayer(GameType.SURVIVAL);
-        var target = EntityType.ZOMBIE.create(context.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        var target = EntityTypes.ZOMBIE.create(context.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         var holder = PowerHolderComponent.KEY.get(player);
         holder.addPower(PowerTypeRegistry.get(id("perks/axolotl_moisture_return_2")), SOURCE);
         player.setAirSupply(100);

@@ -28,12 +28,12 @@ import java.util.function.Consumer;
 @Mixin(Item.class)
 public class PotionItemMixin {
     @Inject(method = "finishUsingItem", at = @At("HEAD"))
-    public void finishUsing(ItemStack stack, Level world, LivingEntity user, CallbackInfoReturnable<ItemStack> cir) {
-        if (!(stack.getItem() instanceof PotionItem)) {
+    public void finishUsing(ItemStack itemStack, Level level, LivingEntity entity, CallbackInfoReturnable<ItemStack> cir) {
+        if (!(itemStack.getItem() instanceof PotionItem)) {
             return;
         }
-        if (user instanceof Player player) {
-            var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        if (entity instanceof Player player) {
+            var nbt = itemStack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
         Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
             if (CTPFormID != null) {
@@ -43,21 +43,21 @@ public class PotionItemMixin {
     }
 
     @Inject(method = "appendHoverText", at = @At("RETURN"))
-    public void appendTooltip(ItemStack stack, TooltipContext context, TooltipDisplay tooltipDisplay, Consumer<Component> consumer, TooltipFlag type, CallbackInfo ci) {
-        if (!(stack.getItem() instanceof PotionItem)) {
+    public void appendTooltip(ItemStack itemStack, TooltipContext context, TooltipDisplay display, Consumer<Component> builder, TooltipFlag tooltipFlag, CallbackInfo ci) {
+        if (!(itemStack.getItem() instanceof PotionItem)) {
             return;
         }
-        var potionContents = stack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        var potionContents = itemStack.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
         var potionEntry = potionContents.potion().orElse(null);
         if (potionEntry == null || potionEntry.value() != RegCustomPotions.CUSTOM_STATUE_FORM_POTION) {
             return;
         }
-        var nbt = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+        var nbt = itemStack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (nbt == null) return;
         Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(nbt.copyTag());
         if (CTPFormID != null) {
             Component formName = RegPlayerForms.getPlayerFormOrDefault(CTPFormID, RegPlayerForms.ORIGINAL_BEFORE_ENABLE).getContentText(CodexData.ContentType.NAME);
-            consumer.accept(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
+            builder.accept(Component.translatable("tooltip.shape_shifter_curse.potion_target_form").append(formName));
         }
     }
 }

@@ -21,7 +21,7 @@ public class CancelEntityStepSoundMixin {
             at = @At("HEAD"),
             cancellable = true
     )
-    private void disablePlayerStepSound(BlockPos pos, BlockState state, CallbackInfo ci) {
+    private void disablePlayerStepSound(BlockPos pos, BlockState blockState, CallbackInfo ci) {
         // 类型检查确保是玩家实体
         if ((Object)this instanceof Player) {
             if (PowerHolderComponent.hasPower((Player) (Object)this, NoStepSoundPower.class)) {

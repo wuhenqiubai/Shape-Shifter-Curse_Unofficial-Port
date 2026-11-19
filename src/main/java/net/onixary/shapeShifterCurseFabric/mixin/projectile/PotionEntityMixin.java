@@ -24,7 +24,7 @@ import java.util.List;
 public class PotionEntityMixin {
 
     @Inject(method = "onHitAsWater(Lnet/minecraft/server/level/ServerLevel;)V", at = @At("HEAD"))
-    private void onApplyWater(ServerLevel serverLevel, CallbackInfo ci) {
+    private void onApplyWater(ServerLevel level, CallbackInfo ci) {
         AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
         AABB box = self.getBoundingBox().inflate(4.0, 2.0, 4.0);
 

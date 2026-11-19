@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.additional_power.ChargePower;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
@@ -25,9 +25,9 @@ public class WebResourceBar implements IManaRender {
     }
 
     public void render(GuiGraphicsExtractor context, float tickDelta) {
-        if (!mc.options.hideGui) {
-            Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
-            this.renderBar(context, tickDelta, pos.getA(), pos.getB());
+        if (!mc.gui.hud.isHidden()) {
+            Pair<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
+            this.renderBar(context, tickDelta, pos.getFirst(), pos.getSecond());
         }
     }
 

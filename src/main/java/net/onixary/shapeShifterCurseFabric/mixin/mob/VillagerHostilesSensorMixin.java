@@ -13,18 +13,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(VillagerHostilesSensor.class)
 public abstract class VillagerHostilesSensorMixin {
     @Inject(method = "isClose", at = @At("HEAD"), cancellable = true)
-    private void isCloseEnoughForDanger(LivingEntity villager, LivingEntity hostile, CallbackInfoReturnable<Boolean> callback) {
-        if (hostile instanceof Player) {
-            if (PowerHolderComponent.hasPower(hostile, ScareVillagerPower.class)) {
-                callback.setReturnValue(hostile.distanceTo(villager) <= 8.0);
+    private void isCloseEnoughForDanger(LivingEntity body, LivingEntity mob, CallbackInfoReturnable<Boolean> callback) {
+        if (mob instanceof Player) {
+            if (PowerHolderComponent.hasPower(mob, ScareVillagerPower.class)) {
+                callback.setReturnValue(mob.distanceTo(body) <= 8.0);
             }
         }
     }
 
     @Inject(method = "isHostile", at = @At("HEAD"), cancellable = true)
-    private void isHostile(LivingEntity hostile, CallbackInfoReturnable<Boolean> callback) {
-        if (hostile instanceof Player) {
-            if (PowerHolderComponent.hasPower(hostile, ScareVillagerPower.class)) {
+    private void isHostile(LivingEntity entity, CallbackInfoReturnable<Boolean> callback) {
+        if (entity instanceof Player) {
+            if (PowerHolderComponent.hasPower(entity, ScareVillagerPower.class)) {
                 callback.setReturnValue(true);
             }
         }

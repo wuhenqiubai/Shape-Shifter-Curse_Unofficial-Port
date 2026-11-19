@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils;
 import net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent;
@@ -19,7 +19,7 @@ public interface ISubForm extends IForm {
 
     // 默认使用主形态的能力
     @Override
-    default @NotNull Tuple<Identifier, Identifier> getFormLayer() {
+    default @NotNull Pair<Identifier, Identifier> getFormLayer() {
         IForm masterForm = this.getMasterForm();
         if (masterForm != null) {
             return masterForm.getFormLayer();
@@ -27,15 +27,15 @@ public interface ISubForm extends IForm {
         throw new RuntimeException("Master form is null");
     }
 
-    @Nullable Tuple<List<Identifier>, List<Identifier>> getLayerModifier();
+    @Nullable Pair<List<Identifier>, List<Identifier>> getLayerModifier();
 
     @Override
     default void afterApplyLayer(Player player) {
-        Tuple<List<Identifier>, List<Identifier>> modifier = getLayerModifier();
+        Pair<List<Identifier>, List<Identifier>> modifier = getLayerModifier();
         if (modifier != null) {
-            Identifier powerSource = getFormLayer().getB();
-            List<Identifier> addPowerList = modifier.getA();
-            List<Identifier> removePowerList = modifier.getB();
+            Identifier powerSource = getFormLayer().getSecond();
+            List<Identifier> addPowerList = modifier.getFirst();
+            List<Identifier> removePowerList = modifier.getSecond();
             for (Identifier powerID : addPowerList) {
                 FormUtils.applyPower(player, powerID, powerSource);
             }

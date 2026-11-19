@@ -5,7 +5,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.PowerTypeRegistry;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.event.SSCEvent;
@@ -130,21 +130,21 @@ public class FormUtils {
         extraPowerRegistry.put(identifier, extraPower);
     }
 
-    public static void applyExtraPower(Player player, Tuple<Identifier, Identifier> layerData) {
+    public static void applyExtraPower(Player player, Pair<Identifier, Identifier> layerData) {
         extraPowerRegistry.forEach((id, extraPower) -> {
-            if (extraPower.canApply(layerData.getA(), layerData.getB())) {
-                extraPower.getPowerIDs().forEach(powerId -> applyPower(player, powerId, layerData.getB()));
+            if (extraPower.canApply(layerData.getFirst(), layerData.getSecond())) {
+                extraPower.getPowerIDs().forEach(powerId -> applyPower(player, powerId, layerData.getSecond()));
             }
         });
     }
 
-    public static void applyLayer(Player player, Tuple<Identifier, Identifier> layerData, boolean shouldReload) {
+    public static void applyLayer(Player player, Pair<Identifier, Identifier> layerData, boolean shouldReload) {
         // 临时 等移除Origins后再重新这部分
         OriginComponent component = ModComponents.ORIGIN.get(player);
         if (!(component instanceof PlayerOriginComponent playerOriginComponent)) return;
-        OriginLayer layer = OriginLayers.getLayer(layerData.getA());
-        if (layer != null && layerData.getB() != null) {
-            Origin origin = OriginRegistry.get(layerData.getB());
+        OriginLayer layer = OriginLayers.getLayer(layerData.getFirst());
+        if (layer != null && layerData.getSecond() != null) {
+            Origin origin = OriginRegistry.get(layerData.getSecond());
             if(layer.contains(origin, player)){
                 if (TechnicalFormOrigin == null) {
                     TechnicalFormOrigin = OriginRegistry.get(ShapeShifterCurseFabric.identifier("technical_form"));
@@ -233,7 +233,7 @@ public class FormUtils {
         PlayerFormComponent playerFormComponent = PlayerFormComponent.COMPONENT.get(player);
         IForm form = playerFormComponent.nowForm;
         form.applyScale(player);
-        Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
+        Pair<Identifier, Identifier> layerPair = form.getFormLayer();
         applyLayer(player, layerPair, true);
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();
@@ -264,7 +264,7 @@ public class FormUtils {
         // 应用Scale
         form.applyScale(player);
         // 应用Power Origin -> OriginExtraPower -> AccessoryPower
-        Tuple<Identifier, Identifier> layerPair = form.getFormLayer();
+        Pair<Identifier, Identifier> layerPair = form.getFormLayer();
         applyLayer(player, layerPair, shouldReload);
         form.afterApplyLayer(player);
         playerFormComponent.nowPerkTree = form.getPerkTreeID();

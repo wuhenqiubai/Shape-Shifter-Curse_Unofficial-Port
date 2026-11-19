@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -20,8 +20,8 @@ public class ActionOnCombatHitPower extends Power {
     private final String event;
     private final float minDamage;
     private final float bonusDamage;
-    private final Predicate<Tuple<Entity, Entity>> condition;
-    private final Consumer<Tuple<Entity, Entity>> action;
+    private final Predicate<Pair<Entity, Entity>> condition;
+    private final Consumer<Pair<Entity, Entity>> action;
 
     public ActionOnCombatHitPower(PowerType<?> type, LivingEntity entity, SerializableData.Instance data) {
         super(type, entity);
@@ -42,7 +42,7 @@ public class ActionOnCombatHitPower extends Power {
 
     public static float meleeBonus(LivingEntity actor, Entity target, boolean critical) {
         float bonus = 0;
-        Tuple<Entity, Entity> pair = new Tuple<>(actor, target);
+        Pair<Entity, Entity> pair = new Pair<>(actor, target);
         for (ActionOnCombatHitPower power : PowerHolderComponent.getPowers(actor, ActionOnCombatHitPower.class)) {
             if ((power.event.equals("melee") || !critical && power.event.equals("non_critical_melee"))
                     && (power.condition == null || power.condition.test(pair))) bonus += power.bonusDamage;
@@ -52,7 +52,7 @@ public class ActionOnCombatHitPower extends Power {
 
     public static void fire(LivingEntity actor, Entity target, String event, float damage) {
         if (actor.level().isClientSide()) return;
-        Tuple<Entity, Entity> pair = new Tuple<>(actor, target);
+        Pair<Entity, Entity> pair = new Pair<>(actor, target);
         for (ActionOnCombatHitPower power : PowerHolderComponent.getPowers(actor, ActionOnCombatHitPower.class)) {
             if (power.event.equals(event) && damage > power.minDamage
                     && (power.condition == null || power.condition.test(pair))) power.action.accept(pair);

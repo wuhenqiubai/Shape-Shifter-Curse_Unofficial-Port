@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.player_animation.AnimationHolder;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -32,8 +32,8 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @Nullable Tuple<List<Identifier>, List<Identifier>> getLayerModifier() {
-        return new Tuple<>(power_ADD, power_REMOVE);
+    public @Nullable Pair<List<Identifier>, List<Identifier>> getLayerModifier() {
+        return new Pair<>(power_ADD, power_REMOVE);
     }
 
     public void addPower(Identifier... powerIDs) {
@@ -94,7 +94,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @NotNull Tuple<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
+    public @NotNull Pair<Boolean, @Nullable AnimationHolder> getPowerAnim(Player player, AnimSystem.AnimSystemData animSystemData, @NotNull Identifier powerAnimID) {
         return this.getMasterForm().getPowerAnim(player, animSystemData, powerAnimID);
     }
 
@@ -163,7 +163,7 @@ public class NormalSubForm extends NormalForm implements ISubForm {
     }
 
     @Override
-    public @NotNull Tuple<Identifier, Identifier> getFormLayer() {
+    public @NotNull Pair<Identifier, Identifier> getFormLayer() {
         return ISubForm.super.getFormLayer();
     }
 }

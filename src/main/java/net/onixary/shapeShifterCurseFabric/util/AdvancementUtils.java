@@ -2,10 +2,10 @@ package net.onixary.shapeShifterCurseFabric.util;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
-import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.criterion.InventoryChangeTrigger;
-import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
+import net.minecraft.advancements.triggers.Criterion;
+import net.minecraft.advancements.triggers.InventoryChangeTrigger;
+import net.minecraft.advancements.predicates.ItemPredicate;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.resources.Identifier;
@@ -56,7 +56,7 @@ public class AdvancementUtils {
         for (Map.Entry<String, Criterion<?>> criterionEntry : criteria.entrySet()) {
             Criterion<?> criterion = criterionEntry.getValue();
             if (criterion.triggerInstance() instanceof InventoryChangeTrigger.TriggerInstance(
-                    Optional<net.minecraft.advancements.criterion.ContextAwarePredicate> player,
+                    Optional<net.minecraft.advancements.predicates.ContextAwarePredicate> player,
                     InventoryChangeTrigger.TriggerInstance.Slots slots,
                     List<ItemPredicate> items
             )) {

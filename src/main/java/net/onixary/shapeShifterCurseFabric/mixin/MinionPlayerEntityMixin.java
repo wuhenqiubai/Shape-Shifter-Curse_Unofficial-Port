@@ -2,7 +2,7 @@ package net.onixary.shapeShifterCurseFabric.mixin;
 
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -140,16 +140,16 @@ public abstract class MinionPlayerEntityMixin implements IPlayerEntityMinion {
     @Unique
     private void checkMinion(Player realThis, ServerLevel world) {
         ConcurrentHashMap<Identifier, ArrayList<UUID>> minions = this.shape_shifter_curse$getAllMinions();
-        LinkedList<Tuple<Identifier, UUID>> minionsToRemove = new LinkedList<>();
+        LinkedList<Pair<Identifier, UUID>> minionsToRemove = new LinkedList<>();
         for (Identifier minionID : minions.keySet()) {
             for (UUID minionUUID : minions.get(minionID)) {
                 if (world.getEntity(minionUUID) == null) {
-                    minionsToRemove.add(new Tuple<>(minionID, minionUUID));
+                    minionsToRemove.add(new Pair<>(minionID, minionUUID));
                 }
             }
         }
-        for (Tuple<Identifier, UUID> minionToRemove : minionsToRemove) {
-            this.shape_shifter_curse$removeMinion(minionToRemove.getA(), minionToRemove.getB());
+        for (Pair<Identifier, UUID> minionToRemove : minionsToRemove) {
+            this.shape_shifter_curse$removeMinion(minionToRemove.getFirst(), minionToRemove.getSecond());
         }
     }
 

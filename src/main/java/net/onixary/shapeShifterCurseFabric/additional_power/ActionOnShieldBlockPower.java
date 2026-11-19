@@ -7,7 +7,7 @@ import io.github.apace100.apoli.power.PowerType;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,8 +16,8 @@ import java.util.function.Consumer;
 
 /** Runs only from the accepted shield-block branch of damage(), never from a shield query. */
 public class ActionOnShieldBlockPower extends Power {
-    private final Consumer<Tuple<Entity, Entity>> action;
-    public ActionOnShieldBlockPower(PowerType<?> type, LivingEntity entity, Consumer<Tuple<Entity, Entity>> action) {
+    private final Consumer<Pair<Entity, Entity>> action;
+    public ActionOnShieldBlockPower(PowerType<?> type, LivingEntity entity, Consumer<Pair<Entity, Entity>> action) {
         super(type, entity);
         this.action = action;
     }
@@ -25,7 +25,7 @@ public class ActionOnShieldBlockPower extends Power {
         if (defender.level().isClientSide() || !defender.isBlocking() || !source.is(DamageTypeTags.IS_PROJECTILE)
                 || source.getEntity() == null || source.getEntity() == defender) return;
         for (var power : PowerHolderComponent.getPowers(defender, ActionOnShieldBlockPower.class)) {
-            power.action.accept(new Tuple<>(defender, source.getEntity()));
+            power.action.accept(new Pair<>(defender, source.getEntity()));
         }
     }
     public static PowerFactory<?> createFactory() {

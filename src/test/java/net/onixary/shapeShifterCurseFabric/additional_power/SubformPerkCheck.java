@@ -18,6 +18,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -28,7 +29,7 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.onixary.shapeShifterCurseFabric.command.ShapeShifterCurseCommand;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.perk.*;
@@ -43,7 +44,7 @@ public class SubformPerkCheck {
     @GameTest
     public void directedParticleOffsets(GameTestHelper c) {
         var actor = c.makeMockPlayer(GameType.SURVIVAL);
-        var target = EntityType.COW.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        var target = EntityTypes.COW.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         actor.setPos(0,1,0);target.setPos(3,2,4);
         var factory = DirectedParticlesAction.getFactory();
         var json = JsonParser.parseString("""
@@ -63,7 +64,7 @@ public class SubformPerkCheck {
         c.assertTrue(new Vec3(reverse.getX(),reverse.getY(),reverse.getZ()).distanceTo(b)<1e-6,"Reverse emission starts at target offset");
         c.assertTrue(Math.abs(reverse.getXDist()+forward.getXDist())<1e-6 && Math.abs(reverse.getYDist()+forward.getYDist())<1e-6 && Math.abs(reverse.getZDist()+forward.getZDist())<1e-6,"Reversing retains actor/target offset ownership");
         json.addProperty("type","shape-shifter-curse:directed_particles");
-        ApoliDataTypes.BIENTITY_ACTION.read(json, registries).accept(new Tuple<>(actor,target));
+        ApoliDataTypes.BIENTITY_ACTION.read(json, registries).accept(new Pair<>(actor,target));
         json.remove("actor_offset");json.remove("target_offset");
         var zero = DirectedParticlesAction.packet(factory.getSerializableData().read(json, registries),actor,actor);
         c.assertTrue(zero.getXDist()==0 && zero.getYDist()==0 && zero.getZDist()==0,"Coincident endpoints have zero velocity");
@@ -160,7 +161,7 @@ public class SubformPerkCheck {
         p.getFoodData().setFoodLevel(6);dash.onUse();c.assertTrue(p.getDeltaMovement().y==-1,"Six food cannot dash");
         p.getFoodData().setFoodLevel(7);dash.onUse();
         c.assertTrue(p.getFoodData().getFoodLevel()==7 && Math.abs(p.getDeltaMovement().z-0.6)<1e-4 && Math.abs(p.getDeltaMovement().y-0.3)<1e-4,"Dash horizontal impulse without food cost");
-        add(p,"marbled_polecat_combat_noodle_melee");var target=EntityType.ZOMBIE.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
+        add(p,"marbled_polecat_combat_noodle_melee");var target=EntityTypes.ZOMBIE.create(c.getLevel(), net.minecraft.world.entity.EntitySpawnReason.MOB_SUMMONED);
         c.assertTrue(ActionOnCombatHitPower.meleeBonus(p,target,false)==4 && ActionOnCombatHitPower.meleeBonus(p,target,true)==0,"Only noncritical melee gets bonus");c.succeed();
     }
     @GameTest

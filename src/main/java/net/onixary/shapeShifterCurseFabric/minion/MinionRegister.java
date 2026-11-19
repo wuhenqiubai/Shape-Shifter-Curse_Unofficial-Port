@@ -1,7 +1,5 @@
 package net.onixary.shapeShifterCurseFabric.minion;
 
-import net.minecraft.world.entity.EntityDimensions;
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -34,9 +32,8 @@ public class MinionRegister {
     public static final EntityType<ManaReservoirEntity> MANA_RESERVOIR = Registry.register(
             BuiltInRegistries.ENTITY_TYPE,
             ShapeShifterCurseFabric.identifier("mana_reservoir"),
-            FabricEntityTypeBuilder
-                    .create(MobCategory.MISC, ManaReservoirEntity::new)
-                    .dimensions(EntityDimensions.fixed(0.6f, 0.6f))
+            EntityType.Builder.of(ManaReservoirEntity::new, MobCategory.MISC)
+                    .sized(0.6f, 0.6f)
                     .build(ResourceKey.create(Registries.ENTITY_TYPE, ShapeShifterCurseFabric.identifier("mana_reservoir"))));
 
     public static void register() {

@@ -27,9 +27,9 @@ public abstract class FeralPlayerEntityRendererMixin {
      * 1.21.11: AvatarRenderer.getRenderOffset(AvatarRenderState)（参数由实体改为 RenderState），从 id 恢复实体
      */
     @Inject(method = "getRenderOffset(Lnet/minecraft/client/renderer/entity/state/AvatarRenderState;)Lnet/minecraft/world/phys/Vec3;", at = @At("RETURN"), cancellable = true)
-    private void cancelSneakOffset(AvatarRenderState avatarRenderState, CallbackInfoReturnable<Vec3> ci)
+    private void cancelSneakOffset(AvatarRenderState state, CallbackInfoReturnable<Vec3> ci)
     {
-        Entity entity = Minecraft.getInstance().level.getEntity(avatarRenderState.id);
+        Entity entity = Minecraft.getInstance().level.getEntity(state.id);
         if(entity instanceof AbstractClientPlayer abstractClientPlayerEntity){
             IForm curForm = FormTextureUtils.getPlayerForm_Render(abstractClientPlayerEntity);
             boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;

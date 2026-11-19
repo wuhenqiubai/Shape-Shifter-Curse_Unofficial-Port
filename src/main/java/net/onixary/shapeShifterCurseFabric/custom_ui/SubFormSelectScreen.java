@@ -50,9 +50,9 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     public static void openSubFormSelectScreen() {
         Minecraft client = Minecraft.getInstance();
         if (getAvailableForms(client).isEmpty()) {
-            client.setScreen(new SubFormSelectScreen_NoForm(Component.empty()));
+            client.gui.setScreen(new SubFormSelectScreen_NoForm(Component.empty()));
         } else {
-            client.setScreen(new SubFormSelectScreen(Component.empty()));
+            client.gui.setScreen(new SubFormSelectScreen(Component.empty()));
         }
     }
 
@@ -329,7 +329,7 @@ public class SubFormSelectScreen extends Screen implements WidgetEXUtils.IWidget
     @Override
     public Identifier getLayerID() {
         IForm playerForm = this.getForm();
-        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getB() : playerForm.getRenderLayerOverride().getB();
+        return playerForm.getRenderLayerOverride() == null ? playerForm.getFormLayer().getSecond() : playerForm.getRenderLayerOverride().getSecond();
     }
 
 }

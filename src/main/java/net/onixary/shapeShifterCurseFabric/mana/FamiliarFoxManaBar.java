@@ -6,7 +6,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.util.UIPositionUtils;
 
@@ -26,7 +26,7 @@ public class FamiliarFoxManaBar implements IManaRender{
 
     @Override
     public void render(GuiGraphicsExtractor context, float tickDelta) {
-        if (!mc.options.hideGui) {
+        if (!mc.gui.hud.isHidden()) {
             // int width = mc.getWindow().getScaledWidth();
             // int height = mc.getWindow().getScaledHeight();
             // //float x = (float) width / 2 + 11;
@@ -34,8 +34,8 @@ public class FamiliarFoxManaBar implements IManaRender{
             // // 39 is the height of the health bar
             // float y = height - 39;
             // y += 22;
-            Tuple<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
-            this.renderBar(context, tickDelta, pos.getA(), pos.getB());
+            Pair<Integer, Integer> pos = UIPositionUtils.getCorrectPosition(ShapeShifterCurseFabric.clientConfig.manaBarPosType, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetX, ShapeShifterCurseFabric.clientConfig.manaBarPosOffsetY);
+            this.renderBar(context, tickDelta, pos.getFirst(), pos.getSecond());
         }
     }
 

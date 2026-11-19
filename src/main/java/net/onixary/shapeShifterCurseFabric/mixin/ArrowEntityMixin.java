@@ -23,8 +23,8 @@ public class ArrowEntityMixin {
     private Identifier CTPFormID = null;
 
     @Inject(method = "setPickupItemStack", at = @At("HEAD"))
-    public void setStack(ItemStack stack, CallbackInfo ci) {
-        var customData = stack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
+    public void setStack(ItemStack itemStack, CallbackInfo ci) {
+        var customData = itemStack.get(net.minecraft.core.component.DataComponents.CUSTOM_DATA);
         if (customData == null) return;
         Identifier CTPFormID = CTPUtils.getCTPFormIDFromNBT(customData.copyTag());
         if (CTPFormID != null) {
@@ -34,8 +34,8 @@ public class ArrowEntityMixin {
     }
 
     @Inject(method = "doPostHurtEffects", at = @At("HEAD"))
-    public void onHit(LivingEntity target, CallbackInfo ci) {
-        if (IsCTPArrow && target instanceof Player player) {
+    public void onHit(LivingEntity mob, CallbackInfo ci) {
+        if (IsCTPArrow && mob instanceof Player player) {
             CTPUtils.setTransformativePotionForm(player, CTPFormID);
         }
     }

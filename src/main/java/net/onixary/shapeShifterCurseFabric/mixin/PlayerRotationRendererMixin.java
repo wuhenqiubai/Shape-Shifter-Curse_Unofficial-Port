@@ -36,12 +36,12 @@ public class PlayerRotationRendererMixin {
 			at = @At("HEAD")
 	)
 	private void lockRotationWhenAttached(
-			Avatar avatar,
-			AvatarRenderState avatarRenderState,
-			float tickDelta,
+			Avatar entity,
+			AvatarRenderState state,
+			float partialTicks,
 			CallbackInfo ci
 	) {
-		if (!(avatar instanceof AbstractClientPlayer player)) {
+		if (!(entity instanceof AbstractClientPlayer player)) {
 			return;
 		}
 

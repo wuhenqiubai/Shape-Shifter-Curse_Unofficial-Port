@@ -52,10 +52,10 @@ public abstract class LivingEntityMixin {
 
     @Shadow public abstract float getSpeed();
 
-    @Shadow protected abstract void checkFallDamage(double heightDifference, boolean onGround, BlockState state, BlockPos landedPosition);
+    @Shadow protected abstract void checkFallDamage(double ya, boolean onGround, BlockState onState, BlockPos pos);
 
     @Shadow
-    protected abstract void blockUsingItem(ServerLevel serverLevel, LivingEntity attacker);
+    protected abstract void blockUsingItem(ServerLevel level, LivingEntity attacker, DamageSource source, float damage);
 
     @Inject(
             method = "die",
@@ -202,7 +202,7 @@ public abstract class LivingEntityMixin {
 
     @Inject(method = "addEffect(Lnet/minecraft/world/effect/MobEffectInstance;Lnet/minecraft/world/entity/Entity;)Z",
             at = @At("HEAD"))
-    private void onStatusEffectAdded(MobEffectInstance effect, Entity source, CallbackInfoReturnable<Boolean> cir) {
+    private void onStatusEffectAdded(MobEffectInstance newEffect, Entity source, CallbackInfoReturnable<Boolean> cir) {
         LivingEntity self = (LivingEntity) (Object) this;
         if (self instanceof Player player) {
             // 检查是否是溅射药水或滞留药水造成的效果
@@ -344,11 +344,11 @@ public abstract class LivingEntityMixin {
     // }
 
     @Inject(method = "applyItemBlocking", at = @At("HEAD"), cancellable = true)
-    private void blockedByShield(ServerLevel serverLevel, DamageSource source, float amount, CallbackInfoReturnable<Float> cir) {
+    private void blockedByShield(ServerLevel level, DamageSource source, float damage, CallbackInfoReturnable<Float> cir) {
         LivingEntity realThis = (LivingEntity) (Object) this;
         for (VirtualShieldPower power : PowerHolderComponent.getPowers(realThis, VirtualShieldPower.class)) {
             if (power.blockDamage(source)) {
-                cir.setReturnValue(amount);
+                cir.setReturnValue(damage);
                 return;
             }
         }

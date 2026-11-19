@@ -7,7 +7,7 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
@@ -24,7 +24,7 @@ public class SpawnParticlesInCircleAction {
 
         // 获取配置参数
         ParticleOptions particleEffect = data.get("particle");
-        Predicate<Tuple<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
+        Predicate<Pair<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
 
         boolean force = data.getBoolean("force");
         float speed = data.getFloat("speed");
@@ -66,7 +66,7 @@ public class SpawnParticlesInCircleAction {
                     speed, count
             );
             for (ServerPlayer player : serverWorld.players()) {
-                if (biEntityCondition == null || biEntityCondition.test(new Tuple<>(entity, player))) {
+                if (biEntityCondition == null || biEntityCondition.test(new Pair<>(entity, player))) {
                     serverWorld.sendParticles(player, force, particlePos.x(), particlePos.y(), particlePos.z(), packet);
                 }
             }

@@ -1,7 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.player_form.forms;
 
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.player.Player;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import net.onixary.shapeShifterCurseFabric.player_animation.v3.AbstractAnimStateController;
@@ -36,8 +36,8 @@ public class Form_SnowFox3_Sub_MarbledPolecat extends NormalSubForm {
     }
 
     @Override
-    public @Nullable Tuple<Identifier, Identifier> getRenderLayerOverride() {
-        return new Tuple<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
+    public @Nullable Pair<Identifier, Identifier> getRenderLayerOverride() {
+        return new Pair<>(Identifier.fromNamespaceAndPath("origins", "origin"), Identifier.fromNamespaceAndPath(this.getFormID().getNamespace(), "form_" + this.getFormID().getPath()));
     }
 
     private static final AnimUtils.AnimationHolderData ANIM_IDLE =

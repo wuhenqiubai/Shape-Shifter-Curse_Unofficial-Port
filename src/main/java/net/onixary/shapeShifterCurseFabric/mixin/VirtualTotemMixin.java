@@ -15,8 +15,8 @@ import java.util.List;
 @Mixin(value = LivingEntity.class, priority = 10)
 public class VirtualTotemMixin {
     @Inject(method = "checkTotemDeathProtection", at = @At("RETURN"), cancellable = true)
-    public void tryUseTotem(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
-        if (source.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+    public void tryUseTotem(DamageSource killingDamage, CallbackInfoReturnable<Boolean> cir) {
+        if (killingDamage.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
             return;
         }
         if (!cir.getReturnValue()) {
