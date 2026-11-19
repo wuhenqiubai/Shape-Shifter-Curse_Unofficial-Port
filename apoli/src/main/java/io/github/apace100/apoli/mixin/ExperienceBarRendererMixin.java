@@ -3,7 +3,7 @@ package io.github.apace100.apoli.mixin;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.OverrideHudTexturePower;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.contextualbar.ExperienceBarRenderer;
+import net.minecraft.client.gui.contextualbar.ExperienceBar;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.Optional;
 
-@Mixin(ExperienceBarRenderer.class)
+@Mixin(ExperienceBar.class)
 public abstract class ExperienceBarRendererMixin {
     @Shadow @Final private Minecraft minecraft;
 

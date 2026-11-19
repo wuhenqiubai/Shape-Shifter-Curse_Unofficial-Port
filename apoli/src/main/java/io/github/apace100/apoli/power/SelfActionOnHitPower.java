@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
@@ -8,7 +9,6 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.apoli.util.HudRender;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,11 +18,11 @@ import java.util.function.Predicate;
 
 public class SelfActionOnHitPower extends CooldownPower {
 
-    private final Predicate<Tuple<DamageSource, Float>> damageCondition;
+    private final Predicate<Pair<DamageSource, Float>> damageCondition;
     private final Predicate<Entity> targetCondition;
     private final Consumer<Entity> entityAction;
 
-    public SelfActionOnHitPower(PowerType<?> type, LivingEntity entity, int cooldownDuration, HudRender hudRender, Predicate<Tuple<DamageSource, Float>> damageCondition, Consumer<Entity> entityAction, Predicate<Entity> targetCondition) {
+    public SelfActionOnHitPower(PowerType<?> type, LivingEntity entity, int cooldownDuration, HudRender hudRender, Predicate<Pair<DamageSource, Float>> damageCondition, Consumer<Entity> entityAction, Predicate<Entity> targetCondition) {
         super(type, entity, cooldownDuration, hudRender);
         this.damageCondition = damageCondition;
         this.entityAction = entityAction;
@@ -31,7 +31,7 @@ public class SelfActionOnHitPower extends CooldownPower {
 
     public void onHit(Entity target, DamageSource damageSource, float damageAmount) {
         if(targetCondition == null || targetCondition.test(target)) {
-            if(damageCondition == null || damageCondition.test(new Tuple<>(damageSource, damageAmount))) {
+            if(damageCondition == null || damageCondition.test(new Pair<>(damageSource, damageAmount))) {
                 if(canUse()) {
                     this.entityAction.accept(this.entity);
                     use();
@@ -50,7 +50,7 @@ public class SelfActionOnHitPower extends CooldownPower {
                 .add("target_condition", ApoliDataTypes.ENTITY_CONDITION, null),
             data ->
                 (type, player) -> new SelfActionOnHitPower(type, player, data.getInt("cooldown"),
-                    (HudRender)data.get("hud_render"), (ConditionFactory<Tuple<DamageSource, Float>>.Instance)data.get("damage_condition"),
+                    (HudRender)data.get("hud_render"), (ConditionFactory<Pair<DamageSource, Float>>.Instance)data.get("damage_condition"),
                     (ActionFactory<Entity>.Instance)data.get("entity_action"),
                     (ConditionFactory<Entity>.Instance)data.get("target_condition")))
             .allowCondition();

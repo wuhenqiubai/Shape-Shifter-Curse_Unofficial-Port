@@ -13,7 +13,7 @@
   ],
   "contact": {
     "homepage": "",
-    "sources": "https://github.com/BluSpring/calio-legacy"
+    "sources": "https://git.devos.one/BluSpring/calio-legacy"
   },
 
   "license": "MIT",
@@ -41,9 +41,9 @@
   "accessWidener": "calio.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.14.0",
+    "fabricloader": ">=0.19.3",
     "fabric-api": "*",
-    "minecraft": "~26.1",
+    "minecraft": "~26.2",
     "java": ">=25"
   }
 }

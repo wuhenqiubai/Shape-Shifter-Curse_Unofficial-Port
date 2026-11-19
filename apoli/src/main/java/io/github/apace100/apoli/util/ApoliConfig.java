@@ -1,9 +1,11 @@
 package io.github.apace100.apoli.util;
 
+import io.github.apace100.apoli.Apoli;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.permissions.PermissionSet;
+import net.minecraft.server.permissions.Permissions;
 
 public class ApoliConfig implements ConfigData {
 

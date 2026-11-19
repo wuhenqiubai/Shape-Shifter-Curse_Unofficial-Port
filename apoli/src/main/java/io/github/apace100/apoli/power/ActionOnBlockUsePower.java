@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
@@ -8,7 +9,6 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
@@ -30,7 +30,7 @@ public class ActionOnBlockUsePower extends ActiveInteractionPower {
     private final EnumSet<Direction> directions;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
-    public ActionOnBlockUsePower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Tuple<Level, ItemStack>> heldItemAction, LazyItemStack itemResult, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, Predicate<BlockInWorld> blockCondition, EnumSet<Direction> directions, Consumer<Triple<Level, BlockPos, Direction>> blockAction, int priority) {
+    public ActionOnBlockUsePower(PowerType<?> type, LivingEntity entity, EnumSet<InteractionHand> hands, InteractionResult actionResult, Predicate<ItemStack> itemCondition, Consumer<Pair<Level, ItemStack>> heldItemAction, LazyItemStack itemResult, Consumer<Pair<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, Predicate<BlockInWorld> blockCondition, EnumSet<Direction> directions, Consumer<Triple<Level, BlockPos, Direction>> blockAction, int priority) {
         super(type, entity, hands, actionResult, itemCondition, heldItemAction, itemResult, resultItemAction, priority);
         this.entityAction = entityAction;
         this.blockCondition = blockCondition;

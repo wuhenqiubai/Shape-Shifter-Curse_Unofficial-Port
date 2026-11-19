@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.factory.action;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.data.ApoliDataTypes;
@@ -29,7 +30,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ARGB;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -197,18 +197,11 @@ public class EntityActions {
         register(new ActionFactory<>(Apoli.identifier("execute_command"), new SerializableData()
             .add("command", SerializableDataTypes.STRING),
             (data, entity) -> {
-                // 只有实体位于服务端维度（ServerLevel）才执行：particle 等命令需要 source.getLevel()，
-                // 客户端/非服务端维度的 level 不是 ServerLevel → source.getLevel() 为 null → NPE。
-                //（对应 1.21.1 提交 b7a79a9 的前置守卫）
                 if(!(entity.level() instanceof ServerLevel serverLevel)) {
                     return;
                 }
                 MinecraftServer server = entity.level().getServer();
                 if(server != null) {
-                    // ⚠ 26.1 差异：Entity 不再 implements CommandSource（1.21.1 时代是），
-                    // 且 Entity 上没有 sendSystemMessage —— 非玩家实体已收不到命令输出。
-                    // 所以 1.21.1 那条「source 恒为实体」只能对 ServerPlayer 成立，其余实体仍只能是 CommandSource.NULL。
-                    // 26.1 另一处差异：权限参数是 PermissionSet（getPermissionHandler()），不是 1.21.1 的 permissionLevel。
                     CommandSourceStack source = new CommandSourceStack(
                         entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
                         entity.position(),
@@ -219,21 +212,14 @@ public class EntityActions {
                         entity.getDisplayName(),
                         server,
                         entity);
-                    // showOutput=false（默认）时只抑制命令反馈广播（/give 的聊天提示等），保留命令执行效果。
-                    // 关键：用 withSuppressedOutput 静默输出，而不是像改动前那样把 source 整个换成 CommandSource.NULL
-                    // —— 后者会连命令效果一起杀掉（1.21.1 b7a79a9 的核心修复点）。
                     if(!Apoli.config.executeCommand.showOutput) {
                         source = source.withSuppressedOutput();
                     }
                     try {
-                        // dispatcher.execute 不剥前导 /（聊天栏的 / 由 MC 剥离后才传入），
-                        // 带 / 会在位置 0 报「未知命令」，这里手动剥掉前导空白与 /。
                         String execCommand = data.getString("command").trim();
                         if(execCommand.startsWith("/")) {
                             execCommand = execCommand.substring(1);
                         }
-                        // 用 dispatcher.execute（返回 int 并抛 CommandSyntaxException），而非 performPrefixedCommand
-                        // —— 后者把语法错误静默记进日志，无法判断命令到底有没有真的执行。
                         server.getCommands().getDispatcher().execute(execCommand, source);
                     } catch (CommandSyntaxException e) {
                         Apoli.LOGGER.warn("execute_command failed: cmd={} | entity={} | {}",
@@ -307,8 +293,8 @@ public class EntityActions {
                     }
                     ItemStack stack = lazyStack.getStack();
                     if(data.isPresent("item_action")) {
-                        ActionFactory<Tuple<Level, ItemStack>>.Instance action = data.get("item_action");
-                        action.accept(new Tuple<>(entity.level(), stack));
+                        ActionFactory<Pair<Level, ItemStack>>.Instance action = data.get("item_action");
+                        action.accept(new Pair<>(entity.level(), stack));
                     }
                     if(data.isPresent("preferred_slot") && entity instanceof LivingEntity living) {
                         EquipmentSlot slot = data.get("preferred_slot");
@@ -339,8 +325,8 @@ public class EntityActions {
             (data, entity) -> {
                 if(entity instanceof LivingEntity) {
                     ItemStack stack = ((LivingEntity)entity).getItemBySlot(data.get("equipment_slot"));
-                    ActionFactory<Tuple<Level, ItemStack>>.Instance action = data.get("action");
-                    action.accept(new Tuple<>(entity.level(), stack));
+                    ActionFactory<Pair<Level, ItemStack>>.Instance action = data.get("action");
+                    action.accept(new Pair<>(entity.level(), stack));
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("trigger_cooldown"), new SerializableData()
@@ -410,19 +396,19 @@ public class EntityActions {
             .add("recursive", SerializableDataTypes.BOOLEAN, false),
             (data, entity) -> {
                 Consumer<Entity> entityAction = data.get("action");
-                Consumer<Tuple<Entity, Entity>> bientityAction = data.get("bientity_action");
-                Predicate<Tuple<Entity, Entity>> cond = data.get("bientity_condition");
+                Consumer<Pair<Entity, Entity>> bientityAction = data.get("bientity_action");
+                Predicate<Pair<Entity, Entity>> cond = data.get("bientity_condition");
                 if(!entity.isVehicle() || (entityAction == null && bientityAction == null)) {
                     return;
                 }
                 Iterable<Entity> passengers = data.getBoolean("recursive") ? entity.getIndirectPassengers() : entity.getPassengers();
                 for(Entity passenger : passengers) {
-                    if(cond == null || cond.test(new Tuple<>(passenger, entity))) {
+                    if(cond == null || cond.test(new Pair<>(passenger, entity))) {
                         if (entityAction != null) {
                             entityAction.accept(passenger);
                         }
                         if (bientityAction != null) {
-                            bientityAction.accept(new Tuple<>(passenger, entity));
+                            bientityAction.accept(new Pair<>(passenger, entity));
                         }
                     }
                 }
@@ -434,32 +420,32 @@ public class EntityActions {
             .add("recursive", SerializableDataTypes.BOOLEAN, false),
             (data, entity) -> {
                 Consumer<Entity> entityAction = data.get("action");
-                Consumer<Tuple<Entity, Entity>> bientityAction = data.get("bientity_action");
-                Predicate<Tuple<Entity, Entity>> cond = data.get("bientity_condition");
+                Consumer<Pair<Entity, Entity>> bientityAction = data.get("bientity_action");
+                Predicate<Pair<Entity, Entity>> cond = data.get("bientity_condition");
                 if(!entity.isPassenger() || (entityAction == null && bientityAction == null)) {
                     return;
                 }
                 if(data.getBoolean("recursive")) {
                     Entity vehicle = entity.getVehicle();
                     while(vehicle != null) {
-                        if(cond == null || cond.test(new Tuple<>(entity, vehicle))) {
+                        if(cond == null || cond.test(new Pair<>(entity, vehicle))) {
                             if(entityAction != null) {
                                 entityAction.accept(vehicle);
                             }
                             if(bientityAction != null) {
-                                bientityAction.accept(new Tuple<>(entity, vehicle));
+                                bientityAction.accept(new Pair<>(entity, vehicle));
                             }
                         }
                         vehicle = vehicle.getVehicle();
                     }
                 } else {
                     Entity vehicle = entity.getVehicle();
-                    if(cond == null || cond.test(new Tuple<>(entity, vehicle))) {
+                    if(cond == null || cond.test(new Pair<>(entity, vehicle))) {
                         if(entityAction != null) {
                             entityAction.accept(vehicle);
                         }
                         if(bientityAction != null) {
-                            bientityAction.accept(new Tuple<>(entity, vehicle));
+                            bientityAction.accept(new Pair<>(entity, vehicle));
                         }
                     }
                 }

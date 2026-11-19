@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.factory.condition;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.MovingEntity;
 import io.github.apace100.apoli.access.SubmergableEntity;
@@ -33,7 +34,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.ProblemReporter;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -443,9 +443,9 @@ public class EntityConditions {
             (data, entity) -> {
                 if(entity.isPassenger()) {
                     if(data.isPresent("bientity_condition")) {
-                        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
+                        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
                         Entity vehicle = entity.getVehicle();
-                        return condition.test(new Tuple<>(entity, vehicle));
+                        return condition.test(new Pair<>(entity, vehicle));
                     }
                     return true;
                 }
@@ -456,9 +456,9 @@ public class EntityConditions {
             (data, entity) -> {
                 if(entity.isPassenger()) {
                     if(data.isPresent("bientity_condition")) {
-                        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
+                        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
                         Entity vehicle = entity.getRootVehicle();
-                        return condition.test(new Tuple<>(entity, vehicle));
+                        return condition.test(new Pair<>(entity, vehicle));
                     }
                     return true;
                 }
@@ -471,10 +471,10 @@ public class EntityConditions {
             (data, entity) -> {
                 int count = 0;
                 if(entity.isPassenger()) {
-                    Predicate<Tuple<Entity, Entity>> cond = data.get("bientity_condition");
+                    Predicate<Pair<Entity, Entity>> cond = data.get("bientity_condition");
                     Entity vehicle = entity.getVehicle();
                     while(vehicle != null) {
-                        if(cond == null || cond.test(new Tuple<>(entity, vehicle))) {
+                        if(cond == null || cond.test(new Pair<>(entity, vehicle))) {
                             count++;
                         }
                         vehicle = vehicle.getVehicle();
@@ -491,8 +491,8 @@ public class EntityConditions {
                 int count = 0;
                 if(entity.isVehicle()) {
                     if(data.isPresent("bientity_condition")) {
-                        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
-                        count = (int)entity.getPassengers().stream().filter(e -> condition.test(new Tuple<>(e, entity))).count();
+                        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
+                        count = (int)entity.getPassengers().stream().filter(e -> condition.test(new Pair<>(e, entity))).count();
                     } else {
                         count = entity.getPassengers().size();
                     }
@@ -507,9 +507,9 @@ public class EntityConditions {
                 int count = 0;
                 if(entity.isVehicle()) {
                     if(data.isPresent("bientity_condition")) {
-                        Predicate<Tuple<Entity, Entity>> condition = data.get("bientity_condition");
+                        Predicate<Pair<Entity, Entity>> condition = data.get("bientity_condition");
                         List<Entity> passengers = entity.getPassengers();
-                        count = (int)passengers.stream().flatMap(Entity::getSelfAndPassengers).filter(e -> condition.test(new Tuple<>(e, entity))).count();
+                        count = (int)passengers.stream().flatMap(Entity::getSelfAndPassengers).filter(e -> condition.test(new Pair<>(e, entity))).count();
                     } else {
                         count = (int)entity.getPassengers().stream().flatMap(Entity::getSelfAndPassengers).count();
                     }

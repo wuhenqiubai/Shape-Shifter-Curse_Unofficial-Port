@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -85,22 +85,22 @@ public class StartingEquipmentPower extends Power {
                 (type, player) -> {
                     StartingEquipmentPower power = new StartingEquipmentPower(type, player);
                     if(data.isPresent("stack")) {
-                        Tuple<Integer, ItemStack> stack = (Tuple<Integer, ItemStack>)data.get("stack");
-                        int slot = stack.getA();
+                        Pair<Integer, ItemStack> stack = (Pair<Integer, ItemStack>)data.get("stack");
+                        int slot = stack.getFirst();
                         if(slot > Integer.MIN_VALUE) {
-                            power.addStack(stack.getA(), stack.getB());
+                            power.addStack(stack.getFirst(), stack.getSecond());
                         } else {
-                            power.addStack(stack.getB());
+                            power.addStack(stack.getSecond());
                         }
                     }
                     if(data.isPresent("stacks")) {
-                        ((List<Tuple<Integer, ItemStack>>)data.get("stacks"))
+                        ((List<Pair<Integer, ItemStack>>)data.get("stacks"))
                             .forEach(integerItemStackPair -> {
-                                int slot = integerItemStackPair.getA();
+                                int slot = integerItemStackPair.getFirst();
                                 if(slot > Integer.MIN_VALUE) {
-                                    power.addStack(integerItemStackPair.getA(), integerItemStackPair.getB());
+                                    power.addStack(integerItemStackPair.getFirst(), integerItemStackPair.getSecond());
                                 } else {
-                                    power.addStack(integerItemStackPair.getB());
+                                    power.addStack(integerItemStackPair.getSecond());
                                 }
                             });
                     }

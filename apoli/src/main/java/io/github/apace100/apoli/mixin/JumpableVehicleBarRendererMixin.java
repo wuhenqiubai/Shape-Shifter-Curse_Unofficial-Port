@@ -3,7 +3,7 @@ package io.github.apace100.apoli.mixin;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.OverrideHudTexturePower;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.contextualbar.JumpableVehicleBarRenderer;
+import net.minecraft.client.gui.contextualbar.JumpableVehicleBar;
 import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import java.util.Optional;
 
-@Mixin(JumpableVehicleBarRenderer.class)
+@Mixin(JumpableVehicleBar.class)
 public class JumpableVehicleBarRendererMixin {
     @Shadow
     @Final

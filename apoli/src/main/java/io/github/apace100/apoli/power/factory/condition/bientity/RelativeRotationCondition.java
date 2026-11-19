@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power.factory.condition.bientity;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
@@ -9,7 +10,6 @@ import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
@@ -19,11 +19,11 @@ import java.util.function.Function;
 
 public class RelativeRotationCondition {
 
-    public static boolean condition(SerializableData.Instance data, Tuple<Entity, Entity> pair) {
+    public static boolean condition(SerializableData.Instance data, Pair<Entity, Entity> pair) {
         RotationType actorRotation = data.get("actor_rotation");
         RotationType targetRotation = data.get("target_rotation");
-        Vec3 vec0 = actorRotation.getRotation(pair.getA());
-        Vec3 vec1 = targetRotation.getRotation(pair.getB());
+        Vec3 vec0 = actorRotation.getRotation(pair.getFirst());
+        Vec3 vec1 = targetRotation.getRotation(pair.getSecond());
         EnumSet<Direction.Axis> axes = data.get("axes");
         vec0 = reduceAxes(vec0, axes);
         vec1 = reduceAxes(vec1, axes);
@@ -46,7 +46,7 @@ public class RelativeRotationCondition {
         );
     }
 
-    public static ConditionFactory<Tuple<Entity, Entity>> getFactory() {
+    public static ConditionFactory<Pair<Entity, Entity>> getFactory() {
         return new ConditionFactory<>(Apoli.identifier("relative_rotation"),
             new SerializableData()
                 .add("axes", SerializableDataTypes.AXIS_SET, EnumSet.allOf(Direction.Axis.class))

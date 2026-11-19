@@ -2,6 +2,7 @@ package io.github.apace100.apoli.power.factory.action;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.MutableItemStack;
 import io.github.apace100.apoli.data.ApoliDataTypes;
@@ -24,7 +25,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -49,23 +49,23 @@ public class ItemActions {
         register(AndAction.getFactory(ApoliDataTypes.ITEM_ACTIONS));
         register(ChanceAction.getFactory(ApoliDataTypes.ITEM_ACTION));
         register(IfElseAction.getFactory(ApoliDataTypes.ITEM_ACTION, ApoliDataTypes.ITEM_CONDITION,
-            Tuple::getB));
+            Pair::getSecond));
         register(ChoiceAction.getFactory(ApoliDataTypes.ITEM_ACTION));
         register(IfElseListAction.getFactory(ApoliDataTypes.ITEM_ACTION, ApoliDataTypes.ITEM_CONDITION,
-            Tuple::getB));
+            Pair::getSecond));
         register(DelayAction.getFactory(ApoliDataTypes.ITEM_ACTION));
         register(NothingAction.getFactory());
-        register(SideAction.getFactory(ApoliDataTypes.ITEM_ACTION, worldAndStack -> !worldAndStack.getA().isClientSide()));
+        register(SideAction.getFactory(ApoliDataTypes.ITEM_ACTION, worldAndStack -> !worldAndStack.getFirst().isClientSide()));
 
         register(new ActionFactory<>(Apoli.identifier("consume"), new SerializableData()
             .add("amount", SerializableDataTypes.INT, 1),
             (data, worldAndStack) -> {
-                worldAndStack.getB().shrink(data.getInt("amount"));
+                worldAndStack.getSecond().shrink(data.getInt("amount"));
             }));
         register(new ActionFactory<>(Apoli.identifier("modify"), new SerializableData()
             .add("modifier", SerializableDataTypes.IDENTIFIER),
             (data, worldAndStack) -> {
-                MinecraftServer server = worldAndStack.getA().getServer();
+                MinecraftServer server = worldAndStack.getFirst().getServer();
                 if(server != null) {
                     Identifier id = data.getId("modifier");
                     LootItemFunction lootFunction = server.registryAccess().lookupOrThrow(Registries.ITEM_MODIFIER).getValue(id);
@@ -74,7 +74,7 @@ public class ItemActions {
                         return;
                     }
                     ServerLevel serverWorld = server.overworld();
-                    ItemStack stack = worldAndStack.getB();
+                    ItemStack stack = worldAndStack.getSecond();
                     LootParams lootContextParameterSet = new LootParams.Builder(serverWorld).withParameter(LootContextParams.ORIGIN, new Vec3(0, 0,0)).create(LootContextParamSets.COMMAND);
                     LootContext lootContext = new LootContext.Builder(lootContextParameterSet).create(Optional.empty());
                     ItemStack newStack = lootFunction.apply(stack, lootContext);
@@ -85,12 +85,12 @@ public class ItemActions {
             .add("amount", SerializableDataTypes.INT, 1)
             .add("ignore_unbreaking", SerializableDataTypes.BOOLEAN, false),
             (data, worldAndStack) -> {
-                if (worldAndStack.getB().isDamageableItem()) {
+                if (worldAndStack.getSecond().isDamageableItem()) {
                     int amount = data.getInt("amount");
                     int i;
                     if (amount > 0 && !data.getBoolean("ignore_unbreaking")) {
-                        i = EnchantmentHelper.getItemEnchantmentLevel(worldAndStack.getA().getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING), worldAndStack.getB());
-                        int j = EnchantmentHelper.processDurabilityChange((ServerLevel) worldAndStack.getA(), worldAndStack.getB(), i);
+                        i = EnchantmentHelper.getItemEnchantmentLevel(worldAndStack.getFirst().getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.UNBREAKING), worldAndStack.getSecond());
+                        int j = EnchantmentHelper.processDurabilityChange((ServerLevel) worldAndStack.getFirst(), worldAndStack.getSecond(), i);
 
                         amount -= j;
                         if (amount <= 0) {
@@ -98,11 +98,11 @@ public class ItemActions {
                         }
                     }
 
-                    i = worldAndStack.getB().getDamageValue() + amount;
-                    worldAndStack.getB().setDamageValue(i);
-                    if(i >= worldAndStack.getB().getMaxDamage()) {
-                        worldAndStack.getB().shrink(1);
-                        worldAndStack.getB().setDamageValue(0);
+                    i = worldAndStack.getSecond().getDamageValue() + amount;
+                    worldAndStack.getSecond().setDamageValue(i);
+                    if(i >= worldAndStack.getSecond().getMaxDamage()) {
+                        worldAndStack.getSecond().shrink(1);
+                        worldAndStack.getSecond().setDamageValue(0);
                     }
                 }
             }));
@@ -113,13 +113,13 @@ public class ItemActions {
                 try {
                     CompoundTag oldTag = TagParser.create(NbtOps.INSTANCE).parseFully(new StringReader(nbtString)).asCompound().get();
                     CompoundTag recreatedTag = new CompoundTag();
-                    recreatedTag.putString("id", BuiltInRegistries.ITEM.getKey(worldAndStack.getB().getItem()).toString());
-                    recreatedTag.putInt("Count", worldAndStack.getB().getCount());
+                    recreatedTag.putString("id", BuiltInRegistries.ITEM.getKey(worldAndStack.getSecond().getItem()).toString());
+                    recreatedTag.putInt("Count", worldAndStack.getSecond().getCount());
                     recreatedTag.put("tag", oldTag);
 
                     var convertedStackNbt = UpgradeUtils.upgradeStack(recreatedTag);
                     var convertedStack = ItemStack.CODEC.decode(NbtOps.INSTANCE, convertedStackNbt).getOrThrow().getFirst();
-                    worldAndStack.getB().applyComponents(convertedStack.getComponents());
+                    worldAndStack.getSecond().applyComponents(convertedStack.getComponents());
                 } catch (CommandSyntaxException e) {
                     Apoli.LOGGER.error("Failed `merge_nbt` item action due to malformed nbt string: \"" + nbtString + "\"");
                 }
@@ -130,7 +130,7 @@ public class ItemActions {
             .add("levels", SerializableDataTypes.INT, null)
             .add("reset_repair_cost", SerializableDataTypes.BOOLEAN, false),
             (data, worldAndStack) -> {
-                ItemStack stack = worldAndStack.getB();
+                ItemStack stack = worldAndStack.getSecond();
                 if(stack.isEmpty()) {
                     return;
                 }
@@ -149,7 +149,7 @@ public class ItemActions {
                 var modifiableEnchants = new ItemEnchantments.Mutable(enchantments);
                 if(enchs.size() > 0) {
                     for(ResourceKey<Enchantment> ench : enchs) {
-                        var enchant = worldAndStack.getA().getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(ench);
+                        var enchant = worldAndStack.getFirst().getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(ench);
                         if(enchants.contains(enchant)) {
                             int newLevel = levels == -1 ? 0 : enchantments.getLevel(enchant) - data.getInt("levels");
                             if(newLevel <= 0) {
@@ -175,7 +175,7 @@ public class ItemActions {
         register(HolderAction.getFactory());
     }
 
-    private static void register(ActionFactory<Tuple<Level, ItemStack>> actionFactory) {
+    private static void register(ActionFactory<Pair<Level, ItemStack>> actionFactory) {
         Registry.register(ApoliRegistries.ITEM_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 }

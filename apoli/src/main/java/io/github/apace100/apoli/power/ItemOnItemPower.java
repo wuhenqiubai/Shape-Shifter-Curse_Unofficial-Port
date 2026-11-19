@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
@@ -8,7 +9,6 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.apace100.calio.util.LazyItemStack;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -26,12 +26,12 @@ public class ItemOnItemPower extends Power {
 
     private final int resultFromOnStack;
     private final LazyItemStack newStack;
-    private final Consumer<Tuple<Level, ItemStack>> usingItemAction;
-    private final Consumer<Tuple<Level, ItemStack>> onItemAction;
-    private final Consumer<Tuple<Level, ItemStack>> resultItemAction;
+    private final Consumer<Pair<Level, ItemStack>> usingItemAction;
+    private final Consumer<Pair<Level, ItemStack>> onItemAction;
+    private final Consumer<Pair<Level, ItemStack>> resultItemAction;
     private final Consumer<Entity> entityAction;
 
-    public ItemOnItemPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> usingItemCondition, Predicate<ItemStack> onItemCondition, LazyItemStack newStack, Consumer<Tuple<Level, ItemStack>> usingItemAction, Consumer<Tuple<Level, ItemStack>> onItemAction, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, int resultFromOnStack) {
+    public ItemOnItemPower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> usingItemCondition, Predicate<ItemStack> onItemCondition, LazyItemStack newStack, Consumer<Pair<Level, ItemStack>> usingItemAction, Consumer<Pair<Level, ItemStack>> onItemAction, Consumer<Pair<Level, ItemStack>> resultItemAction, Consumer<Entity> entityAction, int resultFromOnStack) {
         super(type, entity);
         this.usingItemCondition = usingItemCondition;
         this.onItemCondition = onItemCondition;
@@ -58,7 +58,7 @@ public class ItemOnItemPower extends Power {
         if(newStack != null) {
             stack = newStack.getStack().copy();
             if(resultItemAction != null) {
-                resultItemAction.accept(new Tuple<>(entity.level(), stack));
+                resultItemAction.accept(new Pair<>(entity.level(), stack));
             }
         } else {
             if(resultFromOnStack > 0) {
@@ -67,14 +67,14 @@ public class ItemOnItemPower extends Power {
                 stack = on;
             }
             if(resultItemAction != null) {
-                resultItemAction.accept(new Tuple<>(entity.level(), stack));
+                resultItemAction.accept(new Pair<>(entity.level(), stack));
             }
         }
         if(usingItemAction != null) {
-            usingItemAction.accept(new Tuple<>(entity.level(), using));
+            usingItemAction.accept(new Pair<>(entity.level(), using));
         }
         if(onItemAction != null) {
-            onItemAction.accept(new Tuple<>(entity.level(), on));
+            onItemAction.accept(new Pair<>(entity.level(), on));
         }
         if(newStack != null || resultItemAction != null) {
             Player player = (Player)entity;
@@ -105,9 +105,9 @@ public class ItemOnItemPower extends Power {
                 (type, player) -> new ItemOnItemPower(type, player,
                     (ConditionFactory<ItemStack>.Instance)data.get("using_item_condition"),
                     (ConditionFactory<ItemStack>.Instance)data.get("on_item_condition"),
-                    (LazyItemStack)data.get("result"), (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("using_item_action"),
-                    (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("on_item_action"),
-                    (ActionFactory<Tuple<Level, ItemStack>>.Instance)data.get("result_item_action"),
+                    (LazyItemStack)data.get("result"), (ActionFactory<Pair<Level, ItemStack>>.Instance)data.get("using_item_action"),
+                    (ActionFactory<Pair<Level, ItemStack>>.Instance)data.get("on_item_action"),
+                    (ActionFactory<Pair<Level, ItemStack>>.Instance)data.get("result_item_action"),
                     (ActionFactory<Entity>.Instance)data.get("entity_action"),
                     data.getInt("result_from_on_stack")))
             .allowCondition();

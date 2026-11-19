@@ -24,7 +24,7 @@ public class ServerPlayNetworkHandlerMixin {
         ((EndRespawningEntity)this.player).setEndRespawning(true);
     }
 
-    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/ChangeDimensionTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)V"))
+    @Inject(method = "handleClientCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/triggers/ChangeDimensionTrigger;trigger(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/resources/ResourceKey;Lnet/minecraft/resources/ResourceKey;)V"))
     private void undoEndRespawnStatus(ServerboundClientCommandPacket packet, CallbackInfo ci) {
         ((EndRespawningEntity)this.player).setEndRespawning(false);
     }

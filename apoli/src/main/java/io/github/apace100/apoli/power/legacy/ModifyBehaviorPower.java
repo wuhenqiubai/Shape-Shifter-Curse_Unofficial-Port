@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power.legacy;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.Power;
@@ -8,17 +9,16 @@ import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
 import java.util.function.Predicate;
 
 public class ModifyBehaviorPower extends Power {
-    private final Predicate<Tuple<Entity, Entity>> biEntityCondition;
+    private final Predicate<Pair<Entity, Entity>> biEntityCondition;
     private final BehaviorType behaviorType;
 
-    public ModifyBehaviorPower(PowerType<?> type, LivingEntity entity, Predicate<Tuple<Entity, Entity>> biEntityCondition, BehaviorType behaviorType) {
+    public ModifyBehaviorPower(PowerType<?> type, LivingEntity entity, Predicate<Pair<Entity, Entity>> biEntityCondition, BehaviorType behaviorType) {
         super(type, entity);
         this.biEntityCondition = biEntityCondition;
         this.behaviorType = behaviorType;
@@ -29,7 +29,7 @@ public class ModifyBehaviorPower extends Power {
     }
 
     public boolean doesApply(Entity e) {
-        return biEntityCondition.test(new Tuple<>(this.entity, e));
+        return biEntityCondition.test(new Pair<>(this.entity, e));
     }
 
     public static PowerFactory createFactory() {

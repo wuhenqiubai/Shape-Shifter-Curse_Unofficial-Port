@@ -5,13 +5,15 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import io.github.apace100.apoli.power.*;
+import io.github.apace100.apoli.power.ModifyCameraSubmersionTypePower;
+import io.github.apace100.apoli.power.NightVisionPower;
+import io.github.apace100.apoli.power.PhasingPower;
+import io.github.apace100.apoli.power.ShaderPower;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
@@ -87,27 +89,6 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Inject(method = "extractGui", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/client/DeltaTracker;)V", shift = At.Shift.AFTER))
-    // ⚠ 26.1 无混淆映射后不能再用 @Local(name = "..." )：按名字定位要读字节码里的
-    //   LocalVariableTable，官方 jar 不保证提供，会以 "Unable to find matching local!" 崩在 mixin 阶段。
-    //   extractGui(DeltaTracker, boolean, boolean) 不含 GuiGraphicsExtractor 参数，故按类型唯一。
-    private void renderOverlayPowers(DeltaTracker deltaTracker, boolean shouldRenderLevel, boolean resourcesLoaded, CallbackInfo ci, @Local(type = GuiGraphicsExtractor.class) GuiGraphicsExtractor graphics) {
-        boolean hudHidden = this.minecraft.options.hideGui;
-        boolean thirdPerson = !minecraft.options.getCameraType().isFirstPerson();
-        PowerHolderComponent.withPower(minecraft.getCameraEntity(), OverlayPower.class, p -> {
-            if(p.getDrawPhase() != OverlayPower.DrawPhase.ABOVE_HUD) {
-                return false;
-            }
-            if(hudHidden && p.doesHideWithHud()) {
-                return false;
-            }
-            if(thirdPerson && !p.shouldBeVisibleInThirdPerson()) {
-                return false;
-            }
-            return true;
-        }, p -> p.render(graphics));
-    }
-
     @Inject(at = @At("HEAD"), method = "togglePostEffect", cancellable = true)
     private void disableShaderToggle(CallbackInfo ci) {
         PowerHolderComponent.withPower(minecraft.getCameraEntity(), ShaderPower.class, null, shaderPower -> {
@@ -119,7 +100,7 @@ public abstract class GameRendererMixin {
     }
 
     // NightVisionPower
-    @Inject(at = @At("HEAD"), method = "getNightVisionScale", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "nightVisionScale", cancellable = true)
     private static void getNightVisionStrength(LivingEntity livingEntity, float f, CallbackInfoReturnable<Float> info) {
         if (livingEntity instanceof Player && !livingEntity.hasEffect(MobEffects.NIGHT_VISION)) {
             List<NightVisionPower> nvs = PowerHolderComponent.KEY.get(livingEntity).getPowers(NightVisionPower.class);
@@ -189,9 +170,8 @@ public abstract class GameRendererMixin {
     }
 
     // NIGHT VISION
-    @ModifyReturnValue(method = "getNightVisionScale", at = @At("RETURN"))
-    // 同上：getNightVisionScale(LivingEntity camera, float a) 只有一个 LivingEntity，按类型唯一。
-    private static float adjustNightVisionScale(float value, @Local(argsOnly = true, type = LivingEntity.class) LivingEntity camera) {
+    @ModifyReturnValue(method = "nightVisionScale", at = @At("RETURN"))
+    private static float adjustNightVisionScale(float value, @Local(argsOnly = true, name = "camera") LivingEntity camera) {
         Optional<Float> nightVisionStrength = PowerHolderComponent.KEY.get(camera).getPowers(NightVisionPower.class).stream().filter(NightVisionPower::isActive).map(NightVisionPower::getStrength).max(Float::compareTo);
         return nightVisionStrength.map(aFloat -> Math.max(aFloat, value)).orElse(value);
     }

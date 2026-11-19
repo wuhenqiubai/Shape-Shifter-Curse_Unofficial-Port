@@ -1,9 +1,7 @@
 package io.github.apace100.apoli.power;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.systems.RenderPass;
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
@@ -13,13 +11,15 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.client.gui.render.TextureSetup;
 import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
-
-import java.util.OptionalInt;
+import org.jspecify.annotations.Nullable;
 
 import static io.github.apace100.apoli.power.OverlayPowerPipelines.NAUSEA_PIPELINE;
 import static io.github.apace100.apoli.power.OverlayPowerPipelines.OVERLAY_PIPELINE;
@@ -101,46 +101,44 @@ public class OverlayPower extends Power {
                 break;
         }
 
-        var renderTarget = client.getMainRenderTarget();
-        var encoder = RenderSystem.getDevice().createCommandEncoder();
-
         guiGraphics.blit(RenderPipelines.GUI_NAUSEA_OVERLAY, texture, 0, 0, 0f, 0f, client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight(), client.getWindow().getGuiScaledWidth(), client.getWindow().getGuiScaledHeight(), ARGB.colorFromFloat(a, g, h, k));
-        Tesselator tessellator = Tesselator.getInstance();
-        BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-        bufferBuilder.addVertex(m, n + l, -90.0f).setUv(0.0F, 1.0F).setColor(g, h, k, a);
-        bufferBuilder.addVertex(m + e, n + l, -90.0f).setUv(1.0F, 1.0F).setColor(g, h, k, a);
-        bufferBuilder.addVertex(m + e, n, -90.0f).setUv(1.0F, 0.0F).setColor(g, h, k, a);
-        bufferBuilder.addVertex(m, n, -90.0f).setUv(0.0F, 0.0F).setColor(g, h, k, a);
 
-        try (MeshData meshData = bufferBuilder.buildOrThrow()) {
-            var vertexBuffer = DefaultVertexFormat.POSITION_TEX.uploadImmediateVertexBuffer(meshData.vertexBuffer());
-            GpuBuffer indexBuffer = null;
-            VertexFormat.IndexType indexType = null;
-            if (meshData.indexBuffer() != null) {
-                indexBuffer = DefaultVertexFormat.POSITION_TEX.uploadImmediateIndexBuffer(meshData.indexBuffer());
-                indexType = meshData.drawState().indexType();
+        guiGraphics.guiRenderState.addGuiElement(new GuiElementRenderState() {
+            @Override
+            public void buildVertices(VertexConsumer vertexConsumer) {
+                vertexConsumer.addVertex(m, n + l, -90.0f).setUv(0.0F, 1.0F).setColor(g, h, k, a);
+                vertexConsumer.addVertex(m + e, n + l, -90.0f).setUv(1.0F, 1.0F).setColor(g, h, k, a);
+                vertexConsumer.addVertex(m + e, n, -90.0f).setUv(1.0F, 0.0F).setColor(g, h, k, a);
+                vertexConsumer.addVertex(m, n, -90.0f).setUv(0.0F, 0.0F).setColor(g, h, k, a);
             }
 
-            var clientTexture = client.getTextureManager().getTexture(texture);
-            var gpuTextureView = clientTexture.getTextureView();
-            var gpuSampler = clientTexture.getSampler();
-
-            try (RenderPass pass = encoder.createRenderPass(() -> "Immediate draw for Overlay Power", renderTarget.getColorTextureView(), OptionalInt.empty())) {
-                pass.bindTexture("Sampler0", gpuTextureView, gpuSampler);
-                pass.setVertexBuffer(0, vertexBuffer);
-
-                if (indexBuffer != null)
-                    pass.setIndexBuffer(indexBuffer, indexType);
-
+            @Override
+            public RenderPipeline pipeline() {
                 if (drawMode == DrawMode.NAUSEA) {
-                    pass.setPipeline(NAUSEA_PIPELINE);
+                    return NAUSEA_PIPELINE;
                 } else {
-                    pass.setPipeline(OVERLAY_PIPELINE);
+                    return OVERLAY_PIPELINE;
                 }
-
-                pass.draw(0, meshData.drawState().vertexCount());
             }
-        }
+
+            @Override
+            public TextureSetup textureSetup() {
+                var clientTexture = client.getTextureManager().getTexture(texture);
+                var gpuTextureView = clientTexture.getTextureView();
+                var gpuSampler = clientTexture.getSampler();
+                return TextureSetup.singleTexture(gpuTextureView, gpuSampler);
+            }
+
+            @Override
+            public @Nullable ScreenRectangle scissorArea() {
+                return null;
+            }
+
+            @Override
+            public @Nullable ScreenRectangle bounds() {
+                return null;
+            }
+        });
     }
 
     public static PowerFactory createFactory() {

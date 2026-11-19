@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.IdentifiedLootTable;
 import io.github.apace100.apoli.data.ApoliDataTypes;
@@ -14,7 +15,6 @@ import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemInstance;
@@ -42,10 +42,10 @@ public class ReplaceLootTablePower extends Power {
     private final int priority;
 
     private final Predicate<ItemInstance> itemCondition;
-    private final Predicate<Tuple<Entity, Entity>> biEntityCondition;
+    private final Predicate<Pair<Entity, Entity>> biEntityCondition;
     private final Predicate<BlockInWorld> blockCondition;
 
-    public ReplaceLootTablePower(PowerType<?> type, LivingEntity entity, Map<String, Identifier> replacements, int priority, Predicate<ItemInstance> itemCondition, Predicate<Tuple<Entity, Entity>> biEntityCondition, Predicate<BlockInWorld> blockCondition) {
+    public ReplaceLootTablePower(PowerType<?> type, LivingEntity entity, Map<String, Identifier> replacements, int priority, Predicate<ItemInstance> itemCondition, Predicate<Pair<Entity, Entity>> biEntityCondition, Predicate<BlockInWorld> blockCondition) {
         super(type, entity);
         this.replacements = replacements;
         this.priority = priority;
@@ -64,7 +64,7 @@ public class ReplaceLootTablePower extends Power {
 
     public boolean doesApply(LootContext lootContext) {
         if(biEntityCondition != null
-            && !biEntityCondition.test(new Tuple<>(entity, lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)))) {
+            && !biEntityCondition.test(new Pair<>(entity, lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)))) {
             return false;
         }
         if(itemCondition != null

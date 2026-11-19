@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power.factory.condition;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.registry.ApoliRegistries;
@@ -11,7 +12,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
@@ -29,29 +29,29 @@ public class DamageConditions {
             (data, dmg) -> data.getBoolean("value")));
         register(new ConditionFactory<>(Apoli.identifier("and"), new SerializableData()
             .add("conditions", ApoliDataTypes.DAMAGE_CONDITIONS),
-            (data, dmg) -> ((List<ConditionFactory<Tuple<DamageSource, Float>>.Instance>)data.get("conditions")).stream().allMatch(
+            (data, dmg) -> ((List<ConditionFactory<Pair<DamageSource, Float>>.Instance>)data.get("conditions")).stream().allMatch(
                 condition -> condition.test(dmg)
             )));
         register(new ConditionFactory<>(Apoli.identifier("or"), new SerializableData()
             .add("conditions", ApoliDataTypes.DAMAGE_CONDITIONS),
-            (data, dmg) -> ((List<ConditionFactory<Tuple<DamageSource, Float>>.Instance>)data.get("conditions")).stream().anyMatch(
+            (data, dmg) -> ((List<ConditionFactory<Pair<DamageSource, Float>>.Instance>)data.get("conditions")).stream().anyMatch(
                 condition -> condition.test(dmg)
             )));
         register(new ConditionFactory<>(Apoli.identifier("amount"), new SerializableData()
             .add("comparison", ApoliDataTypes.COMPARISON)
             .add("compare_to", SerializableDataTypes.FLOAT),
-            (data, dmg) -> ((Comparison)data.get("comparison")).compare(dmg.getB(), data.getFloat("compare_to"))));
+            (data, dmg) -> ((Comparison)data.get("comparison")).compare(dmg.getSecond(), data.getFloat("compare_to"))));
         register(new ConditionFactory<>(Apoli.identifier("fire"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.IS_FIRE)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.IS_FIRE)));
         register(new ConditionFactory<>(Apoli.identifier("name"), new SerializableData()
             .add("name", SerializableDataTypes.STRING),
-            (data, dmg) -> dmg.getA().getMsgId().equals(data.getString("name"))));
+            (data, dmg) -> dmg.getFirst().getMsgId().equals(data.getString("name"))));
         register(new ConditionFactory<>(Apoli.identifier("projectile"), new SerializableData()
             .add("projectile", SerializableDataTypes.ENTITY_TYPE, null)
             .add("projectile_condition", ApoliDataTypes.ENTITY_CONDITION, null),
             (data, dmg) -> {
-                if(dmg.getA().is(DamageTypeTags.IS_PROJECTILE)) {
-                    Entity projectile = dmg.getA().getDirectEntity();
+                if(dmg.getFirst().is(DamageTypeTags.IS_PROJECTILE)) {
+                    Entity projectile = dmg.getFirst().getDirectEntity();
                     if(projectile != null) {
                         if(data.isPresent("projectile") && projectile.getType() != data.get("projectile")) {
                             return false;
@@ -65,7 +65,7 @@ public class DamageConditions {
         register(new ConditionFactory<>(Apoli.identifier("attacker"), new SerializableData()
             .add("entity_condition", ApoliDataTypes.ENTITY_CONDITION, null),
             (data, dmg) -> {
-                Entity attacker = dmg.getA().getEntity();
+                Entity attacker = dmg.getFirst().getEntity();
                 if(attacker instanceof LivingEntity) {
                     if(!data.isPresent("entity_condition") || ((ConditionFactory<LivingEntity>.Instance)data.get("entity_condition")).test((LivingEntity)attacker)) {
                         return true;
@@ -74,21 +74,21 @@ public class DamageConditions {
                 return false;
             }));
         register(new ConditionFactory<>(Apoli.identifier("bypasses_armor"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.BYPASSES_ARMOR)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.BYPASSES_ARMOR)));
         register(new ConditionFactory<>(Apoli.identifier("explosive"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.IS_EXPLOSION)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.IS_EXPLOSION)));
         register(new ConditionFactory<>(Apoli.identifier("from_falling"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.IS_FALL)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.IS_FALL)));
         register(new ConditionFactory<>(Apoli.identifier("unblockable"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.BYPASSES_SHIELD)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.BYPASSES_SHIELD)));
         register(new ConditionFactory<>(Apoli.identifier("out_of_world"), new SerializableData(),
-            (data, dmg) -> dmg.getA().is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
+            (data, dmg) -> dmg.getFirst().is(DamageTypeTags.BYPASSES_INVULNERABILITY)));
         register(new ConditionFactory<>(Apoli.identifier("in_tag"), new SerializableData()
                 .add("tag", SerializableDataType.tag(Registries.DAMAGE_TYPE)),
-                (data, dmg) -> dmg.getA().is((TagKey<DamageType>) data.get("tag"))));
+                (data, dmg) -> dmg.getFirst().is((TagKey<DamageType>) data.get("tag"))));
     }
 
-    private static void register(ConditionFactory<Tuple<DamageSource, Float>> conditionFactory) {
+    private static void register(ConditionFactory<Pair<DamageSource, Float>> conditionFactory) {
         Registry.register(ApoliRegistries.DAMAGE_CONDITION, conditionFactory.getSerializerId(), conditionFactory);
     }
 }

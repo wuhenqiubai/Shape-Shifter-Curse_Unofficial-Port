@@ -2,6 +2,7 @@ package io.github.apace100.apoli.mixin;
 
 import com.mojang.authlib.GameProfile;
 import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.access.EndRespawningEntity;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.ActionOnItemUsePower;
@@ -16,7 +17,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import net.minecraft.util.Tuple;
 import net.minecraft.util.Unit;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -63,12 +63,7 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     public abstract void sendSystemMessage(Component message, boolean overlay);
 
     // FRESH_AIR
-    // NeoForge/Connector 兼容（1.21.1 提交 ea98804）：原注入点是
     //   @At(value = "INVOKE", target = "...ServerPlayer;setRespawnPosition(ServerPlayer$RespawnConfig;Z)V")
-    // NeoForge 重新编译后该调用点可能被包进 supplier/lambda，注入点静默失效，
-    // 后果是「禁止睡眠」的 power 在 NeoForge 下失效。
-    // 改为 startSleepInBed HEAD —— 与原来的 INVOKE 默认 shift(BEFORE) 语义一致（都在设置重生点之前），
-    // 且方法名/描述符跨环境稳定。
     @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
     public void preventAvianSleep(BlockPos pos, CallbackInfoReturnable<Either<BedSleepingProblem, Unit>> info) {
         PowerHolderComponent.getPowers(this, PreventSleepPower.class).forEach(p -> {
@@ -118,9 +113,9 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     @Unique
     private BlockPos findPlayerSpawn() {
         ModifyPlayerSpawnPower power = PowerHolderComponent.getPowers(this, ModifyPlayerSpawnPower.class).get(0);
-        Tuple<ServerLevel, BlockPos> spawn = power.getSpawn(true);
+        Pair<ServerLevel, BlockPos> spawn = power.getSpawn(true);
         if(spawn != null) {
-            return spawn.getB();
+            return spawn.getSecond();
         }
         return BlockPos.ZERO;
     }

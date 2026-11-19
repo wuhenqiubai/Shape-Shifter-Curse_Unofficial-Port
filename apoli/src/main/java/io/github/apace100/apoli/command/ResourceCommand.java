@@ -90,7 +90,7 @@ public class ResourceCommand {
                 case GET ->
                 {
                     int i = vIntPower.getValue();
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.get.success", player.getScoreboardName(), i, powerType.getIdentifier()), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.get.success", player.getScoreboardName(), i, Component.translationArg(powerType.getIdentifier())), true);
                     return i;
                 }
                 case SET ->
@@ -98,7 +98,7 @@ public class ResourceCommand {
                     int i = IntegerArgumentType.getInteger(command, "value");
                     vIntPower.setValue(i);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.set.success.single", powerType.getIdentifier(), player.getScoreboardName(), i), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.set.success.single", Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), i), true);
                     return 1;
                 }
                 case CHANGE ->
@@ -107,7 +107,7 @@ public class ResourceCommand {
                     int total = vIntPower.getValue() + i;
                     vIntPower.setValue(total);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.add.success.single", i, powerType.getIdentifier(), player.getScoreboardName(), total), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.add.success.single", i, Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), total), true);
                     return 1;
                 }
                 case OPERATION ->
@@ -115,7 +115,7 @@ public class ResourceCommand {
                     ScoreAccess score = command.getSource().getServer().getScoreboard().getOrCreatePlayerScore(ScoreHolderArgument.getName(command, "entity"), ObjectiveArgument.getObjective(command, "objective"));
                     command.getArgument("operation", PowerOperation.Operation.class).apply(vIntPower, score);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.operation.success.single", powerType.getIdentifier(), player.getScoreboardName(), vIntPower.getValue()), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.operation.success.single", Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), vIntPower.getValue()), true);
                     return 1;
                 }
             }
@@ -130,7 +130,7 @@ public class ResourceCommand {
                 case GET ->
                 {
                     int i = cooldownPower.getRemainingTicks();
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.get.success", player.getScoreboardName(), i, powerType.getIdentifier()), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.get.success", player.getScoreboardName(), i, Component.translationArg(powerType.getIdentifier())), true);
                     return i;
                 }
                 case SET ->
@@ -138,7 +138,7 @@ public class ResourceCommand {
                     int i = IntegerArgumentType.getInteger(command, "value");
                     cooldownPower.setCooldown(i);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.set.success.single", powerType.getIdentifier(), player.getScoreboardName(), i), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.set.success.single", Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), i), true);
                     return 1;
                 }
                 case CHANGE ->
@@ -146,7 +146,7 @@ public class ResourceCommand {
                     int i = IntegerArgumentType.getInteger(command, "value");
                     cooldownPower.modify(i);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.add.success.single", i, powerType.getIdentifier(), player.getScoreboardName(), cooldownPower.getRemainingTicks()), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.add.success.single", i, Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), cooldownPower.getRemainingTicks()), true);
                     return 1;
                 }
                 case OPERATION ->
@@ -154,7 +154,7 @@ public class ResourceCommand {
                     ScoreAccess score = command.getSource().getServer().getScoreboard().getOrCreatePlayerScore(ScoreHolderArgument.getName(command, "entity"), ObjectiveArgument.getObjective(command, "objective"));
                     command.getArgument("operation", PowerOperation.Operation.class).apply(cooldownPower, score);
                     PowerHolderComponent.syncPower(player, powerType);
-                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.operation.success.single", powerType.getIdentifier(), player.getScoreboardName(), cooldownPower.getRemainingTicks()), true);
+                    command.getSource().sendSuccess(() -> Component.translatable("commands.scoreboard.players.operation.success.single", Component.translationArg(powerType.getIdentifier()), player.getScoreboardName(), cooldownPower.getRemainingTicks()), true);
                     return 1;
                 }
             }
@@ -168,7 +168,7 @@ public class ResourceCommand {
                 }
                 case GET ->
                 {
-                    command.getSource().sendFailure(Component.translatable("commands.scoreboard.players.get.null", powerType.getIdentifier(), player.getScoreboardName()));
+                    command.getSource().sendFailure(Component.translatable("commands.scoreboard.players.get.null", Component.translationArg(powerType.getIdentifier()), player.getScoreboardName()));
                     return 0;
                 }
                 case SET, CHANGE, OPERATION ->

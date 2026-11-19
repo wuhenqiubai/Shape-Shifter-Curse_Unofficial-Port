@@ -1,13 +1,12 @@
 package io.github.apace100.apoli.power.factory.action.meta;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.ClassUtil;
 import io.github.apace100.calio.data.SerializableData;
-import io.github.apace100.calio.data.SerializableData.Instance;
 import io.github.apace100.calio.data.SerializableDataType;
-import net.minecraft.util.Tuple;
 
 import java.util.List;
 import java.util.function.Function;
@@ -15,12 +14,12 @@ import java.util.function.Function;
 public class IfElseListAction {
 
     public static <T, U> void action(SerializableData.Instance data, T t, Function<T, U> actionToConditionTypeFunction) {
-        List<Tuple<ConditionFactory<U>.Instance, ActionFactory<T>.Instance>> actions =
+        List<Pair<ConditionFactory<U>.Instance, ActionFactory<T>.Instance>> actions =
             data.get("actions");
         U u = actionToConditionTypeFunction.apply(t);
-        for (Tuple<ConditionFactory<U>.Instance, ActionFactory<T>.Instance> action: actions) {
-            if(action.getA().test(u)) {
-                action.getB().accept(t);
+        for (Pair<ConditionFactory<U>.Instance, ActionFactory<T>.Instance> action: actions) {
+            if(action.getFirst().test(u)) {
+                action.getSecond().accept(t);
                 break;
             }
         }
@@ -31,16 +30,16 @@ public class IfElseListAction {
         SerializableDataType<ConditionFactory<U>.Instance> conditionDataType,
         Function<T, U> actionToConditionTypeFunction) {
         return new ActionFactory<>(Apoli.identifier("if_else_list"), new SerializableData()
-            .add("actions", SerializableDataType.list(SerializableDataType.compound(ClassUtil.castClass(Tuple.class), new SerializableData()
+            .add("actions", SerializableDataType.list(SerializableDataType.compound(ClassUtil.castClass(Pair.class), new SerializableData()
                     .add("action", actionDataType)
                     .add("condition", conditionDataType),
-                inst -> new Tuple<ConditionFactory<U>.Instance, ActionFactory<T>.Instance>(
+                inst -> new Pair<ConditionFactory<U>.Instance, ActionFactory<T>.Instance>(
                     inst.get("condition"),
                     inst.get("action")),
                 (data, pair) -> {
                     SerializableData.Instance inst = data.new Instance();
-                    inst.set("condition", pair.getA());
-                    inst.set("action", pair.getB());
+                    inst.set("condition", pair.getFirst());
+                    inst.set("action", pair.getSecond());
                     return inst;
                 }))),
             (inst, t) -> action(inst, t, actionToConditionTypeFunction));

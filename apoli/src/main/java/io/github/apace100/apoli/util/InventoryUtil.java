@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.util;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.InventoryPower;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
@@ -7,7 +8,6 @@ import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.util.ArgumentWrapper;
 import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.util.Mth;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.SlotAccess;
@@ -110,7 +110,7 @@ public class InventoryUtil {
 
         Consumer<Entity> entityAction = data.get("entity_action");
         Predicate<ItemStack> itemCondition = data.get("item_condition");
-        ActionFactory<Tuple<Level, ItemStack>>.Instance itemAction = data.get("item_action");
+        ActionFactory<Pair<Level, ItemStack>>.Instance itemAction = data.get("item_action");
 
         int counter = 0;
 
@@ -129,7 +129,7 @@ public class InventoryUtil {
 
                 int amount = processor.apply(itemStack);
                 for(int i = 0; i < amount; i++) {
-                    itemAction.accept(new Tuple<>(entity.level(), itemStack));
+                    itemAction.accept(new Pair<>(entity.level(), itemStack));
 
                     counter += 1;
 
@@ -155,7 +155,7 @@ public class InventoryUtil {
 
                 int amount = processor.apply(itemStack);
                 for(int i = 0; i < amount; i++) {
-                    itemAction.accept(new Tuple<>(entity.level(), itemStack));
+                    itemAction.accept(new Pair<>(entity.level(), itemStack));
 
                     counter += 1;
 
@@ -181,7 +181,7 @@ public class InventoryUtil {
 
         Consumer<Entity> entityAction = data.get("entity_action");
         Predicate<ItemStack> itemCondition = data.get("item_condition");
-        Consumer<Tuple<Level, ItemStack>> itemAction = data.get("item_action");
+        Consumer<Pair<Level, ItemStack>> itemAction = data.get("item_action");
 
         LazyItemStack replacementStack = data.get("stack");
         boolean mergeNbt = data.getBoolean("merge_nbt");
@@ -204,7 +204,7 @@ public class InventoryUtil {
                 }
 
                 stackReference.set(stackAfterReplacement);
-                if (itemAction != null) itemAction.accept(new Tuple<>(entity.level(), stackAfterReplacement));
+                if (itemAction != null) itemAction.accept(new Pair<>(entity.level(), stackAfterReplacement));
 
             }
         );
@@ -226,7 +226,7 @@ public class InventoryUtil {
                     }
 
                     inventoryPower.setItem(slot, stackAfterReplacement);
-                    if (itemAction != null) itemAction.accept(new Tuple<>(entity.level(), stackAfterReplacement));
+                    if (itemAction != null) itemAction.accept(new Pair<>(entity.level(), stackAfterReplacement));
 
                 }
             );
@@ -245,7 +245,7 @@ public class InventoryUtil {
 
         Consumer<Entity> entityAction = data.get("entity_action");
         Predicate<ItemStack> itemCondition = data.get("item_condition");
-        Consumer<Tuple<Level, ItemStack>> itemAction = data.get("item_action");
+        Consumer<Pair<Level, ItemStack>> itemAction = data.get("item_action");
 
         if (inventoryPower == null) slots.forEach(
             slot -> {
@@ -259,7 +259,7 @@ public class InventoryUtil {
                 if (!(itemCondition == null || itemCondition.test(itemStack))) return;
 
                 if (entityAction != null) entityAction.accept(entity);
-                if (itemAction != null) itemAction.accept(new Tuple<>(entity.level(), itemStack));
+                if (itemAction != null) itemAction.accept(new Pair<>(entity.level(), itemStack));
 
                 if (amount != 0) {
 
@@ -291,7 +291,7 @@ public class InventoryUtil {
                     if (!(itemCondition == null || itemCondition.test(itemStack))) return;
 
                     if (entityAction != null) entityAction.accept(entity);
-                    if (itemAction != null) itemAction.accept(new Tuple<>(entity.level(), itemStack));
+                    if (itemAction != null) itemAction.accept(new Pair<>(entity.level(), itemStack));
 
                     if (amount != 0) {
 

@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-@Mixin(Entity.class)
+@Mixin(value = Entity.class, priority = 1050)
 public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
 
     @Inject(method = "fireImmune", at = @At("HEAD"), cancellable = true)
@@ -113,12 +113,6 @@ public abstract class EntityMixin implements MovingEntity, SubmergableEntity {
         }
     }
 
-    // NeoForge/Connector 兼容（1.21.1 提交 ea98804）：原实现是
-    //   @Redirect(method = "lambda$isInWall$0", ... BlockState;getCollisionShape(BlockGetter, BlockPos))
-    // 它依赖 isInWall 内部的 lambda —— NeoForge 重新编译后 lambda 名/编号会变，注入点静默失效，
-    // 后果是穿墙 power 在 NeoForge 下失去「不窒息」保护。
-    // 改为在 isInWall HEAD 判定：PhasingPower 激活时直接返回「不在墙里」。方法名与描述符跨环境稳定。
-    // 注：原实现是把碰撞形状换成 entity-aware 的 CollisionContext（等价效果），此处改为直判，更稳。
     @Inject(method = "isInWall", at = @At("HEAD"), cancellable = true)
     private void preventPhasingSuffocation(CallbackInfoReturnable<Boolean> cir) {
         if(PowerHolderComponent.getPowers((Entity)(Object)this, PhasingPower.class).stream().anyMatch(PhasingPower::isActive)) {

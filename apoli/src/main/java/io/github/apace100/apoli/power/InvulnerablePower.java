@@ -1,11 +1,11 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -30,9 +30,9 @@ public class InvulnerablePower extends Power {
                 .add("damage_condition", ApoliDataTypes.DAMAGE_CONDITION),
             data ->
                 (type, player) -> {
-                    ConditionFactory<Tuple<DamageSource, Float>>.Instance damageCondition =
-                        (ConditionFactory<Tuple<DamageSource, Float>>.Instance)data.get("damage_condition");
-                    return new InvulnerablePower(type, player, ds -> damageCondition.test(new Tuple<>(ds, null)));
+                    ConditionFactory<Pair<DamageSource, Float>>.Instance damageCondition =
+                        (ConditionFactory<Pair<DamageSource, Float>>.Instance)data.get("damage_condition");
+                    return new InvulnerablePower(type, player, ds -> damageCondition.test(new Pair<>(ds, null)));
                 })
             .allowCondition();
     }

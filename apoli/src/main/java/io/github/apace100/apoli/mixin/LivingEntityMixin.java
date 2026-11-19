@@ -332,11 +332,6 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
                         return true;
                     } else if(isSuppressingSlidingDownLadder()) {
                         //if(origins_lastClimbingPos != null && isHoldingOntoLadder()) {
-                            // 1.21.1 提交 f3bd124：原判定只查 canHold()，而 canHold 在 holdingCondition 为 null 时
-                            // 会退化成「潜行键按下」，空中按住潜行即触发攀爬 → 悬停 bug。
-                            // 加 isActive()（真正贴住可攀爬面）后，开阔地不触发、贴墙悬停仍正常。
-                            // 注：26.1 的 ClimbingPower.canHold() 自身已在 holdingCondition==null 时回落到 isActive()，
-                            // 所以此处对那种形态是冗余保护；真正起作用的是 holdingCondition != null 的实例。
                             if(climbingPowers.stream().anyMatch(p -> p.isActive() && p.canHold())) {
                                 return true;
                             }
@@ -375,11 +370,8 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
         }
     }
 
-    @ModifyVariable(method = "travelInAir", at = @At(value = "STORE"), index = 3)
+    @ModifyExpressionValue(method = "travelInAir", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F", ordinal = 0))
     private float modifySlipperiness(float original) {
-        if (!this.onGround()) {
-            return original;
-        }
         return PowerHolderComponent.modify(this, ModifySlipperinessPower.class, original, p -> p.doesApply(level(), getBlockPosBelowThatAffectsMyMovement()));
     }
 

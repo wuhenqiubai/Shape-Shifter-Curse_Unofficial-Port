@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.power.factory.condition.entity;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
@@ -45,8 +45,8 @@ public class RaycastCondition {
                 return data.<Predicate<BlockInWorld>>get("block_condition").test(cbp);
             }
             if(hitResult instanceof EntityHitResult ehr && data.isPresent("hit_bientity_condition")) {
-                return data.<Predicate<Tuple<Entity, Entity>>>get("hit_bientity_condition")
-                    .test(new Tuple<>(entity, ehr.getEntity()));
+                return data.<Predicate<Pair<Entity, Entity>>>get("hit_bientity_condition")
+                    .test(new Pair<>(entity, ehr.getEntity()));
             }
             return true;
         }
@@ -58,11 +58,11 @@ public class RaycastCondition {
         return source.level().clip(context);
     }
 
-    private static EntityHitResult performEntityRaycast(Entity source, Vec3 origin, Vec3 target, ConditionFactory<Tuple<Entity, Entity>>.Instance biEntityCondition) {
+    private static EntityHitResult performEntityRaycast(Entity source, Vec3 origin, Vec3 target, ConditionFactory<Pair<Entity, Entity>>.Instance biEntityCondition) {
         Vec3 ray = target.subtract(origin);
         AABB box = source.getBoundingBox().expandTowards(ray).inflate(1.0D, 1.0D, 1.0D);
         EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(source, origin, target, box, (entityx) -> {
-            return !entityx.isSpectator() && (biEntityCondition == null || biEntityCondition.test(new Tuple<>(source, entityx)));
+            return !entityx.isSpectator() && (biEntityCondition == null || biEntityCondition.test(new Pair<>(source, entityx)));
         }, ray.lengthSqr());
         return entityHitResult;
     }

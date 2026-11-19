@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
@@ -15,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.DismountHelper;
@@ -95,13 +95,13 @@ public class ModifyPlayerSpawnPower extends Power {
         if (entity.level().isClientSide() || !(entity instanceof Player playerEntity)) return;
 
         ServerPlayer serverPlayerEntity = (ServerPlayer) playerEntity;
-        Tuple<ServerLevel, BlockPos> newSpawn = getSpawn(false);
+        Pair<ServerLevel, BlockPos> newSpawn = getSpawn(false);
 
         if (newSpawn == null) return;
-        ServerLevel newSpawnDimension = newSpawn.getA();
-        BlockPos newSpawnPos = newSpawn.getB();
+        ServerLevel newSpawnDimension = newSpawn.getFirst();
+        BlockPos newSpawnPos = newSpawn.getSecond();
 
-        Vec3 tpPos = DismountHelper.findSafeDismountLocation(playerEntity.getType(), newSpawn.getA(), newSpawn.getB(), true);
+        Vec3 tpPos = DismountHelper.findSafeDismountLocation(playerEntity.getType(), newSpawn.getFirst(), newSpawn.getSecond(), true);
         if (tpPos == null) {
             serverPlayerEntity.teleportTo(newSpawnDimension, newSpawnPos.getX(), newSpawnPos.getY(), newSpawnPos.getZ(), Set.of(), entity.getXRot(), entity.getYRot(), false);
             Apoli.LOGGER.warn("Power {} could not find a suitable spawnpoint for {}! Teleporting to the desired location directly...", this.getType().getIdentifier(), entity.getScoreboardName());
@@ -111,7 +111,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
     }
 
-    public Tuple<ServerLevel, BlockPos> getSpawn(boolean isSpawnObstructed) {
+    public Pair<ServerLevel, BlockPos> getSpawn(boolean isSpawnObstructed) {
 
         if (entity.level().isClientSide() || !(entity instanceof Player playerEntity)) return null;
 
@@ -146,7 +146,7 @@ public class ModifyPlayerSpawnPower extends Power {
         modifiedSpawnBlockPos.set(msp.x, msp.y, msp.z);
         targetDimension.getChunkSource().addTicketWithRadius(TicketType.PLAYER_SPAWN, ChunkPos.containing(modifiedSpawnBlockPos), 11);
 
-        return new Tuple<>(targetDimension, modifiedSpawnBlockPos);
+        return new Pair<>(targetDimension, modifiedSpawnBlockPos);
 
     }
 
@@ -176,7 +176,7 @@ public class ModifyPlayerSpawnPower extends Power {
 
     }
 
-    private Optional<Tuple<BlockPos, Structure>> getStructurePos(Level world, ResourceKey<Structure> structure, TagKey<Structure> structureTag, ResourceKey<Level> dimension) {
+    private Optional<Pair<BlockPos, Structure>> getStructurePos(Level world, ResourceKey<Structure> structure, TagKey<Structure> structureTag, ResourceKey<Level> dimension) {
 
         Registry<Structure> structureRegistry = world.registryAccess().lookupOrThrow(Registries.STRUCTURE);
         HolderSet<Structure> structureRegistryEntryList = null;
@@ -223,7 +223,7 @@ public class ModifyPlayerSpawnPower extends Power {
             return Optional.empty();
         }
 
-        else return Optional.of(new Tuple<>(structurePos.getFirst(), structurePos.getSecond().value()));
+        else return Optional.of(new Pair<>(structurePos.getFirst(), structurePos.getSecond().value()));
 
     }
 
@@ -231,13 +231,13 @@ public class ModifyPlayerSpawnPower extends Power {
 
         if (structure == null) return getValidSpawn(targetDimension, originPos, range);
 
-        Optional<Tuple<BlockPos, Structure>> targetStructure = getStructurePos(targetDimension, structure, null, dimension);
+        Optional<Pair<BlockPos, Structure>> targetStructure = getStructurePos(targetDimension, structure, null, dimension);
         if (targetStructure.isEmpty()) return Optional.empty();
 
-        BlockPos targetStructurePos = targetStructure.get().getA();
+        BlockPos targetStructurePos = targetStructure.get().getFirst();
         ChunkPos targetStructureChunkPos = new ChunkPos(targetStructurePos.getX() >> 4, targetStructurePos.getZ() >> 4);
 
-        StructureStart targetStructureStart = targetDimension.structureManager().getStartForStructure(SectionPos.of(targetStructureChunkPos, 0), targetStructure.get().getB(), targetDimension.getChunk(targetStructurePos));
+        StructureStart targetStructureStart = targetDimension.structureManager().getStartForStructure(SectionPos.of(targetStructureChunkPos, 0), targetStructure.get().getSecond(), targetDimension.getChunk(targetStructurePos));
         if (targetStructureStart == null) return Optional.empty();
 
         BlockPos targetStructureCenter = new BlockPos(targetStructureStart.getBoundingBox().getCenter());

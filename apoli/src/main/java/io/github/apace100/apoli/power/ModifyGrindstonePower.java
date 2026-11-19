@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
@@ -9,7 +10,6 @@ import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -29,8 +29,8 @@ public class ModifyGrindstonePower extends Power {
     private final Predicate<BlockInWorld> blockCondition;
 
     private final ItemStack newResultStack;
-    private final Consumer<Tuple<Level, ItemStack>> resultItemAction;
-    private final Consumer<Tuple<Level, ItemStack>> lateItemAction;
+    private final Consumer<Pair<Level, ItemStack>> resultItemAction;
+    private final Consumer<Pair<Level, ItemStack>> lateItemAction;
     private final Consumer<Entity> entityAction;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
@@ -38,7 +38,7 @@ public class ModifyGrindstonePower extends Power {
 
     private final Modifier experienceModifier;
 
-    public ModifyGrindstonePower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> topItemCondition, Predicate<ItemStack> bottomItemCondition, Predicate<ItemStack> outputItemCondition, Predicate<BlockInWorld> blockCondition, ItemStack newResultStack, Consumer<Tuple<Level, ItemStack>> resultItemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction, ResultType resultType, Modifier experienceModifier) {
+    public ModifyGrindstonePower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> topItemCondition, Predicate<ItemStack> bottomItemCondition, Predicate<ItemStack> outputItemCondition, Predicate<BlockInWorld> blockCondition, ItemStack newResultStack, Consumer<Pair<Level, ItemStack>> resultItemAction, Consumer<Pair<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction, ResultType resultType, Modifier experienceModifier) {
         super(type, entity);
         this.topItemCondition = topItemCondition;
         this.bottomItemCondition = bottomItemCondition;
@@ -65,7 +65,7 @@ public class ModifyGrindstonePower extends Power {
         if(lateItemAction == null) {
             return;
         }
-        lateItemAction.accept(new Tuple<>(entity.level(), output));
+        lateItemAction.accept(new Pair<>(entity.level(), output));
     }
 
     public boolean doesApply(ItemStack inputTop, ItemStack inputBottom, ItemStack originalOutput, Optional<BlockPos> grindstonePos) {
@@ -96,7 +96,7 @@ public class ModifyGrindstonePower extends Power {
             case FROM_TOP -> output = inputTop.copy();
         }
         if(resultItemAction != null) {
-            resultItemAction.accept(new Tuple<>(entity.level(), output));
+            resultItemAction.accept(new Pair<>(entity.level(), output));
         }
         return output;
     }

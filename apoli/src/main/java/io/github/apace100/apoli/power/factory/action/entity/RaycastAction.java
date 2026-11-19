@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power.factory.action.entity;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
@@ -14,7 +15,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.level.ClipContext;
@@ -86,8 +86,8 @@ public class RaycastAction {
                 blockAction.accept(blockActionContext);
             }
             if(data.isPresent("bientity_action") && hitResult instanceof EntityHitResult ehr) {
-                ActionFactory<Tuple<Entity, Entity>>.Instance bientityAction = data.get("bientity_action");
-                Tuple<Entity, Entity> bientityActionContext = new Tuple<>(entity, ehr.getEntity());
+                ActionFactory<Pair<Entity, Entity>>.Instance bientityAction = data.get("bientity_action");
+                Pair<Entity, Entity> bientityActionContext = new Pair<>(entity, ehr.getEntity());
                 bientityAction.accept(bientityActionContext);
             }
             data.<Consumer<Entity>>ifPresent("hit_action", action -> action.accept(entity));
@@ -144,11 +144,11 @@ public class RaycastAction {
         return source.level().clip(context);
     }
 
-    private static EntityHitResult performEntityRaycast(Entity source, Vec3 origin, Vec3 target, ConditionFactory<Tuple<Entity, Entity>>.Instance biEntityCondition) {
+    private static EntityHitResult performEntityRaycast(Entity source, Vec3 origin, Vec3 target, ConditionFactory<Pair<Entity, Entity>>.Instance biEntityCondition) {
         Vec3 ray = target.subtract(origin);
         AABB box = source.getBoundingBox().expandTowards(ray).inflate(1.0D, 1.0D, 1.0D);
         EntityHitResult entityHitResult = ProjectileUtil.getEntityHitResult(source, origin, target, box, (entityx) -> {
-            return !entityx.isSpectator() && (biEntityCondition == null || biEntityCondition.test(new Tuple<>(source, entityx)));
+            return !entityx.isSpectator() && (biEntityCondition == null || biEntityCondition.test(new Pair<>(source, entityx)));
         }, ray.lengthSqr());
         return entityHitResult;
     }

@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -15,13 +15,13 @@ import java.util.function.Predicate;
 public class SelfGlowPower extends Power {
 
     private final Predicate<Entity> entityCondition;
-    private final Predicate<Tuple<Entity, Entity>> bientityCondition;
+    private final Predicate<Pair<Entity, Entity>> bientityCondition;
     private final boolean useTeams;
     private final float red;
     private final float green;
     private final float blue;
 
-    public SelfGlowPower(PowerType<?> type, LivingEntity entity, Predicate<Entity> entityCondition, Predicate<Tuple<Entity, Entity>> bientityCondition, boolean useTeams, float red, float green, float blue) {
+    public SelfGlowPower(PowerType<?> type, LivingEntity entity, Predicate<Entity> entityCondition, Predicate<Pair<Entity, Entity>> bientityCondition, boolean useTeams, float red, float green, float blue) {
         super(type, entity);
         this.entityCondition = entityCondition;
         this.bientityCondition = bientityCondition;
@@ -32,7 +32,7 @@ public class SelfGlowPower extends Power {
     }
 
     public boolean doesApply(Entity e) {
-        return (entityCondition == null || entityCondition.test(e)) && (bientityCondition == null || bientityCondition.test(new Tuple<>(e, entity)));
+        return (entityCondition == null || entityCondition.test(e)) && (bientityCondition == null || bientityCondition.test(new Pair<>(e, entity)));
     }
 
     public boolean usesTeams() {
@@ -63,7 +63,7 @@ public class SelfGlowPower extends Power {
             data ->
                 (type, player) -> new SelfGlowPower(type, player,
                     (ConditionFactory<Entity>.Instance)data.get("entity_condition"),
-                    (ConditionFactory<Tuple<Entity, Entity>>.Instance)data.get("bientity_condition"),
+                    (ConditionFactory<Pair<Entity, Entity>>.Instance)data.get("bientity_condition"),
                     data.getBoolean("use_teams"),
                     data.getFloat("red"),
                     data.getFloat("green"),

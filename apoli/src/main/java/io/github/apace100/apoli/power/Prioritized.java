@@ -1,14 +1,13 @@
 package io.github.apace100.apoli.power;
 
 import io.github.apace100.apoli.component.PowerHolderComponent;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 public interface Prioritized<T extends Power & Prioritized<T>> {
 

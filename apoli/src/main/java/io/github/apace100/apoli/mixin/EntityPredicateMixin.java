@@ -2,16 +2,17 @@ package io.github.apace100.apoli.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.SetEntityGroupPower;
-import net.minecraft.advancements.criterion.EntityPredicate;
-import net.minecraft.advancements.criterion.EntityTypePredicate;
-import net.minecraft.core.Holder;
+import net.minecraft.advancements.predicates.entity.EntityPredicate;
+import net.minecraft.advancements.predicates.entity.EntitySubPredicate;
+import net.minecraft.advancements.predicates.entity.EntityTypePredicate;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -20,13 +21,12 @@ import java.util.List;
 @Mixin(EntityPredicate.class)
 public abstract class EntityPredicateMixin {
     // SetEntityGroupPower
-    @WrapOperation(method = "matches(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/criterion/EntityTypePredicate;matches(Lnet/minecraft/core/Holder;)Z"))
-    // ⚠ 26.1 起不能再用 @Local(name = "entity")：26.1 不再有混淆映射，
-    //   按名字定位需要读取字节码里的参数名（LocalVariableTable），官方 jar 不保证提供，
-    //   会以 "Unable to find matching local!" 直接崩在 mixin 阶段。改为按类型定位。
-    private boolean checkMatchesEntityGroup(EntityTypePredicate instance, Holder<EntityType<?>> type, Operation<Boolean> original, @Local(argsOnly = true, type = Entity.class) Entity entity) {
-        var value = original.call(instance, type);
-        var entityTypeTag = instance.types().unwrapKey().orElse(null);
+    @WrapOperation(method = "matches(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/advancements/predicates/entity/EntitySubPredicate;matches(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/phys/Vec3;)Z"))
+    private boolean checkMatchesEntityGroup(EntitySubPredicate instance, Entity entity, ServerLevel level, Vec3 vec3, Operation<Boolean> original) {
+        var value = original.call(instance, entity, level, vec3);
+        if (!(instance instanceof EntityTypePredicate typePredicate))
+            return value;
+        var entityTypeTag = typePredicate.types().unwrapKey().orElse(null);
 
         if (entityTypeTag == null) {
             return value;

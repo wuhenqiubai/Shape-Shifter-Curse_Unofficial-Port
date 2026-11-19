@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.factory.action;
 
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.networking.PlayerMountPacket;
@@ -13,7 +14,6 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Registry;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.animal.Animal;
@@ -32,42 +32,42 @@ public class BiEntityActions {
         register(IfElseListAction.getFactory(ApoliDataTypes.BIENTITY_ACTION, ApoliDataTypes.BIENTITY_CONDITION));
         register(DelayAction.getFactory(ApoliDataTypes.BIENTITY_ACTION));
         register(NothingAction.getFactory());
-        register(SideAction.getFactory(ApoliDataTypes.BIENTITY_ACTION, entities -> !entities.getA().level().isClientSide()));
+        register(SideAction.getFactory(ApoliDataTypes.BIENTITY_ACTION, entities -> !entities.getFirst().level().isClientSide()));
 
         register(new ActionFactory<>(Apoli.identifier("invert"), new SerializableData()
             .add("action", ApoliDataTypes.BIENTITY_ACTION),
             (data, entities) -> {
-                ((ActionFactory<Tuple<Entity, Entity>>.Instance)data.get("action")).accept(new Tuple<>(entities.getB(), entities.getA()));
+                ((ActionFactory<Pair<Entity, Entity>>.Instance)data.get("action")).accept(new Pair<>(entities.getSecond(), entities.getFirst()));
             }));
         register(new ActionFactory<>(Apoli.identifier("actor_action"), new SerializableData()
             .add("action", ApoliDataTypes.ENTITY_ACTION),
             (data, entities) -> {
-                ((ActionFactory<Entity>.Instance)data.get("action")).accept(entities.getA());
+                ((ActionFactory<Entity>.Instance)data.get("action")).accept(entities.getFirst());
             }));
         register(new ActionFactory<>(Apoli.identifier("target_action"), new SerializableData()
             .add("action", ApoliDataTypes.ENTITY_ACTION),
             (data, entities) -> {
-                ((ActionFactory<Entity>.Instance)data.get("action")).accept(entities.getB());
+                ((ActionFactory<Entity>.Instance)data.get("action")).accept(entities.getSecond());
             }));
 
         register(new ActionFactory<>(Apoli.identifier("mount"), new SerializableData(),
             (data, entities) -> {
-                entities.getA().startRiding(entities.getB(), true, true);
-                if(!entities.getA().level().isClientSide() && entities.getB() instanceof Player) {
-                    ServerPlayNetworking.send((ServerPlayer) entities.getB(), new PlayerMountPacket(entities.getA().getId(), entities.getB().getId()));
+                entities.getFirst().startRiding(entities.getSecond(), true, true);
+                if(!entities.getFirst().level().isClientSide() && entities.getSecond() instanceof Player) {
+                    ServerPlayNetworking.send((ServerPlayer) entities.getSecond(), new PlayerMountPacket(entities.getFirst().getId(), entities.getSecond().getId()));
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("set_in_love"), new SerializableData(),
             (data, entities) -> {
-                if(entities.getB() instanceof Animal && entities.getA() instanceof Player) {
-                    ((Animal)entities.getB()).setInLove((Player)entities.getA());
+                if(entities.getSecond() instanceof Animal && entities.getFirst() instanceof Player) {
+                    ((Animal)entities.getSecond()).setInLove((Player)entities.getFirst());
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("tame"), new SerializableData(),
             (data, entities) -> {
-                if(entities.getB() instanceof TamableAnimal && entities.getA() instanceof Player) {
-                    if(!((TamableAnimal)entities.getB()).isTame()) {
-                        ((TamableAnimal)entities.getB()).tame((Player)entities.getA());
+                if(entities.getSecond() instanceof TamableAnimal && entities.getFirst() instanceof Player) {
+                    if(!((TamableAnimal)entities.getSecond()).isTame()) {
+                        ((TamableAnimal)entities.getSecond()).tame((Player)entities.getFirst());
                     }
                 }
             }));
@@ -79,7 +79,7 @@ public class BiEntityActions {
             .add("server", SerializableDataTypes.BOOLEAN, true)
             .add("set", SerializableDataTypes.BOOLEAN, false),
             (data, entities) -> {
-                Entity actor = entities.getA(), target = entities.getB();
+                Entity actor = entities.getFirst(), target = entities.getSecond();
                 if (target instanceof Player
                     && (target.level().isClientSide() ?
                         !data.getBoolean("client") : !data.getBoolean("server")))
@@ -95,7 +95,7 @@ public class BiEntityActions {
         register(DamageAction.getFactory());
     }
 
-    private static void register(ActionFactory<Tuple<Entity, Entity>> actionFactory) {
+    private static void register(ActionFactory<Pair<Entity, Entity>> actionFactory) {
         Registry.register(ApoliRegistries.BIENTITY_ACTION, actionFactory.getSerializerId(), actionFactory);
     }
 }

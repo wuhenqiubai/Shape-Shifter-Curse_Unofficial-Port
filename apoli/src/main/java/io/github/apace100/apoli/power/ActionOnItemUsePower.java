@@ -1,12 +1,12 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataType;
 import io.github.apace100.calio.data.SerializableDataTypes;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -20,11 +20,11 @@ public class ActionOnItemUsePower extends Power implements Prioritized<ActionOnI
 
     private final Predicate<ItemStack> itemCondition;
     private final Consumer<Entity> entityAction;
-    private final Consumer<Tuple<Level, ItemStack>> itemAction;
+    private final Consumer<Pair<Level, ItemStack>> itemAction;
     private final TriggerType triggerType;
     private final int priority;
 
-    public ActionOnItemUsePower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> itemCondition, Consumer<Entity> entityAction, Consumer<Tuple<Level, ItemStack>> itemAction, TriggerType triggerType, int priority) {
+    public ActionOnItemUsePower(PowerType<?> type, LivingEntity entity, Predicate<ItemStack> itemCondition, Consumer<Entity> entityAction, Consumer<Pair<Level, ItemStack>> itemAction, TriggerType triggerType, int priority) {
         super(type, entity);
         this.itemCondition = itemCondition;
         this.entityAction = entityAction;
@@ -39,7 +39,7 @@ public class ActionOnItemUsePower extends Power implements Prioritized<ActionOnI
 
     public void executeActions(ItemStack stack) {
         if(itemAction != null) {
-            itemAction.accept(new Tuple<>(entity.level(), stack));
+            itemAction.accept(new Pair<>(entity.level(), stack));
         }
         if(entityAction != null) {
             entityAction.accept(entity);

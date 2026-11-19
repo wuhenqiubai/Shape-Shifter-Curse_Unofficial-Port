@@ -1,11 +1,10 @@
 package io.github.apace100.calio;
 
 import io.github.apace100.calio.mixin.WeightedListEntryAccessor;
-import net.minecraft.world.entity.ai.behavior.ShufflingList;
-
 import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
+import net.minecraft.world.entity.ai.behavior.ShufflingList;
 
 public class FilterableWeightedList<U> extends ShufflingList<U> {
 

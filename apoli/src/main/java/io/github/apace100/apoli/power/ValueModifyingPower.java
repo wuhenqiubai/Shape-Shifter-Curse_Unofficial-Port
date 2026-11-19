@@ -3,12 +3,12 @@ package io.github.apace100.apoli.power;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.resources.Identifier;
-import net.minecraft.world.entity.LivingEntity;
-
+import io.github.apace100.calio.data.SerializableDataTypes;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.BiFunction;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ValueModifyingPower extends Power {
 

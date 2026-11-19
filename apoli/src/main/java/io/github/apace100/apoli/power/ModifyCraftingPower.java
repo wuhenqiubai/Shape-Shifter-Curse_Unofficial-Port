@@ -1,5 +1,6 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
@@ -9,7 +10,6 @@ import io.github.apace100.calio.util.LazyItemStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -29,12 +29,12 @@ public class ModifyCraftingPower extends ValueModifyingPower {
     private final Predicate<ItemStack> itemCondition;
 
     private final LazyItemStack newStack;
-    private final Consumer<Tuple<Level, ItemStack>> itemAction;
-    private final Consumer<Tuple<Level, ItemStack>> lateItemAction;
+    private final Consumer<Pair<Level, ItemStack>> itemAction;
+    private final Consumer<Pair<Level, ItemStack>> lateItemAction;
     private final Consumer<Entity> entityAction;
     private final Consumer<Triple<Level, BlockPos, Direction>> blockAction;
 
-    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, Identifier recipeIdentifier, Predicate<ItemStack> itemCondition, LazyItemStack newStack, Consumer<Tuple<Level, ItemStack>> itemAction, Consumer<Tuple<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
+    public ModifyCraftingPower(PowerType<?> type, LivingEntity entity, Identifier recipeIdentifier, Predicate<ItemStack> itemCondition, LazyItemStack newStack, Consumer<Pair<Level, ItemStack>> itemAction, Consumer<Pair<Level, ItemStack>> lateItemAction, Consumer<Entity> entityAction, Consumer<Triple<Level, BlockPos, Direction>> blockAction) {
         super(type, entity);
         this.recipeIdentifier = recipeIdentifier;
         this.itemCondition = itemCondition;
@@ -63,7 +63,7 @@ public class ModifyCraftingPower extends ValueModifyingPower {
         if(lateItemAction == null) {
             return;
         }
-        lateItemAction.accept(new Tuple<>(entity.level(), output));
+        lateItemAction.accept(new Pair<>(entity.level(), output));
     }
 
     public ItemStack getNewResult(CraftingInput input, CraftingRecipe recipe) {
@@ -74,7 +74,7 @@ public class ModifyCraftingPower extends ValueModifyingPower {
             stack = recipe.assemble(input);
         }
         if(itemAction != null) {
-            itemAction.accept(new Tuple<>(entity.level(), stack));
+            itemAction.accept(new Pair<>(entity.level(), stack));
         }
         return stack;
     }

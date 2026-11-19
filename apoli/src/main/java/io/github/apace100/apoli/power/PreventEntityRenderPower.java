@@ -1,11 +1,11 @@
 package io.github.apace100.apoli.power;
 
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.PowerFactory;
 import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -14,9 +14,9 @@ import java.util.function.Predicate;
 public class PreventEntityRenderPower extends Power {
 
     private final Predicate<Entity> entityCondition;
-    private final Predicate<Tuple<Entity, Entity>> bientityCondition;
+    private final Predicate<Pair<Entity, Entity>> bientityCondition;
 
-    public PreventEntityRenderPower(PowerType<?> type, LivingEntity entity, Predicate<Entity> entityCondition, Predicate<Tuple<Entity, Entity>> bientityCondition) {
+    public PreventEntityRenderPower(PowerType<?> type, LivingEntity entity, Predicate<Entity> entityCondition, Predicate<Pair<Entity, Entity>> bientityCondition) {
         super(type, entity);
         this.entityCondition = entityCondition;
         this.bientityCondition = bientityCondition;
@@ -24,7 +24,7 @@ public class PreventEntityRenderPower extends Power {
 
     public boolean doesApply(Entity e) {
         return (entityCondition == null || entityCondition.test(e))
-            && (bientityCondition == null || bientityCondition.test(new Tuple<>(entity, e)));
+            && (bientityCondition == null || bientityCondition.test(new Pair<>(entity, e)));
     }
 
     public static PowerFactory createFactory() {
@@ -35,7 +35,7 @@ public class PreventEntityRenderPower extends Power {
             data ->
                 (type, player) -> new PreventEntityRenderPower(type, player,
                     (ConditionFactory<Entity>.Instance)data.get("entity_condition"),
-                    (Predicate<Tuple<Entity, Entity>>)data.get("bientity_condition")))
+                    (Predicate<Pair<Entity, Entity>>)data.get("bientity_condition")))
             .allowCondition();
     }
 }

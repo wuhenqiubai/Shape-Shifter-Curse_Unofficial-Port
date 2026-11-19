@@ -2,7 +2,7 @@ package io.github.apace100.calio.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import io.github.apace100.calio.Calio;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -21,7 +21,7 @@ public abstract class CustomNonItalicNameMixin {
         }
     }
 
-    @Mixin(Gui.class)
+    @Mixin(Hud.class)
     public abstract static class ModifyItalicDisplayHud {
         @Shadow private ItemStack lastToolHighlight;
 

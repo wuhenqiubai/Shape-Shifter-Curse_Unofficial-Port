@@ -1,6 +1,7 @@
 package io.github.apace100.apoli.power.factory.action.entity;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.data.ApoliDataTypes;
 import io.github.apace100.apoli.power.factory.action.ActionFactory;
@@ -12,7 +13,6 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.permissions.LevelBasedPermissionSet;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 
 import java.util.function.Consumer;
@@ -26,8 +26,8 @@ public class SelectorAction {
         if (server == null) return;
 
         EntitySelector selector = data.<ArgumentWrapper<EntitySelector>>get("selector").get();
-        Predicate<Tuple<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
-        Consumer<Tuple<Entity, Entity>> biEntityAction = data.get("bientity_action");
+        Predicate<Pair<Entity, Entity>> biEntityCondition = data.get("bientity_condition");
+        Consumer<Pair<Entity, Entity>> biEntityAction = data.get("bientity_action");
 
         CommandSourceStack source = new CommandSourceStack(
             CommandSource.NULL,
@@ -44,8 +44,8 @@ public class SelectorAction {
         try {
             selector.findEntities(source)
                 .stream()
-                .filter(e -> biEntityCondition == null || biEntityCondition.test(new Tuple<>(entity, e)))
-                .forEach(e -> biEntityAction.accept(new Tuple<>(entity, e)));
+                .filter(e -> biEntityCondition == null || biEntityCondition.test(new Pair<>(entity, e)))
+                .forEach(e -> biEntityAction.accept(new Pair<>(entity, e)));
         }
 
         catch (CommandSyntaxException ignored) {}
