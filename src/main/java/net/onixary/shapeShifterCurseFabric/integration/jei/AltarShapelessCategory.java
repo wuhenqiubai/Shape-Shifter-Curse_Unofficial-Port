@@ -99,7 +99,7 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
         if (client.getConnection() != null) {
             return Optional.ofNullable(client.getConnection().getAdvancements().tree().get(id))
                     .flatMap(node -> node.advancement().display())
-                    .map(DisplayInfo::getTitle)
+                    .map(DisplayInfo::title)
                     .orElse(Component.literal(id.toString()));
         }
         return Component.literal(id.toString());

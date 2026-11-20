@@ -51,7 +51,6 @@ import net.onixary.shapeShifterCurseFabric.util.FormColorData;
 import net.onixary.shapeShifterCurseFabric.util.PatronUtils;
 import net.onixary.shapeShifterCurseFabric.util.TickManager;
 import net.onixary.shapeShifterCurseFabric.util.Verify.AuthClient;
-import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.UUID;

@@ -32,7 +32,7 @@ public class ChoseOriginCriterion extends SimpleCriterionTrigger<ChoseOriginCrit
     public record Conditions(Optional<Holder<LootItemCondition>> player, Identifier originId) implements SimpleCriterionTrigger.SimpleInstance {
 
         public static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
+            LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Conditions::player),
             Identifier.CODEC.fieldOf("origin").forGetter(Conditions::originId)
         ).apply(instance, Conditions::new));
 

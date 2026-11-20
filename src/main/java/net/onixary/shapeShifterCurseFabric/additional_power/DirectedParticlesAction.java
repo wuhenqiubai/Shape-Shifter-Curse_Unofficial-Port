@@ -44,7 +44,7 @@ public final class DirectedParticlesAction {
             var packet = packet(data, actor, target);
             for (var viewer : world.players()) {
                 for (int i = 0; i < count; i++) {
-                    if (!world.sendParticles(viewer, data.getBoolean("force"), packet.getX(), packet.getY(), packet.getZ(), packet)) break;
+                    viewer.connection.send(packet);
                 }
             }
         });

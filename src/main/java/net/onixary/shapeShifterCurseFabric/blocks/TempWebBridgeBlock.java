@@ -39,11 +39,6 @@ public class TempWebBridgeBlock extends HorizontalDirectionalBlock {
         this.registerDefaultState(this.stateDefinition.any().setValue(AGE, 0).setValue(HORIZONTAL_FACING, Direction.NORTH));
     }
 
-    @Override
-    protected @NotNull MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return simpleCodec(TempWebBridgeBlock::new);
-    }
-
     public void randomTick(BlockState state, ServerLevel world, BlockPos pos, RandomSource random) {
         this.tick(state, world, pos, random);
     }

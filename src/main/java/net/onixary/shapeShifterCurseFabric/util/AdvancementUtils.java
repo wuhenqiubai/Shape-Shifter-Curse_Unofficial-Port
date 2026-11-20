@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.util;
 
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.triggers.CriteriaTriggers;

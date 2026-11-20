@@ -95,11 +95,6 @@ public class AltarBlock extends BaseEntityBlock {
     }
 
     @Override
-    protected @NotNull MapCodec<AltarBlock> codec() {
-        return Block.simpleCodec(AltarBlock::new);
-    }
-
-    @Override
     public @Nullable <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level world, BlockState state, BlockEntityType<T> type) {
         return world.isClientSide() ? null : createTickerHelper(type, RegCustomBlock.ALTAR_BLOCK_ENTITY, (world1, pos, blockState, blockEntity) -> blockEntity.tick(world1, pos, blockState, blockEntity));
     }

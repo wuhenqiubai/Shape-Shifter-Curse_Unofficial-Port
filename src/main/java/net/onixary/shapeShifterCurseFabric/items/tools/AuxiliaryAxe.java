@@ -8,10 +8,10 @@ import net.minecraft.world.item.component.TooltipDisplay;
 import java.util.function.Consumer;
 
 
-public class AuxiliaryAxe extends AxeItem {
+public class AuxiliaryAxe extends Item {
 
     public AuxiliaryAxe(ToolMaterial material, float attackDamage, float attackSpeed, Properties settings) {
-        super(material, attackDamage, attackSpeed, settings);
+        super(settings.axe(material, attackDamage, attackSpeed));
     }
 
     @Override

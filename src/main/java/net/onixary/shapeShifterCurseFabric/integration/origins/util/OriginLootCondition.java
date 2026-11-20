@@ -42,7 +42,7 @@ public class OriginLootCondition implements LootItemCondition {
 
     @Override
     public boolean test(LootContext lootContext) {
-        OriginComponent component = ModComponents.ORIGIN.maybeGet(lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY))
+        OriginComponent component = ModComponents.ORIGIN.maybeGet(lootContext.getOptional(LootContextParams.THIS_ENTITY))
             .orElse(null);
         if (component == null) {
             return false;

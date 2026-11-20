@@ -71,11 +71,6 @@ public class FormAttunerBlock extends BaseEntityBlock implements BeaconBeamBlock
     }
 
     @Override
-    protected @NotNull MapCodec<FormAttunerBlock> codec() {
-        return Block.simpleCodec(FormAttunerBlock::new);
-    }
-
-    @Override
     protected @NotNull InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
         if (world.isClientSide()) {
             return InteractionResult.SUCCESS;

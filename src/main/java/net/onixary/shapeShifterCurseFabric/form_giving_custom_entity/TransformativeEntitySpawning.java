@@ -98,7 +98,7 @@ public class TransformativeEntitySpawning {
                 MobCategory.CREATURE,
                 new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
                     WeightedList.<MobSpawnSettings.SpawnerData>builder()
-                        .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, 3, 5), 20)
+                        .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_WOLF, net.minecraft.util.valueproviders.UniformInt.of(3, 5)), 20)
                         .build())
             );
             for (Holder<Structure> structureEntry : server.overworld().registryAccess().lookupOrThrow(Registries.STRUCTURE)
@@ -108,7 +108,7 @@ public class TransformativeEntitySpawning {
                     MobCategory.MONSTER,
                     new StructureSpawnOverride(StructureSpawnOverride.BoundingBoxType.PIECE,
                         WeightedList.<MobSpawnSettings.SpawnerData>builder()
-                            .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, 1, 2), 5)
+                            .add(new MobSpawnSettings.SpawnerData(ShapeShifterCurseFabric.T_SPIDER, net.minecraft.util.valueproviders.UniformInt.of(1, 2)), 5)
                             .build())
                 );
             }

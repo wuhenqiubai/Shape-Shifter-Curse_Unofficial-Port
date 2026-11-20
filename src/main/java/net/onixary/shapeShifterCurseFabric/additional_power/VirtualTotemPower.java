@@ -46,7 +46,7 @@ public class VirtualTotemPower extends CooldownPower {
                 client.particleEngine.createTrackingEmitter(playerEntity, ParticleTypes.TOTEM_OF_UNDYING, 30);
                 client.level.playLocalSound(playerEntity.getX(), playerEntity.getY(), playerEntity.getZ(), SoundEvents.TOTEM_USE, playerEntity.getSoundSource(), 1.0f, 1.0f, false);
                 if (playerEntity != client.player) return;
-                client.gameRenderer.displayItemActivation(totemStack);
+                client.player.displayItemActivation(totemStack);
             }
         });
         virtualTotemTypeMap.put(ShapeShifterCurseFabric.identifier("form_anubis_wolf_3_undying"), (Player playerEntity, ItemStack totemStack) -> {
