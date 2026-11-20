@@ -207,7 +207,8 @@ dependencies {
     runtimeOnly "maven.modrinth:cardinal-components-api:${project.cca_version}"
 
     // 官方Maven仓库速度太慢 改为CurseMaven的源
-     implementation "maven.modrinth:jei:${project.jei_version}-fabric"
+    implementation "maven.modrinth:jei:${project.jei_version}-fabric"
+    runtimeOnly "maven.modrinth:mezzconfig:0.7.1-fabric,26.3"
     // 调用频率有点高 所以直接项目依赖吧（26.1 不 remap，与 better-combat / presence-footsteps 等可选集成一致用 compileOnly）
     compileOnly "maven.modrinth:carry-on:2.12.2-fabric,26.3"
 }
