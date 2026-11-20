@@ -55,6 +55,8 @@ public class ConditionedAttributePower extends Power {
                 if(instance != null) {
                     if(!instance.hasModifier(mod.getModifier().id())) {
                         instance.addTransientModifier(mod.getModifier());
+                    } else {
+                        instance.addOrUpdateTransientModifier(mod.getModifier());
                     }
                 }
             }
