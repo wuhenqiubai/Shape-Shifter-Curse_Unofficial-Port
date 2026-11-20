@@ -35,7 +35,7 @@ public class GameRendererMixin {
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 0))
-    private void shape_shifter_curse$renderOverlayAboveHud(net.minecraft.client.DeltaTracker deltaTracker, boolean advanceGameTime, CallbackInfo ci) {
+    private void shape_shifter_curse$renderOverlayAboveHud(CallbackInfo ci) {
         TransformOverlayRenderer.render();
     }
 

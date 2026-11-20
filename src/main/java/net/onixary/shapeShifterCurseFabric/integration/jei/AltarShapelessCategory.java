@@ -97,7 +97,7 @@ public class AltarShapelessCategory extends AbstractRecipeCategory<AltarShapeles
     private Component getAdvancementName(Identifier id) {
         Minecraft client = Minecraft.getInstance();
         if (client.getConnection() != null) {
-            return Optional.ofNullable(client.getConnection().getAdvancements().getTree().get(id))
+            return Optional.ofNullable(client.getConnection().getAdvancements().tree().get(id))
                     .flatMap(node -> node.advancement().display())
                     .map(DisplayInfo::getTitle)
                     .orElse(Component.literal(id.toString()));

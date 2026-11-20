@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.ability;
 
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Player;
@@ -31,12 +32,12 @@ public interface IFormLayerGroup {
     // 给后续留的拓展接口 说不定未来客户端需要知道部分数据 反正目前不需要
     default void write(@NotNull FriendlyByteBuf packetByteBuf) {
         packetByteBuf.writeIdentifier(getGroupID());
-        packetByteBuf.writeCollection(getLayers(), FriendlyByteBuf::writeIdentifier);
+        Identifier.STREAM_CODEC.apply(ByteBufCodecs.collection(java.util.ArrayList::new)).encode(packetByteBuf, new java.util.ArrayList<>(getLayers()));
     }
 
     default void read(@NotNull FriendlyByteBuf packetByteBuf) {
         __setGroupID(packetByteBuf.readIdentifier());
-        __setLayers(packetByteBuf.readCollection(ArrayList::new, FriendlyByteBuf::readIdentifier));
+        __setLayers(Identifier.STREAM_CODEC.apply(ByteBufCodecs.collection(java.util.ArrayList::new)).decode(packetByteBuf));
     }
 
     default void onAddGroup(@NotNull Player player, @NotNull Identifier newLayer) {

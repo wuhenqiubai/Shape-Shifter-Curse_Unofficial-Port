@@ -115,7 +115,6 @@
     "FeralPlayerEntityRendererMixin",
     "GameRendererMixin",
     "HeartTypeMixin",
-    "IEntityRenderDispatcherAccessor",
     "InGameHudMixin",
     "InventoryScreenMixin",
     "KeyboardInputMixin",

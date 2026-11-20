@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.player_form.ability;
 
+import net.minecraft.network.codec.ByteBufCodecs;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.MultiplePowerType;
 import io.github.apace100.apoli.power.PowerType;
@@ -30,12 +31,12 @@ public interface IFormLayer {
     // 给后续留的拓展接口 说不定未来客户端需要知道部分数据 反正目前不需要
     default void write(@NotNull FriendlyByteBuf packetByteBuf) {
         packetByteBuf.writeIdentifier(getID());
-        packetByteBuf.writeCollection(getPowerID(null), FriendlyByteBuf::writeIdentifier);
+        Identifier.STREAM_CODEC.apply(ByteBufCodecs.collection(java.util.ArrayList::new)).encode(packetByteBuf, new java.util.ArrayList<>(getPowerID(null)));
     }
 
     default void read(@NotNull FriendlyByteBuf packetByteBuf) {
         __setID(packetByteBuf.readIdentifier());
-        __setPowerID(packetByteBuf.readCollection(ArrayList::new, FriendlyByteBuf::readIdentifier));
+        __setPowerID(Identifier.STREAM_CODEC.apply(ByteBufCodecs.collection(java.util.ArrayList::new)).decode(packetByteBuf));
     }
 
     static boolean hasPowerType(List<Identifier> powerIDs, PowerType<?> powerType) {

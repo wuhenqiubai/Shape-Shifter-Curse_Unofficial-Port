@@ -1,6 +1,7 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
 
+import net.minecraft.client.Minecraft;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.player.PlayerModel;
@@ -33,9 +34,9 @@ public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRend
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void init(EntityRendererProvider.Context context, boolean slimSteve, CallbackInfo ci) {
-        this.addLayer(new MouthItemFeature<>(this, this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer()));
-        this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer()));
-        FirstPersonHandsAndItemsRenderer itemRenderer = this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer();
+        this.addLayer(new MouthItemFeature<>(this, Minecraft.getInstance().gameRenderer.firstPersonHandsAndItemsRenderer));
+        this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, Minecraft.getInstance().gameRenderer.firstPersonHandsAndItemsRenderer));
+        FirstPersonHandsAndItemsRenderer itemRenderer = Minecraft.getInstance().gameRenderer.firstPersonHandsAndItemsRenderer;
         this.addLayer(new ExtraItemFeatureRenderer<>(this, this.entityRenderDispatcher, itemRenderer));
     }
 }
