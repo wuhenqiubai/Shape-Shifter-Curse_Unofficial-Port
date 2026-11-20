@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.features;
 
+import net.onixary.shapeShifterCurseFabric.render.tech.ItemSubmitUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import dev.tr7zw.firstperson.FirstPersonModelCore;
@@ -135,7 +136,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.rotate(Axis.XP.rotationDegrees(90.0F));
         matrixStack.rotate(Axis.ZP.rotationDegrees(180.0F));
         matrixStack.translate(1.0 / 16.0F, -2.0 / 16.0F, 1.0 / 16.0F);
-        heldItemRenderer.renderItem(player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
+        ItemSubmitUtils.submitItem(player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
         matrixStack.popPose();
     }
 
@@ -152,7 +153,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.scale(1.2f, 1.2f, 1.2f);
         // --- 调整结束 ---
 	    if (Minecraft.getInstance().player != null) {
-		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.FIXED, matrixStack, vertexConsumerProvider, i);
+		    ItemSubmitUtils.submitItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.FIXED, matrixStack, vertexConsumerProvider, i);
 	    }
 	    matrixStack.popPose();
     }
@@ -165,7 +166,7 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         matrixStack.translate(0.0F, 0.5F, 0.25F);
         matrixStack.scale(1.5F, 1.5F, 1.5F);
 	    if (Minecraft.getInstance().player != null) {
-		    heldItemRenderer.renderItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
+		    ItemSubmitUtils.submitItem(Minecraft.getInstance().player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
 	    }
 	    matrixStack.popPose();
     }

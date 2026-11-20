@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.features;
 
+import net.onixary.shapeShifterCurseFabric.render.tech.ItemSubmitUtils;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -126,7 +127,7 @@ public class CustomFeralItemRenderer {
 		int light
 	) {
 		if (!stack.isEmpty()) {
-			this.itemRenderer.renderItem(
+			ItemSubmitUtils.submitItem(
 				entity, stack, renderMode, matrices, vertexConsumers, light
 			);
 		}

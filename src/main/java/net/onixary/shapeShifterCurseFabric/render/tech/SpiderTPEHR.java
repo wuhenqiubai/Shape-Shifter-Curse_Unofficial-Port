@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.render.tech;
 
+import net.onixary.shapeShifterCurseFabric.render.tech.ItemSubmitUtils;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
@@ -51,7 +52,7 @@ public class SpiderTPEHR extends ThirdPersonExtraHandItemRender.TPEHR_Render {
             matrices.rotate(Axis.YP.rotationDegrees(15.0F));
             matrices.translate(1.0 / 16.0F, -2.0 / 16.0F, 1.0 / 16.0F);
         }
-        heldItemRenderer.renderItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, matrices, vertexConsumers, light);
+        ItemSubmitUtils.submitItem(player, stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, matrices, vertexConsumers, light);
 
     }
 }
