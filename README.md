@@ -83,7 +83,7 @@ Of course, if you want a challenge, you could still transform into an SP form an
 - **Bat Form**
   - ![Completed](https://img.shields.io/badge/Completed-2ea44f?style=flat-square) **Avali Form:**<br>
     An alien raptor from another plane of existence🍐. What could have brought them here?
-
+    
 ## License
 
 - Source code: [MIT License](LICENSE.txt)
@@ -93,35 +93,3 @@ Of course, if you want a challenge, you could still transform into an SP form an
   exported from them): [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
 - Avali chatter: [Avali sounds by Nefumi](https://steamcommunity.com/sharedfiles/filedetails/?id=3164757879) — custom permission: free, no monetization, credit and source link required. See [third-party notices](THIRD-PARTY-NOTICES.md).
 - Third-party code and assets: their upstream licenses, see [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-
-
----
-
-## 非官方维护声明
-
-**本分支是社区维护的 1.21.11 移植版本，非官方发布。**
-
-- 此移植由社区贡献者完成，**未经官方开发者 (onixary) 审核或认可**
-- 欢迎提交 Issue 或 PR 协助改进移植质量
-
----
-
-## 移植贡献者 / Port Contributors
-
-| 贡献者                                         | 角色                                  |
-|-----------------------------------------------|---------------------------------------|
-| [wuhenqiubai](https://github.com/wuhenqiubai) | 移植版维护                |
-| [Claude Code](https://claude.com/product/claude-code)                       | 代码辅助 |
-| [onixary](https://github.com/onixary)         | 原作者                 |
-| [xu233333](https://github.com/xu233333)       | 原作者                 |
-
-## 授权
-
-- 源代码：[MIT 许可证](LICENSE.txt)
-- 媒体资源（3D 模型、贴图、动画、音效、字体、翻译文本）：
-  [CC BY-NC 4.0](LICENSE-CC-BY-NC-4.0.txt)，仅限非商业用途
-- avali 子形态资源（模型及由它导出的 geo 模型、贴图、动画）：
-  [CC BY-SA 2.0](https://creativecommons.org/licenses/by-sa/2.0/)
-- 第三方代码与资源：遵循其原始授权，见 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)
-
-各许可证的具体适用范围见 [LICENSING.md](LICENSING.md)。
