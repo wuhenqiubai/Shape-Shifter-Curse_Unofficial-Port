@@ -174,7 +174,7 @@ public class OriginDisplayScreen extends Screen {
                mouseY < rb.y + 9 &&
                rb.hasTooltip()) {
                 int widthLimit = width - mouseX - 24;
-                context.tooltip(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+                context.tooltip(font, rb.getTooltipComponents(font, widthLimit), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, false);
             }
         }
     }
@@ -215,7 +215,7 @@ public class OriginDisplayScreen extends Screen {
             // 26.1: setTooltipForNextFrame(Font, List<ClientTooltipComponent>, ...) 重载被删除，
             // 但 GuiGraphicsExtractor#tooltip(font, List<ClientTooltipComponent>, x, y, positioner, style)
             // 与旧签名完全一致（就是原 renderTooltip），且本类 L174 已在用同一写法，故直接换名。
-            context.tooltip(this.font, List.of(new net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip(ttc.getVisualOrderText())), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null);
+            context.tooltip(this.font, List.of(new net.minecraft.client.gui.screens.inventory.tooltip.ClientTextTooltip(ttc.getVisualOrderText())), mouseX, mouseY, DefaultTooltipPositioner.INSTANCE, null, false);
         }
     }
 

@@ -230,11 +230,11 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
                 RenderType l = (FormRenderUtils.isRenderingInWorld && IRISInstalled) || ImmediatelyFastInstalled
                         ? RenderTypes.entityCutoutZOffset(overlayTexture)
                         : RenderTypes.entityCutout(overlayTexture);
-                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor, null);
+                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor);
             }
             if (emissiveTexture != null) {
                 RenderType l = RenderTypes.entityTranslucentEmissive(emissiveTexture);
-                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor, null);
+                submitNodeCollector.submitModel(playerEntityModel, avatarRenderState, matrixStack, l, i, p, color, null, avatarRenderState.outlineColor);
             }
             playerEntityModel.hat.skipDraw = false;
             playerEntityModel.head.skipDraw = false;

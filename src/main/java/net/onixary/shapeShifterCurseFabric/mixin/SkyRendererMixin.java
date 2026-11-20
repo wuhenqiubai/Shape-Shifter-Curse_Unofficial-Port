@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
+import com.mojang.renderpearl.api.vertex.VertexFormat;
 import com.mojang.renderpearl.api.buffers.GpuBuffer;
 import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
