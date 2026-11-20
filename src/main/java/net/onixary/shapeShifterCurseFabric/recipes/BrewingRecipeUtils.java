@@ -3,12 +3,24 @@ package net.onixary.shapeShifterCurseFabric.recipes;
 import com.google.common.collect.Lists;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.component.CustomData;
+import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import net.onixary.shapeShifterCurseFabric.status_effects.CTPUtils;
 import net.onixary.shapeShifterCurseFabric.ShapeShifterCurseFabric;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,6 +56,46 @@ public class BrewingRecipeUtils {
     public static void onLoadDynamicBrewingRecipesStart() {
         POTION_RECIPES.clear();
         ITEM_RECIPES.clear();
+    }
+
+    public static @Nullable ItemStack findResult(ItemStack source, ItemStack reagent) {
+        if (source.isEmpty() || reagent.isEmpty()) {
+            return null;
+        }
+        for (DynamicRecipe<Item> recipe : ITEM_RECIPES) {
+            if (recipe.matchesInput(source.getItem()) && recipe.ingredient.test(reagent)) {
+                PotionContents contents = source.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+                Holder<Potion> potionEntry = contents.potion().orElse(null);
+                ItemStack out = potionEntry != null
+                        ? PotionContents.createItemStack(recipe.output, potionEntry)
+                        : new ItemStack(recipe.output);
+                applyTargetForm(out, recipe.targetForm);
+                return out;
+            }
+        }
+        PotionContents contents = source.getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        Holder<Potion> potionEntry = contents.potion().orElse(null);
+        if (potionEntry == null) {
+            return null;
+        }
+        Potion potion = potionEntry.value();
+        for (DynamicRecipe<Potion> recipe : POTION_RECIPES) {
+            if (recipe.matchesInput(potion) && recipe.ingredient.test(reagent)) {
+                ItemStack out = PotionContents.createItemStack(source.getItem(), BuiltInRegistries.POTION.wrapAsHolder(recipe.output));
+                applyTargetForm(out, recipe.targetForm);
+                return out;
+            }
+        }
+        return null;
+    }
+
+    private static void applyTargetForm(ItemStack stack, @Nullable Identifier formID) {
+        if (formID == null) {
+            return;
+        }
+        CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+        CTPUtils.setCTPFormIDToNBT(nbt, formID);
+        stack.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt));
     }
 
 	public static List<DynamicRecipe<Potion>> getPotionRecipes() {

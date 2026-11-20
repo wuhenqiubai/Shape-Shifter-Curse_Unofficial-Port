@@ -42,7 +42,7 @@ public class WolfSpiderPerkCheck {
         ServerPlayer p = TestPlayers.spawn(c);
         p.setGameMode(GameType.CREATIVE);
         for (int i = 0; i < 61; i++) p.tick();
-        p.getAbilities().invulnerable = false; p.getAbilities().flying = false; p.setInvulnerable(false);
+        p.getAbilities().invulnerable = false; p.getAbilities().flying = false;
         p.setPos(c.absoluteVec(new Vec3(2.5, 2, 2.5)));
         return p;
     }

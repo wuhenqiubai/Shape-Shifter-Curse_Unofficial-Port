@@ -56,18 +56,18 @@ public class SubformPerkCheck {
         var b = target.getBoundingBox().getCenter().add(-1,1,0);
         var registries = c.getLevel().registryAccess();
         var forward = DirectedParticlesAction.packet(factory.getSerializableData().read(json, registries),actor,target);
-        var velocity = new Vec3(forward.getXDist(),forward.getYDist(),forward.getZDist()).scale(forward.getMaxSpeed());
-        c.assertTrue(new Vec3(forward.getX(),forward.getY(),forward.getZ()).distanceTo(a)<1e-6,"Actor offset is relative to its body center");
-        c.assertTrue(velocity.distanceTo(b.subtract(a).normalize().scale(.5))<1e-6 && forward.getCount()==0,"Packet uses directed velocity mode, not random spread");
+        var velocity = new Vec3(forward.xDist(),forward.yDist(),forward.zDist()).scale(forward.xMaxSpeed());
+        c.assertTrue(new Vec3(forward.x(),forward.y(),forward.z()).distanceTo(a)<1e-6,"Actor offset is relative to its body center");
+        c.assertTrue(velocity.distanceTo(b.subtract(a).normalize().scale(.5))<1e-6 && forward.count()==0,"Packet uses directed velocity mode, not random spread");
         json.addProperty("direction","target_to_actor");
         var reverse = DirectedParticlesAction.packet(factory.getSerializableData().read(json, registries),actor,target);
-        c.assertTrue(new Vec3(reverse.getX(),reverse.getY(),reverse.getZ()).distanceTo(b)<1e-6,"Reverse emission starts at target offset");
-        c.assertTrue(Math.abs(reverse.getXDist()+forward.getXDist())<1e-6 && Math.abs(reverse.getYDist()+forward.getYDist())<1e-6 && Math.abs(reverse.getZDist()+forward.getZDist())<1e-6,"Reversing retains actor/target offset ownership");
+        c.assertTrue(new Vec3(reverse.x(),reverse.y(),reverse.z()).distanceTo(b)<1e-6,"Reverse emission starts at target offset");
+        c.assertTrue(Math.abs(reverse.xDist()+forward.xDist())<1e-6 && Math.abs(reverse.yDist()+forward.yDist())<1e-6 && Math.abs(reverse.zDist()+forward.zDist())<1e-6,"Reversing retains actor/target offset ownership");
         json.addProperty("type","shape-shifter-curse:directed_particles");
         ApoliDataTypes.BIENTITY_ACTION.read(json, registries).accept(new Pair<>(actor,target));
         json.remove("actor_offset");json.remove("target_offset");
         var zero = DirectedParticlesAction.packet(factory.getSerializableData().read(json, registries),actor,actor);
-        c.assertTrue(zero.getXDist()==0 && zero.getYDist()==0 && zero.getZDist()==0,"Coincident endpoints have zero velocity");
+        c.assertTrue(zero.xDist()==0 && zero.yDist()==0 && zero.zDist()==0,"Coincident endpoints have zero velocity");
         json.addProperty("direction","invalid");boolean rejected=false;
         try { factory.read(json, registries); } catch (RuntimeException expected) { rejected=true; }
         c.assertTrue(rejected,"Unknown direction rejected during parsing");c.succeed();
@@ -174,14 +174,14 @@ public class SubformPerkCheck {
             old.enchant(c.getLevel().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).get(Enchantments.UNBREAKING.identifier()).orElseThrow(),3);
             p.getInventory().setItem(0,old);var slot=new Slot(p.getInventory(),0,0,0);
             c.assertTrue(craft.doesApply(using,old),"Recipe input");craft.execute(using,old,slot);
-            c.assertTrue(using.getCount()==1 && slot.getItem().is(tier==1?RegCustomItem.GRAPHENE_BLADE:RegCustomItem.COMPOUND_KINETIC_BOW) && !slot.getItem().isEnchanted() && slot.getItem().getDamageValue()==0,"Fresh output consumes inputs without enchantments");
+            c.assertTrue(using.count()==1 && slot.getItem().is(tier==1?RegCustomItem.GRAPHENE_BLADE:RegCustomItem.COMPOUND_KINETIC_BOW) && !slot.getItem().isEnchanted() && slot.getItem().getDamageValue()==0,"Fresh output consumes inputs without enchantments");
     }
     add(p,"avali_nano_coating_1");add(p,"avali_nano_coating_2");
     var iron=new ItemStack(Items.IRON_INGOT,2);p.setItemInHand(InteractionHand.MAIN_HAND,iron);iron.use(c.getLevel(),p,InteractionHand.MAIN_HAND);
-    c.assertTrue(iron.getCount()==1 && p.getEffect(MobEffects.RESISTANCE).getAmplifier()==0,"Tier II retains iron use");
+    c.assertTrue(iron.count()==1 && p.getEffect(MobEffects.RESISTANCE).getAmplifier()==0,"Tier II retains iron use");
     p.getCooldowns().removeCooldown(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(Items.IRON_INGOT));p.getCooldowns().removeCooldown(net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(Items.DIAMOND));
     var diamond=new ItemStack(Items.DIAMOND,2);p.setItemInHand(InteractionHand.MAIN_HAND,diamond);diamond.use(c.getLevel(),p,InteractionHand.MAIN_HAND);
-    c.assertTrue(diamond.getCount()==1 && p.getEffect(MobEffects.RESISTANCE).getAmplifier()==1 && p.hasEffect(MobEffects.FIRE_RESISTANCE),"Diamond adds stronger coating");c.succeed();
+    c.assertTrue(diamond.count()==1 && p.getEffect(MobEffects.RESISTANCE).getAmplifier()==1 && p.hasEffect(MobEffects.FIRE_RESISTANCE),"Diamond adds stronger coating");c.succeed();
     }
     @GameTest
     public void compoundBowProjectile(GameTestHelper c) {
@@ -193,7 +193,7 @@ public class SubformPerkCheck {
         bow.getItem().releaseUsing(bow,c.getLevel(),p,bow.getUseDuration(p)-20);
         var arrows=c.getLevel().getEntitiesOfClass(AbstractArrow.class,p.getBoundingBox().inflate(3),a->a.getOwner()==p);
         c.assertTrue(arrows.size()==1 && ((net.onixary.shapeShifterCurseFabric.mixin.AbstractArrowAccessor)arrows.get(0)).ssc$getBaseDamage()==2.5,"Actual bow shot applies 25 percent base damage bonus");
-        c.assertTrue(p.getInventory().getItem(1).getCount()==1 && bow.getDamageValue()==1,"Bow consumes arrow and durability");
+        c.assertTrue(p.getInventory().getItem(1).count()==1 && bow.getDamageValue()==1,"Bow consumes arrow and durability");
         arrows.forEach(net.minecraft.world.entity.Entity::discard);c.succeed();
     }
     @GameTest

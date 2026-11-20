@@ -61,7 +61,7 @@ public class SnowFoxPerkCheck {
     private static ServerPlayer player(GameTestHelper c, double height) {
         var p = TestPlayers.spawn(c);
         for (int i = 0; i < 61; i++) p.tick();
-        p.getAbilities().invulnerable = false; p.getAbilities().flying = false; p.setInvulnerable(false);
+        p.getAbilities().invulnerable = false; p.getAbilities().flying = false;
         p.setPos(c.absoluteVec(new Vec3(2.5, height, 2.5))); p.setOnGround(false);
         p.getFoodData().setFoodLevel(20); return p;
     }

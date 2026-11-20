@@ -46,7 +46,6 @@ public class FamiliarFoxPerkCheck {
         var player = TestPlayers.spawn(context);
         for (int i = 0; i < 61; i++) player.tick();
         player.getAbilities().invulnerable = false;
-        player.setInvulnerable(false);
         player.setPos(context.absoluteVec(new Vec3(0.5, 1, 0.5)));
         ManaUtils.gainManaTypeID(player, id("familiar_fox_mana"), id("fox_test"));
         ManaUtils.setPlayerMana(player, 50);
