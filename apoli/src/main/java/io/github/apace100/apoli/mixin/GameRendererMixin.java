@@ -12,7 +12,6 @@ import io.github.apace100.apoli.power.ShaderPower;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Camera;
-import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.BlockPos;
@@ -51,12 +50,8 @@ public abstract class GameRendererMixin {
     private Minecraft minecraft;
 
     @Shadow
-    private boolean effectActive;
-
-    @Shadow protected abstract void setPostEffect(Identifier postEffectId);
-
-    @Shadow public abstract void clearPostEffect();
-
+    @Final
+    private List<Identifier> requestedPostEffects;
     @Unique
     private Identifier currentlyLoadedShader;
 
@@ -65,39 +60,38 @@ public abstract class GameRendererMixin {
         PowerHolderComponent.withPower(minecraft.getCameraEntity(), ShaderPower.class, null, shaderPower -> {
             Identifier shaderLoc = shaderPower.getShaderLocation();
             if(this.minecraft.getResourceManager().getResource(shaderLoc).isPresent()) {
-                this.setPostEffect(shaderLoc);
+                this.requestedPostEffects.add(shaderLoc);
                 currentlyLoadedShader = shaderLoc;
             }
         });
     }
 
     @Inject(at = @At("HEAD"), method = "render")
-    private void loadShaderFromPower(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
+    private void loadShaderFromPower(CallbackInfo ci) {
         PowerHolderComponent.withPower(minecraft.getCameraEntity(), ShaderPower.class, null, shaderPower -> {
             Identifier shaderLoc = shaderPower.getShaderLocation();
             if(currentlyLoadedShader != shaderLoc) {
                 if(this.minecraft.getResourceManager().getResource(shaderLoc).isPresent()) {
-                    this.setPostEffect(shaderLoc);
+                    this.requestedPostEffects.add(shaderLoc);
                     currentlyLoadedShader = shaderLoc;
                 }
             }
         });
         if(!PowerHolderComponent.hasPower(minecraft.getCameraEntity(), ShaderPower.class) && currentlyLoadedShader != null) {
-            this.clearPostEffect();
-            this.effectActive = false;
+            this.requestedPostEffects.remove(currentlyLoadedShader);
             currentlyLoadedShader = null;
         }
     }
 
-    @Inject(at = @At("HEAD"), method = "togglePostEffect", cancellable = true)
-    private void disableShaderToggle(CallbackInfo ci) {
-        PowerHolderComponent.withPower(minecraft.getCameraEntity(), ShaderPower.class, null, shaderPower -> {
-            Identifier shaderLoc = shaderPower.getShaderLocation();
-            if(!shaderPower.isToggleable() && currentlyLoadedShader == shaderLoc) {
-                ci.cancel();
-            }
-        });
-    }
+//    @Inject(at = @At("HEAD"), method = "togglePostEffect", cancellable = true)
+//    private void disableShaderToggle(CallbackInfo ci) {
+//        PowerHolderComponent.withPower(minecraft.getCameraEntity(), ShaderPower.class, null, shaderPower -> {
+//            Identifier shaderLoc = shaderPower.getShaderLocation();
+//            if(!shaderPower.isToggleable() && currentlyLoadedShader == shaderLoc) {
+//                ci.cancel();
+//            }
+//        });
+//    }
 
     // NightVisionPower
     @Inject(at = @At("HEAD"), method = "nightVisionScale", cancellable = true)
@@ -126,7 +120,7 @@ public abstract class GameRendererMixin {
 
     // PHASING: remove_blocks
     @Inject(at = @At(value = "HEAD"), method = "render")
-    private void beforeRender(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
+    private void beforeRender(CallbackInfo ci) {
         List<PhasingPower> phasings = PowerHolderComponent.getPowers(mainCamera.entity(), PhasingPower.class);
         if (phasings.stream().anyMatch(pp -> pp.getRenderType() == PhasingPower.RenderType.REMOVE_BLOCKS)) {
             float view = phasings.stream().filter(pp -> pp.getRenderType() == PhasingPower.RenderType.REMOVE_BLOCKS).map(PhasingPower::getViewDistance).min(Float::compareTo).get();

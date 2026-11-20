@@ -47,12 +47,7 @@ public class HungerManagerMixin {
         int newFood = (int) ModifierUtil.applyModifiers(player, foodModifiers, foodLevelModifier);
         if (newFood != foodLevelModifier) apoli$ShouldUpdateManually = true;
 
-        float origSatMod = 0.0F;
-        if (foodLevelModifier != 0) {
-            origSatMod = saturationLevelModifier / (foodLevelModifier * 2.0F);
-        }
-        float newSatMod = (float) ModifierUtil.applyModifiers(player, saturationModifiers, origSatMod);
-        float newSat = newFood * 2.0F * newSatMod;
+        float newSat = (float) ModifierUtil.applyModifiers(player, saturationModifiers, saturationLevelModifier);
         if (newSat != saturationLevelModifier) apoli$ShouldUpdateManually = true;
 
         foodLevel.set(newFood);

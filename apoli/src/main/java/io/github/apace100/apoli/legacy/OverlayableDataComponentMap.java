@@ -3,11 +3,10 @@ package io.github.apace100.apoli.legacy;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.TypedDataComponent;
 import org.jspecify.annotations.Nullable;
 
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 public class OverlayableDataComponentMap implements DataComponentMap {
@@ -53,8 +52,13 @@ public class OverlayableDataComponentMap implements DataComponentMap {
         if (!this.overlays.isEmpty()) {
             set = new HashSet<>(set);
             for (DataComponentPatch overlay : this.overlays) {
-                for (Map.Entry<DataComponentType<?>, Optional<?>> entry : overlay.entrySet()) {
-                    set.add(entry.getKey());
+                var split = overlay.split();
+                for (TypedDataComponent<?> component : split.added()) {
+                    set.add(component.type());
+                }
+
+                for (DataComponentType<?> component : split.removed()) {
+                    set.remove(component);
                 }
             }
         }

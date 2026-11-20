@@ -3,6 +3,7 @@ package io.github.apace100.apoli.util;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
@@ -10,7 +11,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
-import java.util.List;
+import java.util.Optional;
 
 public class AddPowerLootFunction extends LootItemConditionalFunction {
     public static final MapCodec<AddPowerLootFunction> CODEC = RecordCodecBuilder.mapCodec(instance ->
@@ -37,8 +38,8 @@ public class AddPowerLootFunction extends LootItemConditionalFunction {
     private final boolean hidden;
     private final boolean negative;
 
-    private AddPowerLootFunction(List<LootItemCondition> conditions, EquipmentSlot slot, Identifier powerId, boolean hidden, boolean negative) {
-        super(conditions);
+    private AddPowerLootFunction(Optional<Holder<LootItemCondition>> condition, EquipmentSlot slot, Identifier powerId, boolean hidden, boolean negative) {
+        super(condition);
         this.slot = slot;
         this.powerId = powerId;
         this.hidden = hidden;

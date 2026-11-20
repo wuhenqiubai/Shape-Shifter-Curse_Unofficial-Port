@@ -2,11 +2,11 @@ package io.github.apace100.calio;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
-import net.minecraft.advancements.predicates.entity.EntityPredicate;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
+import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 
 import java.util.Optional;
 
@@ -29,10 +29,10 @@ public class CodeTriggerCriterion extends SimpleCriterionTrigger<CodeTriggerCrit
         return Conditions.CODEC;
     }
 
-    public record Conditions(Optional<ContextAwarePredicate> player, String triggerId) implements SimpleInstance {
+    public record Conditions(Optional<Holder<LootItemCondition>> player, String triggerId) implements SimpleInstance {
         public static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player")
+                LootItemCondition.CODEC.optionalFieldOf("player")
                     .forGetter(Conditions::player),
                 Codec.STRING.fieldOf("trigger_id")
                     .forGetter(Conditions::triggerId)

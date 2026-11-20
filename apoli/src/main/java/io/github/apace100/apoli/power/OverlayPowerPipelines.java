@@ -1,12 +1,7 @@
 package io.github.apace100.apoli.power;
 
-import com.mojang.blaze3d.PrimitiveTopology;
-import com.mojang.blaze3d.pipeline.BlendFunction;
-import com.mojang.blaze3d.pipeline.ColorTargetState;
-import com.mojang.blaze3d.pipeline.DepthStencilState;
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.renderpearl.api.pipeline.*;
 import io.github.apace100.apoli.Apoli;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -17,7 +12,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 public class OverlayPowerPipelines {
     @Environment(EnvType.CLIENT)
     public static final RenderPipeline.Snippet OVERLAY_SNIPPET = RenderPipeline.builder(RenderPipelines.GLOBALS_SNIPPET)
-        .withBindGroupLayout(BindGroupLayouts.MATRICES_PROJECTION)
+        .withBindGroupLayout(BindGroupLayouts.DYNAMIC_TRANSFORMS)
+        .withBindGroupLayout(BindGroupLayouts.PROJECTION)
         .withFragmentShader("core/position_tex_color")
         .withVertexShader("core/position_tex_color")
         .withBindGroupLayout(BindGroupLayouts.SAMPLER0)

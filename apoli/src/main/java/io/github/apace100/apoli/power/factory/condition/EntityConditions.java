@@ -300,8 +300,6 @@ public class EntityConditions {
                         entity.getRotationVector(),
                         entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
                         Apoli.config.executeCommand.getPermissionHandler(),
-                        entity.getName().getString(),
-                        entity.getDisplayName(),
                         server,
                         entity);
                     int output = 0;

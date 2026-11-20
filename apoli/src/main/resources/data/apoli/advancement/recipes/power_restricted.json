@@ -9,7 +9,7 @@
     "has_the_recipe": {
       "trigger": "minecraft:recipe_unlocked",
       "conditions": {
-        "recipe": "apoli:power_restricted"
+        "recipes": "apoli:power_restricted"
       }
     }
   },

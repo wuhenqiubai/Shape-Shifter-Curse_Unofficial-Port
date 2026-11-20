@@ -5,7 +5,7 @@ import net.minecraft.resources.Identifier;
 
 public interface IdentifiedLootTable {
 
-    void setId(Identifier id, HolderGetter.Provider lootManager);
+    void apoli$setId(Identifier id, HolderGetter.Provider lootManager);
 
-    Identifier getId();
+    Identifier apoli$getId();
 }

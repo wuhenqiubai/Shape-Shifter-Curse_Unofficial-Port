@@ -47,26 +47,8 @@ import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.EnumSet;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ApoliDataTypes {
-
-    private static final AtomicInteger UNNAMED_MODIFIER_COUNTER = new AtomicInteger();
-
-    private static Identifier toUniqueModifierId(String name) {
-        int idx = UNNAMED_MODIFIER_COUNTER.getAndIncrement();
-        if ("apoli:unnamed".equals(name)) {
-            return Identifier.fromNamespaceAndPath("apoli", "unnamed_" + idx);
-        }
-        try {
-            Identifier base = SerializableDataTypes.convertNameToLocation(name);
-            if (base != null) {
-                return Identifier.fromNamespaceAndPath("apoli", base.getPath() + "_" + idx);
-            }
-        } catch (Exception e) {
-        }
-        return Identifier.fromNamespaceAndPath("apoli", "modifier_" + idx);
-    }
 
     public static final SerializableDataType<PowerTypeReference> POWER_TYPE = SerializableDataType.wrap(
         PowerTypeReference.class, SerializableDataTypes.IDENTIFIER,
@@ -157,7 +139,7 @@ public class ApoliDataTypes {
             .add("name", SerializableDataTypes.STRING, "apoli:unnamed"),
         dataInst -> new AttributedEntityAttributeModifier(dataInst.get("attribute"),
             new AttributeModifier(
-                toUniqueModifierId(dataInst.getString("name")),
+                SerializableDataTypes.convertNameToLocation(dataInst.getString("name")),
                 dataInst.getDouble("value"),
                 dataInst.get("operation"))),
         (data, inst) -> {

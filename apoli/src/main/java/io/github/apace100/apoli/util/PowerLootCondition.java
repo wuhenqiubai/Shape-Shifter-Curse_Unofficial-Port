@@ -40,7 +40,7 @@ public class PowerLootCondition implements LootItemCondition {
     public boolean test(LootContext lootContext) {
 
         Optional<PowerHolderComponent> optionalPowerHolderComponent = PowerHolderComponent.KEY.maybeGet(
-            lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)
+            lootContext.getOptional(LootContextParams.THIS_ENTITY)
         );
 
         if (optionalPowerHolderComponent.isPresent()) {

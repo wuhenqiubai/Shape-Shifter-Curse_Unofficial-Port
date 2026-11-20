@@ -1,6 +1,6 @@
 package io.github.apace100.apoli.mixin;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import io.github.apace100.apoli.component.PowerHolderComponent;
 import io.github.apace100.apoli.power.PhasingPower;
 import io.github.apace100.apoli.util.MiscUtil;
@@ -20,7 +20,7 @@ import java.util.List;
 @Environment(EnvType.CLIENT)
 @Mixin(LevelRenderer.class)
 public abstract class WorldRendererMixin {
-    @Inject(method = "lambda$addSkyPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;renderSkyDisc(I)V"), cancellable = true)
+    @Inject(method = "lambda$addSkyPass$0", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/SkyRenderer;render(Lcom/mojang/renderpearl/api/buffers/GpuBufferSlice;Lnet/minecraft/client/renderer/state/level/SkyRenderState;)V"), cancellable = true)
     private static void skipSkyRenderingForPhasingBlindness(GpuBufferSlice skyFog, SkyRenderState state, CallbackInfo ci) {
         if(Minecraft.getInstance().getCameraEntity() instanceof LivingEntity) {
             List<PhasingPower> phasings = PowerHolderComponent.getPowers(Minecraft.getInstance().getCameraEntity(), PhasingPower.class);

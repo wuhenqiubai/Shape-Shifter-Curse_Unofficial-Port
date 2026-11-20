@@ -21,6 +21,7 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.asm.mixin.Final;
@@ -98,7 +99,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
                 apoli$CachedPriorityZeroResult = InteractionResult.PASS;
                 if(result != InteractionResult.PASS) {
                     if(result instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) {
-                        this.swing(hand);
+                        this.swing(hand, SwingAnimation.DEFAULT, true);
                     }
                     cir.setReturnValue(result);
                     break;
@@ -159,7 +160,7 @@ public abstract class PlayerEntityMixin extends LivingEntity implements Nameable
             }
         }
         if((custom instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE)) {
-            this.swing(hand);
+            this.swing(hand, SwingAnimation.DEFAULT, true);
         }
         if(original.consumesAction() && !custom.consumesAction()) {
         } else if((original instanceof InteractionResult.Success success && success.swingSource() != InteractionResult.SwingSource.NONE) && (!(custom instanceof InteractionResult.Success success1 && success1.swingSource() != InteractionResult.SwingSource.NONE))) {

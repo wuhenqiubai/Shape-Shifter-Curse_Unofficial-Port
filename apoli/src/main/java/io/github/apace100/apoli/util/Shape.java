@@ -1,9 +1,10 @@
 package io.github.apace100.apoli.util;
 
+import net.minecraft.core.BlockPos;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import net.minecraft.core.BlockPos;
 
 public enum Shape {
     CUBE, CHEBYSHEV,
@@ -21,7 +22,7 @@ public enum Shape {
                                 // The radius can't be negative here (the loops aren't even entered in that case)
                                 // so there's no behavior change from testing that sqrt(i*i + j*j + k*k) <= radius
                             || (Math.abs(i) + Math.abs(j) + Math.abs(k)) <= radius) {
-                        positions.add(new BlockPos(center.offset(i, j, k)));
+                        positions.add(center.offset(i, j, k).immutable());
                     }
                 }
             }

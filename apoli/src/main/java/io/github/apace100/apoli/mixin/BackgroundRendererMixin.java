@@ -17,12 +17,13 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.fog.FogData;
 import net.minecraft.client.renderer.fog.FogRenderer;
 import net.minecraft.core.Holder;
-import net.minecraft.util.ARGB;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.material.FogType;
+import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.joml.Vector4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -68,12 +69,12 @@ public abstract class BackgroundRendererMixin {
         return original;
     }
 
-    @ModifyExpressionValue(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/environment/FogEnvironment;getBaseColor(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/Camera;IF)I"))
-    private static int modifyFogColor(int original, @Local(argsOnly = true) Camera camera) {
+    @ModifyExpressionValue(method = "computeFogColor", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/fog/environment/FogEnvironment;getBaseColor(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/Camera;IF)Lorg/joml/Vector3fc;"))
+    private static Vector3fc modifyFogColor(Vector3fc original, @Local(argsOnly = true) Camera camera) {
         if(camera.entity() instanceof LivingEntity) {
             if(PowerHolderComponent.getPowers(camera.entity(), PhasingPower.class).stream().anyMatch(pp -> pp.getRenderType() == PhasingPower.RenderType.BLINDNESS)) {
                 if(MiscUtil.getInWallBlockState((Player)camera.entity()) != null) {
-                    return ARGB.color(0, 0, 0);
+                    return new Vector3f(0, 0, 0);
                 }
             }
         }

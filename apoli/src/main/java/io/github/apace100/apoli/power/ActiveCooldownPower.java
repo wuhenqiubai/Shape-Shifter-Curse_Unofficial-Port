@@ -81,7 +81,7 @@ public class ActiveCooldownPower extends CooldownPower implements Active {
                             if (!e.level().isClientSide() && e instanceof Player) {
                                 Player p = (Player) e;
                                 p.push(0, data.getFloat("speed"), 0);
-                                p.hurtMarked = true;
+                                p.syncVelocity = true;
                                 if (soundEvent != null) {
                                     p.level().playSound((Player) null, p.getX(), p.getY(), p.getZ(), soundEvent, SoundSource.NEUTRAL, 0.5F, 0.4F / (p.getRandom().nextFloat() * 0.4F + 0.8F));
                                 }

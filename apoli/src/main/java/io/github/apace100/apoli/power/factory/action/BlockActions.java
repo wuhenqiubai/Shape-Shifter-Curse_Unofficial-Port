@@ -73,18 +73,13 @@ public class BlockActions {
                 if(server != null) {
                     String blockName = block.getLeft().getBlockState(block.getMiddle()).getBlock().getDescriptionId();
                     CommandSourceStack source = new CommandSourceStack(
-                        server,
+                        Apoli.config.executeCommand.showOutput ? server : CommandSource.NULL,
                         new Vec3(block.getMiddle().getX() + 0.5, block.getMiddle().getY() + 0.5, block.getMiddle().getZ() + 0.5),
                         new Vec2(0, 0),
                         (ServerLevel)block.getLeft(),
                         Apoli.config.executeCommand.getPermissionHandler(),
-                        blockName,
                         Component.translatable(blockName),
-                        server,
-                        null);
-                    if(!Apoli.config.executeCommand.showOutput) {
-                        source = source.withSuppressedOutput();
-                    }
+                        server);
                     server.getCommands().performPrefixedCommand(source, data.getString("command"));
                 }
             }));

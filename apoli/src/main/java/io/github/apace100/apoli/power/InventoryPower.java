@@ -16,6 +16,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.ItemStackWithSlot;
@@ -223,7 +224,7 @@ public class InventoryPower extends Power implements Active, Container {
             if (shouldDropOnDeath(currentItemStack)) {
                 if (!currentItemStack.isEmpty() && EnchantmentHelper.getItemEnchantmentLevel(playerEntity.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.VANISHING_CURSE), currentItemStack) > 0) removeItemNoUpdate(i);
                 else {
-                    playerEntity.drop(currentItemStack, true, false);
+                    playerEntity.drop(currentItemStack, true, Prediction.SERVER_ONLY);
                     setItem(i, ItemStack.EMPTY);
                 }
             }
@@ -234,7 +235,7 @@ public class InventoryPower extends Power implements Active, Container {
         Player playerEntity = (Player) entity;
         for (int i = 0; i < containerSize; ++i) {
             ItemStack currentItemStack = getItem(i);
-            playerEntity.getInventory().placeItemBackInInventory(currentItemStack);
+            playerEntity.getInventory().placeItemBackInInventory(currentItemStack, Prediction.SERVER_ONLY);
         }
     }
 

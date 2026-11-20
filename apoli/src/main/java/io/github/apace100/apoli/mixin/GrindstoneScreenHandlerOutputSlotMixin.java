@@ -1,83 +1,51 @@
 package io.github.apace100.apoli.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.apace100.apoli.access.PowerModifiedGrindstone;
 import io.github.apace100.apoli.power.ModifyGrindstonePower;
 import io.github.apace100.apoli.util.modifier.Modifier;
 import io.github.apace100.apoli.util.modifier.ModifierUtil;
-import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.GrindstoneMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Objects;
 
-@Mixin(value = GrindstoneMenu.class, priority = 2000)
+@Mixin(targets = "net/minecraft/world/inventory/GrindstoneMenu$4")
 public class GrindstoneScreenHandlerOutputSlotMixin {
 
-    @Shadow
     @Final
-    private Container resultSlots;
+    @Shadow
+    GrindstoneMenu this$0;
 
-    @Unique
-    private ItemStack apoli$lastOutput = ItemStack.EMPTY;
-
-    @Inject(method = "createResult", at = @At("HEAD"))
-    private void apoli$executeGrindstoneActions(CallbackInfo ci) {
-        if (apoli$lastOutput == null || apoli$lastOutput.isEmpty()) {
-            return;
-        }
-        if (!resultSlots.getItem(0).isEmpty()) {
-            return;
-        }
-        PowerModifiedGrindstone pmg = (PowerModifiedGrindstone) this;
+    @Inject(method = "onTake", at = @At(value = "INVOKE",target = "Lnet/minecraft/world/Container;setItem(ILnet/minecraft/world/item/ItemStack;)V", ordinal = 0))
+    private void executeGrindstoneActions(Player player, ItemStack stack, CallbackInfo ci) {
+        PowerModifiedGrindstone pmg = (PowerModifiedGrindstone) this$0;
         List<ModifyGrindstonePower> applyingPowers = pmg.getAppliedPowers();
-        if (applyingPowers == null || applyingPowers.isEmpty()) {
-            return;
-        }
-        ItemStack output = apoli$lastOutput.copy();
         applyingPowers.forEach(mgp -> {
-            mgp.applyAfterGrindingItemAction(output);
+            mgp.applyAfterGrindingItemAction(stack);
             mgp.executeActions(pmg.getPos());
         });
-        apoli$lastOutput = ItemStack.EMPTY;
     }
 
-    @Inject(method = "createResult", at = @At("RETURN"))
-    private void apoli$captureLastOutput(CallbackInfo ci) {
-        apoli$lastOutput = resultSlots.getItem(0).copy();
-    }
-
-    @Inject(method = "createResult", at = @At("RETURN"))
-    private void apoli$modifyExperience(CallbackInfo ci) {
-        PowerModifiedGrindstone pmg = (PowerModifiedGrindstone) this;
-        List<ModifyGrindstonePower> applyingPowers = pmg.getAppliedPowers();
-        if (applyingPowers == null || applyingPowers.isEmpty()) {
-            return;
+    @ModifyReturnValue(method = "getExperienceAmount", at = @At("RETURN"))
+    private int modifyExperience(int original, Level world) {
+        PowerModifiedGrindstone pmg = (PowerModifiedGrindstone) this$0;
+        if(pmg.getAppliedPowers().size() == 0) {
+            return original;
         }
-        List<Modifier> modifiers = applyingPowers.stream()
-            .map(ModifyGrindstonePower::getExperienceModifier)
-            .filter(Objects::nonNull)
-            .toList();
-        if (modifiers.isEmpty()) {
-            return;
+        List<Modifier> modifiers = pmg.getAppliedPowers().stream().map(ModifyGrindstonePower::getExperienceModifier).filter(Objects::nonNull).toList();
+        if(modifiers.size() == 0) {
+            return original;
         }
-        try {
-            Field xpField = GrindstoneMenu.class.getDeclaredField("xp");
-            xpField.setAccessible(true);
-            int original = xpField.getInt(this);
-            if (original == -1) {
-                return;
-            }
-            xpField.setInt(this, (int) ModifierUtil.applyModifiers(pmg.getPlayer(), modifiers, original));
-        } catch (Exception ignored) {
-        }
+        return (int) ModifierUtil.applyModifiers(pmg.getPlayer(), modifiers, original);
     }
 }

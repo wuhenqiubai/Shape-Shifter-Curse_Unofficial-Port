@@ -68,7 +68,7 @@ public class ExplodeAction {
         for (ServerPlayer serverPlayer : ((ServerLevel) world).players()) {
             if (serverPlayer.distanceToSqr(pos) < 4096.0) {
                 Optional<Vec3> optional = Optional.ofNullable(explosion.getHitPlayers().get(serverPlayer));
-                serverPlayer.connection.send(new ClientboundExplodePacket(pos, power, blockCount, optional, particleOptions, SoundEvents.GENERIC_EXPLODE, Level.DEFAULT_EXPLOSION_BLOCK_PARTICLES));
+                serverPlayer.connection.send(new ClientboundExplodePacket(pos, power, blockCount, optional, particleOptions, SoundEvents.GENERIC_EXPLODE, Level.DEFAULT_EXPLOSION_BLOCK_PARTICLES, true));
             }
         }
     }

@@ -23,10 +23,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.Predicate;
 
 public class ReplaceLootTablePower extends Power {
@@ -64,16 +61,16 @@ public class ReplaceLootTablePower extends Power {
 
     public boolean doesApply(LootContext lootContext) {
         if(biEntityCondition != null
-            && !biEntityCondition.test(new Pair<>(entity, lootContext.getOptionalParameter(LootContextParams.THIS_ENTITY)))) {
+            && !biEntityCondition.test(new Pair<>(entity, lootContext.getOptional(LootContextParams.THIS_ENTITY)))) {
             return false;
         }
         if(itemCondition != null
             && lootContext.hasParameter(LootContextParams.TOOL)
-            && !itemCondition.test(lootContext.getOptionalParameter(LootContextParams.TOOL))) {
+            && !itemCondition.test(lootContext.getOptional(LootContextParams.TOOL))) {
             return false;
         }
         if(blockCondition != null && lootContext.hasParameter(LootContextParams.ORIGIN)) {
-            BlockPos blockPos = BlockPos.containing(lootContext.getOptionalParameter(LootContextParams.ORIGIN));
+            BlockPos blockPos = Optional.ofNullable(lootContext.getOptional(LootContextParams.ORIGIN)).map(BlockPos::containing).orElse(BlockPos.ZERO);
             BlockInWorld cbp = new BlockInWorld(lootContext.getLevel(), blockPos, true);
             if(!blockCondition.test(cbp)) {
                 return false;
@@ -140,7 +137,7 @@ public class ReplaceLootTablePower extends Power {
         int count = 0;
         while(!REPLACEMENT_STACK.isEmpty()) {
             LootTable t = pop();
-            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).getId());
+            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).apoli$getId());
             if(!REPLACEMENT_STACK.isEmpty()) {
                 stringBuilder.append(", ");
             }
@@ -153,7 +150,7 @@ public class ReplaceLootTablePower extends Power {
         }
         while(BACKTRACK_STACK.size() > 0) {
             LootTable t = restore();
-            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).getId());
+            stringBuilder.append(t == null ? "null" : ((IdentifiedLootTable)t).apoli$getId());
             if(!BACKTRACK_STACK.isEmpty()) {
                 stringBuilder.append(", ");
             }

@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
@@ -102,7 +103,7 @@ public class BlockConditions {
             .add("fluid_condition", ApoliDataTypes.FLUID_CONDITION),
             (data, block) -> ((ConditionFactory<FluidState>.Instance)data.get("fluid_condition")).test(block.getLevel().getFluidState(block.getPos()))));
         register(new ConditionFactory<>(Apoli.identifier("movement_blocking"), new SerializableData(),
-            (data, block) -> block.getState().blocksMotion() && !block.getState().getCollisionShape(block.getLevel(), block.getPos()).isEmpty()));
+            (data, block) -> block.getState().is(BlockTags.BLOCKS_MOTION) && !block.getState().getCollisionShape(block.getLevel(), block.getPos()).isEmpty()));
         register(new ConditionFactory<>(Apoli.identifier("light_blocking"), new SerializableData(),
             (data, block) -> block.getState().canOcclude()));
         register(new ConditionFactory<>(Apoli.identifier("water_loggable"), new SerializableData(),

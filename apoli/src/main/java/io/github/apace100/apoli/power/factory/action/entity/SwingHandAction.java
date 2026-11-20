@@ -7,12 +7,13 @@ import io.github.apace100.calio.data.SerializableDataTypes;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.component.SwingAnimation;
 
 public class SwingHandAction {
 
     public static void action(SerializableData.Instance data, Entity entity) {
         if(entity instanceof LivingEntity living) {
-            living.swing(data.get("hand"), true);
+            living.swing(data.get("hand"), SwingAnimation.DEFAULT, true);
         }
     }
 

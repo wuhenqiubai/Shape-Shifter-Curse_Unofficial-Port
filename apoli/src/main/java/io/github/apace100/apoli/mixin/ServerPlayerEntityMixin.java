@@ -18,11 +18,14 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.util.Unit;
+import net.minecraft.world.attribute.BedRule;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.AbstractBedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.LevelData;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
@@ -63,9 +66,8 @@ public abstract class ServerPlayerEntityMixin extends Player implements Containe
     public abstract void sendSystemMessage(Component message, boolean overlay);
 
     // FRESH_AIR
-    //   @At(value = "INVOKE", target = "...ServerPlayer;setRespawnPosition(ServerPlayer$RespawnConfig;Z)V")
-    @Inject(method = "startSleepInBed", at = @At("HEAD"), cancellable = true)
-    public void preventAvianSleep(BlockPos pos, CallbackInfoReturnable<Either<BedSleepingProblem, Unit>> info) {
+    @Inject(method = "startSleepInBed", at = @At(value = "INVOKE",target = "Lnet/minecraft/server/level/ServerPlayer;setRespawnPosition(Lnet/minecraft/server/level/ServerPlayer$RespawnConfig;Z)V"), cancellable = true)
+    public void preventAvianSleep(AbstractBedBlock bedBlock, BlockState bedBlockState, BedRule rule, BlockPos pos, CallbackInfoReturnable<Either<BedSleepingProblem, Unit>> info) {
         PowerHolderComponent.getPowers(this, PreventSleepPower.class).forEach(p -> {
                 if(p.doesPrevent(level(), pos)) {
                     if(p.doesAllowSpawnPoint()) {

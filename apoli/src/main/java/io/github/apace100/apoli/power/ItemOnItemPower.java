@@ -9,6 +9,7 @@ import io.github.apace100.apoli.power.factory.condition.ConditionFactory;
 import io.github.apace100.calio.data.SerializableData;
 import io.github.apace100.calio.data.SerializableDataTypes;
 import io.github.apace100.calio.util.LazyItemStack;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -81,7 +82,7 @@ public class ItemOnItemPower extends Power {
             if(slot.getItem().isEmpty()) {
                 slot.set(stack);
             } else {
-                player.getInventory().placeItemBackInInventory(stack);
+                player.getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
             }
         }
         if(entityAction != null) {

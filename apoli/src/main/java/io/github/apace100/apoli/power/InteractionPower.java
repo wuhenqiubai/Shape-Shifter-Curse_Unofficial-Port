@@ -2,6 +2,7 @@ package io.github.apace100.apoli.power;
 
 import com.mojang.datafixers.util.Pair;
 import io.github.apace100.calio.util.LazyItemStack;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,7 +70,7 @@ public class InteractionPower extends Power {
             if(heldStack.isEmpty()) {
                 actor.setItemInHand(hand, resultingStack);
             } else {
-                actor.getInventory().placeItemBackInInventory(resultingStack);
+                actor.getInventory().placeItemBackInInventory(resultingStack, Prediction.SERVER_ONLY);
             }
         }
     }

@@ -5,7 +5,7 @@ import io.github.apace100.calio.resource.OrderedResourceListenerManager;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.server.ReloadableServerRegistries;
 import net.minecraft.server.ReloadableServerResources;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.permissions.PermissionSet;
@@ -25,9 +25,9 @@ public abstract class ReloadableServerResourcesMixin {
     @Unique private final List<IdentifiableResourceReloadListener> calio$registryListeners = new ArrayList<>();
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void calio$initRegistryBasedListeners(LayeredRegistryAccess fullLayers, HolderLookup.Provider loadingContext, FeatureFlagSet enabledFeatures, Commands.CommandSelection commandSelection, List postponedTags, PermissionSet functionCompilationPermissions, List newComponents, CallbackInfo ci) {
+    private void calio$initRegistryBasedListeners(ReloadableServerRegistries.LoadResult loadingContext, FeatureFlagSet enabledFeatures, Commands.CommandSelection commandSelection, List postponedTags, PermissionSet functionCompilationPermissions, List newComponents, CallbackInfo ci) {
         for (Function<HolderLookup.Provider, IdentifiableResourceReloadListener> provider : OrderedResourceListenerManager.getRegistryBasedReloadListenerProviders()) {
-            calio$registryListeners.add(provider.apply(loadingContext));
+            calio$registryListeners.add(provider.apply(loadingContext.lookupWithUpdatedTags()));
         }
     }
 

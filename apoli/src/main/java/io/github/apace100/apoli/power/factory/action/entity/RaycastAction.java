@@ -112,8 +112,6 @@ public class RaycastAction {
                     entity.getRotationVector(),
                     entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
                     Apoli.config.executeCommand.getPermissionHandler(),
-                    entity.getName().getString(),
-                    entity.getDisplayName(),
                     entity.level().getServer(),
                     entity);
                 server.getCommands().performPrefixedCommand(source, command);
@@ -131,8 +129,6 @@ public class RaycastAction {
                 entity.getRotationVector(),
                 entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
                 Apoli.config.executeCommand.getPermissionHandler(),
-                entity.getName().getString(),
-                entity.getDisplayName(),
                 entity.level().getServer(),
                 entity);
             server.getCommands().performPrefixedCommand(source, command);

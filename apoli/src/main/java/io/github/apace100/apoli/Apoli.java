@@ -1,6 +1,7 @@
 package io.github.apace100.apoli;
 
 import de.dafuqs.additionalentityattributes.AdditionalEntityAttributes;
+import io.github.apace100.apoli.access.IdentifiedLootTable;
 import io.github.apace100.apoli.command.PowerCommand;
 import io.github.apace100.apoli.command.ResourceCommand;
 import io.github.apace100.apoli.component.PowerHolderComponent;
@@ -34,6 +35,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.packs.PackType;
@@ -166,6 +168,20 @@ public class Apoli implements ModInitializer, EntityComponentInitializer, Ordere
 		ResourceLoader loader = ResourceLoader.get(PackType.SERVER_DATA);
 		loader.registerReloadListener(identifier("powers"), new PowerTypes());
 		loader.addListenerOrdering(ResourceReloaderKeys.AFTER_VANILLA, identifier("powers"));
+
+		ServerLifecycleEvents.SERVER_STARTED.register(Apoli::bindLootTableKeys);
+		ServerLifecycleEvents.END_DATA_PACK_RELOAD.register((s, _, success) -> {
+			if (success) {
+				bindLootTableKeys(s);
+			}
+		});
+	}
+
+	private static void bindLootTableKeys(MinecraftServer server) {
+		server.reloadableRegistries().lookup().lookupOrThrow(Registries.LOOT_TABLE)
+			.listElements().forEach(holder -> {
+				((IdentifiedLootTable) holder.value()).apoli$setId(holder.key().identifier(), server.registryAccess());
+			});
 	}
 
 	public static Identifier identifier(String path) {

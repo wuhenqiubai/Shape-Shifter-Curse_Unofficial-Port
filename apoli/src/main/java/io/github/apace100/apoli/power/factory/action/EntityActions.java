@@ -1,6 +1,5 @@
 package io.github.apace100.apoli.power.factory.action;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.component.PowerHolderComponent;
@@ -30,6 +29,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.ARGB;
+import net.minecraft.util.Prediction;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -151,7 +151,7 @@ public class EntityActions {
                 }
                 space.toGlobal(vec, entity);
                 method.accept(vec.x, vec.y, vec.z);
-                entity.hurtMarked = true;
+                entity.syncVelocity = true;
             }));
         register(SpawnEntityAction.getFactory());
         register(new ActionFactory<>(Apoli.identifier("gain_air"), new SerializableData()
@@ -197,34 +197,21 @@ public class EntityActions {
         register(new ActionFactory<>(Apoli.identifier("execute_command"), new SerializableData()
             .add("command", SerializableDataTypes.STRING),
             (data, entity) -> {
-                if(!(entity.level() instanceof ServerLevel serverLevel)) {
-                    return;
-                }
                 MinecraftServer server = entity.level().getServer();
                 if(server != null) {
+                    boolean validOutput = !(entity instanceof ServerPlayer) || ((ServerPlayer)entity).connection != null;
                     CommandSourceStack source = new CommandSourceStack(
-                        entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource() : CommandSource.NULL,
+                        Apoli.config.executeCommand.showOutput && validOutput ?
+                            entity instanceof ServerPlayer serverPlayer ? serverPlayer.commandSource()
+                                : CommandSource.NULL
+                        : CommandSource.NULL,
                         entity.position(),
                         entity.getRotationVector(),
-                        serverLevel,
+                        entity.level() instanceof ServerLevel ? (ServerLevel)entity.level() : null,
                         Apoli.config.executeCommand.getPermissionHandler(),
-                        entity.getName().getString(),
-                        entity.getDisplayName(),
-                        server,
+                        entity.level().getServer(),
                         entity);
-                    if(!Apoli.config.executeCommand.showOutput) {
-                        source = source.withSuppressedOutput();
-                    }
-                    try {
-                        String execCommand = data.getString("command").trim();
-                        if(execCommand.startsWith("/")) {
-                            execCommand = execCommand.substring(1);
-                        }
-                        server.getCommands().getDispatcher().execute(execCommand, source);
-                    } catch (CommandSyntaxException e) {
-                        Apoli.LOGGER.warn("execute_command failed: cmd={} | entity={} | {}",
-                                data.getString("command"), entity.getName().getString(), e.getMessage());
-                    }
+                    server.getCommands().performPrefixedCommand(source, data.getString("command"));
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("change_resource"), new SerializableData()
@@ -313,7 +300,7 @@ public class EntityActions {
                         }
                     }
                     if(entity instanceof Player) {
-                        ((Player)entity).getInventory().placeItemBackInInventory(stack);
+                        ((Player)entity).getInventory().placeItemBackInInventory(stack, Prediction.SERVER_ONLY);
                     } else {
                         entity.level().addFreshEntity(new ItemEntity(entity.level(), entity.getX(), entity.getY(), entity.getZ(), stack));
                     }

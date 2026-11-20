@@ -3,8 +3,6 @@ package io.github.apace100.apoli.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.v2.WrapWithCondition;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.apace100.apoli.Apoli;
 import io.github.apace100.apoli.access.EntityLinkedItemStack;
@@ -32,7 +30,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.equipment.Equippable;
@@ -49,7 +46,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.*;
-import java.util.function.BiConsumer;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity implements ModifiableFoodEntity {
@@ -123,11 +119,12 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
         }
     }
 
-    @Inject(method = "collectEquipmentChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlot;Ljava/util/function/BiConsumer;)V"))
-    private void removeEquipmentPowers(CallbackInfoReturnable<Map> cir, @Local(ordinal = 0) ItemStack stack, @Local EquipmentSlot equipmentSlot) {
-        List<StackPowerUtil.StackPower> powers = StackPowerUtil.getPowers(stack, equipmentSlot);
-        if(powers.size() > 0) {
-            Identifier source = Identifier.fromNamespaceAndPath(Apoli.MODID, equipmentSlot.getName());
+    @Inject(method = "collectEquipmentChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;getAttributes()Lnet/minecraft/world/entity/ai/attributes/AttributeMap;"))
+    private void removeEquipmentPowers(CallbackInfoReturnable<Map> cir, @Local(name = "previous") ItemStack previous, @Local(name = "current") ItemStack current, @Local(name = "slot") EquipmentSlot slot) {
+        List<StackPowerUtil.StackPower> powers = StackPowerUtil.getPowers(previous, slot);
+        // Remove
+        if(!powers.isEmpty()) {
+            Identifier source = Identifier.fromNamespaceAndPath(Apoli.MODID, slot.getName());
             PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(this);
             powers.forEach(sp -> {
                 if(PowerTypeRegistry.contains(sp.powerId)) {
@@ -136,16 +133,11 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
             });
             powerHolder.sync();
         }
-    }
 
-    // O-L: We're not using an inject because otherwise the second ItemStack local isn't captured.
-    @WrapOperation(method = "collectEquipmentChanges", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlot;Ljava/util/function/BiConsumer;)V"))
-    private void addEquipmentPowers(ItemStack stack2, EquipmentSlot equipmentSlot, BiConsumer<Holder<Attribute>, AttributeModifier> action, Operation<Void> original, @Local(ordinal = 0) ItemStack stack) {
-        original.call(stack2, equipmentSlot, action);
-
-        List<StackPowerUtil.StackPower> powers = StackPowerUtil.getPowers(stack2, equipmentSlot);
-        if(powers.size() > 0) {
-            Identifier source = Identifier.fromNamespaceAndPath(Apoli.MODID, equipmentSlot.getName());
+        // Add
+        powers = StackPowerUtil.getPowers(current, slot);
+        if(!powers.isEmpty()) {
+            Identifier source = Identifier.fromNamespaceAndPath(Apoli.MODID, slot.getName());
             PowerHolderComponent powerHolder = PowerHolderComponent.KEY.get(this);
             powers.forEach(sp -> {
                 if(PowerTypeRegistry.contains(sp.powerId)) {
@@ -153,7 +145,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
                 }
             });
             powerHolder.sync();
-        } else if(StackPowerUtil.getPowers(stack, equipmentSlot).size() > 0) {
+        } else if(!StackPowerUtil.getPowers(previous, slot).isEmpty()) {
             PowerHolderComponent.KEY.get(this).sync();
         }
 
@@ -332,7 +324,7 @@ public abstract class LivingEntityMixin extends Entity implements ModifiableFood
                         return true;
                     } else if(isSuppressingSlidingDownLadder()) {
                         //if(origins_lastClimbingPos != null && isHoldingOntoLadder()) {
-                            if(climbingPowers.stream().anyMatch(p -> p.isActive() && p.canHold())) {
+                            if(climbingPowers.stream().anyMatch(ClimbingPower::canHold)) {
                                 return true;
                             }
                         //}

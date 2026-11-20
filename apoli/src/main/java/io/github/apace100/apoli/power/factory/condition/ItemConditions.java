@@ -14,6 +14,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -30,8 +31,6 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 public class ItemConditions {
 
@@ -188,19 +187,24 @@ public class ItemConditions {
                     return false;
 
                 DataComponentPatch components = data.get("components");
+                var split = components.split();
 
-                for (Map.Entry<DataComponentType<?>, Optional<?>> entry : components.entrySet()) {
-                    var type = entry.getKey();
-                    var value = entry.getValue();
+                for (TypedDataComponent<?> component : split.added()) {
+                    var type = component.type();
+                    var value = component.value();
 
                     var stackValue = stack.get(type);
-                    if (stackValue != null && value.isPresent() && !stackValue.equals(value.orElseThrow()))
+                    if (stackValue != null && !stackValue.equals(value))
                         return false;
 
-                    if (stackValue == null && value.isPresent())
+                    if (stackValue == null)
                         return false;
+                }
 
-                    if (stackValue != null && value.isEmpty())
+                for (DataComponentType<?> type : split.removed()) {
+                    var stackValue = stack.get(type);
+
+                    if (stackValue != null)
                         return false;
                 }
 

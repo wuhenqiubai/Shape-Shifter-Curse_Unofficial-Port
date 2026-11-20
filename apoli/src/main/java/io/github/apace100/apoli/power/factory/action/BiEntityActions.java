@@ -52,9 +52,15 @@ public class BiEntityActions {
 
         register(new ActionFactory<>(Apoli.identifier("mount"), new SerializableData(),
             (data, entities) -> {
-                entities.getFirst().startRiding(entities.getSecond(), true, true);
-                if(!entities.getFirst().level().isClientSide() && entities.getSecond() instanceof Player) {
-                    ServerPlayNetworking.send((ServerPlayer) entities.getSecond(), new PlayerMountPacket(entities.getFirst().getId(), entities.getSecond().getId()));
+                if (entities.getFirst().level().isClientSide())
+                    return;
+
+                if (entities.getFirst().startRiding(entities.getSecond(), true, true)) {
+                    if(!entities.getFirst().level().isClientSide() && entities.getSecond() instanceof Player) {
+                        ServerPlayNetworking.send((ServerPlayer) entities.getSecond(), new PlayerMountPacket(entities.getFirst().getId(), entities.getSecond().getId()));
+                    }
+                } else {
+                    Apoli.LOGGER.warn("Could not mount entity {} onto entity {}!", entities.getFirst(), entities.getSecond());
                 }
             }));
         register(new ActionFactory<>(Apoli.identifier("set_in_love"), new SerializableData(),
@@ -90,7 +96,7 @@ public class BiEntityActions {
                     method = target::setDeltaMovement;
                 Space.transformVectorToBase(target.position().subtract(actor.position()), vec, actor.getYRot(), true); // vector normalized by method
                 method.accept(vec.x, vec.y, vec.z);
-                target.hurtMarked = true;
+                target.syncVelocity = true;
             }));
         register(DamageAction.getFactory());
     }

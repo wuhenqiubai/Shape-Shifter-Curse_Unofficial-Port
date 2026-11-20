@@ -15,6 +15,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.SlotRanges;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.SwingAnimation;
 import net.minecraft.world.level.Level;
 
 import java.util.*;
@@ -318,7 +319,7 @@ public class InventoryUtil {
     public static void throwItem(Entity thrower, ItemStack itemStack, boolean throwRandomly, boolean retainOwnership) {
 
         if (itemStack.isEmpty()) return;
-        if (thrower instanceof Player playerEntity && playerEntity.level().isClientSide()) playerEntity.swing(InteractionHand.MAIN_HAND);
+        if (thrower instanceof Player playerEntity && playerEntity.level().isClientSide()) playerEntity.swing(InteractionHand.MAIN_HAND, SwingAnimation.DEFAULT, true);
 
         double yOffset = thrower.getEyeY() - 0.30000001192092896D;
         ItemEntity itemEntity = new ItemEntity(thrower.level(), thrower.getX(), yOffset, thrower.getZ(), itemStack);

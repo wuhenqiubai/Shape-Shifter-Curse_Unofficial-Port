@@ -235,12 +235,11 @@ public class ModifyPlayerSpawnPower extends Power {
         if (targetStructure.isEmpty()) return Optional.empty();
 
         BlockPos targetStructurePos = targetStructure.get().getFirst();
-        ChunkPos targetStructureChunkPos = new ChunkPos(targetStructurePos.getX() >> 4, targetStructurePos.getZ() >> 4);
 
-        StructureStart targetStructureStart = targetDimension.structureManager().getStartForStructure(SectionPos.of(targetStructureChunkPos, 0), targetStructure.get().getSecond(), targetDimension.getChunk(targetStructurePos));
+        StructureStart targetStructureStart = targetDimension.structureManager().getStartForStructure(targetStructure.get().getSecond(), targetDimension.getChunk(targetStructurePos));
         if (targetStructureStart == null) return Optional.empty();
 
-        BlockPos targetStructureCenter = new BlockPos(targetStructureStart.getBoundingBox().getCenter());
+        BlockPos targetStructureCenter = targetStructureStart.getBoundingBox().getCenter().immutable();
         return getValidSpawn(targetDimension, targetStructureCenter, range);
 
     }

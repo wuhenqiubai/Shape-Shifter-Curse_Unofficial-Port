@@ -35,8 +35,6 @@ public class SelectorAction {
             entity.getRotationVector(),
             (ServerLevel) entity.level(),
             LevelBasedPermissionSet.GAMEMASTER,
-            entity.getScoreboardName(),
-            entity.getName(),
             server,
             entity
         );
