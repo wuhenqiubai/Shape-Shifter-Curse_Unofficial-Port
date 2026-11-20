@@ -93,9 +93,9 @@ public class CameraBobbingMixin {
                 -Math.abs(Mth.cos(phase * Mth.PI) * amplitude),
                 0.0
         );
-        matrices.mulPose(Axis.ZP.rotationDegrees(
+        matrices.rotate(Axis.ZP.rotationDegrees(
                 Mth.sin(phase * Mth.PI) * amplitude * 3.0f));
-        matrices.mulPose(Axis.XP.rotationDegrees(
+        matrices.rotate(Axis.XP.rotationDegrees(
                 Math.abs(Mth.cos(phase * Mth.PI - 0.2f) * amplitude) * 5.0f));
     }
 
@@ -125,9 +125,9 @@ public class CameraBobbingMixin {
                 -Math.abs(Mth.cos(phase * Mth.PI * 1.1f) * amp) * 1.2f,
                 0.0
         );
-        matrices.mulPose(Axis.ZP.rotationDegrees(
+        matrices.rotate(Axis.ZP.rotationDegrees(
                 Mth.sin(phase * Mth.PI) * amp * 2.0f));
-        matrices.mulPose(Axis.XP.rotationDegrees(
+        matrices.rotate(Axis.XP.rotationDegrees(
                 Math.abs(Mth.cos(phase * Mth.PI - 0.2f) * amp) * 3.0f));
     }
 
@@ -143,9 +143,9 @@ public class CameraBobbingMixin {
                 -Math.abs(sin) * amplitude * 0.8f,
                 0.0
         );
-        matrices.mulPose(Axis.XP.rotationDegrees(
+        matrices.rotate(Axis.XP.rotationDegrees(
                 sin * amplitude * 2.0f));
-        matrices.mulPose(Axis.ZP.rotationDegrees(
+        matrices.rotate(Axis.ZP.rotationDegrees(
                 sin * amplitude * 1.0f));
     }
 }

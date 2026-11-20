@@ -42,7 +42,7 @@ public final class PerkActions {
 
     public static void setVelocity(Entity entity, Vec3 velocity) {
         entity.setDeltaMovement(velocity);
-        entity.hurtMarked = true;
+        entity.syncVelocity = true;
         if (entity instanceof ServerPlayer player) player.connection.send(new ClientboundSetEntityMotionPacket(entity));
     }
 

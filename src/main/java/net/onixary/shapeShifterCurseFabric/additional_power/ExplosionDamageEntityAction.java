@@ -100,7 +100,7 @@ public class ExplosionDamageEntityAction {
                             entityAction.accept(target_entity);
                         }
                         if (bientityAction != null) bientityAction.accept(new Pair<>(entity, target_entity));
-                        target_entity.hurtMarked = true;
+                        target_entity.syncVelocity = true;
                     }
                 }
             }

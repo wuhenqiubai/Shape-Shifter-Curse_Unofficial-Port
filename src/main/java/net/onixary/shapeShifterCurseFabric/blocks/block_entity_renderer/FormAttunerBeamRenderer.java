@@ -75,7 +75,7 @@ public class FormAttunerBeamRenderer implements BlockEntityRenderer<FormAttunerB
         float vOffset = Mth.frac(scroll * 0.2F - Mth.floor(scroll * 0.1F));
         float z = -1.0F + vOffset;
         poseStack.pushPose();
-        poseStack.mulPose(Axis.YP.rotationDegrees(animationTime * 2.25F - 45.0F));
+        poseStack.rotate(Axis.YP.rotationDegrees(animationTime * 2.25F - 45.0F));
         submitPart(poseStack, submitNodeCollector, RenderTypes.beaconBeam(texture, false), color, yOffset, endY,
                 0.0F, inner, inner, 0.0F, -inner, 0.0F, 0.0F, -inner,
                 maxY * radiusScale * (0.5F / inner) + z, z);

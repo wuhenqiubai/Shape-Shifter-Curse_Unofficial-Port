@@ -5,7 +5,7 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -33,9 +33,9 @@ public abstract class AdjustItemHoldPlayerRendererMixin extends LivingEntityRend
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void init(EntityRendererProvider.Context context, boolean slimSteve, CallbackInfo ci) {
-        this.addLayer(new MouthItemFeature<>(this, this.entityRenderDispatcher.getItemInHandRenderer()));
-        this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, this.entityRenderDispatcher.getItemInHandRenderer()));
-        ItemInHandRenderer itemRenderer = this.entityRenderDispatcher.getItemInHandRenderer();
+        this.addLayer(new MouthItemFeature<>(this, this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer()));
+        this.addLayer(new ThirdPersonExtraHandItemRender((RenderLayerParent) (Object) this, this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer()));
+        FirstPersonHandsAndItemsRenderer itemRenderer = this.entityRenderDispatcher.getFirstPersonHandsAndItemsRenderer();
         this.addLayer(new ExtraItemFeatureRenderer<>(this, this.entityRenderDispatcher, itemRenderer));
     }
 }

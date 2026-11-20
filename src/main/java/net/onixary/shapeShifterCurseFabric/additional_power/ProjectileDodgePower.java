@@ -133,7 +133,7 @@ public class ProjectileDodgePower extends Power {
 	    ShapeShifterCurseFabric.LOGGER.info("正在躲避投射物: {}", projectile.getUUID());
         // 应用躲避速度
         player.push(dodgeDirection.scale(dodgeSpeed));
-        player.hurtMarked = true;
+        player.syncVelocity = true;
         if (action != null) {
             action.accept(player);
         }

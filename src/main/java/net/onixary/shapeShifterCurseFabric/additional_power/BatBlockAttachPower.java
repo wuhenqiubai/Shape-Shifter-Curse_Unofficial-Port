@@ -204,7 +204,7 @@ public class BatBlockAttachPower extends Power {
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        player.hurtMarked = true;
+        player.syncVelocity = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
         AnimUtils.playPowerAnimLoop(player, AnimRegistries.POWER_ANIM_ATTACH_SIDE, AnimUtils.AnimationSendSideType.ONLY_SERVER);
@@ -222,7 +222,7 @@ public class BatBlockAttachPower extends Power {
         player.setPos(attachPos.x, attachPos.y, attachPos.z);
         player.setDeltaMovement(Vec3.ZERO);
         player.setOnGround(true);
-        player.hurtMarked = true;
+        player.syncVelocity = true;
 
         // 修改动作 最好在服务器端执行 虽然客户端也能执行 但是客户端还是会发送包到服务器进行处理
         AnimUtils.playPowerAnimLoop(player, AnimRegistries.POWER_ANIM_ATTACH_BOTTOM, AnimUtils.AnimationSendSideType.ONLY_SERVER);
@@ -267,7 +267,7 @@ public class BatBlockAttachPower extends Power {
             // 同时添加向上的速度
             player.push(dirX * jumpSpeed, 0.4f, dirZ * jumpSpeed);
         }
-        player.hurtMarked = true;
+        player.syncVelocity = true;
 
         // 同步到客户端
         if (player instanceof ServerPlayer serverPlayer) {
@@ -318,7 +318,7 @@ public class BatBlockAttachPower extends Power {
         player.zza = 0;
 
         // 标记速度已变更
-        player.hurtMarked = true;
+        player.syncVelocity = true;
 
     }
 

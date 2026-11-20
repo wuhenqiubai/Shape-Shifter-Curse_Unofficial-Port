@@ -56,7 +56,7 @@ public class AdvancementUtils {
         for (Map.Entry<String, Criterion<?>> criterionEntry : criteria.entrySet()) {
             Criterion<?> criterion = criterionEntry.getValue();
             if (criterion.triggerInstance() instanceof InventoryChangeTrigger.TriggerInstance(
-                    Optional<net.minecraft.advancements.predicates.ContextAwarePredicate> player,
+                    Optional<Holder<LootItemCondition>> player,
                     InventoryChangeTrigger.TriggerInstance.Slots slots,
                     List<ItemPredicate> items
             )) {

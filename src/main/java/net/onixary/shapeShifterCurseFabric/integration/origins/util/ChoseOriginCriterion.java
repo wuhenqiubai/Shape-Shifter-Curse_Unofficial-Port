@@ -1,8 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.integration.origins.util;
 
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.advancements.predicates.entity.EntityPredicate;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.resources.Identifier;
@@ -28,7 +29,7 @@ public class ChoseOriginCriterion extends SimpleCriterionTrigger<ChoseOriginCrit
         this.trigger(player, (conditions -> conditions.matches(origin)));
     }
 
-    public record Conditions(Optional<ContextAwarePredicate> player, Identifier originId) implements SimpleCriterionTrigger.SimpleInstance {
+    public record Conditions(Optional<Holder<LootItemCondition>> player, Identifier originId) implements SimpleCriterionTrigger.SimpleInstance {
 
         public static final Codec<Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Conditions::player),

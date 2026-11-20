@@ -12,7 +12,7 @@ import static net.onixary.shapeShifterCurseFabric.player_animation.v3.AnimRegist
 public class UseItemFSM extends AbstractAnimFSM {
     @Override
     public @Nullable Identifier getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData) {
-        if (!(player.isUsingItem() || player.swinging)) {
+        if (!(player.isUsingItem() || player.isSwinging())) {
             return FSM_ON_GROUND;
         }
         return null;

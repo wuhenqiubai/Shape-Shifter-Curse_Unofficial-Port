@@ -71,7 +71,7 @@ public class FormRenderer extends GeoObjectRenderer<FormAnimatable, Void, GeoRen
             if (player == null) player = model.entity;
             if (player == null || model.AnimationSystem == null) return;
             AvatarRenderer renderer = player instanceof AbstractClientPlayer clientPlayer
-                    ? Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(clientPlayer)
+                    ? (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(clientPlayer)
                     : (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
             float partialTick = renderPassInfo.renderState().getPartialTick();
             float limbAngle = renderPassInfo.getOrDefaultGeckolibData(TICKET_LIMB_ANGLE, 0f);

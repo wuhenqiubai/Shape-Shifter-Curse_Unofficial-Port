@@ -1,8 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.advancement;
 
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,10 +28,10 @@ public class OnEndCursedMoonCured extends SimpleCriterionTrigger<OnEndCursedMoon
         return Condition.CODEC;
     }
 
-    public record Condition(Optional<ContextAwarePredicate> player) implements SimpleCriterionTrigger.SimpleInstance {
+    public record Condition(Optional<Holder<LootItemCondition>> player) implements SimpleCriterionTrigger.SimpleInstance {
         public static final Codec<Condition> CODEC = RecordCodecBuilder.create(instance ->
             instance.group(
-                ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Condition::player)
+                LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Condition::player)
             ).apply(instance, Condition::new)
         );
 

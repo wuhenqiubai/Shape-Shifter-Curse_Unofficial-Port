@@ -237,9 +237,9 @@ public class FormRenderUtils {
             float scaleZ = s != null ? s.getScaleZ() : 1f;
             matrices.translate(-posX, posY, posZ);
             matrices.translate(b.pivotX(), b.pivotY(), b.pivotZ());
-            matrices.mulPose(Axis.ZP.rotation(rotZ));
-            matrices.mulPose(Axis.YP.rotation(rotY));
-            matrices.mulPose(Axis.XP.rotation(rotX));
+            matrices.rotate(Axis.ZP.rotation(rotZ));
+            matrices.rotate(Axis.YP.rotation(rotY));
+            matrices.rotate(Axis.XP.rotation(rotX));
             matrices.scale(scaleX, scaleY, scaleZ);
             if (i < chain.size() - 1) {
                 matrices.translate(-b.pivotX(), -b.pivotY(), -b.pivotZ());

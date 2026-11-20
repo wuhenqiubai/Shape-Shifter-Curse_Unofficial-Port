@@ -1,10 +1,10 @@
 package net.onixary.shapeShifterCurseFabric.mixin;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.renderpearl.api.buffers.GpuBuffer;
+import com.mojang.renderpearl.api.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.textures.GpuSampler;
-import com.mojang.blaze3d.textures.GpuTextureView;
+import com.mojang.renderpearl.api.textures.GpuSampler;
+import com.mojang.renderpearl.api.textures.GpuTextureView;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SkyRenderer;
@@ -46,7 +46,7 @@ public abstract class SkyRendererMixin {
         MoonPhase[] phases = MoonPhase.values();
         VertexFormat vf = DefaultVertexFormat.POSITION_TEX;
         try (ByteBufferBuilder byteBufferBuilder = ByteBufferBuilder.exactlySized(phases.length * 4 * vf.getVertexSize())) {
-            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, com.mojang.blaze3d.PrimitiveTopology.QUADS, vf);
+            BufferBuilder bufferBuilder = new BufferBuilder(byteBufferBuilder, com.mojang.renderpearl.api.pipeline.PrimitiveTopology.QUADS, vf);
             for (MoonPhase phase : phases) {
                 int idx = phase.index();
                 float u0 = idx * 32.0F / 256.0F;

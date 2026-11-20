@@ -1,8 +1,9 @@
 package net.onixary.shapeShifterCurseFabric.advancement.misc;
 
+import net.minecraft.core.Holder;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.advancements.predicates.ContextAwarePredicate;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
@@ -27,9 +28,9 @@ public final class CriterionAdditions {
         public @NotNull Codec<Cnd> codec() { return Cnd.CODEC; }
         public void trigger(ServerPlayer player) { trigger(player, Cnd::matchesAny); }
         public void trigger(ServerPlayer player, Identifier formID) { trigger(player, c -> c.matches(formID)); }
-        public record Cnd(Optional<ContextAwarePredicate> player, List<String> form, Optional<List<Integer>> formTier, Optional<List<String>> flags, Optional<List<String>> notFlags) implements SimpleCriterionTrigger.SimpleInstance {
+        public record Cnd(Optional<Holder<LootItemCondition>> player, List<String> form, Optional<List<Integer>> formTier, Optional<List<String>> flags, Optional<List<String>> notFlags) implements SimpleCriterionTrigger.SimpleInstance {
             public static final Codec<Cnd> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
+                LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
                 Codec.STRING.listOf().optionalFieldOf("form", List.of()).forGetter(Cnd::form),
                 Codec.INT.listOf().optionalFieldOf("form_tier").forGetter(Cnd::formTier),
                 Codec.STRING.listOf().optionalFieldOf("flags").forGetter(Cnd::flags),
@@ -51,9 +52,9 @@ public final class CriterionAdditions {
         public Identifier getId() { return ID; }
         public @NotNull Codec<Cnd> codec() { return Cnd.CODEC; }
         public void trigger(ServerPlayer player, Identifier id) { trigger(player, c -> c.matches(id)); }
-        public record Cnd(Optional<ContextAwarePredicate> player, List<String> entity) implements SimpleInstance {
+        public record Cnd(Optional<Holder<LootItemCondition>> player, List<String> entity) implements SimpleInstance {
             public static final Codec<Cnd> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
+                LootItemCondition.CODEC.optionalFieldOf("player").forGetter(Cnd::player),
                 Codec.STRING.listOf().fieldOf("entity").forGetter(Cnd::entity)
             ).apply(instance, Cnd::new));
             public boolean matches(Identifier id) { return entity.stream().anyMatch(e -> id.toString().equals(e)); }

@@ -122,7 +122,7 @@ public class AttractByEntityPower extends Power{
             // 应用速度
             Vec3 finalVelocity = attractDirection.scale(effectiveSpeed).add(0, currentVelocity.y, 0);
             player.setDeltaMovement(finalVelocity);
-            player.hurtMarked = true;
+            player.syncVelocity = true;
 
             // 4. 执行实体动作（如果存在）
             if (entityAction != null) {

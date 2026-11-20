@@ -68,7 +68,7 @@ public class CapeFeatureRendererMixin {
                                        int lightCoords, AvatarRenderState state, float yRot, float xRot, CallbackInfo ci) {
         if (ssc$capePlayer != null) {
             float baseRotation = getCapeBaseRotateAngle(ssc$capePlayer);
-            poseStack.mulPose(Axis.XP.rotationDegrees(baseRotation));
+            poseStack.rotate(Axis.XP.rotationDegrees(baseRotation));
         }
     }
 

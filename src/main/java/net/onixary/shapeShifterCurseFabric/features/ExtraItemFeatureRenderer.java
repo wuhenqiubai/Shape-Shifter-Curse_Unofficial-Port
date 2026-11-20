@@ -11,7 +11,7 @@ import net.fabricmc.loader.api.Version;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
@@ -38,7 +38,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
     private static boolean IS_FIRST_PERSON_MOD_NEW_VERSION = false;
     private static boolean IS_FIRST_PERSON_MOD_VERSION_CHECK_FAIL = false;
 
-    public ExtraItemFeatureRenderer(RenderLayerParent<T, M> context, EntityRenderDispatcher entityRenderDispatcher, ItemInHandRenderer itemRenderer) {
+    public ExtraItemFeatureRenderer(RenderLayerParent<T, M> context, EntityRenderDispatcher entityRenderDispatcher, FirstPersonHandsAndItemsRenderer itemRenderer) {
         super(context);
         this.customFeralItemRenderer = new CustomFeralItemRenderer(Minecraft.getInstance(), entityRenderDispatcher, itemRenderer);
     }
@@ -112,7 +112,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                         matrices.translate(rotCenter.x / 16.0F, rotCenter.y / 16.0F, rotCenter.z / 16.0F);
                         //Vec3d posOffset = ShapeShifterCurseFabric.feralItemPosOffset;
                         Vec3 posOffset = new Vec3(-12.0F, 15.0F, 12.0F);
-                        matrices.mulPose(Axis.ZP.rotationDegrees(240.0F));
+                        matrices.rotate(Axis.ZP.rotationDegrees(240.0F));
                         matrices.translate(posOffset.x / 16.0F, posOffset.y / 16.0F, posOffset.z / 16.0F);
                         float pitch = Mth.lerp(limbAngle, player.xRotO, player.getXRot());
                         float equipProgress = 1.0F - Mth.lerp(limbAngle, customFeralItemRenderer.prevEquipProgressMainHand, customFeralItemRenderer.equipProgressMainHand);
@@ -122,7 +122,7 @@ public class ExtraItemFeatureRenderer <T extends EntityRenderState, M extends En
                                 limbAngle,
                                 pitch,
                                 InteractionHand.MAIN_HAND,
-                                player.getAttackAnim(limbAngle),
+                                player.getSwingAnimation(limbAngle),
                                 player.getMainHandItem(),
                                 equipProgress,
                                 matrices,

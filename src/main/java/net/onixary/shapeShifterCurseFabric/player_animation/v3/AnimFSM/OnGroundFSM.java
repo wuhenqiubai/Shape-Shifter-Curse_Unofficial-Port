@@ -14,7 +14,7 @@ public class OnGroundFSM extends AbstractAnimFSM {
     public @Nullable Identifier getNextFSM(Player player, AnimSystem.AnimSystemData animSystemData) {
         if (!animSystemData.IsOnGround) {
             return FSM_IN_AIR;
-        } else if (player.isUsingItem() || player.swinging) {
+        } else if (player.isUsingItem() || player.isSwinging()) {
             return FSM_USE_ITEM;
         }
         return null;

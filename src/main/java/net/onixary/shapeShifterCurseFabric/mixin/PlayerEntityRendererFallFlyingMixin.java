@@ -61,10 +61,10 @@ public abstract class PlayerEntityRendererFallFlyingMixin extends LivingEntityRe
         }
         else{
             super.setupRotations(state, poseStack, bodyRot, entityScale);
-            poseStack.mulPose(Axis.YP.rotationDegrees((float)Math.toDegrees(state.flyingYRot)));
-            poseStack.mulPose(Axis.XP.rotationDegrees(0.0F));
+            poseStack.rotate(Axis.YP.rotationDegrees((float)Math.toDegrees(state.flyingYRot)));
+            poseStack.rotate(Axis.XP.rotationDegrees(0.0F));
             // 你可以在这里添加任何额外的旋转
-            poseStack.mulPose(Axis.XP.rotationDegrees(90.0F));
+            poseStack.rotate(Axis.XP.rotationDegrees(90.0F));
             ci.cancel();
         }
     }

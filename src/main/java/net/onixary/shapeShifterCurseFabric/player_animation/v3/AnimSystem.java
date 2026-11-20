@@ -122,7 +122,7 @@ public class AnimSystem {
         this.data.fakeVelocity = nowPos.subtract(this.data.LastPosition);
         this.data.playerForm = FormTextureUtils.getPlayerForm_Render(this.player);
         this.data.IsWalking = !this.data.LastPosition.equals(nowPos);
-        if (this.player.swinging) {
+        if (this.player.isSwinging()) {
             this.data.ContinueSwingAnimCounter ++;
         }
         else {

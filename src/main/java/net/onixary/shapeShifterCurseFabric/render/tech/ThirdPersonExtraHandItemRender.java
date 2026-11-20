@@ -5,7 +5,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.ArmedModel;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -23,14 +23,14 @@ import java.util.function.Predicate;
 public class ThirdPersonExtraHandItemRender<S extends EntityRenderState, M extends EntityModel<? super S> & ArmedModel<S>> extends RenderLayer<S, M> {
 
     public static abstract class TPEHR_Render {
-        public abstract void render(ItemInHandRenderer heldItemRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch);
+        public abstract void render(FirstPersonHandsAndItemsRenderer heldItemRenderer, PoseStack matrices, SubmitNodeCollector submitNodeCollector, int light, AbstractClientPlayer player, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch);
     }
 
     public record TPEHRData(Predicate<AbstractClientPlayer> shouldRender, TPEHR_Render render) { }
 
     public static HashMap<IForm, ArrayList<TPEHRData>> data = new HashMap<>();
 
-    public final ItemInHandRenderer heldItemRenderer;
+    public final FirstPersonHandsAndItemsRenderer heldItemRenderer;
 
     static {
         register(RegPlayerForms.SPIDER_3, new TPEHRData(p -> true, new SpiderTPEHR()));
@@ -44,7 +44,7 @@ public class ThirdPersonExtraHandItemRender<S extends EntityRenderState, M exten
         data.get(form).add(Rdata);
     }
 
-    public ThirdPersonExtraHandItemRender(RenderLayerParent<S, M> context, ItemInHandRenderer heldItemRenderer) {
+    public ThirdPersonExtraHandItemRender(RenderLayerParent<S, M> context, FirstPersonHandsAndItemsRenderer heldItemRenderer) {
         super(context);
         this.heldItemRenderer = heldItemRenderer;
     }

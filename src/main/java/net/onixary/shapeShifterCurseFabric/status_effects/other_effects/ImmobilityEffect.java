@@ -16,7 +16,7 @@ public class ImmobilityEffect extends MobEffect {
         if (entity instanceof Player){
             double speedY = entity.getDeltaMovement().y;
             entity.setDeltaMovement(0, speedY, 0);
-            entity.hurtMarked = true;
+            entity.syncVelocity = true;
         }
         return true;
     }

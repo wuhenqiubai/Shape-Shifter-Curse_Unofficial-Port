@@ -10,7 +10,7 @@ import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.player.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.ItemInHandRenderer;
+import net.minecraft.client.renderer.FirstPersonHandsAndItemsRenderer;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.RenderLayerParent;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
@@ -32,11 +32,11 @@ import net.onixary.shapeShifterCurseFabric.util.FormTextureUtils;
 import org.jspecify.annotations.NonNull;
 
 public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel<T> & ArmedModel> extends RenderLayer<T, M> {
-    private final ItemInHandRenderer heldItemRenderer;
+    private final FirstPersonHandsAndItemsRenderer heldItemRenderer;
 
     private static final boolean IS_FIRST_PERSON_MOD_LOADED = FabricLoader.getInstance().isModLoaded("firstperson");
 
-    public MouthItemFeature(RenderLayerParent<T, M> context, ItemInHandRenderer heldItemRenderer) {
+    public MouthItemFeature(RenderLayerParent<T, M> context, FirstPersonHandsAndItemsRenderer heldItemRenderer) {
         super(context);
         this.heldItemRenderer = heldItemRenderer;
     }
@@ -127,13 +127,13 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
             headRoll = (float) Math.toDegrees(head.zRot);
         }
         matrixStack.translate(head.x / 16.0F, head.y / 16.0F, head.z / 16.0F);
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(headRoll));
-        matrixStack.mulPose(Axis.YP.rotationDegrees(k));
-        matrixStack.mulPose(Axis.XP.rotationDegrees(l));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(headRoll));
+        matrixStack.rotate(Axis.YP.rotationDegrees(k));
+        matrixStack.rotate(Axis.XP.rotationDegrees(l));
         matrixStack.translate(0.06F, 0.085F, -0.35D);
         matrixStack.scale(1.25F, 1.25F, 1.25F);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(90.0F));
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        matrixStack.rotate(Axis.XP.rotationDegrees(90.0F));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(180.0F));
         matrixStack.translate(1.0 / 16.0F, -2.0 / 16.0F, 1.0 / 16.0F);
         heldItemRenderer.renderItem(player, itemStack, ItemDisplayContext.GROUND, matrixStack, vertexConsumerProvider, i);
         matrixStack.popPose();
@@ -146,9 +146,9 @@ public class MouthItemFeature<T extends EntityRenderState, M extends EntityModel
         body.translateAndRotate(matrixStack);
         // --- 格挡时盾牌的调整 ---
         matrixStack.translate(-0.7f, 1.2f, 0.8f);
-        matrixStack.mulPose(Axis.XP.rotationDegrees(180.0f - 20.0f));
-        matrixStack.mulPose(Axis.YP.rotationDegrees(180.0f));
-        matrixStack.mulPose(Axis.ZP.rotationDegrees(-75.0f));
+        matrixStack.rotate(Axis.XP.rotationDegrees(180.0f - 20.0f));
+        matrixStack.rotate(Axis.YP.rotationDegrees(180.0f));
+        matrixStack.rotate(Axis.ZP.rotationDegrees(-75.0f));
         matrixStack.scale(1.2f, 1.2f, 1.2f);
         // --- 调整结束 ---
 	    if (Minecraft.getInstance().player != null) {

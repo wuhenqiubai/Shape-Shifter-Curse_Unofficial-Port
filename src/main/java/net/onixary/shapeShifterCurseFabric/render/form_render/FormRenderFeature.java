@@ -68,7 +68,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
         if (!(entity instanceof AbstractClientPlayer player)) return;
         if (player.isInvisible() || player.isSpectator()) return;
         if (!(getParentModel() instanceof PlayerModel playerModel)) return;
-        AvatarRenderer avatarRenderer = Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(player);
+        AvatarRenderer avatarRenderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
         boolean slim = isSlim(player);
 
         boolean pause = FormTextureUtils.getPlayerForm_Render(player).getBodyType() == PlayerFormBodyType.FERAL;
@@ -102,7 +102,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             formRenderer.setPlayer(player, slim);
 
             poseStack.pushPose();
-            poseStack.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
+            poseStack.rotate(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             poseStack.translate(0, -1.51f, 0);
             poseStack.translate(-0.5, -0.5, -0.5);
 
@@ -289,7 +289,7 @@ public class FormRenderFeature<S extends EntityRenderState, M extends EntityMode
             String armBoneName = armGeoBone != null ? armGeoBone.name() : null;
 
             matrices.pushPose();
-            matrices.mulPose(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
+            matrices.rotate(new Quaternionf().rotateX(180 * Mth.DEG_TO_RAD));
             matrices.translate(0, -1.51f, 0);
             matrices.translate(SSC_ARM_ORIGIN.x, SSC_ARM_ORIGIN.y, SSC_ARM_ORIGIN.z);
             org.joml.Matrix4f sscEyeToPose = new org.joml.Matrix4f(RenderSystem.getModelViewMatrixCopy()).mul(new org.joml.Matrix4f(matrices.last().pose())).invert();

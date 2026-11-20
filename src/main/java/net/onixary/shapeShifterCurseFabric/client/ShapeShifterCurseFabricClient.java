@@ -271,7 +271,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> requestAuthCount = 0);
 
-		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_GRAVE_ACCENT, SSC_CATEGORY);
+		makeSound = new KeyMapping("key.shape-shifter-curse.make_sound", InputConstants.Type.KEYBOARD, InputConstants.KEY_GRAVE, SSC_CATEGORY);
 		ApoliClient.registerPowerKeybinding("make_sound", makeSound);
 		KeyMappingHelper.registerKeyMapping(makeSound);
 
@@ -282,20 +282,20 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		// 打开菜单 5->6
 		// 切换能力 6->5
 		// 这2个分配给常用技能 一般推荐绑鼠标侧键上
-		useActiveSkill1PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill2PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill1PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_1", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		useActiveSkill2PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_2", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
 		// 这2个介于常用和非常用之间 尽量别放类似火球这种能力 如果鼠标侧键多也可以绑侧键上
-		useActiveSkill3PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill4PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill3PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_3", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		useActiveSkill4PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_4", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
 		// 这2个给打开UI/可切换功能使用 不推荐给主动能力用 当然 你要是加个自爆技能也能绑这2个按键 推荐绑键盘不太常按的按键上
-		useActiveSkill5PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		useActiveSkill6PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		useActiveSkill5PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_5", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		useActiveSkill6PowerKeybind = new SkillKeyBinding("key.shape-shifter-curse.active_skill_6", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
 		// 这个是开测试UI的 开发什么UI就绑哪个UI 发布时记得注释掉
-		openTestUIKeybind = new KeyMapping("key.shape-shifter-curse.open_test_ui", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		scrollActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.scroll_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		prevActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.prev_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		nextActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.next_active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
-		activeSkillKeybind = new KeyMapping("key.shape-shifter-curse.active_skill", InputConstants.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, SSC_CATEGORY);
+		openTestUIKeybind = new KeyMapping("key.shape-shifter-curse.open_test_ui", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		scrollActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.scroll_active_skill", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		prevActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.prev_active_skill", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		nextActiveSkillKeybind = new KeyMapping("key.shape-shifter-curse.next_active_skill", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
+		activeSkillKeybind = new KeyMapping("key.shape-shifter-curse.active_skill", InputConstants.Type.KEYBOARD, 0, SSC_CATEGORY);
 
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_1", useActiveSkill1PowerKeybind);
 		ApoliClient.registerPowerKeybinding("key.shape-shifter-curse.active_skill_2", useActiveSkill2PowerKeybind);

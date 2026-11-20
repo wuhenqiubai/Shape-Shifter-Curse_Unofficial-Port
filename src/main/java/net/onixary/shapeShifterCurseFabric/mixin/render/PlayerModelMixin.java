@@ -21,7 +21,7 @@ public abstract class PlayerModelMixin {
 		if (!(entity instanceof AbstractClientPlayer player)) {
 			return;
 		}
-		AvatarRenderer renderer = Minecraft.getInstance().getEntityRenderDispatcher().getPlayerRenderer(player);
+		AvatarRenderer renderer = (AvatarRenderer) Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
 		FormRenderFeature.rM_PartA(renderer, player, (PlayerModel) (Object) this, new PoseStack(), 0);
 	}
 }

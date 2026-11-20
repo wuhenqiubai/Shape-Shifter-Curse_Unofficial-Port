@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.items;
 
+import net.minecraft.util.Prediction;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
@@ -58,7 +59,7 @@ public class Inhibitor  extends Item {
         } else {
             if (user instanceof Player playerEntity) {
                 if (!playerEntity.getInventory().add(new ItemStack(Items.BOWL))) {
-                    playerEntity.drop(new ItemStack(Items.BOWL), false);
+                    playerEntity.drop(new ItemStack(Items.BOWL), false, Prediction.SERVER_ONLY);
                 }
             }
             return stack;

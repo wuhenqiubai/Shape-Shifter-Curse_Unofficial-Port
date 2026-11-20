@@ -64,7 +64,7 @@ public class FSMUtils {
         if (animSystemData.IsWalking) {
             return false;
         }
-        if (player.isUsingItem() || player.swinging) {
+        if (player.isUsingItem() || player.isSwinging()) {
             return false;
         }
         return true;

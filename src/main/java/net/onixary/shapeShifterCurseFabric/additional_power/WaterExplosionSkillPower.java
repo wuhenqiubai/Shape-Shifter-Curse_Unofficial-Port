@@ -112,7 +112,7 @@ public class WaterExplosionSkillPower extends ActiveCooldownPower {
                 onPullAction.accept(new Pair<>(entity, target));
             }
             target.setDeltaMovement(newVelocity);
-            target.hurtMarked = true;
+            target.syncVelocity = true;
         }
     }
 
