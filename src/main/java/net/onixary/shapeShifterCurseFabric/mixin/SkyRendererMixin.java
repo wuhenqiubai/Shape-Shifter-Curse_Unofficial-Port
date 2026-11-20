@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Inject;
 
 @Mixin(SkyRenderer.class)
 public abstract class SkyRendererMixin {
@@ -64,18 +65,31 @@ public abstract class SkyRendererMixin {
         }
     }
 
-    @ModifyArg(method = "renderMoon", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;bindTexture(Ljava/lang/String;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;)V"), index = 1)
+    @Unique
+    private boolean ssc$renderingMoon;
+
+    @Inject(method = "renderMoon", at = @At("HEAD"))
+    private void ssc$beginMoon(com.mojang.renderpearl.api.commands.RenderPass renderPass, net.minecraft.world.level.MoonPhase moonPhase, float rainBrightness, PoseStack poseStack, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        this.ssc$renderingMoon = true;
+    }
+
+    @Inject(method = "renderMoon", at = @At("RETURN"))
+    private void ssc$endMoon(com.mojang.renderpearl.api.commands.RenderPass renderPass, net.minecraft.world.level.MoonPhase moonPhase, float rainBrightness, PoseStack poseStack, org.spongepowered.asm.mixin.injection.callback.CallbackInfo ci) {
+        this.ssc$renderingMoon = false;
+    }
+
+    @ModifyArg(method = "drawCelestialBody", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/commands/RenderPass;setUniform(Ljava/lang/String;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;)V"), index = 1)
     private GpuTextureView ssc$modifyMoonTexture(GpuTextureView view) {
-        return ssc$isCursedMoon() ? ssc$getCursedMoonTexture().getTextureView() : view;
+        return ssc$isCursedMoon() && this.ssc$renderingMoon ? ssc$getCursedMoonTexture().getTextureView() : view;
     }
 
-    @ModifyArg(method = "renderMoon", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;bindTexture(Ljava/lang/String;Lcom/mojang/blaze3d/textures/GpuTextureView;Lcom/mojang/blaze3d/textures/GpuSampler;)V"), index = 2)
+    @ModifyArg(method = "drawCelestialBody", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/commands/RenderPass;setUniform(Ljava/lang/String;Lcom/mojang/renderpearl/api/textures/GpuTextureView;Lcom/mojang/renderpearl/api/textures/GpuSampler;)V"), index = 2)
     private GpuSampler ssc$modifyMoonSampler(GpuSampler sampler) {
-        return ssc$isCursedMoon() ? ssc$getCursedMoonTexture().getSampler() : sampler;
+        return ssc$isCursedMoon() && this.ssc$renderingMoon ? ssc$getCursedMoonTexture().getSampler() : sampler;
     }
 
-    @ModifyArg(method = "renderMoon", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderPass;setVertexBuffer(ILcom/mojang/blaze3d/buffers/GpuBufferSlice;)V"), index = 1)
+    @ModifyArg(method = "drawCelestialBody", at = @At(value = "INVOKE", target = "Lcom/mojang/renderpearl/api/commands/RenderPass;setVertexBuffer(ILcom/mojang/renderpearl/api/buffers/GpuBufferSlice;)V"), index = 1)
     private GpuBufferSlice ssc$modifyMoonBuffer(GpuBufferSlice buffer) {
-        return ssc$isCursedMoon() ? ssc$getCursedMoonBuffer() : buffer;
+        return ssc$isCursedMoon() && this.ssc$renderingMoon ? ssc$getCursedMoonBuffer() : buffer;
     }
 }

@@ -55,7 +55,7 @@ public abstract class LivingEntityMixin {
     @Shadow protected abstract void checkFallDamage(double ya, boolean onGround, BlockState onState, BlockPos pos);
 
     @Shadow
-    protected abstract void blockUsingItem(ServerLevel level, LivingEntity attacker, DamageSource source, float damage);
+    protected abstract void blockUsingItem(ServerLevel level, LivingEntity attacker, DamageSource source, float damage, boolean fullyBlocked);
 
     @Inject(
             method = "die",
