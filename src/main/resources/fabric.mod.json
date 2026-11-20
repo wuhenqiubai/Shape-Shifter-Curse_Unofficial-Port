@@ -146,7 +146,7 @@
 
   "depends": {
     "java": ">=25",
-    "fabricloader": ">=0.20.1",
+    "fabricloader": ">=0.19.5",
     "fabric-api": ">=0.160.0",
     "minecraft": "~26.2",
     "pehkui": ">=3.8.3",
