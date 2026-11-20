@@ -23,9 +23,16 @@ import java.util.List;
 @Mixin(AbstractThrownPotion.class)
 public class PotionEntityMixin {
 
-    @Inject(method = "onHitAsWater(Lnet/minecraft/server/level/ServerLevel;)V", at = @At("HEAD"))
-    private void onApplyWater(ServerLevel level, CallbackInfo ci) {
+    @Inject(method = "onHit(Lnet/minecraft/world/phys/HitResult;)V", at = @At("HEAD"))
+    private void onApplyWater(HitResult hitResult, CallbackInfo ci) {
         AbstractThrownPotion self = (AbstractThrownPotion) (Object) this;
+        if (self.level().isClientSide()) {
+            return;
+        }
+        PotionContents contents = self.getItem().getOrDefault(DataComponents.POTION_CONTENTS, PotionContents.EMPTY);
+        if (!contents.is(net.minecraft.tags.PotionTags.HURTS_WATER_SENSITIVE_ENTITIES)) {
+            return;
+        }
         AABB box = self.getBoundingBox().inflate(4.0, 2.0, 4.0);
 
         List<LivingEntity> entities = self.level().getEntitiesOfClass(LivingEntity.class, box);
