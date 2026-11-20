@@ -12,7 +12,6 @@
     "ArrowEntityMixin",
     "BlockDropMixin",
     "BrewingStandBlockEntityMixin",
-    "FirstPersonHandsAndItemsMixin",
     "FrostMovementMixin",
     "FrostFallDamageMixin",
     "BreathingUnderWaterMixin",
@@ -109,6 +108,7 @@
     "CameraBobbingMixin",
     "CapeFeatureRendererMixin",
     "CursedMoonLightmapMixin",
+    "FirstPersonHandsAndItemsMixin",
     "CustomEdibleHeldItemRendererMixin",
     "DisablePlayerRotationRendererMixin",
     "ElytraEntityModelMixin",
@@ -144,5 +144,5 @@
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  }
 }
