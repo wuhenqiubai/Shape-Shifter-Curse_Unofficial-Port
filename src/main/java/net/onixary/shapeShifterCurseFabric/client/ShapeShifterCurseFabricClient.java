@@ -25,6 +25,7 @@ import net.onixary.shapeShifterCurseFabric.additional_power.ItemStorePower;
 import net.onixary.shapeShifterCurseFabric.additional_power.LevitatePower;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity_renderer.FormAttunerBeamRenderer;
+import net.onixary.shapeShifterCurseFabric.config.NeoForgeConfigEntry;
 import net.onixary.shapeShifterCurseFabric.cursed_moon.CursedMoonClient;
 import net.onixary.shapeShifterCurseFabric.custom_ui.BookOfShapeShifterScreenV2_P1;
 import net.onixary.shapeShifterCurseFabric.custom_ui.FormUpgradeScreen;
@@ -359,6 +360,7 @@ public class ShapeShifterCurseFabricClient implements ClientModInitializer {
 		PatronUtils.OnClientInit();
 		AuthClient.init();
 		RegMenuScreen.init();
+		NeoForgeConfigEntry.register();
 
 		BlockEntityRenderers.register(RegCustomBlock.FORM_ATTUNER_BLOCK_ENTITY, FormAttunerBeamRenderer::new);
 
