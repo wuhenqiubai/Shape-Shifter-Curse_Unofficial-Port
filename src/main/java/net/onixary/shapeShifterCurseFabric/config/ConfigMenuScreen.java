@@ -23,6 +23,7 @@ public class ConfigMenuScreen extends Screen {
     private Screen parent;
     public ConfigMenuScreen(Screen parent) {
         super(Component.translatable("text.shape-shifter-curse.config.title"));
+        this.parent = parent;
     }
 
     public void init() {
