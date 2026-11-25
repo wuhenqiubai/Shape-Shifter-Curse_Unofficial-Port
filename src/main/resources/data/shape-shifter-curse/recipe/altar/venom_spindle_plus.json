@@ -1,4 +1,5 @@
 {
+  "copy_enchantments_from": "shape-shifter-curse:venom_spindle",
   "type": "shape-shifter-curse:altar_shapeless",
   "ingredients": [
     "shape-shifter-curse:venom_spindle"

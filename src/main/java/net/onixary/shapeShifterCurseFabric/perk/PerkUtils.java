@@ -136,7 +136,7 @@ public class PerkUtils {
             return;
         }
         @Nullable FormAttunerBlockEntity lastUsedAttuner = FormAttunerBlock.getPlayerLastUsedAttuner(player);
-        if (lastUsedAttuner == null || lastUsedAttuner.level < tier) {
+        if (lastUsedAttuner == null || !meetsAttunerTier(player, lastUsedAttuner.level, tier)) {
             return;
         }
 
@@ -199,5 +199,9 @@ public class PerkUtils {
             }
         }
         return perkAvailability;
+    }
+
+    public static boolean meetsAttunerTier(Player player, int attunerTier, int requiredTier) {
+        return attunerTier >= requiredTier || (attunerTier >= 0 && player.getAbilities().instabuild);
     }
 }
