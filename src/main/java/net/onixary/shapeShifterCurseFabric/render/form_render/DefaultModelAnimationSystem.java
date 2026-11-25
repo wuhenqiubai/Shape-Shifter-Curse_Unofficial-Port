@@ -346,11 +346,17 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         private float tailDragAmountVertical = 0.0F;
         private float tailDragAmountVerticalO;
         private float currentTailDragAmountVertical = 0.0F;
+        private int lastBeforeTickCount = Integer.MIN_VALUE;
+        private float lastBeforePartial;
+        private int lastFinishTickCount = Integer.MIN_VALUE;
+        private float lastFinishPartial;
+        private int lastImpulseTick = Integer.MIN_VALUE;
     }
     private static class neckData {
         private float headYaw;
         private float headPitch;
-        private double lastRenderTick = -1d;
+        private int lastTickCount = Integer.MIN_VALUE;
+        private float lastPartial;
 
         neckData(Player player) {
             headYaw = Mth.wrapDegrees(player.yHeadRot - player.yBodyRot);
@@ -499,7 +505,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         m.invertRotForPart(OriginFursBoneID, false, true, true);
     }
 
-    public final void setRotationForTailBones(Player player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmount, float tailDragAmountVertical) {
+    public final void setRotationForTailBones(Player player, FormModel model, float limbAngle, float limbDistance, double age, float tailDragAmount, float tailDragAmountVertical) {
         IForm curForm = FormTextureUtils.getPlayerForm_Render(player);
         boolean isFeral = curForm.getBodyType() == PlayerFormBodyType.FERAL;
         float SWAY_RATE = 0.33333334F * 0.5F;
@@ -510,7 +516,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (firstTail == null) {
                 continue;
             }
-            float tailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
+            float tailSway = SWAY_SCALE * ProceduralAnimMath.cosTicks(age, SWAY_RATE, (Math.PI / 3.0) * 0.75);
             float tailBalance = Mth.cos(limbAngle * 0.6662F) * 0.325F * limbDistance;
             if(!isFeral){
                 firstTail.setRotY(-Mth.lerp(limbDistance, tailSway, tailBalance) - tailDragAmount * 0.75F);
@@ -523,9 +529,9 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
                 if(!isFeral){
-                    chainBone.setRotY(- Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                    chainBone.setRotY(- Mth.lerp(limbDistance, SWAY_SCALE * ProceduralAnimMath.cosTicks(age, SWAY_RATE, -((Math.PI / 3.0) * offset)), 0.0f) - tailDragAmount * 0.75F);
                 } else{
-                    chainBone.setRotZ(Mth.lerp(limbDistance, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) + tailDragAmount * 0.75F);
+                    chainBone.setRotZ(Mth.lerp(limbDistance, SWAY_SCALE * ProceduralAnimMath.cosTicks(age, SWAY_RATE, -((Math.PI / 3.0) * offset)), 0.0f) + tailDragAmount * 0.75F);
                 }
                 chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
@@ -533,7 +539,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         }
     }
 
-    public final void setRotationForHeadTailBones(Player player, FormModel model, float headAngle, float age, float tailDragAmount, float tailDragAmountVertical){
+    public final void setRotationForHeadTailBones(Player player, FormModel model, float headAngle, double age, float tailDragAmount, float tailDragAmountVertical){
         float SWAY_RATE = 0.33333334F * 0.5F;
         float SWAY_SCALE = 0.05F;
         if (this.headTailChain == null || !this.headTailChain.canApply(player)) { return; }
@@ -542,7 +548,7 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             if (firstHeadTail == null) {
                 continue;
             }
-            float headTailSway = SWAY_SCALE * Mth.cos(age * SWAY_RATE + (((float)Math.PI / 3.0F) * 0.75f));
+            float headTailSway = SWAY_SCALE * ProceduralAnimMath.cosTicks(age, SWAY_RATE, (Math.PI / 3.0) * 0.75);
             float headTailBalance = Mth.cos(headAngle * 0.6662F) * 0.325F * 0.1f;
             firstHeadTail.setRotY(-Mth.lerp(0.1f, headTailSway, headTailBalance) - tailDragAmount * 0.75F);
             firstHeadTail.setRotX(-tailDragAmountVertical * 0.75f);
@@ -550,16 +556,15 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             for (int i = 1; i < tailChain.size(); i++){
                 GeoBone chainBone = model.getCachedGeoBone(tailChain.get(i));
                 if (chainBone == null) {continue;}
-                chainBone.setRotY(- Mth.lerp(0.1f, SWAY_SCALE * Mth.cos(age * SWAY_RATE - (((float)Math.PI / 3.0F) * offset)), 0.0f) - tailDragAmount * 0.75F);
+                chainBone.setRotY(- Mth.lerp(0.1f, SWAY_SCALE * ProceduralAnimMath.cosTicks(age, SWAY_RATE, -((Math.PI / 3.0) * offset)), 0.0f) - tailDragAmount * 0.75F);
                 chainBone.setRotX(-tailDragAmountVertical * 0.75f * (offset + 0.75f));
                 offset += 0.75F;
             }
         }
     }
 
-    public final void setRotationForWingBones(Player player, FormModel model, float limbAngle, float limbDistance, float age, float tailDragAmountVertical){
-        float swayAngle = age * 20.0F * (float) (Math.PI / 180.0) + limbAngle;
-        float sway_base = Mth.cos(swayAngle) * (float) Math.PI * 0.15F + limbDistance;
+    public final void setRotationForWingBones(Player player, FormModel model, float limbAngle, float limbDistance, double age, float tailDragAmountVertical){
+        float sway_base = ProceduralAnimMath.cosTicks(age, 20.0 * Math.PI / 180.0, limbAngle) * (float) Math.PI * 0.15F + limbDistance;
         float sway_l = (float) -(Math.PI / 4) + sway_base;
         float sway_r = (float) (Math.PI / 4) - sway_base;
 
@@ -611,9 +616,11 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         float targetHeadPitch = player.getViewXRot(tickDelta);
         float bodyYaw = LongNeckRenderUtils.lerpAngle(tickDelta, player.yBodyRotO, player.yBodyRot);
         float targetHeadYaw = Mth.wrapDegrees(viewYaw - bodyYaw);
-        double renderTick = player.tickCount + tickDelta;
-        float deltaTicks = (float) Mth.clamp(renderTick - data.lastRenderTick, 0.0D, 1.0D);
-        data.lastRenderTick = renderTick;
+        int lastTickCount = data.lastTickCount;
+        float lastPartial = data.lastPartial;
+        data.lastTickCount = player.tickCount;
+        data.lastPartial = tickDelta;
+        float deltaTicks = ProceduralAnimMath.deltaTicks(player.tickCount, tickDelta, lastTickCount, lastPartial);
 
         if (deltaTicks <= 0.0F) {
             return new Vec2(data.headYaw, data.headPitch);
@@ -655,10 +662,19 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     @Override
     public void beforeRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
+        int lastTickCount = td.lastBeforeTickCount;
+        float lastPartial = td.lastBeforePartial;
+        td.lastBeforeTickCount = player.tickCount;
+        td.lastBeforePartial = tickDelta;
+        float deltaTicks = ProceduralAnimMath.deltaTicks(player.tickCount, tickDelta, lastTickCount, lastPartial);
+        if (deltaTicks <= 0.0F) {
+            return;
+        }
+        float alpha = ProceduralAnimMath.expAlpha(0.04F, deltaTicks);
         float targetDrag = Mth.lerp(tickDelta, td.tailDragAmountO, td.tailDragAmount);
-        td.currentTailDragAmount = Mth.lerp(0.04f, td.currentTailDragAmount, targetDrag);
+        td.currentTailDragAmount = Mth.lerp(alpha, td.currentTailDragAmount, targetDrag);
         float targetDragVertical = Mth.lerp(tickDelta, td.tailDragAmountVerticalO, td.tailDragAmountVertical);
-        td.currentTailDragAmountVertical = Mth.lerp(0.04f, td.currentTailDragAmountVertical, targetDragVertical);
+        td.currentTailDragAmountVertical = Mth.lerp(alpha, td.currentTailDragAmountVertical, targetDragVertical);
     }
 
 
@@ -689,9 +705,10 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
         model.setRotationForBone(RM_BodyGeoBoneID, FormRenderUtils.getPartRotation(playerModel.body));
         Vec2 neckAngles = getLongNeckAngles(player, tickDelta, headYaw, headPitch);
         this.setRotationForNeckBones(player, model, neckAngles.x, neckAngles.y);
-        this.setRotationForTailBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
-        this.setRotationForHeadTailBones(player, model, neckAngles.x, player.tickCount, td.currentTailDragAmount, td.currentTailDragAmountVertical);
-        this.setRotationForWingBones(player, model, limbAngle, limbDistance, player.tickCount, td.currentTailDragAmountVertical);
+        double contTick = ProceduralAnimMath.continuousTick(player.tickCount, tickDelta);
+        this.setRotationForTailBones(player, model, limbAngle, limbDistance, contTick, td.currentTailDragAmount, td.currentTailDragAmountVertical);
+        this.setRotationForHeadTailBones(player, model, neckAngles.x, contTick, td.currentTailDragAmount, td.currentTailDragAmountVertical);
+        this.setRotationForWingBones(player, model, limbAngle, limbDistance, contTick, td.currentTailDragAmountVertical);
         if (this.bodyTransform != null) this.bodyTransform.apply(model.getCachedGeoBone(RM_BodyGeoBoneID));
         model.invertRotForPart(RM_BodyGeoBoneID, false, true, false);
         model.setRotationForBone(RM_LeftArmGeoBoneID, FormRenderUtils.getPartRotation(playerModel.leftArm));
@@ -734,9 +751,20 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
     @Override
     public void finishRender(FormRenderer formRenderer, FormModel model, PlayerRenderer renderer, Player player, PoseStack matrices, MultiBufferSource vertexConsumers, int light, float limbAngle, float limbDistance, float tickDelta, float animationProgress, float headYaw, float headPitch) {
         tailData td = tailDataMap.get(player);
+        int lastTickCount = td.lastFinishTickCount;
+        float lastPartial = td.lastFinishPartial;
+        td.lastFinishTickCount = player.tickCount;
+        td.lastFinishPartial = tickDelta;
+        float deltaTicks = ProceduralAnimMath.deltaTicks(player.tickCount, tickDelta, lastTickCount, lastPartial);
+        if (deltaTicks <= 0.0F) {
+            return;
+        }
         td.tailDragAmountO = td.tailDragAmount;
-        td.tailDragAmount *= 0.75F;
-        td.tailDragAmount -= (float) (Math.toRadians((player.yBodyRot - player.yBodyRotO)) * 0.55F);
+        td.tailDragAmount *= ProceduralAnimMath.expDecay(0.75F, deltaTicks);
+        if (td.lastImpulseTick != player.tickCount) {
+            td.lastImpulseTick = player.tickCount;
+            td.tailDragAmount -= (float) (Math.toRadians((player.yBodyRot - player.yBodyRotO)) * 0.55F);
+        }
         td.tailDragAmount = Mth.clamp(td.tailDragAmount, -1.6F, 1.6F);
         float verticalSpeed = (float) player.getDeltaMovement().y;
         // 连动量都没同步好 MC到底都同步了什么
@@ -746,8 +774,8 @@ public class DefaultModelAnimationSystem implements IModelAnimationSystem, IModi
             verticalSpeed = (float) (nowPosY - prevPosY);
         }
         float targetVerticalDrag = Mth.clamp(verticalSpeed * 1.5f, -1.6f, 1.6f);
-        td.tailDragAmountVertical *= 0.8F;
-        td.tailDragAmountVertical += targetVerticalDrag * 0.15F;
+        td.tailDragAmountVertical *= ProceduralAnimMath.expDecay(0.8F, deltaTicks);
+        td.tailDragAmountVertical += targetVerticalDrag * ProceduralAnimMath.expGain(0.15F, 0.8F, deltaTicks);
         td.tailDragAmountVertical = Mth.clamp(td.tailDragAmountVertical, -1.6f, 1.6f);
         td.tailDragAmountVerticalO = td.tailDragAmountVertical;
     }

@@ -319,6 +319,12 @@ tasks.register('checkEyeBlink', JavaExec) {
     mainClass = 'net.onixary.shapeShifterCurseFabric.render.form_render.sub_controller.FormEyeBlinkCheck'
 }
 
+tasks.register('checkProceduralAnim', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'net.onixary.shapeShifterCurseFabric.render.form_render.ProceduralAnimCheck'
+}
+
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
