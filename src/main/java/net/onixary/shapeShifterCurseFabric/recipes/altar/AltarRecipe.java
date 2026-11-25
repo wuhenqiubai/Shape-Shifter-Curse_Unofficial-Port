@@ -1,5 +1,6 @@
 package net.onixary.shapeShifterCurseFabric.recipes.altar;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -18,6 +19,22 @@ public abstract class AltarRecipe implements Recipe<RecipeInput> {
     @Override
     public @NotNull RecipeType<? extends Recipe<RecipeInput>> getType() {
         return RecipeUtils.ALTAR_RECIPE;
+    }
+
+    protected static ItemStack copyEnchantments(RecipeInput inventory, ItemStack output, @Nullable Ingredient source) {
+        ItemStack result = output.copy();
+        if (source != null && !source.isEmpty()) {
+            for (int slot = 0; slot < Math.min(9, inventory.size()); slot++) {
+                ItemStack input = inventory.getItem(slot);
+                if (!input.isEmpty() && source.test(input)) {
+                    if (input.isEnchanted()) {
+                        result.set(DataComponents.ENCHANTMENTS, input.getEnchantments());
+                    }
+                    break;
+                }
+            }
+        }
+        return result;
     }
 
     @Override

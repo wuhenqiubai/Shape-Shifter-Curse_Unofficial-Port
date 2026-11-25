@@ -1,4 +1,5 @@
 {
+  "copy_enchantments_from": "shape-shifter-curse:attach_hook",
   "type": "shape-shifter-curse:altar_shapeless",
   "ingredients": [
     "shape-shifter-curse:attach_hook"

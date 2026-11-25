@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.FriendlyByteBuf;
@@ -20,11 +21,15 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.onixary.shapeShifterCurseFabric.blocks.RegCustomBlock;
 import net.onixary.shapeShifterCurseFabric.blocks.block_entity.AltarBlockEntity;
 import net.onixary.shapeShifterCurseFabric.items.RegCustomItem;
 import net.onixary.shapeShifterCurseFabric.recipes.RecipeSerializerRegister;
+import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.onixary.shapeShifterCurseFabric.util.TrinketUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -224,4 +229,74 @@ public final class AltarRecipeCheck {
         System.out.println("Altar recipe checks passed.");
         context.succeed();
     }
+
+    @GameTest
+    public void enchantmentInheritance(GameTestHelper context) {
+        var registries = context.getLevel().registryAccess();
+        var enchantments = registries.lookupOrThrow(Registries.ENCHANTMENT);
+        for (boolean shaped : new boolean[]{false, true}) {
+            String json = """
+                    {"ingredients":["minecraft:diamond_pickaxe"],
+                     "pattern":["P"],"key":{"P":"minecraft:diamond_pickaxe"},
+                     "copy_enchantments_from":"minecraft:diamond_pickaxe",
+                     "result":{"id":"minecraft:netherite_pickaxe"}}
+                    """;
+            AltarRecipe recipe = shaped ? shapedFromJson(json, registries) : shapelessFromJson(json, registries);
+            RegistryFriendlyByteBuf packet = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+            if (shaped) {
+                RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().encode(packet, (AltarShapedRecipe) recipe);
+                recipe = RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().decode(packet);
+            } else {
+                RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().encode(packet, (AltarShapelessRecipe) recipe);
+                recipe = RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().decode(packet);
+            }
+            packet.release();
+            Inventory inventory = new Inventory();
+            ItemStack tool = new ItemStack(Items.DIAMOND_PICKAXE);
+            tool.enchant(enchantments.getOrThrow(Enchantments.UNBREAKING), 3);
+            tool.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
+            tool.setDamageValue(45);
+            tool.set(DataComponents.CUSTOM_NAME, Component.literal("Old tool"));
+            inventory.setItem(8, tool);
+            check(recipe.matches(input(inventory), context.getLevel()), "Enchanted input matches at any grid position");
+            ItemStack output = recipe.assemble(input(inventory), registries);
+            check(output.getEnchantments().equals(tool.getEnchantments()), "Packet roundtrip preserves enchantments and curses");
+            check(output.getDamageValue() == 0 && output.get(DataComponents.CUSTOM_NAME) == null, "Only enchantments are inherited");
+            output.enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            ItemStack template = shaped ? ((AltarShapedRecipe) recipe).output : ((AltarShapelessRecipe) recipe).output;
+            check(tool.getEnchantments().size() == 2 && !template.isEnchanted(), "No shared mutable state");
+            inventory.setItem(8, new ItemStack(Items.DIAMOND_PICKAXE));
+            inventory.setItem(9, tool);
+            check(!recipe.assemble(input(inventory), registries).isEnchanted(), "Unenchanted inputs and catalysts do not leak enchantments");
+            String legacy = """
+                    {"ingredients":["minecraft:diamond_pickaxe"],
+                     "pattern":["P"],"key":{"P":"minecraft:diamond_pickaxe"},
+                     "result":{"id":"minecraft:netherite_pickaxe"}}
+                    """;
+            recipe = shaped ? shapedFromJson(legacy, registries) : shapelessFromJson(legacy, registries);
+            inventory.setItem(8, tool);
+            check(!recipe.assemble(input(inventory), registries).isEnchanted(), "Omitted field retains old behavior");
+        }
+        int upgrades = 0;
+        for (RecipeHolder<?> entry : context.getLevel().getServer().getRecipeManager().getRecipes()) {
+            String path = entry.id().identifier().getPath();
+            if (!path.endsWith("_plus") && !path.endsWith("explosive_charm_paper")) continue;
+            if (!(entry.value() instanceof AltarShapelessRecipe upgrade)) continue;
+            Inventory inventory = new Inventory();
+            for (int i = 0; i < upgrade.input.size(); i++) inventory.setItem(i, new ItemStack(upgrade.input.get(i).items().findFirst().orElseThrow().value()));
+            ItemStack original = inventory.getItem(0);
+            original.enchant(enchantments.getOrThrow(Enchantments.UNBREAKING), 3);
+            original.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
+            if (upgrade.catalyst != null) inventory.setItem(9, new ItemStack(upgrade.catalyst.items().findFirst().orElseThrow().value()));
+            inventory.getItem(9).enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            if (!inventory.getItem(1).isEmpty()) inventory.getItem(1).enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            check(upgrade.matches(input(inventory), context.getLevel()), "Actual enchanted upgrade matches: " + path);
+            check(upgrade.assemble(input(inventory), registries).getEnchantments().equals(original.getEnchantments()),
+                    "Actual upgrade inherits only original equipment enchantments: " + path);
+            upgrades++;
+        }
+        check(upgrades == 13, "All 13 current equipment upgrades are configured");
+        context.succeed();
+    }
+
 }

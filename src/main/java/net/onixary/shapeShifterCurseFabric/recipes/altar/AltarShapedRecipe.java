@@ -33,9 +33,15 @@ public class AltarShapedRecipe extends AltarRecipe {
     public final int recipeTime;
     public final int fuelCostPerTick;
     public final @Nullable Identifier requireAdvancement;
+    public final @Nullable Ingredient copyEnchantmentsFrom;
     private @Nullable PlacementInfo placementInfo;
 
     public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement) {
+        this(pattern, output, catalyst, recipeTime, fuelCostPerTick, requireAdvancement, null);
+    }
+
+    public AltarShapedRecipe(ShapedRecipePattern pattern, ItemStack output, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable Identifier requireAdvancement, @Nullable Ingredient copyEnchantmentsFrom) {
+        this.copyEnchantmentsFrom = copyEnchantmentsFrom;
         this.pattern = pattern;
         this.output = output;
         this.catalyst = catalyst;
@@ -129,7 +135,7 @@ public class AltarShapedRecipe extends AltarRecipe {
 
     @Override
     public @NotNull ItemStack assemble(@NonNull RecipeInput recipeInput, HolderLookup.@NonNull Provider provider) {
-        return this.output.copy();
+        return copyEnchantments(recipeInput, this.output, this.copyEnchantmentsFrom);
     }
 
     @Override
@@ -145,9 +151,10 @@ public class AltarShapedRecipe extends AltarRecipe {
                 Ingredient.CODEC.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                    Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
-            ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement) ->
-                new AltarShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
+                    Identifier.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
+                Ingredient.CODEC.optionalFieldOf("copy_enchantments_from").forGetter(r -> Optional.ofNullable(r.copyEnchantmentsFrom))
+            ).apply(instance, (pattern, output, catalyst, time, fuelCost, requireAdvancement, copyEnchantmentsFrom) ->
+                new AltarShapedRecipe(pattern, output, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null), copyEnchantmentsFrom.orElse(null)))
         );
 
         private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapedRecipe> STREAM_CODEC = StreamCodec.of(
@@ -247,7 +254,11 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement);
+            Ingredient copyEnchantmentsFrom = null;
+            if (buf.readBoolean()) {
+                copyEnchantmentsFrom = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+            }
+            return new AltarShapedRecipe(pattern, output, catalyst, time, fuelCost, requireAdvancement, copyEnchantmentsFrom);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf packetByteBuf, AltarShapedRecipe altarRecipe) {
@@ -267,6 +278,12 @@ public class AltarShapedRecipe extends AltarRecipe {
             ItemStack.STREAM_CODEC.encode(packetByteBuf, altarRecipe.output);
             packetByteBuf.writeVarInt(altarRecipe.recipeTime);
             packetByteBuf.writeVarInt(altarRecipe.fuelCostPerTick);
+            if (altarRecipe.copyEnchantmentsFrom != null) {
+                packetByteBuf.writeBoolean(true);
+                Ingredient.CONTENTS_STREAM_CODEC.encode(packetByteBuf, altarRecipe.copyEnchantmentsFrom);
+            } else {
+                packetByteBuf.writeBoolean(false);
+            }
         }
     }
 }
