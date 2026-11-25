@@ -80,6 +80,10 @@ loom {
 	}
 }
 
+tasks.matching { it.name == 'runClient' || it.name == 'runServer' }.configureEach {
+	enabled = false
+}
+
 dependencies {
 
 	implementation 'com.demonwav.mcdev:annotations:1.0'

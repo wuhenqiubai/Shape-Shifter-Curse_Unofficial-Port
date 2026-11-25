@@ -32,6 +32,10 @@ loom {
 	accessWidenerPath = file("src/main/resources/calio.accesswidener")
 }
 
+tasks.matching { it.name == "runClient" || it.name == "runServer" }.configureEach {
+	enabled = false
+}
+
 tasks.withType<JavaCompile>().configureEach {
 	// ensure that the encoding is set to UTF-8, no matter what the system default is
 	// this fixes some edge cases with special characters not displaying correctly
