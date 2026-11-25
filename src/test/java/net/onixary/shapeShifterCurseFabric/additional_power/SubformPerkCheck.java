@@ -92,19 +92,18 @@ public class SubformPerkCheck {
         } finally { respawned.discard(); }
         c.succeed();
     }
-    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    @GameTest(template=FabricGameTest.EMPTY_STRUCTURE)
     public void perkCommands(GameTestHelper c) throws com.mojang.brigadier.exceptions.CommandSyntaxException {
-        var p = c.makeMockServerPlayerInLevel();
-        var forms = PlayerFormComponent.COMPONENT.get(p);
-        var avali = RegPlayerForms.BAT_3_SUB_AVALI;
-        FormUtils.setForm(p,avali);
-        var dispatcher = new CommandDispatcher<CommandSourceStack>();
-        ShapeShifterCurseCommand.register(dispatcher);
-        var source = p.createCommandSourceStack().withPermission(2);
-        String prefix = "shape_shifter_curse perk ";
+        var p=c.makeMockServerPlayerInLevel();
+        var forms=net.onixary.shapeShifterCurseFabric.player_form.utils.PlayerFormComponent.COMPONENT.get(p);
+        var avali=net.onixary.shapeShifterCurseFabric.player_form.RegPlayerForms.BAT_3_SUB_AVALI;
+        net.onixary.shapeShifterCurseFabric.player_form.utils.FormUtils.setForm(p,avali);
+        var dispatcher=new com.mojang.brigadier.CommandDispatcher<CommandSourceStack>();
+        net.onixary.shapeShifterCurseFabric.command.ShapeShifterCurseCommand.register(dispatcher);
+        var source=p.createCommandSourceStack().withPermission(2);
+        String prefix="shape_shifter_curse perk ";
         c.assertTrue(!dispatcher.getRoot().getChild("shape_shifter_curse").getChild("perk").canUse(source.withPermission(0)),"Non-OP cannot use debug commands");
-        int listed = dispatcher.execute(prefix+"list",source);
-        c.assertTrue(listed==6,"Lists current form tree");
+        c.assertTrue(dispatcher.execute(prefix+"list",source)==6,"Lists current form tree");
         dispatcher.execute(prefix+"toggle_free true",source);
         p.getAbilities().instabuild = false;
         c.assertTrue(PerkUtils.isFreeUnlock(p),"Free unlock independent of creative mode");
@@ -112,18 +111,18 @@ public class SubformPerkCheck {
         var registries = c.getLevel().registryAccess();
         forms.writeToNbt(nbt, registries);forms.freePerkForms.clear();forms.readFromNbt(nbt, registries);
         c.assertTrue(PerkUtils.isFreeUnlock(p),"Free setting survives NBT sync and reload");
-        forms.nowPerkTree=id("snow_fox_3_perk_tree");
-        int unlocked = dispatcher.execute(prefix+"unlock_all",source);
-        c.assertTrue(unlocked==8,"Unlocks the overridden preview tree");
-        int restored = dispatcher.execute(prefix+"unlock_all",source);
-        c.assertTrue(restored==6,"Reapply restores the form tree");
-        c.assertTrue(forms.nowPerkTree.equals(id("avali_perk_tree")),"Perk tree follows the actual form");
+        forms.nowPerkTree=RegPerks.T_SnowFox3PerkTree;
+        c.assertTrue(dispatcher.execute(prefix+"list",source)==8,"Debug command uses selected nowPerkTree, not the form binding");
+        c.assertTrue(dispatcher.execute(prefix+"unlock_all",source)==8,"Unlocks the selected snow fox tree including dependent nodes");
+        c.assertTrue(forms.formPerkMap.get(RegPerks.T_SnowFox3PerkTree).size()==8,"Unlocks recorded under selected tree");
+        forms.nowPerkTree=RegPerks.T_AvaliPerkTree;
+        c.assertTrue(dispatcher.execute(prefix+"unlock_all",source)==6,"Unlocks all six Avali nodes in dependency order");
         c.assertTrue(dispatcher.execute(prefix+"unlock_all",source)==0,"Repeated unlock is idempotent");
         var holder = PowerHolderComponent.KEY.get(p);
         var base = PowerTypeRegistry.get(id("sub_form_avali_water_slowness"));
         var upgraded = PowerTypeRegistry.get(id("perks/avali_environmental_protection_1"));
         c.assertTrue(!holder.hasPower(base) && holder.hasPower(upgraded),"Unlock applies replacement");
-        var other = id("snow_fox_3_perk_tree");forms.formPerkMap.put(other,new ArrayList<>(List.of(id("snow_fox_revenge"))));
+        var other=id("snow_fox_3_perk_tree");forms.formPerkMap.put(other,new java.util.ArrayList<>(java.util.List.of(id("snow_fox_revenge"))));
         c.assertTrue(dispatcher.execute(prefix+"reset_all",source)==6,"Reset all current nodes");
         c.assertTrue(holder.hasPower(base) && !holder.hasPower(upgraded),"Reset restores base powers");
         c.assertTrue(forms.formPerkMap.get(other).size()==1,"Other tree unlocks preserved");
@@ -143,7 +142,7 @@ public class SubformPerkCheck {
             for(var power:perk.powerAdd)c.assertTrue(PowerTypeRegistry.get(power)!=null,"Loaded "+power);
             for(var power:perk.powerRemove)c.assertTrue(PowerTypeRegistry.get(power)!=null,"Replacement "+power);
         }
-        c.assertTrue(count==12,"Twelve subform perks");c.succeed();
+        c.assertTrue(count==12,"Twelve current subform perks");c.succeed();
     }
     @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
     public void jumpsDashAndCombat(GameTestHelper c) {
@@ -160,7 +159,7 @@ public class SubformPerkCheck {
         var dash=(ActiveCooldownPower)add(p,"marbled_polecat_leaping_dash");dash.fromTag(LongTag.valueOf(-10000), registries);
         p.getFoodData().setFoodLevel(6);dash.onUse();c.assertTrue(p.getDeltaMovement().y==-1,"Six food cannot dash");
         p.getFoodData().setFoodLevel(7);dash.onUse();
-        c.assertTrue(p.getFoodData().getFoodLevel()==7 && Math.abs(p.getDeltaMovement().z-0.6)<1e-4 && Math.abs(p.getDeltaMovement().y-0.3)<1e-4,"Dash horizontal impulse without food cost");
+        c.assertTrue(p.getFoodData().getFoodLevel()==7 && Math.abs(p.getDeltaMovement().z-.6)<1e-6 && Math.abs(p.getDeltaMovement().y-.3)<1e-6,"Dash horizontal impulse without food cost");
         add(p,"marbled_polecat_combat_noodle_melee");var target=EntityType.ZOMBIE.create(c.getLevel());
         c.assertTrue(ActionOnCombatHitPower.meleeBonus(p,target,false)==4 && ActionOnCombatHitPower.meleeBonus(p,target,true)==0,"Only noncritical melee gets bonus");c.succeed();
     }

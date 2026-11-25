@@ -256,7 +256,7 @@ public class FormPerkCheck {
         ChargePower charge = (ChargePower) holder.getPower(chargeType);
         player.setAirSupply(100);
         charge.onUse(); charge.onUse();
-        context.assertTrue(player.getAirSupply() == 95, "Holding pays once");
+        context.assertTrue(player.getAirSupply() == 95, "Holding pays five air once");
         context.assertTrue(charge.isCharging(), "Charging state for preview");
         charge.fire(false);
         context.assertTrue(!charge.isCharging(), "Release clears preview");

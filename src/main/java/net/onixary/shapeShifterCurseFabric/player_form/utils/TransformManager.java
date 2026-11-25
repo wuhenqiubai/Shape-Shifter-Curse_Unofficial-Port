@@ -58,6 +58,11 @@ public class TransformManager {
         return data;
     }
 
+    public static boolean isTransforming(ServerPlayer player) {
+        PlayerTransformData data = playerData.get(player.getUUID());
+        return data != null && data.transformTimer >= 0;
+    }
+
     public static boolean startTransform(Player player, IForm form, @Nullable Consumer<PlayerTransformData> onTransformComplete) {
         if (form.isPlayerForm(player) || !(player instanceof ServerPlayer serverPlayerEntity)) {
             return true;

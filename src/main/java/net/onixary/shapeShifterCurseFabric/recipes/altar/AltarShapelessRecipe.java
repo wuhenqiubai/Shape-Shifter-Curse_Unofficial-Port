@@ -34,8 +34,14 @@ public class AltarShapelessRecipe extends AltarRecipe {
     public final int fuelCostPerTick;
 
     public final @Nullable ResourceLocation requireAdvancement;
+    public final Ingredient copyEnchantmentsFrom;
 
     public AltarShapelessRecipe(ItemStack output, NonNullList<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable ResourceLocation requireAdvancement) {
+        this(output, input, catalyst, recipeTime, fuelCostPerTick, requireAdvancement, Ingredient.EMPTY);
+    }
+
+    public AltarShapelessRecipe(ItemStack output, NonNullList<Ingredient> input, @Nullable Ingredient catalyst, int recipeTime, int fuelCostPerTick, @Nullable ResourceLocation requireAdvancement, Ingredient copyEnchantmentsFrom) {
+        this.copyEnchantmentsFrom = copyEnchantmentsFrom;
         this.output = output;
         this.input = input;
         this.recipeTime = recipeTime;
@@ -102,7 +108,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
 
     @Override
     public @NotNull ItemStack assemble(RecipeInput recipeInput, HolderLookup.Provider provider) {
-        return this.output.copy();
+        return copyEnchantments(recipeInput, this.output, this.copyEnchantmentsFrom);
     }
 
     @Override
@@ -139,9 +145,10 @@ public class AltarShapelessRecipe extends AltarRecipe {
                 Ingredient.CODEC_NONEMPTY.optionalFieldOf("catalyst").forGetter(r -> Optional.ofNullable(r.catalyst)),
                 Codec.INT.optionalFieldOf("time", 200).forGetter(r -> r.recipeTime),
                 Codec.INT.optionalFieldOf("fuel_cost", 1).forGetter(r -> r.fuelCostPerTick),
-                ResourceLocation.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement))
-            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement) ->
-                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null)))
+                ResourceLocation.CODEC.optionalFieldOf("require_advancement").forGetter(r -> Optional.ofNullable(r.requireAdvancement)),
+                Ingredient.CODEC.optionalFieldOf("copy_enchantments_from", Ingredient.EMPTY).forGetter(r -> r.copyEnchantmentsFrom)
+            ).apply(instance, (output, input, catalyst, time, fuelCost, requireAdvancement, copyEnchantmentsFrom) ->
+                new AltarShapelessRecipe(output, input, catalyst.orElse(null), time, fuelCost, requireAdvancement.orElse(null), copyEnchantmentsFrom))
         );
 
         private static final StreamCodec<RegistryFriendlyByteBuf, AltarShapelessRecipe> STREAM_CODEC = StreamCodec.of(
@@ -173,7 +180,8 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStack output = ItemStack.STREAM_CODEC.decode(buf);
             int time = buf.readVarInt();
             int fuelCost = buf.readVarInt();
-            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement);
+            Ingredient copyEnchantmentsFrom = Ingredient.CONTENTS_STREAM_CODEC.decode(buf);
+            return new AltarShapelessRecipe(output, list, catalyst, time, fuelCost, requireAdvancement, copyEnchantmentsFrom);
         }
 
         private static void toNetwork(RegistryFriendlyByteBuf packetByteBuf, AltarShapelessRecipe shapelessRecipe) {
@@ -196,6 +204,7 @@ public class AltarShapelessRecipe extends AltarRecipe {
             ItemStack.STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.output);
             packetByteBuf.writeVarInt(shapelessRecipe.recipeTime);
             packetByteBuf.writeVarInt(shapelessRecipe.fuelCostPerTick);
+            Ingredient.CONTENTS_STREAM_CODEC.encode(packetByteBuf, shapelessRecipe.copyEnchantmentsFrom);
         }
     }
 }

@@ -15,6 +15,11 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.onixary.shapeShifterCurseFabric.recipes.RecipeUtils;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.WorldlyContainer;
 import net.minecraft.world.item.ItemStack;
@@ -216,6 +221,75 @@ public final class AltarRecipeCheck {
         check(altar.nowRecipe == null, "Do not overstack an upgraded accessory in the output slot");
 
         System.out.println("Altar recipe checks passed.");
+        context.succeed();
+    }
+
+    @GameTest(template = FabricGameTest.EMPTY_STRUCTURE)
+    public void enchantmentInheritance(GameTestHelper context) {
+        var registries = context.getLevel().registryAccess();
+        var enchantments = registries.lookupOrThrow(Registries.ENCHANTMENT);
+        for (boolean shaped : new boolean[]{false, true}) {
+            String json = """
+                    {"ingredients":[{"item":"minecraft:diamond_pickaxe"}],
+                     "pattern":["P"],"key":{"P":{"item":"minecraft:diamond_pickaxe"}},
+                     "copy_enchantments_from":{"item":"minecraft:diamond_pickaxe"},
+                     "result":{"id":"minecraft:netherite_pickaxe"}}
+                    """;
+            AltarRecipe recipe = shaped ? shapedFromJson(json) : shapelessFromJson(json);
+            RegistryFriendlyByteBuf packet = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+            if (shaped) {
+                RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().encode(packet, (AltarShapedRecipe) recipe);
+                recipe = RecipeSerializerRegister.ALTAR_SHAPED_RECIPE.streamCodec().decode(packet);
+            } else {
+                RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().encode(packet, (AltarShapelessRecipe) recipe);
+                recipe = RecipeSerializerRegister.ALTAR_SHAPELESS_RECIPE.streamCodec().decode(packet);
+            }
+            packet.release();
+            Inventory inventory = new Inventory();
+            ItemStack tool = new ItemStack(Items.DIAMOND_PICKAXE);
+            tool.enchant(enchantments.getOrThrow(Enchantments.UNBREAKING), 3);
+            tool.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
+            tool.setDamageValue(45);
+            tool.set(DataComponents.CUSTOM_NAME, Component.literal("Old tool"));
+            inventory.setItem(8, tool);
+            check(recipe.matches(input(inventory), context.getLevel()), "Enchanted input matches at any grid position");
+            ItemStack output = recipe.assemble(input(inventory), registries);
+            check(output.getEnchantments().equals(tool.getEnchantments()), "Packet roundtrip preserves enchantments and curses");
+            check(output.getDamageValue() == 0 && output.get(DataComponents.CUSTOM_NAME) == null, "Only enchantments are inherited");
+            output.enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            check(tool.getEnchantments().size() == 2 && !recipe.getResultItem(registries).isEnchanted(), "No shared mutable state");
+            inventory.setItem(8, new ItemStack(Items.DIAMOND_PICKAXE));
+            inventory.setItem(9, tool);
+            check(!recipe.assemble(input(inventory), registries).isEnchanted(), "Unenchanted inputs and catalysts do not leak enchantments");
+            String legacy = """
+                    {"ingredients":[{"item":"minecraft:diamond_pickaxe"}],
+                     "pattern":["P"],"key":{"P":{"item":"minecraft:diamond_pickaxe"}},
+                     "result":{"id":"minecraft:netherite_pickaxe"}}
+                    """;
+            recipe = shaped ? shapedFromJson(legacy) : shapelessFromJson(legacy);
+            inventory.setItem(8, tool);
+            check(!recipe.assemble(input(inventory), registries).isEnchanted(), "Omitted field retains old behavior");
+        }
+        int upgrades = 0;
+        for (RecipeHolder<AltarRecipe> holder : context.getLevel().getRecipeManager().<RecipeInput, AltarRecipe>getAllRecipesFor(RecipeUtils.ALTAR_RECIPE)) {
+            String path = holder.id().getPath();
+            if (!path.endsWith("_plus") && !path.endsWith("explosive_charm_paper")) continue;
+            check(holder.value() instanceof AltarShapelessRecipe, "Current upgrade recipe type");
+            AltarShapelessRecipe upgrade = (AltarShapelessRecipe) holder.value();
+            Inventory inventory = new Inventory();
+            for (int i = 0; i < upgrade.input.size(); i++) inventory.setItem(i, upgrade.input.get(i).getItems()[0].copy());
+            ItemStack original = inventory.getItem(0);
+            original.enchant(enchantments.getOrThrow(Enchantments.UNBREAKING), 3);
+            original.enchant(enchantments.getOrThrow(Enchantments.VANISHING_CURSE), 1);
+            if (upgrade.catalyst != null) inventory.setItem(9, upgrade.catalyst.getItems()[0].copy());
+            inventory.getItem(9).enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            if (!inventory.getItem(1).isEmpty()) inventory.getItem(1).enchant(enchantments.getOrThrow(Enchantments.MENDING), 1);
+            check(upgrade.matches(input(inventory), context.getLevel()), "Actual enchanted upgrade matches: " + path);
+            check(upgrade.assemble(input(inventory), registries).getEnchantments().equals(original.getEnchantments()),
+                    "Actual upgrade inherits only original equipment enchantments: " + path);
+            upgrades++;
+        }
+        check(upgrades == 13, "All 13 current equipment upgrades are configured");
         context.succeed();
     }
 }

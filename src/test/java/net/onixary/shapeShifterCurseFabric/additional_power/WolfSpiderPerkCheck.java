@@ -169,12 +169,14 @@ public class WolfSpiderPerkCheck {
             c.assertTrue(charge.nowTier==3 && Math.abs(ManaUtils.getPlayerMana(p)-35)<1,"Full charge still costs approximately 15");
             charge.onRemoved();
         }
-        add(p,"spider_perceptual_web"); var glow=(EntityGlowPower)PowerHolderComponent.KEY.get(p).getPower(PowerTypeRegistry.get(id("perks/spider_perceptual_web_glow")));
+        add(p,"spider_perceptual_web");
+        var glow=(EntityGlowPower)PowerHolderComponent.KEY.get(p).getPower(PowerTypeRegistry.get(id("perks/spider_perceptual_web_glow")));
         c.assertTrue(!glow.isActive(),"No outline off web bridge");
         c.setBlock(new BlockPos(2,2,2),RegCustomBlock.TEMP_WEB_BRIDGE);
         c.assertTrue(glow.isActive(),"Standing inside bridge enables outline");
         var sheep=c.spawn(EntityType.SHEEP,new BlockPos(4,2,2));
         c.assertTrue(glow.doesApply(sheep) && !glow.usesTeams() && glow.getRed()==1,"Passive animals receive white outline too");
+        sheep.setPos(p.position().add(32,0,0));c.assertTrue(glow.doesApply(sheep),"Outline includes the 32-block boundary");
         sheep.setPos(p.position().add(33,0,0));c.assertTrue(!glow.doesApply(sheep),"Outline range is 32 blocks");
         sheep.discard();p.discard();c.succeed();
     }
